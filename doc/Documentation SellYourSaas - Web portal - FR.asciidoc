@@ -1,0 +1,513 @@
+= Document installation et exploitation SellYourSaas
+:source-highlighter: rouge
+:companyname: Teclib
+:corpname: Teclib
+:orgname: Teclib
+:title: Document installation et exploitation du serveur Web et mail
+// Date du document :
+:docdate: 30/01/2019
+// Ville associée au document
+:city: Bordeaux
+:toc: manual
+:toc-placement: preamble
+Ce document décrit les spécifications techniques pour la mise en oeuvre du serveur Web et Mails du service SellYourSaas (service de mise en SaaS automatisé par Dolibarr).
+
+
+
+== Installation de la machine et OS
+
+=== Choix machine ===
+
+Avec Amazon Standard Medium:
+Server *m1.medium* hosted in EU @ $0.18 per hour plus $10 for storage and bandwidth puis passage à *m1.large* @ $0.18 per hour
+
+Avec OVH Public Cloud:
+1 core.
+
+
+=== OS Ubuntu server ===
+
+* Installation de Ubuntu LTS.
+
+
+[ajout_de_disque]
+=== Ajout de disque ===
+
+Avec OVH Public Cloud:
+
+* Créer le serveur
+* Ajouter les disques (chaque disque suplémentaire est ajouté en /dev/vdb, /dev/vdc, /dev/vdd, ...). 
+Remarque, le disque devient visible avec fdisk -l.
+* Ajouter la partition sur les disques (type Linux) et la formater si c'est un disque jamais partitionné
+
+[source,bash]
+---------------
+fdisk /dev/vdx
+option n puis p (choisir alors le numéro de partition) puis w
+
+fsck -N /dev/vdxY
+mkfs.ext4 /dev/vdxY
+---------------
+
+Récuper la valeur du UUID qui s'affiche.
+
+* Monter les disques
+
+[source,bash]
+---------------
+mkdir /mnt/disk  ou  /mnt/diskX
+mount /dev/vdxY /mnt/disk  ou  mount /dev/vdxY /mnt/diskX
+
+lsblk
+---------------
+
+* Désactiver le montage des anciens disques externes et ajouter le montage en automatique du nouveau par *vi /etc/fstab*
+
+[source,bash]
+---------------
+UUID=4ca52db5-4e90-491b-bda7-9013daf57ef1 /mnt/disk ext4 nofail 0 0
+---------------
+
+
+
+=== Configuration système
+
+Créer le compte utilisateur *mylogin*.
+
+[source,bash]
+---------------
+adduser mylogin
+---------------
+
+Ajouter la clé publique.
+
+[source,bash]
+---------------
+ssh-copy-id mylogin@x.y.z.a
+---------------
+
+
+Initialiser le mot de passe de *root* et de *mylogin*.
+
+Modifier */etc/ssh/sshd_config* pour changer les autorisations de login:
+
+	PermitRootLogin no
+	ChallengeResponseAuthentication yes
+
+Ajouter la ligne suivante dans le fichier /etc/sudoers pour repositionne le HOME selon le user apres un sudo -s
+
+	Defaults        set_home
+
+Créer un fichier *mylogin* à mettre dans le répertoire */etc/sudoers.d* avec les permission *r--r-----* et le contenu
+
+	mylogin ALL=(ALL) NOPASSWD:ALL
+
+
+=== Modification du nom du serveur
+
+Mettre le nom du serveur dans le fichier */etc/hostname*
+
+
+=== Ajout d'un swap
+
+Ajouter un swap sur /swap/swap.img
+
+https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory-swap-file-on-a-vps#4
+
+
+
+== Installation des outils externe
+
+=== Copie outils dans /home/admin/tools
+
+* Copier les outils dans /home/admin/tools
+
+
+=== Installation de webmin
+
+* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
+
+
+
+== Installation des composants systèmes et applicatifs
+
+=== Installation des packages
+
+* Installation des packages Ubuntu suivant
+
+[source,bash]
+---------------
+sudo apt-get install ntp git zip memcached rrdtool
+sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php libapache2-mod-evasive php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt
+sudo apt-get install cpulimit apparmor
+---------------
+
+=== Activation des modules apache
+
+actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers ident include info ldap log_forensic mem_cache mime mime_magic mod-evasive negotiation php5 proxy_ajp proxy_balancer proxy_connect proxy_ftp proxy_http proxy rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
+
+
+
+=== Installation de watchdog
+
+* Installation et activation de watchdog avec les configs dans */etc/watchdog*
+
+
+=== Installation du firewall
+
+* Installation et activation du firewall dans */home/admin/tools/firewall* en créant un lien par
+
+[source,bash]
+---------------
+ln -fs /home/admin/tools/firewall /etc/init.d/firewall
+---------------
+
+
+=== Installation de fail2ban
+
+* Installation et activation de fail2ban avec les configs dans */etc/fail2ban*
+
+
+=== Installation de afick
+
+* Installer afick.pl tool from debian package
+* Complete setup */etc/afick.conf* by adding:
+
+[source,bash]
+---------------
+/home MyRule
+/home/admin/logs Logs
+/home/mysaas/logs Logs
+/home/mylogin/logs Logs
+!/home/admin/wwwroot/dolibarr_documents
+!/home/admin/wwwroot/htdocs/cache
+!/home/mysaas/mysaasdomainname.com/htdocs/cache
+!/home/mylogin/wwwroot/perso/tmp
+
+exclude_suffix := cache
+---------------
+
+
+=== Installation de mlocate
+
+* Installer mlocate tool from debian package
+* Complete setup */etc/updatedb.conf* by adding dir */mnt/backup* into exclude list:
+
+[source,bash]
+---------------
+...
+PRUNEPATHS="/tmp /var/spool /media /home/.ecryptfs /var/lib/schroot /mnt/diskbackup"
+...
+---------------
+
+
+=== Configuration de cpulimit (optionnel) 
+
+* Lancement de cpulimit au démarrage pour exécuter:
+
+Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
+
+cpulimit launched with script  cpulimit --exe=apache2 --limit=20
+
+
+=== Installation de saslauthd (optionnel) ===
+
+Pour permettre authentification extern SMTP.
+
+[source,bash]
+---------------
+sudo apt-get sasl2-bin
+vi /etc/default/saslauthd  pour mettre START=yes
+---------------
+
+
+=== Installation de Open DKIM
+
+Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix
+
+To test DKIM, send an email to  check-auth@verifier.port25.com, you will receive a response with success or failure.
+To test SPF + DKIM + spam analysis of an email,  send an email to email suggested by  https://www.mail-tester.com
+
+
+
+=== Configuration du nom de domain
+
+Modifier son enregistrement de domaine, pour ajouter SPF et DKIM et DMARC
+
+* SPF permet de lister les serveurs autorisés à envoyer des email avec comme émetteur: mysaasdomainname.com
+
+ mysaasdomainname.com.		600	IN	TXT	"v=spf1 a mx ip4:91.121.9.47 ip4:147.135.135.4 ip4:147.135.135.36 ip4:147.135.135.37 include:spf.sendinblue.com include:_spf.google.com ~all"
+
+* DKIM permet de signer certaines informations du mail.
+
+ dkim._domainkey.mysaasdomainname.com. 1000 IN	TXT	"v=DKIM1\; k=rsa\; t=y\; p=MIGfMA0GCSrGSIb3DQEBAQUAA4GNADCBiQKBgQC6xSkwtlnAkegCARg5US7KHdoTlUS2MsXFPMy7ykwG88XK8vKEYPGuN56/6+YoxGLxtN2CZy/MVagQUOYcA3VAjBEPP5vJPrUnDsVY0OC8U+dK383g+DDW0tcAqrMXJI7Y/jXUJXh/ydI5aloiqT59JGo9Ane1C3XmoJz3bkVsKwIDAQAB"
+
+* DMARC permet d'indiquer que le domaine est protégé par SPF et/ou DKIM
+
+ _dmarc.mysaasdomainname.com	 v=DMARC1; p=none
+
+
+=== Configuration de postfix
+
+Vérifier que le user postfix se trouve dans le groupe sasl. Si non, l'ajouter.
+
+[source,bash]
+---------------
+adduser postfix sasl
+---------------
+
+
+Modfifier le fichier master.cf pour ajouter un n afin de désactiver le chroot de smtpd
+
+[source,bash]
+---------------
+smtp      inet  n       -       n       -       -       smtpd
+---------------
+
+Ajouter un fichier smtpd.conf dans /etc/postfix/sasl
+
+[source,bash]
+---------------
+saslauthd_path: /var/run/saslauthd/mux
+pwcheck_method: saslauthd
+mech_list: plain login
+---------------
+
+
+Compléter le fichier main.cf avec:
+
+[source,bash]
+---------------
+smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
+myhostname = myservername.mysaasdomainname.com
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+myorigin = /etc/mailname
+mydestination = $myhostname, apollon.localdomain, localhost.localdomain, localhost
+# mynetworks contains only localhost. Allowed external host are allowed with firewall on port 25 + because we use sasl authentication
+mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+mailbox_size_limit = 204800000
+recipient_delimiter = +
+inet_interfaces = all
+inet_protocols = all
+
+#smtp_sasl_auth_enable = yes
+#smtp_sasl_password_maps = static:apikey:abc1234567890abc12345678901234567890
+#smtp_sasl_security_options = noanonymous
+#smtp_tls_security_level = encrypt
+#header_size_limit = 4096000
+#relayhost = [smtp.sendgrid.net]:2525
+relayhost =
+
+smtpd_recipient_limit = 100
+smtpd_helo_required = yes
+smtpd_client_connection_count_limit = 20
+#deliver_lock_attempts = 10
+#deliver_lock_delay = 10s
+message_size_limit = 20480000
+
+header_checks = regexp:/etc/postfix/header_checks
+
+# Liste des emails virtuelles
+#----------------------------
+virtual_alias_maps = hash:/etc/postfix/virtual
+
+# Liste des clients bloques
+#-----------------------------
+smtpd_client_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access
+
+# Liste des emetteurs bloques
+#----------------------------
+# Here we declare we want mail from specific email, mail not rejected by rbl, otherwise refused
+#smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_rbl_client cbl.abuseat.org, reject_rbl_client bl.spamcop.net, reject_unknown_sender_domain
+smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_unknown_sender_domain
+
+# Liste des recepteurs bloques
+#-----------------------------
+# Here we declare we want mail to my domain, to specific email with SA filtering, otherwise refuse.
+smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
+
+#debug_peer_list = mysaasdomainname.com
+compatibility_level = 2
+
+
+# FOR SASL AUTH
+#smtpd_sasl_type = dovecot
+#smtpd_sasl_path = private/auth-client
+#smtpd_sasl_local_domain =
+# Allow SMTP AUTH
+smtpd_sasl_auth_enable = yes
+# Need auth
+smtpd_sasl_security_options = noanonymous
+broken_sasl_auth_clients = yes
+smtpd_tls_loglevel = 1
+smtpd_tls_security_level = may
+
+
+# FOR DKIM
+milter_default_action = accept
+milter_protocol = 6
+smtpd_milters = inet:localhost:12345
+non_smtpd_milters = inet:localhost:12345
+
+---------------
+
+
+
+=== Configuration de mysql/mariadb
+
+Mise en place du fichier de config *my.cnf* dans */etc/mysql* pour changer
+
+[source,bash]
+---------------
+bind-address = 0.0.0.0
+max_connections      = 500
+max_user_connections = 30
+---------------
+
+Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
+
+
+=== Configuration de apparmor
+
+...
+
+
+=== Securisation rep session PHP
+
+Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php*
+
+
+=== Ajout du wrapper PHP pour mail
+
+Modifier le fichier php.ini de apache avec:
+
+[source,bash]
+---------------
+; Automatically add files before PHP document.
+; http://php.net/auto-prepend-file
+auto_prepend_file = /usr/local/bin/phpsendmailprepend.php
+
+; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
+; http://php.net/sendmail-path
+sendmail_path = /usr/local/bin/phpsendmail.php
+
+; The path to a log file that will log all mail() calls. Log entries include
+; the full path of the script, line number, To address and headers.
+mail.log = /var/log/phpmail.log
+---------------
+
+ln -fs /home/admin/tools/phpsendmailprepend.php /usr/local/bin/
+ln -fs /home/admin/tools/phpsendmail.php /usr/local/bin/
+
+
+
+=== Crer un virtual host pour les Portails Web
+
+
+
+=== Installation de certificat ssl apache par letsencrypt
+
+On utilisera la methode "webroot" qui a l'avantage de pouvoir fonctionner aussi à travers un cache comme CloudFlare.
+
+Pour forcer le renewal d'un domaine en particulier:
+
+[source,bash]
+---------------
+/root/certbot-auto certonly -d www.dolimed.com
+---------------
+
+Pour renouveller automatiquement les certificats créés:
+
+[source,bash]
+---------------
+/root/certbot-auto renew
+---------------
+
+
+
+
+== Clonage d'un instance serveur
+
+- Créer un snapshot du serveur + Disque
+
+- Créer un nouveau serveur OVH depuis le snapshot.
+
+- Ajouter une entrée du nouveau serveur dans le DNS.
+
+- Aller dans l'interface de gestion des IP OVH, pour ajouter le reverse sur l'IP.
+
+- Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement.
+
+- Se connecter et modifier le fichier */etc/hosts* avec le nom du nouveau serveur et nouvelle ip du serveur.
+
+- Modifier le fichier */etc/init.d/firewall* pour prendre en compte le nouveau nom et ip du serveur.
+
+- Vérifier le fichier */etc/network/interfaces*.
+
+- Formater le nouveau disque dur. Pour cela, voir la chapitre <<ajout_de_disque>>.
+
+- Ajouter un fichier à la racine du disque pour identifier le volume.
+
+- Se connecter à webmin pour désactiver les actions de supervision en doublons avec celle du serveur cloné.
+
+- Supprimer les crons en doublons avec le serveur cloné.
+
+- Modifier le fichiers /etc/postfix/main.cf et /etc/postfix/mydestination
+
+- Modifier les fichiers de serveur virtuels Apache
+
+
+
+== Installation composants Backups/Synchro
+
+=== Synchro des filesystems /home
+
+- Utilisation de Lsyncd
+- ??? quid dns
+
+
+=== IP virtuelle et test de bascule
+
+- Ajout d'une IP virtuelle via le manager OVH
+
+- Déclaration de l'interface dans /etc/network/interfaces
+
+Example pour les 2 ip virtuelles:
+
+auto eth0:0
+iface eth0:0 inet static
+        address 91.121.46.42
+        netmask 255.255.255.255
+        broadcast 91.121.46.42
+
+auto eth0:1
+iface eth0:1 inet static
+        address 79.137.96.15
+        netmask 255.255.255.255
+        broadcast 79.137.96.15
+
+
+
+
+
+== Sauvegarde / Restauration
+
+La sauvegarde peut se faire par un snapshot d'image de la VM.
+Il est aussi possible de ne faire un snapshot que des disques complémentaires.
+
+Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentire),
+à condition que la cible (serveur ou disque) soit supérieur en terme de capacité de stockage.
+
+Une fois une restauration faite, si elle a été faite sur un autre serveur, il faut:
+
+* Log into ssh: Change apache virtual host to set new host name
+* If VM is a backup VM, disabled also root cron tasks
+
+* For Prestashop sites, if VM has a new url, go into database to set correct url into table ps_configuration (var PS_SHOP_DOMAIN, PS_SHOP_DOMAIN_SSL, CANONICAL_URL) and ps_shop_url
+* For Mediawiki sites, if VM has a new url, go into database to set correct url into file LocalSettings.php
+
+
+
+
+
