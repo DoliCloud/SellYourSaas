@@ -1,0 +1,28 @@
+language: php
+
+php:
+  - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+# http://docs.travis-ci.com/user/build-configuration/#Rows-That-are-Allowed-To-Fail
+matrix:
+  fast_finish: true
+  include:
+    - php: 5.3
+      dist: precise
+
+script:
+  # Check syntax all PHP files, redirect stderr to file and return 0 if file is empty
+  - find . -name '*.php' -exec php -l {} > /dev/null \; 2> /tmp/lint.err ; test ! -s /tmp/lint.err
+
+  # Execute PHPUnit tests
+  - composer install --prefer-dist
+  - vendor/bin/phpunit --coverage-text

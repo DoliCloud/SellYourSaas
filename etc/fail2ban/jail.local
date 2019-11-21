@@ -1,0 +1,49 @@
+
+[email-dol-perhour]
+
+; rule against intensive email ko - too high number of recipient
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-rulesko
+logpath = /var/log/phpsendmail.log
+action = %(action_mw)s
+bantime  = 7200      ; 2 hour
+findtime = 3600      ; 1 hour
+maxretry = 5
+
+[email-dol-blacklist]
+
+; rule against email ko - blacklist ip, email or content
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-ruleskoblacklist
+logpath = /var/log/phpsendmail.log
+action = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 1
+
+[email-dol-perday]
+
+; rule against out of limit emails (max 500 emails per day)
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-rulesall
+logpath = /var/log/phpsendmail.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 86400     ; 1 day
+maxretry = 500
+
+[email-dol-perhouradmin]
+
+; rule against out of limit emails (max 10 from admin)
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-rulesadmin
+logpath = /var/log/phpsendmail.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 60        ; 1 minute
+maxretry = 10
+

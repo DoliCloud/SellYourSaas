@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="logo_sellyoursaas.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.1706705"
+     inkscape:cx="220.85375"
+     inkscape:cy="913.87521"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     borderlayer="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1023"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="_x2601__xFE0F__1_"
+       transform="matrix(1.2539577,0,0,0.87128312,42.070902,18.30887)">
+	<path
+   id="path827"
+   d="m 15.9,30.3 c 0,0.4 -0.4,0.8 -0.8,0.8 C 10,31.6 6,36.7 6,42.9 6,49.5 10.5,54.8 16.2,54.8 H 54.9 C 61,54.8 66,49.1 66,42.2 66,35.6 61.4,30.1 55.6,29.7 c -0.4,0 -0.8,-0.3 -0.9,-0.8 -1.3,-6.7 -7.3,-11.7 -14.3,-11.7 -4.6,0 -8.7,2.1 -11.3,5.4 -0.3,0.4 -0.8,0.5 -1.1,0.4 -1,-0.4 -2.1,-0.6 -3.3,-0.6 -4.6,-0.1 -8.4,3.4 -8.8,7.9 z"
+   stroke-miterlimit="10"
+   inkscape:connector-curvature="0"
+   style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10" />
+
+</g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:12.14800739px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.30370018"
+       x="61.14101"
+       y="52.093708"
+       id="text841"
+       transform="scale(0.87119907,1.1478433)"><tspan
+         sodipodi:role="line"
+         id="tspan839"
+         x="61.14101"
+         y="52.093708"
+         style="stroke-width:0.30370018"><tspan
+   style="fill:#aa4400;stroke-width:0.30370018"
+   id="tspan849">$ell</tspan>Your<tspan
+   style="fill:#aa4400;stroke-width:0.30370018"
+   id="tspan851">$aa$</tspan></tspan></text>
+  </g>
+</svg>

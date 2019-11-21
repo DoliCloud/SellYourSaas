@@ -1,0 +1,666 @@
+#!/bin/bash
+
+# To use this script with remote ssh (not required when using the remote agent):
+# Create a symbolic link to this file .../action_suspend_unsuspend.sh into /usr/bin
+# Grant adequate permissions (550 mean root and group www-data can read and execute, nobody can write)
+# sudo chown root:www-data /usr/bin/action_suspend_unsuspend.sh
+# sudo chmod 550 /usr/bin/action_suspend_unsuspend.sh
+# And allow apache to sudo on this script by doing visudo to add line:
+#www-data        ALL=(ALL) NOPASSWD: /usr/bin/action_suspend_unsuspend.sh
+
+
+export now=`date +%Y%m%d%H%M%S`
+
+echo
+echo
+echo "####################################### ${0} ${1}"
+echo "${0} ${@}"
+echo "# user id --------> $(id -u)"
+echo "# now ------------> $now"
+echo "# PID ------------> ${$}"
+echo "# PWD ------------> $PWD" 
+echo "# arguments ------> ${@}"
+echo "# path to me -----> ${0}"
+echo "# parent path ----> ${0%/*}"
+echo "# my name --------> ${0##*/}"
+echo "# realname -------> $(realpath ${0})"
+echo "# realname name --> $(basename $(realpath ${0}))"
+echo "# realname dir ---> $(dirname $(realpath ${0}))"
+
+export PID=${$}
+export ZONES_PATH="/etc/bind/zones"
+export scriptdir=$(dirname $(realpath ${0}))
+export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+
+
+if [ "$(id -u)" != "0" ]; then
+	echo "This script must be run as root" 1>&2
+	exit 1
+fi
+
+if [ "x$1" == "x" ]; then
+	echo "Missing parameter 1 - mode (suspend|unsuspend)" 1>&2
+	exit 1
+fi
+if [ "x$2" == "x" ]; then
+	echo "Missing parameter 2 - osusername" 1>&2
+	exit 1
+fi
+if [ "x$3" == "x" ]; then
+	echo "Missing parameter 3 - ospassword" 1>&2
+	exit 1
+fi
+if [ "x$4" == "x" ]; then
+	echo "Missing parameter 4 - instancename" 1>&2
+	exit 1
+fi
+if [ "x$5" == "x" ]; then
+	echo "Missing parameter 5 - domainname" 1>&2
+	exit 1
+fi
+if [ "x$6" == "x" ]; then
+	echo "Missing parameter 6 - dbname" 1>&2
+	exit 1
+fi
+if [ "x$7" == "x" ]; then
+	echo "Missing parameter 7 - dbport" 1>&2
+	exit 1
+fi
+if [ "x${22}" == "x" ]; then
+	echo "Missing parameter 22 - EMAILFROM" 1>&2
+	exit 1
+fi
+if [ "x${23}" == "x" ]; then
+	echo "Missing parameter 23 - REMOTEIP" 1>&2
+	exit 1
+fi
+
+
+export mode=$1
+export osusername=$2
+export ospassword=$3
+export instancename=$4
+export domainname=$5
+
+export dbname=$6
+export dbport=$7
+export dbusername=$8
+export dbpassword=$9
+
+export fileforconfig1=${10}
+export targetfileforconfig1=${11}
+export dirwithdumpfile=${12}
+export dirwithsources1=${13}
+export targetdirwithsources1=${14}
+export dirwithsources2=${15}
+export targetdirwithsources2=${16}
+export dirwithsources3=${17}
+export targetdirwithsources3=${18}
+export cronfile=${19}
+export cliafter=${20}
+export targetdir=${21}
+export EMAILTO=${22}
+export REMOTEIP=${23}
+export SELLYOURSAAS_ACCOUNT_URL=${24}
+export instancenameold=${25}
+export domainnameold=${26}
+export customurl=${27}
+if [ "x$customurl" == "x-" ]; then
+	customurl=""
+fi
+export contractlineid=${28}
+export EMAILFROM=${29}
+export CERTIFFORCUSTOMDOMAIN=${30}
+export archivedir=${31}
+export SSLON=${32}
+export apachereload=${33}
+export ALLOWOVERRIDE=${34//£/ }
+if [ "x$ALLOWOVERRIDE" == "x-" ]; then
+	ALLOWOVERRIDE=""
+fi
+export VIRTUALHOSTHEAD=${35//£/ }
+if [ "x$VIRTUALHOSTHEAD" == "x-" ]; then
+	VIRTUALHOSTHEAD=""
+fi
+
+export instancedir=$targetdir/$osusername/$dbname
+export fqn=$instancename.$domainname
+export fqnold=$instancenameold.$domainnameold
+
+export webSSLCertificateCRT=with.sellyoursaas.com.crt
+export webSSLCertificateKEY=with.sellyoursaas.com.key
+export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
+
+
+# For debug
+echo `date +%Y%m%d%H%M%S`" input params for $0:"
+echo "mode = $mode"
+echo "osusername = $osusername"
+echo "ospassword = XXXXXX"
+echo "instancename = $instancename"
+echo "domainname = $domainname"
+echo "targetdir = $targetdir"
+echo "EMAILTO = $EMAILTO"
+echo "REMOTEIP = $REMOTEIP"
+echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL" 
+echo "instancenameold = $instancenameold" 
+echo "domainnameold = $domainnameold"
+echo "customurl = $customurl"
+echo "contractlineid = $contractlineid" 
+echo "EMAILFROM = $EMAILFROM"
+echo "CERTIFFORCUSTOMDOMAIN = $CERTIFFORCUSTOMDOMAIN"
+echo "archivedir = $archivedir"
+echo "SSLON = $SSLON"
+echo "apachereload = $apachereload"
+echo "ALLOWOVERRIDE = $ALLOWOVERRIDE"
+echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
+
+echo `date +%Y%m%d%H%M%S`" calculated params:"
+echo "instancedir = $instancedir"
+echo "fqn = $fqn"
+echo "fqnold = $fqnold"
+
+
+testorconfirm="confirm"
+
+
+
+# Rename
+
+if [[ "$mode" == "rename" ]]; then
+
+	if [[ "$fqn" != "$fqnold" ]]; then
+		echo `date +%Y%m%d%H%M%S`" ***** For instance in /home/jail/home/$osusername/$dbname, check if new virtual host $fqn exists"
+
+		export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
+		if [ -f $apacheconf ]; then
+			echo "Error failed to rename. New name is already used (found file /etc/apache2/sellyoursaas-online/$fqn.conf)." 
+			exit 1
+		fi
+	fi
+	
+	# TODO
+	# Add DNS entry for $fqn
+
+
+	echo `date +%Y%m%d%H%M%S`" ***** For instance in /home/jail/home/$osusername/$dbname, create a new virtual name $fqn"
+
+	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
+	echo `date +%Y%m%d%H%M%S`" ***** Create a new apache conf $apacheconf from $vhostfile"
+
+	if [[ -s $apacheconf ]]
+	then
+		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		rm -f $apacheconf
+	fi
+
+	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
+			  sed -e 's/__webAppLogName__/$instancename/g' | \
+              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+			  sed -e 's/__osUsername__/$osusername/g' | \
+			  sed -e 's/__osGroupname__/$osusername/g' | \
+			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppLogName__/$instancename/g" | \
+              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+			  sed -e "s/__osUsername__/$osusername/g" | \
+			  sed -e "s/__osGroupname__/$osusername/g" | \
+			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+
+
+	#echo Enable conf with a2ensite $fqn.conf
+	#a2ensite $fqn.conf
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+
+
+	# Remove and recreate customurl
+	rm -f /etc/apache2/sellyoursaas-available/$fqn.custom.conf
+	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+	if [[ "x$customurl" != "x" ]]; then
+	
+		echo `date +%Y%m%d%H%M%S`" ***** For instance in /home/jail/home/$osusername/$dbname, create a new custom virtual name $fqn.custom"
+	
+		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
+		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
+			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt ]]; then
+				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt to /etc/apache2/with.sellyoursaas.com.crt"
+				ln -fs /etc/apache2/with.sellyoursaas.com.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt
+			fi
+			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key ]]; then
+				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key to /etc/apache2/with.sellyoursaas.com.key"
+				ln -fs /etc/apache2/with.sellyoursaas.com.key /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key
+			fi
+			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt ]]; then
+				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt to /etc/apache2/with.sellyoursaas.com-intermediate.crt"
+				ln -fs /etc/apache2/with.sellyoursaas.com-intermediate.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt
+			fi
+		fi
+		
+		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
+		echo `date +%Y%m%d%H%M%S`" ***** Create a new apache conf $apacheconf from $vhostfile"
+	
+		if [[ -s $apacheconf ]]
+		then
+			echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+			rm -f $apacheconf
+		fi
+	
+		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
+				  sed -e 's/__webAppAliases__/$customurl/g' | \
+				  sed -e 's/__webAppLogName__/$instancename/g' | \
+                  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+                  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+                  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+				  sed -e 's/__osUsername__/$osusername/g' | \
+				  sed -e 's/__osGroupname__/$osusername/g' | \
+				  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__webAppPath__;$instancedir;g' | sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
+		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
+				  sed -e "s/__webAppAliases__/$customurl/g" | \
+				  sed -e "s/__webAppLogName__/$instancename/g" | \
+                  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+                  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+                  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+				  sed -e "s/__osUsername__/$osusername/g" | \
+				  sed -e "s/__osGroupname__/$osusername/g" | \
+				  sed -e "s/SSLEngine on/SSLEngine $SSLON/ig" | \
+				  sed -e "s/SSLEngine off/SSLEngine $SSLON/ig" | \
+				  sed -e "s/RewriteEngine on/RewriteEngine $SSLON/ig" | \
+				  sed -e "s/RewriteEngine off/RewriteEngine $SSLON/ig" | \
+				  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__webAppPath__;$instancedir;g" | sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
+	
+	
+		#echo Enable conf with a2ensite $fqn.custom.conf
+		#a2ensite $fqn.custom.conf
+		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+		ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+	
+	fi 
+
+
+	echo mkdir /home/jail/home/$osusername/$dbname to be sure apache can create its error log file
+	mkdir -p /home/jail/home/$osusername/$dbname
+
+	
+	echo /usr/sbin/apache2ctl configtest
+	/usr/sbin/apache2ctl configtest
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running apache2ctl configtest 
+		echo "Failed to unsuspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
+		sleep 1
+		exit 1
+	fi 
+
+	if [[ "x$apachereload" != "xnoapachereload" ]]; then
+		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+		service apache2 reload
+		if [[ "x$?" != "x0" ]]; then
+			echo Error when running service apache2 reload
+			echo "Failed to unsuspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
+			sleep 1
+			exit 2
+		fi
+	else
+		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+	fi
+
+	if [[ "$fqn" != "$fqnold" ]]; then
+		echo `date +%Y%m%d%H%M%S`" ***** For instance in /home/jail/home/$osusername/$dbname, delete old virtual name $fqnold"
+
+		export apacheconf="/etc/apache2/sellyoursaas-online/$fqnold.conf"
+		echo `date +%Y%m%d%H%M%S`" ***** Remove apache conf $apacheconf"
+
+		if [ -f $apacheconf ]; then
+		
+			echo Disable conf with a2dissite $fqnold.conf
+			#a2dissite $fqn.conf
+			rm -f /etc/apache2/sellyoursaas-online/$fqnold.conf
+			rm -f /etc/apache2/sellyoursaas-online/$fqnold.custom.conf
+			
+			/usr/sbin/apache2ctl configtest
+			if [[ "x$?" != "x0" ]]; then
+				echo Error when running apache2ctl configtest 
+				echo "Failed to delete virtual host with old name instance $instancenameold.$domainnameold with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in rename" $EMAILTO
+				sleep 1
+				exit 3
+			fi
+			
+			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload"
+			service apache2 reload
+			if [[ "x$?" != "x0" ]]; then
+				echo Error when running service apache2 reload 
+				echo "Failed to delete virtual host with old name instance $instancenameold.$domainnameold with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in rename" $EMAILTO
+				sleep 1
+				exit 4
+			fi
+		else
+			echo "Virtual host $apacheconf seems already disabled"
+		fi
+
+		# TODO
+		# Remove DNS entry for $fqnold
+	fi
+
+fi
+
+# Suspend
+
+if [[ "$mode" == "suspend" ]]; then
+	echo `date +%Y%m%d%H%M%S`" ***** Suspend instance in /home/jail/home/$osusername/$dbname"
+
+	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
+	echo "Create a suspended apache conf $apacheconf from $vhostfilesuspended"
+
+	if [[ -s $apacheconf ]]
+	then
+		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		rm -f $apacheconf
+	fi
+
+	echo "cat $vhostfilesuspended | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
+			  sed -e 's/__webAppLogName__/$instancename/g' | \
+              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+			  sed -e 's/__osUsername__/$osusername/g' | \
+			  sed -e 's/__osGroupname__/$osusername/g' | \
+			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+	cat $vhostfilesuspended | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppLogName__/$instancename/g" | \
+              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+			  sed -e "s/__osUsername__/$osusername/g" | \
+			  sed -e "s/__osGroupname__/$osusername/g" | \
+			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+
+
+	#echo Enable conf with a2ensite $fqn.conf
+	#a2ensite $fqn.conf
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+	
+	
+	if [[ "x$customurl" != "x" ]]; then
+	
+		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
+		echo "Create a suspended apache conf $apacheconf from $vhostfilesuspended"
+	
+		if [[ -s $apacheconf ]]
+		then
+			echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+			rm -f $apacheconf
+		fi
+	
+		echo "cat $vhostfilesuspended | sed -e 's/__webAppDomain__/$customurl/g' | \
+				  sed -e 's/__webAppAliases__/$customurl/g' | \
+				  sed -e 's/__webAppLogName__/$instancename/g' | \
+                  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+                  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+                  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+				  sed -e 's/__osUsername__/$osusername/g' | \
+				  sed -e 's/__osGroupname__/$osusername/g' | \
+				  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__webAppPath__;$instancedir;g' | sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
+		cat $vhostfilesuspended | sed -e "s/__webAppDomain__/$customurl/g" | \
+				  sed -e "s/__webAppAliases__/$customurl/g" | \
+				  sed -e "s/__webAppLogName__/$instancename/g" | \
+                  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+                  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+                  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+				  sed -e "s/__osUsername__/$osusername/g" | \
+				  sed -e "s/__osGroupname__/$osusername/g" | \
+				  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+			  	  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__webAppPath__;$instancedir;g" | sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
+	
+	
+		#echo Enable conf with a2ensite $fqn.custom.conf
+		#a2ensite $fqn.custom.conf
+		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+		ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+	
+	fi
+	
+	
+	echo /usr/sbin/apache2ctl configtest
+	/usr/sbin/apache2ctl configtest
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn.conf to hope to restore configtest ok.
+		rm -f /etc/apache2/sellyoursaas-online/$fqn.conf
+		rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+		echo "Failed to suspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb when suspending $instancename.$domainname" $EMAILTO 
+		sleep 1
+		exit 5
+	fi 
+	
+	if [[ "x$apachereload" != "xnoapachereload" ]]; then
+		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+		service apache2 reload
+		if [[ "x$?" != "x0" ]]; then
+			echo Error when running service apache2 reload
+			echo "Failed to suspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb when suspending $instancename.$domainname" $EMAILTO
+			sleep 1 
+			exit 6
+		fi
+	else
+		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+	fi
+fi
+
+
+# Unsuspend
+
+if [[ "$mode" == "unsuspend" ]]; then
+	echo `date +%Y%m%d%H%M%S`" ***** Unsuspend instance in /home/jail/home/$osusername/$dbname"
+
+	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
+	echo "Create a new apache conf $apacheconf from $vhostfile"
+
+	if [[ -s $apacheconf ]]
+	then
+		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		rm -f $apacheconf
+	fi
+
+	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
+			  sed -e 's/__webAppLogName__/$instancename/g' | \
+              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+			  sed -e 's/__osUsername__/$osusername/g' | \
+			  sed -e 's/__osGroupname__/$osusername/g' | \
+			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppLogName__/$instancename/g" | \
+              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+			  sed -e "s/__osUsername__/$osusername/g" | \
+			  sed -e "s/__osGroupname__/$osusername/g" | \
+			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+
+
+	#echo Enable conf with a2ensite $fqn.conf
+	#a2ensite $fqn.conf
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+	
+	
+	if [[ "x$customurl" != "x" ]]; then
+	
+		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
+		echo "Create a new apache conf $apacheconf from $vhostfile"
+	
+		if [[ -s $apacheconf ]]
+		then
+			echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+			rm -f $apacheconf
+		fi
+	
+		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
+				  sed -e 's/__webAppAliases__/$customurl/g' | \
+				  sed -e 's/__webAppLogName__/$instancename/g' | \
+                  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+                  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+                  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+				  sed -e 's/__osUsername__/$osusername/g' | \
+				  sed -e 's/__osGroupname__/$osusername/g' | \
+				  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__webAppPath__;$instancedir;g' | sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
+		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
+				  sed -e "s/__webAppAliases__/$customurl/g" | \
+				  sed -e "s/__webAppLogName__/$instancename/g" | \
+                  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+                  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+                  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+				  sed -e "s/__osUsername__/$osusername/g" | \
+				  sed -e "s/__osGroupname__/$osusername/g" | \
+				  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__webAppPath__;$instancedir;g" | sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
+	
+	
+		#echo Enable conf with a2ensite $fqn.custom.conf
+		#a2ensite $fqn.custom.conf
+		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+		ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+	
+	fi
+	
+	
+	
+	echo /usr/sbin/apache2ctl configtest
+	/usr/sbin/apache2ctl configtest
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running apache2ctl configtest 
+		echo "Failed to unsuspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
+		sleep 1
+		exit 7
+	fi 
+
+	echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload"
+	service apache2 reload
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running service apache2 reload
+		echo "Failed to unsuspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
+		sleep 1
+		exit 8
+	fi
+
+fi
+
+
+# Cron
+
+if [[ "$mode" == "unsuspend" ]]; then
+
+	echo `date +%Y%m%d%H%M%S`" ***** Reinstall cron file $cronfile"
+	if [[ -f /var/spool/cron/crontabs/$osusername ]]; then
+		echo merge existing $cronfile with existing /var/spool/cron/crontabs/$osusername
+		echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
+		cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
+		echo "cat $cronfile >> /tmp/$dbname.tmp"
+		cat $cronfile >> /tmp/$dbname.tmp
+		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+	else
+		echo cron file /var/spool/cron/crontabs/$osusername does not exists yet
+		echo cp $cronfile /var/spool/cron/crontabs/$osusername
+		cp $cronfile /var/spool/cron/crontabs/$osusername
+	fi
+
+	chown $osusername.$osusername /var/spool/cron/crontabs/$osusername
+	chmod 600 /var/spool/cron/crontabs/$osusername
+fi
+
+if [[ "$mode" == "suspend" ]]; then
+
+	echo `date +%Y%m%d%H%M%S`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
+	if [ -s /var/spool/cron/crontabs/$osusername ]; then
+		mkdir -p /var/spool/cron/crontabs.disabled
+		rm -f /var/spool/cron/crontabs.disabled/$osusername
+		echo cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
+		cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
+		echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
+		cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
+		#echo rm -f /var/spool/cron/crontabs/$osusername
+		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+	else
+		echo cron file /var/spool/cron/crontabs/$osusername already removed or empty
+	fi 
+
+fi
+
+
+echo `date +%Y%m%d%H%M%S`" Process of action $mode of $instancename.$domainname for user $osusername finished"
+echo
+
+sleep 1
+exit 0
