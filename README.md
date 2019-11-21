@@ -9,7 +9,7 @@ your subscribers and automatic invoicing and renewal.
 
 This is a list of some features supported by this application:
 
-- Can create profiles of packages to define what to deploy when a subscription to this package is done: files or directories to deploy, databases dump to load, cron entry to add,
+- Creationo of profiles of packages to define what to deploy when a subscription to this package is done: files or directories to deploy, databases dump to load, cron entry to add,
 SSH public keys of administrator to deploy and any other command lines to launch.
 - Create services that define the plan (which package and option) and price policy to use for invoicing: per application, per user, per Gigabytes or any combination of this.
 - Option to support free trial periods (with no credit card required) on some plans.
