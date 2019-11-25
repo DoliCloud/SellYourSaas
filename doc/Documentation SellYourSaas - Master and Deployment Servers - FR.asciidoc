@@ -572,10 +572,10 @@ sudo apt-get install bind9
 === Activation des modules apache
 
 actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex
-cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers ident include info ldap
-mem_cache mime mime_magic negotiation php7.0 proxy_ajp proxy_balancer proxy_connect proxy_ftp proxy_http proxy rewrite setenvif
+cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
+mem_cache mime mime_magic negotiation php7.0|php7.2 reqtimeout rewrite setenvif
 speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
-mpm_itk
+mpm_itk mpm_prefork
 
 Sur les serveurs de Déploiement:
 
@@ -2501,9 +2501,30 @@ image::Example_ecran_datadog.png[Ecran supervision DataDog]
 
 === Options cachées
 
-* SELLYOURSAAS_NAME_FORDOMAIN-mydomain.com = My Service name bis 
+You can force different values for some setup parameters when the customer has registered itself from a page with *mydomain.com* as main domain.
 
-Show another name for service than the one defined if setup. This name will be used if the customer has registered itself from a a page with mydomain.com as main domain.
+* SELLYOURSAAS_NAME_FORDOMAIN-myseconddomain.com = My Service name bis 
+* SELLYOURSAAS_ACCOUNT_URL-myseconddomain.com = https://myaccount.myseconddomain.com
+* SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-myseconddomain.com = 0
+* SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-myseconddomain.com = contact@myseconddomain.com
+* SELLYOURSAAS_MAIN_EMAIL_PREMIUM_FORDOMAIN-myseconddomain.com = contact+premium@myseconddomain.com
+* SELLYOURSAAS_NOREPLY_EMAIL_FORDOMAIN-myseconddomain.cloud = noreply@myseconddomain.com
+* SELLYOURSAAS_RESELLER_URL-myseconddomain.com = https://www.myseconddomain.com/resellers.php
+
+To define account to use getipintel API for VPN probability.
+* SELLYOURSAAS_GETIPINTEL_EMAIL = contact+checkcustomer@nltechno.com
+
+To enable native Datadog reporting (datadog-agent must just be installed)
+* SELLYOURSAAS_DATADOG_ENABLED = 1
+
+
+
+
+
+
+
+
+ 
 
 
 

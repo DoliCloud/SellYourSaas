@@ -54,7 +54,7 @@ $id=(GETPOST('socid','int') ? GETPOST('socid','int') : GETPOST('id','int'));
 $ref = GETPOST('ref', 'alpha');
 
 // Security check - Protection if external user
-//if ($user->societe_id > 0) access_forbidden();
+//if ($user->societe_id > 0) accessforbidden();
 //if ($user->societe_id > 0) $socid = $user->societe_id;
 //$result = restrictedArea($user, 'sellyoursaas', $id);
 

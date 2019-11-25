@@ -66,7 +66,7 @@ else
 $search_agenda_label=GETPOST('search_agenda_label');
 
 // Security check - Protection if external user
-//if ($user->societe_id > 0) access_forbidden();
+//if ($user->societe_id > 0) accessforbidden();
 //if ($user->societe_id > 0) $socid = $user->societe_id;
 //$result = restrictedArea($user, 'sellyoursaas', $id);
 
