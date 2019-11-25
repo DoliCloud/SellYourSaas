@@ -5,6 +5,10 @@
     border-radius: 10px;
 }
 
+span.pictowarning {
+    color: #ff8800;
+}
+
 .clearboth {
 	clear: both;
 }
