@@ -1804,7 +1804,9 @@ Pour générer le fichier .key:
     
 [source,bash]
 ---------------
+cd /etc/apache2
 openssl genrsa 2048 > with.mysaasdomainname.com.key
+chmod go-r with.mysaasdomainname.com.key
 ---------------
 
 Pour générer le fichier .csr:
@@ -1827,7 +1829,7 @@ Choisir:
 
 * Soumettre le fichier.
 
-* Récupérer les certificats SSL (fichier .crt) et les installer dans le chemin des certificats SSL spécifiés par le modèle de virtual host pour les instances (les modèles de virtual hosts sont dans sellyoursaas/scripts/templates/)
+* Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans le chemin des certificats SSL spécifiés par le modèle de virtual host pour les instances (les modèles de virtual hosts sont dans sellyoursaas/scripts/templates/)
 
 
 [[installation_des_taches_cron]]
