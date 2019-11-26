@@ -1829,7 +1829,16 @@ Choisir:
 
 * Soumettre le fichier.
 
-* Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans le chemin des certificats SSL spécifiés par le modèle de virtual host pour les instances (les modèles de virtual hosts sont dans sellyoursaas/scripts/templates/)
+* Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
+
+* Créer un lien symbolique vers ce certificats avec le nom generique *with.sellyoursaas.com.crt* et *with.sellyoursaas.com-intermediate.crt*:
+
+---------------
+cd /etc/apache2
+ln -fs with.mysaasdomainname.com.key with.sellyoursaas.com.crt
+ln -fs with.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
+---------------
+
 
 
 [[installation_des_taches_cron]]
@@ -2007,14 +2016,14 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 
 - Modifier le fichiers */etc/postfix/main.cf* et */etc/postfix/mydestination* (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement)
 
-- Ajouter les entrées du nouveau serveur dans le DNS mondomain.com avec l'IP du serveur attribué par OVH lors de sa création.
+- Ajouter les entrées du nouveau serveur dans le DNS mysellyoursaasdomainname.com avec l'IP du serveur attribué par OVH lors de sa création.
 
 - Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *monserveur*).
 
 - Aller dans l'interface de gestion des IP OVH, pour ajouter aussi 
  
-  - le reverse sur l'IP du nouveau serveur: monserveur.mondomain.com
-  - le reverse sur l'IP virtuel si vous en avez pris une sur: with.mondomain.com
+  - le reverse sur l'IP du nouveau serveur: monserveur.mysellyoursaasdomainname.com
+  - le reverse sur l'IP virtuel si vous en avez pris une sur: with.mysellyoursaasdomainname.com
    
 - Se connecter et modifier le fichier */etc/hosts* avec le nom du nouveau serveur et nouvelle ip du serveur.
 
@@ -2059,7 +2068,7 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
   mysql -uroot -e "show databases" | grep dbn | gawk '{print "drop database `" $1 "`;select sleep(0.1);"}' > /tmp/dbntodelete.sql
   mysql -uroot < /tmp/dbntodelete.sql
   
-- Renommer le fichier DNS */etc/bind/withX.mondomain.com.hosts* en */etc/bind/with(X+1).mondomain.com.hosts* et l'éditer pour prendre en compte le nouveau prefix.
+- Renommer le fichier DNS */etc/bind/withX.mysellyoursaasdomainname.com.hosts* en */etc/bind/with(X+1).mysellyoursaasdomainname.com.hosts* et l'éditer pour prendre en compte le nouveau prefix.
 
 - Relancer le service de supervision *datadog-agent* si il est installé pour prendre en compte le nom du nouveau serveur.
 
@@ -2072,6 +2081,10 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 	mkdir /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
 	chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
 
+- Acquerir les certificats SSL du nouveau nom de domaine *withX.mysellyoursaasdomainname.com*, les déposer sur le serveur
+et créer les liens symboliques (Voir chapitre certificats SSL).
+
+ 
 En complément, si d'autres applications étaient actives sur le serveur clonés:
 
 * For Prestashop sites, if the new server has a new url:
@@ -2375,7 +2388,7 @@ Lancer le script:
 
 === Principe de déploiement d'une nouvelle instance SellYourSaas
 
-- Le visiteur va sur la page d'inscription  https://myaccount.mondomain.com/register.php et saisit son email et choisit un nom d'URL pour son instance (l'URL peut accepter des paramètres pour spécifier le
+- Le visiteur va sur la page d'inscription  https://myaccount.mysellyoursaasdomainname.com/register.php et saisit son email et choisit un nom d'URL pour son instance (l'URL peut accepter des paramètres pour spécifier le
 services souscrit, ou encore le nom du revendeur).
 
 - En cliquant sur La page d'inscription, les opérations suivantes sont réalisées :
