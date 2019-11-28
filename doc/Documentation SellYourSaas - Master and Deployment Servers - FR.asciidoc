@@ -139,7 +139,7 @@ Pour voir les options d'optimisation des filesystems:
 
 [source,bash]
 ---------------
-tune2fs -l /dev/vda1 | grep features
+tune2fs -l /dev/vdxY | grep features
 ---------------
 retourne
 
@@ -172,6 +172,11 @@ Rem: Si il faut récupérer des données d'un autre disque, utilisez
 [source,bash]
 ---------------
 rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
+
+Example:
+rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mysellyoursaasdomainname.com:/var/lib/mysql
+chown -R mysql.mysql /var/lib/mysql
+mysqlcheck --all-databases
 ---------------
 
 
@@ -1097,8 +1102,17 @@ inet_protocols = ipv4
 
 ==== Configuration
 
-Edition du fichier de config *myqlnd.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
+Edition du fichier de config *mysqld.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
 ou *50-server.cnf* dans */etc/mysql/mariadb.conf.d* (si mariadb) pour changer :
+
+Remplacer le 
+
+[source,bash]
+---------------
+bind-address = 127.0.0.1
+---------------
+
+par 
 
 [source,bash]
 ---------------
@@ -1106,8 +1120,8 @@ bind-address = 0.0.0.0
 max_connections      = 500
 max_user_connections = 30
 wait_timeout         = 7200
-table_open_cache     = 2000
-table_definition_cache = 2000
+table_open_cache     = 4000
+table_definition_cache = 8000
 # Mysql: max_execution_time = 300000 (milliseconds) or Mariadb: max_statement_time = 300 (seconds)
 #max_execution_time = 300000
 
@@ -1138,7 +1152,9 @@ For Mysql:
 
 [source,sql]
 ---------------
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'test';
+# Identification par mot de passe
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
+# Identification par unix socket
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
 
@@ -1146,7 +1162,9 @@ For MariaDb:
 
 [source,sql]
 ---------------
+# Identification par mot de passe
 update mysql.user set plugin='' where user='root';
+# Identification par unix socket
 update mysql.user set plugin='unix_socket' where user='root';
 ---------------
 
@@ -1183,6 +1201,28 @@ ou
 SET PASSWORD FOR 'sellyoursaas'@'localhost' = PASSWORD('...');
 ou
 update mysql.user SET authentication_string = PASSWORD('...') where user  = 'sellyoursaas' and host = 'localhost';
+FLUSH PRIVILEGES;
+---------------
+
+
+Donner les droits d'accès sur le serveur de déploiement pour administration à distance:
+
+[source,sql]
+---------------
+CREATE USER 'yourlogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
+GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'sellyoursaas'@'ipserverdeployment';
+GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'sellyoursaas'@'ipserverdeployment';
+FLUSH PRIVILEGES;
+---------------
+
+
+Si vous utilisez la supervision DataDog, créer un compte datadog pouvant accéder locallement à la base:
+
+[source,sql]
+---------------
+CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...';
+GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
+GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 FLUSH PRIVILEGES;
 ---------------
 
@@ -1974,15 +2014,16 @@ Les URL pour tester les déploiements sont visibles dans le menu SellYourSaas - 
 La sauvegarde du serveur+bases peut se faire par un snapshot d'image de la VM.
 Il est aussi possible de ne faire un snapshot que des disques complémentaires.
 
-Voir chapitre [Clonage d'une instance serveur pour production bis ou pour développement]
+Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour développement>>
 
 ==== Restauration système
 
 Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire),
 à condition que la cible (serveur ou disque) soit supérieure en terme de capacité de stockage.
 
-Voir chapitre [Clonage d'une instance serveur pour production bis ou pour développement]
+Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour développement>>
 
+[[Clonage d'une instance serveur pour production bis ou pour développement]]
 ==== Clonage d'une instance serveur pour production bis ou pour développement
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
@@ -2016,14 +2057,14 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 
 - Modifier le fichiers */etc/postfix/main.cf* et */etc/postfix/mydestination* (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement)
 
-- Ajouter les entrées du nouveau serveur dans le DNS mysellyoursaasdomainname.com avec l'IP du serveur attribué par OVH lors de sa création.
+- Ajouter les entrées du nouveau serveur dans le DNS de *mysellyoursaasdomainname.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) du serveur attribué par OVH lors de sa création.
 
-- Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *monserveur*).
+- Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *myserver*).
 
 - Aller dans l'interface de gestion des IP OVH, pour ajouter aussi 
  
-  - le reverse sur l'IP du nouveau serveur: monserveur.mysellyoursaasdomainname.com
-  - le reverse sur l'IP virtuel si vous en avez pris une sur: with.mysellyoursaasdomainname.com
+  - le reverse sur l'IP du nouveau serveur: *myserver.mysellyoursaasdomainname.com*
+  - le reverse sur l'IP virtuel si vous en avez pris une sur: *with.mysellyoursaasdomainname.com*
    
 - Se connecter et modifier le fichier */etc/hosts* avec le nom du nouveau serveur et nouvelle ip du serveur.
 
@@ -2036,12 +2077,12 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 - Modifier les fichiers de serveurs virtuels Apache pour mettre la nouvelle IP/nouveau nom.
 
 - Déclarer l'IP pour l'envoi d'emails:
-  - Si un serveur SMTP distant est utilisé, penser à autoriser l'ip du nouveau serveur à ce serveur.
-  - Ajouter l'ip dans l'entrée SPF du DNS.
+  - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
+  - Ajouter l'IP dans l'entrée SPF du DNS.
 
-- Créer un compte sellyoursaas et permission au serveur de déploiement sur la base de donnée du master. Voir <<creer_un_compte_db_sellyoursaas>>.
+- Créer un compte *sellyoursaas* et permissions au serveur de déploiement sur la base de donnée du master. Voir <<creer_un_compte_db_sellyoursaas>>.
 
-- Modifier le fichier */etc/sellyoursaas.conf* avec la nouvelle ip et nom de sous-domaine du nouveau pool et information du compte d'accès base de donnée du master.
+- Modifier le fichier */etc/sellyoursaas.conf* avec la nouvelle IP et nom de sous-domaine du nouveau pool et information du compte d'accès base de donnée du master.
 
 - Effacer les fichiers dans :
 
@@ -2074,7 +2115,7 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 
 - Arrêter, relancer le firewall, fail2ban, bind9, apache, postfix, remote_server
 
-- Vérifier que, depuis le serveur master, l'url *http://ipnouveauserverdeployment:8080/index.php/test* répond par un 404.
+- Vérifier que, depuis le serveur Master, l'url *http://ipnouveauserverdeployment:8080/index.php/test* répond par un "404 Not Found".
 
 - Vérifier que les répertoires existent avec les bons droits ou les forcer: 
 
@@ -2250,7 +2291,7 @@ Pour pousser une image sur un projet:
 
 - Pour recréer un serveur depuis une image
 
-Voir chapitre [Clonage d'une instance serveur pour production bis ou pour développement]
+Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour développement>>
 
 
 === Déplacement de la base de données (var/lib/mysql vers /mnt/diskhome/mysql/) ===
@@ -2343,7 +2384,12 @@ Ajouter */mnt/diskhome/mysql* dans les profiles apparmor qui contiennent */var/l
 
 [source,bash]
 ---------------
-# Allow data dir access
+# ADD For SellYourSaas. It allows also to move mysql dir into /mnt/diskhome if required. 
+  /proc/*/status r,
+  /sys/devices/system/node/ r,
+  /sys/devices/system/node/node*/meminfo r,
+  /sys/devices/system/node/*/* r,
+  /sys/devices/system/node/* r,
   /mnt/diskhome/mysql/ r,
   /mnt/diskhome/mysql/** rwk,
 ---------------
@@ -2355,6 +2401,10 @@ Recharge apparmor
 ---------------
 aa-enforce usr.sbin.mysqld
 ---------------
+
+=== Lancement de mysql sans permissions
+
+sudo mkdir -p /var/run/mysqld; sudo chown mysql /var/run/mysqld; sudo mysqld_safe --skip-grant-tables &
 
 
 
@@ -2379,6 +2429,8 @@ Lancer le script:
 ---------------
 /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 ---------------
+
+
 
 
 <<<
