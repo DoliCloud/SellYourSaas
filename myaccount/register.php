@@ -518,7 +518,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	    $reg = array();
 	                	    if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 	                	        $newval = preg_replace('/:.*$/', '', $newval);
-	                	        if ($reg[1] != $domainname && $reg[1] != GETPOST('forcetoacceptdomain', 'alpha')) continue;
+	                	        if ($reg[1] != $domainname && $newval != GETPOST('forcetoacceptdomain', 'alpha')) continue;
 	                	    }
 
 	                	    if (! empty($tmppackage->restrict_domains))   // There is a restriction on some domains for this package
@@ -542,8 +542,20 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                    ?>
 	                </select>
 	                	<?php
-	                	if (GETPOST('forcetoacceptdomain', 'alpha') && ! in_array(GETPOST('forcetoacceptdomain', 'alpha'), $listofdomain)) {
-	                	    print '<br>Error: Value for forcetoacceptdomain = '.GETPOST('forcetoacceptdomain', 'alpha').' is not in list of allowed domains.';
+	                	// Show warning if forcetoacceptdomain set and not found
+	                	if (GETPOST('forcetoacceptdomain', 'alpha')) {
+	                	    $forcetoacceptdomainfound = false;
+	                	    foreach($listofdomain as $val)
+	                	    {
+	                	        //$newval = preg_replace('/^.*:/', '', $val);
+	                	        $newval = preg_replace('/:.*$/', '', $val);
+	                	        if ($newval == GETPOST('forcetoacceptdomain', 'alpha')) {
+	                	            $forcetoacceptdomainfound = true;
+	                	        }
+	                	    }
+	                	    if (! $forcetoacceptdomainfound) {
+	                	        print '<br>Error: Value for forcetoacceptdomain = '.GETPOST('forcetoacceptdomain', 'alpha').' is not in list of available subdomainss.';
+	                	    }
 	                	}
 	                	?>
 	                <br class="unfloat" />
