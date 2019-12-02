@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2018 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2018-2019 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -417,10 +417,10 @@ $parameters=array('arrayfields'=>$arrayfields);
 $reshook=$hookmanager->executeHooks('printFieldListOption', $parameters, $object);    // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
 // Link
-print '<td>';
+print '<td class="liste_titre">';
 print '</td>';
 // Action column
-print '<td class="liste_titre" align="right">';
+print '<td class="liste_titre">';
 $searchpicto=$form->showFilterButtons();
 print $searchpicto;
 print '</td>';
@@ -441,9 +441,9 @@ foreach($object->fields as $key => $val)
 // Extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
 // Link
-print '<td>';
+print '<th>';
 print $langs->trans("URL");
-print '</td>';
+print '</th>';
 // Hook fields
 $parameters=array('arrayfields'=>$arrayfields,'param'=>$param,'sortfield'=>$sortfield,'sortorder'=>$sortorder);
 $reshook=$hookmanager->executeHooks('printFieldListTitle', $parameters, $object);    // Note that $action and $object may have been modified by hook
@@ -505,8 +505,9 @@ while ($i < min($num, $limit))
 	// Extra fields
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
 	// Link
-	print '<td>';
-	print '<a href="'.getRootUrlForAccount($object).'/register.php?origin=backofficelink&plan='.$obj->ref.'&partner=&partnerkey=md5aliaspartner" target="_register">';
+	print '<td class="nowrap">';
+	$helponurl=$langs->trans('ShowMoreParametersForRegisterUrls');
+	print '<a class="classfortooltip" href="'.getRootUrlForAccount($object).'/register.php?origin=backofficelink&plan='.$obj->ref.'&partner=&partnerkey=md5aliaspartner" target="_register" title="'.dol_escape_htmltag($helponurl).'">';
 	print img_picto('', 'object_globe');
 	print ' URL';
 	print '</a>';

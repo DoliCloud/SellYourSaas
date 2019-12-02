@@ -174,9 +174,9 @@ if ($reusecontractid)
 	$contract = new Contrat($db);
 	$contract->fetch($reusecontractid);
 	$socid = $contract->fk_soc;
-	$tmparray=explode('.', $contract->ref_customer);
+	$tmparray=explode('.', $contract->ref_customer, 2);
 	$sldAndSubdomain=$tmparray[0];
-	$tldid=$tmparray[1];
+	$tldid='.'.$tmparray[1];
 }
 
 $mythirdparty = new Societe($db);
@@ -527,21 +527,25 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	        $tmparray=explode(',', $tmppackage->restrict_domains);
 	                	        foreach($tmparray as $tmprestrictdomain)
 	                	        {
-	                	            //var_dump($val.' - '.$tmprestrictdomain);
 	                	            if ($newval == $tmprestrictdomain)
                                     {
                                         $restrictfound=true;
                                         break;
                                     }
 	                	        }
-	                	        if (! $restrictfound) continue;   // The domain in SELLYOURSAAS_SUB_DOMAIN_NAMES is inside restrictlist of package
+	                	        if (! $restrictfound && $newval != GETPOST('forcetoacceptdomain', 'alpha')) continue;   // The domain in SELLYOURSAAS_SUB_DOMAIN_NAMES is not inside restrictlist of package
 	                	    }
 
 	                		if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
-	                		print '<option value="'.$newval.'"'.(GETPOST('tldid','alpha') == $newval ? ' selected="selected"':'').'>'.$newval.'</option>';
+	                		print '<option value="'.$newval.'"'.(($tldid == $newval || ($newval == '.'.GETPOST('forcetoacceptdomain', 'alpha'))) ? ' selected="selected"':'').'>'.$newval.'</option>';
 	                	}
 	                    ?>
 	                </select>
+	                	<?php
+	                	if (GETPOST('forcetoacceptdomain', 'alpha') && ! in_array(GETPOST('forcetoacceptdomain', 'alpha'), $listofdomain)) {
+	                	    print '<br>Error: Value for forcetoacceptdomain = '.GETPOST('forcetoacceptdomain', 'alpha').' is not in list of allowed domains.';
+	                	}
+	                	?>
 	                <br class="unfloat" />
 	              </div>
 	            </div>
