@@ -463,6 +463,7 @@ Create directories required to store data and backups:
 
 [source,bash]
 ---------------
+mkdir /mnt/diskhome/home
 ln -fs /mnt/diskhome/home /home/jail/home
 
 mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid

@@ -554,7 +554,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	        }
 	                	    }
 	                	    if (! $forcetoacceptdomainfound) {
-	                	        print '<br>Error: Value for forcetoacceptdomain = '.GETPOST('forcetoacceptdomain', 'alpha').' is not in list of available subdomainss.';
+	                	        print '<br>Error: Value for forcetoacceptdomain = '.GETPOST('forcetoacceptdomain', 'alpha').' is not in list of available subdomains.';
 	                	    }
 	                	}
 	                	?>
