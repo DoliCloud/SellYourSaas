@@ -503,8 +503,8 @@ vi /etc/exports
 
 [source,bash]
 ---------------
-exportfs -v -a			(if there is new entry to add)
-exportfs -v -r			(if there is new entry to remove)
+exportfs -v -a			(to validate new entries to add)
+exportfs -v -r			(to validate new entries to remove)
 exportfs
 systemctl enable nfs-kernel-server
 systemctl restart nfs-kernel-server
@@ -2055,6 +2055,43 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
   Si il s'agit d'un dique déjà formatté, TODO...
 
 - Ajouter un fichier à la racine du disque pour identifier le volume (Par exemple: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...).
+
+- Ajouter une autorisation d'accès NFS au nouveau serveur sur le master
+
+[source,bash]
+---------------
+vi /etc/exports
+---------------
+
+Pour ajouter une ligne du type:
+
+	/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
+
+[source,bash]
+---------------
+exportfs -v -a			(to validate new entries to add)
+exportfs
+systemctl restart nfs-kernel-server
+---------------
+
+- Ajouter, dans le fichier */etc/fstab* du nouveau serveur de déploiement, l'entrée pour avoir le montage NFS au démarrage.
+
+[source,bash]
+---------------
+ip.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
+---------------
+
+- Autoriser l'accès entre le nouveau serveur de déploiement et le serveur master au niveau du firewall.
+
+Par exemple, sur le serveur master:
+
+[source,bash]
+---------------
+${IPTABLES} -t filter -A INPUT -i ens3 -p tcp -s ip.server.deploymeent --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A INPUT -i ens3 -p udp -s ip.server.deploymeent --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp -d ip.server.deploymeent --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -o ens3 -p udp -d ip.server.deploymeent --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+---------------
 
 - Modifier le fichiers */etc/postfix/main.cf* et */etc/postfix/mydestination* (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement)
 
