@@ -2008,7 +2008,7 @@ Les URL pour tester les déploiements sont visibles dans le menu SellYourSaas - 
 
 == Exploitation - Supervision
 
-=== Sauvegarde / Restauration ===
+=== Sauvegarde / Restauration
 
 ==== Sauvegarde système
 
@@ -2019,13 +2019,37 @@ Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour déve
 
 ==== Restauration système
 
-Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire),
-à condition que la cible (serveur ou disque) soit supérieure en terme de capacité de stockage.
+Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure en terme de capacité de stockage.
 
 Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour développement>>
 
+
+==== Sauvegarde fichiers et bases
+
+- Une sauvegarde locale de la configuration du serveur et des instances payantes est assurée par le cron
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* de *root* (voir <<installation_des_taches_cron>>) vers le disque */home/admin/backup/conf* et */home/admin/backup/mysql*
+
+- Une sauvegarde locale des instances clients payantes est assurée par le cron 
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* de *admin* (voir <<installation_des_taches_cron>>) vers le disque */mnt/diskbackup/backup/osu*
+
+- Une sauvegarde externe est assurée vers un autre serveur par le cron en lançant le fichier */home/admin/tools/backup_ext_rsync.pl* de admin (voir plus haut) de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* d'un autre serveur sur un autre datacenter. Ce script ne fait pas partie du projet *sellyoursaas*, il vous revient de le réaliser. Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
+TODO Contenu de ccript à proposer. S'assurez qu'il envoit un email en cas d'erreur de copie.
+
+
+- Pour une sauvegarde chez AWS:
+
+[source,bash]
+---------------
+pip install awscli --upgrade --user
+
+    TODO...
+---------------
+
+
 [[Clonage d'une instance serveur pour production bis ou pour développement]]
-==== Clonage d'une instance serveur pour production bis ou pour développement
+=== Clonage d'une instance serveur pour production bis ou pour développement
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
 
@@ -2175,28 +2199,19 @@ En complément, si d'autres applications étaient actives sur le serveur clonés
 * For Mediawiki sites, if VM has a new url, go into database to set correct url into file *LocalSettings.php*
 
 
-==== Sauvegarde fichiers et bases
+=== Upgrade OS
 
-- Une sauvegarde locale de la configuration du serveur et des instances payantes est assurée par le cron
+Pour mettre à jour Ubuntu 16.04 vers 18.04 sur un serveur SellYourSaas:
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* de *root* (voir <<installation_des_taches_cron>>) vers le disque */home/admin/backup/conf* et */home/admin/backup/mysql*
-
-- Une sauvegarde locale des instances clients payantes est assurée par le cron 
-
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* de *admin* (voir <<installation_des_taches_cron>>) vers le disque */mnt/diskbackup/backup/osu*
-
-- Une sauvegarde externe est assurée vers un autre serveur par le cron en lançant le fichier */home/admin/tools/backup_ext_rsync.pl* de admin (voir plus haut) de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* d'un autre serveur sur un autre datacenter. Ce script ne fait pas partie du projet *sellyoursaas*, il vous revient de le réaliser. Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
-TODO Contenu de ccript à proposer. S'assurez qu'il envoit un email en cas d'erreur de copie.
-
-
-- Pour une sauvegarde chez AWS:
-
-[source,bash]
+[source,sql]
 ---------------
-pip install awscli --upgrade --user
+apt dist-upgrade
 
-    TODO...
+apt install php-mysql
+a2enmode php7.2
+apt remove php-fpm php7-fpm
 ---------------
+
 
 
 === Suivi espace utilisé en base
@@ -2324,8 +2339,6 @@ Pour pousser une image sur un projet:
 ---------------
 
 ---------------
-
-
 
 - Pour recréer un serveur depuis une image
 
