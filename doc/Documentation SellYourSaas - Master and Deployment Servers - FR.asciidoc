@@ -575,6 +575,17 @@ sudo apt-get install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-prof
 sudo apt-get install bind9
 ---------------
 
+
+=== Désactivation de la mise a jour automatique
+
+Désinstaller le package *unattended-upgrades*
+
+[source,bash]
+---------------
+apt remove unattended-upgrades
+---------------
+
+
 === Activation des modules apache
 
 actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex
@@ -1103,6 +1114,15 @@ inet_protocols = ipv4
 
 ==== Configuration
 
+Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre:
+LimitNOFILE=50000
+
+Prendre en compte le changement en lançant:
+[source,bash]
+---------------
+systemctl daemon-reload
+---------------
+
 Edition du fichier de config *mysqld.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
 ou *50-server.cnf* dans */etc/mysql/mariadb.conf.d* (si mariadb) pour changer :
 
@@ -1121,13 +1141,16 @@ bind-address = 0.0.0.0
 max_connections      = 500
 max_user_connections = 30
 wait_timeout         = 7200
-table_open_cache     = 4000
+table_open_cache     = 10000
 table_definition_cache = 8000
 # Mysql: max_execution_time = 300000 (milliseconds) or Mariadb: max_statement_time = 300 (seconds)
 #max_execution_time = 300000
 
 innodb_buffer_pool_size=1G
 innodb_buffer_pool_instances=8
+innodb_file_per_table=1
+innodb_log_file_size=256M
+innodb_log_buffer_size=32M
 ---------------
 
 Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
@@ -1171,25 +1194,24 @@ update mysql.user set plugin='unix_socket' where user='root';
 
 
 [[creer_un_compte_db_sellyoursaas]]
-==== Créer un utilisateur sellyoursaas to administer other databases
+==== Créer un utilisateur sellyoursaas pour administrer les bases des instances
 
-Sur le serveur master et sur chaque serveur de déploiement, donner l'accès localement au compte:
+Sur le serveur *Master* et sur chaque *Serveur de déploiement*, donner l'accès localement au compte *sellyoursaas*:
 
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'localhost' IDENTIFIED BY '...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'sellyoursaas'@'localhost';
-GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'sellyoursaas'@'localhost';
+GRANT CREATE USER, GRANT OPTION, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'sellyoursaas'@'localhost';
+GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT, UPDATE, ALTER, INDEX, REFERENCES, SHOW VIEW ON *.* TO 'sellyoursaas'@'localhost';
 FLUSH PRIVILEGES;
 ---------------
 
-Donner les droits d'accès sur le master au compte de chaque serveur de déploiement:
+Donner les droits d'accès, sur le *Master*, au compte de chaque serveur de déploiement, sur la base *dolibarr*:
 
 [source,sql]
 ---------------
-CREATE USER 'sellyoursaas'@'ipserverdeployment' IDENTIFIED BY '...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'sellyoursaas'@'ipserverdeployment';
-GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'sellyoursaas'@'ipserverdeployment';
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON *.dolibarr TO 'sellyoursaas'@'ip.server.deployment';
 FLUSH PRIVILEGES;
 ---------------
 
@@ -1206,18 +1228,18 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-Donner les droits d'accès sur le serveur de déploiement pour administration à distance:
+Donner les droits d'accès sur le serveur *Master* et les *Serveurs de déploiement* pour administration à distance:
 
 [source,sql]
 ---------------
-CREATE USER 'yourlogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
+CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
 GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'sellyoursaas'@'ipserverdeployment';
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'sellyoursaas'@'ipserverdeployment';
 FLUSH PRIVILEGES;
 ---------------
 
 
-Si vous utilisez la supervision DataDog, créer un compte datadog pouvant accéder locallement à la base:
+Si vous utilisez la supervision DataDog, créer un compte datadog pouvant accéder localement à la base (le mot de passe est celui dans */etc/datadog-agent/conf.d/mysql.d/conf.yaml*:
 
 [source,sql]
 ---------------
