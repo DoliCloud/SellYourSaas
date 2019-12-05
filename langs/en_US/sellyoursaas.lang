@@ -302,6 +302,7 @@ ContractMustHaveStatusProcessingOrUndeployed=Contract must have 'Deployment stat
 AnnounceOnCustomerDashboard=Enable announce on portal and/or customers dashboard
 AnnounceMajorOutage=We are currently experiencing major technical outages impacting access to some instances.<br>We are engaged in restoration efforts and service will be restored as safely and quickly as possible.
 AnnounceMinorOutage=We are currently experiencing minor technical troubles impacting access to some instances. Your may experience slow access or disconnecting troubles on our services.<br>We are engaged in restoration efforts and service will be restored as safely and quickly as possible.
+AnnounceMaintenanceInProgress=A technical maintenance is on progress.<br>Your instance will be back in a few minutes ...
 CommandToManageRemoteDeploymentAgent=Command to start/stop remote deployment agent
 CommandToPutInstancesOnOffline=Command to put all instances online/offline
 InstanceWasDeployed=Instance was deployed

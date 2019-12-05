@@ -184,6 +184,9 @@ mysqlcheck --all-databases
 
 === Augmenter la taille du disque
 
+* Faire le snapshot du disque à redimensionner pour sauvegarde. Créer un nouveau disque depuis ce snapshot et le rattacher à un autre serveur (voir chapitre précédent) pour s'assurer qu'il est lisible 
+et avoir les fichiers de la sauvegarde sous la main.
+
 * Démonter le filesystem:
 
 [source,bash]
@@ -209,7 +212,7 @@ parted /dev/vdX    (X=a, b, !!! SANS le chiffre, on veut le disque complet)
 print all
 resizepart 
 Y
-999GB    (Ne pas saisir la valeur proposé par défaut mais la valeur max du disque)
+999GB    (Ne pas saisir la valeur proposé par défaut mais la valeur max du disque qui a été affiché par le "print all")
 q
 ---------------
 

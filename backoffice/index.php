@@ -168,7 +168,7 @@ else
 print $enabledisableannounce;
 print '<br>';
 print '<span class="opacitymedium">';
-print $langs->trans("Example").': (AnnounceMajorOutage), (AnnounceMinorOutage), Any custom text...</span><br>';
+print $langs->trans("Example").': (AnnounceMajorOutage), (AnnounceMinorOutage), (AnnounceMaintenanceInProgress), Any custom text...</span><br>';
 print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE">';
 print $conf->global->SELLYOURSAAS_ANNOUNCE;
 print '</textarea>';
