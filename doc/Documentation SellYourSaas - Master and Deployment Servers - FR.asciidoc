@@ -1123,8 +1123,12 @@ inet_protocols = ipv4
 
 ==== Configuration
 
-Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre:
+Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par sudo systemctl show -p DefaultLimitNOFILE) par défaut de systemd:
+[source,bash]
+---------------
 LimitNOFILE=50000
+Restart=on-watchdog
+---------------
 
 Prendre en compte le changement en lançant:
 [source,bash]
@@ -1152,6 +1156,11 @@ max_user_connections = 30
 wait_timeout         = 7200
 table_open_cache     = 10000
 table_definition_cache = 8000
+sort_buffer_size=2M
+read_buffer_size=1M
+join_buffer_size=2M
+max_heap_table_size=32M
+max_alloed_packet=32M
 # Mysql: max_execution_time = 300000 (milliseconds) or Mariadb: max_statement_time = 300 (seconds)
 #max_execution_time = 300000
 
