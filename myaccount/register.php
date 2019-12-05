@@ -511,7 +511,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 	                	$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
-	                	$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);   // This is list of all domains to show into combo list
+	                	$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);   // This is list of all sub domains to show into combo list
 	                	foreach($listofdomain as $val)
 	                	{
 	                	    $newval = $val;
@@ -520,6 +520,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	        $newval = preg_replace('/:.*$/', '', $newval);
 	                	        if ($reg[1] != $domainname && $newval != GETPOST('forcetoacceptdomain', 'alpha')) continue;
 	                	    }
+                            // $newval is subdomain (with.mysaasdomainname.com for example)
 
 	                	    if (! empty($tmppackage->restrict_domains))   // There is a restriction on some domains for this package
 	                	    {
@@ -527,13 +528,14 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	        $tmparray=explode(',', $tmppackage->restrict_domains);
 	                	        foreach($tmparray as $tmprestrictdomain)
 	                	        {
-	                	            if ($newval == $tmprestrictdomain)
+	                	            $newdomain = getDomainFromURL($newval, 1);
+	                	            if ($newdomain == $tmprestrictdomain)
                                     {
                                         $restrictfound=true;
                                         break;
                                     }
 	                	        }
-	                	        if (! $restrictfound && $newval != GETPOST('forcetoacceptdomain', 'alpha')) continue;   // The domain in SELLYOURSAAS_SUB_DOMAIN_NAMES is not inside restrictlist of package
+	                	        if (! $restrictfound && $newval != GETPOST('forcetoacceptdomain', 'alpha')) continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
 	                	    }
 
 	                		if (! preg_match('/^\./', $newval)) $newval='.'.$newval;

@@ -111,6 +111,8 @@ fsck -N /dev/vdxY
 mkfs.ext4 /dev/vdxY
 ---------------
 
+Que le disque viennent d'etre formaté ou qu'il s'aggisse d'un disque ajouté déjà formaté, la suite de la procédure est identique:
+
 * Récuper la valeur du UUID à l'issue du formatage qui s'affiche, sinon, la récupérer avec la commande *blkid*
 
 * Déclarer le montage pour un montage automatique à chaque reboot en ajoutant une ligne dans */etc/fstab*
@@ -167,7 +169,7 @@ Pour vérifier:
 cat /proc/mounts | grep diskX
 ---------------
 
-Rem: Si il faut récupérer des données d'un autre disque, utilisez
+Rem: Si il faut récupérer des données d'un autre disque, utilisez:
 
 [source,bash]
 ---------------
@@ -182,8 +184,23 @@ mysqlcheck --all-databases
 
 === Augmenter la taille du disque
 
-* Changer le disque sur OVH
-* Augmenter la partition en lançant 
+* Démonter le filesystem:
+
+[source,bash]
+---------------
+umount /mnt/disk/
+---------------
+
+Rem: Pour voir les fichiers ouverts sur un disque si le démontage échoue:
+	
+[source,bash]
+---------------
+lsof | grep "/mnt/disk"
+---------------
+
+* Détacher le disque du serveur. S'assurer que son nom ne contient pas d'espaces ou caractères spéciaux. Changer la taille du disque depuis le manager du Public Cloud et le réattacher au serveur.
+
+* Augmenter la partition en lançant: 
 
 [source,bash]
 ---------------
@@ -196,20 +213,12 @@ Y
 q
 ---------------
 
-* Démonter et remonter le disque pour prise en compte et augmenter le formatage du filesystem sans effacement.
+* Remonter le disque pour prise en compte et augmenter le formatage du filesystem sans effacement.
 
 [source,bash]
 ---------------
-umount /mnt/disk/
 mount /mnt/disk/
 resize2fs /dev/vdX9
----------------
-
-Rem: Pour voir les fichiers ouverts sur un disque si le démontage échoue:
-	
-[source,bash]
----------------
-lsof | grep "/mnt/disk"
 ---------------
 
 
