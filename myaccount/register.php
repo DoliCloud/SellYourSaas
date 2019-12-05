@@ -518,7 +518,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	    $reg = array();
 	                	    if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 	                	        $newval = preg_replace('/:.*$/', '', $newval);
-	                	        if ($reg[1] != $domainname && $newval != GETPOST('forcetoacceptdomain', 'alpha')) continue;
+	                	        if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) continue;
 	                	    }
                             // $newval is subdomain (with.mysaasdomainname.com for example)
 
@@ -535,28 +535,28 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
                                         break;
                                     }
 	                	        }
-	                	        if (! $restrictfound && $newval != GETPOST('forcetoacceptdomain', 'alpha')) continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
+	                	        if (! $restrictfound && $newval != GETPOST('forcesubdomain', 'alpha')) continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
 	                	    }
 
 	                		if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
-	                		print '<option value="'.$newval.'"'.(($tldid == $newval || ($newval == '.'.GETPOST('forcetoacceptdomain', 'alpha'))) ? ' selected="selected"':'').'>'.$newval.'</option>';
+	                		print '<option value="'.$newval.'"'.(($tldid == $newval || ($newval == '.'.GETPOST('forcesubdomain', 'alpha'))) ? ' selected="selected"':'').'>'.$newval.'</option>';
 	                	}
 	                    ?>
 	                </select>
 	                	<?php
-	                	// Show warning if forcetoacceptdomain set and not found
-	                	if (GETPOST('forcetoacceptdomain', 'alpha')) {
-	                	    $forcetoacceptdomainfound = false;
+	                	// Show warning if forcesubdomain set and not found
+	                	if (GETPOST('forcesubdomain', 'alpha')) {
+	                	    $forcesubdomainfound = false;
 	                	    foreach($listofdomain as $val)
 	                	    {
 	                	        //$newval = preg_replace('/^.*:/', '', $val);
 	                	        $newval = preg_replace('/:.*$/', '', $val);
-	                	        if ($newval == GETPOST('forcetoacceptdomain', 'alpha')) {
-	                	            $forcetoacceptdomainfound = true;
+	                	        if ($newval == GETPOST('forcesubdomain', 'alpha')) {
+	                	            $forcesubdomainfound = true;
 	                	        }
 	                	    }
-	                	    if (! $forcetoacceptdomainfound) {
-	                	        print '<br>Error: Value for forcetoacceptdomain = '.GETPOST('forcetoacceptdomain', 'alpha').' is not in list of available subdomains.';
+	                	    if (! $forcesubdomainfound) {
+	                	        print '<br>Error: Value for forcesubdomain = '.GETPOST('forcesubdomain', 'alpha').' is not in list of available subdomains.';
 	                	    }
 	                	}
 	                	?>

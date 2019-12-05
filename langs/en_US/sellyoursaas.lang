@@ -471,4 +471,4 @@ ErrSCAAuthentication=It seems your credit card needs authentication for EACH tra
 PaymentChargedButReversedByBank=Payment was charged but was then canceled illegitimately by the bank
 StripeAccount=Stripe Account
 MaxNbOfInstances=Max number of instances
-ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcetoacceptdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>
+ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>
