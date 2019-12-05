@@ -303,6 +303,7 @@ Définir ou redéfinir le mot de passe de *root*, *admin*, et de *myunixlogin* a
 rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 
+
 === Modification de /etc/skel
 
 Editer le contenu de */etc/skel* afin de mettre le *.ssh/authorized_keys* de l'utilisateur *myunixlogin*
