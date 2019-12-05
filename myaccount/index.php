@@ -3393,6 +3393,7 @@ if ($mode == 'instances')
 {
     // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
     $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
+    $forcedsubdomain = GETPOST('forcesubdomain', 'alpha');
 
     // List of available plans/products
 	$arrayofplans=array();
@@ -3403,7 +3404,8 @@ if ($mode == 'instances')
 	$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 	$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
 	// restict_domains can be empty (it's ok), can be mydomain.com or can be with.mydomain.com
-	$sqlproducts.= " AND (pa.restrict_domains IS NULL OR pa.restrict_domains = '".$db->escape($domainname)."' OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."')";
+	$sqlproducts.= " AND (pa.restrict_domains IS NULL OR pa.restrict_domains = '".$db->escape($domainname)."' OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'";
+	$sqlproducts.= ")";
 	//$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
 	//$sqlproducts.=' AND p.rowid = 202';
 	//print $sqlproducts;
@@ -3852,7 +3854,6 @@ if ($mode == 'instances')
     								print '</div>';
 								}
 
-
 								print '<br><br>';
 
 								// Show the current Plan (with link to change it)
@@ -4160,7 +4161,7 @@ if ($mode == 'instances')
 	}
 
 
-	// Link to add new instance
+	// Section to add/create a new instance
 	print '
 	<!-- Add a new instance -->
 	<div class="portlet-body" style=""><br>
@@ -4246,19 +4247,22 @@ if ($mode == 'instances')
     			<span class="opacitymedium">https://</span>
     			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" value="" maxlength="29" required />
     			<select name="tldid" id="tldid" >';
-            		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+    		        // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
             		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
             		$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
             		foreach($listofdomain as $val)
             		{
             		    $newval=$val;
+            		    $reg = array();
             		    if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
             		        $newval = preg_replace('/:.*$/', '', $newval);
-            		        if ($reg[1] != $domainname) continue;
+            		        if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) continue;
             		    }
+            		    // $newval is subdomain (with.mysaasdomainname.com for example)
+
             		    if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
-            		    print '<option value="'.$newval.'">'.$newval.'</option>';
+            		    print '<option value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
             		}
     			print '</select>
     			<br class="unfloat" />
