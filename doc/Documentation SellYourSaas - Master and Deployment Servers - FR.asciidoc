@@ -298,6 +298,10 @@ ssh-copy-id myunixlogin@x.y.z.a
 Définir ou redéfinir le mot de passe de *root*, *admin*, et de *myunixlogin* avec un mot de passe sure.
 
 
+=== Suppression fichiers d'information au login
+
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
+rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 
 === Modification de /etc/skel
 
@@ -1490,6 +1494,7 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   /usr/bin/groups rix,
   /usr/bin/head rix,
   /usr/bin/id rix,
+  /usr/bin/locale-check rix,
   /usr/bin/mawk rix,
   /usr/bin/mysql rix,
   /usr/bin/mysqldump rix,
@@ -2486,7 +2491,7 @@ Ajouter */mnt/diskhome/mysql* dans les profiles apparmor qui contiennent */var/l
 ---------------
 
 
-Recharge apparmor
+Recharger apparmor
 
 [source,bash]
 ---------------
