@@ -2104,9 +2104,7 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 
 - Créer un snapshot du *Serveur de déploiement* à cloner.
 
-- Créer un nouveau serveur OVH depuis le snapshot en spécifiant le nom du snapshot source et en indiquant le script suivant en *post installation*:
-
-    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/post_inst_script.sh
+- Créer un nouveau serveur OVH depuis le snapshot en spécifiant le nom du snapshot source et en copiant dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
 
 - Une fois le serveur prêt: Se connecter pour désactiver les crons en doublons avec le serveur cloné (possibilité de désactiver le process cron complètement) par
 
