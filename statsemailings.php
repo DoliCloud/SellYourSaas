@@ -287,7 +287,7 @@ $relativepath=$dirtmp."statsannonces.png".$categ;
                         print "</td>";
                         */
                         $nbofrecipient=$obj->getNbOfRecipients(-1,$type);
-                        print '<td align="center">';
+                        print '<td class="center">';
                         if ($nbofrecipient >= 0)
                         {
                         	print $nbofrecipient;
@@ -299,7 +299,7 @@ $relativepath=$dirtmp."statsannonces.png".$categ;
                         print '</td>';
 
                         $nbofrecipient=$obj->getNbOfRecipients(0,$type);
-                        print '<td align="center">';
+                        print '<td class="center">';
                         if ($nbofrecipient >= 0)
                         {
                         	print $nbofrecipient;
@@ -311,7 +311,7 @@ $relativepath=$dirtmp."statsannonces.png".$categ;
                         print '</td>';
 
                         $nbofrecipient=$obj->getNbOfRecipients(1,$type);
-                        print '<td align="center">';
+                        print '<td class="center">';
                         if ($nbofrecipient >= 0)
                         {
                         	print $nbofrecipient;
@@ -391,7 +391,7 @@ $relativepath=$dirtmp."statsannonces.png".$categ;
                         print '<td>&nbsp;</td>';
 
                         $nbofrecipient=$obj->getNbOfRecipients(-1,$type);
-                        print '<td align="center">';
+                        print '<td class="center">';
                         if ($nbofrecipient >= 0)
                         {
                         	print $nbofrecipient;
@@ -403,7 +403,7 @@ $relativepath=$dirtmp."statsannonces.png".$categ;
                         print '</td>';
 
                         $nbofrecipient=$obj->getNbOfRecipients(1,$type);
-                        print '<td align="center">';
+                        print '<td class="center">';
                         if ($nbofrecipient >= 0)
                         {
                         	print $nbofrecipient;
@@ -431,7 +431,7 @@ $relativepath=$dirtmp."statsannonces.png".$categ;
                         print '<td>&nbsp;</td>';
 
                         $nbofrecipient=$obj->getNbOfRecipients(-2,$type);
-                        print '<td align="center">';
+                        print '<td class="center">';
                         if ($nbofrecipient >= 0)
                         {
                         	print $nbofrecipient;
@@ -443,7 +443,7 @@ $relativepath=$dirtmp."statsannonces.png".$categ;
                         print '</td>';
 
                         $nbofrecipient=$obj->getNbOfRecipients(2,$type);
-                        print '<td align="center">';
+                        print '<td class="center">';
                         if ($nbofrecipient >= 0)
                         {
                         	print $nbofrecipient;
