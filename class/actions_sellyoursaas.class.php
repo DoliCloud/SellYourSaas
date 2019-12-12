@@ -727,7 +727,7 @@ class ActionsSellyoursaas
 				{
     				if ($ispaid)
     				{
-    				    $ret .= '<span class="badge" style="font-size: 1em; background-color: green; color: #fff;">'.$langs->trans("PayedMode").'</span>';
+    				    $ret .= '<span class="badge badge-status4 badge-status">'.$langs->trans("PayedMode").'</span>';
     				    // nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
     				    if (! $object->nbofservicesclosed)
     				    {
@@ -742,7 +742,7 @@ class ActionsSellyoursaas
     				}
     				else
     				{
-    				    $ret .= '<span class="badge" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
+    				    $ret .= '<span class="badge badge-status5 badge-status" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
     				    // nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
     				    if (! $object->nbofservicesclosed)
     				    {

@@ -370,7 +370,7 @@ print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("DirForScriptPath").'</td>';
 print '<td>';
-print '<input class="minwidth500" type="text" name="DOLICLOUD_SCRIPTS_PATH" value="'.$conf->global->DOLICLOUD_SCRIPTS_PATH.'">';
+print '<input class="minwidth300" type="text" name="DOLICLOUD_SCRIPTS_PATH" value="'.$conf->global->DOLICLOUD_SCRIPTS_PATH.'">';
 print '</td>';
 print '<td>'.dol_buildpath('sellyoursaas/scripts').'</td>';
 print '</tr>';
