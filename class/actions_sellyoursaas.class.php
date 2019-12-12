@@ -973,7 +973,7 @@ class ActionsSellyoursaas
 	    		}
 	    		$contractmpforloop->id = $parameters['obj']->rowid ? $parameters['obj']->rowid : $parameters['obj']->id;
 	    		$contractmpforloop->socid = $parameters['obj']->socid;
-	    		print '<td align="center">';
+	    		print '<td class="center">';
 
 	    		if (! preg_match('/\.on\./', $parameters['obj']->ref_customer))
 	    		{
@@ -1003,7 +1003,7 @@ class ActionsSellyoursaas
 
     			$atleastonepaymentmode = sellyoursaasThirdpartyHasPaymentMode($companytmpforloop->id);
 
-    			print '<td align="center">';
+    			print '<td class="center">';
     			dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
     			if ($atleastonepaymentmode) print $langs->trans("Yes");
     			print '</td>';

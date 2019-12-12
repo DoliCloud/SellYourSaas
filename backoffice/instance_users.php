@@ -619,7 +619,7 @@ function print_user_table($newdb, $object)
 				if ($obj->fk_member > 0)    $txtparent.=($txtparent?'<br>':'').'Parent member: '.$obj->fk_member;
 				print $txtparent;
 				print '</td>';
-				print '<td align="center">';
+				print '<td class="center">';
 				if ($obj->statut)
 				{
 					print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
