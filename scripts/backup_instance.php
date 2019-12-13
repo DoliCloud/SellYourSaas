@@ -235,8 +235,8 @@ if (empty($login) || empty($dirdb))
 }
 
 print 'Backup instance '.$instance.' from '.(in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":").' to '.$dirroot.'/'.$login."\n";
-print 'SFTP password '.$object->password_web."\n";
-print 'Database password '.$object->password_db."\n";
+//print 'SFTP password '.$object->password_web."\n";
+//print 'Database password '.$object->password_db."\n";
 
 //$listofdir=array($dirroot.'/'.$login, $dirroot.'/'.$login.'/documents', $dirroot.'/'.$login.'/system', $dirroot.'/'.$login.'/htdocs', $dirroot.'/'.$login.'/scripts');
 if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
