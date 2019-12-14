@@ -106,8 +106,14 @@ class ActionsSellyoursaas
 
     	if ($object->element == 'contrat')
     	{
-    	    // TODO Change the alt/title
-    	    //$this->resprints = ' - <!-- Added by getNomUrl hook of SellYourSaas -->';
+    	    $reg = array();
+    	    if (preg_match('/title="([^"]+)"/', $parameters['getnomurl'], $reg)) {
+    	       $object->fetch_optionals();
+    	       $newtitle = $reg[1].'<!-- Added by getNomUrl hook of SellYourSaas --><br>';
+    	       $newtitle .= '<b>'.$langs->trans("DeploymentStatus").'</b> : '.(empty($object->array_options['options_deployment_status']) ? '' : $object->array_options['options_deployment_status']);
+    	       $this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
+    	       return 1;
+            }
     	}
 
     	return 0;
