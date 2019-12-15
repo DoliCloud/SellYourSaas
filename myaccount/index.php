@@ -1442,7 +1442,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     						{
     							$error++;
     							$errormsg = $e->getMessage();
-    							dol_syslog('--- FailedToCreateCardRecord Exception '.$errormsg, LOG_WARNING);
+    							dol_syslog('--- FailedToCreateCardRecord Exception '.$e->getCode().' '.$errormsg, LOG_WARNING);
     							setEventMessages($langs->trans('FailedToCreateCardRecord').($errormsg?'<br>'.$errormsg:''), null, 'errors');
     							$action='';
     						}
