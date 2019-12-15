@@ -612,7 +612,7 @@ class ActionsSellyoursaas
                 }
                 else
                 {
-                    setEventMessages($langs->trans("PaymentDoneOn".ucfirst($service)), null, 'mesgs');
+                    setEventMessages($langs->trans("PaymentDoneOn".ucfirst($service), $sellyoursaasutils->stripechargedone), null, 'mesgs');
 
 
                 }
