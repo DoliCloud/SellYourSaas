@@ -1484,7 +1484,10 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     			if (! $error)
     			{
     			    $companypaymentmode->setAsDefault($companypaymentmode->id, 1);
-    				dol_syslog("--- A credit card was recorded", LOG_DEBUG, 0);
+    				dol_syslog("--- A credit card was recorded. Now we reset the stripeaccount (to force use of default Stripe setup)", LOG_DEBUG, 0);
+
+    				$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
+    				$db->query($sql);
 
     				if ($mythirdpartyaccount->client == 2)
     				{
