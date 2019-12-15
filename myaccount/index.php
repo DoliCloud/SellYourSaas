@@ -1372,7 +1372,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     		$companypaymentmode->type            = 'card';
     		$companypaymentmode->country_code    = $mythirdpartyaccount->country_code;
     		$companypaymentmode->status          = $servicestatusstripe;
-    		$companypaymentmode->comment         = 'Credit card created from customer cashboard';     // TODO Fields not declared in companypaymentmode
+    		$companypaymentmode->comment         = 'Credit card created from customer dashboard';     // TODO Fields not declared in companypaymentmode
     		$companypaymentmode->ipaddress       = getUserRemoteIP();                                 // TODO Fields not declared in companypaymentmode
     		// field $companypaymentmode->stripe_card_ref is filled later
 
@@ -1402,7 +1402,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     					{
     						$error++;
     						setEventMessages($stripe->error, $stripe->errors, 'errors');
-    						dol_syslog('Error: Failed to get Stripe customer remote object (cu), stripe->error = '.$stripe->error, LOG_ERR);
+    						dol_syslog('Error: Failed to get Stripe customer remote object (cu), servicestatusstripe = '.$servicestatusstripe.', stripe->error = '.$stripe->error, LOG_ERR);
     					}
     					else
     					{
