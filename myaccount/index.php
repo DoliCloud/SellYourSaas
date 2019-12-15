@@ -714,6 +714,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
             $companypaymentmode->status          = $servicestatusstripe;
             $companypaymentmode->comment         = 'Credit card entered from customer dashboard with STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION on (using SetupIntent)';
             $companypaymentmode->ipaddress       = getUserRemoteIP();
+
             $companypaymentmode->stripe_card_ref = $payment_method->id;
             $companypaymentmode->card_type       = $payment_method->card->brand;
             $companypaymentmode->owner_address   = $payment_method->billing_details->address->line1;
@@ -736,9 +737,9 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                 if (! $error)
                 {
                     $stripe = new Stripe($db);
-                    $stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no network access here)
+                    $stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
 
-                    // Get the Stripe customer and create if not linked
+                    // Get the Stripe customer and create if not linked (use default Stripe setup)
                     $cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 0);
                     if (! $cu)
                     {
@@ -1391,12 +1392,12 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     			if (! empty($conf->stripe->enabled) && class_exists('Stripe'))
     			{
     				$stripe = new Stripe($db);
-    				$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no network access here)
+    				$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
 
     				// Create card on Stripe
     				if (! $error)
     				{
-    					// Get the Stripe customer and create if not linked
+    					// Get the Stripe customer and create if not linked (use default Stripe setup)
     					$cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 1);
     					if (! $cu)
     					{
@@ -5313,7 +5314,7 @@ if ($mode == 'billing')
 							{
 								include_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';
 								$stripe = new Stripe($db);
-								$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no network access here)
+								$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
 								$customer = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 0);
 
 								print '<tr><td>';

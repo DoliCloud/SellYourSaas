@@ -988,7 +988,7 @@ class ActionsSellyoursaas
 		    			dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
 		    			$ret = '<div class="bold">';
 		    			$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);
-		    			if ($ispaid) $ret .= '<span badge badge-status4="badge" style="font-size: 1em;">'.$langs->trans("PayedMode").'</span>';
+		    			if ($ispaid) $ret .= '<span class"badge badge-status4" style="font-size: 1em;">'.$langs->trans("PayedMode").'</span>';
 		    			else $ret .= '<span class="badge" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
 		    			$ret .= '</div>';
 
