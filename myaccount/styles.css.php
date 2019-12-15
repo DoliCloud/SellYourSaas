@@ -270,7 +270,7 @@ padding: 10px;
 }
 
 /* Error message */
-font.error {
+font.error, p.error {
 font-weight: bold;
 color: #dd4444;
 }

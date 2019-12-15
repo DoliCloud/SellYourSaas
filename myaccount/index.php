@@ -7029,7 +7029,7 @@ if ($mode == 'myaccount')
                             <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
 
 				              <div class="">
-				                <p class="opacitymedium" style="padding: 5px">
+				                <p class="opacitymedium error" style="padding: 5px">
 				                    ';
 									if (($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstancessuspendedreseller) > 0)
 									{
