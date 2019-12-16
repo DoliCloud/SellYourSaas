@@ -1223,7 +1223,7 @@ update mysql.user set plugin='unix_socket' where user='root';
 ==== Créer un utilisateur sellyoursaas pour administrer les bases des instances
 
 Sur le serveur *Master* et sur chaque *Serveur de déploiement*, donner l'accès localement au compte *sellyoursaas*:
-
+cd /var/log
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'localhost' IDENTIFIED BY '...';
@@ -1236,8 +1236,8 @@ Donner les droits d'accès, sur le *Master*, au compte de chaque serveur de dép
 
 [source,sql]
 ---------------
-CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';
-GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON *.dolibarr TO 'sellyoursaas'@'ip.server.deployment';
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON dolibarr.* TO 'sellyoursaas'@'ip.server.deployment';
 FLUSH PRIVILEGES;
 ---------------
 
@@ -2123,11 +2123,15 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 	fdisk -l
 
 - Si on est parti sur un disque vierge, formater le nouveau disque dur de donnée. Pour cela, voir la chapitre <<ajout_de_disque>>.
-  Si il s'agit d'un dique déjà formatté, TODO...
+  Si il s'agit d'un dique déjà formatté, voir la chapitre <<ajout_de_disque>> pour ne réaliser que les opérations de montage et d'ajout en */etc/fstab*.
 
-- Ajouter un fichier à la racine du disque pour identifier le volume (Par exemple: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...).
+- Ajouter un fichier à la racine du disque pour identifier le volume (Par exemple: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...). 
 
-- Ajouter une autorisation d'accès NFS au nouveau serveur sur le master
+---------------
+touch /mnt/diskhome/DATA_MYDEPLOYMENTSERVERX
+---------------
+
+- Ajouter une autorisation d'accès NFS au nouveau serveur sur le *Master*
 
 [source,bash]
 ---------------
@@ -2188,7 +2192,7 @@ fi
 
 - Modifier le fichiers */etc/postfix/main.cf* et */etc/postfix/mydestination* (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement)
 
-- Ajouter les entrées du nouveau serveur dans le DNS de *mysellyoursaasdomainname.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) du serveur attribué par OVH lors de sa création.
+- Ajouter les entrées du nouveau serveur *mynewservername.mysellyoursaasdomainname.com* dans le DNS du domaine *mysellyoursaasdomainname.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) attribué par OVH lors de la création du nouveau serveur.
 
 - Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *myserver*).
 
@@ -2205,20 +2209,20 @@ fi
 
 - Si webmin a été installé, se connecter à webmin pour désactiver les actions de supervision en doublons avec celle du serveur cloné.
 
-- Modifier les fichiers de serveurs virtuels Apache pour mettre la nouvelle IP/nouveau nom.
+- Modifier les fichiers de serveurs virtuels Apache dans */etc/apache2/sites-enabled* pour mettre la nouvelle IP/nouveau nom.
 
 - Déclarer l'IP pour l'envoi d'emails:
   - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
-  - Ajouter l'IP dans l'entrée SPF du DNS.
+  - Ajouter les IPs du nouveau serveur dans l'entrée SPF du DNS.
 
-- Créer un compte *sellyoursaas* et permissions au serveur de déploiement sur la base de donnée du master. Voir <<creer_un_compte_db_sellyoursaas>>.
+- Créer un compte *sellyoursaas* et permissions au serveur de déploiement sur la base de donnée du *Master*. Voir <<creer_un_compte_db_sellyoursaas>>.
 
 - Modifier le fichier */etc/sellyoursaas.conf* avec la nouvelle IP et nom de sous-domaine du nouveau pool et information du compte d'accès base de donnée du master.
 
 - Effacer les fichiers dans :
 
   */etc/apache2/sellyoursaas-online*
-  */etc/apache2/sellyoursaas-onffline*
+  */etc/apache2/sellyoursaas-offline*
   */etc/apache2/sellyoursaas-available*
 
   Et le fichiers ayant pour nom :
@@ -2234,7 +2238,7 @@ fi
   
 - Détruire la base de données 
 
-  - de *dolibarr* master si la source était le serveur master.
+  - de *dolibarr* master si la source était le serveur *Master*.
   - des instances clients si la sources était un serveur de déploiement. Ceci peut se faire en lançant:
   
   mysql -uroot -e "show databases" | grep dbn | gawk '{print "drop database `" $1 "`;select sleep(0.1);"}' > /tmp/dbntodelete.sql
@@ -2521,6 +2525,7 @@ Recharger apparmor
 ---------------
 aa-enforce usr.sbin.mysqld
 ---------------
+
 
 === Lancement de mysql sans permissions
 
