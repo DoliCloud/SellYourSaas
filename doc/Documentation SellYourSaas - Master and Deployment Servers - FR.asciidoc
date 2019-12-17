@@ -2245,6 +2245,11 @@ fi
   mysql -uroot < /tmp/dbntodelete.sql
   
 - Renommer le fichier DNS */etc/bind/withX.mysellyoursaasdomainname.com.hosts* en */etc/bind/with(X+1).mysellyoursaasdomainname.com.hosts* et l'éditer pour prendre en compte le nouveau prefix.
+  Modifier le fichier */etc/bind/named.conf.local* pour prendre en compte le nouveau nom.
+
+- Ajouter l'entrée DNS A pour *ns1withX*, *ns2withX* au domain *mysellyoursaasdomainname.com* pointant sur l'IP du nouveau serveur de déploiement.
+
+- Ajouter l'entrée DNS NS pour *withX* au domain *mysellyoursaasdomainname.com* pointant sur *ns1withX.mysellyoursaasdomainname.com*.
 
 - Relancer le service de supervision *datadog-agent* si il est installé pour prendre en compte le nom du nouveau serveur.
 
