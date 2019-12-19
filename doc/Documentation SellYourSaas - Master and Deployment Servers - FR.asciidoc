@@ -2236,6 +2236,8 @@ fi
   */etc/shadow*
   */etc/group*
   
+- Effacer les répertoires */mnt/diskhome/home/osu...*
+  
 - Détruire la base de données 
 
   - de *dolibarr* master si la source était le serveur *Master*.
