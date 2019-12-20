@@ -2023,21 +2023,26 @@ Avec pour contenu:
 
 [source,conf]
 ---------------
-ipserverdeployment=ipduserverdeployment
 # domain du service
 domain=mysaasdomainname.com
 subdomain=with.mysaasdomainname.com
 # ips autorisés à commander le déploiement
 allowed_hosts=127.0.0.1,ipduservermaster
-# Set to 1 if this server hosts a dns for the pool (server of instances)
+# Set to 1 if this server is the master server
+masterserver=1
+# Set to its own if if it is a deployment server
+ipserverdeployment=ipduserverdeployment
+# Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
-# Set to 1 if this server host instances for the pool (server of instances)
+# Set to 1 if this server host instances for the pool (deployment server)
 instanceserver=1
+# Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
 database=databaseduservermaster
+# Set credential for the master and deployment database
 databaseuser=sellyoursaas
 databasepass=...
-# Set this to 1 or 0 to archive or not the test instances during undeployment
+# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
 ---------------
 
