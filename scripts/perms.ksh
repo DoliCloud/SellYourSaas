@@ -59,8 +59,10 @@ for fic in `ls -art /home/jail/home/osu*/dbn*/*_error.log`; do > $fic; done
 echo "Nettoyage fichier logs dolibarr"
 for fic in `ls -art /home/jail/home/osu*/dbn*/documents/dolibarr*.log`; do > $fic; done
 
-echo "Nettoyage vieux fichiers tmp"
-find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +10 -exec rm {} \;
+if [[ "x$masterserver" == "x1" ]]; then
+	echo We are on a master server, so we clean old temp files 
+	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +10 -exec rm {} \;
+fi
 
 echo "Nettoyage vieux fichiers log"
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +10 -exec rm {} \;
