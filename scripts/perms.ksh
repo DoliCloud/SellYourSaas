@@ -32,7 +32,7 @@ do
 done
 
 if [[ "x$masterserver" == "x1" ]]; then
-	echo We are on a master server, so we do: chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 fi
 chmod -R ug+w /home/admin/wwwroot/dolibarr_documents
@@ -46,11 +46,9 @@ echo "Set owner and permission on /home/admin/wwwroot/dolibarr_nltechno"
 chmod -R a-w /home/admin/wwwroot/dolibarr_nltechno 2>/dev/null
 chmod -R u+w /home/admin/wwwroot/dolibarr_nltechno/.git 2>/dev/null
 
-if [[ "x$masterserver" == "x1" ]]; then
-	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_sellyoursaas
-	chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas
-	chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git
-fi
+echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_sellyoursaas
+chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas
+chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 chown www-data.admin /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
