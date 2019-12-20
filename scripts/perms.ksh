@@ -61,7 +61,7 @@ for fic in `ls -art /home/jail/home/osu*/dbn*/documents/dolibarr*.log`; do > $fi
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 
-	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +10 -exec rm {} \;
+	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -exec rm {} \;
 fi
 
 echo "Nettoyage vieux fichiers log"
