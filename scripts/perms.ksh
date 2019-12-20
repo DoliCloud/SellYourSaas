@@ -29,13 +29,13 @@ chown admin.www-data /home/admin/wwwroot/dolibarr_documents
 for fic in `ls /home/admin/wwwroot/dolibarr_documents | grep -v sellyoursaas`; 
 do 
 	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/$fic
+	chmod -R ug+w /home/admin/wwwroot/dolibarr_documents/$fic
 done
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 fi
-chmod -R ug+w /home/admin/wwwroot/dolibarr_documents
 
 echo "Set owner and permission on /home/admin/wwwroot/dolibarr"
 chown -R admin.admin /home/admin/wwwroot/dolibarr
