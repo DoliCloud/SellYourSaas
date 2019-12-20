@@ -28,7 +28,7 @@ chmod g+ws /home/admin/wwwroot/dolibarr_documents/
 chown admin.www-data /home/admin/wwwroot/dolibarr_documents
 for fic in `ls /home/admin/wwwroot/dolibarr_documents | grep -v sellyoursaas`; 
 do 
-	chown -R admin.www-data $fic
+	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/$fic
 done
 
 if [[ "x$masterserver" == "x1" ]]; then
