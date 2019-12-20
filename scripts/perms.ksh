@@ -65,4 +65,4 @@ if [[ "x$masterserver" == "x1" ]]; then
 fi
 
 echo "Nettoyage vieux fichiers log"
-find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +10 -exec rm {} \;
+find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
