@@ -18,7 +18,7 @@
  *
  * FEATURE
  *
- * Make a backup of files (rsync) or database (mysqdump) of a deployed instance. 
+ * Make a backup of files (rsync) or database (mysqdump) of a deployed instance.
  * There is no report/tracking done into any database. This must be done by a parent script.
  * This script is run from the deployment servers.
  *
@@ -424,7 +424,7 @@ else
 		        $statsd = new DataDog\DogStatsd($arrayconfig);
 
 		        $arraytags=array('result'=>'ko');
-		        $statsd->increment('sellyoursaas.backup', 1, $arraytags);
+		        $statsd->increment('sellyoursaas.restore', 1, $arraytags);
 		    }
 		    catch(Exception $e)
 		    {
