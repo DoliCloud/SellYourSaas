@@ -56,9 +56,10 @@ chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 
 echo "Nettoyage fichier logs error"
 for fic in `ls -art /home/jail/home/osu*/dbn*/*_error.log`; do > $fic; done
-echo "Nettoyage fichier logs dolibarr"
-for fic in `ls -art /home/jail/home/osu*/dbn*/documents/dolibarr*.log`; do > $fic; done
-
+echo "Nettoyage fichier logs"
+for fic in `ls -art /home/jail/home/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
+for fic in `ls -art /home/jail/home/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+ 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 
 	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -exec rm {} \;
