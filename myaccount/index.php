@@ -711,16 +711,17 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
             $companypaymentmode->default_rib     = 1;
             $companypaymentmode->type            = 'card';
             $companypaymentmode->country_code    = $payment_method->card->country;
-            $companypaymentmode->status          = $servicestatusstripe;
             $companypaymentmode->comment         = 'Credit card entered from customer dashboard with STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION on (using SetupIntent)';
             $companypaymentmode->ipaddress       = getUserRemoteIP();
 
             $companypaymentmode->stripe_card_ref = $payment_method->id;
+            $companypaymentmode->stripe_account  = $stripearrayofkeys['publishable_key'];
+            $companypaymentmode->status          = $servicestatusstripe;
+
             $companypaymentmode->card_type       = $payment_method->card->brand;
             $companypaymentmode->owner_address   = $payment_method->billing_details->address->line1;
             $companypaymentmode->approved        = ($payment_method->card->checks->cvc_check == 'pass' ? 1 : 0);
             $companypaymentmode->email           = $payment_method->billing_details->email;
-            // field $companypaymentmode->stripe_card_ref is filled later
 
             $db->begin();
 
@@ -1356,7 +1357,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     	{
     	    $thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($mythirdpartyaccount->id);    // Check if customer has already a payment mode or not
 
-    		// Ajout
+    		// Add payment mode
     		$companypaymentmode = new CompanyPaymentMode($db);
 
     		$companypaymentmode->fk_soc          = $mythirdpartyaccount->id;
@@ -1375,6 +1376,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     		$companypaymentmode->status          = $servicestatusstripe;
     		$companypaymentmode->comment         = 'Credit card created from customer dashboard';     // TODO Fields not declared in companypaymentmode
     		$companypaymentmode->ipaddress       = getUserRemoteIP();                                 // TODO Fields not declared in companypaymentmode
+
     		// field $companypaymentmode->stripe_card_ref is filled later
 
     		$db->begin();
@@ -1459,8 +1461,14 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     							}
     							else
     							{
+    							    global $stripearrayofkeysbyenv;
+   							        $stripearrayofkeys = $stripearrayofkeysbyenv[$servicestatusstripe];
+
     								$sql = "UPDATE " . MAIN_DB_PREFIX . "societe_rib";
-    								$sql.= " SET stripe_card_ref = '".$db->escape($card->id)."', card_type = '".$db->escape($card->brand)."',";
+    								$sql.= " SET stripe_card_ref = '".$db->escape($card->id)."',";
+    								$sql.= " stripe_account = '".$db->escape($stripearrayofkeys['publishable_key'])."',";
+    								$sql.= " status = ".((int) $servicestatusstripe).",";
+    								$sql.= " card_type = '".$db->escape($card->brand)."',";
     								$sql.= " country_code = '".$db->escape($card->country)."',";
     								$sql.= " exp_date_month = '".$db->escape($card->exp_month)."',";
     								$sql.= " exp_date_year = '".$db->escape($card->exp_year)."',";
@@ -1472,6 +1480,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     								$resql = $db->query($sql);
     								if (! $resql)
     								{
+    								    dol_syslog("Failed to update societe_rib ".$db->lasterror(), LOG_ERR);
     									setEventMessages($db->lasterror(), null, 'errors');
     								}
 
