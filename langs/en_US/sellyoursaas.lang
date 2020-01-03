@@ -283,6 +283,7 @@ High=High
 YourText=Please enter your text here...
 TicketSent=Your ticket was received. We will proceed it as soon as possible.
 FailedToSentTicketPleaseTryLater=Failed to submit your ticket. Please try later...
+SupportURLExternal=To open a support ticket, please follow the instructions available on <a href="%s" target="_support">this page</a>.
 FailedToCreateCardRecord=Failed to validate your card.
 AlreadyHaveAnAccount=Already have an account?
 LoginAction=Login

@@ -44,6 +44,7 @@ include ('./mainmyaccount.inc.php');
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
 if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+if (! $res && ! empty($_SERVER["DOCUMENT_ROOT"])) $res=@include($_SERVER["DOCUMENT_ROOT"]."/main.inc.php");
 // Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
@@ -6430,8 +6431,23 @@ if ($mode == 'support')
 	<!-- END PAGE HEAD -->
 	<!-- END PAGE HEADER-->';
 
+    $sellyoursaassupporturl = $conf->global->SELLYOURSAAS_SUPPORT_URL;
+    if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+        && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+    {
+        $newnamekey = 'SELLYOURSAAS_SUPPORT_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+        if (! empty($conf->global->$newnamekey)) $sellyoursaassupporturl = $conf->global->$newnamekey;
+    }
 
-	print '
+	if ($sellyoursaassupporturl) {
+
+		print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
+		print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br />'."\n";
+		print '</div></div></div>';
+
+	} else {
+
+		print '
 			    <div class="row" id="choosechannel">
 			      <div class="col-md-12">
 
@@ -6622,6 +6638,7 @@ if ($mode == 'support')
 
 			    </div> <!-- END ROW -->
 			';
+	}
 
 	if ($action != 'presend')
 	{
