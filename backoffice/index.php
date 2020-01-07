@@ -122,6 +122,8 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
  * Announce
  */
 
+$param = '';
+
 print '<form method="post" action="'.dol_buildpath('/sellyoursaas/backoffice/index.php',1).'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<table class="noborder nohover" width="100%">';
@@ -136,14 +138,14 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES))
 {
     // Button off, click to enable
     $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=0'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error');
+    $enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle');
     $enabledisablehtml.='</a>';
 }
 else
 {
     // Button on, click to disable
     $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=1'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on');
+    $enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle');
     $enabledisablehtml.='</a>';
 }
 print $enabledisablehtml;
@@ -155,14 +157,14 @@ if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON))
 {
     // Button off, click to enable
     $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '');
+    $enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle');
     $enabledisableannounce.='</a>';
 }
 else
 {
     // Button on, click to disable
     $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning');
+    $enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle');
     $enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
