@@ -207,7 +207,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='User: ';
 	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" size="30"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('userstring');
-	
+
 	// SSH
     $sshconnectstring='ssh '.$object->username_os.'@'.$object->hostname_os;
     $links.='SSH connect string: ';
@@ -224,7 +224,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
     //$links.='<br>';
 
 	// SFTP
-	//$sftpconnectstring=$object->username_os.':'.$object->password_web.'@'.$object->hostname_os.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+	//$sftpconnectstring=$object->username_os.':'.$object->password_web.'@'.$object->hostname_os.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
     $sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
     $links.='SFTP connect string: ';
 	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.$sftpconnectstring.'" size="110"><br>';
@@ -255,7 +255,8 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$dirforexampleforsources = preg_replace('/__DOL_DATA_ROOT__/', DOL_DATA_ROOT, preg_replace('/\/htdocs\/?$/', '', $tmppackage->srcfile1));
 
 	$upgradestring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/rsync_instance.php '.$dirforexampleforsources.' '.$object->hostname_os;
-	$purgestring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/../dev/initdata/dev/purge-data.php test xxx mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port?$object->database_port:3306);
+
+	$purgestring=DOL_DATA_ROOT.'/../dev/initdata/purge-data.php test (all|option) (all|YYYY-MM-DD) mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port?$object->database_port:3306);
 
 	// Mysql Backup
 	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(),'dayhourlog').'.sql';
