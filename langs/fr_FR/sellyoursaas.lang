@@ -271,6 +271,7 @@ High=Elevé
 YourText=Merci d'entrer votre texte ici...
 TicketSent=Votre ticket a été reçu. Nous allons le traiter dès que possible.
 FailedToSentTicketPleaseTryLater=Echec de l'envoi de votre ticket. Merci de réessayer plus tard...
+SupportURLExternal=Pour ouvrir un ticket de support, suivez les instructions disponibles sur <a href="%s" target="_support">cette page</a>.
 FailedToCreateCardRecord=Echec de la validation de votre carte.
 AlreadyHaveAnAccount=Vous avez déjà un compte?
 LoginAction=Se logguer
