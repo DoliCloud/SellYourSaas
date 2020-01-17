@@ -6643,7 +6643,7 @@ if ($mode == 'support')
 			';
 	}
 
-	if ($sellyoursaassupporturl && $action != 'presend')
+	if (empty($sellyoursaassupporturl) && $action != 'presend')
 	{
 		print '
 				<!-- BEGIN PAGE HEADER-->
