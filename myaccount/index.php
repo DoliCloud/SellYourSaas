@@ -6440,9 +6440,9 @@ if ($mode == 'support')
     }
 
 	if ($sellyoursaassupporturl) {
-	    $sellyoursaassupporturl = str_replace('__EMAIL__', $mythirdpartyaccount->email);
-	    $sellyoursaassupporturl = str_replace('__FIRSTNAME__', $mythirdpartyaccount->array_options['options_firstname']);
-	    $sellyoursaassupporturl = str_replace('__LASTNAME__', $mythirdpartyaccount->array_options['options_lastname']);
+	    $sellyoursaassupporturl = str_replace('__EMAIL__', $mythirdpartyaccount->email, $sellyoursaassupporturl);
+	    $sellyoursaassupporturl = str_replace('__FIRSTNAME__', $mythirdpartyaccount->array_options['options_firstname'], $sellyoursaassupporturl);
+	    $sellyoursaassupporturl = str_replace('__LASTNAME__', $mythirdpartyaccount->array_options['options_lastname'], $sellyoursaassupporturl);
 
 		print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
 		print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br />'."\n";
@@ -6643,7 +6643,7 @@ if ($mode == 'support')
 			';
 	}
 
-	if ($action != 'presend')
+	if ($sellyoursaassupporturl && $action != 'presend')
 	{
 		print '
 				<!-- BEGIN PAGE HEADER-->
