@@ -6440,6 +6440,9 @@ if ($mode == 'support')
     }
 
 	if ($sellyoursaassupporturl) {
+	    $sellyoursaassupporturl = str_replace('__EMAIL__', $mythirdpartyaccount->email);
+	    $sellyoursaassupporturl = str_replace('__FIRSTNAME__', $mythirdpartyaccount->array_options['options_firstname']);
+	    $sellyoursaassupporturl = str_replace('__LASTNAME__', $mythirdpartyaccount->array_options['options_lastname']);
 
 		print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
 		print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br />'."\n";
