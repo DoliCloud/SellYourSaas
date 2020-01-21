@@ -6883,7 +6883,9 @@ if ($mode == 'myaccount')
                 <div class="form-group">
                   <label>'.$langs->trans("Country").'</label><br>';
 				$countryselected = (GETPOSTISSET('country_id')?GETPOST('country_id','aZ09'):$mythirdpartyaccount->country_id);
-				print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1);
+				$exclude_country_code = array();
+				if (! empty($conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES)) $exclude_country_code = explode(',', $conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES);
+				print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1, 0, $exclude_country_code);
 				print '
                 </div>
                 <div class="form-group">
