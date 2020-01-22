@@ -855,9 +855,10 @@ class SellYourSaasUtils
      * @param	int		$includedraft				Include draft invoices
      * @param	int		$noemailtocustomeriferror	1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
      * @param	int		$nocancelifpaymenterror		1=Do not cancel payment if there is a recent payment error AC_PAYMENT_STRIPE_KO (used to charge from user console)
+     * @param   int     $calledinmyaccountcontext   1=The payment is called in a myaccount GUI context. So we can ignore control on delayed payments.
      * @return	int									0 if no error, >0 if error
      */
-    function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice=null, $includedraft=0, $noemailtocustomeriferror=0, $nocancelifpaymenterror=0)
+    function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice=null, $includedraft=0, $noemailtocustomeriferror=0, $nocancelifpaymenterror=0, $calledinmyaccountcontext=0)
     {
     	global $conf, $mysoc, $user, $langs;
 
@@ -1059,7 +1060,7 @@ class SellYourSaasUtils
 							$errorforinvoice++;
 							$this->errors[]=$errmsg;
 						}
-						elseif (! empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now) {
+						elseif (! empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
 						    $errmsg='Payment try was canceled (invoice is qualified by the automatic payment was delayed after the '.dol_print_date($invoice->array_options['options_delayautopayment'], 'day').')';
 						    dol_syslog($errmsg, LOG_DEBUG);
 

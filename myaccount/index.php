@@ -846,7 +846,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
                 $sellyoursaasutils = new SellYourSaasUtils($db);
 
-                $result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1);	// Include draft invoices
+                $result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
                 if ($result != 0)
                 {
                     $error++;
@@ -1184,7 +1184,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
                             $sellyoursaasutils = new SellYourSaasUtils($db);
 
-                            $result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1);
+                            $result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
                             if ($result != 0)
                             {
                                 $error++;
@@ -1549,7 +1549,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
     			$sellyoursaasutils = new SellYourSaasUtils($db);
 
-    			$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1);	// Include draft invoices
+    			$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
     			if ($result != 0)
     			{
     				$error++;
@@ -1894,7 +1894,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
     						$sellyoursaasutils = new SellYourSaasUtils($db);
 
-    						$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1);
+    						$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
     						if ($result != 0)
     						{
     							$error++;
