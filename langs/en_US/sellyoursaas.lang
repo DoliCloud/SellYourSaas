@@ -474,5 +474,5 @@ PaymentChargedButReversedByBank=Payment was charged but was then canceled illegi
 StripeAccount=Stripe Account
 MaxNbOfInstances=Max number of instances
 ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>
-AFirstInvoiceOfWillBeDone=According to the plan you choosed and data of your existing instance, your subscription will start with a first invoice of %s, tax included 
-SeeOurPrices=See <a href="%s" target="_blank">prices for each plan here</a>
+AFirstInvoiceOfWillBeDone=Taking into account the chosen plan and data of your existing instance, your subscription will start with a first invoice of <span class="nowrap">%s tax included</span> 
+SeeOurPrices=See prices for each plan <a href="%s" target="_blank">here</a>

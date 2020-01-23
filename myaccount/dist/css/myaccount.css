@@ -1,5 +1,11 @@
 /* CSS myaccount */
 
+.firstpaymentmessage {
+    width: 70%;
+    /* text-align: center; */
+    display: inline-grid;
+}
+
 .jnotify-container .jnotify-notification .jnotify-message {
 	box-shadow: 5px 5px 5px #eee;
     border-radius: 10px;

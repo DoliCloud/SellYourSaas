@@ -5460,7 +5460,7 @@ if ($mode == 'registerpaymentmode')
 
     	    // We are not yet a customer
         	if ($amounttopayasfirstinvoice) {
-        	    print '<span class="opacitymedium"><small>'.$langs->trans("AFirstInvoiceOfWillBeDone", price($amounttopayasfirstinvoice, 0, $langs, 1, -1, -1, $conf->currency));
+        	    print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("AFirstInvoiceOfWillBeDone", price($amounttopayasfirstinvoice, 0, $langs, 1, -1, -1, $conf->currency));
         	    $urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
         	    if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
         	        && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
@@ -5474,7 +5474,7 @@ if ($mode == 'registerpaymentmode')
         	    } else {
         	        print '.';
         	    }
-        	    print '</small></span>';
+        	    print '</small></div>';
         	    print '<br><br>';
         	}
     	}

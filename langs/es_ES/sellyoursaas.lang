@@ -347,3 +347,5 @@ YourCustomUrl=Su URL personalizada
 NextInvoice=Siguiente factura
 RegistrationSuspendedForTheMomentPleaseTryLater=El registro de nuevas instancias se suspende por el momento debido al mantenimiento. Por favor intente de nuevo más tarde ...
 ErrorBadValueForIntraVAT=Error: el valor '%s' ingresado para el campo '%s' no coincide con las reglas de sintaxis de su país (%s).<br>Por favor, corrija su país o su número de IVA (También puede desmarque el campo '%s' si no es una empresa o si no tiene su número de IVA, se puede agregar un IVA al facturar el servicio para respetar las normas de IVA europeas).
+AFirstInvoiceOfWillBeDone=Teniendo en cuenta la fórmula elegida y los datos de su instancia existente, su suscripción comenzará con una primera factura de <span class="nowrap">%s impuestos incluidos</span>
+SeeOurPrices=Vea los precios de cada fórmula <a href="%s" target="_blank">aquí</a>
