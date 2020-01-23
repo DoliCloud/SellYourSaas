@@ -70,8 +70,9 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-dol_include_once('/sellyoursaas/class/packages.class.php');
-dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+dol_include_once('./sellyoursaas/class/packages.class.php');
+dol_include_once('./sellyoursaas/lib/sellyoursaas.lib.php');
+dol_include_once('./sellyoursaas/class/sellyoursaasutils.class.php');
 
 $conf->global->SYSLOG_FILE_ONEPERSESSION=2;
 
@@ -842,8 +843,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
             {
                 dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
 
-                dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
-
                 $sellyoursaasutils = new SellYourSaasUtils($db);
 
                 $result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
@@ -868,8 +867,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
             if (! $error)
             {
                 dol_syslog("--- Make renewals on contracts for thirdparty id=".$mythirdpartyaccount->id, LOG_DEBUG, 0);
-
-                dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
                 $sellyoursaasutils = new SellYourSaasUtils($db);
 
@@ -1180,8 +1177,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                         {
                             dol_syslog("--- Now we try to take payment for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
 
-                            dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
-
                             $sellyoursaasutils = new SellYourSaasUtils($db);
 
                             $result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
@@ -1214,8 +1209,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                         if (! $error)
                         {
                             dol_syslog("--- Now we make renewal of contracts for thirdpartyid=".$mythirdpartyaccount->id." if payments were ok and contract are not unsuspended", LOG_DEBUG, 0);
-
-                            dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
                             $sellyoursaasutils = new SellYourSaasUtils($db);
 
@@ -1545,8 +1538,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     		{
     			dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
 
-    			dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
-
     			$sellyoursaasutils = new SellYourSaasUtils($db);
 
     			$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
@@ -1571,8 +1562,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     		if (! $error)
     		{
     			dol_syslog("--- Make renewals on crontacts for thirdparty id=".$mythirdpartyaccount->id, LOG_DEBUG, 0);
-
-    			dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
     			$sellyoursaasutils = new SellYourSaasUtils($db);
 
@@ -1890,8 +1879,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     					{
     						dol_syslog("--- Now we try to take payment for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
 
-    						dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
-
     						$sellyoursaasutils = new SellYourSaasUtils($db);
 
     						$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
@@ -1917,8 +1904,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     					if (! $error)
     					{
     						dol_syslog("--- Now we make renewal of contracts for thirdpartyid=".$mythirdpartyaccount->id." if payments were ok and contract are not unsuspended", LOG_DEBUG, 0);
-
-    						dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
     						$sellyoursaasutils = new SellYourSaasUtils($db);
 
@@ -2116,7 +2101,6 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 
 			if (! $error)
 			{
-				dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($db);
 				$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspend', $contract, 'admin', '', '', 0, $comment);
 				if ($result < 0)
@@ -2219,7 +2203,6 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 
 				if (! $error)
 				{
-					dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 					$sellyoursaasutils = new SellYourSaasUtils($db);
 					$result = $sellyoursaasutils->sellyoursaasRemoteAction('undeploy', $contract, 'admin', '', '', 0, $comment, 300);
 					if ($result < 0)
@@ -3513,7 +3496,6 @@ if ($mode == 'instances')
 	}
 	else
 	{
-		dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 
 		$arrayforsort = array();
@@ -4390,7 +4372,6 @@ if ($mode == 'mycustomerinstances')
 	}
 	else
 	{
-		dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 
 		$arrayforsort = array();
@@ -5462,6 +5443,42 @@ if ($mode == 'registerpaymentmode')
     	print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
     	//print '<input type="hidden" name="thirdparty_id" value="'.$mythirdpartyaccount->id.'">';
 
+    	// If thirdparty is not yet a customer, we show him the amount to pay in its first invoice.
+    	if ($mythirdpartyaccount->client != 1 && $mythirdpartyaccount->client != 3) {
+            // Loop on contracts
+    	    $amounttopayasfirstinvoice = 0;
+    	    foreach ($listofcontractid as $contract)
+    	    {
+    	        $sellyoursaasutils = new SellYourSaasUtils($db);
+
+    	        $comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
+    	        // First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
+    	        $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+
+    	        $amounttopayasfirstinvoice += $contract->total_ttc;
+    	    }
+
+    	    // We are not yet a customer
+        	if ($amounttopayasfirstinvoice) {
+        	    print '<span class="opacitymedium"><small>'.$langs->trans("AFirstInvoiceOfWillBeDone", price($amounttopayasfirstinvoice, 0, $langs, 1, -1, -1, $conf->currency));
+        	    $urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
+        	    if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+        	        && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+        	    {
+        	        $newnamekey = 'SELLYOURSAAS_PRICES_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+        	        $urlforplanprices = $conf->global->$newnamekey;
+        	    }
+
+        	    if ($urlforplanprices) {
+        	        print ' ('.$langs->trans("SeeOurPrices", $urlforplanprices).')';
+        	    } else {
+        	        print '.';
+        	    }
+        	    print '</small></span>';
+        	    print '<br><br>';
+        	}
+    	}
+
     	print '
 		<div class="radio-list">
 		<label class="radio-inline" style="margin-right: 0px" id="linkcard">
@@ -5551,7 +5568,7 @@ if ($mode == 'registerpaymentmode')
 		print '</div></div>';
 
 		require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
-		// Reforce the $stripearrayofkeys because content may change depending on option
+		// Reforce the $stripearrayofkeys because content may have been changed by the include of config.php
 		if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox','alpha') || ! empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST))
 		{
 			$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
