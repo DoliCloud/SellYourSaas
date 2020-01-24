@@ -470,14 +470,12 @@ if ($object->nbofusers == 0)    // If value not already loaded
                 {
                     $sqlformula = make_substitutions($tmparray[1], $substitarray);
 
-                    $serverdeployment = $object->array_options['options_deployment_host'];
-
-                    dol_syslog("Try to connect to instance database (at ".$serverdeployment.") to execute formula calculation");
+                    dol_syslog("Try to connect to instance database (at ".$generateddbhostname.") to execute formula calculation");
 
                     //var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
                     //var_dump($serverdeployement);		// just ip of deployement server
                     //$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-                    $dbinstance = @getDoliDBInstance('mysqli', $serverdeployment, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+                    $dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
                     if (! $dbinstance || ! $dbinstance->connected)
                     {
                         $error++;
