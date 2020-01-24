@@ -3744,6 +3744,7 @@ class SellYourSaasUtils
     		}
     	}
 
+    	// Complete message if error
     	$recordanevent = 0;
     	$prefixlabel = '';
     	if ($forceaddevent && (get_class($object) == 'Contrat' || get_class($object) == 'ContratLigne'))
@@ -3830,6 +3831,8 @@ class SellYourSaasUtils
 
         	    $arraytags=array('remoteaction'=> ($remoteaction?$remoteaction:'unknown'), 'result'=>($error ? 'ko' : 'ok'));
 
+        	    dol_syslog("Send info to datadog ".(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '')." remoteaction=".($remoteaction?$remoteaction:'unknown')." result=".($error ? 'ko' : 'ok'));
+
         	    $statsd->increment('sellyoursaas.remoteaction', 1, $arraytags);
 
                 // Add flag for customer lost
@@ -3852,7 +3855,7 @@ class SellYourSaasUtils
     	}
 
 
-    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." password=".$password." error=".$error." retarray['http_code']=".$retarray['http_code'].")", LOG_DEBUG, -1);
+    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." password=".$password." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
 
     	if ($error) return -1;
     	else return 1;
