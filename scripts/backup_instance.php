@@ -352,11 +352,17 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 // Backup database
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
+    $serverdb = $server;
+    if (filter_var($object->database_db, FILTER_VALIDATE_IP) !== false) {
+        print strftime("%Y%m%d-%H%M%S").' database_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
+        $serverdb = $object->database_db;
+    }
+
 	$command="mysqldump";
 	$param=array();
 	$param[]=$object->database_db;
 	$param[]="-h";
-	$param[]=$server;
+	$param[]=$serverdb;
 	$param[]="-u";
 	$param[]=$object->username_db;
 	$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$object->password_db).'"';
