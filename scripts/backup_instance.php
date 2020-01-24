@@ -353,9 +353,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
     $serverdb = $server;
-    if (filter_var($object->database_db, FILTER_VALIDATE_IP) !== false) {
-        print strftime("%Y%m%d-%H%M%S").' database_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
-        $serverdb = $object->database_db;
+    if (filter_var($object->array_options['options_hostname_db'], FILTER_VALIDATE_IP) !== false) {
+        print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
+        $serverdb = $object->array_options['options_hostname_db'];
     }
 
 	$command="mysqldump";
