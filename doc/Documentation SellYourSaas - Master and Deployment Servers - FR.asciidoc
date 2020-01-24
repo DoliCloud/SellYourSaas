@@ -2311,8 +2311,19 @@ La requête suivante permet d'avoir une vision de l'espace réél (sans le gachi
 SET GLOBAL innodb_stats_on_metadata=0;
 SELECT table_schema "DB Name", ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB",
 SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables 
-WHERE table_schema LIKE 'dbna%';
+WHERE table_schema LIKE 'dbna%'
 GROUP BY table_schema;
+---------------
+
+Et par table
+
+[source,sql]
+---------------
+SET GLOBAL innodb_stats_on_metadata=0;
+SELECT table_schema "DB Name", table_name, ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB",
+SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables 
+WHERE table_schema LIKE 'dbna%'
+GROUP BY table_schema, table_name;
 ---------------
 
 or old request:

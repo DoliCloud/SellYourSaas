@@ -106,7 +106,26 @@ $form=new Form($db);
 
 llxHeader('',$langs->transnoentitiesnoconv('DoliCloudCustomers'),'');
 
-print_fiche_titre($langs->trans("DoliCloudArea"));
+//print_fiche_titre($langs->trans("DoliCloudArea"));
+
+
+$h = 0;
+$head = array();
+
+$head[$h][0] = 'index.php';
+$head[$h][1] = $langs->trans("Home");
+$head[$h][2] = 'home';
+$h++;
+
+$head[$h][0] = 'reports.php';
+$head[$h][1] = $langs->trans("CustomReporting");
+$head[$h][2] = 'customreport';
+$h++;
+
+
+//$head = commande_prepare_head(null);
+dol_fiche_head($head, 'home', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');
+
 
 $tmparray=dol_getdate(dol_now());
 $endyear=$tmparray['year'];
@@ -557,6 +576,9 @@ else
 	print '<input class="button" type="submit" name="'.$langs->trans("Save").'">';
 	print '</form>';
 }
+
+
+dol_fiche_end();
 
 
 // End of page
