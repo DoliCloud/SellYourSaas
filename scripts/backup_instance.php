@@ -377,8 +377,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--default-character-set=utf8";
 
 	$fullcommand=$command." ".join(" ",$param);
-	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=" | bzip2 > /dev/null";
-	else $fullcommand.=" | bzip2 > ".$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2';
+	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=" | gzip > /dev/null";
+	else $fullcommand.=" | gzip > ".$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
 	$output=array();
 	$return_varmysql=0;
 	$datebeforemysqldump = strftime("%Y%m%d-%H%M%S");
@@ -386,6 +386,10 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	exec($fullcommand, $output, $return_varmysql);
 	$dateaftermysqldump = strftime("%Y%m%d-%H%M%S");
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.')'."\n";
+
+	// Delete file with same name and bzip2 extension
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+	dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 
 	// Output result
 	foreach($output as $outputline)
