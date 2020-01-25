@@ -53,15 +53,13 @@ $search_xaxis = GETPOST('search_xaxis', 'array');
 $search_yaxis = GETPOST('search_yaxis', 'array');
 $search_graph = GETPOST('search_graph');
 
-$sortfield = GETPOST("sortfield",'alpha');
-$sortorder = GETPOST("sortorder",'alpha');
-$page = GETPOST("page",'int');
-if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
-$offset = $conf->liste_limit * $page;
-if (! $sortorder) $sortorder='ASC';
-if (! $sortfield) $sortfield='t.date_registration';
-$limit = GETPOST('limit','int')?GETPOST('limit','int'):$conf->liste_limit;
-
+// Load variable for pagination
+$limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
+$sortfield = GETPOST('sortfield', 'alpha');
+$sortorder = GETPOST('sortorder', 'alpha');
+$page = GETPOST('page', 'int');
+if (empty($page) || $page == -1 || GETPOST('button_search', 'alpha') || GETPOST('button_removefilter', 'alpha') || (empty($toselect) && $massaction === '0')) { $page = 0; }     // If $page is not defined, or '' or -1 or if we click on clear filters or if we select empty mass action
+$offset = $limit * $page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
@@ -72,7 +70,13 @@ if ($user->societe_id > 0)
 }
 
 $object = new Contrat($db);
+$extrafields = new ExtraFields($db);
 
+// Fetch optionals attributes and labels
+$extrafields->fetch_name_optionals_label($object->table_element);
+//$extrafields->fetch_name_optionals_label($object->table_element_line);
+
+$search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
 
 
 /*
@@ -120,7 +124,7 @@ $startyear=$endyear-2;
 
 $param = '';
 
-$arrayofmesures = array('count'=>'Count');
+$arrayofmesures = array('t.count'=>'Count');
 $arrayofxaxis = array();
 $arrayofyaxis = array();
 
@@ -135,12 +139,15 @@ print $langs->trans("Status").' '.$form->multiselectarray('search_status', $arra
 print '</div>';
 print '<div class="divsearchfield clearboth">';
 foreach($object->fields as $key => $val) {
-    if ($val['measure']) $arrayofmesures[$key] = $val['label'];
+    if ($val['measure']) $arrayofmesures['t.'.$key] = $val['label'];
 }
 // Add measure from extrafields
 if ($object->isextrafieldmanaged) {
-    // TODO
-
+    foreach($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
+        if (! empty($extrafields->attributes[$object->table_element]['totalizable'][$key])) {
+            $arrayofmesures['te.'.$key] = $extrafields->attributes[$object->table_element]['label'][$key];
+        }
+    }
 }
 print $langs->trans("Measures").' '.$form->multiselectarray('search_measures', $arrayofmesures, $search_measures, 0, 0, 'minwidth100', 1);
 print '</div>';
@@ -149,27 +156,44 @@ foreach($object->fields as $key => $val) {
     if (! $val['measure']) {
         if (in_array($key, array('id', 'rowid', 'last_main_doc', 'extraparams'))) continue;
         if (in_array($val['type'], array('html', 'text'))) continue;
-        $arrayofxaxis[$key] = $val['label'];
+        $arrayofxaxis['t.'.$key] = $val['label'];
+    }
+    // Add measure from extrafields
+    if ($object->isextrafieldmanaged) {
+        foreach($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
+            if (! empty($extrafields->attributes[$object->table_element]['totalizable'][$key])) {
+                $arrayofxaxis['te.'.$key] = $extrafields->attributes[$object->table_element]['label'][$key];
+            }
+        }
     }
 }
 print $langs->trans("XAxis").' '.$form->multiselectarray('search_xaxis', $arrayofxaxis, $search_xaxis, 0, 0, 'minwidth100', 1);
 print '</div>';
+
 if ($mode == 'grid') {
     print '<div class="divsearchfield">';
     foreach($object->fields as $key => $val) {
-        if (! $val['measure']) $arrayofyaxis[$key] = $val['label'];
-    }
-    // Add measure from extrafields
-    if ($object->isextrafieldmanaged) {
-        // TODO
-
+        if (! $val['measure']) {
+            if (in_array($key, array('id', 'rowid', 'last_main_doc', 'extraparams'))) continue;
+            if (in_array($val['type'], array('html', 'text'))) continue;
+            $arrayofyaxis['t.'.$key] = $val['label'];
+        }
+        // Add measure from extrafields
+        if ($object->isextrafieldmanaged) {
+            foreach($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
+                if (! empty($extrafields->attributes[$object->table_element]['totalizable'][$key])) {
+                    $arrayofyaxis['te.'.$key] = $extrafields->attributes[$object->table_element]['label'][$key];
+                }
+            }
+        }
     }
     print $langs->trans("YAxis").' '.$form->multiselectarray('search_yaxis', $arrayofyaxis, $search_yaxis, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
+
 if ($mode == 'graph') {
     print '<div class="divsearchfield">';
-    $arrayofgraphs = array('line', 'bars', 'pies');
+    $arrayofgraphs = array('line', 'bars'); // also 'pies'
     print $langs->trans("Graph").' '.$form->selectarray('search_graph', $arrayofgraphs, $search_graph, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
@@ -179,32 +203,44 @@ print '</div>';
 print '</div>';
 print '</form>';
 
-// Generate the SQL request
-$sql = 'SELECT ';
-foreach($search_xaxis as $key => $val) {
-    $sql .= $val.' as x_'.$key.', ';
-}
-foreach($search_measures as $key => $val) {
-    if ($key == 'count') $sql .= 'COUNT(rowid) as y_'.$key.', ';
-    else $sql .= 'SUM(1 + '.$key.') as y_'.$key.', ';
-}
-$sql = preg_replace('/,\s*$/', '', $sql);
-$sql .= ' FROM '.MAIN_DB_PREFIX.$object->table_element;
-$sql .= ' WHERE 1 = 1';
-$sql .= ' AND entity IN ('.getEntity($object->element).')';
-foreach($search_filters as $key => $val) {
 
+// Generate the SQL request
+$sql = '';
+if (! empty($search_measures) && ! empty($search_xaxis))
+{
+    $fieldid = 'rowid';
+
+    $sql = 'SELECT ';
+    foreach($search_xaxis as $key => $val) {
+        $sql .= $val.' as x_'.$key.', ';
+    }
+    foreach($search_measures as $key => $val) {
+        if ($val == 't.count') $sql .= 'COUNT(t.'.$fieldid.') as y_'.$key.', ';
+        else $sql .= 'SUM('.$db->ifsql($val.' IS NULL', '0', $val).') as y_'.$key.', ';
+    }
+    $sql = preg_replace('/,\s*$/', '', $sql);
+    $sql .= ' FROM '.MAIN_DB_PREFIX.$object->table_element.' as t';
+    // Add measure from extrafields
+    if ($object->isextrafieldmanaged) {
+        $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.$object->table_element.'_extrafields as te ON te.fk_object = t.'.$fieldid;
+    }
+    $sql .= ' WHERE 1 = 1';
+    $sql .= ' AND entity IN ('.getEntity($object->element).')';
+    foreach($search_filters as $key => $val) {
+
+    }
+    $sql .= ' GROUP BY ';
+    foreach($search_xaxis as $key => $val) {
+        $sql .= $val.', ';
+    }
+    $sql = preg_replace('/,\s*$/', '', $sql);
+    $sql .= ' ORDER BY ';
+    foreach($search_xaxis as $key => $val) {
+        $sql .= $val.', ';
+    }
+    $sql = preg_replace('/,\s*$/', '', $sql);
 }
-$sql .= ' GROUP BY ';
-foreach($search_xaxis as $key => $val) {
-    $sql .= $val.', ';
-}
-$sql = preg_replace('/,\s*$/', '', $sql);
-$sql .= ' ORDER BY ';
-foreach($search_xaxis as $key => $val) {
-    $sql .= $val.', ';
-}
-$sql = preg_replace('/,\s*$/', '', $sql);
+
 
 $legend=array();
 foreach($search_measures as $key => $val) {
@@ -213,27 +249,37 @@ foreach($search_measures as $key => $val) {
 
 
 // Execute the SQL request
-$resql = $db->query($sql);
-if (! $resql) {
-    dol_print_error($db);
-}
-
+$totalnbofrecord = 0;
 $data = array();
-while($obj = $db->fetch_object($resql)) {
-    // $this->data  = array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn));   // or when there is n series to show for each x
-    foreach($search_xaxis as $xkey => $xval) {
-        $fieldforxkey = 'x_'.$xkey;
-        $xarray = array(0 => $obj->$fieldforxkey);
-        foreach($search_measures as $key => $val) {
-            $fieldfory = 'y_'.$key;
-            $xarray[] = $obj->$fieldfory;
-        }
-        $data[] = $xarray;
+if ($sql) {
+    $resql = $db->query($sql);
+    if (! $resql) {
+        dol_print_error($db);
     }
+
+    while($obj = $db->fetch_object($resql)) {
+        // $this->data  = array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn));   // or when there is n series to show for each x
+        foreach($search_xaxis as $xkey => $xval) {
+            $fieldforxkey = 'x_'.$xkey;
+            $xarray = array(0 => $obj->$fieldforxkey);
+            foreach($search_measures as $key => $val) {
+                $fieldfory = 'y_'.$key;
+                $xarray[] = $obj->$fieldfory;
+            }
+            $data[] = $xarray;
+        }
+    }
+
+    $totalnbofrecord = count($data);
 }
 
-// Show admin info
-print info_admin($langs->trans("SQLUsedForExport").':<br> '.$sql);
+
+print '<div class="customreportsoutput'.($totalnbofrecord?'':' customreportsoutputnotdata').'">';
+
+if ($sql) {
+    // Show admin info
+    print info_admin($langs->trans("SQLUsedForExport").':<br> '.$sql);
+}
 
 
 if ($mode == 'grid') {
@@ -257,9 +303,9 @@ if ($mode == 'graph') {
     	foreach($search_measures as $key => $val) {
     	    $arrayoftypes[] = $search_graph;
     	}
-        //$arrayoftypes = array('lines','lines','lines');
 
     	$px1->SetLegend($legend);
+    	$px1->SetMinValue($px1->GetFloorMinValue());
     	$px1->SetMaxValue($px1->GetCeilMaxValue());
     	$px1->SetWidth($WIDTH);
     	$px1->SetHeight($HEIGHT);
@@ -278,10 +324,11 @@ if ($mode == 'graph') {
 
     	$px1->draw($filenamenb, $fileurlnb);
 
-    	print $px1->show();
+    	print $px1->show($totalnbofrecord ? 0 : $langs->trans("SelectYourGraphOptionsFirst"));
     }
 }
 
+print '<div>';
 
 dol_fiche_end();
 
