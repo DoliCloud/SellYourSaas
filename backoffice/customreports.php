@@ -42,7 +42,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
 require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("companies","other","sellyoursaas@sellyoursaas"));
+$langs->loadLangs(array("companies", "other", "exports", "sellyoursaas@sellyoursaas"));
 
 // Get parameters
 $mode		= GETPOST('mode','alpha') ? GETPOST('mode','alpha') : 'graph';
@@ -51,6 +51,7 @@ $search_filters = GETPOST('search_filters', 'array');
 $search_measures = GETPOST('search_measures', 'array');
 $search_xaxis = GETPOST('search_xaxis', 'array');
 $search_yaxis = GETPOST('search_yaxis', 'array');
+$search_graph = GETPOST('search_graph');
 
 $sortfield = GETPOST("sortfield",'alpha');
 $sortorder = GETPOST("sortorder",'alpha');
@@ -136,6 +137,11 @@ print '<div class="divsearchfield clearboth">';
 foreach($object->fields as $key => $val) {
     if ($val['measure']) $arrayofmesures[$key] = $val['label'];
 }
+// Add measure from extrafields
+if ($object->isextrafieldmanaged) {
+    // TODO
+
+}
 print $langs->trans("Measures").' '.$form->multiselectarray('search_measures', $arrayofmesures, $search_measures, 0, 0, 'minwidth100', 1);
 print '</div>';
 print '<div class="divsearchfield">';
@@ -153,7 +159,18 @@ if ($mode == 'grid') {
     foreach($object->fields as $key => $val) {
         if (! $val['measure']) $arrayofyaxis[$key] = $val['label'];
     }
+    // Add measure from extrafields
+    if ($object->isextrafieldmanaged) {
+        // TODO
+
+    }
     print $langs->trans("YAxis").' '.$form->multiselectarray('search_yaxis', $arrayofyaxis, $search_yaxis, 0, 0, 'minwidth100', 1);
+    print '</div>';
+}
+if ($mode == 'graph') {
+    print '<div class="divsearchfield">';
+    $arrayofgraphs = array('line', 'bars', 'pies');
+    print $langs->trans("Graph").' '.$form->selectarray('search_graph', $arrayofgraphs, $search_graph, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
 print '<div class="divsearchfield">';
@@ -216,7 +233,7 @@ while($obj = $db->fetch_object($resql)) {
 }
 
 // Show admin info
-print info_admin($sql);
+print info_admin($langs->trans("SQLUsedForExport").':<br> '.$sql);
 
 
 if ($mode == 'grid') {
@@ -236,6 +253,12 @@ if ($mode == 'graph') {
     	$px1->SetData($data);
     	unset($data);
 
+    	$arrayoftypes = array();
+    	foreach($search_measures as $key => $val) {
+    	    $arrayoftypes[] = $search_graph;
+    	}
+        //$arrayoftypes = array('lines','lines','lines');
+
     	$px1->SetLegend($legend);
     	$px1->SetMaxValue($px1->GetCeilMaxValue());
     	$px1->SetWidth($WIDTH);
@@ -244,7 +267,7 @@ if ($mode == 'graph') {
     	$px1->SetShading(3);
     	$px1->SetHorizTickIncrement(1);
     	$px1->SetCssPrefix("cssboxes");
-    	$px1->SetType(array('lines','lines','lines'));
+    	$px1->SetType($arrayoftypes);
     	$px1->mode='depth';
     	$px1->SetTitle('');
 
