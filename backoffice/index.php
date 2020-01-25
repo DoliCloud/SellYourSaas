@@ -117,9 +117,9 @@ $head[$h][1] = $langs->trans("Home");
 $head[$h][2] = 'home';
 $h++;
 
-$head[$h][0] = 'reports.php';
-$head[$h][1] = $langs->trans("CustomReporting");
-$head[$h][2] = 'customreport';
+$head[$h][0] = 'customreports.php';
+$head[$h][1] = $langs->trans("CustomReports");
+$head[$h][2] = 'customreports';
 $h++;
 
 
