@@ -3768,7 +3768,6 @@ class SellYourSaasUtils
     	if ($recordanevent)
     	{
     	    $tmpcontract = $object;
-
     	    if (get_class($object) == 'ContratLigne')
     	    {
     	        $tmpcontract = new Contrat($this->db);
@@ -3831,7 +3830,14 @@ class SellYourSaasUtils
 
         	    $arraytags=array('remoteaction'=> ($remoteaction?$remoteaction:'unknown'), 'result'=>($error ? 'ko' : 'ok'));
 
-        	    dol_syslog("Send info to datadog ".(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '')." remoteaction=".($remoteaction?$remoteaction:'unknown')." result=".($error ? 'ko' : 'ok'));
+        	    $tmpcontract = $object;
+        	    if (get_class($object) == 'ContratLigne')
+        	    {
+        	        $tmpcontract = new Contrat($this->db);
+        	        $tmpcontract->fetch($object->fk_contrat);
+        	    }
+
+        	    dol_syslog("Send info to datadog".(get_class($tmpcontract) == 'Contrat' ? ' contractid='.$tmpcontract->id.' contractref='.$tmpcontract->ref: '')." remoteaction=".($remoteaction?$remoteaction:'unknown')." result=".($error ? 'ko' : 'ok'));
 
         	    $statsd->increment('sellyoursaas.remoteaction', 1, $arraytags);
 
