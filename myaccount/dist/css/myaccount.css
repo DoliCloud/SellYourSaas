@@ -1,5 +1,9 @@
 /* CSS myaccount */
 
+label {
+    margin-bottom: .3rem;
+}
+
 .firstpaymentmessage {
     width: 70%;
     /* text-align: center; */
