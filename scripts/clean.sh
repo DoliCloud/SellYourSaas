@@ -144,7 +144,7 @@ do
 done
 
 
-echo "***** Get list of databases of all instances and save into /tmp/instancefound-dbinsellyoursaas"
+echo "***** Get list of databases of all instances and save it into /tmp/instancefound-dbinsellyoursaas"
 
 echo "#url=ref_customer	username_os	database_db status" > /tmp/instancefound-dbinsellyoursaas
 
@@ -160,7 +160,7 @@ if [ "x$?" != "x0" ]; then
 fi
 
 
-echo "***** Get list of databases of known active instances and save into /tmp/instancefound-activedbinsellyoursaas"
+echo "***** Get list of databases of known active instances and save it into /tmp/instancefound-activedbinsellyoursaas"
 
 echo "#url=ref_customer	username_os	database_db status" > /tmp/instancefound-activedbinsellyoursaas
 
@@ -176,14 +176,14 @@ if [ "x$?" != "x0" ]; then
 fi
 
 
-echo "***** Get list of databases available in mysql and save into /tmp/instancefound-dbinmysqldic"
+echo "***** Get list of databases available in mysql local and save it into /tmp/instancefound-dbinmysqldic"
 
 Q1="use mysql; "
 Q2="SHOW DATABASES; ";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e '$SQL' | grep 'dbn' "
-$MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
+echo "$MYSQL -usellyoursaas -pxxxxxx -h localhost -e '$SQL' | grep 'dbn' "
+$MYSQL -usellyoursaas -p$passsellyoursaas -h localhost -e "$mysql" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
 	exit 1
