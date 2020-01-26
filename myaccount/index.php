@@ -1370,8 +1370,8 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     		$companypaymentmode->status          = $servicestatusstripe;
     		$companypaymentmode->comment         = 'Credit card created from customer dashboard';     // TODO Fields not declared in companypaymentmode
     		$companypaymentmode->ipaddress       = getUserRemoteIP();                                 // TODO Fields not declared in companypaymentmode
-
-    		// field $companypaymentmode->stripe_card_ref is filled later
+    		// $companypaymentmode->stripe_card_ref is filled later
+    		// $companypaymentmode->stripe_account is filled later
 
     		$db->begin();
 
@@ -5388,8 +5388,8 @@ if ($mode == 'billing')
 	            print '
 	                <br><br>
 	                <a href="'.$urltoenterpaymentmode.'" class="btn default btn-xs green-stripe">';
-	            	if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode");
-	            	else print $langs->trans("AddAPaymentMode");
+	            	if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode").'...';
+	            	else print $langs->trans("AddAPaymentMode").'...';
 	                print '</a>
 
 	            </p>
@@ -7052,8 +7052,21 @@ if ($mode == 'myaccount')
 	        </div>
 
 
-
 			';
+
+
+			if (! GETPOST('deleteaccount')) {
+			    print '<div class="center"><br>';
+			    $urltoenterpaymentmode = $_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode);
+			    print '<a href="'.$urltoenterpaymentmode.'" class="">';
+            	if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode").'...';
+            	else print $langs->trans("AddAPaymentMode").'...';
+                print '</a>';
+	            print '<br>';
+	            print '</div>';
+			}
+
+
 			if (! GETPOST('deleteaccount')) print '<div class="center"><br><a href="#deletemyaccountarea" class="deletemyaccountclick">'.$langs->trans("DeleteMyAccount").'...<br><br></a></div>';
 
 			print '
