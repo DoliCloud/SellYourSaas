@@ -717,7 +717,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
             $companypaymentmode->ipaddress       = getUserRemoteIP();
 
             $companypaymentmode->stripe_card_ref = $payment_method->id;
-            $companypaymentmode->stripe_account  = $stripearrayofkeys['publishable_key'];
+            $companypaymentmode->stripe_account  = $payment_method->customer.'@'.$stripearrayofkeys['publishable_key'];
             $companypaymentmode->status          = $servicestatusstripe;
 
             $companypaymentmode->card_type       = $payment_method->card->brand;
@@ -1460,7 +1460,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
     								$sql = "UPDATE " . MAIN_DB_PREFIX . "societe_rib";
     								$sql.= " SET stripe_card_ref = '".$db->escape($card->id)."',";
-    								$sql.= " stripe_account = '".$db->escape($stripearrayofkeys['publishable_key'])."',";
+    								$sql.= " stripe_account = '".$db->escape($cu.'@'.$stripearrayofkeys['publishable_key'])."',";
     								$sql.= " status = ".((int) $servicestatusstripe).",";
     								$sql.= " card_type = '".$db->escape($card->brand)."',";
     								$sql.= " country_code = '".$db->escape($card->country)."',";
