@@ -220,6 +220,7 @@ while read bidon osusername dbname deploymentstatus ipserverdeployment; do
 		#echo notfoundip=$notfoundip
 
 		if [[ $notfoundip == 0 ]]; then
+		    # The current line of instancefound-activedbinsellyoursaas is for an instance with files deployed on this server
 	    	id $osusername >/dev/null 2>/dev/null
 	    	if [[ "x$?" == "x1" ]]; then
 				echo Line $bidon $osusername $dbname $deploymentstatus $ipserverdeployment is for a user on this server that does not exists. Should not happen.
@@ -245,7 +246,7 @@ done < /tmp/instancefound-activedbinsellyoursaas
 
 
 
-echo "***** Save osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save into /tmp/osutoclean" 
+echo "***** Save osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
 Q1="use $database; "
 Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.deployment_host = '$IPSERVERDEPLOYMENT' AND c.rowid IN ";
 Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";
