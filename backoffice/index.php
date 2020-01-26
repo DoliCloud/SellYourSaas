@@ -489,8 +489,8 @@ if (! $mesg)
 	unset($data1);
 
 	$legend=array();
-	$legend[0]=$langs->trans("RevenuePerMonth");
-	$legend[1]=$langs->trans("CommissionPerMonth");
+	$legend[0]=$langs->trans("RevenuePerMonth").' ('.$langs->trans("HT").')';
+	$legend[1]=$langs->trans("CommissionPerMonth").' ('.$langs->trans("HT").')';
 	$legend[2]=$langs->trans("BenefitDoliCloud");
 
 	$px1->SetLegend($legend);

@@ -3548,12 +3548,12 @@ class SellYourSaasUtils
     					//$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
     					$serverdeployment = $contract->array_options['options_deployment_host'];
 
-    					dol_syslog("Try to connect to remote instance database (at ".$serverdeployment.") to execute formula calculation");
+    					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation");
 
     					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
     					//var_dump($serverdeployment);		// just ip of deployment server
     					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-    					$dbinstance = @getDoliDBInstance('mysqli', $serverdeployment, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+    					$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
     					if (! $dbinstance || ! $dbinstance->connected)
     					{
     						$error++;

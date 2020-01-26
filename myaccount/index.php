@@ -2326,7 +2326,6 @@ if ($action == 'deleteaccount')
  */
 
 $form = new Form($db);
-$formother = new FormOther($db);
 
 if ($welcomecid > 0)
 {
@@ -3390,7 +3389,7 @@ if ($mode == 'instances')
 {
     // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
     $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-    $forcedsubdomain = GETPOST('forcesubdomain', 'alpha');
+    $forcesubdomain = GETPOST('forcesubdomain', 'alpha');
 
     // List of available plans/products
 	$arrayofplans=array();
