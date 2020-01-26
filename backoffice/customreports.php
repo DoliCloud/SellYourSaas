@@ -78,6 +78,8 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 
 $search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
 
+$search_component_params=array('');
+
 
 /*
  * Actions
@@ -134,8 +136,8 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<div class="liste_titre liste_titre_bydiv centpercent">';
 // Add Filter
 print '<div class="divsearchfield">';
-$arrayofstatus = array(Contrat::STATUS_DRAFT=>'Draft', Contrat::STATUS_VALIDATED=>'Validated', Contrat::STATUS_CLOSED=>'Closed');
-print $langs->trans("Status").' '.$form->multiselectarray('search_status', $arrayofstatus, $search_status, 0, 0, 'minwidth100', 1);
+print $langs->trans("Filters").' ';
+print $form->searchComponent(array($object->element => $object->fields), $search_component_params);
 print '</div>';
 print '<div class="divsearchfield clearboth">';
 foreach($object->fields as $key => $val) {
@@ -149,45 +151,69 @@ if ($object->isextrafieldmanaged) {
         }
     }
 }
-print $langs->trans("Measures").' '.$form->multiselectarray('search_measures', $arrayofmesures, $search_measures, 0, 0, 'minwidth100', 1);
+print $langs->trans("Measures").' '.$form->multiselectarray('search_measures', $arrayofmesures, $search_measures, 0, 0, 'minwidth150', 1);
 print '</div>';
 print '<div class="divsearchfield">';
 foreach($object->fields as $key => $val) {
     if (! $val['measure']) {
-        if (in_array($key, array('id', 'rowid', 'last_main_doc', 'extraparams'))) continue;
+        if (in_array($key, array('id', 'rowid', 'entity', 'last_main_doc', 'extraparams'))) continue;
+        if (preg_match('/^fk_/', $key)) continue;
         if (in_array($val['type'], array('html', 'text'))) continue;
-        $arrayofxaxis['t.'.$key] = $val['label'];
+        if (in_array($val['type'], array('timestamp', 'date', 'datetime'))) {
+            $arrayofxaxis['t.'.$key.'-year'] = array('label' => $langs->trans($val['label']).' ('.$langs->trans("Year").')', 'position' => $val['position']);
+            $arrayofxaxis['t.'.$key.'-month'] = array('label' => $langs->trans($val['label']).' ('.$langs->trans("Month").')', 'position' => $val['position']);
+            $arrayofxaxis['t.'.$key.'-day'] = array('label' => $langs->trans($val['label']).' ('.$langs->trans("Day").')', 'position' => $val['position']);
+        } else {
+            $arrayofxaxis['t.'.$key] = array('label' => $val['label'], 'position' => (int) $val['position']);
+        }
     }
     // Add measure from extrafields
     if ($object->isextrafieldmanaged) {
         foreach($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
             if (! empty($extrafields->attributes[$object->table_element]['totalizable'][$key])) {
-                $arrayofxaxis['te.'.$key] = $extrafields->attributes[$object->table_element]['label'][$key];
+                $arrayofxaxis['te.'.$key] = array('label' => $extrafields->attributes[$object->table_element]['label'][$key], 'position' => (int) $extrafields->attributes[$object->table_element]['pos'][$key]);
             }
         }
     }
 }
-print $langs->trans("XAxis").' '.$form->multiselectarray('search_xaxis', $arrayofxaxis, $search_xaxis, 0, 0, 'minwidth100', 1);
+$arrayofxaxis = dol_sort_array($arrayofxaxis, 'position');
+$arrayofxaxislabel = array();
+foreach($arrayofxaxis as $key => $val) {
+    $arrayofxaxislabel[$key] = $val['label'];
+}
+print $langs->trans("XAxis").' '.$form->multiselectarray('search_xaxis', $arrayofxaxislabel, $search_xaxis, 0, 0, 'minwidth100', 1);
 print '</div>';
 
 if ($mode == 'grid') {
     print '<div class="divsearchfield">';
     foreach($object->fields as $key => $val) {
         if (! $val['measure']) {
-            if (in_array($key, array('id', 'rowid', 'last_main_doc', 'extraparams'))) continue;
+            if (in_array($key, array('id', 'rowid', 'entity', 'last_main_doc', 'extraparams'))) continue;
+            if (preg_match('/^fk_/', $key)) continue;
             if (in_array($val['type'], array('html', 'text'))) continue;
-            $arrayofyaxis['t.'.$key] = $val['label'];
+            if (in_array($val['type'], array('timestamp', 'date', 'datetime'))) {
+                $arrayofyaxis['t.'.$key.'-year'] = array('label' => $langs->trans($val['label']).' ('.$langs->trans("Year").')', 'position' => $val['position']);
+                $arrayofyaxis['t.'.$key.'-month'] = array('label' => $langs->trans($val['label']).' ('.$langs->trans("Month").')', 'position' => $val['position']);
+                $arrayofyaxis['t.'.$key.'-day'] = array('label' => $langs->trans($val['label']).' ('.$langs->trans("Day").')', 'position' => $val['position']);
+            } else {
+                $arrayofyaxis['t.'.$key] = array('label' => $val['label'], 'position' => (int) $val['position']);
+            }
         }
         // Add measure from extrafields
         if ($object->isextrafieldmanaged) {
             foreach($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
                 if (! empty($extrafields->attributes[$object->table_element]['totalizable'][$key])) {
-                    $arrayofyaxis['te.'.$key] = $extrafields->attributes[$object->table_element]['label'][$key];
+                    $arrayofyaxis['te.'.$key] = array('label' => $extrafields->attributes[$object->table_element]['label'][$key], 'position' => (int) $extrafields->attributes[$object->table_element]['pos'][$key]);
                 }
             }
         }
     }
-    print $langs->trans("YAxis").' '.$form->multiselectarray('search_yaxis', $arrayofyaxis, $search_yaxis, 0, 0, 'minwidth100', 1);
+    $arrayofyaxis = dol_sort_array($arrayofyaxis, 'position');
+    $arrayofyaxislabel = array();
+    foreach($arrayofyaxis as $key => $val) {
+        $arrayofyaxislabel[$key] = $val['label'];
+    }
+    print $langs->trans("YAxis").' '.$form->multiselectarray('search_yaxis', $arrayofyaxislabel, $search_yaxis, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
 
@@ -212,7 +238,17 @@ if (! empty($search_measures) && ! empty($search_xaxis))
 
     $sql = 'SELECT ';
     foreach($search_xaxis as $key => $val) {
-        $sql .= $val.' as x_'.$key.', ';
+        if (preg_match('/\-year$/', $val)) {
+            $tmpval = preg_replace('/\-year$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y') as x_".$key.', ';
+        } elseif (preg_match('/\-month$/', $val)) {
+            $tmpval = preg_replace('/\-month$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m') as x_".$key.', ';
+        } elseif (preg_match('/\-day$/', $val)) {
+            $tmpval = preg_replace('/\-day$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%f') as x_".$key.', ';
+        }
+        else $sql .= $val.' as x_'.$key.', ';
     }
     foreach($search_measures as $key => $val) {
         if ($val == 't.count') $sql .= 'COUNT(t.'.$fieldid.') as y_'.$key.', ';
@@ -231,12 +267,32 @@ if (! empty($search_measures) && ! empty($search_xaxis))
     }
     $sql .= ' GROUP BY ';
     foreach($search_xaxis as $key => $val) {
-        $sql .= $val.', ';
+        if (preg_match('/\-year$/', $val)) {
+            $tmpval = preg_replace('/\-year$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y')";
+        } elseif (preg_match('/\-month$/', $val)) {
+            $tmpval = preg_replace('/\-month$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m')";
+        } elseif (preg_match('/\-day$/', $val)) {
+            $tmpval = preg_replace('/\-day$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%f')";
+        }
+        else $sql .= $val.', ';
     }
     $sql = preg_replace('/,\s*$/', '', $sql);
     $sql .= ' ORDER BY ';
     foreach($search_xaxis as $key => $val) {
-        $sql .= $val.', ';
+        if (preg_match('/\-year$/', $val)) {
+            $tmpval = preg_replace('/\-year$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y'), ";
+        } elseif (preg_match('/\-month$/', $val)) {
+            $tmpval = preg_replace('/\-month$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m'), ";
+        } elseif (preg_match('/\-day$/', $val)) {
+            $tmpval = preg_replace('/\-day$/', '', $val);
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%f'), ";
+        }
+        else $sql .= $val.', ';
     }
     $sql = preg_replace('/,\s*$/', '', $sql);
 }
@@ -244,9 +300,8 @@ if (! empty($search_measures) && ! empty($search_xaxis))
 
 $legend=array();
 foreach($search_measures as $key => $val) {
-    $legend[]=$langs->trans($val);
+    $legend[] = $langs->trans($arrayofmesures[$val]);
 }
-
 
 // Execute the SQL request
 $totalnbofrecord = 0;
@@ -261,7 +316,12 @@ if ($sql) {
         // $this->data  = array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn));   // or when there is n series to show for each x
         foreach($search_xaxis as $xkey => $xval) {
             $fieldforxkey = 'x_'.$xkey;
-            $xarray = array(0 => $obj->$fieldforxkey);
+            $xlabel = $obj->$fieldforxkey;
+            $xvalwithoutprefix = preg_replace('/^[a-z]+\./', '', $xval);
+            if (! empty($object->fields[$xvalwithoutprefix]['arrayofkeyval'])) {
+                $xlabel = $object->fields[$xvalwithoutprefix]['arrayofkeyval'][$obj->$fieldforxkey];
+            }
+            $xarray = array(0 => ($xlabel ? dol_trunc($xlabel, 20, 'middle') : $langs->trans("NotDefined")));
             foreach($search_measures as $key => $val) {
                 $fieldfory = 'y_'.$key;
                 $xarray[] = $obj->$fieldfory;
@@ -275,11 +335,6 @@ if ($sql) {
 
 
 print '<div class="customreportsoutput'.($totalnbofrecord?'':' customreportsoutputnotdata').'">';
-
-if ($sql) {
-    // Show admin info
-    print info_admin($langs->trans("SQLUsedForExport").':<br> '.$sql);
-}
 
 
 if ($mode == 'grid') {
@@ -326,6 +381,11 @@ if ($mode == 'graph') {
 
     	print $px1->show($totalnbofrecord ? 0 : $langs->trans("SelectYourGraphOptionsFirst"));
     }
+}
+
+if ($sql) {
+    // Show admin info
+    print '<br>'.info_admin($langs->trans("SQLUsedForExport").':<br> '.$sql);
 }
 
 print '<div>';
