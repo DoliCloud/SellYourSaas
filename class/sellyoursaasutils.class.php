@@ -2803,7 +2803,7 @@ class SellYourSaasUtils
     					        }
     					    }
 
-    					    // Delete draft invoices linked to this thirdparty
+    					    // Delete draft invoices linked to this thirdparty, after a successfull undeploy
     					    if (is_array($object->linkedObjects['facture']))
     					    {
         					    foreach ($object->linkedObjects['facture'] as $idinvoice => $invoicetodelete)
