@@ -683,7 +683,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
             \Stripe\Stripe::setApiKey($stripearrayofkeys['secret_key']);
 
             $setupintent = \Stripe\SetupIntent::retrieve($setupintentid);
-
             if (empty($setupintent->payment_method))        // Example: $setupintent->payment_method = 'pm_...'
             {
                 setEventMessages('Error: The payment_method is empty into the setupintentid', null, 'errors');
@@ -696,6 +695,8 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
         if (! $error)
         {
             $payment_method = \Stripe\PaymentMethod::retrieve($setupintent->payment_method);
+
+            // Note: Here setupintent->customer is defined but $payment_method->customer is not yet. It will be attached later by ->attach
 
             // Ajout
             $companypaymentmode = new CompanyPaymentMode($db);
@@ -717,7 +718,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
             $companypaymentmode->ipaddress       = getUserRemoteIP();
 
             $companypaymentmode->stripe_card_ref = $payment_method->id;
-            $companypaymentmode->stripe_account  = $payment_method->customer.'@'.$stripearrayofkeys['publishable_key'];
+            $companypaymentmode->stripe_account  = $setupintent->customer.'@'.$stripearrayofkeys['publishable_key'];
             $companypaymentmode->status          = $servicestatusstripe;
 
             $companypaymentmode->card_type       = $payment_method->card->brand;
@@ -742,7 +743,8 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                     $stripe = new Stripe($db);
                     $stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
 
-                    // Get the Stripe customer and create if not linked (use default Stripe setup)
+                    // Get the Stripe customer (should have been created already when creating the setupintent)
+                    // Note that we should have already the customer in $setupintent->customer
                     $cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 0);
                     if (! $cu)
                     {
@@ -753,9 +755,11 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                     {
                         dol_syslog('--- Stripe customer retrieved cu = '.$cu->id);
 
-                        // Attach payment_mode from SetupIntent to customer
+                        // Attach payment_method from SetupIntent to customer
                         try {
-                            $payment_method_obj = \Stripe\PaymentMethod::retrieve($payment_method->id);
+                            //$payment_method_obj = \Stripe\PaymentMethod::retrieve($payment_method->id);
+                            $payment_method_obj = $payment_method;
+
                             if (empty($payment_method_obj->customer))
                             {
                                 $result = $payment_method_obj->attach(['customer' => $cu->id]);
@@ -1460,7 +1464,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
     								$sql = "UPDATE " . MAIN_DB_PREFIX . "societe_rib";
     								$sql.= " SET stripe_card_ref = '".$db->escape($card->id)."',";
-    								$sql.= " stripe_account = '".$db->escape($cu.'@'.$stripearrayofkeys['publishable_key'])."',";
+    								$sql.= " stripe_account = '".$db->escape($cu->id.'@'.$stripearrayofkeys['publishable_key'])."',";
     								$sql.= " status = ".((int) $servicestatusstripe).",";
     								$sql.= " card_type = '".$db->escape($card->brand)."',";
     								$sql.= " country_code = '".$db->escape($card->country)."',";
@@ -5448,13 +5452,15 @@ if ($mode == 'registerpaymentmode')
     	    $amounttopayasfirstinvoice = 0;
     	    foreach ($listofcontractid as $contract)
     	    {
-    	        $sellyoursaasutils = new SellYourSaasUtils($db);
+    	        if ($contract->array_options['options_deployment_status'] == 'done') {
+        	        $sellyoursaasutils = new SellYourSaasUtils($db);
 
-    	        $comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
-    	        // First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-    	        $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+        	        $comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
+        	        // First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
+        	        $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
 
-    	        $amounttopayasfirstinvoice += $contract->total_ttc;
+        	        $amounttopayasfirstinvoice += $contract->total_ttc;
+    	        }
     	    }
 
     	    // We are not yet a customer
@@ -5474,6 +5480,9 @@ if ($mode == 'registerpaymentmode')
         	        print '.';
         	    }
         	    print '</small></div>';
+        	    print '<br><br>';
+        	} else {
+        	    print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
         	    print '<br><br>';
         	}
     	}
@@ -5552,12 +5561,24 @@ if ($mode == 'registerpaymentmode')
 		    $stripe = new Stripe($db);
 		    $stripeacc = $stripe->getStripeAccount($service);
 		    $stripecu = null;
-		    $stripecu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatus, 1);
+		    $stripecu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatus, 1); // will use $stripearrayofkeysbyenv to know which env to search into
 
 		    if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION))
 		    {
 		        $setupintent=$stripe->getSetupIntent('Stripe setupintent '.$fulltag, $mythirdpartyaccount, $stripecu, $stripeacc, $servicestatus);
-		        if ($stripe->error) setEventMessages($stripe->error, null, 'errors');
+		        if ($stripe->error) {
+		            setEventMessages($stripe->error, null, 'errors');
+
+		            $emailforerror = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+		            if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+		                && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+		            {
+		                $newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+		                $emailforerror = $conf->global->$newnamekey;
+		            }
+
+		            setEventMessages($langs->trans("ErrorContactEMail", $emailforerror, 'StripeCusNotFound'), null, 'errors');
+		        }
 		    }
 		}
 
