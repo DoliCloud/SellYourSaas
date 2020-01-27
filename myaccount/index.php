@@ -1471,7 +1471,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
     								$sql.= " exp_date_month = '".$db->escape($card->exp_month)."',";
     								$sql.= " exp_date_year = '".$db->escape($card->exp_year)."',";
     								$sql.= " last_four = '".$db->escape($card->last4)."',";
-    								$sql.= " ipaddress = '".getUserRemoteIP()."',";
+    								$sql.= " ipaddress = '".$db->escape(getUserRemoteIP())."',";
     								$sql.= " approved = ".($card->cvc_check == 'pass' ? 1 : 0);
     								$sql.= " WHERE rowid = " . $companypaymentmode->id;
     								$sql.= " AND type = 'card'";
