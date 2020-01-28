@@ -1080,8 +1080,11 @@ class ActionsSellyoursaas
 
     	$file = $parameters['file'];
 
+    	$formatarray = pdf_getFormat();
+    	$format = array($formatarray['width'], $formatarray['height']);
+
     	// Create empty PDF
-    	$pdf=pdf_getInstance();
+    	$pdf=pdf_getInstance($format);
     	if (class_exists('TCPDF'))
     	{
     		$pdf->setPrintHeader(false);
