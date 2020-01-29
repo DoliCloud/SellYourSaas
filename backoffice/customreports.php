@@ -39,13 +39,15 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
-require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 
 // Load traductions files requiredby by page
 $langs->loadLangs(array("companies", "other", "exports", "sellyoursaas@sellyoursaas"));
 
 // Get parameters
 $mode		= GETPOST('mode','alpha') ? GETPOST('mode','alpha') : 'graph';
+
+$objecttype = GETPOST('objecttype', 'alpha');
+if (empty($objecttype)) $objecttype = 'contract';
 
 $search_filters = GETPOST('search_filters', 'array');
 $search_measures = GETPOST('search_measures', 'array');
@@ -69,7 +71,23 @@ if ($user->societe_id > 0)
 	//accessforbidden();
 }
 
-$object = new Contrat($db);
+if ($objecttype == 'contract') {
+    require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
+    $object = new Contrat($db);
+}
+elseif ($objecttype == 'invoice') {
+    require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
+    $object = new Facture($db);
+}
+elseif ($objecttype == 'invoice_template') {
+    require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture-rec.class.php");
+    $object = new FactureRec($db);
+}
+else {
+    dol_print_error('', 'Bad value for objecttype');
+    exit;
+}
+
 $extrafields = new ExtraFields($db);
 
 // Fetch optionals attributes and labels
@@ -134,6 +152,14 @@ print '<form method="post" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
 print '<div class="liste_titre liste_titre_bydiv centpercent">';
+// Select object
+print '<div class="divsearchfield">';
+$arrayoftype = array('contract' => 'Contract', 'invoice' => 'Invoice', 'invoice_template'=>'InvoiceRec');
+print $langs->trans("Object").' ';
+print $form->selectarray('objecttype', $arrayoftype, $objecttype, 0, 0, 0, '', 1);
+print '</div><div class="clearboth"></div>';
+
+
 // Add Filter
 print '<div class="divsearchfield">';
 print $langs->trans("Filters").' ';
@@ -141,7 +167,7 @@ print $form->searchComponent(array($object->element => $object->fields), $search
 print '</div>';
 print '<div class="divsearchfield clearboth">';
 foreach($object->fields as $key => $val) {
-    if ($val['measure']) $arrayofmesures['t.'.$key] = $val['label'];
+    if ($val['isameasure']) $arrayofmesures['t.'.$key] = $val['label'];
 }
 // Add measure from extrafields
 if ($object->isextrafieldmanaged) {
@@ -156,7 +182,7 @@ print '</div>';
 print '<div class="divsearchfield">';
 foreach($object->fields as $key => $val) {
     if (! $val['measure']) {
-        if (in_array($key, array('id', 'rowid', 'entity', 'last_main_doc', 'extraparams'))) continue;
+        if (in_array($key, array('id', 'ref_int', 'ref_ext', 'rowid', 'entity', 'last_main_doc', 'extraparams'))) continue;
         if (preg_match('/^fk_/', $key)) continue;
         if (in_array($val['type'], array('html', 'text'))) continue;
         if (in_array($val['type'], array('timestamp', 'date', 'datetime'))) {
