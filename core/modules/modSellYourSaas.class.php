@@ -582,7 +582,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('separatorproductend',                   "Other",'separate',   199,     '',  'product', 0, 1,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Thirdparty
-		$resultx=$extrafields->addExtraField('separatorthirdparty',       "SELLYOURSAAS_NAME", 'separate',  100,    '','thirdparty', 0, 1,   '',    '1', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('separatorthirdparty',       "SELLYOURSAAS_NAME", 'separate',  100,    '','thirdparty', 0, 0,   '',    '1', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$arrayoptions=array(
 		    'no'=>'No',
 		    //'yesv1'=>'Yes (v1)',
@@ -603,10 +603,10 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('commission',                      "PartnerCommission",      'int',195,   '3', 'thirdparty', 0, 0, '', $param, 1, '',  1, 'If checked, the batch SellYourSaasValidateDraftInvoices will never validate invoices of this customer', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('stripeaccount',                       "StripeAccount",  'varchar',197, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 'Example: pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567');
 		$resultx=$extrafields->addExtraField('maxnbofinstances',                 "MaxNbOfInstances",      'int',198,   '3', 'thirdparty', 0, 0, '4',    '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('separatorthirdpartyend',                      "Other", 'separate',199,    '', 'thirdparty', 0, 1, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('separatorthirdpartyend',                      "Other", 'separate',199,    '', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Contract
-		$resultx=$extrafields->addExtraField('separatorcontract',               "SELLYOURSAAS_NAME", 'separate', 100,    '',    'contrat', 0, 1,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('separatorcontract',               "SELLYOURSAAS_NAME", 'separate', 100,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('plan',                                         "Plan",  'varchar', 102,  '64',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed'));
 		$resultx=$extrafields->addExtraField('deployment_init_adminpass',  "DeploymentInitPassword",  'varchar', 103,  '64',    'contrat', 0, 0,    '',      '', 1, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
@@ -643,7 +643,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('spammer',                                              "EvilUser", 'varchar', 152,  '8',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Invoice
-		$resultx=$extrafields->addExtraField('separatorinvoice',        "SELLYOURSAAS_NAME", 'separate', 10,    '', 'facture', 0, 1, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('separatorinvoice',        "SELLYOURSAAS_NAME", 'separate', 10,    '', 'facture', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('commission',"PartnerCommissionForThisInvoice",      'int', 20,   '3', 'facture', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('Societe:societe/class/societe.class.php'=>null));
 		$resultx=$extrafields->addExtraField('reseller',                         "Reseller",     'link', 30,   '3', 'facture', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
