@@ -41,7 +41,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("companies", "other", "exports", "sellyoursaas@sellyoursaas"));
+$langs->loadLangs(array("companies", "contracts", "bills", "other", "exports", "sellyoursaas@sellyoursaas"));
 
 // Get parameters
 $mode		= GETPOST('mode','alpha') ? GETPOST('mode','alpha') : 'graph';
@@ -152,33 +152,39 @@ print '<form method="post" action="'.$_SERVER['PHP_SELF'].'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
 print '<div class="liste_titre liste_titre_bydiv centpercent">';
+
 // Select object
 print '<div class="divsearchfield">';
-$arrayoftype = array('contract' => 'Contract', 'invoice' => 'Invoice', 'invoice_template'=>'InvoiceRec');
-print $langs->trans("Object").' ';
+$arrayoftype = array('contract' => 'Contracts', 'invoice' => 'Invoices', 'invoice_template'=>'PredefinedInvoices');
+print '<div class="width150 inline-block">'.$langs->trans("Object").'</div> ';
 print $form->selectarray('objecttype', $arrayoftype, $objecttype, 0, 0, 0, '', 1);
 print '</div><div class="clearboth"></div>';
 
 
 // Add Filter
-print '<div class="divsearchfield">';
-print $langs->trans("Filters").' ';
+print '<div class="divsearchfield quatrevingtpercent">';
 print $form->searchComponent(array($object->element => $object->fields), $search_component_params);
 print '</div>';
 print '<div class="divsearchfield clearboth">';
 foreach($object->fields as $key => $val) {
-    if ($val['isameasure']) $arrayofmesures['t.'.$key] = $val['label'];
+    if ($val['isameasure']) {
+        $arrayofmesures['t.'.$key.'-sum'] = $val['label'].' <span class="opacitymedium">('.$langs->trans("Sum").')</span>';
+        $arrayofmesures['t.'.$key.'-average'] = $val['label'].' <span class="opacitymedium">(('.$langs->trans("Average").')</span>';
+    }
 }
 // Add measure from extrafields
 if ($object->isextrafieldmanaged) {
     foreach($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
         if (! empty($extrafields->attributes[$object->table_element]['totalizable'][$key])) {
-            $arrayofmesures['te.'.$key] = $extrafields->attributes[$object->table_element]['label'][$key];
+            $arrayofmesures['te.'.$key.'-sum'] = $langs->trans($extrafields->attributes[$object->table_element]['label'][$key]).' <span class="opacitymedium">('.$langs->trans("Sum").')</span>';
+            $arrayofmesures['te.'.$key.'-average'] = $langs->trans($extrafields->attributes[$object->table_element]['label'][$key]).' <span class="opacitymedium">('.$langs->trans("Average").')</span>';
         }
     }
 }
-print $langs->trans("Measures").' '.$form->multiselectarray('search_measures', $arrayofmesures, $search_measures, 0, 0, 'minwidth150', 1);
+print '<div class="inline-block opacitymedium"><span class="fas fa-chart-line paddingright" title="Filter"></span>'.$langs->trans("Measures").'</div> ';
+print $form->multiselectarray('search_measures', $arrayofmesures, $search_measures, 0, 0, 'minwidth500', 1);
 print '</div>';
+// Measures
 print '<div class="divsearchfield">';
 foreach($object->fields as $key => $val) {
     if (! $val['measure']) {
@@ -207,7 +213,8 @@ $arrayofxaxislabel = array();
 foreach($arrayofxaxis as $key => $val) {
     $arrayofxaxislabel[$key] = $val['label'];
 }
-print $langs->trans("XAxis").' '.$form->multiselectarray('search_xaxis', $arrayofxaxislabel, $search_xaxis, 0, 0, 'minwidth100', 1);
+print '<div class="inline-block opacitymedium"><span class="fas fa-long-arrow-alt-right paddingright" title="Filter"></span>'.$langs->trans("XAxis").'</div> ';
+print $form->multiselectarray('search_xaxis', $arrayofxaxislabel, $search_xaxis, 0, 0, 'minwidth500', 1);
 print '</div>';
 
 if ($mode == 'grid') {
@@ -239,14 +246,16 @@ if ($mode == 'grid') {
     foreach($arrayofyaxis as $key => $val) {
         $arrayofyaxislabel[$key] = $val['label'];
     }
-    print $langs->trans("YAxis").' '.$form->multiselectarray('search_yaxis', $arrayofyaxislabel, $search_yaxis, 0, 0, 'minwidth100', 1);
+    print '<div class="inline-block opacitymedium"><span class="fas fa-sort-numeric-up-alt paddingright" title="Filter"></span>'.$langs->trans("YAxis").'</div> ';
+    print $form->multiselectarray('search_yaxis', $arrayofyaxislabel, $search_yaxis, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
 
 if ($mode == 'graph') {
     print '<div class="divsearchfield">';
     $arrayofgraphs = array('line', 'bars'); // also 'pies'
-    print $langs->trans("Graph").' '.$form->selectarray('search_graph', $arrayofgraphs, $search_graph, 0, 0, 'minwidth100', 1);
+    print '<div class="inline-block opacitymedium"><span class="fas fa-chart-area paddingright" title="Filter"></span>'.$langs->trans("Graph").'</div> ';
+    print $form->selectarray('search_graph', $arrayofgraphs, $search_graph, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
 print '<div class="divsearchfield">';
@@ -278,7 +287,14 @@ if (! empty($search_measures) && ! empty($search_xaxis))
     }
     foreach($search_measures as $key => $val) {
         if ($val == 't.count') $sql .= 'COUNT(t.'.$fieldid.') as y_'.$key.', ';
-        else $sql .= 'SUM('.$db->ifsql($val.' IS NULL', '0', $val).') as y_'.$key.', ';
+        elseif (preg_match('/\-sum$/', $val)) {
+            $tmpval  = preg_replace('/\-sum$/', '', $val);
+            $sql .= 'SUM('.$db->ifsql($tmpval.' IS NULL', '0', $tmpval).') as y_'.$key.', ';
+        }
+        elseif (preg_match('/\-average$/', $val)) {
+            $tmpval  = preg_replace('/\-average$/', '', $val);
+            $sql .= 'AVG('.$db->ifsql($tmpval.' IS NULL', '0', $tmpval).') as y_'.$key.', ';
+        }
     }
     $sql = preg_replace('/,\s*$/', '', $sql);
     $sql .= ' FROM '.MAIN_DB_PREFIX.$object->table_element.' as t';
