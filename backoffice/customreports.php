@@ -71,7 +71,11 @@ if ($user->societe_id > 0)
 	//accessforbidden();
 }
 
-if ($objecttype == 'contract') {
+if ($objecttype == 'thirdparty') {
+    require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
+    $object = new Societe($db);
+}
+elseif ($objecttype == 'contract') {
     require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
     $object = new Contrat($db);
 }
@@ -83,8 +87,20 @@ elseif ($objecttype == 'invoice_template') {
     require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture-rec.class.php");
     $object = new FactureRec($db);
 }
+elseif ($objecttype == 'bom') {
+    require_once(DOL_DOCUMENT_ROOT."/bom/class/bom.class.php");
+    $object = new Bom($db);
+}
+elseif ($objecttype == 'mo') {
+    require_once(DOL_DOCUMENT_ROOT."/mrp/class/mo.class.php");
+    $object = new Mo($db);
+}
+elseif ($objecttype == 'ticket') {
+    require_once(DOL_DOCUMENT_ROOT."/ticket/class/ticket.class.php");
+    $object = new Ticket($db);
+}
 else {
-    dol_print_error('', 'Bad value for objecttype');
+    dol_print_error('', 'Bad value for objecttype '.$objecttype);
     exit;
 }
 
@@ -154,22 +170,32 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 print '<div class="liste_titre liste_titre_bydiv centpercent">';
 
 // Select object
-print '<div class="divsearchfield">';
-$arrayoftype = array('contract' => 'Contracts', 'invoice' => 'Invoices', 'invoice_template'=>'PredefinedInvoices');
-print '<div class="width150 inline-block">'.$langs->trans("Object").'</div> ';
-print $form->selectarray('objecttype', $arrayoftype, $objecttype, 0, 0, 0, '', 1);
+print '<div class="divadvancedsearchfield center floatnone">';
+$arrayoftype = array(
+    'thirdparty' => 'ThirdParties',
+    'contract' => 'Contracts',
+    'invoice' => 'Invoices',
+    'invoice_template'=>'PredefinedInvoices',
+    'bom' => 'BOM',
+    'mo' => 'MO',
+    'ticket' => 'Ticket',
+);
+print '<div class="inline-block"><span class="opacitymedium">'.$langs->trans("StatisticsOn").'</span></div> ';
+print $form->selectarray('objecttype', $arrayoftype, $objecttype, 0, 0, 0, '', 1, 0, 0, '', '', 1);
 print '</div><div class="clearboth"></div>';
 
 
 // Add Filter
-print '<div class="divsearchfield quatrevingtpercent">';
+print '<div class="divadvancedsearchfield quatrevingtpercent">';
 print $form->searchComponent(array($object->element => $object->fields), $search_component_params);
 print '</div>';
-print '<div class="divsearchfield clearboth">';
+
+// Measures
+print '<div class="divadvancedsearchfield clearboth">';
 foreach($object->fields as $key => $val) {
     if ($val['isameasure']) {
-        $arrayofmesures['t.'.$key.'-sum'] = $val['label'].' <span class="opacitymedium">('.$langs->trans("Sum").')</span>';
-        $arrayofmesures['t.'.$key.'-average'] = $val['label'].' <span class="opacitymedium">(('.$langs->trans("Average").')</span>';
+        $arrayofmesures['t.'.$key.'-sum'] = $langs->trans($val['label']).' <span class="opacitymedium">('.$langs->trans("Sum").')</span>';
+        $arrayofmesures['t.'.$key.'-average'] = $langs->trans($val['label']).' <span class="opacitymedium">('.$langs->trans("Average").')</span>';
     }
 }
 // Add measure from extrafields
@@ -181,14 +207,16 @@ if ($object->isextrafieldmanaged) {
         }
     }
 }
-print '<div class="inline-block opacitymedium"><span class="fas fa-chart-line paddingright" title="Filter"></span>'.$langs->trans("Measures").'</div> ';
+print '<div class="inline-block opacitymedium"><span class="fas fa-chart-line paddingright" title="'.$langs->trans("Measures").'"></span>'.$langs->trans("Measures").'</div> ';
 print $form->multiselectarray('search_measures', $arrayofmesures, $search_measures, 0, 0, 'minwidth500', 1);
 print '</div>';
-// Measures
-print '<div class="divsearchfield">';
+
+// XAxis
+print '<div class="divadvancedsearchfield">';
 foreach($object->fields as $key => $val) {
     if (! $val['measure']) {
         if (in_array($key, array('id', 'ref_int', 'ref_ext', 'rowid', 'entity', 'last_main_doc', 'extraparams'))) continue;
+        if (isset($val['enabled']) && ! dol_eval($val['enabled'], 1)) continue;
         if (preg_match('/^fk_/', $key)) continue;
         if (in_array($val['type'], array('html', 'text'))) continue;
         if (in_array($val['type'], array('timestamp', 'date', 'datetime'))) {
@@ -213,12 +241,13 @@ $arrayofxaxislabel = array();
 foreach($arrayofxaxis as $key => $val) {
     $arrayofxaxislabel[$key] = $val['label'];
 }
-print '<div class="inline-block opacitymedium"><span class="fas fa-long-arrow-alt-right paddingright" title="Filter"></span>'.$langs->trans("XAxis").'</div> ';
+print '<div class="inline-block opacitymedium"><span class="fas fa-ruler-horizontal paddingright" title="'.$langs->trans("XAxis").'"></span>'.$langs->trans("XAxis").'</div> ';
 print $form->multiselectarray('search_xaxis', $arrayofxaxislabel, $search_xaxis, 0, 0, 'minwidth500', 1);
 print '</div>';
 
+// YAxis
 if ($mode == 'grid') {
-    print '<div class="divsearchfield">';
+    print '<div class="divadvancedsearchfield">';
     foreach($object->fields as $key => $val) {
         if (! $val['measure']) {
             if (in_array($key, array('id', 'rowid', 'entity', 'last_main_doc', 'extraparams'))) continue;
@@ -246,19 +275,19 @@ if ($mode == 'grid') {
     foreach($arrayofyaxis as $key => $val) {
         $arrayofyaxislabel[$key] = $val['label'];
     }
-    print '<div class="inline-block opacitymedium"><span class="fas fa-sort-numeric-up-alt paddingright" title="Filter"></span>'.$langs->trans("YAxis").'</div> ';
+    print '<div class="inline-block opacitymedium"><span class="fas fa-ruler-vertical paddingright" title="'.$langs->trans("YAxis").'"></span>'.$langs->trans("YAxis").'</div> ';
     print $form->multiselectarray('search_yaxis', $arrayofyaxislabel, $search_yaxis, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
 
 if ($mode == 'graph') {
-    print '<div class="divsearchfield">';
+    print '<div class="divadvancedsearchfield">';
     $arrayofgraphs = array('line', 'bars'); // also 'pies'
-    print '<div class="inline-block opacitymedium"><span class="fas fa-chart-area paddingright" title="Filter"></span>'.$langs->trans("Graph").'</div> ';
+    print '<div class="inline-block opacitymedium"><span class="fas fa-chart-area paddingright" title="'.$langs->trans("Graph").'"></span>'.$langs->trans("Graph").'</div> ';
     print $form->selectarray('search_graph', $arrayofgraphs, $search_graph, 0, 0, 'minwidth100', 1);
     print '</div>';
 }
-print '<div class="divsearchfield">';
+print '<div class="divadvancedsearchfield">';
 print '<input type="submit" class="button" value="'.$langs->trans("Refresh").'">';
 print '</div>';
 print '</div>';
@@ -281,7 +310,7 @@ if (! empty($search_measures) && ! empty($search_xaxis))
             $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m') as x_".$key.', ';
         } elseif (preg_match('/\-day$/', $val)) {
             $tmpval = preg_replace('/\-day$/', '', $val);
-            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%f') as x_".$key.', ';
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%d') as x_".$key.', ';
         }
         else $sql .= $val.' as x_'.$key.', ';
     }
@@ -311,13 +340,13 @@ if (! empty($search_measures) && ! empty($search_xaxis))
     foreach($search_xaxis as $key => $val) {
         if (preg_match('/\-year$/', $val)) {
             $tmpval = preg_replace('/\-year$/', '', $val);
-            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y')";
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y'), ";
         } elseif (preg_match('/\-month$/', $val)) {
             $tmpval = preg_replace('/\-month$/', '', $val);
-            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m')";
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m'), ";
         } elseif (preg_match('/\-day$/', $val)) {
             $tmpval = preg_replace('/\-day$/', '', $val);
-            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%f')";
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%d'), ";
         }
         else $sql .= $val.', ';
     }
@@ -332,7 +361,7 @@ if (! empty($search_measures) && ! empty($search_xaxis))
             $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m'), ";
         } elseif (preg_match('/\-day$/', $val)) {
             $tmpval = preg_replace('/\-day$/', '', $val);
-            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%f'), ";
+            $sql .= 'DATE_FORMAT('.$tmpval.", '%Y-%m-%d'), ";
         }
         else $sql .= $val.', ';
     }
@@ -363,7 +392,7 @@ if ($sql) {
             if (! empty($object->fields[$xvalwithoutprefix]['arrayofkeyval'])) {
                 $xlabel = $object->fields[$xvalwithoutprefix]['arrayofkeyval'][$obj->$fieldforxkey];
             }
-            $xarray = array(0 => ($xlabel ? dol_trunc($xlabel, 20, 'middle') : $langs->trans("NotDefined")));
+            $xarray = array(0 => (($xlabel || $xlabel == '0') ? dol_trunc($xlabel, 20, 'middle') : $langs->trans("NotDefined")));
             foreach($search_measures as $key => $val) {
                 $fieldfory = 'y_'.$key;
                 $xarray[] = $obj->$fieldfory;
