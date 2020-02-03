@@ -228,6 +228,9 @@ Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix
 To test DKIM, send an email to  check-auth@verifier.port25.com, you will receive a response with success or failure.
 To test SPF + DKIM + spam analysis of an email,  send an email to email suggested by  https://www.mail-tester.com
 
+Setup of domains to protect are into */etc/opendkim/*
+
+Note: SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @myserver.mysellyoursaasmydomain.com
 
 
 === Configuration du nom de domain
@@ -240,11 +243,13 @@ Modifier son enregistrement de domaine, pour ajouter SPF et DKIM et DMARC
 
 * DKIM permet de signer certaines informations du mail.
 
- dkim._domainkey.mysaasdomainname.com. 1000 IN	TXT	"v=DKIM1\; k=rsa\; t=y\; p=MIGfMA0GCSrGSIb3DQEBAQUAA4GNADCBiQKBgQC6xSkwtlnAkegCARg5US7KHdoTlUS2MsXFPMy7ykwG88XK8vKEYPGuN56/6+YoxGLxtN2CZy/MVagQUOYcA3VAjBEPP5vJPrUnDsVY0OC8U+dK383g+DDW0tcAqrMXJI7Y/jXUJXh/ydI5aloiqT59JGo9Ane1C3XmoJz3bkVsKwIDAQAB"
+ dkim._domainkey.mysaasdomainname.com. 1000 IN	TXT	"v=DKIM1; k=rsa; p=MIGfMA0GCSrGSIb3DQEBAQUAA4GNADCBiQKBgQC6xSkwtlnAkegCARg5US7KHdoTlUS2MsXFPMy7ykwG88XK8vKEYPGuN56/6+YoxGLxtN2CZy/MVagQUOYcA3VAjBEPP5vJPrUnDsVY0OC8U+dK383g+DDW0tcAqrMXJI7Y/jXUJXh/ydI5aloiqT59JGo9Ane1C3XmoJz3bkVsKwIDAQAB"
+
+Attention, certains hébergeurs DNS comme OVH n'accepte que des clés de 1024 et pas plus à la saisie via leur interface d'administration DNS.
 
 * DMARC permet d'indiquer que le domaine est protégé par SPF et/ou DKIM
 
- _dmarc.mysaasdomainname.com	 v=DMARC1; p=none
+ _dmarc.mysaasdomainname.com	 "v=DMARC1; p=none; rua=mailto:supervision@mysaasdomainname.com; ruf=mailto:supervision@mysaasdomainname.com; fo=1;"
 
 
 === Configuration de postfix

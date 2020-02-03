@@ -18,7 +18,6 @@ Laurent Destailleur
 Ce document décrit les spécifications techniques pour la mise en oeuvre de SellYourSaas - système de déploiement et vente automatisé en SaaS d'une application WAMP (Dolibarr ERP CRM, GLPI, ...).
 
 
-
 <<<<
 
 == Introduction ==
@@ -2220,7 +2219,7 @@ fi
 
 - Déclarer l'IP pour l'envoi d'emails:
   - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
-  - Ajouter les IPs du nouveau serveur dans l'entrée SPF du DNS.
+  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @myserver.mysellyoursaasmydomain.com).
 
 - Créer un compte *sellyoursaas* et permissions au serveur de déploiement sur la base de donnée du *Master*. Voir <<creer_un_compte_db_sellyoursaas>>.
 
