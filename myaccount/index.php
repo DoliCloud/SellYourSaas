@@ -4126,7 +4126,7 @@ if ($mode == 'instances')
 					                    '.$langs->trans("PleaseBeSure", $contract->ref_customer).'
 					                </p>
 									<p class="center" style="padding-bottom: 15px">
-										<input type="text" required="required" class="center urlofinstancetodestroy" name="urlofinstancetodestroy" value="'.GETPOST('urlofinstancetodestroy','alpha').'" placeholder="" autofocus>
+										<input type="text" required="required" class="urlofinstancetodestroy" name="urlofinstancetodestroy" value="'.GETPOST('urlofinstancetodestroy','alpha').'" placeholder="'.$langs->trans("NameOfInstanceToDestroy").'" autofocus>
 									</p>';
 								}
 								print '
@@ -7130,7 +7130,7 @@ if ($mode == 'myaccount')
 					                    print '
 						                </p>
 										<p class="center" style="padding-bottom: 15px">
-											<input type="text" class="center urlofinstancetodestroy" name="accounttodestroy" value="'.GETPOST('accounttodestroy','alpha').'" placeholder="">
+											<input type="text" class="urlofinstancetodestroy" name="accounttodestroy" value="'.GETPOST('accounttodestroy','alpha').'" placeholder="'.$langs->trans("NameOfInstanceToDestroy").'" autofocus>
 										</p>
 										<p class="center">
 											<input type="hidden" name="mode" value="myaccount"/>

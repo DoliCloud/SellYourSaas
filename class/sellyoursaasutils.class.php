@@ -731,9 +731,10 @@ class SellYourSaasUtils
      * Loop on invoice for customer with default payment mode Stripe and take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
      * CAN BE A CRON TASK
      *
-     * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+     * @param	int		    $maxnbofinvoicetotry      Max number of payment to do (0 = No max)
+     * @return	int			                         0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
      */
-    public function doTakePaymentStripe()
+     public function doTakePaymentStripe($maxnbofinvoicetotry = 0)
     {
     	global $conf, $langs, $mysoc;
 
@@ -824,6 +825,10 @@ class SellYourSaasUtils
     			}
 
     			$i++;
+
+    			if ($maxnbofinvoicetotry && $i >= $maxnbofinvoicetotry) {
+    			    break;
+    			}
     		}
     	}
     	else
@@ -961,7 +966,7 @@ class SellYourSaasUtils
 
 			$invoice->fetch_thirdparty();
 
-			dol_syslog("--- Process invoice thirdparty_id=".$thirdparty_id.", thirdparty_name=".$invoice->thirdparty->name." id=".$invoice->id.", ref=".$invoice->ref.", datef=".dol_print_date($invoice->date, 'dayhour'), LOG_DEBUG);
+			dol_syslog("--- Process invoice thirdparty_id=".$thirdparty_id.", thirdparty_name=".$invoice->thirdparty->name." id=".$invoice->id.", ref=".$invoice->ref.", datef=".dol_print_date($invoice->date, 'dayhourlog'), LOG_DEBUG);
 
 			$alreadypayed = $invoice->getSommePaiement();
     		$amount_credit_notes_included = $invoice->getSumCreditNotesUsed();
@@ -1061,7 +1066,7 @@ class SellYourSaasUtils
 							$this->errors[]=$errmsg;
 						}
 						elseif (! empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
-						    $errmsg='Payment try was canceled (invoice is qualified by the automatic payment was delayed after the '.dol_print_date($invoice->array_options['options_delayautopayment'], 'day').')';
+						    $errmsg='Payment try was canceled (invoice qualified by the automatic payment was delayed after the '.dol_print_date($invoice->array_options['options_delayautopayment'], 'day').')';
 						    dol_syslog($errmsg, LOG_DEBUG);
 
 						    $error++;
@@ -1165,7 +1170,7 @@ class SellYourSaasUtils
 
 	    							$error++;
 	    							$errorforinvoice++;
-	    							$errmsg='Failed to charge card ('.$stripearrayofkeys['publishable_key'].')';
+	    							$errmsg=$langs->trans("FailedtoChargeCard");
 	    							if (! empty($charge))
 	    							{
 	    							    if ($stripefailuredeclinecode == 'authentication_required')
@@ -1173,7 +1178,7 @@ class SellYourSaasUtils
 	    							        $errauthenticationmessage=$langs->trans("ErrSCAAuthentication");
 	    							        $errmsg=$errauthenticationmessage;
 	    							    }
-	    							    elseif ($stripefailuredeclinecode == 'insufficient_funds')
+	    							    elseif (in_array($stripefailuredeclinecode, array('insufficient_funds', 'generic_decline')))
 	    							    {
 	    							        $errmsg.=': '.$charge->failure_code;
 	    							        $errmsg.=($charge->failure_message?' - ':'').' '.$charge->failure_message;
@@ -1195,7 +1200,7 @@ class SellYourSaasUtils
 	    							}
 
 	    							$description='Stripe payment ERROR from doTakePaymentStripeForThirdparty: '.$FULLTAG;
-	    							$postactionmessages[]=$errmsg;
+	    							$postactionmessages[]=$errmsg.' ('.$stripearrayofkeys['publishable_key'].')';
 	    							$this->errors[]=$errmsg;
 	    						}
 	    						else
@@ -1691,7 +1696,7 @@ class SellYourSaasUtils
     				// Test if there is pending invoice
     				$object->fetchObjectLinked();
 
-    				dol_syslog('Search if there is at least on open invoice', LOG_DEBUG);
+    				dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
     				if (is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0)
     				{
     					usort($object->linkedObjects['facture'], "cmp");
@@ -1717,7 +1722,7 @@ class SellYourSaasUtils
 
     				if ($expirationdate && $expirationdate < $enddatetoscan)
     				{
-    				    dol_syslog("Define the newdate of end of services from expirationdate=".$expirationdate);
+    				    dol_syslog("Define the newdate of end of services from expirationdate=".$expirationdate.' ('.dol_print_date($expirationdate, 'dayhourlog').')');
     				    $newdate = $expirationdate;
     					$protecti=0;	//$protecti is to avoid infinite loop
     					while ($newdate < $enddatetoscan && $protecti < 1000)
@@ -1729,7 +1734,7 @@ class SellYourSaasUtils
     					if ($protecti < 1000)	// If not, there is a pb
     					{
     						// We will update the end of date of contrat, so first we refresh contract data
-    						dol_syslog("We update qty of resources by a remote action refresh.");
+    					    dol_syslog("We update qty of resources by a remote action refresh on ".$object->ref);
 
     						$this->db->begin();
 
@@ -3557,7 +3562,7 @@ class SellYourSaasUtils
     					if (! $dbinstance || ! $dbinstance->connected)
     					{
     						$error++;
-    						$this->error = $dbinstance->error;
+    						$this->error = $dbinstance->error.' ('.$generateddbusername.'@'.$generateddbhostname.'/'.$generateddbname.')';
     						$this->errors = $dbinstance->errors;
     					}
     					else
