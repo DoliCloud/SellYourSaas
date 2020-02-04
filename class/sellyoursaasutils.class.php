@@ -852,16 +852,16 @@ class SellYourSaasUtils
      * doTakePaymentStripeForThirdparty
      * Take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
      *
-     * @param	int		$service					'StripeTest' or 'StripeLive'
-     * @param	int		$servicestatus				Service 0 or 1
-     * @param	int		$thirdparty_id				Thirdparty id
-     * @param	int		$companypaymentmode			Company payment mode id
-     * @param	int		$invoice					null=All invoices of thirdparty, Invoice=Only this invoice
-     * @param	int		$includedraft				Include draft invoices
-     * @param	int		$noemailtocustomeriferror	1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
-     * @param	int		$nocancelifpaymenterror		1=Do not cancel payment if there is a recent payment error AC_PAYMENT_STRIPE_KO (used to charge from user console)
-     * @param   int     $calledinmyaccountcontext   1=The payment is called in a myaccount GUI context. So we can ignore control on delayed payments.
-     * @return	int									0 if no error, >0 if error
+     * @param	int		             $service					'StripeTest' or 'StripeLive'
+     * @param	int		             $servicestatus				Service 0 or 1
+     * @param	int		             $thirdparty_id				Thirdparty id
+     * @param	CompanyPaymentMode	 $companypaymentmode		Company payment mode id
+     * @param	int		             $invoice					null=All invoices of thirdparty, Invoice=Only this invoice
+     * @param	int		             $includedraft				Include draft invoices
+     * @param	int		             $noemailtocustomeriferror	1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
+     * @param	int		             $nocancelifpaymenterror	1=Do not cancel payment if there is a recent payment error AC_PAYMENT_STRIPE_KO (used to charge from user console)
+     * @param   int                  $calledinmyaccountcontext  1=The payment is called in a myaccount GUI context. So we can ignore control on delayed payments.
+     * @return	int					                 			0 if no error, >0 if error
      */
     function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice=null, $includedraft=0, $noemailtocustomeriferror=0, $nocancelifpaymenterror=0, $calledinmyaccountcontext=0)
     {
@@ -871,7 +871,7 @@ class SellYourSaasUtils
 
     	$langs->load("agenda");
 
-    	dol_syslog("doTakePaymentStripeForThirdparty service=".$service." servicestatus=".$servicestatus." thirdparty_id=".$thirdparty_id);
+    	dol_syslog("doTakePaymentStripeForThirdparty service=".$service." servicestatus=".$servicestatus." thirdparty_id=".$thirdparty_id." companypaymentmode=".$companypaymentmode->id);
 
     	$this->stripechargedone = 0;
     	$this->stripechargeerror = 0;
@@ -995,29 +995,40 @@ class SellYourSaasUtils
     				dol_syslog("Current Stripe environment is ".$stripearrayofkeysbyenv[$servicestatus]['publishable_key']);
     				dol_syslog("Current Saved Stripe environment is ".$savstripearrayofkeysbyenv[$servicestatus]['publishable_key']);
 
+    				$foundalternativestripeaccount = '';
+
     				// Force stripe to another value (by default this value is empty)
     				if (! empty($thirdparty->array_options['options_stripeaccount']))
     				{
     				    dol_syslog("The thirdparty id=".$thirdparty->id." has a dedicated Stripe Account, so we switch to it.");
-    				    $tmparray = explode(':', $thirdparty->array_options['options_stripeaccount']);
-    				    if (! empty($tmparray[3]))
-    				    {
-    				        $stripearrayofkeysbyenv = array(
-        				        0=>array(
-        				            "publishable_key" => $tmparray[0],
-        				            "secret_key"      => $tmparray[1]
-        				        ),
-        				        1=>array(
-        				            "publishable_key" => $tmparray[2],
-        				            "secret_key"      => $tmparray[3]
-        				        )
-        				    );
 
-       				        $stripearrayofkeys = $stripearrayofkeysbyenv[$servicestatus];
-        				    \Stripe\Stripe::setApiKey($stripearrayofkeys['secret_key']);
-        				    dol_syslog("We use now ".$stripearrayofkeys['publishable_key'], LOG_DEBUG);
+    				    $tmparray = explode('@', $thirdparty->array_options['options_stripeaccount']);
+    				    if (! empty($tmparray[1]))
+    				    {
+        				    $tmparray2 = explode(':', $tmparray[1]);
+        				    if (! empty($tmparray2[3]))
+        				    {
+        				        $stripearrayofkeysbyenv = array(
+            				        0=>array(
+            				            "publishable_key" => $tmparray2[0],
+            				            "secret_key"      => $tmparray2[1]
+            				        ),
+            				        1=>array(
+            				            "publishable_key" => $tmparray2[2],
+            				            "secret_key"      => $tmparray2[3]
+            				        )
+            				    );
+
+           				        $stripearrayofkeys = $stripearrayofkeysbyenv[$servicestatus];
+            				    \Stripe\Stripe::setApiKey($stripearrayofkeys['secret_key']);
+
+            				    $foundalternativestripeaccount = $tmparray[0];    // Store the customer id
+
+            				    dol_syslog("We use now customer=".$foundalternativestripeaccount." publishable_key=".$stripearrayofkeys['publishable_key'], LOG_DEBUG);
+        				    }
     				    }
-    				    else
+
+    				    if (! $foundalternativestripeaccount)
     				    {
     				        $stripearrayofkeysbyenv = $savstripearrayofkeysbyenv;
 
@@ -1036,11 +1047,19 @@ class SellYourSaasUtils
 
     				$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no network access here)
 
-    				$customer = $stripe->customerStripe($thirdparty, $stripeacc, $servicestatus, 0);
-    				if (empty($customer) && ! empty($stripe->error))
-					{
-						$this->errors[] = $stripe->error;
-					}
+    				if ($foundalternativestripeaccount) {
+    				    if (empty($stripeacc)) {				// If the Stripe connect account not set, we use common API usage
+    				        $customer = \Stripe\Customer::retrieve("$foundalternativestripeaccount");
+    				    } else {
+    				        $customer = \Stripe\Customer::retrieve("$foundalternativestripeaccount", array("stripe_account" => $stripeacc));
+    				    }
+    				} else {
+        				$customer = $stripe->customerStripe($thirdparty, $stripeacc, $servicestatus, 0);
+        				if (empty($customer) && ! empty($stripe->error))
+    					{
+    						$this->errors[] = $stripe->error;
+    					}
+    				}
 
     				$nbhoursbetweentries    = (empty($conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES) ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
     				$nbdaysbeforeendoftries = (empty($conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES) ? 35 : $conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES);

@@ -598,7 +598,7 @@ class ActionsSellyoursaas
 
             include_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
             $companypaymentmode = new CompanyPaymentMode($db);
-            $companypaymentmode->fetch(GETPOST('companymodeid','int'));
+            $companypaymentmode->fetch(GETPOST('companymodeid','int'));     // Read into llx_societe_rib
 
             if ($companypaymentmode->id > 0)
             {
