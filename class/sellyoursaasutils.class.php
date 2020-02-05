@@ -246,6 +246,9 @@ class SellYourSaasUtils
     	if ($delayindaysshort <= 0 || $delayindayshard <= 0)
     	{
     		$this->error='BadValueForDelayBeforeTrialEndForAlert';
+
+    		$conf->global->SYSLOG_FILE = $savlog;
+
     		return -1;
     	}
     	dol_syslog(__METHOD__." we send email warning on contract that will expire in ".$delayindaysshort." days or before and not yet reminded", LOG_DEBUG, 1);
@@ -448,6 +451,9 @@ class SellYourSaasUtils
     	{
     		$this->error = 'Bad value for parameter day1 and day2. Set param to "1, 20" for example';
     		$error++;
+
+    		$conf->global->SYSLOG_FILE = $savlog;
+
     		return 1;
     	}
 
@@ -470,6 +476,9 @@ class SellYourSaasUtils
 
     	if ($currentday != $day1 && $currentday != $day2) {
     		$this->output = 'Nothing to do. We are not the day '.$day1.', neither the day '.$day2.' of the month';
+
+    		$conf->global->SYSLOG_FILE = $savlog;
+
     		return 0;
     	}
 
@@ -602,6 +611,9 @@ class SellYourSaasUtils
     	{
     		$this->error = 'Bad value for parameter day1 and day2. Set param to "1, 20" for example';
     		$error++;
+
+    		$conf->global->SYSLOG_FILE = $savlog;
+
     		return 1;
     	}
 
@@ -624,6 +636,9 @@ class SellYourSaasUtils
 
     	if ($currentday != $day1 && $currentday != $day2) {
     		$this->output = 'Nothing to do. We are not the day '.$day1.', neither the day '.$day2.' of the month';
+
+    		$conf->global->SYSLOG_FILE = $savlog;
+
     		return 0;
     	}
 
@@ -757,6 +772,9 @@ class SellYourSaasUtils
     	if (empty($conf->stripe->enabled))
     	{
     		$this->error='Error, stripe module not enabled';
+
+    		$conf->global->SYSLOG_FILE = $savlog;
+
     		return 1;
     	}
 
