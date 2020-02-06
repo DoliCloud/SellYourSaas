@@ -1638,6 +1638,7 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   owner @{HOME}/ rwl,
   owner @{HOME}/** rwl,
   owner /mnt/diskhome/home/** rixwlk,
+  /mnt/diskhome/home/osu*/dbn*/*_error.log r,
 }
 ---------------
 
