@@ -274,7 +274,7 @@ FailedToSentTicketPleaseTryLater=Echec de l'envoi de votre ticket. Merci de rée
 SupportURLExternal=Pour ouvrir un ticket de support, suivez les instructions disponibles sur <a href="%s" target="_support">cette page</a>.
 FailedToCreateCardRecord=Echec de la validation de votre carte.
 AlreadyHaveAnAccount=Vous avez déjà un compte?
-LoginAction=Se logguer
+LoginAction=Se connecter
 RecreateAuthorizedKey=Créer fichier authorized_keys
 RecreateLock=Créer fichier lock
 SellYourSaasRemoveLock=Supprimer fichier lock
@@ -296,7 +296,7 @@ YouAreAReseller=Vous êtes un revendeur
 YourURLToCreateNewInstance=Pour avoir de nouveaux utilisateurs liés à votre compte revendeur, il faut utiliser l'URL suivante lors de l'inscription
 YourCommissionsAppearsInMenu=Vos commissions (taux actuel <strong>%s%%</strong>) sont visibles dans le menu %s
 InvoicingSuspended=Facturation suspendue
-LoginWithCustomerAccount=Se logguer avec le compte client
+LoginWithCustomerAccount=Se connecter avec le compte client
 ErrorYouDontOwnTheInstanceYouTryToDelete=Erreur, vous ne possédez pas l'instance <strong>%s</strong> que vous essayez d'effacer.
 FirstRecord=Premier enregistrement
 LastRecord=Dernier enregistrement
