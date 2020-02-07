@@ -302,7 +302,7 @@ if (empty($reshook))
             /*$sql = "SELECT rowid, statut, ref, fk_soc, mise_en_service as datemise,";
              $sql.= " ref_supplier, ref_customer,";
              $sql.= " ref_ext,";
-             $sql.= " fk_user_mise_en_service, date_contrat as datecontrat,";
+             $sql.= " date_contrat as datecontrat,";
              $sql.= " fk_user_author, fin_validite, date_cloture,";
              $sql.= " fk_projet,";
              $sql.= " fk_commercial_signature, fk_commercial_suivi,";
