@@ -21,7 +21,8 @@ do
     if [ -d "$dir/.git" ]; then
         cd $dir
         git reset --hard HEAD
-        git pull --depth=1
+        # Do not use git pull --depth=1 here, this will maka merge errors.
+        git pull
         echo Result of git pull = $?
    
     	echo "Clean some dirs to save disk spaces"
