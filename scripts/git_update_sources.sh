@@ -21,7 +21,7 @@ do
     if [ -d "$dir/.git" ]; then
         cd $dir
         git reset --hard HEAD
-        git pull
+        git pull -- depth=1
         echo Result of git pull = $?
    
     	echo "Clean some dirs to save disk spaces"
