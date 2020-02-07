@@ -1135,7 +1135,7 @@ class SellYourSaasUtils
 	    						$stripefailuremessage='';
 	    						$stripefailuredeclinecode='';
 
-	    						if (empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) // Using old method
+	    						if (preg_match('/^card_/', $stripecard->id)) // Using old method
 	    						{
     	    						dol_syslog("* Create charge on card ".$stripecard->id.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
