@@ -1124,6 +1124,45 @@ class ActionsSellyoursaas
 
     	return $ret;
     }
+
+
+    /**
+     * Overloading the loadDataForCustomReports function : returns data to complete the customreport tool
+     *
+     * @param   array           $parameters     Hook metadatas (context, etc...)
+     * @param   string          $action         Current action (if set). Generally create or edit or null
+     * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+     * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
+     */
+    public function loadDataForCustomReports($parameters, &$action, $hookmanager)
+    {
+        global $conf, $user, $langs;
+
+        $langs->load("sellyoursaas@sellyoursaas");
+
+        $this->results = array();
+
+        $head = array();
+        $h = 0;
+
+        if ($parameters['tabfamily'] == 'sellyoursaas') {
+            $head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/index.php', 1);
+            $head[$h][1] = $langs->trans("Home");
+            $head[$h][2] = 'home';
+            $h++;
+
+            $this->results['title'] = $langs->trans("DoliCloudArea");
+            $this->results['picto'] = 'sellyoursaas@sellyoursaas';
+        }
+
+        $head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily'])?'':'&tabfamily='.$parameters['tabfamily']);
+        $head[$h][1] = $langs->trans("CustomReports");
+        $head[$h][2] = 'customreports';
+
+        $this->results['head'] = $head;
+
+        return 1;
+    }
 }
 
 
