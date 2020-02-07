@@ -21,7 +21,7 @@ do
     if [ -d "$dir/.git" ]; then
         cd $dir
         git reset --hard HEAD
-        git pull
+        git pullvendor/tecnickcom/tcpdf/fonts
         echo Result of git pull = $?
     
     	echo "Clean some dirs to save disk spaces"
@@ -29,6 +29,8 @@ do
     	rm -fr dev/ test/ doc/ htdocs/includes/ckeditor/ckeditor/adapters htdocs/includes/ckeditor/ckeditor/samples
     	rm -fr htdocs/includes/sabre/sabre/*/tests htdocs/includes/stripe/tests
     	rm -fr htdocs/includes/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* htdocs/includes/tecnickcom/tcpdf/fonts/freefont-* htdocs/includes/tecnickcom/tcpdf/fonts/ae_fonts_*
+    	#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
+    	rm -fr files/_cache/*
     	# We remove subdir of build. We need files.
     	find build/* -type d -exec rm -fr {} \;
     	
@@ -38,8 +40,8 @@ do
         fi
     
     	# Create a deployment tar file
-    	#echo "Compress the repository into an archive $dir.tar.gz"
-    	#tar cz --exclude-vcs -f $dir.tar.gz .
+    	echo "Compress the repository into an archive $dir.tar.gz"
+    	tar cz --exclude-vcs -f ../$dir.tgz .
     	
         cd -
     else
