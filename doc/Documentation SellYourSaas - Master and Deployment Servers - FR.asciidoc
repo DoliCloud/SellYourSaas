@@ -1008,12 +1008,28 @@ Vérifier que le user postfix se trouve dans le groupe *sasl*. Si non, l'ajouter
 adduser postfix sasl
 ---------------
 
-Modfifier le fichier */etc/postfix/master.cf* pour ajouter un 'n' afin de désactiver le chroot de smtpd
+Modifier le fichier */etc/postfix/master.cf* pour ajouter un 'n' afin de désactiver le chroot de smtpd
 
 [source,bash]
 ---------------
 smtp      inet  n       -       n       -       -       smtpd
 ---------------
+
+Créer un fichier */etc/postfix/generic* pour ajouter la correspondance entre l'email utilisé par les envois de mails système qui ont un from vide
+et l'email à utiliser qui est officiellement valide.
+
+[source,bash]
+---------------
+root@myservername		noreply@mysaasdomain.com
+---------------
+
+Compiler le fichier par:
+
+[source,bash]
+---------------
+postmap /etc/postfix/generic
+---------------
+
 
 Ajouter un fichier *smtpd.conf* dans */etc/postfix/sasl*
 
@@ -1062,6 +1078,7 @@ mailbox_size_limit = 204800000
 recipient_delimiter = +
 inet_interfaces = ip.public.du.serveur
 inet_protocols = ipv4
+smtp_generic_maps = hash:/etc/postfix/generic
 
 # Activer ces lignes pour utiliser SendGrid comme serveur envoi pour les envois d'emails depuis les instances clients
 #smtp_sasl_auth_enable = yes
@@ -2201,15 +2218,15 @@ fi
 ---------------
 
 
-- Modifier le fichiers */etc/postfix/main.cf* et */etc/postfix/mydestination* (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement)
+- Modifier le fichiers */etc/postfix/main.cf* et */etc/postfix/mydestination* et */etc/postfix/generic* (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement)
 
-- Ajouter les entrées du nouveau serveur *mynewservername.mysellyoursaasdomainname.com* dans le DNS du domaine *mysellyoursaasdomainname.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) attribué par OVH lors de la création du nouveau serveur.
+- Ajouter les entrées du nouveau serveur *mynewserverX.mysellyoursaasdomainname.com* dans le DNS du domaine *mysellyoursaasdomainname.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) attribué par OVH lors de la création du nouveau serveur.
 
-- Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *myserver*).
+- Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *myserverX*).
 
 - Aller dans l'interface de gestion des IP OVH, pour ajouter aussi 
  
-  - le reverse sur l'IP du nouveau serveur: *myserver.mysellyoursaasdomainname.com*
+  - le reverse sur l'IP du nouveau serveur: *myserverX.mysellyoursaasdomainname.com*
   - le reverse sur l'IP virtuel si vous en avez pris une sur: *with.mysellyoursaasdomainname.com*
    
 - Se connecter et modifier le fichier */etc/hosts* avec le nom du nouveau serveur et nouvelle ip du serveur.
@@ -2224,7 +2241,7 @@ fi
 
 - Déclarer l'IP pour l'envoi d'emails:
   - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
-  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @myserver.mysellyoursaasmydomain.com).
+  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé *@mysellyoursaasmydomain.com* et pour chaque sous-domaines *@myserverX.mysellyoursaasmydomain.com*).
 
 - Créer un compte *sellyoursaas* et permissions au serveur de déploiement sur la base de donnée du *Master*. Voir <<creer_un_compte_db_sellyoursaas>>.
 
