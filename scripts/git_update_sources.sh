@@ -21,9 +21,9 @@ do
     if [ -d "$dir/.git" ]; then
         cd $dir
         git reset --hard HEAD
-        git pullvendor/tecnickcom/tcpdf/fonts
+        git pull
         echo Result of git pull = $?
-    
+   
     	echo "Clean some dirs to save disk spaces"
     	rm -fr documents/*
     	rm -fr dev/ test/ doc/ htdocs/includes/ckeditor/ckeditor/adapters htdocs/includes/ckeditor/ckeditor/samples
@@ -41,8 +41,9 @@ do
     
     	# Create a deployment tar file
     	echo "Compress the repository into an archive $dir.tar.gz"
-    	tar cz --exclude-vcs -f ../$dir.tgz .
-    	
+		export gitdir=`basename $dir`
+    	tar cz --exclude-vcs -f $dir/../$gitdir.tgz .
+
         cd -
     else
         echo "Not a git dir. Nothing done."
