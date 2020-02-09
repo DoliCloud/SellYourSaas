@@ -3,6 +3,7 @@
 	<name>sell-your-saas</name>
 	<comment></comment>
 	<projects>
+		<project>dolibarr</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -1303,9 +1303,10 @@ class SellYourSaasUtils
 
 	    							if (! $errorforinvoice)
 	    							{
-	    								dol_syslog('* Record payment for invoice id '.$invoice->id);
+	    								dol_syslog('* Record payment for invoice id '.$invoice->id.'. It includes closing of invoice and regenerating document');
 
-	    								$paiement_id = $paiement->create($user, 1);    // This include closing invoices to 'paid' (and trigger including unsuspending) and regenerating documents
+	    								// This include closing invoices to 'paid' (and trigger including unsuspending) and regenerating document
+	    								$paiement_id = $paiement->create($user, 1);
 	    								if ($paiement_id < 0)
 	    								{
 	    								    $postactionmessages[] = $paiement->error.($paiement->error?' ':'').join("<br>\n", $paiement->errors);
