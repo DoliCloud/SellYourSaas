@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2007-2018 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -216,7 +216,8 @@ print '<tr class="oddeven">';
 print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ',$listofipwithinstances).'</strong></td>';
 print '</tr>';
 print '<tr class="oddeven">';
-print '<td>'.$langs->trans('SellYourSaasSubDomainsIP').': <strong>'.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'</strong> for domain name <strong>'.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES.'</strong></td>';
+print '<td>'.$langs->trans('SellYourSaasSubDomainsIP').': <strong>'.join(', ',explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)).'</strong> for domain name <strong>';
+print join(', ', explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES)).'</strong></td>';
 print '</tr>';
 print '<tr class="oddeven"><td>';
 print $langs->trans("CommandToManageRemoteDeploymentAgent").'<br>';
