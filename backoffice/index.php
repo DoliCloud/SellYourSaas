@@ -297,9 +297,10 @@ $benefit=price2num(($total * (1 - $part) - $serverprice - $totalcommissions), 'M
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
 print '<td class="wordwrap wordbreak"><span class="valignmiddle">'.$langs->trans('MasterServer').' - '.$langs->trans("Statistics").'</span>';
+print '</td>';
+print '<td class="right">';
 print '<a href="'.$_SERVER["PHP_SELF"].'?mode=refreshstats">'.img_picto('', 'refresh', '', false, 0, 0, '', 'valignmiddle').'</a>';
 print '</td>';
-print '<td></td>';
 print '</tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("NbOfResellers");
