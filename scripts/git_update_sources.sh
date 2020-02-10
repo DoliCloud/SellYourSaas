@@ -26,6 +26,8 @@ do
 	        # Do not use git pull --depth=1 here, this will maka merge errors.
 	        git pull
 	        echo Result of git pull = $?
+
+	    	git rev-parse HEAD > gitcommit.txt
 	    else
 	        echo "Not a git dir. Nothing done."
 	    fi
@@ -41,8 +43,8 @@ do
 		find build/* -type d -exec rm -fr {} \;
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
-	            echo "Found generate_filelist_xml.php"
-	            php build/generate_filelist_xml.php release=auto-dolicloud
+	        echo "Found generate_filelist_xml.php"
+	        php build/generate_filelist_xml.php release=auto-dolicloud
 	    fi
 	
 		# Create a deployment tar file
