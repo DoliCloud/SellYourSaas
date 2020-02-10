@@ -121,7 +121,6 @@ Que le disque viennent d'etre formaté ou qu'il s'aggisse d'un disque ajouté d�
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 ou
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (ne bloque pas le démarrage du serveur)
-
 ---------------
 
 * Monter les disques
@@ -1825,9 +1824,6 @@ su root syslog
         rotate 7
         compress
         sharedscripts
-        #prerotate
-        #/home/awstats/demo/awstats/tools/awstats_updateall.pl -awstatsprog=/home/awstats/demo/awstats/wwwroot/cgi-bin/awstats.pl now >/dev/null
-        #endscript
         postrotate
                 if [ -f "`. /etc/apache2/envvars ; echo ${APACHE_PID_FILE:-/var/run/apache2.pid}`" ]; then
                         /etc/init.d/apache2 reload > /dev/null
@@ -1842,7 +1838,7 @@ su root syslog
 [source,conf]
 ---------------
 /var/log/phpsendmail.log /var/log/phpmail.log {
-        su root root        
+        su syslog adm        
         weekly
         rotate 4
         compress
