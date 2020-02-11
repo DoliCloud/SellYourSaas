@@ -1146,6 +1146,7 @@ class ActionsSellyoursaas
         $h = 0;
 
         if ($parameters['tabfamily'] == 'sellyoursaas') {
+            //$this->results['modenotusedforlist'] = 1;
             $head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/index.php', 1);
             $head[$h][1] = $langs->trans("Home");
             $head[$h][2] = 'home';
@@ -1155,9 +1156,11 @@ class ActionsSellyoursaas
             $this->results['picto'] = 'sellyoursaas@sellyoursaas';
         }
 
-        $head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily'])?'':'&tabfamily='.$parameters['tabfamily']);
-        $head[$h][1] = $langs->trans("CustomReports");
-        $head[$h][2] = 'customreports';
+        //if ($parameters['tabfamily'] == 'sellyoursaas') {
+            $head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily'])?'':'&tabfamily='.$parameters['tabfamily']);
+            $head[$h][1] = $langs->trans("CustomReports");
+            $head[$h][2] = 'customreports';
+        //}
 
         $this->results['head'] = $head;
 
