@@ -3427,9 +3427,7 @@ class SellYourSaasUtils
     				// Execute personalized SQL requests (sqlafter)
 			    	if (! $error)
 			    	{
-			    		$sqltoexecute = make_substitutions($tmppackage->sqlafter, $substitarray);
-
-			    		dol_syslog("Try to connect to customer instance database to execute personalized requests substitarray=".join(',', $substitarray));
+			    		dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
 			    		//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
 			    		//var_dump($serverdeployment);		// just ip of deployement server
@@ -3440,10 +3438,17 @@ class SellYourSaasUtils
 			    			$error++;
 			    			$this->error = $dbinstance->error;
 			    			$this->errors = $dbinstance->errors;
-
 			    		}
 			    		else
 			    		{
+			    			$substitarrayforsql = array();
+			    			foreach($substitarray as $key => $val) {
+			    				$substitarrayforsql[$key] = $dbinstance->escape($val);
+			    			}
+			    			dol_syslog("newsubstitarray=".join(',', $substitarrayforsql));
+
+			    			$sqltoexecute = make_substitutions($tmppackage->sqlafter, $substitarrayforsql);
+
 			    			$arrayofsql=explode(';', $sqltoexecute);
 			    			foreach($arrayofsql as $sqltoexecuteline)
 			    			{
