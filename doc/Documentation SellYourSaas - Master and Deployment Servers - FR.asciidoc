@@ -16,7 +16,10 @@ Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas 
 :toc-placement: preamble
 :revnumber: v1.0
 :revdate: 2019-01-30
-:revremark: First version
+:revremark: Première version
+:revnumber: v1.1
+:revdate: 2020-02-12
+:revremark: Nombreuses améliorations
 
 <<<<
 
