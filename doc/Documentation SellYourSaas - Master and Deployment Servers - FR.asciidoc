@@ -20,7 +20,6 @@ Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas 
 :revnumber: v1.1
 :revdate: 2020-02-12
 :revremark: Nombreuses améliorations
-:pdf-theme: style.yml
 
 <<<<
 
