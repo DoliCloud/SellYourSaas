@@ -10,6 +10,7 @@
 :city: Bordeaux
 :toc: manual
 :toc-placement: preamble
+
 Ce document décrit les spécifications techniques pour la mise en oeuvre du poste client de l'administrateur du service SellYourSaas (service de mise en SaaS automatisé par Dolibarr).
 
 

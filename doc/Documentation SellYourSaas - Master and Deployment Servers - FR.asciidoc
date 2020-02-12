@@ -1,66 +1,68 @@
 = Document installation et exploitation SellYourSaas
+Ce document décrit les spécifications techniques pour la mise en oeuvre de SellYourSaas - système de déploiement et vente automatisé en SaaS d'une application WAMP (comme Dolibarr ERP CRM, GLPI, ...) - Laurent Destailleur - www.sellyoursaas.org
 :source-highlighter: rouge
 :companyname: Teclib
 :corpname: Teclib
 :orgname: Teclib
 :creator: Laurent Destailleur
 :title: Document installation et exploitation de SellYourSaas
-:subject: Ce document décrit les spécifications techniques pour la mise en oeuvre de SellYourSaas (système de déploiement et vente automatisé en SaaS d'une application comme Dolibarr ERP CRM).
+:subject: Ce document décrit les spécifications techniques pour la mise en oeuvre de SellYourSaas (système de déploiement et vente automatisé en SaaS d'une application WAMP (comme Dolibarr ERP CRM, GLPI, ...).
 :keywords: sellyoursaas, saas, dolibarr, wamp
-// Date du document :
-:docdate: 30/01/2019
-// Ville associée au document
+:imagesdir: ./img
 :city: Bordeaux
 :toc: manual
+:toclevels: 3                                                       
+:toc-title: Table of Content  
 :toc-placement: preamble
-Laurent Destailleur
-
-Ce document décrit les spécifications techniques pour la mise en oeuvre de SellYourSaas - système de déploiement et vente automatisé en SaaS d'une application WAMP (Dolibarr ERP CRM, GLPI, ...).
-
+:revnumber: v1.0
+:revdate: 2019-01-30
+:revremark: First version
 
 <<<<
 
 == Introduction ==
 
-SellYourSaas est un projet Open Source né suite au besoin de fournir en temps réel des instances d'application Web dédiées (comme Dolibarr ERP CRM)
-à des utilisateurs, à des fins de tests immédiat, avec les impératifs suivants:
+SellYourSaas est un projet Open Source, né suite au besoin de fournir, en temps réel, des instances d'application Web (comme Dolibarr ERP CRM) à des utilisateurs, à des fins d'utilisation immédiate, avec les impératifs suivants:
 
-	* Capable de gérer un nombre très élevé d'utilisateurs.
-	* Cout très très faibles (au moins 10x inférieurs aux solutions Cloud par containers).
+	* Capable de gérer un nombre très élevé d'instances et d'utilisateurs.
+	* Cout très faibles (devant être au moins 10x inférieurs aux solutions Cloud par containers).
 	* Déploiement en temps réel.
-	* Offrir un accès complet et privé à l'application proposée, avec accès complet sans bridage de fonctionnalités ou paramétrage.
+	* Offrir un accès complet et privé à l'application proposée, y compris à l'administration, avec accès complet sans bridage de fonctionnalités ou paramétrage.
 	* Offrir un SaaS ouvert, avec accès SSH, SFTP et base de donnée direct possible aux utilisateurs. 
 
-Suite au déploiement de la v1, la plateforme évolua pour ajouter d'autres objectifs :
+Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser leur instance via une souscription, la plateforme évolua pour ajouter d'autres objectifs :
 
 	* Prendre en compte la souscription à l'application proposée sous forme d'abonnements payants.
-	* Espace client dédié 
+	* Espace client dédié pour gestion de ces factures, comptes et support.
 	* Système 100% automatisé (de l'arrivée du prospect à la résiliation de son abonnement en passant par la délivrance du service, sauvegardes, supervision et alimentation de la comptabilité: pas d'intervention humaine).
-	* Une souplesse dans le mode d'abonnement (fréquence, tarifs, service complémentaires, ...)
+	* Une souplesse dans le mode d'abonnement (fréquence, tarifs, service complémentaires, options, ...)
 	* Compatible (ou à minima adaptable) pour toute application Web.
 	* Gestion d'un réseau de revendeur.
 	* Disponible en OpenSource.
 	
-Financé par les sociétés Open Source [NLTechno https://www.nltechno.com] et [Teclib https://www.teclib.com], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (DoliCloud, NovaFirstCloud, GLPI-Network, ...). Voici un synthèse de ces capacités:
+Financé par les sociétés Open Source https://www.nltechno.com[NLTechno] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (DoliCloud, NovaFirstCloud, GLPI-Network, ...). Voici un synthèse de ses capacités:
 
-    * Déploiment de n'importe quelle application WAMP. Gestion de multiples solutions différents en même temps.
-    * Gestion de différents niveaux de tarifications
+    * Déploiment de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
+    * Diffusion d'instance gratuites sans demande d'informations confidentiels ni cartes bancaires.
+    * Diffusion d'instances payantes avec différents niveaux de tarifications.
     * Site web vitrine (optionnel) prêt à l'emploi pour vendre votre application.
-    * Espace client dédié.
+    * Espace client dédié (facturation, ticket, compte client).
     * Précablé pour une supervision via DataDog.
     * Précablé pour une analyse de performance, taux de conversion via Google Analytics.
     * Paiement par carte bancaire via Stripe, conforme SCA (Strong Customer Authentication).
     * Paiement par prélèvement SEPA (mais pas d'interface direct pour soumettre les fichiers SEPA à la banque).
     * Systèmes anti usage abusif des applications.
     * Systèmes de quota de souscription d'instances.
-    * Outils facilitant la maintenance et le support des clients.
-    * Gestion d'un réseau de revendeur.
-    * Coût d'infrastructure par instance < 20 centimes (Coût constaté sur le service commercial DoliCloud avec Dolibarr ERP CRM).
+    * Outils facilitant la maintenance, le support des clients, les mises à jour des applications.
+    * Gestion d'un réseau de revendeur. Espace revendeur dédié (facturation, compte client).
+    * Coût d'infrastructure par instance < 20 centimes (Coût constaté sur le service commercial DoliCloud fournissant Dolibarr ERP CRM).
     * ... 
      
 
 Le projet est disponible de manière communautaire depuis 2020 sur GitHub: https://github.com/eldy/sellyoursaas
+
 Il est composé:
+
     * D'un module extension à l'excellent ERP CRM Open Source Dolibarr (https://www.dolibarr.org).
     * Des outils systèmes divers.
     * Une documentation d'installation et paramétrage système (cette documentation). 
@@ -68,24 +70,27 @@ Il est composé:
 
 Ce document présente les étapes pour mettre en oeuvre votre propre plateforme de business SaaS.
 	
+<<<<
 
 == Installation de la machine et OS
 
-La première étape est de mettre à disposition un (ou plusieurs) serveur. Si on part sur plusieurs, serveur, l'un sera serveur *Master* et les autres seront *Serveurs de déploiement*. Le serveur *Master* pouvant aussi être *Serveur de déploiement*, il est possible de démarrer avec un seul serveur. 
- 
+La première étape est de mettre à disposition un (ou plusieurs) serveur. Si on part sur plusieurs serveurs, l'un sera serveur *Master* (pilotage et facturation) et les autres seront *Serveurs de déploiement* (les instances des clients). Le serveur *Master* pouvant aussi être *Serveur de déploiement*, il est possible de démarrer avec un seul serveur.
+
 === Choix de la machine et de l'OS
 
 * Obtenir un serveur avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le serveur Master.
-* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le serveur de Déploiement. Remarque: Cette étape peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master.
+* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le serveur de Déploiement. Remarque: Ce point peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master.
 
-Exemple avec Amazon Standard Medium:
+_Exemple avec Amazon Standard Medium:_
 
 Server *m1.medium* hosted in EU @ $0.18 per hour plus $10 for storage and bandwidth puis passage à *m1.large* @ $0.18 per hour
 
-Exemple avec OVH Public Cloud:
+_Exemple avec OVH Public Cloud:_
  
 Pour le serveur master: VPS ou B2-15 ou +
-Pour le ou les serveurs de déploiement: B2-15 ou + (soit server 2 core minimum - Mémoire 8 Go minimum - Coût en 2019: 22 euros / mois)
+Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit server 2 core minimum - Mémoire 8 Go minimum - Coût en 2020: 22 euros / mois). Doublez les caractéristiques si vous visez 1 000 instances client par serveur.
+
+
 
 
 [[ajout_de_disque]]
@@ -472,7 +477,7 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 === Création des répertoires de travail
 
-Sur le serveur Master et les serveurs de Déploiement, créer les répertoires pour stocker les sauvegardes et les archives.
+Sur le serveur *Master* et les serveurs de *Déploiement*, créer les répertoires pour stocker les sauvegardes et les archives.
 
 Create directories required to store data and backups:
 
@@ -491,7 +496,10 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 
 === Installation du partage nfs
 
-==== Sur le master server
+Le partage NFS permettra aux serveurs de *Déploiement* de récupérer les images d'application à installer qui sont centralisées sur le 
+serveur *Master*.
+
+==== Sur le serveur Master
 
 Installer le serveur NFS et le partage sur */home/admin/wwwroot/dolibarr_documents/sellyoursaas*
     
@@ -527,9 +535,9 @@ systemctl status nfs-kernel-server
 exportfs
 ---------------
 
-==== Sur le(s) serveur(s) de déployment
+==== Sur le(s) Serveur(s) de Déployment
 
-Pensez à ouvir l'accès du firewall entre le client NFS (Serveur de déploiement) et le serveur NFS (serveur Master).
+Pensez à ouvir l'accès du firewall entre le client NFS (*Serveur de déploiement*) et le serveur NFS (*serveur Master*).
 
 Installer le client NFS et faire le montage en manuel. Le montage est réalisé par défaut en NFSv4.
 
@@ -548,9 +556,9 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 
-<<<
+<<<<
 
-== Installation des outils externes
+== Installation d'outils externes
 
 === Installation de webmin (optionnel pour supervision)
 
@@ -573,7 +581,7 @@ foreach $db (@dbs) {
 ---------------
 
 
-<<<
+<<<<
 
 == Installation des composants systèmes et applicatifs
 
@@ -601,7 +609,7 @@ apt remove unattended-upgrades
 ---------------
 
 
-=== Activation des modules apache
+=== Activation des modules Apache
 
 actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex
 cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
@@ -639,7 +647,7 @@ systemctl reload apache2
 
 Sur le serveur Master:
 
-* Créer un virtual host pour le Dolibarr Master admin
+* Créer un virtual host *admin.mycompany.com* sur le Dolibarr *Master* pour l'administration de SellyourSaas
 
 [source,bash]
 ---------------
@@ -702,7 +710,7 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 ---------------
 
 
-* Créer un virtual host pour l'espace client
+* Créer un virtual host pour l'espace client *myaccount.mycompany.com*
 
 [source,bash]
 ---------------
@@ -929,11 +937,40 @@ echo $?
 ---------------
 
 
-=== Installation de afick ===
+=== Installation de Afick
 
 * Installer afick.pl tool from the debian package found on afick web site.
+
 * Comment line that exclude suffix we want to keep in */etc/afick.conf*:
-* Complete setup */etc/afick.conf* by adding:
+
+* Complete setup */etc/afick.conf* for section *macros* with
+
+[source,bash]
+---------------
+# used by cron job (afick_cron)
+# define the mail adress to send cron job result
+@@define MAILTO supervision@mycompany.com
+# truncate the result sended by mail to the number of lines (avoid too long mails)
+@@define LINES 1000
+# REPORT = 1 to enable mail reports, =0 to disable report
+@@define REPORT 1
+# VERBOSE = 1 to have one mail by run, =0 to have a mail only if changes are detected
+@@define VERBOSE 1
+# define the nice value : from 0 to 19 (priority of the job)
+@@define NICE 18
+# = 1 to allow cron job, = 0 to suppress cron job
+@@define BATCH 1
+# (optionnal, for unix) specify a file system to mount before the scan
+# it must be defined in /etc/fstab
+#@@define MOUNT /mnt/dist
+# if set to 0, keep all archives, else define the number of days to keep
+# with the syntaxe nS , n for a number, S for the scale
+# (d for day, w for week, m for month, y for year)
+# ex : for 5 months : 5m
+@@define ARCHIVE_RETENTION 6m
+---------------
+
+* Complete setup */etc/afick.conf* by adding at end:
 
 [source,bash]
 ---------------
@@ -2078,6 +2115,7 @@ Voir l'exemple dans le document *Exemple config de package pour appli Dolibarr s
 
 Les URL pour tester les déploiements sont visibles dans le menu SellYourSaas - URL de déploiement
 
+<<<<
 
 == Exploitation - Supervision
 
@@ -2088,13 +2126,13 @@ Les URL pour tester les déploiements sont visibles dans le menu SellYourSaas - 
 La sauvegarde du serveur+bases peut se faire par un snapshot d'image de la VM.
 Il est aussi possible de ne faire un snapshot que des disques complémentaires.
 
-Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour développement>>
+Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
 
 ==== Restauration système
 
 Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure en terme de capacité de stockage.
 
-Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour développement>>
+Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
 
 
 ==== Sauvegarde fichiers et bases
@@ -2121,7 +2159,7 @@ pip install awscli --upgrade --user
 ---------------
 
 
-[[Clonage d'une instance serveur pour production bis ou pour développement]]
+[[Clonage d une instance serveur pour production bis ou pour développement]]
 === Clonage d'une instance serveur pour production bis ou pour développement
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
@@ -2458,10 +2496,10 @@ Pour pousser une image sur un projet:
 
 - Pour recréer un serveur depuis une image
 
-Voir chapitre <<Clonage d'une instance serveur pour production bis ou pour développement>>
+Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
 
 
-=== Déplacement de la base de données (var/lib/mysql vers /mnt/diskhome/mysql/) ===
+=== Déplacement de la base de données (var/lib/mysql vers /mnt/diskhome/mysql/)
 
 From the MySQL prompt, select the data directory:
 
@@ -2600,9 +2638,7 @@ Lancer le script:
 
 
 
-
-<<<
-
+<<<<
 
 == Principe de fonctionnement de SellYourSaas
 
@@ -2833,8 +2869,6 @@ Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys"
 - Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
 
 
-<<<
-
 === Quelques règles de fonctionnement métier de SellYourSaas
 
 - Le traitement qui valide les factures à l'état brouillon ne valide qu'une seule facture par client à la fois. Si il y en a 2 en attente, il faudra donc 2 lancements du batch de validation des factures pour les valider toutes les 2.
@@ -2851,10 +2885,15 @@ Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys"
 
 - Si un client a une facture impayée, la facture suivante reste à l'état brouillon.
 
+- Quand une instance est détruite définitivement, les factures brouillons qui lui sont liées sont aussi détruites.  
+
 - Les sauvegardes des bases et fichiers des instances ne se font que pour les clients SellYourSaas payants (ayant saisi au moins une fois un mode de paiement).
 
 
+
 <<<
+
+== Annexes
 
 === Quelques URL type pour les objectifs Google Analytics ou Statistiques DataDog
 
