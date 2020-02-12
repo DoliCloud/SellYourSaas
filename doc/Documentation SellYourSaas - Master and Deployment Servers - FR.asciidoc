@@ -538,7 +538,7 @@ systemctl status nfs-kernel-server
 exportfs
 ---------------
 
-==== Sur le(s) Serveur(s) de Déployment
+==== Sur les Serveurs de Déployment
 
 Pensez à ouvir l'accès du firewall entre le client NFS (*Serveur de déploiement*) et le serveur NFS (*serveur Master*).
 
