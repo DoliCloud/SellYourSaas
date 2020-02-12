@@ -808,9 +808,9 @@ systemctl status apache_watchdog_launcher
 ---------------
 
 
-=== Installation du listener de deploiement des instances ===
+=== Installation de l'agent de deploiement des instances ===
 
-* Installation et activation du watchdog apache dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/remote_server_launcher.sh* en créant un lien par
+* Installation et activation de l'agent dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/remote_server_launcher.sh* en créant un lien par
 
 [source,bash]
 ---------------
@@ -824,9 +824,11 @@ systemctl status remote_server_launcher
 
 === Installation de fail2ban ===
 
-* Installation de fail2ban et activation des regles fail2ban suivante dans */etc/fail2ban/jail.conf* :
+* Installation de fail2ban et activation des règles fail2ban suivante dans */etc/fail2ban/jail.conf* :
   *apache-shellshock*, *php-url-fopen*, *suhosin*, *webmin-auth*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*, 
+
+NOTE: Les règles par défaut disponibles peuvent varier selon la version de l'OS installé.
 
 * Ajouter les regles antispammeur dans fail2ban en les mettant dans */etc/jail.local*
 
@@ -2157,6 +2159,18 @@ pip install awscli --upgrade --user
 
     TODO...
 ---------------
+
+
+=== Mise à jour des images
+
+- Un script cron permet de réaliser le git pull nécessaire pour mettre à jour les images des packages à déployer en lançant le script sur le serveur *Master*: 
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git*
+
+
+=== Mise à des statistiques SellYourSaas
+
+- Un script cron permet de réaliser le calcul des statistiques en lançant le script sur le serveur *Master*: 
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly*
 
 
 [[Clonage d une instance serveur pour production bis ou pour développement]]
