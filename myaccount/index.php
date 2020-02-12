@@ -762,7 +762,15 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
                             if (empty($payment_method_obj->customer))
                             {
-                                $result = $payment_method_obj->attach(['customer' => $cu->id]);
+                                $arrayforattach = array(
+                                    'customer' => $cu->id,
+                                    //'metadata' => array('dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>getUserRemoteIP())
+                                );
+                                $result = $payment_method_obj->attach($arrayforattach);
+
+                                // TODO To set this payment mode as default, you must make
+                                // $arrayofparam = array('invoice_settings' => array('default_payment_method' => $payment_method_obj->id));
+                                // $cu->update($arrayofparam);
                             }
                             elseif($payment_method_obj->customer != $cu->id)
                             {
