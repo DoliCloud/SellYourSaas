@@ -20,6 +20,7 @@ Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas 
 :revnumber: v1.1
 :revdate: 2020-02-12
 :revremark: Nombreuses améliorations
+:pdf-theme: style.yml
 
 <<<<
 
@@ -2176,8 +2177,8 @@ pip install awscli --upgrade --user
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly*
 
 
-[[Clonage d une instance serveur pour production bis ou pour développement]]
-=== Clonage d'une instance serveur pour production bis ou pour développement
+[Clonage d une instance serveur pour production bis ou pour développement]
+=== Clonage d une instance serveur pour production bis ou pour développement
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
 
