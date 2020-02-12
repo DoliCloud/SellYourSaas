@@ -1,18 +1,18 @@
 = Document installation et exploitation SellYourSaas
-Ce document décrit les spécifications techniques pour la mise en oeuvre de SellYourSaas - système de déploiement et vente automatisé en SaaS d'une application WAMP (comme Dolibarr ERP CRM, GLPI, ...) - Laurent Destailleur - www.sellyoursaas.org
+Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas - système de déploiement et vente automatisé en SaaS d'une application WAMP (comme Dolibarr ERP CRM, GLPI, ...) - Laurent Destailleur - www.sellyoursaas.org
 :source-highlighter: rouge
 :companyname: Teclib
 :corpname: Teclib
 :orgname: Teclib
 :creator: Laurent Destailleur
 :title: Document installation et exploitation de SellYourSaas
-:subject: Ce document décrit les spécifications techniques pour la mise en oeuvre de SellYourSaas (système de déploiement et vente automatisé en SaaS d'une application WAMP (comme Dolibarr ERP CRM, GLPI, ...).
+:subject: Ce document décrit la mise en oeuvre technique et fonctionnelle de SellYourSaas (système de déploiement et vente automatisé en SaaS d'une application WAMP (comme Dolibarr ERP CRM, GLPI, ...).
 :keywords: sellyoursaas, saas, dolibarr, wamp
 :imagesdir: ./img
 :city: Bordeaux
 :toc: manual
 :toclevels: 3                                                       
-:toc-title: Table of Content  
+:toc-title: Table des matières  
 :toc-placement: preamble
 :revnumber: v1.0
 :revdate: 2019-01-30
