@@ -5458,6 +5458,7 @@ if ($mode == 'registerpaymentmode')
     	if ($mythirdpartyaccount->client != 1 && $mythirdpartyaccount->client != 3) {
             // Loop on contracts
     	    $amounttopayasfirstinvoice = 0;
+    	    $amounttopayasfirstinvoicetinstances = array();
     	    foreach ($listofcontractid as $contract)
     	    {
     	        if ($contract->array_options['options_deployment_status'] == 'done') {
@@ -5466,26 +5467,52 @@ if ($mode == 'registerpaymentmode')
         	        $comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
         	        // First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
         	        $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+        	        $contract->fetch($contract->id);   // Reload to get new values after refresh
 
         	        $amounttopayasfirstinvoice += $contract->total_ttc;
+        	        $amounttopayasfirstinvoicetinstances[$contract->ref_customer] = $contract;
     	        }
     	    }
 
     	    // We are not yet a customer
         	if ($amounttopayasfirstinvoice) {
         	    print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("AFirstInvoiceOfWillBeDone", price($amounttopayasfirstinvoice, 0, $langs, 1, -1, -1, $conf->currency));
-        	    $urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
-        	    if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-        	        && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-        	    {
-        	        $newnamekey = 'SELLYOURSAAS_PRICES_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-        	        $urlforplanprices = $conf->global->$newnamekey;
-        	    }
-
-        	    if ($urlforplanprices) {
-        	        print ' ('.$langs->trans("SeeOurPrices", $urlforplanprices).')';
+        	    if (count($amounttopayasfirstinvoicetinstances) >= 2) {    // If 2 instances
+        	        print ' (';
+        	        $i = 0;
+        	        foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
+        	            if ($i) print ', ';
+        	            print '<strong>'.$key.'</strong>: '.price($tmpcontracttopay->total_ttc, 0, $langs, 1, -1, -1, $conf->currency);
+        	            $i++;
+        	        }
+        	        print ')';
         	    } else {
-        	        print '.';
+        	        $parenthesisopen = 0;
+        	        if (count($amounttopayasfirstinvoicetinstances) == 1) {   // If 1 instance
+            	        foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
+            	            $parenthesisopen = 1;
+            	            print ' ('.$langs->trans("Instance").': <strong>'.$key.'</strong>';
+            	        }
+        	        }
+
+        	        $urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
+            	    if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+            	        && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+            	    {
+            	        $newnamekey = 'SELLYOURSAAS_PRICES_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+            	        $urlforplanprices = $conf->global->$newnamekey;
+            	    }
+
+            	    if ($urlforplanprices) {
+            	        print ' - ';
+            	        print $langs->trans("SeeOurPrices", $urlforplanprices);
+            	    }
+
+            	    if ($parenthesisopen) {
+            	        print ')';
+            	    } else {
+            	        print '.';
+            	    }
         	    }
         	    print '</small></div>';
         	    print '<br><br>';
