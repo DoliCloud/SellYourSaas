@@ -70,12 +70,36 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
         $s.=' ';
 
-        $s.=$langs->trans("Status").': ';
+        $s.=$langs->trans("DeploymentStatus").': ';
         $s.='<select name="filter" class="flat">';
         $s.='<option value="none">&nbsp;</option>';
         foreach($arraystatus as $key => $status)
         {
 	        $s.='<option value="'.$key.'">'.$status.'</option>';
+        }
+        $s.='</select>';
+
+        $s.=' ';
+
+        $listofipwithinstances=array();
+        $sql="SELECT DISTINCT deployment_host FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+        $resql=$this->db->query($sql);
+        if ($resql)
+        {
+            while($obj = $this->db->fetch_object($resql))
+            {
+                $listofipwithinstances[]=$obj->deployment_host;
+            }
+            $this->db->free($resql);
+        }
+        else dol_print_error($this->db);
+
+        $s.=$langs->trans("DeploymentHost").': ';
+        $s.='<select name="filterip" class="flat">';
+        $s.='<option value="none">&nbsp;</option>';
+        foreach($listofipwithinstances as $val)
+        {
+            $s.='<option value="'.$val.'">'.$val.'</option>';
         }
         $s.='</select>';
 
@@ -137,7 +161,8 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
-		if (! empty($_POST['filter']) && $_POST['filter'] != 'none')
+		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
+		    (! empty($_POST['filterip']) && $_POST['filterip'] != 'none'))
 		{
 			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
 			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
@@ -155,6 +180,10 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		if (! empty($_POST['filter']) && $_POST['filter'] != 'none')
 		{
 			$sql.= " AND coe.deployment_status = '".$this->db->escape($_POST['filter'])."'";
+		}
+		if (! empty($_POST['filterip']) && $_POST['filterip'] != 'none')
+		{
+		    $sql.= " AND coe.deployment_host = '".$this->db->escape($_POST['filterip'])."'";
 		}
 		if (! empty($_POST['client']) && $_POST['client'] != '-1')
 		{

@@ -209,6 +209,7 @@ if ($resql)
     $db->free($resql);
 }
 else dol_print_error($db);
+
 print '<table class="noborder nohover" width="100%">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('DeploymentServers').'</td></tr>';
