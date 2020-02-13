@@ -430,5 +430,5 @@ PaymentChargedButReversedByBank=Paiement encaissé puis annulé illégitimementt
 StripeAccount=Compte Stripe
 MaxNbOfInstances=Nb max d'instances
 ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL: <br> &forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une adresse IP<br>&extcss=mycssurl<br>
-AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instances existante, votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span>
+AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instance(s) existante(s), votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span>
 SeeOurPrices=Voir les prix de chaque formule <a href="%s" target="_blank">ici</a>
