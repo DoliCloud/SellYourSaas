@@ -62,26 +62,30 @@ if [[ ! -d $targetdir2 ]]; then
 fi
 
 echo "Do a tar of config files"
-echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | bzip2 > $targetdir2/conffiles.tar.bz2"
-tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | bzip2 > $targetdir2/conffiles.tar.bz2
-chown root.admin $targetdir2/conffiles.tar.bz2
-chmod o-rwx $targetdir2/conffiles.tar.bz2
+echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz"
+tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz
+chown root.admin $targetdir2/conffiles.tar.gz
+chmod o-rwx $targetdir2/conffiles.tar.gz
+rm -f $targetdir2/conffiles.tar.bz2
 
+export dbname="mysql" 
 echo "Do a dump of database $dbname"
-#export dbname="mysql" 
-#echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | bzip2 > $targetdir/${dbname}_"`date +%d`".sql.bz2"
-#$MYSQLDUMP --quick --skip-extended-insert $dbname | bzip2 > $targetdir/${dbname}_`date +%d`.sql.bz2
-#chown root.admin $targetdir/${dbname}_`date +%d`.sql.bz2
-#chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.bz2
+echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
+$MYSQLDUMP --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
+chown root.admin $targetdir/${dbname}_`date +%d`.sql.gz
+chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
+rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 
 if [ "x$DATABASE" != "x" ]; then
 	export dbname=$DATABASE 
-	echo "$MYSQLDUMP $dbname | bzip2 > $targetdir/${dbname}_"`date +%d`".sql.bz2"
-	$MYSQLDUMP $dbname | bzip2 > $targetdir/${dbname}_`date +%d`.sql.bz2
-	chown root.admin $targetdir/${dbname}_`date +%d`.sql.bz2
-	chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.bz2
+	echo "Do a dump of database $dbname"
+	echo "$MYSQLDUMP $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
+	$MYSQLDUMP $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
+	chown root.admin $targetdir/${dbname}_`date +%d`.sql.gz
+	chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
+	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 else
-	echo "No system database found to backup."
+	echo "No sellyoursaas database found to backup."
 fi
 
 exit 0

@@ -1225,7 +1225,7 @@ sort_buffer_size=2M
 read_buffer_size=1M
 join_buffer_size=2M
 max_heap_table_size=32M
-max_alloed_packet=32M
+max_allowed_packet=32M
 # Mysql: max_execution_time = 300000 (milliseconds) or Mariadb: max_statement_time = 300 (seconds)
 #max_execution_time = 300000
 
@@ -1234,6 +1234,10 @@ innodb_buffer_pool_instances=8
 innodb_file_per_table=1
 innodb_log_file_size=256M
 innodb_log_buffer_size=32M
+
+
+[mariadb]
+log_warnings = 2
 ---------------
 
 Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
@@ -1270,10 +1274,22 @@ For MariaDb:
 [source,sql]
 ---------------
 # Identification par mot de passe
-update mysql.user set plugin='' where user='root';
+update mysql.user set plugin='' where user='root' and host='localhost';
 # Identification par unix socket
-update mysql.user set plugin='unix_socket' where user='root';
+update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
+
+
+Note: Pour afficher tous les paramètres spécifiques qui ne sont pas les valeurs par défaut, on peut lancer:
+
+[source,bash]
+---------------
+mysqld --print-defaults
+---------------
+
+
+Note: Pour effacer les plugin actifs, vider la table *plugins* de mysql. Voir se <<Lancement de mysql sans permissions>> si cela bloque le lancement du serveur si nécessaire.
+
 
 
 [[creer_un_compte_db_sellyoursaas]]
@@ -2624,7 +2640,7 @@ Recharger apparmor
 aa-enforce usr.sbin.mysqld
 ---------------
 
-
+[[Lancement de mysql sans permissions]]
 === Lancement de mysql sans permissions
 
 sudo mkdir -p /var/run/mysqld; sudo chown mysql /var/run/mysqld; sudo mysqld_safe --skip-grant-tables &
