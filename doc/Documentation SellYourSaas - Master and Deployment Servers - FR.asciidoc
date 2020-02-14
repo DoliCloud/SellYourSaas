@@ -231,7 +231,7 @@ resize2fs /dev/vdX9
 ---------------
 
 
-=== Configuration système
+=== Shell par défaut
 
 Modifier le shell par défaut pour utiliser bash (au lieu dh sh ou dash)
 
@@ -240,6 +240,8 @@ Modifier le shell par défaut pour utiliser bash (au lieu dh sh ou dash)
 ln -fs /bin/bash sh
 ---------------
 
+
+=== Compte unix admin
 
 Créer le compte utilisateur *admin*. Il sera utilisé pour installer et administrer le systeme lorsque root n'est pas nécessaire.
 
@@ -256,6 +258,8 @@ Créer un compte utilisateur pour vous même (ou d'autres administrateurs), par 
 adduser myunixlogin
 ---------------
 
+
+=== ssh et sudo
 
 Modifier */etc/ssh/sshd_config* pour changer les autorisations de login:
 
@@ -295,7 +299,6 @@ myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
 
-
 Ajouter votre clé publique à votre compte unix.
 
 [source,bash]
@@ -307,15 +310,39 @@ ssh-copy-id myunixlogin@x.y.z.a
 Définir ou redéfinir le mot de passe de *root*, *admin*, et de *myunixlogin* avec un mot de passe sure.
 
 
-=== Suppression fichiers d'information au login
+=== Timeout des lancements de serveurs
 
+Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent etre long en cas de plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
+
+[source,bash]
+---------------
+[Service]
+TimeoutStartSec=3600s
+TimeoutStopSec=3600s
+---------------
+
+Puis recharger la nouvelle configuration:
+
+[source,bash]
+---------------
+systemctl reload nom_du_service.service
+---------------
+
+
+=== Suppression des fichiers d'information au login
+
+Afin de ne pas donner d'information aux utilisateurs qui feront du SSH:
+
+[source,bash]
+---------------
 rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
+---------------
 
 
 === Modification de /etc/skel
 
-Editer le contenu de */etc/skel* afin de mettre le *.ssh/authorized_keys* de l'utilisateur *myunixlogin*
+Editer le contenu de */etc/skel* afin de mettre le *.ssh/authorized_keys* du ou des utilisateurs *myunixlogin*
 
 [source,bash]
 ---------------
@@ -366,7 +393,13 @@ Ajouter une entrée du nouveau serveur dans le DNS fourni par le provider du dom
 
 Aller dans l'interface de gestion des IP OVH, pour ajouter le reverse sur l'IP du serveur.
 
-Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement).
+Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement) avec le nom court. Le fichier aura alors comme seul contenu: 
+
+[source,bash]
+---------------
+nomduserveur
+---------------
+
 
 Se connecter et modifier le fichier */etc/hosts* avec l'entrée du nouveau serveur 
 
@@ -1717,7 +1750,8 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
 ---------------
 
 
-* Activer ou recharger la règle apparmor en mode *enforce* (ou *complain*)
+
+* Activer la règle apparmor en mode *enforce* (ou *complain*)
 
 [source,bash]
 ---------------
@@ -1726,6 +1760,29 @@ aa-enforce bin.secureBash
 aa-status
 /etc/init.d/apparmor status
 ---------------
+
+
+* Pour recharger une règle apparmor:
+
+[source,bash]
+---------------
+apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
+---------------
+
+
+* Pour désactiver un profile
+
+[source,bash]
+---------------
+aa-enforce usr.sbin.mysqld
+---------------
+
+Pour éviter que apparmor se relance en cas d'arrêt, modifier */lib/systemd/system/apparmor.service* pour décommenter RemainAfterExit=no
+[source,bash]
+---------------
+RemainAfterExit=no
+---------------
+
 
 === Autoriser la génération de vignettes aperçus PNG depuis les PDF
 
@@ -2617,7 +2674,7 @@ Output
 Now that you’ve restarted MySQL and confirmed that it’s using the new location, take the opportunity to ensure that your database is fully functional. Once you’ve verified the integrity of any existing data, you can remove the backup data directory with sudo rm -Rf /var/lib/mysql.bak.
 
 
-!!!!!
+!!!!! Sur Ubuntu 18.04
 Ajouter */mnt/diskhome/mysql* dans les profiles apparmor qui contiennent */var/lib/mysql* (fichier */etc/apparmor.d/usr.sbin.mysqld*)
 
 [source,bash]
@@ -2633,17 +2690,39 @@ Ajouter */mnt/diskhome/mysql* dans les profiles apparmor qui contiennent */var/l
 ---------------
 
 
-Recharger apparmor
+Recharger le profile apparmor
 
 [source,bash]
 ---------------
 aa-enforce usr.sbin.mysqld
 ---------------
 
-[[Lancement de mysql sans permissions]]
-=== Lancement de mysql sans permissions
 
-sudo mkdir -p /var/run/mysqld; sudo chown mysql /var/run/mysqld; sudo mysqld_safe --skip-grant-tables &
+
+[[Lancement de mysql sans permissions]]
+=== Lancement de mysql/mariadb speciaux
+
+* Sans permissions :
+
+[source,bash]
+---------------
+sudo mkdir -p /var/run/mysqld; 
+sudo chown mysql /var/run/mysqld; 
+sudo mysqld_safe --skip-grant-tables &
+---------------
+ps
+* Avec un mode different de recovery, modifier le fichier server.conf pour mettre 1, 2, 3, 4
+
+[source,bash]
+---------------
+### RECOVERY
+innodb_force_recovery=1
+---------------
+
+A partir de 3 ou +, risque de perte de données.
+
+
+NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Elle sont ouvertes par ordre de dates sur le disque.
 
 
 
