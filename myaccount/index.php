@@ -1324,7 +1324,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                                     'source_type_name' => 'API',
                                     'host'       => gethostname()
                                 )
-                                );
+                            );
                         }
                         catch(Exception $e)
                         {

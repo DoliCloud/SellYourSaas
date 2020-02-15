@@ -3900,6 +3900,37 @@ class SellYourSaasUtils
                         dol_syslog("Send other metric sellyoursaas.payingcustomerlost to datadog".(get_class($tmpcontract) == 'Contrat' ? ' contractid='.$tmpcontract->id.' contractref='.$tmpcontract->ref: ''));
        	                $arraytags=null;
        	                $statsd->increment('sellyoursaas.payingcustomerlost', 1, $arraytags);
+
+       	                global $dolibarr_main_url_root;
+       	                $urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
+       	                $urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
+       	                //$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
+
+       	                $tmpcontract->fetch_thirdparty();
+       	                $mythirdpartyaccount = $tmpcontract->thirdparty;
+
+       	                $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+       	                if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+       	                    && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+       	                {
+       	                    $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+       	                    if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+       	                }
+
+       	                $titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("CustomerLost").': '.$mythirdpartyaccount->name, 90);
+       	                $messageofevent = ' - '.$langs->trans("CustomerLost").' '.getUserRemoteIP()."\n";
+       	                $messageofevent.= $langs->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
+       	                //$messageofevent.= $langs->trans("SourceURLOfEvent").": ".$url;
+
+       	                // See https://docs.datadoghq.com/api/?lang=python#post-an-event
+       	                $statsd->event($titleofevent,
+       	                    array(
+       	                        'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
+       	                        'alert_type' => 'info',
+       	                        'source_type_name' => 'API',
+       	                        'host'       => gethostname()
+       	                    )
+       	                );
                     }
                 }
     	    }
