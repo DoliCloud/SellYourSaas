@@ -3897,6 +3897,7 @@ class SellYourSaasUtils
                         // Check if customer has still an instance on
                         // TODO
 
+                        dol_syslog("Send other metric sellyoursaas.payingcustomerlost to datadog".(get_class($tmpcontract) == 'Contrat' ? ' contractid='.$tmpcontract->id.' contractref='.$tmpcontract->ref: ''));
        	                $arraytags=null;
        	                $statsd->increment('sellyoursaas.payingcustomerlost', 1, $arraytags);
                     }
