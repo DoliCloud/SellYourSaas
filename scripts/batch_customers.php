@@ -596,9 +596,9 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
         $statsd = new DataDog\DogStatsd($arrayconfig);
 
         $arraytags=array();
-        $statsd->set('sellyoursaas.instancedeployed', $nbofinstancedeployed, $arraytags);
-        $statsd->set('sellyoursaas.instancepaymentko', $nbofactivesusp+$nbofactivepaymentko, $arraytags);
-        $statsd->set('sellyoursaas.instancepaymentok', $nbofactive, $arraytags);
+        $statsd->set('sellyoursaas.instancedeployed', $nbofinstancedeployed, 1.0, $arraytags);
+        $statsd->set('sellyoursaas.instancepaymentko', $nbofactivesusp+$nbofactivepaymentko, 1.0, $arraytags);
+        $statsd->set('sellyoursaas.instancepaymentok', $nbofactive, 1.0, $arraytags);
     }
     catch(Exception $e)
     {
