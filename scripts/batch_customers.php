@@ -575,6 +575,33 @@ $out.= (count($instancesbackuperror)?", error for backup on ".join(', ',$instanc
 $out.= (count($instancesupdateerror)?", error for update on ".join(', ',$instancesupdateerror):"");
 $out.= "\n";
 print $out;
+
+
+// Send to DataDog (metric)
+if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
+{
+    try {
+        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+
+        $arrayconfig=array();
+        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
+        {
+            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+        }
+
+        $statsd = new DataDog\DogStatsd($arrayconfig);
+
+        $arraytags=array();
+        $statsd->set('sellyoursaas.instancepaymentko', $nbofactivesusp+$nbofactivepaymentko, $arraytags);
+        $statsd->set('sellyoursaas.instancepaymentok', $nbofactive, $arraytags);
+    }
+    catch(Exception $e)
+    {
+
+    }
+}
+
+
 if (! $nboferrors)
 {
 	print '--- end OK - '.strftime("%Y%m%d-%H%M%S")."\n";
