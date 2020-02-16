@@ -158,8 +158,11 @@ print '--- start'."\n";
 $now = dol_now();
 
 $action=$argv[1];
-$nbofko=0;
 $nbofok=0;
+// Nb of deployed instances
+$nbofinstancedeployed=0;
+// Nb of paying instance
+$nbofactiveok=0;
 $nbofactive=0;
 $nbofactivesusp=0;
 $nbofactiveclosurerequest=0;
@@ -227,31 +230,31 @@ if ($resql)
 			{
 				$instance = $obj->instance;
 				$payment_status='PAID';
-				$subscription_status = 'OPEN';
 
-				$found = true;
 				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
 				$instance_status_bis = '';
 				$result = $object->fetch($obj->id);
-				if ($result <= 0) $found=false;
+				if ($result <= 0) {
+				    $i++;
+				    dol_print_error($dbmaster, $object->error, $object->errors);
+				    continue;
+				}
 				else
 				{
 					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; }
 					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'CLOSED'; $instance_status_bis = 'UNDEPLOYED'; }
-					elseif ($object->array_options['options_deployment_status'] == 'done')       { $instance_status = 'DEPLOYED'; }
+					elseif ($object->array_options['options_deployment_status'] == 'done')       {
+                        $instance_status = 'DEPLOYED';
+                        $nbofinstancedeployed++;
+					}
 					else { $instance_status = 'UNKNOWN'; }
 				}
 
 				$issuspended = sellyoursaasIsSuspended($object);
 				if ($issuspended)
 				{
-					$subscription_status = 'CLOSED';
 					$instance_status = 'SUSPENDED';
-				}
-				else
-				{
-					$subscription_status = 'OPEN';
 				}
 
 				$ispaid = sellyoursaasIsPaidInstance($object);
@@ -263,7 +266,7 @@ if ($resql)
 				}
 
 				if (empty($instance_status_bis)) $instance_status_bis=$instance_status;
-				print "Analyze instance ".($i+1)." ".$instance." status=".$instance_status." instance_status=".$instance_status_bis." payment_status=".$payment_status." subscription_status=".$subscription_status."\n";
+				print "Analyze instance ".($i+1)." ".$instance." status=".$instance_status." instance_status=".$instance_status_bis." payment_status=".$payment_status."\n";
 
 				// Count
 				if (! in_array($payment_status,array('TRIAL','TRIALING','TRIAL_EXPIRED')))
@@ -283,21 +286,21 @@ if ($resql)
 						else $nbofactiveok++; // not suspended, not close request
 
 						$instances[$obj->id]=$instance;
-						print "Qualify instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$subscription_status."\n";
+						print "Qualify instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 					}
 					else
 					{
-						//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
+						//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 					}
 				}
 				elseif ($instancefiltercomplete)
 				{
 					$instances[$obj->id]=$instance;
-					print "Qualify instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 				}
 				else
 				{
-					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
+					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 				}
 			}
 			$i++;
@@ -559,6 +562,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 // Result
 $out = '';
+$out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
 $out.= "Nb of paying instances (all time): ".$nbofalltime."\n";
 $out.= "Nb of paying instances (active with or without payment error, close request or not): ".$nbofactive."\n";
 $out.= "Nb of paying instances (active but close request): ".$nbofactiveclosurerequest."\n";
@@ -592,6 +596,7 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
         $statsd = new DataDog\DogStatsd($arrayconfig);
 
         $arraytags=array();
+        $statsd->set('sellyoursaas.instancedeployed', $nbofinstancedeployed, $arraytags);
         $statsd->set('sellyoursaas.instancepaymentko', $nbofactivesusp+$nbofactivepaymentko, $arraytags);
         $statsd->set('sellyoursaas.instancepaymentok', $nbofactive, $arraytags);
     }
