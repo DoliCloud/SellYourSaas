@@ -2878,49 +2878,67 @@ class SellYourSaasUtils
     				if (! $error) {
     				    $this->db->commit();
 
-    				    if ($remotetouse) {
+    				    if ($remotetouse && $mode == 'paid') {
         				    $contract = $object;
+        				    $tmpcontract = $contract;
 
-        				    // Add flag for paying instance lost
-        				    $ispaidinstance = sellyoursaasIsPaidInstance($contract);
-        				    if ($ispaidinstance)
+        				    if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
         				    {
-        				        $tmpcontract = $contract;
+        				        try {
+        				            dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-        				        dol_syslog("Send other metric sellyoursaas.payinginstancelost to datadog".(get_class($tmpcontract) == 'Contrat' ? ' contractid='.$tmpcontract->id.' contractref='.$tmpcontract->ref: ''));
-        				        $arraytags=null;
-        				        $statsd->increment('sellyoursaas.payinginstancelost', 1, $arraytags);
+        				            $arrayconfig=array();
+        				            if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
+        				            {
+        				                $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+        				            }
 
-        				        global $dolibarr_main_url_root;
-        				        $urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
-        				        $urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
-        				        //$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
+        				            $statsd = new DataDog\DogStatsd($arrayconfig);
 
-        				        //$tmpcontract->fetch_thirdparty();
-        				        $mythirdpartyaccount = $tmpcontract->thirdparty;
+                				    // Add flag for paying instance lost
+                				    $ispaidinstance = sellyoursaasIsPaidInstance($contract);
+                				    if ($ispaidinstance)
+                				    {
+                				        dol_syslog("Send other metric sellyoursaas.payinginstancelost to datadog".(get_class($tmpcontract) == 'Contrat' ? ' contractid='.$tmpcontract->id.' contractref='.$tmpcontract->ref: ''));
+                				        $arraytags=null;
+                				        $statsd->increment('sellyoursaas.payinginstancelost', 1, $arraytags);
 
-        				        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-        				        if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-        				            && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-        				        {
-        				            $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-        				            if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+                				        global $dolibarr_main_url_root;
+                				        $urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
+                				        $urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
+                				        //$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
+
+                				        //$tmpcontract->fetch_thirdparty();
+                				        $mythirdpartyaccount = $tmpcontract->thirdparty;
+
+                				        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+                				        if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+                				            && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+                				        {
+                				            $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+                				            if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+                				        }
+
+                				        $titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("PayingInstanceLost").': '.$mythirdpartyaccount->name, 90);
+                				        $messageofevent = ' - '.$langs->trans("IPAddress").' '.getUserRemoteIP()."\n";
+                				        $messageofevent.= $langs->trans("PayingInstanceLost").': '.$mythirdpartyaccount->name.' ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
+                				        $messageofevent.= 'Lost after cron job made a remoteaction='.$remotetouse."\n";
+
+                				        // See https://docs.datadoghq.com/api/?lang=python#post-an-event
+                				        $statsd->event($titleofevent,
+                				            array(
+                				                'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
+                				                'alert_type' => 'info',
+                				                'source_type_name' => 'API',
+                				                'host'       => gethostname()
+                				            )
+                				        );
+                				    }
         				        }
-
-        				        $titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("PayingInstanceLost").': '.$mythirdpartyaccount->name, 90);
-        				        $messageofevent = ' - '.$langs->trans("IPAddress").' '.getUserRemoteIP()."\n";
-        				        $messageofevent.= $langs->trans("PayingInstanceLost").': '.$mythirdpartyaccount->name.' ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
-        				        $messageofevent.= 'Lost after cron job made a remoteaction='.$remotetouse."\n";
-
-        				        // See https://docs.datadoghq.com/api/?lang=python#post-an-event
-        				        $statsd->event($titleofevent,
-        				            array(
-        				                'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
-        				                'alert_type' => 'info',
-        				                'source_type_name' => 'API',
-        				                'host'       => gethostname()
-        				            )
-        				            );
+        				        catch(Exception $e)
+        				        {
+        				            // Nothing
+        				        }
         				    }
     				    }
     				} else {
