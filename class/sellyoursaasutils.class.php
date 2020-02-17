@@ -2718,8 +2718,6 @@ class SellYourSaasUtils
     	$now = dol_now();
     	$datetotest = dol_time_plus_duree($now, -1 * abs($delayindays), 'd');
 
-    	$this->db->begin();
-
     	$sql = 'SELECT c.rowid, c.ref_customer, s.client, cd.rowid as lid';
     	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce, ';
     	$sql.= ' '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'societe_extrafields as se';
@@ -2731,7 +2729,7 @@ class SellYourSaasUtils
     	$sql.= " AND se.fk_object = s.rowid";
     	$sql.= " AND se.dolicloud = 'yesv2'";
     	$sql.= $this->db->order('s.client,c.rowid','ASC,ASC');
-    	$sql.= $this->db->plimit(1000);	// To avoid too long answers. There is another limit on number of case undeployed to MAXPERCALL later
+    	$sql.= $this->db->plimit(1000);	// To avoid too long answers. There is another limit on number of case really undeployed to MAXPERCALL later
 
     	$resql = $this->db->query($sql);
     	if ($resql)
@@ -2772,12 +2770,14 @@ class SellYourSaasUtils
     				}
     				$somethingdoneoncontract++;
 
-    				// Undeploy instance
+    				$this->db->begin();
+
     				$tmparray = sellyoursaasGetExpirationDate($object);
     				$expirationdate = $tmparray['expirationdate'];
 
-    				if ($expirationdate && $expirationdate < ($now - (abs($delayindays)*24*3600)))
+    				if ($expirationdate && $expirationdate < $datetotest)
     				{
+    				    // Undeploy instance
     				    $remotetouse = 'undeploy';
     				    if ($mode == 'test') $remotetouse = 'undeployall';
 
@@ -2794,82 +2794,90 @@ class SellYourSaasUtils
     					//$object->array_options['options_deployment_status'] = 'suspended';
 
     					$contractprocessed[$object->id]=$object->ref;	// To avoid to make action twice on same contract
-    				}
 
-    				// Finish undeploy
+        				// Finish undeploy
 
-    				// Unactivate all lines
-    				if (! $error)
-    				{
-    					dol_syslog("Unactivate all lines - doUndeployOldSuspendedInstances undeploy or undeployall");
+        				// Unactivate all lines
+        				if (! $error)
+        				{
+        					dol_syslog("Unactivate all lines - doUndeployOldSuspendedInstances undeploy or undeployall");
 
-    					$conf->global->noapachereload = 1;       // Set a global variable that can be read later by trigger
-    					$comment = "Close after undeployment by doUndeployOldSuspendedInstances('".$mode."') the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
-    					$result = $object->closeAll($user, 1, $comment);
-    					$conf->global->noapachereload = null;    // unset a global variable that can be read later by trigger
-    					if ($result <= 0)
-    					{
-    						$error++;
-    						$this->error=$object->error;
-    						$this->errors = array_merge((array) $this->errors, (array) $object->errors);
-    					}
-    				}
+        					$conf->global->noapachereload = 1;       // Set a global variable that can be read later by trigger
+        					$comment = "Close after undeployment by doUndeployOldSuspendedInstances('".$mode."') the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
+        					$result = $object->closeAll($user, 1, $comment);   // Disable trigger to avoid any other action
+        					$conf->global->noapachereload = null;    // unset a global variable that can be read later by trigger
+        					if ($result <= 0)
+        					{
+        						$error++;
+        						$this->error=$object->error;
+        						$this->errors = array_merge((array) $this->errors, (array) $object->errors);
+        					}
+        				}
 
-    				// End of undeployment is now OK / Complete
-    				if (! $error)
-    				{
-    					$object->array_options['options_deployment_status'] = 'undeployed';
-    					$object->array_options['options_undeployment_date'] = dol_now();
-    					$object->array_options['options_undeployment_ip'] = $_SERVER['REMOTE_ADDR'];
+        				// End of undeployment is now OK / Complete
+        				if (! $error)
+        				{
+        					$object->array_options['options_deployment_status'] = 'undeployed';
+        					$object->array_options['options_undeployment_date'] = dol_now();
+        					$object->array_options['options_undeployment_ip'] = getUserRemoteIP();
 
-    					$result = $object->update($user);
-    					if ($result < 0)
-    					{
-    						// We ignore errors. This should not happen in real life.
-    						//setEventMessages($contract->error, $contract->errors, 'errors');
-    					}
-    					else
-    					{
-    						// Now we force disable of recurring invoices
-    					    $object->fetchObjectLinked();
+        					$result = $object->update($user);
+        					if ($result < 0)
+        					{
+        						// We ignore errors. This should not happen in real life.
+        						//setEventMessages($contract->error, $contract->errors, 'errors');
+        					}
+        					else
+        					{
+        						// Now we force disable of recurring invoices
+        					    $object->fetchObjectLinked();
 
-    					    if (is_array($object->linkedObjects['facturerec']))
-    					    {
-    					        foreach($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice)
-    					        {
-                                    // Disabled this template invoice
-    					            $res = $templateinvoice->setValueFrom('suspended', 1);
-    					            if ($res)
-    					            {
-    					               $res = $templateinvoice->setValueFrom('note_private', dol_concatdesc($templateinvoice->note_private, 'Disabled by doUndeployOldSuspendedInstances mode='.$mode.' the '.dol_print_date($now, 'dayhour')));
-    					            }
-    					        }
-    					    }
-
-    					    // Delete draft invoices linked to this thirdparty, after a successfull undeploy
-    					    if (is_array($object->linkedObjects['facture']))
-    					    {
-        					    foreach ($object->linkedObjects['facture'] as $idinvoice => $invoicetodelete)
+        					    if (is_array($object->linkedObjects['facturerec']))
         					    {
-        					        if ($invoicetodelete->statut == Facture::STATUS_DRAFT)
+        					        foreach($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice)
         					        {
-        					            if (preg_match('/\(.*\)/', $invoicetodelete->ref))
+                                        // Disabled this template invoice
+        					            $res = $templateinvoice->setValueFrom('suspended', 1);
+        					            if ($res)
         					            {
-                					        //$sql = "DELETE FROM ".MAIN_DB_PREFIX."facture WHERE fk_statut = ".Facture::STATUS_DRAFT." AND fk_soc = ".$object->fk_soc;
-                					        //$sql.= " AND rowid IN (".join(',', $object->linkedObjectsIds['facture']).")";
-                					        //var_dump($sql);
-            					            $res = $invoicetodelete->delete($user);
-            					            //var_dump($idinvoice.' '.$res);
-        					            }
-        					            else
-        					            {
-        					                dol_syslog("The draft invoice ".$invoicetodelete->ref." has not a ref that match '(...)' so we do not delete it.", LOG_WAR);
+        					               $res = $templateinvoice->setValueFrom('note_private', dol_concatdesc($templateinvoice->note_private, 'Disabled by doUndeployOldSuspendedInstances mode='.$mode.' the '.dol_print_date($now, 'dayhour')));
         					            }
         					        }
         					    }
-    					    }
-    					    //exit;
-    					}
+
+        					    // Delete draft invoices linked to this thirdparty, after a successfull undeploy
+        					    if (is_array($object->linkedObjects['facture']))
+        					    {
+            					    foreach ($object->linkedObjects['facture'] as $idinvoice => $invoicetodelete)
+            					    {
+            					        if ($invoicetodelete->statut == Facture::STATUS_DRAFT)
+            					        {
+            					            if (preg_match('/\(.*\)/', $invoicetodelete->ref))
+            					            {
+                    					        //$sql = "DELETE FROM ".MAIN_DB_PREFIX."facture WHERE fk_statut = ".Facture::STATUS_DRAFT." AND fk_soc = ".$object->fk_soc;
+                    					        //$sql.= " AND rowid IN (".join(',', $object->linkedObjectsIds['facture']).")";
+                    					        //var_dump($sql);
+                					            $res = $invoicetodelete->delete($user);
+                					            //var_dump($idinvoice.' '.$res);
+            					            }
+            					            else
+            					            {
+            					                dol_syslog("The draft invoice ".$invoicetodelete->ref." has not a ref that match '(...)' so we do not delete it.", LOG_WAR);
+            					            }
+            					        }
+            					    }
+        					    }
+        					    //exit;
+        					}
+        				}
+    				} else {
+    				    dol_syslog("Record was qualified by select but not by test after fetch expirationdate=".$expirationdate." datetotest=".$datetotest, LOG_WARNING);
+    				}
+
+    				if (! $error) {
+    				    $this->db->commit();
+    				} else {
+    				    $this->db->rollback();
     				}
     			}
     			$i++;
@@ -2882,8 +2890,6 @@ class SellYourSaasUtils
     	}
 
     	$this->output = count($contractprocessed).' contract(s), in mode '.$mode.', suspended, with a planned end date before '.dol_print_date($datetotest, 'dayrfc').' undeployed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '');
-
-    	$this->db->commit();
 
     	return ($error ? 1: 0);
     }
