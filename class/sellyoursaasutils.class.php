@@ -290,6 +290,12 @@ class SellYourSaasUtils
     			{
     				if (! empty($contractprocessed[$obj->rowid])) continue;
 
+    				if ($nbsending > $MAXPERCALL)
+    				{
+    				    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed per batch, so we quit loop for the batch doAlertSoftTrial to avoid to reach email quota.", LOG_WARNING);
+    				    break;
+    				}
+
     				// Test if this is a paid or not instance
     				$object = new Contrat($this->db);
     				$result = $object->fetch($obj->rowid);
@@ -328,60 +334,53 @@ class SellYourSaasUtils
     				if ($expirationdate && $expirationdate < $date_limit_expiration)
     				{
     					$nbsending++;
-    					if ($nbsending <= $MAXPERCALL)
+
+					    // Load third party
+					    $object->fetch_thirdparty();
+
+					    $outputlangs = new Translate('', $conf);
+					    $outputlangs->setDefaultLang($object->thirdparty->default_lang);
+					    $outputlangs->loadLangs(array('main'));
+
+					    // @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
+					    dol_syslog("We will call getEMailTemplate for type 'contract', label 'GentleTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
+					    $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminder');
+
+    					$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
+    					$substitutionarray['__SELLYOURSAAS_EXPIRY_DATE__']=dol_print_date($expirationdate, 'day', 'tzserver', $outputlangs);
+    					complete_substitutions_array($substitutionarray, $outputlangs, $object);
+
+    					$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray);
+    					$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray);
+
+    					$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+    					$to = $object->thirdparty->email;
+    					$trackid = 'thi'.$object->thirdparty->id;
+
+    					$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid);
+    					$result = $cmail->sendfile();
+    					if (! $result)
     					{
-    					    // Load third party
-    					    $object->fetch_thirdparty();
-
-    					    $outputlangs = new Translate('', $conf);
-    					    $outputlangs->setDefaultLang($object->thirdparty->default_lang);
-    					    $outputlangs->loadLangs(array('main'));
-
-    					    // @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
-    					    dol_syslog("We will call getEMailTemplate for type 'contract', label 'GentleTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
-    					    $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminder');
-
-	    					$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
-	    					$substitutionarray['__SELLYOURSAAS_EXPIRY_DATE__']=dol_print_date($expirationdate, 'day', 'tzserver', $outputlangs);
-	    					complete_substitutions_array($substitutionarray, $outputlangs, $object);
-
-	    					$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray);
-	    					$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray);
-
-	    					$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-	    					$to = $object->thirdparty->email;
-	    					$trackid = 'thi'.$object->thirdparty->id;
-
-	    					$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid);
-	    					$result = $cmail->sendfile();
-	    					if (! $result)
-	    					{
-	    						$error++;
-	    						$this->error = $cmail->error;
-	    						$this->errors = $cmail->errors;
-	    						dol_syslog("Failed to send email to ".$to." ".$this->error, LOG_WARNING);
-	    						$contractko[$object->id]=$object->ref;
-	    					}
-	    					else
-	    					{
-	    						dol_syslog("Email sent to ".$to, LOG_DEBUG);
-	    						$contractok[$object->id]=$object->ref;
-
-	    						$sqlupdatedate = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields SET date_softalert_endfreeperiod = '".$this->db->idate($now)."' WHERE fk_object = ".$object->id;
-	    						$resqlupdatedate = $this->db->query($sqlupdatedate);
-	    						if (! $resqlupdatedate)
-	    						{
-	    						    dol_syslog("Failed to update date_softalert_endfreeperiod with '".$this->db->idate($now)."' for object id = ".$object->id, LOG_ERR);
-	    						}
-	    					}
-
-	    					$contractprocessed[$object->id]=$object->ref;
+    						$error++;
+    						$this->error = $cmail->error;
+    						$this->errors = $cmail->errors;
+    						dol_syslog("Failed to send email to ".$to." ".$this->error, LOG_WARNING);
+    						$contractko[$object->id]=$object->ref;
     					}
     					else
     					{
-    					    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed per batch, so we quit loop for the batch doAlertSoftTrial to avoid to reach email quota.", LOG_WARNING);
-    					    break;
+    						dol_syslog("Email sent to ".$to, LOG_DEBUG);
+    						$contractok[$object->id]=$object->ref;
+
+    						$sqlupdatedate = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields SET date_softalert_endfreeperiod = '".$this->db->idate($now)."' WHERE fk_object = ".$object->id;
+    						$resqlupdatedate = $this->db->query($sqlupdatedate);
+    						if (! $resqlupdatedate)
+    						{
+    						    dol_syslog("Failed to update date_softalert_endfreeperiod with '".$this->db->idate($now)."' for object id = ".$object->id, LOG_ERR);
+    						}
     					}
+
+    					$contractprocessed[$object->id]=$object->ref;
     				}
     				else
     				{
@@ -2178,10 +2177,15 @@ class SellYourSaasUtils
     		    $ifetchservice++;
 
 				$obj = $this->db->fetch_object($resql);
-
 				if ($obj)
 				{
 					if (! empty($contractprocessed[$obj->rowid])) continue;
+
+					if ($somethingdoneoncontract > $MAXPERCALL)
+					{
+					    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed, so we quit loop for this batch doSuspendInstances to avoid to reach email quota.", LOG_WARNING);
+					    break;
+					}
 
 					// Test if this is a paid or not instance
 					$object = new Contrat($this->db);
@@ -2220,11 +2224,6 @@ class SellYourSaasUtils
 
 					if ($expirationdate && $expirationdate < $now)	// If contract expired (we already had a test into main select, this is a security)
 					{
-					    if ($somethingdoneoncontract >= $MAXPERCALL)
-					    {
-					        dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed, so we quit loop for this batch doSuspendInstances to avoid to reach email quota.", LOG_WARNING);
-                            break;
-					    }
 					    $somethingdoneoncontract++;
 
 						$wemustsuspendinstance = false;
@@ -2747,6 +2746,12 @@ class SellYourSaasUtils
     			{
     				if (! empty($contractprocessed[$obj->rowid])) continue;
 
+    				if ($somethingdoneoncontract > $MAXPERCALL)
+    				{
+    				    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed, so we quit loop for this batch doUndeployOldSuspendedInstances to avoid a too long process.", LOG_WARNING);
+    				    break;
+    				}
+
     				// Test if this is a paid or not instance
     				$object = new Contrat($this->db);
     				$object->fetch($obj->rowid);
@@ -2763,11 +2768,6 @@ class SellYourSaasUtils
     				if ($mode == 'paid' && ! $isAPayingContract) continue;			// Discard if this is a test instance when we are in paid mode
 
     				// Undeploy now
-    				if ($somethingdoneoncontract >= $MAXPERCALL)
-    				{
-    				    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed, so we quit loop for this batch doUndeployOldSuspendedInstances to avoid a too long process.", LOG_WARNING);
-    				    break;
-    				}
     				$somethingdoneoncontract++;
 
     				$this->db->begin();
@@ -3896,6 +3896,7 @@ class SellYourSaasUtils
         	    $statsd->increment('sellyoursaas.remoteaction', 1, $arraytags);
 
                 // Add flag for customer lost
+                /*
                 if ($ispaidinstance)
                 {
                     if (in_array($remoteaction, array('undeploy', 'undeployall')))
@@ -3938,7 +3939,7 @@ class SellYourSaasUtils
        	                    )
        	                );
                     }
-                }
+                }*/
     	    }
     	    catch(Exception $e)
     	    {
