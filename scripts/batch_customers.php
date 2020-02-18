@@ -165,7 +165,6 @@ $nbofinstancedeployed=0;
 $nbofactiveok=0;
 $nbofactive=0;
 $nbofactivesusp=0;
-$nbofactiveclosurerequest=0;
 $nbofactivepaymentko=0;
 $nbofalltime=0;
 $nboferrors=0;
@@ -281,7 +280,6 @@ if ($resql)
 							$nbofactivesusp++;
 							$instancesactivebutsuspended[$obj->id]=$obj->ref.' ('.$instance.')';
 						}
-						else if (in_array($instance_status,array('CLOSE_QUEUED','CLOSURE_REQUESTED')) ) $nbofactiveclosurerequest++;
 						else if (in_array($payment_status,array('FAILURE','PAST_DUE'))) $nbofactivepaymentko++;
 						else $nbofactiveok++; // not suspended, not close request
 
@@ -313,7 +311,7 @@ else
 	$nboferrors++;
 	dol_print_error($dbtousetosearch);
 }
-print "Found ".count($instances)." not trial instances including ".$nbofactivesusp." suspended + ".$nbofactiveclosurerequest." active with closure request + ".$nbofactivepaymentko." active with payment ko\n";
+print "Found ".count($instances)." not trial instances including ".$nbofactivesusp." suspended + ".$nbofactivepaymentko." active with payment ko\n";
 
 
 //print "----- Start loop for backup_instance\n";
@@ -564,12 +562,11 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 $out = '';
 $out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
 $out.= "Nb of paying instances (all time): ".$nbofalltime."\n";
-$out.= "Nb of paying instances (active with or without payment error, close request or not): ".$nbofactive."\n";
-$out.= "Nb of paying instances (active but close request): ".$nbofactiveclosurerequest."\n";
-$out.= "Nb of paying instances (active but suspended): ".$nbofactivesusp;
+$out.= "Nb of paying instances (deployed with or without payment error): ".$nbofactive."\n";
+$out.= "Nb of paying instances (deployed but suspended): ".$nbofactivesusp;
 $out.= (count($instancesactivebutsuspended)?", suspension on ".join(', ',$instancesactivebutsuspended):"");
 $out.= "\n";
-$out.= "Nb of paying instances (active but payment ko, not yet suspended): ".$nbofactivepaymentko."\n";
+$out.= "Nb of paying instances (deployed but payment ko, not yet suspended): ".$nbofactivepaymentko."\n";
 if ($action != 'updatestatsonly')
 {
 	$out.= "Nb of paying instances processed ok: ".$nbofok."\n";
