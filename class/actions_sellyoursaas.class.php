@@ -1047,17 +1047,48 @@ class ActionsSellyoursaas
     	global $conf,$langs;
     	global $hookmanager;
 
-    	// If not a selyoursaas user, we leave
-    	if (is_object($parameters['object']->thirdparty))
+    	if (! is_object($parameters['object']))
     	{
-    		if (empty($parameters['object']->thirdparty->array_options['options_dolicloud']) || $parameters['object']->thirdparty->array_options['options_dolicloud'] == 'no')
-    		{
-				return 0;
-    		}
+    	    dol_syslog("Trigger afterPDFCreation was called but parameter 'object' was not set by caller.", LOG_WARNING);
+    	    return 0;
     	}
 
-    	// Same logo
-    	if ($conf->global->SELLYOURSAAS_LOGO_SMALL == $conf->global->SOCIETE_LOGO_SMALL)
+    	if (! is_object($parameters['object']->thirdparty))
+    	{
+    	    dol_syslog("Trigger afterPDFCreation was called but property thirdparty of object was not load by caller.", LOG_WARNING);
+    	    return 0;
+    	}
+
+    	// If not a sellyoursaas user, we leave
+   		if (empty($parameters['object']->thirdparty->array_options['options_dolicloud']) || $parameters['object']->thirdparty->array_options['options_dolicloud'] == 'no')
+   		{
+			return 0;
+    	}
+
+    	$mythirdpartyaccount = $parameters['object']->thirdparty;
+
+    	// Define logo
+    	$secondlogo = $conf->global->SELLYOURSAAS_LOGO_SMALL;
+    	$secondlogoblack = $conf->global->SELLYOURSAAS_LOGO_SMALL_BLACK;
+    	if (is_object($mythirdpartyaccount) && $mythirdpartyaccount->array_options['options_domain_registration_page'])
+    	{
+    	    $domainforkey = strtoupper($mythirdpartyaccount->array_options['options_domain_registration_page']);
+    	    $domainforkey = preg_replace('/\./', '_', $domainforkey);
+
+    	    $constname = 'SELLYOURSAAS_LOGO_SMALL_'.$domainforkey;
+    	    $constnameblack = 'SELLYOURSAAS_LOGO_SMALL_BLACK_'.$domainforkey;
+    	    if (! empty($conf->global->$constname))
+    	    {
+    	        $secondlogo=$conf->global->$constname;
+    	    }
+    	    if (! empty($conf->global->$constnameblack))
+    	    {
+    	        $secondlogoblack=$conf->global->$constnameblack;
+    	    }
+    	}
+
+    	// Is second logo is same than main logo ?
+    	if ($secondlogo == $conf->global->SOCIETE_LOGO_SMALL)
     	{
     		return 0;
     	}
@@ -1071,13 +1102,7 @@ class ActionsSellyoursaas
 
     	$ret=0;
     	dol_syslog(get_class($this).'::executeHooks action='.$action);
-
-    	if (! is_object($parameters['object']))
-    	{
-    		dol_syslog("Trigger afterPDFCreation was called but parameter 'object' was not set by caller.", LOG_WARNING);
-    		return 0;
-    	}
-
+    	
     	$file = $parameters['file'];
 
     	$formatarray = pdf_getFormat();
@@ -1103,7 +1128,7 @@ class ActionsSellyoursaas
     		$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
     		$pdf->useTemplate($tplidx);
 
-    		$logo = $conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->SELLYOURSAAS_LOGO_SMALL;
+    		$logo = $conf->mycompany->dir_output.'/logos/thumbs/'.$secondlogo;
 
     		$height=pdf_getHeightForLogo($logo);
     		$pdf->Image($logo, 80, $this->marge_haute, 0, 10);	// width=0 (auto)
