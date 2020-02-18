@@ -872,8 +872,8 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
-	echo "$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | bzip2 > $archivedir/$osusername/dump.$dbname.$now.sql.bz2"
-	$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | bzip2 > $archivedir/$osusername/dump.$dbname.$now.sql.bz2
+	echo "$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
+	$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
 
 	if [[ "x$?" == "x0" ]]; then
 		echo "Now drop the database"
