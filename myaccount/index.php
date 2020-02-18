@@ -2126,7 +2126,7 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 
 			if (! $error)
 			{
-				dol_syslog("--- Unactivate all lines of '.$contract->ref.' - undeploy process from myaccount", LOG_DEBUG, 0);
+				dol_syslog('--- Unactivate all lines of '.$contract->ref.' - undeploy process from myaccount', LOG_DEBUG, 0);
 
 				$result = $contract->closeAll($user, 1, $comment);	// Triggers disabled by call (suspend were done just before)
 				if ($result < 0)
@@ -2209,7 +2209,8 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 					}
 				}
 
-				flush();
+				// Do not use the flush here, this will return header and break the redirect later.
+				//flush();
 
 				$comment = 'Contract for '.$contract->ref.' is undeployed after a click on the undeploy confirmation request (sent by email from customer dashboard)';
 
@@ -2231,7 +2232,7 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 				// Unactivate all lines
 				if (! $error)
 				{
-					dol_syslog("--- Unactivate all lines of '.$contract->ref.' - undeployconfirmed process from myaccount", LOG_DEBUG, 0);
+					dol_syslog('--- Unactivate all lines of '.$contract->ref.' - undeployconfirmed process from myaccount', LOG_DEBUG, 0);
 
 					$result = $object->closeAll($user, 1, $comment);
 					if ($result <= 0)
