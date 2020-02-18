@@ -2170,7 +2170,7 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 		{
 			$hash = GETPOST('hash','none');
 
-			dol_syslog("Hash received = ".$hash.' to compare to '.$stringtohash);
+			dol_syslog("Hash received = ".$hash.' to compare to hash of '.$stringtohash.' = '.dol_hash($stringtohash));
 
 			if (! dol_verifyHash($stringtohash, $hash))
 			{
