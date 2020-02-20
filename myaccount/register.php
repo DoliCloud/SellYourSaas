@@ -632,6 +632,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
     function applyDomainConstraints( domain )
     {
         domain = domain.replace(/ /g,"");
+        domain = domain.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         domain = domain.replace(/\W/g,"");
         domain = domain.replace(/\_/g,"");
         domain = domain.toLowerCase();
@@ -648,6 +649,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 
         /* Autofill the domain */
         jQuery("[name=orgName]").change(function() {
+            console.log("Update sldAndSubdomain");
         	dn = applyDomainConstraints( $(this).val() );
     	    $("[name=sldAndSubdomain]").val( applyDomainConstraints( $(this).val() ) );
         });
