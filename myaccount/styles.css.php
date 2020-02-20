@@ -249,6 +249,10 @@ margin-top: 25px;
     input.sldAndSubdomain {
         max-width: 150px;
     }
+
+    img#logo {
+        padding-top: 10px;
+    }
 }
 
 div#waitMask {
