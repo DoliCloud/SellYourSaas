@@ -217,7 +217,7 @@ min-width: 500px;
 margin-top: 20px;
 }
 .block.medium {
-margin-top: 20px;
+margin-top: 25px;
 }
 
 .large { margin: 0 auto; padding-top: 20px;}
@@ -227,14 +227,20 @@ margin-top: 20px;
 .signup { margin: 0 auto; max-width: 700px; padding-top: 20px;}
 
 .signup2 { max-width: 700px; display: inline-block; text-align: initial; }
+
 .paddingtop20 {
-padding-top: 16px;
+    padding-top: 0px;
 }
 
+/* For smartphones */
 @media (max-width: 600px) {
-.paddingtop20 {
-padding-top: 0;
-}
+    .paddingtop20 {
+        padding-top: 0;
+    }
+
+    input.sldAndSubdomain {
+        max-width: 150px;
+    }
 }
 
 div#waitMask {
