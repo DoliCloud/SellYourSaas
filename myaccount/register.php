@@ -332,8 +332,9 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 				      ?>
 		          <div class="paddingtop20" style="float: right;">
 		              <div class="padding: 4px 10px 5px 10px;">
-		              <span class="opacitymedium hideonsmartphone"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?>&nbsp;</span>
-		              <a href="/" class="btn blue btn-sm btnalreadyanaccount"><?php echo $langs->trans("LoginAction"); ?></a>
+		              <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
+		              <?php if (! empty($partner) || ! empty($partnerkey)) { print '<br>'; } ?>
+		              <a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
 		              </div>
 		              <?php if (empty($partner) && empty($partnerkey)) { ?>
 		              <div class="padding: 4px 10px 5px 10px;">
@@ -637,7 +638,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
         if (!isNaN(domain)) {
           return ""
         }
-        while ( domain.length >1 && !isNaN( domain.charAt(0))  ){
+        while ( domain.length > 1 && !isNaN( domain.charAt(0))  ){
           domain=domain.substr(1)
         }
         return domain
@@ -646,11 +647,10 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
     jQuery(document).ready(function() {
 
         /* Autofill the domain */
-        jQuery("[name=orgName]").change(function(){
-        	dn = applyDomainConstraints( $(this).val() )
-    	    	$("[name=sldAndSubdomain]").val( applyDomainConstraints( $(this).val() ) );
+        jQuery("[name=orgName]").change(function() {
+        	dn = applyDomainConstraints( $(this).val() );
+    	    $("[name=sldAndSubdomain]").val( applyDomainConstraints( $(this).val() ) );
         });
-
 
         /* Sow hourglass */
         $('#formregister').submit(function() {

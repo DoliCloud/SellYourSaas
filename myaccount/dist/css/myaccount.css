@@ -673,7 +673,7 @@ border-color: #f13e46;}.btn-danger .badge {color: #F3565D;
 background-color: #fff;}.btn > i {font-size: 14px;}.btn-lg {padding: 
 10px 16px;font-size: 18px;line-height: 1.33;vertical-align: middle;}.
 btn-lg > i {font-size: 18px;}
-.btn-sm,.btn-xs {padding: 4px 10px 5px 10px; line-height: 1.5;}
+.btn-sm,.btn-xs {padding: 4px 10px 5px 10px; line-height: 1.4em;}
 .btn-sm > i,.btn-xs > i {
 font-size: 13px;}.btn-xs {padding: 1px 5px;}.btn-xs > i {font-size: 
 12px;}.btn-group .input-sm .btn-default {padding-top: 3px;

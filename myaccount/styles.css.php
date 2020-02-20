@@ -232,6 +232,14 @@ margin-top: 25px;
     padding-top: 0px;
 }
 
+.paddingright {
+    padding-right: 5px;
+}
+
+.margintop {
+    margin-top: 5px;
+}
+
 /* For smartphones */
 @media (max-width: 600px) {
     .paddingtop20 {
