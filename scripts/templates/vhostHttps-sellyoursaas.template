@@ -78,5 +78,6 @@
 SSLCertificateFile /etc/apache2/__webSSLCertificateCRT__
 SSLCertificateKeyFile /etc/apache2/__webSSLCertificateKEY__
 SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
+SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
 
 </VirtualHost>
