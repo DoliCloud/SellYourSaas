@@ -446,29 +446,30 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
 	echo "Check dirwithsources1=$dirwithsources1 targetdirwithsources1=$targetdirwithsources1"
 	if [ -d $dirwithsources1 ]; then
-	if [[ "x$targetdirwithsources1" != "x" ]]; then
-		mkdir -p $targetdirwithsources1
-		echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
-		cp -pr  $dirwithsources1/. $targetdirwithsources1
-	fi
+		if [[ "x$targetdirwithsources1" != "x" ]]; then
+			mkdir -p $targetdirwithsources1
+			echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
+			cp -pr  $dirwithsources1/. $targetdirwithsources1
+		fi
 	fi
 	echo "Check dirwithsources2=$dirwithsources2 targetdirwithsources2=$targetdirwithsources2"
 	if [ -d $dirwithsources2 ]; then
-	if [[ "x$targetdirwithsources2" != "x" ]]; then
-		mkdir -p $targetdirwithsources2
-		echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
-		cp -pr  $dirwithsources2/. $targetdirwithsources2
-	fi
+		if [[ "x$targetdirwithsources2" != "x" ]]; then
+			mkdir -p $targetdirwithsources2
+			echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
+			cp -pr  $dirwithsources2/. $targetdirwithsources2
+		fi
 	fi
 	echo "Check dirwithsources3=$dirwithsources3 targetdirwithsources3=$targetdirwithsources3"
 	if [ -d $dirwithsources3 ]; then
-	if [[ "x$targetdirwithsources3" != "x" ]]; then
-		mkdir -p $targetdirwithsources3
-		echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
-		cp -pr  $dirwithsources3/. $targetdirwithsources3
-	fi
+		if [[ "x$targetdirwithsources3" != "x" ]]; then
+			mkdir -p $targetdirwithsources3
+			echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
+			cp -pr  $dirwithsources3/. $targetdirwithsources3
+		fi
 	fi
 
+	echo "Force permissions and owner on /home/jail/home/$osusername/$dbname"
 	chown -R $osusername.$osusername /home/jail/home/$osusername/$dbname
 	chmod -R go-rwx /home/jail/home/$osusername/$dbname
 fi
@@ -838,6 +839,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	# If we use mysql and not mariadb, we set password differently
 	dpkg -l | grep mariadb > /dev/null
 	if [ $? == "1" ]; then
+		# For mysql
 		Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
 	fi
 	Q4="FLUSH PRIVILEGES; "

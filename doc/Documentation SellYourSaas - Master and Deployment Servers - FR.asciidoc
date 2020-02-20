@@ -3084,9 +3084,13 @@ To enable native Datadog reporting (datadog-agent must just be installed)
 
 
 
+=== TroubleShooting
 
+ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
+Error found in /var/log/syslog when using IMAP PHP function.
 
+=> ???
 
 
  
