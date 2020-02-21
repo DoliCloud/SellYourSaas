@@ -146,9 +146,9 @@ if (! isset($argv[1])) {	// Check parameters
     print "- backuprsync         creates backup (rsync)\n";
     print "- backupdatabase      creates backup (mysqldump)\n";
     print "- backup              creates backup (rsync + mysqldump) ***** Used by cron on deployment servers *****\n";
-    print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats\n";
+    print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats.\n";
     print "- updatecountsonly    updates counters of instances only (only nb of user for instances)\n";
-    print "- updatestatsonly     updates stats only (only table dolicloud_stats) ***** Used by cron on master server *****\n";
+    print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
     exit;
 }
 print '--- start'."\n";
@@ -560,6 +560,12 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 // Result
 $out = '';
+if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+    $out.= "\n";
+    $out.= "***** Summary for host ".$ipserverdeployment."\n";
+} else {
+    $out.= "***** Summary for all deployment servers\n";
+}
 $out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
 $out.= "Nb of paying instances (all time): ".$nbofalltime."\n";
 $out.= "Nb of paying instances (deployed with or without payment error): ".$nbofactive."\n";
@@ -579,30 +585,31 @@ print $out;
 
 
 // Send to DataDog (metric)
-if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
-{
-    try {
-        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
-
-        $arrayconfig=array();
-        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-        {
-            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-        }
-
-        $statsd = new DataDog\DogStatsd($arrayconfig);
-
-        $arraytags=null;
-        $statsd->gauge('sellyoursaas.instancedeployed', (float) $nbofinstancedeployed, 1.0, $arraytags);
-        $statsd->gauge('sellyoursaas.instancepaymentko', (float) $nbofactivesusp+$nbofactivepaymentko, 1.0, $arraytags);
-        $statsd->gauge('sellyoursaas.instancepaymentok', (float) $nbofactive, 1.0, $arraytags);
-    }
-    catch(Exception $e)
+if ($action == 'updatedatabase') {
+    if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
     {
+        try {
+            dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
+            $arrayconfig=array();
+            if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
+            {
+                $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+            }
+
+            $statsd = new DataDog\DogStatsd($arrayconfig);
+
+            $arraytags=null;
+            $statsd->gauge('sellyoursaas.instancedeployed', (float) $nbofinstancedeployed, 1.0, $arraytags);
+            $statsd->gauge('sellyoursaas.instancepaymentko', (float) $nbofactivesusp+$nbofactivepaymentko, 1.0, $arraytags);
+            $statsd->gauge('sellyoursaas.instancepaymentok', (float) $nbofactive, 1.0, $arraytags);
+        }
+        catch(Exception $e)
+        {
+
+        }
     }
 }
-
 
 if (! $nboferrors)
 {
