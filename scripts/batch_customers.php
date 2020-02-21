@@ -589,6 +589,7 @@ if ($action == 'updatedatabase') {
     if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
     {
         try {
+            print 'Send data to DataDog'."\n";
             dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
             $arrayconfig=array();
