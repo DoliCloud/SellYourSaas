@@ -290,7 +290,7 @@ class SellYourSaasUtils
     			{
     				if (! empty($contractprocessed[$obj->rowid])) continue;
 
-    				if ($nbsending > $MAXPERCALL)
+    				if ($nbsending >= $MAXPERCALL)
     				{
     				    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed per batch, so we quit loop for the batch doAlertSoftTrial to avoid to reach email quota.", LOG_WARNING);
     				    break;
@@ -2180,7 +2180,7 @@ class SellYourSaasUtils
 				{
 					if (! empty($contractprocessed[$obj->rowid])) continue;
 
-					if ($somethingdoneoncontract > $MAXPERCALL)
+					if ($somethingdoneoncontract >= $MAXPERCALL)
 					{
 					    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed, so we quit loop for this batch doSuspendInstances to avoid to reach email quota.", LOG_WARNING);
 					    break;
@@ -2753,7 +2753,7 @@ class SellYourSaasUtils
     			{
     				if (! empty($contractprocessed[$obj->rowid])) continue;
 
-    				if ($somethingdoneoncontract > $MAXPERCALL)
+    				if ($somethingdoneoncontract >= $MAXPERCALL)
     				{
     				    dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed, so we quit loop for this batch doUndeployOldSuspendedInstances to avoid a too long process.", LOG_WARNING);
     				    break;
@@ -2775,8 +2775,6 @@ class SellYourSaasUtils
     				if ($mode == 'paid' && ! $isAPayingContract) continue;			// Discard if this is a test instance when we are in paid mode
 
     				// Undeploy now
-    				$somethingdoneoncontract++;
-
     				$this->db->begin();
 
     				$tmparray = sellyoursaasGetExpirationDate($object);
@@ -2785,6 +2783,8 @@ class SellYourSaasUtils
     				$remotetouse = '';
     				if ($expirationdate && $expirationdate < $datetotest)
     				{
+    				    $somethingdoneoncontract++;
+
     				    // Undeploy instance
     				    $remotetouse = 'undeploy';
     				    if ($mode == 'test') $remotetouse = 'undeployall';
