@@ -2128,8 +2128,7 @@ class SellYourSaasUtils
     		return -1;
     	}
 
-    	$langs->load("sellyoursaas");
-    	$langs->load("agenda");
+    	$langs->loadLangs(array("sellyoursaas", "agenda"));
 
     	$error = 0;
     	$erroremail = '';
@@ -2315,7 +2314,8 @@ class SellYourSaasUtils
 									$idinvoice = $invoice_draft->create($user);      // This include class to add_object_linked() and add add_contact()
 									if (! ($idinvoice > 0))
 									{
-										$this->errors[] = $invoice_draft->error;
+									    if ($invoice_draft->error) $this->errors[] = $invoice_draft->error;
+									    else $this->errors[] = 'Error creating draft invoice';
 										$error++;
 									}
 								}
@@ -2494,14 +2494,15 @@ class SellYourSaasUtils
 										if (! $error && $result < 0)
 										{
 											$error++;
-											$this->errors[] = $db->lasterror();
+											$this->errors[] = 'Error sql '.$db->lasterror();
 										}
 
 										$result=$oldinvoice->delete($user, 1);
 										if (! $error && $result < 0)
 										{
 											$error++;
-											$this->errors[] = $oldinvoice->error;
+											if ($oldinvoice->error) $this->errors[] = $oldinvoice->error;
+											else $this->errors[] = 'Error deleting invoice';
 										}
 
 										if (! $error)
@@ -2512,7 +2513,8 @@ class SellYourSaasUtils
 									else
 									{
 										$error++;
-										$this->errors[] = $invoice_rec->error;
+										if ($invoice_rec->error) $this->errors[] = $invoice_rec->error;
+										else $this->errors[] = 'Error creating recurring invoice';
 									}
 								}
 							}
@@ -2533,7 +2535,10 @@ class SellYourSaasUtils
 							{
 								$error++;
 								$this->error = $object->error;
-								$this->errors = array_merge((array) $this->errors, (array) $object->errors);
+								if (is_array($object->errors) && count($object->errors)) {
+								    if (is_array($this->errors)) $this->errors = array_merge($this->errors, $object->errors);
+								    else $this->errors = $object->errors;
+								}
 							}
 							else
 							{
@@ -2613,7 +2618,7 @@ class SellYourSaasUtils
    		if (! $error)
    		{
    			$this->db->commit();
-   			$this->output = $numofexpiredcontractlines.' expired contract lines found';
+   			$this->output = $numofexpiredcontractlines.' expired contract lines found'."\n";
    			$this->output.= ' - '.count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' suspended'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
    			$this->output.= '. '.count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' converted into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
    			if ($erroremail) $this->output.='. Got errors when sending some email : '.$erroremail;
@@ -2621,7 +2626,9 @@ class SellYourSaasUtils
    		else
    		{
    			$this->db->rollback();
-   			$this->output = count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to suspend'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
+   			$this->output = "Rollback after error\n";
+   			$this->output.= $numofexpiredcontractlines.' expired contract lines found'."\n";
+   			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to suspend'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
    			$this->output.='. '.count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to convert into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
    			if ($erroremail) $this->output.='. Got errors when sending some email : '.$erroremail;
    		}
