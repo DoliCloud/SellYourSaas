@@ -151,7 +151,7 @@ if (! isset($argv[1])) {	// Check parameters
     print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
     exit;
 }
-print '--- start'."\n";
+print '--- start '.$argv[1]."\n";
 //print 'Argument 1='.$argv[1]."\n";
 //print 'Argument 2='.$argv[2]."\n";
 
@@ -585,7 +585,7 @@ print $out;
 
 
 // Send to DataDog (metric)
-if ($action == 'updatedatabase') {
+if ($action == 'updatestatsonly') {
     if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
     {
         try {
