@@ -603,7 +603,7 @@ if ($action == 'updatestatsonly') {
             $arraytags=null;
             $statsd->gauge('sellyoursaas.instancedeployed', (float) $nbofinstancedeployed, 1.0, $arraytags);
             $statsd->gauge('sellyoursaas.instancepaymentko', (float) $nbofactivesusp+$nbofactivepaymentko, 1.0, $arraytags);
-            $statsd->gauge('sellyoursaas.instancepaymentok', (float) $nbofactive, 1.0, $arraytags);
+            $statsd->gauge('sellyoursaas.instancepaymentok', (float) $nbofactive-($nbofactivesusp+$nbofactivepaymentko), 1.0, $arraytags);
         }
         catch(Exception $e)
         {
