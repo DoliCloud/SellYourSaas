@@ -53,7 +53,7 @@ do
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php"
-	        php build/generate_filelist_xml.php release=auto-dolicloud
+	        php build/generate_filelist_xml.php release=auto-sellyoursaas
 	    fi
 	
 		# Create a deployment tar file
