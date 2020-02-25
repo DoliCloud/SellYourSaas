@@ -7,7 +7,7 @@
 #---------------------------------------------------------
 
 if [ "x$1" == "x" ]; then
-   echo "Usage:   $0  dir_document_of_git_repositories"
+   echo "Usage:   $0  dir_document_of_git_repositories [subdir]"
    echo "Example: $0  /pathtodocuments/documents/sellyoursaas/git"
    exit 1
 fi
@@ -16,11 +16,20 @@ echo "Update git dirs found into $1 and generate the tgz image."
 
 for dir in `ls -d $1/* | grep -v tgz`
 do
+	# If a subdir is given, discard if not subdir
+	if [ "x$2" != "x" ]; then
+		if [ "x$1/$2" != "x$dir" ]; then
+			continue;
+		fi
+	fi
+
     echo -- Process dir $dir
     cd $dir
 	if [ $? -eq 0 ]; then
 		export gitdir=`basename $dir`
 	
+		
+		
 	    if [ -d ".git" ]; then
 	        git reset --hard HEAD
 	        # Do not use git pull --depth=1 here, this will maka merge errors.
