@@ -2906,6 +2906,8 @@ class SellYourSaasUtils
                 				    $ispaidinstance = sellyoursaasIsPaidInstance($contract);
                 				    if ($ispaidinstance)
                 				    {
+                				    	$langs->load("sellyoursaas@sellyoursaas");
+
                 				        dol_syslog("Send other metric sellyoursaas.payinginstancelost to datadog".(get_class($tmpcontract) == 'Contrat' ? ' contractid='.$tmpcontract->id.' contractref='.$tmpcontract->ref: ''));
                 				        $arraytags=null;
                 				        $statsd->increment('sellyoursaas.payinginstancelost', 1, $arraytags);
@@ -2915,7 +2917,7 @@ class SellYourSaasUtils
                 				        $urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
                 				        //$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
 
-                				        //$tmpcontract->fetch_thirdparty();
+                				        $tmpcontract->fetch_thirdparty();
                 				        $mythirdpartyaccount = $tmpcontract->thirdparty;
 
                 				        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
