@@ -448,24 +448,39 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
-			echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
-			cp -pr  $dirwithsources1/. $targetdirwithsources1
+			if [ -f $dirwithsources1.tgz ]; then
+				echo "tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
+				tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
+			else
+				echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
+				cp -pr  $dirwithsources1/. $targetdirwithsources1
+			fi
 		fi
 	fi
 	echo "Check dirwithsources2=$dirwithsources2 targetdirwithsources2=$targetdirwithsources2"
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
-			echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
-			cp -pr  $dirwithsources2/. $targetdirwithsources2
+			if [ -f $dirwithsources2.tgz ]; then
+				echo "tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
+				tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
+			else
+				echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
+				cp -pr  $dirwithsources2/. $targetdirwithsources2
+			fi
 		fi
 	fi
 	echo "Check dirwithsources3=$dirwithsources3 targetdirwithsources3=$targetdirwithsources3"
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
-			echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
-			cp -pr  $dirwithsources3/. $targetdirwithsources3
+			if [ -f $dirwithsources3.tgz ]; then
+				echo "tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
+				tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
+			else
+				echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
+				cp -pr  $dirwithsources3/. $targetdirwithsources3
+			fi
 		fi
 	fi
 
