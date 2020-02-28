@@ -409,34 +409,26 @@ ipduserveurprincipale   nomduserveur.mysaasdomainname.com
 ---------------
 
 
-=== Ajout IP virtuelle (optionnel) et/ou IP v6
+=== Ajout IP virtuelle (optionnel)
 
-- Ajout d'une IP virtuelle et ou du suport IPv6 via le manager OVH
+- Ajouter l'IP virtuelle via le manager OVH.
 
-- Ajouter l'interface réseau virtuelle sur le serveur de manière dynamique.
+- Ajouter et supprimer l'interface réseau virtuelle sur le serveur de manière dynamique (pour test).
+
+Ajout: 
 
 [source,bash]
 ---------------
 ifconfig eth0:0 a.b.c.d
 ---------------
 
-- Pour la supprimer de manière dynamique
+Suppression:
 
 [source,bash]
 ---------------
 ifconfig eth0:0 down
 ---------------
 
-- Pour ajouter le support IPv6 de manière dynamique
-
-[source,bash]
----------------
-ip addr add 2002:41d0:302:1000::1234:1234/128 dev eth0
-ip -6 route add 2002:41d0:302:1000::1 dev eth0
-ip -6 route add default via 2002:41d0:302:1000::1 dev eth0
----------------
-       
-        
 - Pour une définition persistente au reboot, déclarer l'interface dans */etc/network/interfaces* ou dans un fichier de */etc/network/interfaces.d* (Ubuntu < 17.10)
 
 Exemple pour 2 IPs virtuelles:
@@ -455,15 +447,6 @@ iface eth0:1 inet static
 		    address e.f.g.h
 		    netmask 255.255.255.255
 		    broadcast e.f.g.h
-
-# Pour declarer une IP v6 persistente (le masque est 128 chez OVH en ipv6) 
-iface eth0 inet6 static
-        address 2002:41d0:302:1000::4:1438
-        netmask 128
-        post-up /sbin/ip -6 route add 2002:41d0:302:1000::1 dev eth0
-        post-up /sbin/ip -6 route add default via 2002:41d0:302:1000::1 dev eth0
-        pre-down /sbin/ip -6 route del default via 2002:41d0:302:1000::1 dev eth0
-        pre-down /sbin/ip -6 route del 2002:41d0:302:1000::1 dev eth0
 ---------------
 
 Rem: *eth0* can be something else, for example *ens3*.
@@ -479,22 +462,73 @@ Pour prendre en compte, essayer ceci, sinon, reboot.
 
 
 
-Rem: On oublie netplan (Ubuntu > 17.10, test ko):
+=== Ajout du support de l'IP v6
+
+==== Avec ifupdown
+
+- Pour ajouter une IP v6 de manière dynamique à des fins de test dans un premier temps: 
+
+[source,bash]
+---------------
+ip addr add 2002:41d0:1234:1000::1234/128 dev eth0
+ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+---------------
+
+- Pour une définition persistente au reboot, déclarer l'interface dans */etc/network/interfaces* ou dans un fichier de */etc/network/interfaces.d* (Ubuntu < 17.10)
+
+Exemple pour une IPv6 2002:41d0:1234:1000::1234 avec comme gateway 2002:41d0:1234:1000::1
 
 [source,conf]
 ---------------
-	network:
-		version: 2
-		renderer: networkd
-		ethernets:
-			enp0s3: #object name
-				dhcp4: no # dhcp v4 disable
-				dhcp6: no # dhcp v6 disable
-				addresses: 91.121.46.42
-				gateway4: 91.121.46.42
-				nameservers:
-					addresses: [8.8.8.8,8.8.4.4] #name servers
+
+# Pour declarer une IP v6 persistente (le masque est 128 chez OVH en ipv6) 
+iface eth0 inet6 static
+        address 2002:41d0:1234:1000::1234
+        netmask 128
+        post-up /sbin/ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+        post-up /sbin/ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del 2002:41d0:1234:1000::1 dev eth0
 ---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
+Pour prendre en compte, essayer ceci, sinon, reboot.
+
+[source,bash]
+---------------
+/etc/init.d/networking restart
+---------------
+
+==== Avec netplan (Ubuntu 18.04 +)
+
+Ajouter un fichier de conf */etc/netplan/51-ipv6-ovh.yaml*.
+Remarque: OVH fourni un /128 pour l'ipv6 mais netplan veut du /64
+ 
+Exemple pour une IPv6 2002:41d0:1234:1000::1234 avec comme gateway 2002:41d0:1234:1000::1
+
+[source,conf]
+---------------
+network:
+	version: 2
+	ethernets:
+		eth0:
+			match:
+				name: eth0
+			addresses:
+				- "2002:41d0:1234:1000::1234/64"
+			gateway6: "2002:41d0:1234:1000::1"
+---------------
+ 
+[source,bash]
+---------------
+netplan try
+netplan apply
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
 
 
 === Ajout d'un swap (optionnel)
@@ -614,6 +648,92 @@ en
 foreach $db (@dbs) {
     # @CHANGE LDR
     if ($db =~ /^dbn/) { next; }
+---------------
+
+=== Installation de DataDog (optionnel pour supervision)
+
+* Créer un compte DataDog.
+
+* Installer l'agent sur le serveur par:
+
+[source,bash]
+---------------
+DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+---------------
+
+
+* Copier le fichier de config datadog pour superviser *mysql/mariadb*. Le fichier sera éditer pour renseigner le mot de passe du compte de base datadog un peu plus loin... 
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
+---------------
+
+
+* Copier le fichier de config datadog pour superviser *apache*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.d/apache.d/conf.yaml
+---------------
+
+
+* Copier le fichier de config datadog pour superviser *postfix*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+---------------
+
+Editer le fichier pour ajouter "min_collection_interval: 300" sous "postfix_user: postfix" et sous "queues: - deffered"
+
+
+* Copier le fichier de config datadog pour superviser *memcached*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+---------------
+
+
+* Copier le fichier de config datadog pour superviser certains *process*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
+---------------
+
+Editer le pour suivre les 3 process suivants:
+
+[source,bash]
+---------------
+instances:
+  - name: process_apache2
+    search_string: ['apache2']
+    exact_match: False
+    thresholds:
+      critical: [5, 5000]
+
+  - name: agent_sellyoursaas
+    search_string: ['remote_server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: apache_watchdog_daemon
+    search_string: ['apache_watchdog_daemon']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+---------------
+
+
+Relancer datadog
+
+[source,bash]
+---------------
+sudo service datadog-agent stop
+sudo service datadog-agent start
 ---------------
 
 
@@ -1876,7 +1996,7 @@ zone "with.mysaasdomainname.com" {
 
 
 
-Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant)
+Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
 
 Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local.
 
@@ -1884,6 +2004,7 @@ Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind
 ---------------
 sudo systemctl disable systemd-resolved.service
 sudo systemctl stop systemd-resolved
+cat "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
 ---------------
 
@@ -1891,7 +2012,7 @@ shutdown -Fr now
 
 === Securisation du répertoire des sessions PHP
 
-Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* ou */var/lib/php*
+Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php*
 
 
 
@@ -1909,7 +2030,7 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendma
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
-Modifier le fichier php.ini de apache avec:
+Modifier le fichier *php.ini* de apache avec:
 
 [source,bash]
 ---------------
@@ -1929,7 +2050,7 @@ mail.log = /var/log/phpmail.log
 
 === Configuration de logrotate
 
-* Ajouter une ligne si non deja présente dans le fichier */etc/logrotate.conf*
+* Ajouter une ligne si non déjà présente dans le fichier */etc/logrotate.conf*
 
 [source,conf]
 ---------------
@@ -1995,7 +2116,7 @@ logrotate -f logrotate_sellyoursaas_log
 ---------------
 
 
-=== Configuration de journalctl (sur Ubutntu 18.04+)
+=== Configuration de journalctl (sur Ubuntu 18.04+)
 
 * Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
 
@@ -2007,7 +2128,7 @@ SystemMaxUse=100M
 ---------------
 
 
-=== Désactivation de apport
+=== Désactivation de apport (optionnel)
 
 [source,bash]
 ---------------
@@ -2018,7 +2139,7 @@ sudo systemctl status apport.service
 
 
 
-=== Installer certbot (pour le ssl des sites hors instances clients)
+=== Installer certbot (pour le SSL des sites hors instances clients)
 
 [source,bash]
 ---------------
@@ -2029,7 +2150,9 @@ apt-get install python-certbot-apache
 ---------------
 
 
-=== Création d'un certificat SSL wildcard.
+=== Création d'un certificat SSL wildcard pour les instances clients
+
+Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
 
 * Créer le fichier key *with.mysaasdomainname.com.key* et csr *with.mysaasdomainname.com.csr* ainsi:
 
@@ -2051,7 +2174,7 @@ openssl req -nodes -newkey rsa:2048 -sha256 -keyout with.mysaasdomainname.com.ke
 
 Choisir:
 
-	CN	*.with.mysaasdomainname.com
+	CN	*.withX.mysaasdomainname.com
 	OU	IT
 	O	The company name
 	L	Paris
@@ -2064,7 +2187,7 @@ Choisir:
 
 * Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
 
-* Créer un lien symbolique vers ce certificats avec le nom generique *with.sellyoursaas.com.crt* et *with.sellyoursaas.com-intermediate.crt*:
+* Créer un lien symbolique vers ce certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
 ---------------
 cd /etc/apache2
@@ -3086,11 +3209,12 @@ To enable native Datadog reporting (datadog-agent must just be installed)
 
 === TroubleShooting
 
-ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
-Error found in /var/log/syslog when using IMAP PHP function.
+On deployment server in */var/log/syslog* when using IMAP PHP function:
 
-=> ???
+ ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
+
+=> Check that you have less than 1024 instances on same deployment server.
 
 
  
