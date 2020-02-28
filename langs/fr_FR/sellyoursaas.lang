@@ -338,6 +338,7 @@ DeleteMyAccount=Supprimer mon compte
 ClosingAccountResellerNotPossible=Pour pouvoir supprimer votre compte revendeur, vous devez auparavant nous demander (%s) de basculer vos clients actifs sur un autre compte revendeur.
 ClosingAccountNotPossible=Avant de pouvoir fermer votre compte, vous devez d'abord clore vos abonnements actifs (%s). Pour cela, aller sur le menu '%s' puis, pour chaque instance, aller sur l'onglet '%s' pour détruire l'instance. 
 PleaseBeSureCustomerAccount=Afin de confirmer la suppression de votre compte, merci de saisi ici l'email du compte à supprimer
+EmailOfAccountToDestroy=Email de votre compte
 ErrorEmailMustMatch=Erreur, l'email du compte à supprimer doit correspondre à votre email
 YourAccountHasBeenClosed=Votre compte a été fermé.
 SorryInstanceSuspended=Désolé, votre instance <strong>%s</strong> a été suspendue.

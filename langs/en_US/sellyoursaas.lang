@@ -356,6 +356,7 @@ DeleteMyAccount=Delete my account
 ClosingAccountResellerNotPossible=To be able to close your reseller account, your must first ask us (%s) to migrate your customer on another reseller.
 ClosingAccountNotPossible=To be able to close your account, your must first delete/close your online instances (%s). Go on menu '%s' then on each instance, go on tab '%s' to delete the instance. 
 PleaseBeSureCustomerAccount=To confirm the deletion of your account, please enter here email of account to delete...
+EmailOfAccountToDestroy=Email of your account
 ErrorEmailMustMatch=Error, email of account to delete must match email of your account
 YourAccountHasBeenClosed=You account has been closed.
 SorryInstanceSuspended=Sorry, your instance <strong>%s</strong> has been suspended.

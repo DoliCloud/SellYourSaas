@@ -7229,7 +7229,7 @@ if ($mode == 'myaccount')
 					                    print '
 						                </p>
 										<p class="center" style="padding-bottom: 15px">
-											<input type="text" class="urlofinstancetodestroy" name="accounttodestroy" value="'.GETPOST('accounttodestroy','alpha').'" placeholder="'.$langs->trans("NameOfInstanceToDestroy").'" autofocus>
+											<input type="text" class="urlofinstancetodestroy" name="accounttodestroy" value="'.GETPOST('accounttodestroy','alpha').'" placeholder="'.$langs->trans("EmailOfAccountToDestroy").'" autofocus>
 										</p>
 										<p class="center">
 											<input type="hidden" name="mode" value="myaccount"/>
