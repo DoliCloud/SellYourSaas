@@ -31,21 +31,47 @@
 if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
 
-// Add specific definition to allow a dedicated session management
-include ('./mainmyaccount.inc.php');
+$sapi_type = php_sapi_name();
+$script_file = basename(__FILE__);
+$path=dirname($_SERVER['PHP_SELF']).'/';
+
+// Test if batch mode
+if (substr($sapi_type, 0, 3) != 'cli') {
+	// Add specific definition to allow a dedicated session management
+	include ('./mainmyaccount.inc.php');
+} else {
+	// Add specific definition to allow a dedicated session management
+	include ($path.'mainmyaccount.inc.php');
+}
 
 // Load Dolibarr environment
 $res=0;
-// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
-// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
-// Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
-if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+if (substr($sapi_type, 0, 3) != 'cli') {
+	// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
+	if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+	// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+	$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+	while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+	if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
+	if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+	// Try main.inc.php using relative path
+	if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
+	if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+} else {
+	// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
+	$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+	while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+	if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+	if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+	// Try master.inc.php using relative path
+	if (! $res && file_exists("./master.inc.php")) $res=@include "./master.inc.php";
+	if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+	if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+	if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
+	if (! $res) die("Include of master fails");
+	// After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
+	// $user is created but empty.
+}
 if (! $res) die("Include of main fails");
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
@@ -79,7 +105,7 @@ if (empty($user->id))
 	if (empty($user->id))
 	{
 		dol_print_error_email('SETUPANON', 'Error setup of module not complete or wrong. Missing the anonymous user.', null, 'alert alert-error');
-		exit;
+		exit(-1);
 	}
 
 	$user->getrights();
@@ -93,7 +119,6 @@ $password2 = trim(GETPOST('password2','alpha'));
 $country_code = trim(GETPOST('address_country','alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain','alpha'));
 $tldid = trim(GETPOST('tldid','alpha'));
-$domainname = preg_replace('/^\./', '', $tldid);
 $origin = GETPOST('origin','aZ09');
 $partner=GETPOST('partner','int');
 $partnerkey=GETPOST('partnerkey','alpha');		// md5 of partner name_alias
@@ -109,7 +134,30 @@ $plan=GETPOST('plan','alpha');
 $productref=(GETPOST('productref','alpha')?GETPOST('productref','alpha'):($plan?$plan:''));
 $extcss=GETPOST('extcss','alpha');
 
+// If ran from command line
+if (substr($sapi_type, 0, 3) == 'cli') {
+	$productref = $argv[1];
+	$instancefullname = $argv[2];
+	$instancefullnamearray = explode('.', $instancefullname);
+	$sldAndSubdomain = $instancefullnamearray[0];
+	unset($instancefullnamearray[0]);
+	$tldid = '.'.join('.', $instancefullnamearray);
+	$password = $argv[3];
+	$reusesocid = $argv[4];
+	if (empty($productref) || empty($sldAndSubdomain) || empty($tldid) || empty($password) || empty($reusesocid)) {
+		print "***** ".$script_file." *****\n";
+		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
+		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.sellyoursaasdomain password CustomerID\n";
+		print "Example: ".$script_file." SERVICETODEPLOY myinstance.with.mysellyoursaasdomain.com mypassword 123\n";
+		exit(-1);
+	}
+	$password2 = $password;
+	$disablecustomeremail = 1;
+}
+
+
 $remoteip = getUserRemoteIP();
+$domainname = preg_replace('/^\./', '', $tldid);
 
 $tmpproduct = new Product($db);
 $tmppackage = new Packages($db);
@@ -120,27 +168,27 @@ if (empty($reusecontractid) && $productref != 'none')
 	$result = $tmpproduct->fetch($productid, $productref);
 	if (empty($tmpproduct->id))
 	{
-		print 'Service/Plan (Product id / ref) '.$productid.' / '.$productref.' was not found.';
-		exit;
+		print 'Service/Plan (Product id / ref) '.$productid.' / '.$productref.' was not found.'."\n";
+		exit(-1);
 	}
 	// We have the main product, we are searching the package
 	if (empty($tmpproduct->array_options['options_package']))
 	{
-		print 'Service/Plan (Product id / ref) '.$tmpproduct->id.' / '.$productref.' has no package defined on it.';
-		exit;
+		print 'Service/Plan (Product id / ref) '.$tmpproduct->id.' / '.$productref.' has no package defined on it.'."\n";
+		exit(-1);
 	}
 	// We have the main product, we are searching the duration
 	if (empty($tmpproduct->duration_value) || empty($tmpproduct->duration_unit))
 	{
-		print 'Service/Plan name (Product ref) '.$productref.' has no default duration';
-		exit;
+		print 'Service/Plan name (Product ref) '.$productref.' has no default duration'."\n";
+		exit(-1);
 	}
 
 	$tmppackage->fetch($tmpproduct->array_options['options_package']);
 	if (empty($tmppackage->id))
 	{
-		print 'Package with id '.$tmpproduct->array_options['options_package'].' was not found.';
-		exit;
+		print 'Package with id '.$tmpproduct->array_options['options_package'].' was not found.'."\n";
+		exit(-1);
 	}
 }
 
@@ -192,32 +240,32 @@ elseif ($reusesocid)		// When we use the "Add another instance" from myaccount d
 	    $newurl=preg_replace('/register/', 'index', $newurl);
 	    setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer")), null, 'errors');
 	    header("Location: ".$newurl.'#addanotherinstance');
-	    exit;
+	    exit(-1);
 	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain))
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain))
 	{
 		setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if (empty($password) || empty($password2))
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if ($password != $password2)
 	{
 		setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 }
 else                    // When we deploy from the register.php page
@@ -237,56 +285,56 @@ else                    // When we deploy from the register.php page
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain))
 	{
 		setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if (empty($orgname))
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameOfCompany")), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if (! preg_match('/[a-zA-Z0-9][a-zA-Z0-9]/', $orgname))
 	{
 		setEventMessages($langs->trans("ErrorFieldMustHaveXChar", $langs->transnoentitiesnoconv("NameOfCompany"), 2), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if (empty($email))
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if (! isValidEmail($email))
 	{
 		setEventMessages($langs->trans("ErrorBadEMail"), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0)
 	{
 	    dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
 	    setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, $conf->global->SELLYOURSAAS_MAIN_EMAIL), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 	if (empty($password) || empty($password2))
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
 	    header("Location: ".$newurl);
-	    exit;
+	    exit(-1);
 	}
 	if ($password != $password2)
 	{
 	    setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
 	    header("Location: ".$newurl);
-	    exit;
+	    exit(-1);
 	}
 }
 
@@ -314,7 +362,7 @@ if ($reusecontractid)
 	{
 		setEventMessages($langs->trans("NotFound"), null, 'errors');
 		header("Location: ".$newurl);
-		exit;
+		exit(-1);
 	}
 
 	$contract->fetch_thirdparty();
@@ -358,7 +406,7 @@ else
     {
         setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
         header("Location: ".$newurl);
-        exit;
+        exit(-1);
     }
 
     // Check number of instance with same IP on same hour
@@ -378,7 +426,7 @@ else
     {
         setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour"), null, 'errors');
         header("Location: ".$newurl);
-        exit;
+        exit(-1);
     }
 
     // Check if some deployment are already in process and ask to wait
@@ -397,7 +445,7 @@ else
     {
         setEventMessages($langs->trans("TooManyRequestPleaseTryLater"), null, 'errors');
         header("Location: ".$newurl);
-        exit;
+        exit(-1);
     }
 
 	$tmpthirdparty=new Societe($db);
@@ -407,7 +455,7 @@ else
 		if ($result < 0)
 		{
 			dol_print_error_email('FETCHTP'.$reusesocid, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
-			exit;
+			exit(-1);
 		}
 	}
 	else
@@ -418,13 +466,13 @@ else
 		if ($result < 0)
 		{
 			dol_print_error_email('FETCHTP'.$email, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
-			exit;
+			exit(-1);
 		}
 		else if ($result > 0)	// Found one record
 		{
 			setEventMessages($langs->trans("AccountAlreadyExistsForEmail", $conf->global->SELLYOURSAAS_ACCOUNT_URL), null, 'errors');
 			header("Location: ".$newurl);
-			exit;
+			exit(-1);
 		}
 		else dol_syslog("Email not already used. Good.");
 	}
@@ -436,9 +484,14 @@ else
 		$result = $contract->fetch(0, '', $fqdninstance);
 		if ($result > 0)
 		{
-			setEventMessages($langs->trans("InstanceNameAlreadyExists", $fqdninstance), null, 'errors');
-			header("Location: ".$newurl);
-			exit;
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("InstanceNameAlreadyExists", $fqdninstance), null, 'errors');
+				header("Location: ".$newurl);
+				exit(-1);
+			} else {
+				print $langs->trans("InstanceNameAlreadyExists", $fqdninstance)."\n";
+				exit(-1);
+			}
 		}
 		else dol_syslog("Contract name not already used. Good.");
 	}
@@ -450,7 +503,7 @@ else
 
 	    setEventMessages($langs->trans("InstanceNameReseved", $fqdninstance), null, 'errors');
 	    header("Location: ".$newurl);
-	    exit;
+	    exit(-1);
 	}
 
 	// Generate credentials
@@ -508,7 +561,7 @@ else
 				$db->rollback();
 				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 				header("Location: ".$newurl);
-				exit;
+				exit(-1);
 			}
 		}
 	}
@@ -531,7 +584,7 @@ else
 			$db->rollback();
 			setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 			header("Location: ".$newurl);
-			exit;
+			exit(-1);
 		}
 
 		// Restore lang to user/visitor language
@@ -546,13 +599,13 @@ else
 			$db->rollback();
 			setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 			header("Location: ".$newurl);
-			exit;
+			exit(-1);
 		}
 	}
 	else
 	{
 		dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default customer tag is not defined.', null, 'alert alert-error');
-		exit;
+		exit(-1);
 	}
 
 	if ($productref == 'none')
@@ -566,13 +619,13 @@ else
 				$db->rollback();
 				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 				header("Location: ".$newurl);
-				exit;
+				exit(-1);
 			}
 		}
 		else
 		{
 			dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default reseller tag is not defined.', null, 'alert alert-error');
-			exit;
+			exit(-1);
 		}
 	}
 
@@ -600,7 +653,7 @@ else
 
 		dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 		$sellyoursaasutils = new SellYourSaasUtils($db);
-		$serverdeployement = SellYourSaasUtils::getRemoveServerDeploymentIp($domainname);
+		$serverdeployement = $sellyoursaasutils->getRemoveServerDeploymentIp($domainname);
 
 		$contract->array_options['options_plan'] = $productref;
 		$contract->array_options['options_deployment_status'] = 'processing';
@@ -667,7 +720,7 @@ else
 		if ($result <= 0)
 		{
 			dol_print_error_email('CREATECONTRACT', $contract->error, $contract->errors, 'alert alert-error');
-			exit;
+			exit(-1);
 		}
 	}
 
@@ -701,13 +754,12 @@ else
 		if ($contractlineid < 0)
 		{
 			dol_print_error_email('CREATECONTRACTLINE1', $contract->error, $contract->errors, 'alert alert-error');
-			exit;
+			exit(-1);
 		}
 	}
 
 	//var_dump('user:'.$dolicloudcustomer->price_user);
 	//var_dump('instance:'.$dolicloudcustomer->price_instance);
-	//exit;
 
 	$j=1;
 
@@ -740,7 +792,7 @@ else
 				if ($contractlineid < 0)
 				{
 					dol_print_error_email('CREATECONTRACTLINE'.$j, $contract->error, $contract->errors, 'alert alert-error');
-					exit;
+					exit(-1);
 				}
 			}
 		}
@@ -867,7 +919,7 @@ if (! $error)
 	$_SESSION['initialapplogin']='admin';
 	$_SESSION['initialapppassword']=$password;
 
-	if (! GETPOST('disablecustomeremail','alpha'))	// In most cases this test is true
+	if (! $disablecustomeremail)	// In most cases this test is true
 	{
 		// Send deployment email
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -910,9 +962,14 @@ if (! $error)
 		setEventMessages('NoEmailSent', null, 'warnings');
 	}
 
-	dol_syslog("Deployment successful");
-	header("Location: ".$newurl);
-	exit;
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		dol_syslog("Deployment successful");
+		header("Location: ".$newurl);
+	}
+	else {
+		print "Instance created\n";
+	}
+	exit(0);
 }
 
 
@@ -924,18 +981,18 @@ if ($reusecontractid > 0)
 {
 	setEventMessages('', $errormessages, 'errors');
 	header("Location: ".$newurl);
-	exit();
+	exit(-1);
 }
 
 
 // If we are here, there was an error
 if ($productref != 'none')
 {
-    $errormessages[] = 'Deployement of instance '.$sldAndSubdomain.$tldid.' from '.getUserRemoteIP() .' started but failed.';
+    $errormessages[] = 'Deployement of instance '.$sldAndSubdomain.$tldid.' from '.($remoteip?$remoteip:'localhost').' started but failed.';
 }
 else
 {
-	$errormessages[] = 'Creation of account '.$email.' from '.getUserRemoteIP() .' has failed.';
+	$errormessages[] = 'Creation of account '.$email.' from '.($remoteip?$remoteip:'localhost').' has failed.';
 }
 $errormessages[] = $langs->trans("OurTeamHasBeenAlerted");
 

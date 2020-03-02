@@ -3274,7 +3274,10 @@ class SellYourSaasUtils
     			}
     			if (empty($serverdeployment))	// Failed to get remote ip
     			{
-    				dol_syslog(($this->error ? $this->error : 'Failed to get ip for deployment server'), LOG_ERR);
+    				if (empty($this->error)) {
+    					$this->error = 'Failed to get ip for deployment server';
+    				}
+    				dol_syslog($this->error.' domainname='.$domainname.' contract='.$contract->array_options['options_deployment_host'], LOG_ERR);
     				$error++;
     				break;
     			}
