@@ -3322,8 +3322,11 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
 => Check that you have less than 1024 instances on same deployment server.
 
 
- 
+Error when sending email in */var/log/mail.log*:
 
+	Mar  2 22:41:59 novafirstcloud6 postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
+
+=> Check you have a file /etc/resolv.conf and that it point to 127.0.0.1 (if not, create it and restart postfix)
 
 
 
