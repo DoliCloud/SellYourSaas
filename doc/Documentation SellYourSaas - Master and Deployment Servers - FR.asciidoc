@@ -409,59 +409,6 @@ ipduserveurprincipale   nomduserveur.mysaasdomainname.com
 ---------------
 
 
-=== Ajout IP virtuelle (optionnel)
-
-- Ajouter l'IP virtuelle via le manager OVH.
-
-- Ajouter et supprimer l'interface réseau virtuelle sur le serveur de manière dynamique (pour test).
-
-Ajout: 
-
-[source,bash]
----------------
-ifconfig eth0:0 a.b.c.d
----------------
-
-Suppression:
-
-[source,bash]
----------------
-ifconfig eth0:0 down
----------------
-
-- Pour une définition persistente au reboot, déclarer l'interface dans */etc/network/interfaces* ou dans un fichier de */etc/network/interfaces.d* (Ubuntu < 17.10)
-
-Exemple pour 2 IPs virtuelles:
-
-[source,conf]
----------------
-auto eth0:0
-iface eth0:0 inet static
-		    address a.b.c.d
-		    netmask 255.255.255.255
-		    broadcast a.b.c.d
-
-# Pour declarer une IP virtuelle persistante
-auto eth0:1
-iface eth0:1 inet static
-		    address e.f.g.h
-		    netmask 255.255.255.255
-		    broadcast e.f.g.h
----------------
-
-Rem: *eth0* can be something else, for example *ens3*.
-
-Pour prendre en compte, essayer ceci, sinon, reboot.
-
-[source,bash]
----------------
-/etc/init.d/networking restart
----------------
-
-- Associer l'IP virtuel au serveur depuis la manager OVH.
-
-
-
 === Ajout du support de l'IP v6
 
 ==== Avec ifupdown
@@ -529,6 +476,57 @@ netplan apply
 
 Rem: *eth0* can be something else, for example *ens3*.
 
+
+=== Ajout IP virtuelle (optionnel)
+
+- Ajouter l'IP virtuelle via le manager OVH.
+
+- Ajouter et supprimer l'interface réseau virtuelle sur le serveur de manière dynamique (pour test).
+
+Ajout: 
+
+[source,bash]
+---------------
+ifconfig eth0:0 a.b.c.d
+---------------
+
+Suppression:
+
+[source,bash]
+---------------
+ifconfig eth0:0 down
+---------------
+
+- Pour une définition persistente au reboot, déclarer l'interface dans */etc/network/interfaces* ou dans un fichier de */etc/network/interfaces.d* (Ubuntu < 17.10)
+
+Exemple pour 2 IPs virtuelles:
+
+[source,conf]
+---------------
+auto eth0:0
+iface eth0:0 inet static
+            address a.b.c.d
+            netmask 255.255.255.255
+            broadcast a.b.c.d
+
+# Pour declarer une IP virtuelle persistante
+auto eth0:1
+iface eth0:1 inet static
+            address e.f.g.h
+            netmask 255.255.255.255
+            broadcast e.f.g.h
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
+Pour prendre en compte, essayer ceci, sinon, reboot.
+
+[source,bash]
+---------------
+/etc/init.d/networking restart
+---------------
+
+- Associer l'IP virtuel au serveur depuis la manager OVH.
 
 
 === Ajout d'un swap (optionnel)
@@ -623,117 +621,6 @@ Ajouter la ligne au fichier */etc/fstab* pour avoir le montage automatique au re
 [source,bash]
 ---------------
 i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
----------------
-
-
-<<<<
-
-== Installation d'outils externes
-
-=== Installation de webmin (optionnel pour supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-* Si la fonction sauvegarde de toutes les bases de Webmin est active, modifier les fichiers */usr/share/webmin/mysql/backup.pl*  et  */usr/share/webmin/mysql/backup_db.cgi*
-
-[source,perl]
----------------
-foreach $db (@dbs) {
----------------
-
-en
-
-[source,perl]
----------------
-foreach $db (@dbs) {
-    # @CHANGE LDR
-    if ($db =~ /^dbn/) { next; }
----------------
-
-=== Installation de DataDog (optionnel pour supervision)
-
-* Créer un compte DataDog.
-
-* Installer l'agent sur le serveur par:
-
-[source,bash]
----------------
-DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
----------------
-
-
-* Copier le fichier de config datadog pour superviser *mysql/mariadb*. Le fichier sera éditer pour renseigner le mot de passe du compte de base datadog un peu plus loin... 
-
-[source,bash]
----------------
-cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
----------------
-
-
-* Copier le fichier de config datadog pour superviser *apache*.
-
-[source,bash]
----------------
-cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.d/apache.d/conf.yaml
----------------
-
-
-* Copier le fichier de config datadog pour superviser *postfix*.
-
-[source,bash]
----------------
-cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
----------------
-
-Editer le fichier pour ajouter "min_collection_interval: 300" sous "postfix_user: postfix" et sous "queues: - deffered"
-
-
-* Copier le fichier de config datadog pour superviser *memcached*.
-
-[source,bash]
----------------
-cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.d/mcache.d/conf.yaml
----------------
-
-
-* Copier le fichier de config datadog pour superviser certains *process*.
-
-[source,bash]
----------------
-cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
----------------
-
-Editer le pour suivre les 3 process suivants:
-
-[source,bash]
----------------
-instances:
-  - name: process_apache2
-    search_string: ['apache2']
-    exact_match: False
-    thresholds:
-      critical: [5, 5000]
-
-  - name: agent_sellyoursaas
-    search_string: ['remote_server']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]
-
-  - name: apache_watchdog_daemon
-    search_string: ['apache_watchdog_daemon']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]
----------------
-
-
-Relancer datadog
-
-[source,bash]
----------------
-sudo service datadog-agent stop
-sudo service datadog-agent start
 ---------------
 
 
@@ -1225,7 +1112,8 @@ et l'email à utiliser qui est officiellement valide.
 
 [source,bash]
 ---------------
-root@myservername		noreply@mysaasdomain.com
+root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
+root@myshortservername.locadomain          noreply@mysaasdomain.com
 ---------------
 
 Compiler le fichier par:
@@ -2327,6 +2215,118 @@ Voir l'exemple dans le document *Exemple config de package pour appli Dolibarr s
 
 Les URL pour tester les déploiements sont visibles dans le menu SellYourSaas - URL de déploiement
 
+
+<<<<
+
+== Installation d'outils externes
+
+=== Installation de webmin (optionnel pour supervision)
+
+* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
+
+* Si la fonction sauvegarde de toutes les bases de Webmin est active, modifier les fichiers */usr/share/webmin/mysql/backup.pl*  et  */usr/share/webmin/mysql/backup_db.cgi*
+
+[source,perl]
+---------------
+foreach $db (@dbs) {
+---------------
+
+en
+
+[source,perl]
+---------------
+foreach $db (@dbs) {
+    # @CHANGE LDR
+    if ($db =~ /^dbn/) { next; }
+---------------
+
+=== Installation de DataDog (optionnel pour supervision)
+
+* Créer un compte DataDog.
+
+* Installer l'agent sur le serveur par:
+
+[source,bash]
+---------------
+DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+---------------
+
+
+* Copier le fichier de config datadog pour superviser *mysql/mariadb*. Le fichier sera éditer pour renseigner le mot de passe du compte de base datadog un peu plus loin... 
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
+---------------
+
+
+* Copier le fichier de config datadog pour superviser *apache*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.d/apache.d/conf.yaml
+---------------
+
+
+* Copier le fichier de config datadog pour superviser *postfix*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+---------------
+
+Editer le fichier pour ajouter "min_collection_interval: 300" sous "postfix_user: postfix" et sous "queues: - deffered"
+
+
+* Copier le fichier de config datadog pour superviser *memcached*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+---------------
+
+
+* Copier le fichier de config datadog pour superviser certains *process*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
+---------------
+
+Editer le pour suivre les 3 process suivants:
+
+[source,bash]
+---------------
+instances:
+  - name: process_apache2
+    search_string: ['apache2']
+    exact_match: False
+    thresholds:
+      critical: [5, 5000]
+
+  - name: agent_sellyoursaas
+    search_string: ['remote_server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: apache_watchdog_daemon
+    search_string: ['apache_watchdog_daemon']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+---------------
+
+
+Relancer datadog
+
+[source,bash]
+---------------
+sudo service datadog-agent stop
+sudo service datadog-agent start
+---------------
+
+
 <<<<
 
 == Exploitation - Supervision
@@ -2342,12 +2342,14 @@ Voir chapitre <<Clonage d une instance serveur pour production bis ou pour déve
 
 ==== Restauration système
 
-Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure en terme de capacité de stockage.
+Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure ou égale en terme de capacité de stockage.
 
 Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
 
 
 ==== Sauvegarde fichiers et bases
+
+===== Sauvegarde locale
 
 - Une sauvegarde locale de la configuration du serveur et des instances payantes est assurée par le cron
 
@@ -2357,8 +2359,111 @@ Voir chapitre <<Clonage d une instance serveur pour production bis ou pour déve
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* de *admin* (voir <<installation_des_taches_cron>>) vers le disque */mnt/diskbackup/backup/osu*
 
-- Une sauvegarde externe est assurée vers un autre serveur par le cron en lançant le fichier */home/admin/tools/backup_ext_rsync.pl* de admin (voir plus haut) de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* d'un autre serveur sur un autre datacenter. Ce script ne fait pas partie du projet *sellyoursaas*, il vous revient de le réaliser. Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
-TODO Contenu de ccript à proposer. S'assurez qu'il envoit un email en cas d'erreur de copie.
+
+===== Sauvegarde distante
+
+- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/tools/backup_ext_rsync.pl* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script ne fait pas partie du projet *sellyoursaas*, il vous revient de le réaliser. Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
+
+Voici un exemple de script (remplacer les variables de la rubrique *Sources* et *Target*, et pensez à autoriser le rsync entre les 2 serveurs si vous utilisez ce script):
+
+[source,perl]
+---------------
+#!/usr/bin/perl
+#-------------------------------------------------------
+# Script sauvegarde vers exterieur par rsync
+#-------------------------------------------------------
+#use strict;
+
+#-------------------------------------------------------
+# Defines
+#-------------------------------------------------------
+use vars qw/ $REVISION $VERSION /;
+$REVISION='$Revision: 1.1 $'; $REVISION =~ /\s(.*)\s/; $REVISION=$1;
+$VERSION="1.1 (build $REVISION)";
+
+# Source
+$DIRSOURCE1="/home";
+$DIRSOURCE2="/mnt/diskbackup/backup";
+
+# Target
+$SERVDESTI="myserverbackup";
+$USER="userbackup";
+$DIRDESTI1="/mnt/diskbackup/home_servertobackup";
+$DIRDESTI2="/mnt/diskbackup/backup_servertobackup";
+
+# Options
+#my $OPTIONS="-vv --stats -a --delete";
+#my $OPTIONS="-vv --stats -a --delete --delete-excluded";
+my $OPTIONS="-v --stats -a";
+
+
+
+#-------------------------------------------------------
+# MAIN
+# Usage: backup_ext_rsync.pl [--delete]
+#-------------------------------------------------------
+
+# Get current time
+($nowsec,$nowmin,$nowhour,$nowday,$nowmonth,$nowyear,$nowwday,$nowyday,$nowisdst) = localtime(time);
+if ($nowyear < 100) { $nowyear+=2000; } else { $nowyear+=1900; }
+$nowsmallyear=$nowyear;
+$nowsmallyear =~ s/^..//;
+if (++$nowmonth < 10) { $nowmonth = "0$nowmonth"; }
+if ($nowday < 10) { $nowday = "0$nowday"; }
+if ($nowhour < 10) { $nowhour = "0$nowhour"; }
+if ($nowmin < 10) { $nowmin = "0$nowmin"; }
+
+if ($ARGV[0]) { $OPTIONS.=" ".$ARGV[0]; }
+
+print "***** $nowyear-$nowmonth-$nowday $nowhour:$nowmin:$nowsec Synchronization de $DIRSOURCE1 vers $USER\@$SERVDESTI:$DIRDESTI1...\n";
+$command="rsync -x --delete --delete-excluded --exclude '_sessions' --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log//
+*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER\@$SERVDESTI:$DIRDESTI1";
+print "$command\n";
+
+#my $ret=`$command`;
+#print "$ret\n";
+$pid = open(PH, "$command 2>&1 |");       # or with an open pipe
+while (<PH>) {
+    print "$_";
+}
+close(PH);
+$ret1=$?;
+
+
+print "***** $nowyear-$nowmonth-$nowday $nowhour:$nowmin:$nowsec Synchronization de $DIRSOURCE2 vers $USER\@$SERVDESTI:$DIRDESTI2...\n";
+
+$ret2=0;
+foreach my $i ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', ''
+4', '5', '6', '7', '8', '9') {
+        $command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DII
+RSOURCE2/osu$i* $USER\@$SERVDESTI:$DIRDESTI2";
+        print "$command\n";
+
+        #my $ret=`$command`;
+        #print "$ret\n";
+        $pid = open(PH, "$command 2>&1 |");       # or with an open pipe
+        while (<PH>) {
+            print "$_";
+        }
+        close(PH);
+        $ret2=$ret2+($? ? 1 : 0);
+}
+
+
+# Get current time
+($endsec,$endmin,$endhour,$endday,$endmonth,$endyear,$endwday,$endyday,$endisdst) = localtime(time);
+if ($endyear < 100) { $endyear+=2000; } else { $endyear+=1900; }
+$endsmallyear=$endyear;
+$endsmallyear =~ s/^..//;
+if (++$endmonth < 10) { $endmonth = "0$endmonth"; }
+if ($endday < 10) { $endday = "0$endday"; }
+if ($endhour < 10) { $endhour = "0$endhour"; }
+if ($endmin < 10) { $endmin = "0$endmin"; }
+
+print "***** $endyear-$endmonth-$endday $endhour:$endmin:$endsec Done ret1=$ret1 ret2=$ret2\n";
+---------------
+
+TODO Ajouter un envoi d'email à supervision@mysellyoursaasdomain en cas d'erreur de copie.
 
 
 - Pour une sauvegarde chez AWS:
