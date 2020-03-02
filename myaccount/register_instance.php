@@ -122,6 +122,7 @@ $tldid = trim(GETPOST('tldid','alpha'));
 $origin = GETPOST('origin','aZ09');
 $partner=GETPOST('partner','int');
 $partnerkey=GETPOST('partnerkey','alpha');		// md5 of partner name_alias
+$custmourl = '';
 
 $fromsocid=GETPOST('fromsocid','int');
 $reusecontractid = GETPOST('reusecontractid','int');
@@ -144,11 +145,21 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 	$tldid = '.'.join('.', $instancefullnamearray);
 	$password = $argv[3];
 	$reusesocid = $argv[4];
+	$custmourl = $argv[5];
 	if (empty($productref) || empty($sldAndSubdomain) || empty($tldid) || empty($password) || empty($reusesocid)) {
 		print "***** ".$script_file." *****\n";
 		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
-		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.sellyoursaasdomain password CustomerID\n";
-		print "Example: ".$script_file." SERVICETODEPLOY myinstance.with.mysellyoursaasdomain.com mypassword 123\n";
+		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.sellyoursaasdomain password CustomerID [custom_domain]\n";
+		print "Example: ".$script_file." SERVICETODEPLOY myinstance.with.mysellyoursaasdomain.com mypassword 123 [myinstance.withold.mysellyoursaasdomain.com]\n";
+		exit(-1);
+	}
+	$CERTIFFORCUSTOMDOMAIN = $custmourl;
+	if ($CERTIFFORCUSTOMDOMAIN &&
+		(! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt') || ! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.key') || ! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'-intermediate.crt'))) {
+		print "***** ".$script_file." *****\n";
+		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
+		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.sellyoursaasdomain password CustomerID [custom_domain]\n";
+		print 'Error:   A certificat file '.$conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'(.crt|.key|-intermediate.crt) not found.'."\n";
 		exit(-1);
 	}
 	$password2 = $password;
@@ -673,6 +684,11 @@ else
 		$contract->array_options['options_port_db'] = $generateddbport;
 		$contract->array_options['options_username_db'] = $generateddbusername;
 		$contract->array_options['options_password_db'] = $generateddbpassword;
+
+		if ($custmourl) {
+			$contract->array_options['options_custom_url'] = $custmourl;
+		}
+
 		//$contract->array_options['options_nb_users'] = 1;
 		//$contract->array_options['options_nb_gb'] = 0.01;
 		// TODO Remove hardcoded code here

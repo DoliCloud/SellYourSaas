@@ -3335,10 +3335,9 @@ class SellYourSaasUtils
 	    			}
 	    			else
 	    			{
-		    			// Check if SSL certificate for $customurl exists. If it does not exist, return an error to ask to upload certificate first.
-	    				// FIXME Detection of /etc/apache2/'.$CERTIFFORCUSTOMDOMAIN.'.crt' fails due to basedir. Save them into another dir than /etc/apache2.
-		    			if (! file_exists('/etc/apache2/'.$CERTIFFORCUSTOMDOMAIN.'.crt'))
-		    			{
+	    				// Check if SSL certificate for $customurl exists. If it does not exist, return an error to ask to upload certificate first.
+	    				if (! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt'))
+	    				{
 		    			    // TODO Return error to ask to upload a certificate first.
 		    			    $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
 		    				$SSLON='Off';
@@ -3591,8 +3590,7 @@ class SellYourSaasUtils
     				    else
     				    {
     				        // Check if SSL certificate for $customurl exists. If it does not exist, return an error to ask to upload certificate first.
-    				        // FIXME Detection of /etc/apache2/'.$CERTIFFORCUSTOMDOMAIN.'.crt' fails due to basedir. Save them into another dir than /etc/apache2.
-    				        if (! file_exists('/etc/apache2/'.$CERTIFFORCUSTOMDOMAIN.'.crt'))
+    				    	if (! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt'))
     				        {
     				            include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
     				            $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);

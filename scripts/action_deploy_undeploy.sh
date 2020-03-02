@@ -156,7 +156,7 @@ echo "domainname = $domainname"
 echo "dbname = $dbname"
 echo "dbport = $dbport"
 echo "dbusername = $dbusername"
-echo "dbpassword = $dbpassword"
+echo "dbpassword = XXXXXX"
 echo "fileforconfig1 = $fileforconfig1"
 echo "targetfileforconfig1 = $targetfileforconfig1"
 echo "dirwithdumpfile = $dirwithdumpfile"
@@ -329,7 +329,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
 		/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
 		
-		echo Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID
+		echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
+		
 		named-checkzone $domainname /tmp/${ZONE}.$PID
 		if [[ "$?x" != "0x" ]]; then
 			echo Error when editing the DNS file during a deployment. File /tmp/${ZONE}.$PID is not valid. Sending email to $EMAILFROM
@@ -403,7 +404,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
 		/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
 		
-		echo `date +%Y%m%d%H%M%S`" Test temporary file /tmp/${ZONE}.$PID"
+		echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
 		
 		named-checkzone $domainname /tmp/${ZONE}.$PID
 		if [[ "$?x" != "0x" ]]; then
@@ -674,6 +675,40 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			rm -f $apacheconf
 		fi
 
+		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
+		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
+			export pathforcertif=`dirname $fileforconfig1`
+			export pathforcertif=`dirname $pathforcertif`
+		
+			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt ]]; then
+				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt to /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.crt"
+				ln -fs /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt
+				# It is better to link to a bad certificate than linking to non existing file
+				if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt ]]; then
+					echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt to /etc/apache2/with.sellyoursaas.com.crt"
+					ln -fs /etc/apache2/with.sellyoursaas.com.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt
+				fi
+			fi
+			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key ]]; then
+				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key to /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.key"
+				ln -fs /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.key /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key
+				# It is better to link to a bad certificate than linking to non existing file
+				if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key ]]; then
+					echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key to /etc/apache2/with.sellyoursaas.com.key"
+					ln -fs /etc/apache2/with.sellyoursaas.com.key /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key
+				fi
+			fi
+			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt ]]; then
+				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt to /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN-intermediate.crt"
+				ln -fs /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN-intermediate.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt
+				# It is better to link to a bad certificate than linking to non existing file
+				if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt ]]; then
+					echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt to /etc/apache2/with.sellyoursaas.com-intermediate.crt"
+					ln -fs /etc/apache2/with.sellyoursaas.com-intermediate.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt
+				fi
+			fi
+		fi
+
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
@@ -687,7 +722,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
-				  sed -e 's;__webAppPath__;$instancedir;g' | sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
+				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -701,7 +737,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
-				  sed -e "s;__webAppPath__;$instancedir;g" | sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
+				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 
 
 		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online 
