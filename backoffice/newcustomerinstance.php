@@ -48,13 +48,7 @@ dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 dol_include_once('/sellyoursaas/class/dolicloud_customers.class.php');
 
-$langs->load("admin");
-$langs->load("companies");
-$langs->load("users");
-$langs->load("other");
-$langs->load("commercial");
-$langs->load("bills");
-$langs->load("sellyoursaas@sellyoursaas");
+$langs->loadLangs(array("admin", "companies", "users", "other", "commercial", "bills", "sellyoursaas@sellyoursaas"));
 
 $mesg=''; $error=0; $errors=array();
 
