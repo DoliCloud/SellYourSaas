@@ -2293,6 +2293,8 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
         			$ispaidinstance = sellyoursaasIsPaidInstance($contract);
         			if ($ispaidinstance)
         			{
+        				$langs->load("sellyoursaas@sellyoursaas");
+
         		        dol_syslog("Send other metric sellyoursaas.payinginstancelost to datadog".(get_class($tmpcontract) == 'Contrat' ? ' contractid='.$tmpcontract->id.' contractref='.$tmpcontract->ref: ''));
         		        $arraytags=null;
         		        $statsd->increment('sellyoursaas.payinginstancelost', 1, $arraytags);
