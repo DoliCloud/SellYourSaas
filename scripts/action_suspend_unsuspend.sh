@@ -124,6 +124,7 @@ if [ "x$VIRTUALHOSTHEAD" == "x-" ]; then
 	VIRTUALHOSTHEAD=""
 fi
 export ispaidinstance=${36}
+export ErrorLog='#ErrorLog'
 
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
@@ -158,11 +159,13 @@ echo "apachereload = $apachereload"
 echo "ALLOWOVERRIDE = $ALLOWOVERRIDE"
 echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
 echo "ispaidinstance = $ispaidinstance"
+echo "ErrorLog = $ErrorLog"
 
 echo `date +%Y%m%d%H%M%S`" calculated params:"
 echo "instancedir = $instancedir"
 echo "fqn = $fqn"
 echo "fqnold = $fqnold"
+echo "CRONHEAD = $CRONHEAD"
 
 
 testorconfirm="confirm"
@@ -211,6 +214,7 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
@@ -225,6 +229,7 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
@@ -297,6 +302,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
@@ -316,6 +322,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
@@ -420,6 +427,7 @@ if [[ "$mode" == "suspend" ]]; then
 			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfilesuspended | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
@@ -434,6 +442,7 @@ if [[ "$mode" == "suspend" ]]; then
 			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
