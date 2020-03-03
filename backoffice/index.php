@@ -210,6 +210,9 @@ if ($resql)
 }
 else dol_print_error($db);
 
+print "\n";
+print "<!-- section of deployment servers -->\n";
+print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder nohover" width="100%">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('DeploymentServers').'</td></tr>';
@@ -217,9 +220,31 @@ print '<tr class="oddeven">';
 print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ',$listofipwithinstances).'</strong></td>';
 print '</tr>';
 print '<tr class="oddeven">';
-print '<td>'.$langs->trans('SellYourSaasSubDomainsIP').': <strong>'.join(', ',explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)).'</strong> for domain name <strong>';
-print join(', ', explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES)).'</strong></td>';
+print '<td>';
+print $form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), "SELLYOURSAAS_SUB_DOMAIN_IP = ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES).':<br>';
+print '<table class="noborder">';
+print '<tr><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>'.$langs->trans("Open").'</td><td></td><td></td></tr>';
+$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+foreach($listofips as $key => $val) {
+	$tmparraydomain = explode(':', $listofdomains[$key]);
+	print '<tr><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
+	print in_array($tmparraydomain[1], array('bidon', 'hidden')) ? $langs->trans("Hidden") : 'X';
+	print '</td>';
+	print '<td>';
+	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
+	print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
+	print '</td>';
+	print '<td>';
+	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
+	print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
+	print '</td>';
+	print '</tr>';
+}
+print '</table>';
+print '</td>';
 print '</tr>';
+/*
 print '<tr class="oddeven"><td>';
 print $langs->trans("CommandToManageRemoteDeploymentAgent").'<br>';
 print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
@@ -235,7 +260,10 @@ print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline">'.$l
 print ' &nbsp; - &nbsp; ';
 print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeonline">'.$langs->trans("PutAllInstancesOnLine").'</a>';
 print '</td></tr>';
-print "</table><br>";
+*/
+print "</table>";
+print '</div>';
+print "<br>";
 
 
 print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
