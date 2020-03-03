@@ -376,6 +376,26 @@ if ($reusecontractid)
 		exit(-1);
 	}
 
+	// Get tmppackage
+	foreach($contract->lines as $keyline => $line)
+	{
+		$tmpproduct = new Product($db);
+		if ($line->fk_product > 0)
+		{
+			$tmpproduct->fetch($line->fk_product);
+			if ($tmpproduct->array_options['options_app_or_option'] == 'app')
+			{
+				if ($tmpproduct->array_options['options_package'] > 0) {
+					$tmppackage->fetch($tmpproduct->array_options['options_package']);
+					$freeperioddays = $tmpproduct->array_options['options_freeperioddays'];
+					break;
+				} else {
+					dol_syslog("Error: ID of package not defined on productwith ID ".$line->fk_product);
+				}
+			}
+		}
+	}
+
 	$contract->fetch_thirdparty();
 
 	$tmpthirdparty = $contract->thirdparty;
@@ -960,12 +980,21 @@ if (! $error)
 
 		$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
 		$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+
+		$sellyoursaasemailnoreply = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+
+		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+		$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$domainname;
+		if (! empty($conf->global->$constforaltemailnoreply))
+		{
+			$sellyoursaasemailnoreply = $conf->global->$constforaltemailnoreply;
+		}
+
 		$to = $contract->thirdparty->email;
 
 		$trackid = 'thi'.$_SESSION['dol_loginsellyoursaas'];
 
-		$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid);
+		$cmail = new CMailFile($subject, $to, $sellyoursaasemailnoreply, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid);
 		$result = $cmail->sendfile();
 		if (! $result)
 		{
