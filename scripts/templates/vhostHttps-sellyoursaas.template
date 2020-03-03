@@ -22,7 +22,7 @@
         # Possible values include: debug, info, notice, warn, error, crit, alert, emerg.
         LogLevel info
 
-        ErrorLog __osUserPath__/__webAppLogName___error.log
+        #ErrorLog __osUserPath__/__webAppLogName___error.log
         #TransferLog /var/log/apache2/__webAppLogName___access_log
 
         ServerSignature On

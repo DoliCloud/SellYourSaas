@@ -22,7 +22,7 @@
         # Possible values include: debug, info, notice, warn, error, crit, alert, emerg.
         LogLevel info
 
-        ErrorLog __osUserPath__/__webAppLogName___error.log
+        #ErrorLog __osUserPath__/__webAppLogName___error.log
         #TransferLog /var/log/apache2/__webAppLogName___access_log
 
         ServerSignature On
@@ -53,9 +53,12 @@
         #   Enable/Disable SSL for this virtual host.
         SSLEngine on
 
-        RewriteEngine   on
-        RewriteRule     ^(.*)$ __webMyAccount__/suspended.php?instance=%{SERVER_NAME} [L,R]
 
+        RewriteEngine   on
+        # This will enable the Rewrite capabilities
+        
+        RewriteRule     ^(.*)$ __webMyAccount__/suspended.php?instance=%{SERVER_NAME} [L,R]
+		# This redirect to the suspended page
 
         <FilesMatch "\.(cgi|shtml|phtml|php)$">
                 SSLOptions +StdEnvVars
@@ -68,6 +71,7 @@
 SSLCertificateFile /etc/apache2/__webSSLCertificateCRT__
 SSLCertificateKeyFile /etc/apache2/__webSSLCertificateKEY__
 SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
+SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
 
 </VirtualHost>
 

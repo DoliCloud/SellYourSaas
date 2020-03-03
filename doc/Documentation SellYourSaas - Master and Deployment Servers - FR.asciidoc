@@ -609,7 +609,7 @@ apt remove unattended-upgrades
 ---------------
 
 
-=== Activation des modules Apache
+=== Configuration du serveur Web Apache
 
 actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex
 cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
@@ -643,6 +643,16 @@ systemctl reload apache2
 	# Include virtual host for sellyoursaas instances:
 	IncludeOptional sellyoursaas-enabled/*.conf
 ---------------
+
+* Ajout des directives pour définir la log par défaut des erreurs dans */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
+
+[source,conf]
+---------------
+ErrorLogFormat "[%v] [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\ %a] %M% ,\ referer\ %{Referer}i"
+ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
+---------------
+
+
 
 Sur le serveur Master:
 
@@ -1031,7 +1041,7 @@ Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 
 === Configuration de /etc/security/limits.conf (optionnel)
 
-* Editer le fichier */etc/security/limits.conf* par exemple pour ajouter
+* Editer le fichier */etc/security/limits.conf* par exemple pour augmenter le nombre de fichiers max ouvert par processus
 
 [source,conf]
 ---------------
@@ -1039,8 +1049,15 @@ mysql           soft     nofile           4096
 mysql           hard     nofile           32768
 ---------------
 
+Pour voir les limites:
 
-=== Configuration de postfix
+[source,bash]
+---------------
+ulimit -a
+---------------
+
+
+=== Configuration de Postfix
 
 Créer un fichier */etc/postfix/generic* pour ajouter la correspondance entre l'email utilisé par les envois de mails système qui ont un from vide
 et l'email à utiliser qui est officiellement valide.
@@ -1131,7 +1148,7 @@ inet_protocols = ipv4
 ---------------
 
 
-=== Configuration de postfix pour authentification externe SMTP sécurisée (optionnel)
+=== Configuration de Postfix pour authentification externe SMTP sécurisée (optionnel)
 
 En cas de besoin d'utiliser postfix depuis un accès externe (et donc authentifié)
 
@@ -1201,7 +1218,7 @@ broken_sasl_auth_clients = yes
 
 
 
-=== Configuration de mysql/mariadb
+=== Configuration de Mysql ou Mariadb
 
 ==== Configuration
 
@@ -1459,7 +1476,7 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 
 
 
-=== Configuration de apparmor
+=== Configuration de AppArmor
 
 Copy */bin/bash* or */bin/dash* into */bin/secureBash*
 
@@ -1781,7 +1798,7 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration de bind sur les serveurs de Déploiement
+=== Configuration du DNS Bind sur les serveurs de Déploiement
 
 ==== Pour le développement local
 
