@@ -315,6 +315,7 @@ DeleteMyAccount=Eliminar mi cuenta
 ClosingAccountResellerNotPossible=Para eliminar su cuenta de revendedor, primero debe solicitarnos (%s) cambiar sus clientes activos a otra cuenta de revendedor.
 ClosingAccountNotPossible=Para poder cerrar su cuenta, primero debe cerrar sus suscripciones activas (%s). Para hacerlo, vaya al menú '%s' y luego, en cada instancia, vaya a la pestaña '%s' para destruir la instancia.
 PleaseBeSureCustomerAccount=Para confirmar la eliminación de su cuenta, indique aquí el e-mail de la cuenta a eliminar
+EmailOfAccountToDestroy=e-mail de su cuenta
 ErrorEmailMustMatch=Error, el e-mail de la cuenta a eliminar debe coincidir con su e-mail
 YourAccountHasBeenClosed=Su cuenta ha sido cerrada.
 SorryInstanceSuspended=Lo sentimos, su instancia de <strong>%s</strong> ha sido suspendida.
