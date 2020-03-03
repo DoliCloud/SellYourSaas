@@ -198,6 +198,7 @@ if [[ "$mode" == "rename" ]]; then
 		rm -f $apacheconf
 	fi
 
+	# Create virtual host for standard name (custom url may be created later)
 	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppLogName__/$instancename/g' | \
@@ -520,7 +521,7 @@ if [[ "$mode" == "suspend" ]]; then
 fi
 
 
-# Unsuspend
+# Unsuspend. Can also be used to force recreation of Virtual host.
 
 if [[ "$mode" == "unsuspend" ]]; then
 	echo `date +%Y%m%d%H%M%S`" ***** Unsuspend instance in /home/jail/home/$osusername/$dbname"
