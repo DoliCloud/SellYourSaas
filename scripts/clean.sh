@@ -294,8 +294,8 @@ if [ -s /tmp/osutoclean ]; then
 			if [[ "x$dbname" != "xNULL" ]]; then	
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
-				echo "$MYSQLDUMP -usellyoursaas -pxxxxxx -h $databasehostdeployment $dbname | bzip2 > $archivedirtest/$osusername/dump.$dbname.$now.sql.bz2"
-				$MYSQLDUMP -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname | bzip2 > $archivedirtest/$osusername/dump.$dbname.$now.sql.bz2
+				echo "$MYSQLDUMP -usellyoursaas -pxxxxxx -h $databasehostdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
+				$MYSQLDUMP -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
 
 				echo "Now drop the database"
 				echo "echo 'DROP DATABASE $dbname;' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname"
