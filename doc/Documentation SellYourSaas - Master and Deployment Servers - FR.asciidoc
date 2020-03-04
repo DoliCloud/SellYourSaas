@@ -2144,10 +2144,47 @@ Sur tous les serveurs (Master et Déploiement):
 
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
 
-* Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès définis dans le document
-*Liste des droits de anonymous pour sellyoursaas.pdf*
+* Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants:
+
+** Module Agenda
+*** Lires les actions
+*** Créer modifier les actions
+*** Lire les actions des autres
+*** Créer des actions pour les autres.
+** Module Banque
+*** Consulter les comptes financiers
+*** Créer/modifier montant/supprimer écritures bancaires
+** Module Catégories
+*** Consulter les catégories
+** Contrats/Abonnements
+*** Lire les contrats/abonnements
+*** Créer modifier les contrats abonnements
+*** Activer un service abonnement
+*** Désactiver un service abonnement
+** Module GED
+*** Lire/ Récuperer les documents
+*** Soumettre ou supprimer un document
+** Module Factures et avoir
+*** Consulter les factures
+** Module Fournisseurs
+*** Consulter les fournisseurs
+** Module Prélèvement
+*** Consulter les prélèvements
+** Module Produit
+*** Consulter les produits
+** Module SellYourSaas
+*** Read SellYourSaaS data
+** Module Services
+*** Consulter les services
+** Module Tiers
+*** Consulter les tiers liés à l'utilisateur
+*** Consulter les contacts
+** Module Utilisateurs et Groupes
+*** Créer/modifier ses propres informations utilisateur
 
 * Activer le module SellYourSaas dans Dolibarr et configurer le.
+
+TODO Description de la page de setup.
 
 * Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur Master et les serveurs de Déploiement)
 
