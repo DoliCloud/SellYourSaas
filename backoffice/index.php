@@ -213,23 +213,32 @@ else dol_print_error($db);
 print "\n";
 print "<!-- section of deployment servers -->\n";
 print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder nohover" width="100%">';
+print '<table class="noborder nohover centpercent">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('DeploymentServers').'</td></tr>';
-print '<tr class="oddeven">';
+print '<tr class="oddeven nohover">';
 print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ',$listofipwithinstances).'</strong></td>';
 print '</tr>';
-print '<tr class="oddeven">';
+print '<tr class="">';
 print '<td>';
-print $form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), "SELLYOURSAAS_SUB_DOMAIN_IP = ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES).':<br>';
+$helptooltip = "SELLYOURSAAS_SUB_DOMAIN_IP = ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
+print $form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), $helptooltip).':<br>';
 print '<table class="noborder">';
-print '<tr><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>'.$langs->trans("Open").'</td><td></td><td></td></tr>';
+print '<tr class="liste_titre_bidon"><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>';
+$helptooltip = img_warning('', '').' '.$langs->trans("EvenIfDomainIsOpenTo");
+print $form->textwithpicto($langs->trans("Registration"), $helptooltip);
+print '</td><td></td><td></td></tr>';
 $listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
 $listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 foreach($listofips as $key => $val) {
 	$tmparraydomain = explode(':', $listofdomains[$key]);
-	print '<tr><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
-	print in_array($tmparraydomain[1], array('bidon', 'hidden')) ? $langs->trans("Hidden") : 'X';
+	print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
+	print in_array($tmparraydomain[1], array('bidon', 'hidden')) ? $langs->trans("Hidden") : img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0);
+	if (! empty($tmparraydomain[1])) {
+		print $langs->trans("OnDomainOnly", $tmparraydomain[1]);
+	} else {
+		print $langs->trans("Open");
+	}
 	print '</td>';
 	print '<td>';
 	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';

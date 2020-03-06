@@ -512,6 +512,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 	                	$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
+	                	$domainstosuggest = array();
 	                	$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);   // This is list of all sub domains to show into combo list
 	                	foreach($listofdomain as $val)
 	                	{
@@ -519,7 +520,10 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	    $reg = array();
 	                	    if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 	                	        $newval = preg_replace('/:.*$/', '', $newval);
-	                	        if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) continue;
+	                	        if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) {
+	                	        	print '<!-- '.$newval.' disabled. Allowed only if main domain of registration page is '.$reg[1].' -->';
+	                	        	continue;
+	                	        }
 	                	    }
                             // $newval is subdomain (with.mysaasdomainname.com for example)
 
@@ -536,12 +540,26 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
                                         break;
                                     }
 	                	        }
-	                	        if (! $restrictfound && $newval != GETPOST('forcesubdomain', 'alpha')) continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
+	                	        if (! $restrictfound && $newval != GETPOST('forcesubdomain', 'alpha')) {
+	                	        	print '<!-- '.$newval.' disabled. There is a restriction on package to use only '.$tmppackage->restrict_domains.' -->';
+	                	        	continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
+	                	        }
 	                	    }
 
 	                		if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
-	                		print '<option value="'.$newval.'"'.(($tldid == $newval || ($newval == '.'.GETPOST('forcesubdomain', 'alpha'))) ? ' selected="selected"':'').'>'.$newval.'</option>';
+
+	                		$domainstosuggest[] = $newval;
 	                	}
+
+	                	// Defined a preselected domain
+	                	$randomselect = '';
+	                	if (empty($tldid) && ! GETPOSTISSET('forcesubdomain') && ! GETPOSTISSET('tldid')) {
+	                		$randomselect = $domainstosuggest[rand(0, 2)];
+	                	}
+	                	foreach($domainstosuggest as $val) {
+	                		print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
+	                	}
+
 	                    ?>
 	                </select>
 	                	<?php
@@ -558,6 +576,8 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	    }
 	                	    if (! $forcesubdomainfound) {
 	                	        print '<br>Error: Value for forcesubdomain = '.GETPOST('forcesubdomain', 'alpha').' is not in list of available subdomains.';
+	                	    } else {
+	                	    	print '<input type="hidden" name="forcesubdomain" value="'.GETPOST('forcesubdomain', 'alpha').'">';
 	                	    }
 	                	}
 	                	?>
