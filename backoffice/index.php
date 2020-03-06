@@ -233,11 +233,14 @@ $listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 foreach($listofips as $key => $val) {
 	$tmparraydomain = explode(':', $listofdomains[$key]);
 	print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
-	print in_array($tmparraydomain[1], array('bidon', 'hidden')) ? $langs->trans("Hidden") : img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0);
 	if (! empty($tmparraydomain[1])) {
-		print $langs->trans("OnDomainOnly", $tmparraydomain[1]);
+		if (in_array($tmparraydomain[1], array('bidon', 'hidden'))) {
+			print $langs->trans("Hidden");
+		} else {
+			print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("OnDomainOnly", $tmparraydomain[1]);
+		}
 	} else {
-		print $langs->trans("Open");
+		print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("Open");
 	}
 	print '</td>';
 	print '<td>';
