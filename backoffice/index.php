@@ -234,8 +234,8 @@ foreach($listofips as $key => $val) {
 	$tmparraydomain = explode(':', $listofdomains[$key]);
 	print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
 	if (! empty($tmparraydomain[1])) {
-		if (in_array($tmparraydomain[1], array('bidon', 'hidden'))) {
-			print $langs->trans("Hidden");
+		if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
+			print $langs->trans("Closed");
 		} else {
 			print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("OnDomainOnly", $tmparraydomain[1]);
 		}
