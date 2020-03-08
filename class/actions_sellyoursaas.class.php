@@ -31,9 +31,32 @@ dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
  */
 class ActionsSellyoursaas
 {
-    var $db;
-    var $error;
-    var $errors=array();
+	/**
+	 * @var DoliDB Database handler.
+	 */
+	public $db;
+
+	/**
+	 * @var string Error code (or message)
+	 */
+	public $error = '';
+
+	/**
+	 * @var array Errors
+	 */
+	public $errors = array();
+
+
+	/**
+	 * @var array Hook results. Propagated to $hookmanager->resArray for later reuse
+	 */
+	public $results = array();
+
+	/**
+	 * @var string String displayed by executeHook() immediately after return
+	 */
+	public $resprints;
+
 
     /**
 	 *	Constructor
@@ -896,8 +919,6 @@ class ActionsSellyoursaas
     }
 
 
-
-
     /**
      * Complete list
      *
@@ -1102,7 +1123,7 @@ class ActionsSellyoursaas
 
     	$ret=0;
     	dol_syslog(get_class($this).'::executeHooks action='.$action);
-    	
+
     	$file = $parameters['file'];
 
     	$formatarray = pdf_getFormat();
@@ -1189,7 +1210,39 @@ class ActionsSellyoursaas
 
         $this->results['head'] = $head;
 
+        $arrayoftypes = array(
+        	'packages' => array('label' => 'Packages', 'ObjectClassName' => 'Packages', 'enabled' => $conf->sellyoursaas->enabled, 'ClassPath' => "/sellyoursaas/class/packages.class.php", 'langs'=>'sellyousaas@sellyoursaas')
+		);
+        $this->results['arrayoftype'] = $arrayoftypes;
+
         return 1;
+    }
+
+    /**
+     * Overloading the restrictedArea function : check permission on an object
+     *
+     * @param   array           $parameters     Hook metadatas (context, etc...)
+     * @param   string          $action         Current action (if set). Generally create or edit or null
+     * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+   	 * @return  int 		      			  	<0 if KO,
+     *                          				=0 if OK but we want to process standard actions too,
+     *  	                            		>0 if OK and we want to replace standard actions.
+     */
+    public function restrictedArea($parameters, &$action, $hookmanager)
+    {
+    	global $user;
+
+		if ($parameters['features'] == 'packages') {
+			if ($user->rights->sellyoursaas->read) {
+				$this->results['result'] = 1;
+				return 1;
+			} else {
+				$this->results['result'] = 0;
+				return 1;
+			}
+		}
+
+    	return 0;
     }
 }
 
