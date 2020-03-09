@@ -202,7 +202,7 @@ if ($instancefiltercomplete) {
     }
     $sql.= " AND c.ref_customer IN (".$stringforsearch.")";
 }
-else $sql.= " AND ce.deployment_status == 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
+else $sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 $sql.= " AND ce.deployment_status IS NOT NULL";
 // Add filter on deployment server
 if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
