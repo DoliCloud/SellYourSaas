@@ -203,7 +203,7 @@ if ($instancefiltercomplete) {
     }
     $sql.= " AND c.ref_customer IN (".$stringforsearch.")";
 }
-else $sql.= " AND ce.deployment_status <> 'undeployed'";		// Exclude undeployed only if we don't request a specific instance
+else $sql.= " AND ce.deployment_status == 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 $sql.= " AND ce.deployment_status IS NOT NULL";
 // Add filter on deployment server
 if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
@@ -232,7 +232,6 @@ if ($resql)
 
 				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
-				$instance_status_bis = '';
 				$result = $object->fetch($obj->id);
 				if ($result <= 0) {
 				    $i++;
@@ -242,7 +241,7 @@ if ($resql)
 				else
 				{
 					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; }
-					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'CLOSED'; $instance_status_bis = 'UNDEPLOYED'; }
+					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; }
 					elseif ($object->array_options['options_deployment_status'] == 'done')       {
                         $instance_status = 'DEPLOYED';
                         $nbofinstancedeployed++;
@@ -264,14 +263,13 @@ if ($resql)
 					if ($ispaymentko) $payment_status='FAILURE';
 				}
 
-				if (empty($instance_status_bis)) $instance_status_bis=$instance_status;
-				print "Analyze instance ".($i+1)." ".$instance." status=".$instance_status." instance_status=".$instance_status_bis." payment_status=".$payment_status."\n";
+				print "Analyze instance ".($i+1)." ".$instance." instance_status=".$instance_status." payment_status=".$payment_status."\n";
 
 				// Count
-				if (! in_array($payment_status,array('TRIAL','TRIALING','TRIAL_EXPIRED')))
+				if (! in_array($payment_status,array('TRIAL')))
 				{
 					$nbofalltime++;
-					if (! in_array($instance_status,array('PROCESSING')) && ! in_array($instance_status,array('CLOSED')) && ! in_array($instance_status_bis,array('UNDEPLOYED')))		// Nb of active
+					if (! in_array($instance_status,array('PROCESSING', 'UNDEPLOYED')))		// Nb of active
 					{
 						$nbofactive++;
 
@@ -284,7 +282,7 @@ if ($resql)
 						else $nbofactiveok++; // not suspended, not close request
 
 						$instances[$obj->id]=$instance;
-						print "Qualify instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
+						print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 					}
 					else
 					{
@@ -294,7 +292,7 @@ if ($resql)
 				elseif ($instancefiltercomplete)
 				{
 					$instances[$obj->id]=$instance;
-					print "Qualify instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				}
 				else
 				{
@@ -647,6 +645,8 @@ else
 	{
 		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		// Supervision tools are generic for all domain. No ay to target a specific supervision email.
+
 		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
