@@ -300,21 +300,25 @@ if ($resql)
 
 if ($mode == 'refreshstats')
 {
-	$rep=sellyoursaas_calculate_stats($db,'');	// $datelastday is last day of current month
+	$rep=sellyoursaas_calculate_stats($db, '');	// $datelastday is last day of current month
 
 	$total=$rep['total'];
 	$totalcommissions=$rep['totalcommissions'];
 	$totalinstancespaying=$rep['totalinstancespaying'];
-	$totalinstancessuspended=$rep['totalinstancessuspended'];
-	$totalinstancesexpired=$rep['totalinstancesexpired'];
+	$totalinstancessuspendedfree=$rep['totalinstancessuspendedfree'];
+	$totalinstancessuspendedpaying=$rep['totalinstancessuspendedpaying'];
+	$totalinstancesexpiredfree=$rep['totalinstancesexpiredfree'];
+	$totalinstancesexpiredpaying=$rep['totalinstancesexpiredpaying'];
 	$totalinstances=$rep['totalinstances'];
 	$totalusers=$rep['totalusers'];
 
 	$_SESSION['stats_total']=$total;
 	$_SESSION['stats_totalcommissions']=$totalcommissions;
 	$_SESSION['stats_totalinstancespaying']=$totalinstancespaying;
-	$_SESSION['stats_totalinstancessuspended']=$totalinstancessuspended;
-	$_SESSION['stats_totalinstancesexpired']=$totalinstancesexpired;
+	$_SESSION['stats_totalinstancessuspendedfree']=$totalinstancessuspendedfree;
+	$_SESSION['stats_totalinstancesexpiredfree']=$totalinstancesexpiredfree;
+	$_SESSION['stats_totalinstancessuspendedpaying']=$totalinstancessuspendedpaying;
+	$_SESSION['stats_totalinstancesexpiredpaying']=$totalinstancesexpiredpaying;
 	$_SESSION['stats_totalinstances']=$totalinstances;
 	$_SESSION['stats_totalusers']=$totalusers;
 }
@@ -323,8 +327,10 @@ else
 	$total = $_SESSION['stats_total'];
 	$totalcommissions = $_SESSION['stats_totalcommissions'];
 	$totalinstancespaying = $_SESSION['stats_totalinstancespaying'];
-	$totalinstancessuspended = $_SESSION['stats_totalinstancessuspended'];
-	$totalinstancesexpired = $_SESSION['stats_totalinstancesexpired'];
+	$totalinstancessuspendedfree = $_SESSION['stats_totalinstancessuspendedfree'];
+	$totalinstancesexpiredfree = $_SESSION['stats_totalinstancesexpiredfree'];
+	$totalinstancessuspendedpaying = $_SESSION['stats_totalinstancessuspendedpaying'];
+	$totalinstancesexpiredpaying = $_SESSION['stats_totalinstancesexpiredpaying'];
 	$totalinstances = $_SESSION['stats_totalinstances'];
 	$totalusers = $_SESSION['stats_totalusers'];
 }
@@ -349,10 +355,24 @@ print '</td><td align="right">';
 print '<font size="+2">'.$totalresellers.'</font>';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
-print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $langs->trans("NbOfInstancesActivePayingDesc"));
-print ' / '.$langs->trans("NbOfActiveInstances").' ';
+$texthelp = $langs->trans("NbOfInstancesActivePayingDesc");
+$stringlistofinstancespayingwithoutrecinvoice = '';
+$nboflistofinstancespayingwithoutrecinvoice = 0;
+if (is_array($rep['listofinstancespayingwithoutrecinvoice']))
+{
+	$nboflistofinstancespayingwithoutrecinvoice = count($rep['listofinstancespayingwithoutrecinvoice']);
+	$rep['listofinstancespayingwithoutrecinvoice'] = dol_sort_array($rep['listofinstancespayingwithoutrecinvoice'], 'thirdparty_name');
+	foreach($rep['listofinstancespayingwithoutrecinvoice'] as $arrayofcontract)
+	{
+		$stringlistofinstancespayingwithoutrecinvoice .= $arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
+	}
+}
+$texthelp .= '<br>'.$langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
+if ($stringlistofinstancespayingwithoutrecinvoice) $texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
+print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $texthelp);
+print ' | '.$langs->trans("NbOfActiveInstances").' ';
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancespaying.' / '.$totalinstances.'</font>';
+if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstances.'</font>';
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '<!-- List of instances : '."\n";
 if (is_array($rep['listofinstancespaying']))
@@ -366,10 +386,11 @@ if (is_array($rep['listofinstancespaying']))
 print "\n".'-->';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
-print $langs->trans("NbOfSuspendedInstances").' ';
-print ' + '.$langs->trans("NbOfExpiredInstances").' ';
+print $langs->trans("NbOfSuspendedInstances").' '.$langs->trans("Paying").' | '.$langs->trans("Free");
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancessuspended.' + '.$totalinstancesexpired.'</font>';
+if (! empty($_SESSION['stats_totalusers'])) {
+	print '<font size="+2">'.$totalinstancessuspendedfree.' | '.$totalinstancessuspendedpaying.'</font>';
+}
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
