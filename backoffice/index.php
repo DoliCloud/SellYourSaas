@@ -492,7 +492,7 @@ else dol_print_error($db);
 
 $data2 = array();
 $sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
-$sql.=" WHERE service = '".$servicetouse."' AND name IN ('totalinstancespaying', 'totalusers')";
+$sql.=" WHERE service = '".$servicetouse."' AND name IN ('totalinstancespaying', 'totalinstancespayingall', 'totalinstances', 'totalusers')";
 $sql.=" ORDER BY x, name";
 $resql=$db->query($sql);
 if ($resql)
@@ -521,7 +521,9 @@ if ($resql)
 		$oldx=$obj->x;
 
 		if ($obj->name == 'totalinstancespaying') $absice[1]=$obj->y;
-		if ($obj->name == 'totalusers') $absice[2]=$obj->y;
+		if ($obj->name == 'totalinstancespayingall') $absice[2]=$obj->y;
+		if ($obj->name == 'totalinstances') $absice[3]=$obj->y;
+		if ($obj->name == 'totalusers') $absice[4]=$obj->y;
 
 		$i++;
 	}
@@ -553,7 +555,7 @@ $mesg = $px1->isGraphKo();
 if (! $mesg)
 {
 	$px1->SetData($data1);
-	unset($data1);
+	$data1 = null;
 
 	$legend=array();
 	$legend[0]=$langs->trans("RevenuePerMonth").' ('.$langs->trans("HT").')';
@@ -580,11 +582,13 @@ $mesg = $px2->isGraphKo();
 if (! $mesg)
 {
 	$px2->SetData($data2);
-	unset($data2);
+	$data2 = null;
 
 	$legend=array();
-	$legend[0]=$langs->trans("NbOfInstancesPaying");
-	$legend[1]=$langs->trans("NbOfUsers");
+	$legend[0]=$langs->trans("NbOfInstancesActivePaying");
+	$legend[1]=$langs->trans("NbOfInstancesActivePayingAll");
+	$legend[2]=$langs->trans("NbOfActiveInstances");
+	$legend[3]=$langs->trans("NbOfUsers");
 
 	$px2->SetLegend($legend);
 	$px2->SetMaxValue($px2->GetCeilMaxValue());
@@ -594,7 +598,7 @@ if (! $mesg)
 	$px2->SetShading(3);
 	$px2->SetHorizTickIncrement(1);
 	$px2->SetCssPrefix("cssboxes");
-	$px2->SetType(array('lines','lines'));
+	$px2->SetType(array('lines','lines','lines','lines'));
 	$px2->mode='depth';
 	$px2->SetTitle($langs->trans("Instances").'/'.$langs->trans("Users"));
 

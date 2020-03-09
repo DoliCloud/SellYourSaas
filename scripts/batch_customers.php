@@ -492,7 +492,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 				$x=sprintf("%04d%02d",$year,$m);
 
-				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstances','totalusers','benefit','totalcustomerspaying','totalcustomers');
+				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','benefit','totalcustomerspaying','totalcustomers');
 				foreach($statkeylist as $statkey)
 				{
 					if (! isset($stats[$statkey][$x]) || ($today <= $datelastday))
@@ -511,6 +511,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 							$total=$rep['total'];
 							$totalcommissions=$rep['totalcommissions'];
 							$totalinstancespaying=$rep['totalinstancespaying'];
+							$totalinstancespayingall=$rep['totalinstancespayingall'];
 							$totalinstances=$rep['totalinstances'];
 							$totalusers=$rep['totalusers'];
 							$totalcustomerspaying=$rep['totalcustomerspaying'];
@@ -521,6 +522,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 							if ($statkey == 'total') $y=$total;
 							if ($statkey == 'totalcommissions') $y=$totalcommissions;
 							if ($statkey == 'totalinstancespaying') $y=$totalinstancespaying;
+							if ($statkey == 'totalinstancespayingall') $y=$totalinstancespayingall;
 							if ($statkey == 'totalinstances') $y=$totalinstances;
 							if ($statkey == 'totalusers') $y=$totalusers;
 							if ($statkey == 'benefit') $y=$benefit;
