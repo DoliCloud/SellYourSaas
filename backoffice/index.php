@@ -489,7 +489,6 @@ if ($resql)
 }
 else dol_print_error($db);
 
-
 $data2 = array();
 $sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
 $sql.=" WHERE service = '".$servicetouse."' AND name IN ('totalinstancespaying', 'totalinstancespayingall', 'totalinstances', 'totalusers')";
@@ -548,6 +547,8 @@ else
 	$WIDTH=DolGraph::getDefaultGraphSizeForStats('width');
 	$HEIGHT=DolGraph::getDefaultGraphSizeForStats('height');
 }
+
+$fileurlnb = '';
 
 // Show graph
 $px1 = new DolGraph();
