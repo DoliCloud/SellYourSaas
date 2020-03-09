@@ -592,18 +592,20 @@ function sellyoursaas_calculate_stats($db, $datelim)
 							$totalinstancespayingwithoutrecinvoice++;
 						}
 
-						$listofcustomerspaying[$obj->customer_id]++;
-						$listofinstancespaying[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
-						$totalinstancespaying++;
+						if ($tmpdata['status'] != 5) {	// If service not suspended
+							$total+=$price;
 
-						$total+=$price;
+							$listofcustomerspaying[$obj->customer_id]++;
+							$listofinstancespaying[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
+							$totalinstancespaying++;
 
-						//print "cpt=".$totalinstancespaying." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price."<br>\n";
-						if ($atleastonenotsuspended && ! empty($obj->parent))
-						{
-							$thirdpartyparent = new Societe($db);		// TODO Extend the select with left join on parent + extrafield to get this data
-							$thirdpartyparent->fetch($obj->parent);
-							$totalcommissions+=price2num($price * $thirdpartyparent->array_options['options_commission'] / 100);
+							//print "cpt=".$totalinstancespaying." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price."<br>\n";
+							if ($atleastonenotsuspended && ! empty($obj->parent))
+							{
+								$thirdpartyparent = new Societe($db);		// TODO Extend the select with left join on parent + extrafield to get this data
+								$thirdpartyparent->fetch($obj->parent);
+								$totalcommissions+=price2num($price * $thirdpartyparent->array_options['options_commission'] / 100);
+							}
 						}
 					}
 				}
