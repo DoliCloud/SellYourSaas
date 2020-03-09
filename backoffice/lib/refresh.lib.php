@@ -484,11 +484,11 @@ function dolicloud_calculate_stats($db, $datelim)
  */
 function sellyoursaas_calculate_stats($db, $datelim)
 {
-	$total = $totalcommissions = $totalinstancespaying = $totalinstancespayingwithoutrecinvoice = 0;
+	$total = $totalcommissions = $totalinstancespaying = $totalinstancespayingall = $totalinstancespayingwithoutrecinvoice = 0;
 	$totalinstancesexpiredfree = $totalinstancesexpiredpaying = $totalinstancessuspendedfree = $totalinstancessuspendedpaying = 0;
 	$totalinstances = $totalusers = 0;
-	$listofinstancespaying=array(); $listofinstancespayingwithoutrecinvoice = array();
-	$listofcustomers=array(); $listofcustomerspaying=array(); $listofcustomerspayingwithoutrecinvoice=array();
+	$listofinstancespaying=array(); $listofinstancespayingall=array(); $listofinstancespayingwithoutrecinvoice = array();
+	$listofcustomers=array(); $listofcustomerspaying=array(); $listofcustomerspayingwithoutrecinvoice=array(); $listofcustomerspayingall=array();
 
 	// Get list of instance
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
@@ -592,7 +592,11 @@ function sellyoursaas_calculate_stats($db, $datelim)
 							$totalinstancespayingwithoutrecinvoice++;
 						}
 
-						if ($tmpdata['status'] != 5) {	// If service not suspended
+						$listofcustomerspayingall[$obj->customer_id]++;
+						$listofinstancespayingall[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
+						$totalinstancespayingall++;
+
+						if ($atleastonenotsuspended && $tmpdata['expirationdate'] >= $now && $tmpdata['status'] != 5) {	// If service really paying and not expired and not suspended
 							$total+=$price;
 
 							$listofcustomerspaying[$obj->customer_id]++;
@@ -624,12 +628,12 @@ function sellyoursaas_calculate_stats($db, $datelim)
 	//var_dump($listofinstancespaying);
 	return array(
 		'total'=>(double) $total, 'totalcommissions'=>(double) $totalcommissions,
-		'totalinstancespaying'=>(int) $totalinstancespaying, 'totalinstancespayingwithoutrecinvoice'=>(int) $totalinstancespayingwithoutrecinvoice,
+		'totalinstancespaying'=>(int) $totalinstancespaying, 'totalinstancespayingall'=>(int) $totalinstancespayingall, 'totalinstancespayingwithoutrecinvoice'=>(int) $totalinstancespayingwithoutrecinvoice,
 		'totalinstancessuspendedfree'=>(int) $totalinstancessuspendedfree, 'totalinstancessuspendedpaying'=>(int) $totalinstancessuspendedpaying,
 		'totalinstancesexpiredfree'=>(int) $totalinstancesexpiredfree, 'totalinstancesexpired'=>(int) $totalinstancesexpiredpaying,
 		'totalinstances'=>(int) $totalinstances,
 		'totalusers'=>(int) $totalusers,
 		'totalcustomerspaying'=>(int) count($listofcustomerspaying), 'totalcustomers'=>(int) count($listofcustomers),
-		'listofinstancespaying'=>$listofinstancespaying, 'listofinstancespayingwithoutrecinvoice'=>$listofinstancespayingwithoutrecinvoice
+		'listofinstancespaying'=>$listofinstancespaying, 'listofinstancespayingall'=>$listofinstancespayingall, 'listofinstancespayingwithoutrecinvoice'=>$listofinstancespayingwithoutrecinvoice
 	);
 }

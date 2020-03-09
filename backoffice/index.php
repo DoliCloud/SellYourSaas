@@ -305,6 +305,7 @@ if ($mode == 'refreshstats')
 	$total=$rep['total'];
 	$totalcommissions=$rep['totalcommissions'];
 	$totalinstancespaying=$rep['totalinstancespaying'];
+	$totalinstancespayingall=$rep['totalinstancespayingall'];
 	$totalinstancessuspendedfree=$rep['totalinstancessuspendedfree'];
 	$totalinstancessuspendedpaying=$rep['totalinstancessuspendedpaying'];
 	$totalinstancesexpiredfree=$rep['totalinstancesexpiredfree'];
@@ -315,6 +316,7 @@ if ($mode == 'refreshstats')
 	$_SESSION['stats_total']=$total;
 	$_SESSION['stats_totalcommissions']=$totalcommissions;
 	$_SESSION['stats_totalinstancespaying']=$totalinstancespaying;
+	$_SESSION['stats_totalinstancespayingall']=$totalinstancespayingall;
 	$_SESSION['stats_totalinstancessuspendedfree']=$totalinstancessuspendedfree;
 	$_SESSION['stats_totalinstancesexpiredfree']=$totalinstancesexpiredfree;
 	$_SESSION['stats_totalinstancessuspendedpaying']=$totalinstancessuspendedpaying;
@@ -327,6 +329,7 @@ else
 	$total = $_SESSION['stats_total'];
 	$totalcommissions = $_SESSION['stats_totalcommissions'];
 	$totalinstancespaying = $_SESSION['stats_totalinstancespaying'];
+	$totalinstancespayingall = $_SESSION['stats_totalinstancespayingall'];
 	$totalinstancessuspendedfree = $_SESSION['stats_totalinstancessuspendedfree'];
 	$totalinstancesexpiredfree = $_SESSION['stats_totalinstancesexpiredfree'];
 	$totalinstancessuspendedpaying = $_SESSION['stats_totalinstancessuspendedpaying'];
@@ -367,12 +370,12 @@ if (is_array($rep['listofinstancespayingwithoutrecinvoice']))
 		$stringlistofinstancespayingwithoutrecinvoice .= ($stringlistofinstancespayingwithoutrecinvoice ? ', ' : '').$arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
 	}
 }
-$texthelp .= '<br>'.$langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
-if ($stringlistofinstancespayingwithoutrecinvoice) $texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
 print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $texthelp);
-print ' | '.$langs->trans("NbOfActiveInstances").' ';
+$texthelp = $langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
+if ($stringlistofinstancespayingwithoutrecinvoice) $texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
+print ' | '.$form->textwithpicto($langs->trans("NbOfInstancesActivePayingAll"), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstances.'</font>';
+if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstancespayingall.' | '.$totalinstances.'</font>';
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '<!-- List of instances : '."\n";
 if (is_array($rep['listofinstancespaying']))
