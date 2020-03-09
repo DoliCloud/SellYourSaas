@@ -364,7 +364,7 @@ if (is_array($rep['listofinstancespayingwithoutrecinvoice']))
 	$rep['listofinstancespayingwithoutrecinvoice'] = dol_sort_array($rep['listofinstancespayingwithoutrecinvoice'], 'thirdparty_name');
 	foreach($rep['listofinstancespayingwithoutrecinvoice'] as $arrayofcontract)
 	{
-		$stringlistofinstancespayingwithoutrecinvoice .= $arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
+		$stringlistofinstancespayingwithoutrecinvoice .= ($stringlistofinstancespayingwithoutrecinvoice ? ', ' : '').$arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
 	}
 }
 $texthelp .= '<br>'.$langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
@@ -386,10 +386,10 @@ if (is_array($rep['listofinstancespaying']))
 print "\n".'-->';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
-print $langs->trans("NbOfSuspendedInstances").' '.$langs->trans("Paying").' | '.$langs->trans("Free");
+print $langs->trans("NbOfSuspendedInstances").' '.$langs->trans("payed").' | '.$langs->trans("test");
 print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) {
-	print '<font size="+2">'.$totalinstancessuspendedfree.' | '.$totalinstancessuspendedpaying.'</font>';
+	print '<font size="+2">'.$totalinstancessuspendedpaying.' | '.$totalinstancessuspendedfree.'</font>';
 }
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '</td></tr>';
