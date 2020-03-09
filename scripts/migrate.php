@@ -53,7 +53,6 @@ if (! $res) die("Include of master fails");
 // $user is created but empty.
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
-dol_include_once('/sellyoursaas/class/dolicloud_customers.class.php');
 dol_include_once('/sellyoursaas/class/packages.class.php');
 include_once(DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php');
 include_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');

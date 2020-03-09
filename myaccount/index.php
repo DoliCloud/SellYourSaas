@@ -224,6 +224,7 @@ if ($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG > 0)
 	}
 }
 
+$nbtotalofrecords = 0;
 $listofcontractidresellerall = array();
 $listofcontractidreseller = array();
 $listofcustomeridreseller = array();

@@ -65,7 +65,6 @@ if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../ma
 if (! $res) die("Include of master fails");
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
-dol_include_once('/sellyoursaas/class/dolicloud_customers.class.php');
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';

@@ -62,7 +62,6 @@ if (! $res) die("Include of master fails");
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
-dol_include_once('/sellyoursaas/class/dolicloud_customers.class.php');
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");
 

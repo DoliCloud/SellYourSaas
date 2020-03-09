@@ -140,10 +140,10 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
  * 	->nbofusers,
  * 	->modulesenabled, version, date_lastcheck, lastcheck
  *
- * @param 	Conf						$conf		Conf
- * @param 	Database					$db			Database handler
- * @param 	Contract|DoliCloudCustomer 	$object	    Customer (can modify caller)
- * @param	array						$errors	    Array of errors
+ * @param 	Conf			$conf		Conf
+ * @param 	Database		$db			Database handler
+ * @param 	Contrat 		$object	    Customer (can modify caller)
+ * @param	array			$errors	    Array of errors
  * @return	int										1
  */
 function dolicloud_database_refresh($conf, $db, &$object, &$errors)
@@ -479,7 +479,7 @@ function dolicloud_calculate_stats($db, $datelim)
  * Rem: Comptage des users par status
  *
  * @param	Database	$db			Database handler
- * @param	date		$datelim	Date limit
+ * @param	integer		$datelim	Date limit
  * @return	array					Array of data
  */
 function sellyoursaas_calculate_stats($db, $datelim)
