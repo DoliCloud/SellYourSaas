@@ -260,6 +260,12 @@ elseif ($reusesocid)		// When we use the "Add another instance" from myaccount d
 		header("Location: ".$newurl);
 		exit(-1);
 	}
+	if ($productref != 'none' && strlen($sldAndSubdomain) >= 29)
+	{
+		setEventMessages($langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-1);
+	}
 	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain))
 	{
 		setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
