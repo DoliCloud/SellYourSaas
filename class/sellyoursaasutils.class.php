@@ -786,7 +786,7 @@ class SellYourSaasUtils
    			$servicestatus = 1;
     	}
 
-    	dol_syslog(__METHOD__, LOG_DEBUG);
+    	dol_syslog(__METHOD__." maxnbofinvoicetotry=".$maxnbofinvoicetotry." noemailtocustomeriferror=".$noemailtocustomeriferror, LOG_DEBUG);
 
     	$this->db->begin();
 
@@ -889,7 +889,7 @@ class SellYourSaasUtils
 
     	$langs->load("agenda");
 
-    	dol_syslog("doTakePaymentStripeForThirdparty service=".$service." servicestatus=".$servicestatus." thirdparty_id=".$thirdparty_id." companypaymentmode=".$companypaymentmode->id);
+    	dol_syslog("doTakePaymentStripeForThirdparty service=".$service." servicestatus=".$servicestatus." thirdparty_id=".$thirdparty_id." companypaymentmode=".$companypaymentmode->id." noemailtocustomeriferror=".$noemailtocustomeriferror." nocancelifpaymenterror=".$nocancelifpaymenterror." calledinmyaccountcontext=".$calledinmyaccountcontext);
 
     	$this->stripechargedone = 0;
     	$this->stripechargeerror = 0;
@@ -1207,7 +1207,7 @@ class SellYourSaasUtils
 
 	    							$error++;
 	    							$errorforinvoice++;
-	    							$errmsg=$langs->trans("FailedtoChargeCard");
+	    							$errmsg=$langs->trans("FailedToChargeCard");
 	    							if (! empty($charge))
 	    							{
 	    							    if ($stripefailuredeclinecode == 'authentication_required')
