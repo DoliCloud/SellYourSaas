@@ -44,7 +44,7 @@ do
 		echo "Clean some dirs to save disk spaces"
 		rm -fr documents/*
 		rm -fr dev/ test/ doc/ htdocs/includes/ckeditor/ckeditor/adapters htdocs/includes/ckeditor/ckeditor/samples
-		rm -fr htdocs/includes/sabre/sabre/*/tests htdocs/includes/stripe/tests
+		rm -fr htdocs/includes/sabre/sabre/*/tests htdocs/includes/stripe/tests htdocs/includes/stripe/stripe-php/tests
 		rm -fr htdocs/includes/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* htdocs/includes/tecnickcom/tcpdf/fonts/freefont-* htdocs/includes/tecnickcom/tcpdf/fonts/ae_fonts_*
 		#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
 		rm -fr files/_cache/*
