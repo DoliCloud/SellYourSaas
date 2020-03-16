@@ -1065,7 +1065,8 @@ et l'email à utiliser qui est officiellement valide.
 [source,bash]
 ---------------
 root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-root@myshortservername.locadomain          noreply@mysaasdomain.com
+root@myshortservername.locadomain			noreply@mysaasdomain.com
+admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
 
 Compiler le fichier par:
