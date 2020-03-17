@@ -129,20 +129,20 @@ print "***** ".$script_file." *****\n";
 if (empty($newinstance) || empty($mode))
 {
 	print "Migrate an old instance on a new server. Script must be ran with root.\n";
-	print "Script must be ran from target server\n";
+	print "Script must be ran from the new host server.\n";
 	print "Usage: ".$script_file." oldinstance newinstance (test|confirm) [MYPRODUCTREF]\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
 
-/*if (0 != posix_getuid()) {
+if (0 != posix_getuid()) {
 	echo "Script must be ran with root.\n";
 	exit(-1);
-}*/
-if (0 == posix_getuid()) {
+}
+/*if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with admin sellyoursaas account).\n";
 	exit(-1);
-}
+}*/
 if (empty($ipserverdeployment))
 {
 	echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
@@ -243,7 +243,7 @@ $newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
 if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing'))
 {
-	print "Error: An existing instance called '".$newinstance."' with deployment status != 'processin' already exists.\n";
+	print "Error: An existing instance called '".$newinstance."' with deployment status != 'processing' already exists.\n";
 	exit(-1);
 }
 
@@ -325,7 +325,7 @@ print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
 print 'SFTP new connect string : '.$newsftpconnectstring."\n";
 print 'SFTP old password '.$oldospass."\n";
-//print 'SFTP new password '.$newobject->password_web."\n";
+//print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
 $param=array();
@@ -442,7 +442,7 @@ $param[]=$olddbname;
 $param[]="-h";
 $param[]=$olddbhost;
 $param[]="-u";
-$param[]=$olddbname;
+$param[]=$olddbuser;
 $param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$olddbpass).'"';
 $param[]="--compress";
 $param[]="-l";

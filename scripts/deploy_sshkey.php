@@ -98,7 +98,6 @@ $nbofko=0;
 $nbofok=0;
 $nbofactive=0;
 $nbofactivesusp=0;
-$nbofactiveclosurerequest=0;
 $nbofactivepaymentko=0;
 $nbofalltime=0;
 $nboferrors=0;
@@ -143,13 +142,13 @@ if ($resql)
 			    dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 				$object = new Contrat($db);
 
-				$instance_status_bis = '';
+				$instance_status = '';
 				$result = $object->fetch($obj->id);
 				if ($result <= 0) $found=false;
 				else
 				{
 					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; }
-					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'CLOSED'; $instance_status_bis = 'UNDEPLOYED'; }
+					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; }
 					elseif ($object->array_options['options_deployment_status'] == 'done')       { $instance_status = 'DEPLOYED'; }
 					else { $instance_status = 'UNKNOWN'; }
 				}
@@ -162,34 +161,33 @@ if ($resql)
 					if ($ispaymentko) $payment_status='FAILURE';
 				}
 
-				if (empty($instance_status_bis)) $instance_status_bis=$instance_status;
-				print "Analyze instance ".($i+1)." ".$instance." status=".$instance_status." instance_status=".$instance_status_bis." payment_status=".$payment_status."\n";
+				print "Analyze instance ".($i+1)." ".$instance." status=".$instance_status." instance_status=".$instance_status." payment_status=".$payment_status."\n";
 
 				// Count
-				if ($found && ! in_array($payment_status,array('TRIAL','TRIALING','TRIAL_EXPIRED')))
+				if ($found)
 				{
-					$nbofalltime++;
-					if (! in_array($instance_status,array('PROCESSING')) && ! in_array($instance_status,array('CLOSED')) && ! in_array($instance_status_bis,array('UNDEPLOYED')))		// Nb of active
+					if ($instancefiltercomplete)
 					{
-						$nbofactive++;
-
-						if (in_array($instance_status,array('SUSPENDED'))) $nbofactivesusp++;
-						else if (in_array($instance_status,array('CLOSE_QUEUED','CLOSURE_REQUESTED')) ) $nbofactiveclosurerequest++;
-						else if (in_array($payment_status,array('FAILURE','PAST_DUE'))) $nbofactivepaymentko++;
-						else $nbofactiveok++; // not suspended, not close request
-
 						$instances[$obj->id]=$object;
-						print "Qualify instance ".($i+1)." ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
+						print "Qualify instance ".($i+1)." ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
 					}
-					else
-					{
-						//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
+					else {
+						$nbofalltime++;
+						if (! in_array($instance_status,array('PROCESSING')) && ! in_array($instance_status,array('UNDEPLOYED')))		// Nb of active
+						{
+							$nbofactive++;
+
+							if (in_array($instance_status,array('SUSPENDED'))) $nbofactivesusp++;
+							else $nbofactiveok++; // not suspended, not close request
+
+							$instances[$obj->id]=$object;
+							print "Qualify instance ".($i+1)." ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
+						}
+						else
+						{
+							//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
+						}
 					}
-				}
-				elseif ($found && $instancefiltercomplete)
-				{
-					$instances[$obj->id]=$object;
-					print "Qualify instance ".($i+1)." ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
 				}
 				else
 				{
@@ -206,7 +204,7 @@ else
 	$nboferrors++;
 	dol_print_error($dbtousetosearch);
 }
-print "Found ".count($instances)." not trial instances including ".$nbofactivesusp." suspended + ".$nbofactiveclosurerequest." active with closure request + ".$nbofactivepaymentko." active with payment ko\n";
+print "Found ".count($instances)." instances including ".$nbofactivesusp." suspended\n";
 
 
 //print "----- Start loop for backup_instance\n";
