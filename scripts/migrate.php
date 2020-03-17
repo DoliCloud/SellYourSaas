@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2012 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2020 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -328,6 +328,7 @@ $result=$newobject->fetch('', '', $newinstance);
 $newserver=$newobject->array_options['options_hostname_os'];
 $newlogin=$newobject->array_options['options_username_os'];
 $newpassword=$newobject->array_options['options_password_os'];
+$newserverbase=$newobject->array_options['options_hostname_db'];
 $newloginbase=$newobject->array_options['options_username_db'];
 $newpasswordbase=$newobject->array_options['options_password_db'];
 $newdatabasedb=$newobject->array_options['options_database_db'];
@@ -511,7 +512,7 @@ if ($return_var) {
 print '--- Load database '.$newdatabasedb.' from /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
-$fullcommanda='echo "drop table llx_accounting_account;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$fullcommanda='echo "drop table llx_accounting_account;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanda."\n";
@@ -521,7 +522,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-$fullcommandb='echo "drop table llx_accounting_system;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$fullcommandb='echo "drop table llx_accounting_system;" | mysql -h'.$newserverbase.'-u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommandb."\n";
@@ -531,7 +532,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-$fullcommand="cat /tmp/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
+$fullcommand="cat /tmp/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h'.$newserverbase.' -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmrm')
 {
