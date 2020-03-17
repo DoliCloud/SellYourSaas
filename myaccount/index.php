@@ -3063,7 +3063,7 @@ if (empty($welcomecid))
 				if ($delayindays >= 0) {
 					print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
 				} else {
-					print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, 0, $delaybeforeundeployment);
+					print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
 				}
 				if (empty($atleastonepaymentmode))
 				{
