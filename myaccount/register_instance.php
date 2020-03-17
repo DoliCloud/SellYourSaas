@@ -1056,8 +1056,6 @@ if (is_object($contract) && method_exists($contract, 'fetch_thirdparty'))
 // Send email to customer
 if (is_object($contract->thirdparty))
 {
-	dol_syslog("Error in deployment, send email to customer (copy supervision)", LOG_ERR);
-
 	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 	$sellyoursaasemailsupervision = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
 	$sellyoursaasemailnoreply = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
@@ -1076,8 +1074,15 @@ if (is_object($contract->thirdparty))
 
 	$to = $contract->thirdparty->email;
 
-	$email = new CMailFile('['.$sellyoursaasname.'] Registration/deployment temporary error - '.dol_print_date(dol_now(), 'dayhourrfc'), $to, $sellyoursaasemailnoreply, $langs->trans("AnErrorOccuredDuringDeployment")."<br>\n".join("<br>\n",$errormessages)."<br>\n", array(), array(), array(), $sellyoursaasemailsupervision, '', 0, -1, '', '', '', '', 'emailing');
-	$email->sendfile();
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		// We send email but only if not in Command Line mode
+		dol_syslog("Error in deployment, send email to customer (copy supervision)", LOG_ERR);
+
+		$email = new CMailFile('['.$sellyoursaasname.'] Registration/deployment temporary error - '.dol_print_date(dol_now(), 'dayhourrfc'), $to, $sellyoursaasemailnoreply, $langs->trans("AnErrorOccuredDuringDeployment")."<br>\n".join("<br>\n",$errormessages)."<br>\n", array(), array(), array(), $sellyoursaasemailsupervision, '', 0, -1, '', '', '', '', 'emailing');
+		$email->sendfile();
+	} else {
+		dol_syslog("Error in deployment, no email sent because we are in CLI mode", LOG_ERR);
+	}
 }
 
 
