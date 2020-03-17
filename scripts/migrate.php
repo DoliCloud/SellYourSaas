@@ -174,6 +174,11 @@ if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match(
     $newinstance=$newinstance.".".$tmpstring;   // Automatically concat first domain name
 }
 
+
+// TODO Test if $ipserverdeployment (in sellyoursaas.conf) match ip target by $newinstance. If not error.
+// Test $ipserverdeployment
+
+
 $tmppackage = new Packages($dbmaster);
 
 

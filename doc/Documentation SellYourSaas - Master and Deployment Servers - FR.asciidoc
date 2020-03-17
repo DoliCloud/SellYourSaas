@@ -2197,7 +2197,7 @@ Sur tous les serveurs (Master et Déploiement):
 
 TODO Description de la page de setup.
 
-* Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur Master et les serveurs de Déploiement)
+* Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
 
 [source,bash]
 ---------------
