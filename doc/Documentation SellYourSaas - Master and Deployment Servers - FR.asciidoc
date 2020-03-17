@@ -1882,16 +1882,26 @@ shutdown -Fr now
 ---------------
 
 
+=== Configuration de PHP
 
-=== Securisation du répertoire des sessions PHP
+==== Securisation du répertoire des sessions PHP
 
 Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php*
 
 
+==== Définition taille upload
+
+Modifier le fichier *php.ini* pour permettre l'upload de plus gros fichiers.
+
+[source,bash]
+---------------
+upload_max_filesize = 20M
+
+post_max_size = 25M
+---------------
 
 
-
-=== Ajout du wrapper PHP pour la fonction PHP mail
+==== Ajout du wrapper PHP pour la fonction PHP mail
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 
