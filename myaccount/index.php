@@ -5245,8 +5245,8 @@ if ($mode == 'billing')
 									$amount_credit_notes_included = $invoice->getSumCreditNotesUsed();
 									$paymentinerroronthisinvoice = 0;
 
-									// Test if there is a payment error, if yes, ask to fix payment data
-									$sql = 'SELECT f.rowid, ee.code, ee.label, ee.extraparams  FROM '.MAIN_DB_PREFIX.'facture as f';
+									// Test if there is a payment error (if last event is payment error). If yes, ask to fix payment data
+									$sql = 'SELECT f.rowid, ee.code, ee.label, ee.extraparams, ee.datep  FROM '.MAIN_DB_PREFIX.'facture as f';
 									$sql.= ' INNER JOIN '.MAIN_DB_PREFIX."actioncomm as ee ON ee.fk_element = f.rowid AND ee.elementtype = 'invoice'";
 									$sql.= " AND (ee.code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";
 									$sql.= ' WHERE f.fk_soc = '.$mythirdpartyaccount->id.' AND f.paye = 0 AND f.rowid = '.$invoice->id;
@@ -5264,17 +5264,18 @@ if ($mode == 'billing')
 											$obj = $db->fetch_object($resql);
 
 											// There is at least one payment error
+											$lasttrystring = $langs->trans("LastTry").': '.dol_print_date($db->jdate($obj->datep));
 											if ($obj->label == 'Cancellation of payment by the bank')
 											{
-											    print '<span title="'.$langs->trans("PaymentChargedButReversedByBank").'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
+												print '<span title="'.$langs->trans("PaymentChargedButReversedByBank").' - '.$lasttrystring.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 											}
 											elseif ($obj->extraparams == 'PAYMENT_ERROR_INSUFICIENT_FUNDS')
 											{
-											    print '<span title="'.$obj->extraparams.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png" alt="Insuficient funds"> '.$langs->trans("PaymentError").'</span>';
+												print '<span title="'.$obj->extraparams.' - '.$lasttrystring.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png" alt="Insuficient funds"> '.$langs->trans("PaymentError").'</span>';
 											}
 											else
 											{
-											    print '<span title="'.$obj->extraparams.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
+												print '<span title="'.$obj->extraparams.' - '.$lasttrystring.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 											}
 										}
 									}
@@ -5284,6 +5285,9 @@ if ($mode == 'billing')
 										$s = preg_replace('/'.$langs->trans("BillStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
 										$s = preg_replace('/'.$langs->trans("BillShortStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
 										print $s;
+										// TODO Add details of payments
+										//$htmltext = 'Soon here: Details of payment...';
+										//print $form->textwithpicto('', $htmltext);
 									}
 									print '
 					              </div>
