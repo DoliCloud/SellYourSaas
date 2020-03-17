@@ -522,7 +522,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-$fullcommandb='echo "drop table llx_accounting_system;" | mysql -h'.$newserverbase.'-u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$fullcommandb='echo "drop table llx_accounting_system;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommandb."\n";
@@ -532,7 +532,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-$fullcommand="cat /tmp/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h'.$newserverbase.' -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
+$fullcommand="cat /tmp/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmrm')
 {
