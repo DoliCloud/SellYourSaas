@@ -434,3 +434,10 @@ MaxNbOfInstances=Nb max d'instances
 ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL: <br> &forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une adresse IP<br>&extcss=mycssurl<br>
 AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instances existantes, votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span>
 SeeOurPrices=Voir les prix de chaque formule <a href="%s" target="_blank">ici</a>
+NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.
+PayingInstanceLost=Instance payant perdue
+StartStopAgent=Lancement|Arrêt agent
+OnlineOffline=Mise en ligne|hors ligne des instances
+EvenIfDomainIsOpenTo=Even if domain is open to registration, it may not appears on registration page due to restriction set on the package of the service you try to register.
+OnDomainOnly=Uniquement depuis %s
+LastPaymentTry=Dernier tentative d'encaissement

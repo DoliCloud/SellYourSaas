@@ -486,4 +486,5 @@ PayingInstanceLost=Paying instance lost
 StartStopAgent=Start|Stop agent
 OnlineOffline=Online|Offline user instances
 EvenIfDomainIsOpenTo=Even if domain is open to registration, it may not appears on registration page due to restriction set on the package of the service you try to register.
-OnDomainOnly=Only on %s
+OnDomainOnly=Only from %s
+LastPaymentTry=Last payment try
