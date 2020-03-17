@@ -36,6 +36,8 @@ $error=0;
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
 define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+//if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');                                  // Do not create database handler $db
+//if (! defined('NOREQUIREUSER'))            define('NOREQUIREUSER', '1');                                // Do not load object $user
 
 // Load Dolibarr environment
 $res=0;
@@ -60,6 +62,7 @@ include_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');
 include_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
 include_once(DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php');
 include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
+//include_once(DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
@@ -73,6 +76,10 @@ if ($fp) {
 	foreach($array as $val)
 	{
 		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'masterserver')
+		{
+			$masterserver = $tmpline[1];
+		}
 		if ($tmpline[0] == 'ipserverdeployment')
 		{
 			$ipserverdeployment = $tmpline[1];
@@ -128,22 +135,25 @@ print "***** ".$script_file." *****\n";
 
 if (empty($newinstance) || empty($mode))
 {
-	print "Migrate an old instance on a new server. Script must be ran with root.\n";
-	print "Script must be ran from the new host server.\n";
+	print "Migrate an old instance on a new server. Script must be ran with admin.\n";
+	print "Script must be ran from the master server.\n";
 	print "Usage: ".$script_file." oldinstance newinstance (test|confirm) [MYPRODUCTREF]\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
 
-if (0 != posix_getuid()) {
-	echo "Script must be ran with root.\n";
-	exit(-1);
-}
-/*if (0 == posix_getuid()) {
+/*
+	if (0 != posix_getuid()) {
+		echo "Script must be ran with root.\n";
+		exit(-1);
+	}
+} else {*/
+if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with admin sellyoursaas account).\n";
 	exit(-1);
-}*/
-if (empty($ipserverdeployment))
+}
+
+/*if (empty($ipserverdeployment))
 {
 	echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
 	exit(-1);
@@ -152,9 +162,10 @@ if (empty($instanceserver))
 {
 	echo "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
 	exit(-1);
-}
+}*/
 
-$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+//$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+$dbmaster = $db;
 if ($dbmaster->error)
 {
 	dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
@@ -165,6 +176,11 @@ if ($dbmaster)
 	$conf->setValues($dbmaster);
 }
 if (empty($db)) $db=$dbmaster;
+
+
+//$user = new User();
+//$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+
 
 // Forge complete name of instance
 if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance))
@@ -204,12 +220,12 @@ $olddbport=($oldobject->array_options['options_port_db'] ? $oldobject->array_opt
 $olddbuser=$oldobject->array_options['options_username_db'];
 $olddbpass=$oldobject->array_options['options_password_db'];
 
-$db2=getDoliDBInstance('mysqli', $olddbhost, $olddbuser, $olddbpass, $olddbname, $olddbport);
+/*$db2=getDoliDBInstance('mysqli', $olddbhost, $olddbuser, $olddbpass, $olddbname, $olddbport);
 if ($db2->error)
 {
     dol_print_error($db2,"host=".$olddbhost.", port=".$olddbport.", user=".$olddbuser.", databasename=".$olddbname.", ".$db2->error);
     exit(-1);
-}
+}*/
 
 $productref = '';
 if (isset($argv[4])) $productref = $argv[4];
@@ -315,7 +331,6 @@ $newpassword=$newobject->array_options['options_password_os'];
 $newloginbase=$newobject->array_options['options_username_db'];
 $newpasswordbase=$newobject->array_options['options_password_db'];
 $newdatabasedb=$newobject->array_options['options_database_db'];
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb))
 {
@@ -326,6 +341,9 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb))
 $newsftpconnectstring=$newlogin.'@'.$newserver.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$newdatabasedb);
 
 
+// Now sync files
+
+$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
 print 'SFTP new connect string : '.$newsftpconnectstring."\n";
@@ -359,7 +377,12 @@ $fullcommand=$command." ".join(" ",$param);
 $output=array();
 $return_var=0;
 print $fullcommand."\n";
-exec($fullcommand, $output, $return_var);
+//exec($fullcommand, $output, $return_var);
+
+print "Run this command on target host and press a key to continue...\n";
+$input = trim(fgets(STDIN));
+
+
 
 // Output result
 foreach($output as $outputline)
@@ -425,7 +448,13 @@ if ($mode == 'confirm')
 		print 'Bad value for data. We stop to avoid drama';
 		exit(-7);
 	}
-	exec("chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb, $output, $return_varchmod);
+	$fullcommand = "chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
+
+	print $fullcommand."\n";
+	//exec($fullcommand, $output, $return_varchmod);
+
+	print "Run this command on target host and press a key to continue...\n";
+	$input = trim(fgets(STDIN));
 }
 
 // Output result
