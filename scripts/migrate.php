@@ -45,6 +45,7 @@ while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2
 if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/master.inc.php");
 if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php");
 // Try master.inc.php using relative path
+if (! $res && file_exists("./master.inc.php")) $res=@include("./master.inc.php");
 if (! $res && file_exists("../master.inc.php")) $res=@include("../master.inc.php");
 if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.inc.php");
 if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
@@ -60,25 +61,57 @@ include_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
 include_once(DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php');
 include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
 
+// Read /etc/sellyoursaas.conf file
+$databasehost='localhost';
+$database='';
+$databaseuser='sellyoursaas';
+$databasepass='';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach($array as $val)
+	{
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'ipserverdeployment')
+		{
+			$ipserverdeployment = $tmpline[1];
+		}
+		if ($tmpline[0] == 'instanceserver')
+		{
+			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasehost')
+		{
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database')
+		{
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseuser')
+		{
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass')
+		{
+			$databasepass = $tmpline[1];
+		}
+	}
+}
+else
+{
+	print "Failed to open /etc/sellyoursaas.conf file\n";
+	exit;
+}
+
+
 $langs->loadLangs(array("main", "errors"));
 
-$contract = new Contrat($db);
+$oldinstance=isset($argv[1])?$argv[1]:'';
 
-$defaultproductref='DOLICLOUD-PACK-Dolibarr';
-
-$oldoshost=isset($argv[1])?$argv[1]:'';
-$oldosuser=isset($argv[2])?$argv[2]:'';
-$oldospass=isset($argv[3])?$argv[3]:'';
-$oldosdir=isset($argv[4])?$argv[4]:'';
-
-$olddbhost=isset($argv[5])?$argv[5]:'';
-$olddbname=isset($argv[6])?$argv[6]:'';
-$olddbport=3306;
-$olddbuser=isset($argv[7])?$argv[7]:'';
-$olddbpass=isset($argv[8])?$argv[8]:'';
-
-$newinstance=isset($argv[9])?$argv[9]:'';
-$mode=isset($argv[10])?$argv[10]:'';
+$newinstance=isset($argv[2])?$argv[2]:'';
+$mode=isset($argv[3])?$argv[3]:'';
 
 $langsen = new Translate('', $conf);
 $langsen->setDefaultLang($mysoc->default_lang);
@@ -95,16 +128,43 @@ print "***** ".$script_file." *****\n";
 
 if (empty($newinstance) || empty($mode))
 {
-	print "Migrate an old instance on new server. Script must be ran with root.\n";
-	print "Usage: ".$script_file." oldoshost oldosuser oldospass oldosdir olddbhost olddbname olddbuser olddbpass newinstance (test|confirm) [".$defaultproductref."]\n";
+	print "Migrate an old instance on a new server. Script must be ran with root.\n";
+	print "Script must be ran from target server\n";
+	print "Usage: ".$script_file." oldinstance newinstance (test|confirm) [MYPRODUCTREF]\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
 
-if (0 != posix_getuid()) {
+/*if (0 != posix_getuid()) {
 	echo "Script must be ran with root.\n";
 	exit(-1);
+}*/
+if (0 == posix_getuid()) {
+	echo "Script must not be ran with root (but with admin sellyoursaas account).\n";
+	exit(-1);
 }
+if (empty($ipserverdeployment))
+{
+	echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
+	exit(-1);
+}
+if (empty($instanceserver))
+{
+	echo "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
+	exit(-1);
+}
+
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+if ($dbmaster->error)
+{
+	dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+	exit;
+}
+if ($dbmaster)
+{
+	$conf->setValues($dbmaster);
+}
+if (empty($db)) $db=$dbmaster;
 
 // Forge complete name of instance
 if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance))
@@ -114,35 +174,86 @@ if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match(
     $newinstance=$newinstance.".".$tmpstring;   // Automatically concat first domain name
 }
 
-if ($oldbhost)
+$tmppackage = new Packages($dbmaster);
+
+
+// Get data of old instance
+$oldobject = new Contrat($dbmaster);
+$result=$oldobject->fetch('', '', $oldinstance);
+$oldobject->fetch_thirdparty();
+
+if ($result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done')
 {
-    $db2=getDoliDBInstance('mysqli', $oldbhost, $oldbuser, $oldbpass, $olddbname, $olddbport);
-    if ($db2->error)
-    {
-        dol_print_error($db2,"host=".$oldbhost.", port=".$oldbport.", user=".$oldbuser.", databasename=".$oldbname.", ".$db2->error);
-        exit(-1);
-    }
+	print "Error: old instance to migrate '".$oldinstance."' with a deployment status = 'done' not found.\n";
+	exit(-1);
 }
 
-if (isset($argv[11])) $productref = $argv[11];
+$oldoshost=$oldobject->array_options['options_hostname_os'];
+$oldosuser=$oldobject->array_options['options_username_os'];
+$oldospass=$oldobject->array_options['options_password_os'];
+//$oldosdir=$oldobject->array_options['dir'];
+
+$olddbhost=$oldobject->array_options['options_hostname_db'];
+$olddbname=$oldobject->array_options['options_database_db'];
+$olddbport=($oldobject->array_options['options_port_db'] ? $oldobject->array_options['options_port_db'] : 3306);
+$olddbuser=$oldobject->array_options['options_username_db'];
+$olddbpass=$oldobject->array_options['options_password_db'];
+
+$db2=getDoliDBInstance('mysqli', $olddbhost, $olddbuser, $olddbpass, $olddbname, $olddbport);
+if ($db2->error)
+{
+    dol_print_error($db2,"host=".$olddbhost.", port=".$olddbport.", user=".$olddbuser.", databasename=".$olddbname.", ".$db2->error);
+    exit(-1);
+}
+
+$productref = '';
+if (isset($argv[4])) $productref = $argv[4];
+if (empty($productref)) {
+
+	// Get tmppackage
+	foreach($oldobject->lines as $keyline => $line)
+	{
+		$tmpproduct = new Product($dbmaster);
+		if ($line->fk_product > 0)
+		{
+			$tmpproduct->fetch($line->fk_product);
+			if ($tmpproduct->array_options['options_app_or_option'] == 'app')
+			{
+				if ($tmpproduct->array_options['options_package'] > 0) {
+					$productref = $tmpproduct->ref;
+					$tmppackage->fetch($tmpproduct->array_options['options_package']);
+					$freeperioddays = $tmpproduct->array_options['options_freeperioddays'];
+					break;
+				} else {
+					dol_syslog("Error: ID of package not defined on productwith ID ".$line->fk_product);
+				}
+			}
+		}
+	}
+
+}
+if (empty($productref)) {
+	print "Error: Failed to get product ref of instance '".$oldinstance."'\n";
+	exit(-1);
+}
 
 $createthirdandinstance = 0;
 
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$newobject = new Contrat($db);
+$newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
-if ($result <= 0 || $newobject->statut == 0)
+if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing'))
 {
-	print "Error: newinstance ".$newinstance." with status <> 0 not found.";
+	print "Error: An existing instance called '".$newinstance."' with deployment status != 'processin' already exists.\n";
+	exit(-1);
 }
 
 $newobject->instance = $newinstance;
-$newobject->username_web = $newobject->array_options['options_username_os'];
-$newobject->password_web = $newobject->array_options['options_password_os'];
-$newobject->hostname_web = $newobject->array_options['options_hostname_os'];
-$newobject->username_db  = $newobject->array_options['options_username_db'];
-$newobject->password_db  = $newobject->array_options['options_password_db'];
-$newobject->database_db  = $newobject->array_options['options_database_db'];
+$newobject->username_web = $oldobject->array_options['options_username_os'];
+$newobject->password_web = $oldobject->array_options['options_password_os'];
+$newobject->hostname_web = $oldobject->array_options['options_hostname_os'];
+$newobject->username_db  = $oldobject->array_options['options_username_db'];
+$newobject->password_db  = $oldobject->array_options['options_password_db'];
+$newobject->database_db  = $oldobject->array_options['options_database_db'];
 
 if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db))
 {
@@ -150,24 +261,65 @@ if (empty($newobject->instance) || empty($newobject->username_web) || empty($new
 	exit(-3);
 }
 
-$oldosdirdb=$oldosdir;
-$oldlogin=$oldoduser;
-$oldpassword=$oldospass;
-$oldloginbase=$olddbuser;
-$oldpasswordbase=$olddbpass;
-$newdirdb=$newobject->database_db;
-$newlogin=$newobject->username_web;
-$newpassword=$newobject->password_web;
-$newloginbase=$newobject->username_db;
-$newpasswordbase=$newobject->password_db;
+$olddirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $oldobject->array_options['options_database_db']);
+$sourcedir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$oldobject->array_options['options_username_os'].'/'.$olddirdb;
 
-$sourcedir=$oldosdir;
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb;
-$oldserver=$oldoshost;
+$oldsftpconnectstring=$oldosuser.'@'.$oldoshost.':'.$sourcedir;
+
+
+print '--- Create new container for new instance'."\n";
+
+$newpass = $oldobject->array_options['options_deployment_initial_password'];
+if (empty($newpass)) $newpass = getRandomPassword(true, array('I'), 16);
+
+$command='php '.($path?$path:'./')."../myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
+echo $command."\n";
+
+$return_val = 0;
+if ($mode == 'confirm')
+{
+	//$output = shell_exec($command);
+	ob_start();
+	passthru($command, $return_val);
+	$content_grabbed=ob_get_contents();
+	ob_end_clean();
+
+	echo "Result: ".$return_val."\n";
+	echo "Output: ".$content_grabbed."\n";
+}
+
+if ($return_val != 0) $error++;
+
+// Return
+if (! $error)
+{
+	print '-> Creation of new instance success with name '.$newinstance."\n";
+}
+else
+{
+	print '-> Failed to create new instance with name '.$newinstance."\n";
+	exit(-1);
+}
+
+$newobject = new Contrat($dbmaster);
+$result=$newobject->fetch('', '', $newinstance);
+
 $newserver=$newobject->array_options['options_hostname_os'];
+$newlogin=$newobject->array_options['options_username_os'];
+$newpassword=$newobject->array_options['options_password_os'];
+$newloginbase=$newobject->array_options['options_username_db'];
+$newpasswordbase=$newobject->array_options['options_password_db'];
+$newdatabasedb=$newobject->array_options['options_database_db'];
+$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
 
-$oldsftpconnectstring=$oldosuser.'@'.$oldoshost.':'.$oldosdir;
-$newsftpconnectstring=$newobject->username_web.'@'.$newobject->hostname_web.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$newdirdb);
+if ($result <= 0 || empty($newlogin) || empty($newdatabasedb))
+{
+	print "Error: Failed to find instance '".$newinstance."' (it should have been created before).\n";
+	exit(-1);
+}
+
+$newsftpconnectstring=$newlogin.'@'.$newserver.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$newdatabasedb);
+
 
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
@@ -211,6 +363,7 @@ foreach($output as $outputline)
 }
 
 // Remove install.lock file if mode )) confirmunlock
+/*
 if ($mode == 'confirmunlock')
 {
 	// SFTP connect
@@ -231,7 +384,7 @@ if ($mode == 'confirmunlock')
 			$sftp = ssh2_sftp($connection);
 
 			// Check if install.lock exists
-			$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+			$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$newdatabasedb);
 			$fileinstalllock=$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/'.$dir.'/documents/install.lock';
 
 			print 'Remove file '.$fileinstalllock."\n";
@@ -245,23 +398,29 @@ if ($mode == 'confirmunlock')
 		exit(-6);
 	}
 }
+*/
 
-print "-> Files were sync into dir of instance ".$newobject->ref_customer.": ".$targetdir."\n";
+if ($return_var) {
+	print "-> Error during rsync of instance ".$newobject->ref_customer.": ".$targetdir."\n";
+	exit(-1);
+} else {
+	print "-> Files were sync into dir of instance ".$newobject->ref_customer.": ".$targetdir."\n";
+}
 print "\n";
 
 
 
-print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb."\n";
+print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb."\n";
 $output=array();
 $return_varchmod=0;
 if ($mode == 'confirm')
 {
-	if (empty($conf->global->DOLICLOUD_INSTANCES_PATH) || empty($newlogin) || empty($newdirdb))
+	if (empty($conf->global->DOLICLOUD_INSTANCES_PATH) || empty($newlogin) || empty($newdatabasedb))
 	{
 		print 'Bad value for data. We stop to avoid drama';
 		exit(-7);
 	}
-	exec("chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb, $output, $return_varchmod);
+	exec("chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb, $output, $return_varchmod);
 }
 
 // Output result
@@ -275,7 +434,7 @@ print "\n";
 print "-> Files owner were modified for instance ".$newobject->ref_customer.": ".$targetdir." to user ".$newlogin."\n";
 
 
-print '--- Dump database '.$olddbname.' into /tmp/mysqldump_'.$oldbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Dump database '.$olddbname.' into /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 
 $command="mysqldump";
 $param=array();
@@ -309,12 +468,16 @@ foreach($output as $outputline)
 	print $outputline."\n";
 }
 
+if ($return_var) {
+	print "-> Error during mysql dump of instance ".$oldobject->ref_customer."\n";
+	exit(-1);
+}
 
 
-print '--- Load database '.$newobject->database_db.' from /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Load database '.$newdatabasedb.' from /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
-$fullcommanda='echo "drop table llx_accounting_account;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
+$fullcommanda='echo "drop table llx_accounting_account;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanda."\n";
@@ -324,7 +487,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-$fullcommandb='echo "drop table llx_accounting_system;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
+$fullcommandb='echo "drop table llx_accounting_system;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommandb."\n";
@@ -334,7 +497,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-$fullcommand="cat /tmp/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db;
+$fullcommand="cat /tmp/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmrm')
 {
@@ -345,7 +508,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-$fullcommandc='echo "UPDATE llx_const set value = \''.$newlogin.'\' WHERE name = \'CRON_KEY\';" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
+/*$fullcommandc='echo "UPDATE llx_const set value = \''.$newlogin.'\' WHERE name = \'CRON_KEY\';" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Update cron key '.$fullcommandc."\n";
@@ -353,20 +516,23 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 {
 	exec($fullcommandc, $output, $return_var);
 	foreach($output as $line) print $line."\n";
+}*/
+
+if ($return_var) {
+	print "-> Error during mysql load of instance ".$newobject->ref_customer."\n";
+	exit(-1);
 }
-
-
 
 print "\n";
 
 if ($mode == 'confirm')
 {
-	print '-> Dump loaded into database '.$newobject->database_db.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
+	print '-> Dump loaded into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	print "Finished.\n";
 }
 else
 {
-	print '-> Dump NOT loaded (test mode) into database '.$newobject->database_db.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
+	print '-> Dump NOT loaded (test mode) into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	print "Finished. DON'T FORGET TO DISABLE ACCESS AND/OR INVOICING ON OLD SYSTEM !!!\n";
 }
 
