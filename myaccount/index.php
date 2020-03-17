@@ -3057,10 +3057,14 @@ if (empty($welcomecid))
 				$delayindays = round($delayafterexpiration / 3600 / 24);
 				$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
 
-				print '<!-- XDaysAfterEndOfPeriodInstanceSuspended -->'."\n";
+				print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
 				print '<div class="note note-warning">'."\n";
 				print '		<h4 class="block">'."\n";
-				print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
+				if ($delayindays >= 0) {
+					print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
+				} else {
+					print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, 0, $delaybeforeundeployment);
+				}
 				if (empty($atleastonepaymentmode))
 				{
 				    print '<br><a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';

@@ -341,6 +341,7 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb))
 
 $newsftpconnectstring=$newlogin.'@'.$newserver.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$newdatabasedb);
 
+$createthirdandinstance=1;
 
 // Now sync files
 
@@ -543,20 +544,18 @@ if ($mode == 'confirm' || $mode == 'confirmrm')
 	foreach($output as $line) print $line."\n";
 }
 
-/*$fullcommandc='echo "UPDATE llx_const set value = \''.$newlogin.'\' WHERE name = \'CRON_KEY\';" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
-$output=array();
-$return_var=0;
-print strftime("%Y%m%d-%H%M%S").' Update cron key '.$fullcommandc."\n";
-if ($mode == 'confirm' || $mode == 'confirmrm')
-{
-	exec($fullcommandc, $output, $return_var);
-	foreach($output as $line) print $line."\n";
-}*/
-
 if ($return_var) {
 	print "-> Error during mysql load of instance ".$newobject->ref_customer."\n";
 	exit(-1);
 }
+
+
+// TODO Move link of template invoice on old contract to this new contract
+$sql = 'UPDATE '.MAIN_DB_PREFIX.'facture_rec SET fk_source = '.$newobject->id.' WHERE';
+$sql.= ' fk_source = '.$oldobject->id." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
+print $sql."\n";
+//$dbmaster->query($sql);
+
 
 print "\n";
 
