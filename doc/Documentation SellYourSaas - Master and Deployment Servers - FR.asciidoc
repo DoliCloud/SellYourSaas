@@ -2011,7 +2011,18 @@ SystemMaxUse=100M
 ---------------
 
 
-=== Désactivation de apport (optionnel)
+=== Désactivation ou activation de apport (optionnel, "on" recommandé)
+
+Pour activer:
+
+[source,bash]
+---------------
+sudo systemctl enable apport.service
+sudo systemctl start apport.service
+sudo systemctl status apport.service
+---------------
+
+Pour désactiver:
 
 [source,bash]
 ---------------
@@ -2020,6 +2031,7 @@ sudo systemctl stop apport.service
 sudo systemctl status apport.service
 ---------------
 
+Note: Les rapports sont dans */var/crash*
 
 
 === Installer certbot (pour le SSL des sites hors instances utilisateurs)
