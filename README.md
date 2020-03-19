@@ -3,21 +3,20 @@
 
 ## Features
 
-SellYourSaas is a module working with the framework of Dolibarr ERP CRM Open Source softwre so it is able to manage and sell any Web application as a Saas service.
+SellYourSaas is a module working with the framework of Dolibarr ERP CRM Open Source software - so it is able to manage and sell any Web application as a Saas service.
 It covers definition of the packages to sell (which application, where to sources and database image, how to install it), the tools to deploy the application on a remote server, but also a customer dashboard for your subscribers, automatic invoicing and renewal. The administration / backoffice is Dolibarr ERP CRM Open Source software.
 
 This is a list of some features supported by this project:
 
-- Creationo of profiles of packages to define what to deploy when a subscription to this package is done: files or directories to deploy, databases dump to load, cron entry to add,
-SSH public keys of administrator to deploy and any other command lines to launch.
+- Creation of profiles of packages - to define what to deploy when a subscription to this package is done: files or directories to deploy, databases dump to load, cron entry to add, SSH public keys of administrator to deploy and any other command lines to launch.
 - Create services that define the plan (which package and option) and price policy to use for invoicing: per application, per user, per Gigabytes or any combination of this.
 - Option to support free trial periods (with no credit card required) on some plans.
 - Can define the SQL or CLI command for each sold services to define how to count the quantity to bill (For example a SQL request to count the number of users).
 - Provides ready to use URLs for an online subscription to a hosting service by your prospects or customers.
-- Autofill and autodetect country in the subscription page using Geoip.
+- Autofill and autodetect country in the subscription page using GeoIP.
 - Include a probability of VPN usage for each subscriber (to fight against spammer).
-- Can decide if customer has direct access to the MySQL/MariaDB databse and restricted (or not) SSH access to its instance.
-- Each customer has its own system and data environment (jail)
+- Can decide if customer has direct access to the MySQL/MariaDB database and restricted (or not) SSH access to its instance.
+- Each customer has its own system and data environment (jail).
 - Add a system layer to replace the php mail function to track and stop evil users using their created instance to try to make Spams.  
 - Manage a network of reseller with commission dedicated to each reseller (a reseller has its own URL to register/create a new instances of an application and any customer that use it to create its instance is linked to the reseller. Reseller will gain a commission for each invoice paid by the customer). 
 - Provide a customer dashboard for customers to manage their subscription, download their invoices.
