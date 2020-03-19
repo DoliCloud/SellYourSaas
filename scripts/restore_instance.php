@@ -128,7 +128,7 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode))
 {
     print "This script must be ran as 'admin' user.\n";
-    print "Usage:   $script_file backup_dir  instance  mysqldump_dbn...sql.tgz|dayofmysqldump  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
+    print "Usage:   $script_file backup_dir  instance  mysqldump_dbn...sql.gz|dayofmysqldump  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
 	print "Example: $script_file ".$conf->global->DOLICLOUD_BACKUP_PATH."/osu123456/dbn789012  myinstance  31  testrsync\n";
 	print "Note:    ssh keys must be authorized to have testrsync and confirmrsync working\n";
 	print "Return code: 0 if success, <>0 if error\n";
@@ -325,7 +325,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	if (is_numeric($dayofmysqldump))
 	{
 	    $dateselected=sprintf("%02s", $dayofmysqldump);
-	    $dumpfiletoload='mysqldump_'.$object->database_db.'_'.$dateselected.".sql.tgz";
+	    $dumpfiletoload='mysqldump_'.$object->database_db.'_'.$dateselected.".sql.gz";
 	}
 	else
 	{
@@ -333,8 +333,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	}
 
 	$fullcommand=$command." ".join(" ",$param);
-	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | tar -x > /dev/null';
-	else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | tar -x | '.$fullcommand;
+	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d > /dev/null';
+	else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d | '.$fullcommand;
 	$output=array();
 	$return_varmysql=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
