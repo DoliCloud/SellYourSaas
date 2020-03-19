@@ -309,7 +309,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	}
 }
 
-// Backup database
+// Restore database
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
 	$command="mysql";
@@ -332,6 +332,10 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	    $dumpfiletoload=$dayofmysqldump;
 	}
 
+	// TODO
+	// Drop table to avoid error on load due to foreign keys
+
+	// Launch load
 	$fullcommand=$command." ".join(" ",$param);
 	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d > /dev/null';
 	else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d | '.$fullcommand;
