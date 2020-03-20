@@ -357,7 +357,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		$handle=fopen($dirroot.'/../last_mysqlrestore_'.$instance.'.txt','w');
 		if ($handle)
 		{
-			fwrite($handle,'File created after mysql of '.$instance.". return_varmysql=".$return_varmysql."\n");
+			fwrite($handle,'File created after mysql load into '.$instance.". return_varmysql=".$return_varmysql."\n");
+			fwrite($handle,'The dump file restored was: '.$dirroot.'/../'.$dumpfiletoload."\n");
 			fclose($handle);
 		}
 		else
