@@ -407,8 +407,8 @@ if (empty($return_var) && empty($return_varmysql))
 }
 else
 {
-	if (! empty($return_var))      print "ERROR into backup process of rsync: ".$return_var."\n";
-	if (! empty($return_varmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql."\n";
+	if (! empty($return_var))      print "ERROR into restore process of rsync: ".$return_var."\n";
+	if (! empty($return_varmysql)) print "ERROR into restore process of mysqldump: ".$return_varmysql."\n";
 
 	if ($mode == 'confirm')
 	{
