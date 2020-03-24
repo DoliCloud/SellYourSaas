@@ -62,6 +62,7 @@ margin-top: .4rem;
     background-color: #be3013 !important;
 }
 
+.marginrightonlyimp { margin-right: 5px !important; }
 
 label,input,button,select,textarea {font-weight: normal;line-height: 20px;}
 input,button,select,textarea {font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;}label {display: block;margin-bottom: 5px;}

@@ -122,6 +122,7 @@ PageForPicto=File for picto
 ParentsId=Id of parent
 ResetPassword=Reset password of user of instance
 ConfirmResetPassword=Are you sure you want to reset password for this user ?
+SEPAMandate=SEPA Mandate
 SepaMandateForSellYourSaas=SEPA Mandate for SellYourSaas
 FooterContent=Content of footer in "myaccount" web site 
 ConversionContent=Content of footer on the "conversion page" (once a payment mode was recorded)

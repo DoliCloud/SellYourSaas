@@ -5529,8 +5529,12 @@ if ($mode == 'registerpaymentmode')
     	print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
     	//print '<input type="hidden" name="thirdparty_id" value="'.$mythirdpartyaccount->id.'">';
 
-    	// If thirdparty is not yet a customer, we show him the amount to pay in its first invoice.
-    	if ($mythirdpartyaccount->client != 1 && $mythirdpartyaccount->client != 3) {
+    	$tmp = $mythirdpartyaccount->getOutstandingBills();
+    	$outstandingTotalIncTax = $tmp['total_ttc'];
+
+    	// If thirdparty is not yet a customer (no payment never done), we show him the amount to pay in its first invoice.
+    	if ($outstandingTotalIncTax == 0) {
+
             // Loop on contracts
     	    $amounttopayasfirstinvoice = 0;
     	    $amounttopayasfirstinvoicetinstances = array();
@@ -5630,7 +5634,7 @@ if ($mode == 'registerpaymentmode')
 			{
 				$foundcard++;
 				print '<hr>';
-				print img_credit_card($companypaymentmodetemp->type_card);
+				print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
 				print $langs->trans("CurrentCreditOrDebitCard").':<br>';
 				print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
 				print '....'.$companypaymentmodetemp->last_four;
@@ -5648,7 +5652,7 @@ if ($mode == 'registerpaymentmode')
 		if ($foundcard)
 		{
 			print '<hr>';
-			print img_credit_card($companypaymentmodetemp->type_card);
+			print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
 			print $langs->trans("NewCreditOrDebitCard").':<br>';
 		}
 

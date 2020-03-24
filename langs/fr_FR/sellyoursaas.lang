@@ -112,6 +112,7 @@ PageForPicto=Fichier pour picto
 ParentsId=Id parent
 ResetPassword=Réinitialisation du mot de passe de l'utilisateur de l'instance
 ConfirmResetPassword=Etes vous sur de vouloir réinitialiser le mot de passe de cet utilisateur ?
+SEPAMandate=Mandat SEPA
 SepaMandateForSellYourSaas=Mandat SEPA pour SellYourSaas
 FooterContent=Contenu du pied de page pour les pages "myaccount"
 InstallingInstance=Installation de votre instance en cours...
