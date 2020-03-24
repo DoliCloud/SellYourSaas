@@ -788,7 +788,7 @@ else
 		//var_dump($vat);exit;
 
 		$price = $tmpproduct->price;
-		$discount = 0;
+		$discount = $tmpthirdparty->remise_percent;
 
 		$productidtocreate = $tmpproduct->id;
 
