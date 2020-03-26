@@ -70,6 +70,8 @@ if ($action == 'set')
 	{
 	    dolibarr_set_const($db,'SELLYOURSAAS_FORCE_STRIPE_TEST',GETPOST("SELLYOURSAAS_FORCE_STRIPE_TEST",'int'),'chaine',0,'',$conf->entity);
 
+	    dolibarr_set_const($db,'SELLYOURSAAS_MAIN_FAQ_URL',GETPOST("SELLYOURSAAS_MAIN_FAQ_URL",'custom', 0, FILTER_VALIDATE_URL),'chaine',0,'',$conf->entity);
+
 	    dolibarr_set_const($db,"SELLYOURSAAS_NAME",GETPOST("SELLYOURSAAS_NAME"),'chaine',0,'',$conf->entity);
 
 		dolibarr_set_const($db,"SELLYOURSAAS_MAIN_DOMAIN_NAME",GETPOST("SELLYOURSAAS_MAIN_DOMAIN_NAME"),'chaine',0,'',$conf->entity);
@@ -310,6 +312,12 @@ print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_FORCE_STRIPE_TEST" value="'.$conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST.'">';
 print '</td>';
 print '<td>1</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAIN_FAQ_URL").'</td>';
+print '<td colspan="2">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.$conf->global->SELLYOURSAAS_MAIN_FAQ_URL.'">';
+print '</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasName").'</td>';
