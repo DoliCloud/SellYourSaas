@@ -1179,10 +1179,13 @@ class SellYourSaasUtils
 	    						    if ($paymentintent->status == 'succeeded')
 	    						    {
 	    						        $charge->status = 'ok';
+	    						        $charge->id = $paymentintent->id;
+	    						        $charge->customer = $customer->id;
 	    						    }
 	    						    else
 	    						    {
 	    						        $charge->status = 'failed';
+	    						        $charge->customer = $customer->id;
                                         $charge->failure_code = $stripe->code;
                                         $charge->failure_message = $stripe->error;
                                         $charge->failure_declinecode = $stripe->declinecode;
@@ -1300,6 +1303,8 @@ class SellYourSaasUtils
 	    							$paiement->num_payment = '';
 	    							// Add a comment with keyword 'SellYourSaas' in text. Used by trigger.
 	    							$paiement->note_public  = 'SellYourSaas payment '.dol_print_date($now, 'standard').' using '.$paymentmethod.($ipaddress?' from ip '.$ipaddress:'').' - Transaction ID = '.$TRANSACTIONID;
+	    							$paiement->ext_payment_id = $charge->id.'@'.$customer->id;
+	    							$paiement->ext_payment_site = 'stripe';
 
 	    							if (! $errorforinvoice)
 	    							{
@@ -2389,7 +2394,7 @@ class SellYourSaasUtils
 
 										// Extrafields
 										if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
-											$lines[$i]->fetch_optionals($lines[$i]->rowid);
+											$lines[$i]->fetch_optionals();
 											$array_options = $lines[$i]->array_options;
 										}
 
