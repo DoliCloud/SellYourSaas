@@ -442,3 +442,4 @@ OnlineOffline=Mise en ligne|hors ligne des instances
 EvenIfDomainIsOpenTo=Even if domain is open to registration, it may not appears on registration page due to restriction set on the package of the service you try to register.
 OnDomainOnly=Uniquement depuis %s
 LastPaymentTry=Dernier tentative d'encaissement
+TitleFactureRec=Modèle de facture pour %s %s

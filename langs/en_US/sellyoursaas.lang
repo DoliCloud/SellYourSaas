@@ -489,3 +489,4 @@ OnlineOffline=Online|Offline user instances
 EvenIfDomainIsOpenTo=Even if domain is open to registration, it may not appears on registration page due to restriction set on the package of the service you try to register.
 OnDomainOnly=Only from %s
 LastPaymentTry=Last payment try
+TitleFactureRec=Template invoice for %s %s
