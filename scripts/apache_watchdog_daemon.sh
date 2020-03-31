@@ -7,6 +7,8 @@
 export now=`date '+%Y-%m-%d %H:%M:%S'`
 export WDLOGFILE='/var/log/apache2/error.log'
 
+export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 echo >> /var/log/apache_watchdog.log
 echo "**** ${0} started" >> /var/log/apache_watchdog.log
 echo $now" Try to detect lines 'AH00060: seg fault or similar nasty error detected in the parent process' into $WDLOGFILE" >> /var/log/apache_watchdog.log 
@@ -23,10 +25,16 @@ echo $now" Try to detect lines 'AH00060: seg fault or similar nasty error detect
 #echo "# realname name --> $(basename $(realpath ${0}))"
 #echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
-export EMAILFROM=support@dolicloud.com
-export EMAILTO=supervision@dolicloud.com
+export EMAILFROM=support@$DOMAIN
+export EMAILTO=supervision@$DOMAIN
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
+
+echo "DOMAIN=$DOMAIN" >> /var/log/apache_watchdog.log
+echo "EMAILFROM=$EMAILFROM" >> /var/log/apache_watchdog.log
+echo "EMAILTO=$EMAILTO" >> /var/log/apache_watchdog.log
+echo "PID=$PID" >> /var/log/apache_watchdog.log
+
 
 tail -F $WDLOGFILE | grep --line-buffered 'AH00060: seg fault or similar nasty error detected in the parent process' | 
 while read ; do
