@@ -269,7 +269,9 @@ Définir ou redéfinir le mot de passe de *root*, *admin*, et de *myunixlogin* a
 
 === Timeout des lancements de serveurs
 
-Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent etre long en cas de plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
+Sur Ubuntu 18.04 et avec MariaDb migré depuis un MySql:
+
+Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long en cas de plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
 
 [source,bash]
 ---------------
@@ -277,6 +279,8 @@ Augmenter le timeout de lancement des processus car parfois les lancements de my
 TimeoutStartSec=3600s
 TimeoutStopSec=3600s
 ---------------
+
+Rem: Au lieu de mettre *3600s*, il est possible de mettre *infinity*
 
 Puis recharger la nouvelle configuration:
 
@@ -1223,7 +1227,7 @@ broken_sasl_auth_clients = yes
 
 ==== Configuration
 
-Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par sudo systemctl show -p DefaultLimitNOFILE) par défaut de systemd:
+Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par *sudo systemctl show -p DefaultLimitNOFILE*) par défaut de systemd:
 [source,bash]
 ---------------
 LimitNOFILE=50000
@@ -1781,7 +1785,7 @@ apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
 aa-enforce usr.sbin.mysqld
 ---------------
 
-Pour éviter que apparmor se relance en cas d'arrêt, modifier */lib/systemd/system/apparmor.service* pour décommenter RemainAfterExit=no
+Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour décommenter *RemainAfterExit=no*
 [source,bash]
 ---------------
 RemainAfterExit=no
@@ -2146,6 +2150,14 @@ Mettre dans le cron du user *admin*:
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
+==== Vérifier le lancement des cron
+
+Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. Par exemple par:
+
+[source,bash]
+---------------
+cd / && run-parts --report /etc/cron.daily
+---------------
 
 
 == Installation de Dolibarr
@@ -3414,13 +3426,14 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
  ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
 => Check that you have less than 1024 instances on same deployment server.
+=> Check that error log file for instances is shared (instead one log file is open per instance with same unix account leading to troubles).
 
 
 Error when sending email in */var/log/mail.log*:
 
 	Mar  2 22:41:59 novafirstcloud6 postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 
-=> Check you have a file /etc/resolv.conf and that it point to 127.0.0.1 (if not, create it and restart postfix)
+=> Check you have a file */etc/resolv.conf* and that it point to 127.0.0.1 (if not, create it and restart postfix)
 
 
 
