@@ -963,6 +963,28 @@ echo $?
 ---------------
 
 
+=== Installation de ClamAV
+
+Installer clamav et clamav-daemon
+
+To test clamav tool, create a file */tmp/testvirus* with content
+
+[source,bash]
+---------------
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+---------------
+
+And to test
+
+[source,bash]
+---------------
+clamscan /tmp/testvirus
+clamscand /tmp/testvirus --fdpass
+---------------
+
+Note: Removing the apparmor profile for usr.sbin.clamd may be required if called from web process (otherwise error on "getattr").
+
+
 === Installation de Afick
 
 * Installer afick.pl tool from the debian package found on afick web site.
@@ -1774,7 +1796,7 @@ aa-status
 
 [source,bash]
 ---------------
-apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
+aa-enforce usr.sbin.mysqld
 ---------------
 
 
@@ -1782,7 +1804,7 @@ apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
 
 [source,bash]
 ---------------
-aa-enforce usr.sbin.mysqld
+apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
 ---------------
 
 Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour décommenter *RemainAfterExit=no*

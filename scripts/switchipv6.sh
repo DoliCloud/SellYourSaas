@@ -22,3 +22,8 @@ sysctl -w net.ipv6.conf.all.disable_ipv6=0
 ifconfig
 more /proc/net/if_inet6
 fi
+
+echo You can try perf with
+echo Orange FRANCE: ./speedtest -s 24215 -vvv
+echo Lafibre.info: ./speedtest -s 21415 -vvv
+
