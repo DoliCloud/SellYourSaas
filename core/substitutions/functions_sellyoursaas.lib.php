@@ -40,7 +40,6 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 	include_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
-	dol_include_once('/sellyoursaas/class/customeraccount.class.php');
 
     $langs->load("sellyoursaas@sellyoursaas");
 
