@@ -1303,7 +1303,7 @@ class SellYourSaasUtils
 	    							$paiement->num_payment = '';
 	    							// Add a comment with keyword 'SellYourSaas' in text. Used by trigger.
 	    							$paiement->note_public  = 'SellYourSaas payment '.dol_print_date($now, 'standard').' using '.$paymentmethod.($ipaddress?' from ip '.$ipaddress:'').' - Transaction ID = '.$TRANSACTIONID;
-	    							$paiement->ext_payment_id = $charge->id.'@'.$customer->id;
+	    							$paiement->ext_payment_id = $charge->id.':'.$customer->id.'@'.$stripearrayofkeys['publishable_key'];
 	    							$paiement->ext_payment_site = 'stripe';
 
 	    							if (! $errorforinvoice)
