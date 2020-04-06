@@ -524,7 +524,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	if [ -d $targetdir/$osusername/$dbname ]; then
 		echo The dir $targetdir/$osusername/$dbname still exists, we archive it
 		if [ -d $archivedir/$osusername/$dbname ]; then				# Should not happen
-			echo The dir $archivedir/$osusername/$dbname already exists, so we overwrite files into existing archive
+			echo The target archive directory $archivedir/$osusername/$dbname already exists, so we overwrite files into existing archive
 			echo cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
 			cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
 			if [[ $testorconfirm == "confirm" ]]
