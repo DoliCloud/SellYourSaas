@@ -3411,8 +3411,13 @@ class SellYourSaasUtils
         			'__APPDOMAIN__'=>$sldAndSubdomain.'.'.$domainname,
         			'__ALLOWOVERRIDE__'=>$tmppackage->allowoverride,
         			'__VIRTUALHOSTHEAD__'=>$customvirtualhostline,
-    			    '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
+    			    '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT,
     			);
+
+    			// If a given timezone was set for contract/instance
+    			if (! empty($contract->array_options['options_timezone'])) {
+    				$substitarray['TZ=UTC'] = 'TZ='.$contract->array_options['options_timezone'];
+    			}
 
     			$dirfortmpfiles = DOL_DATA_ROOT.'/sellyoursaas/temp';
     			dol_mkdir($dirfortmpfiles, '', '0775');
