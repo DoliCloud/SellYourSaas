@@ -302,7 +302,7 @@ print '<input type="hidden" name="action" value="set">';
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
 print '<td class="titlefield">'.$langs->trans("ParametersOnMasterServer").'</td><td>'.$langs->trans("Value").'</td>';
-print '<td>'.$langs->trans("Examples").'<div class="floatright"><input type="submit" class="button" value="'.$langs->trans("Save").'"></div></td>';
+print '<td>'.$langs->trans("Examples").'<div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_FORCE_STRIPE_TEST").'</td>';
@@ -655,7 +655,7 @@ print '<br>';
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
 print '<td class="titlefield">'.$langs->trans("ParametersOnDeploymentServers").'</td><td>'.$langs->trans("Value").'</td>';
-print '<td>'.$langs->trans("Examples").'<div class="floatright"><input type="submit" class="button" value="'.$langs->trans("Save").'"></div></td>';
+print '<td>'.$langs->trans("Examples").'<div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("DirForDoliCloudInstances").'</td>';
