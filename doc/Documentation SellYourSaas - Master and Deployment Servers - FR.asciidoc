@@ -2586,7 +2586,7 @@ lsof | grep "/mnt/disk"
 
 * Détacher le disque du serveur. S'assurer que son nom ne contient pas d'espaces ou caractères spéciaux. Changer la taille du disque depuis le manager du Public Cloud et le réattacher au serveur.
 
-* Augmenter la partition en lançant: 
+* Agrandir la partition en lançant: 
 
 [source,bash]
 ---------------
