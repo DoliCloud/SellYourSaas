@@ -1807,10 +1807,15 @@ aa-enforce usr.sbin.mysqld
 apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
 ---------------
 
-Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour décommenter *RemainAfterExit=no*
+Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour mettre *RemainAfterExit=no*
 [source,bash]
 ---------------
 RemainAfterExit=no
+---------------
+
+Puis
+---------------
+systemctl daemon-reload
 ---------------
 
 
