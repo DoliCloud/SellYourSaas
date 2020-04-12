@@ -278,7 +278,7 @@ $newobject->database_db  = $oldobject->array_options['options_database_db'];
 
 if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db))
 {
-	print "Error: Some properties for instance ".$newinstance." was not registered into database (missing instance, username_web, password_web or database_db.\n";
+	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_web, password_web or database_db).\n";
 	exit(-3);
 }
 
@@ -335,8 +335,17 @@ $newdatabasedb=$newobject->array_options['options_database_db'];
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb))
 {
-	print "Error: Failed to find instance '".$newinstance."' (it should have been created before).\n";
+	print "Error: Failed to find instance '".$newinstance."' (it should have been created before). Are you in test mode ?\n";
 	exit(-1);
+}
+
+if (! empty($oldobject->array_options['options_custom_url'])) {
+	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
+	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
+	if ($mode == 'confirm')
+	{
+		$newobject->update($user, 1);
+	}
 }
 
 $newsftpconnectstring=$newlogin.'@'.$newserver.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$newdatabasedb);
@@ -567,8 +576,8 @@ if ($mode == 'confirm')
 else
 {
 	print '-> Dump NOT loaded (test mode) into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
-	print "Finished. DON'T FORGET TO DISABLE ACCESS AND/OR INVOICING ON OLD SYSTEM !!!\n";
 }
+print "Finished. DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM AND TO MOVE RECURRING INVOICE ON NEW INSTANCE !!!\n";
 
 
 exit($return_var + $return_varmysql);
