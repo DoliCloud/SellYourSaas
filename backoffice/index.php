@@ -151,42 +151,42 @@ print '<td>';
 print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
-print $langs->trans("EnableNewInstance");
 $enabledisablehtml='';
 if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES))
 {
     // Button off, click to enable
     $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=0'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle');
+    $enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright fa-15');
     $enabledisablehtml.='</a>';
 }
 else
 {
     // Button on, click to disable
     $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=1'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle');
+    $enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright fa-15');
     $enabledisablehtml.='</a>';
 }
 print $enabledisablehtml;
+print $langs->trans("EnableNewInstance");
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
-print $langs->trans("AnnounceOnCustomerDashboard");
 $enabledisableannounce='';
 if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON))
 {
     // Button off, click to enable
     $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle');
+    $enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright fa-15');
     $enabledisableannounce.='</a>';
 }
 else
 {
     // Button on, click to disable
     $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle');
+    $enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright fa-15');
     $enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
+print $langs->trans("AnnounceOnCustomerDashboard");
 print '<br>';
 print '<span class="opacitymedium">';
 print $langs->trans("Example").': (AnnounceMajorOutage), (AnnounceMinorOutage), (AnnounceMaintenanceInProgress), Any custom text...</span><br>';
