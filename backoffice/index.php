@@ -156,14 +156,14 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES))
 {
     // Button off, click to enable
     $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=0'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright fa-15');
+    $enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
     $enabledisablehtml.='</a>';
 }
 else
 {
     // Button on, click to disable
     $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=1'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright fa-15');
+    $enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
     $enabledisablehtml.='</a>';
 }
 print $enabledisablehtml;
@@ -175,14 +175,14 @@ if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON))
 {
     // Button off, click to enable
     $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright fa-15');
+    $enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
     $enabledisableannounce.='</a>';
 }
 else
 {
     // Button on, click to disable
     $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright fa-15');
+    $enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
     $enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
