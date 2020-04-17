@@ -2198,6 +2198,11 @@ Sur tous les serveurs (Master et Déploiement):
 * Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du relai. 
 
 
+=== Installation de Geoip2
+
+* Installer la base de données de MaxMind. Activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
+
+
 == Installation du plugin SellYourSaas
 
 Sur tous les serveurs (Master et Déploiement):
