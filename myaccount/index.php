@@ -159,19 +159,27 @@ if ($langs->getDefaultLang(1) == 'es') $langcode = 'es';
 if ($langs->getDefaultLang(1) == 'fr') $langcode = 'fr';
 
 $urlfaq = '';
-if (preg_match('/dolicloud\.com/', $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME))
+if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL))
 {
-	$urlfaq='https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/'.$langcode.'/faq';
+    if (preg_match('/dolicloud\.com/', $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME))
+    {
+        $urlfaq='https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/'.$langcode.'/faq';
+    }
+    else
+    {
+        $urlfaq='https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/faq-'.$langcode.'.php';
+        if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+            && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+        {
+            $urlfaq = 'https://www.'.$mythirdpartyaccount->array_options['options_domain_registration_page'].'/faq-'.$langcode.'.php';
+        }
+    }
 }
 else
 {
-    $urlfaq='https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/faq-'.$langcode.'.php';
-    if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-        && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-    {
-        $urlfaq = 'https://www.'.$mythirdpartyaccount->array_options['options_domain_registration_page'].'/faq-'.$langcode.'.php';
-    }
+    $urlfaq = $conf->global->SELLYOURSAAS_MAIN_FAQ_URL;
 }
+
 
 $urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';

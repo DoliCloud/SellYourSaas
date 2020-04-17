@@ -351,6 +351,7 @@ CurrentCreditOrDebitCard=Current credit or debit card
 NewCreditOrDebitCard=New credit or debit card
 CantActivateContractWhenUndeployed=Can't activate an instance when a contract is undeployed
 SELLYOURSAAS_FORCE_STRIPE_TEST=Force Test mode of Stripe (whatever is setup of Stripe module)
+SELLYOURSAAS_MAIN_FAQ_URL=Force a unique FAQ page
 MaxNumberOfInstanceReached=You have reached the maximum number of instances (<strong>%s</strong>) you can create for this account. If you need more, please contact us at <strong>%s</strong>
 whereXXXcanbe=where XXX can be
 FailedToConnectToSftp=Failed to reach SSH server with ssh2_connect(%s)

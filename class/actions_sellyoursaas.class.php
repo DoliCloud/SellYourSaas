@@ -1109,7 +1109,7 @@ class ActionsSellyoursaas
     	}
 
     	// Is second logo is same than main logo ?
-    	if ($secondlogo == $conf->global->SOCIETE_LOGO_SMALL)
+    	if ($secondlogo == $conf->global->MAIN_INFO_SOCIETE_LOGO_SMALL)
     	{
     		return 0;
     	}
