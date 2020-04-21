@@ -148,6 +148,7 @@ if (empty($reshook))
 
 	    	// Set language to use for notes on the user we will create.
 	    	$newlangs = new Translate('', $conf);
+	    	$newlangs->load("sellyoursaas@sellyoursaas");
 	    	$newlangs->setDefaultLang('en_US');		// TODO Best is to used the language of customer.
 
 	    	// Restore current setup
