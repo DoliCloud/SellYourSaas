@@ -146,10 +146,14 @@ if (empty($reshook))
 	        // Calculate hash with remote setup
 	    	$password_crypted_for_remote = dol_hash($password);
 
+	    	// Set language to use for notes on the user we will create.
+	    	$newlangs = new Translate('', $conf);
+	    	$newlangs->setDefaultLang('en_US');		// TODO Best is to used the language of customer.
+
 	    	// Restore current setup
 	    	$conf->global->MAIN_SECURITY_HASH_ALGO = $savMAIN_SECURITY_HASH_ALGO;
 	    	$conf->global->MAIN_SECURITY_SALT = $savMAIN_SECURITY_SALT;
-	    	$private_note = 'This user is used for maintenance purpose by your hosting provider. You can delete it at any time, it will be recreate if desired.';
+	    	$private_note = $newlangs->trans("NoteForSupportUser");
 	    	$signature = '--<br>Support team';
 
 	    	$sql="INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, signature)";

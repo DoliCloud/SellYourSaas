@@ -493,3 +493,4 @@ EvenIfDomainIsOpenTo=Even if domain is open to registration, it may not appears 
 OnDomainOnly=Only from %s
 LastPaymentTry=Last payment try
 SellYourSaasTimeZoneDesc=This timezone can be used to replace string TZ=UTC into cron file
+NoteForSupportUser=This user is used for maintenance purpose by your hosting provider. This user can be deleted at any time and you can also delete it yourself at any time, it will be recreated if necessary. If you have a paid instance, this user is not included into billing.
