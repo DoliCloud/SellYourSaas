@@ -153,7 +153,7 @@ if (empty($reshook))
 	    	$signature = '--<br>Support team';
 
 	    	$sql="INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, signature)";
-	    	$sql.=" VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', 1, '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$newdb->escape($password_crypted_for_remote)."', 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$$newdb->escape($signature)."')";
+	    	$sql.=" VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', 1, '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$newdb->escape($password_crypted_for_remote)."', 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($signature)."')";
 	        $resql=$newdb->query($sql);
 	        if (! $resql)
 	        {
