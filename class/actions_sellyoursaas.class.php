@@ -121,8 +121,8 @@ class ActionsSellyoursaas
 		    	        }
 		    	    }
 
-		    	    $this->resprints = (empty($parameters['notiret'])?' - ':'').'<!-- Added by getNomUrl hook of SellYourSaas -->';
-			    	$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop"></span></a>';
+		    	    $this->resprints = (empty($parameters['notiret'])?' -':'').'<!-- Added by getNomUrl hook of SellYourSaas -->';
+			    	$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
 		    	}
 	    	}
     	}
