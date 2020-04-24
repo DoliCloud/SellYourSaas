@@ -27,13 +27,16 @@ do
     cd $dir
 	if [ $? -eq 0 ]; then
 		export gitdir=`basename $dir`
-	
-		
+
 		
 	    if [ -d ".git" ]; then
-	        git reset --hard HEAD
-	        # Do not use git pull --depth=1 here, this will maka merge errors.
-	        git pull
+	    	git pull
+	    	if [ $? -ne 0 ]; then
+	    		# If git pull fail, we force a git reset before and try again.
+	        	git reset --hard HEAD
+	        	# Do not use git pull --depth=1 here, this will make merge errors.
+	        	git pull
+	        fi
 	        echo Result of git pull = $?
 
 	    	git rev-parse HEAD > gitcommit.txt
