@@ -860,7 +860,9 @@ maxretry = 5
 
 [email-dol-perhour]
 
-; rule against intensive email ko - too high number of recipient
+; rule against intensive email ko - too high number of recipient (see file etc/fail2ban/filter.d/apache-dolibarr-rulesko)
+; A log for this rule wil be reported if nb of recipients is higher than $MAXOK defined into phpsendmail.php file
+; Note: For Dolibarr app, you can set MAIL_MAX_NB_OF_RECIPIENTS_IN_SAME_EMAIL to match same value.
 enabled = true
 port    = http,https
 filter  = apache-dolibarr-rulesko
@@ -872,7 +874,7 @@ maxretry = 5
 
 [email-dol-blacklist]
 
-; rule against email ko - blacklist ip, email or content
+; rule against email ko - blacklist ip, email or content (see file etc/fail2ban/filter.d/apache-dolibarr-ruleskoblacklist)
 enabled = true
 port    = http,https
 filter  = apache-dolibarr-ruleskoblacklist
@@ -884,7 +886,7 @@ maxretry = 1
 
 [email-dol-perday]
 
-; rule against out of limit emails (max 500 emails per day)
+; rule against out of limit emails (max 500 emails per day) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesall)
 enabled = true
 port    = http,https
 filter  = apache-dolibarr-rulesall
@@ -896,7 +898,7 @@ maxretry = 500
 
 [email-dol-perhouradmin]
 
-; rule against out of limit emails (max 10 from admin)
+; rule against out of limit emails (max 10 from admin) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesadmin)
 enabled = true
 port    = http,https
 filter  = apache-dolibarr-rulesadmin
@@ -908,7 +910,7 @@ maxretry = 10
 
 [web-dol-passforgotten]
 
-; rule against call to passwordforgottenpage
+; rule against call to passwordforgottenpage (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
 ; disable this rule by setting enable to false on deployment servers
 enabled = true
 port    = http,https
@@ -3099,7 +3101,7 @@ innodb_force_recovery=1
 A partir de 3 ou +, risque de perte de données.
 
 
-NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouvertes par ordre de dates sur le disque.
+NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouverts par ordre de dates sur le disque.
 
 
 
