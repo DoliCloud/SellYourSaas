@@ -5844,10 +5844,10 @@ if ($mode == 'registerpaymentmode')
                     	payment_method_data: {
         			        billing_details: {
         			        	name: cardholderName.value
-        			        	<?php if (GETPOST('email', 'alpha') || ! empty($mythirdpartyaccount->email)) { ?>, email: '<?php echo dol_escpae_js(GETPOST('email', 'alpha') ? GETPOST('email', 'alpha') : $mythirdpartyaccount->email); ?>'<?php } ?>
-        			        	<?php if (! empty($mythirdpartyaccount->phone)) { ?>, phone: '<?php echo dol_escpae_js($mythirdpartyaccount->phone); ?>'<?php } ?>
+        			        	<?php if (GETPOST('email', 'alpha') || ! empty($mythirdpartyaccount->email)) { ?>, email: '<?php echo dol_escape_js(GETPOST('email', 'alpha') ? GETPOST('email', 'alpha') : $mythirdpartyaccount->email); ?>'<?php } ?>
+        			        	<?php if (! empty($mythirdpartyaccount->phone)) { ?>, phone: '<?php echo dol_escape_js($mythirdpartyaccount->phone); ?>'<?php } ?>
         			        	<?php if (is_object($mythirdpartyaccount)) { ?>, address: {
-        			        	    city: '<?php echo dol_escpae_js($mythirdpartyaccount->town); ?>',
+        			        	    city: '<?php echo dol_escape_js($mythirdpartyaccount->town); ?>',
         			        	    country: '<?php echo dol_escape_js($mythirdpartyaccount->country_code); ?>',
         			        	    line1: '<?php echo dol_escape_js($mythirdpartyaccount->address); ?>',
         			        	    postal_code: '<?php echo dol_escape_js($mythirdpartyaccount->zip); ?>'}<?php } ?>
