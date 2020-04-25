@@ -46,8 +46,8 @@ class modSellYourSaas extends DolibarrModules
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description used if translation string 'ModuleXXXDesc' not found (XXX is value SellYourSaas)
 		$this->description = "Module to sell SaaS applications";
-        $this->editor_name = 'NLTechno';
-        $this->editor_url = 'https://www.nltechno.com';
+        $this->editor_name = 'SellYourSaas team';
+        $this->editor_url = 'https://www.sellyoursaas.org';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 		$this->version = '1.0';
 		// Key used in llx_const table to save module status enabled/disabled (where SELLYOURSAAS is value of property name of module in uppercase)
