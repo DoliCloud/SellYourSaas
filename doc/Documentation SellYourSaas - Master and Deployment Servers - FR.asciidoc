@@ -301,31 +301,6 @@ rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgr
 ---------------
 
 
-=== Creation de la clé ssh du compte admin
-
-==== Sur le serveur master et de déploiement
-
-Générer une clé publique et privée ssh pour le compte *admin*.
-
-[source,bash]
----------------
-ssh-keygen
----------------
-
-==== Sur les serveurs de déploiement
-
-Sur les serveurs de déploiement, copier la clé publique et privé du compte ssh *admin* du masteur en /home/admin/.ssh/id_rsa_sellyoursaas... (Cette clé est celle commune pour la maintenance pour accéder aux comptes utilisateurs).
-
-Compléter le fichier */home/admin/.ssh/config* pour indiquer d'utiliser cette clé publique lors d'accès à lui même au lieu de *id_rsa* par défaut. 
-
-[source,bash]
----------------
-Host ipserveurdeploiment
-    IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
----------------
-    
-
-
 === Modification de /etc/skel
 
 Editer le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys* avec 
@@ -614,6 +589,38 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 
+=== Creation de la clé ssh du compte admin
+
+==== Sur le serveur master et de déploiement
+
+Générer une clé publique et privée ssh pour le compte *admin*.
+
+[source,bash]
+---------------
+ssh-keygen
+---------------
+
+==== Sur les serveurs de déploiement
+
+Sur les serveurs de déploiement, copier la clé publique et privé du compte ssh *admin* du masteur en /home/admin/.ssh/id_rsa_sellyoursaas... (Cette clé est celle commune pour la maintenance pour accéder aux comptes utilisateurs). Mettre les bons droits.
+
+[source,bash]
+---------------
+chmod u+rw /home/admin/.ssh/id_rsa_sellyoursaas*
+chmod go-rw /home/admin/.ssh/id_rsa_sellyoursaas* 
+chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
+---------------
+
+
+Compléter le fichier */home/admin/.ssh/config* pour indiquer d'utiliser cette clé publique lors d'accès à lui même au lieu de *id_rsa* par défaut. 
+
+[source,bash]
+---------------
+Host ipserveurdeploiment
+    IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
+---------------
+
+  
 <<<<
 
 == Installation des composants systèmes et applicatifs
