@@ -44,16 +44,16 @@ fi
 
 if [ "x$1" == "xstart" ]; then
 
-	pid=`ps ax | grep 'apache_watchdog_daemon' | grep -v grep | awk ' { print $1 } '`
+	pid=`ps ax | grep 'apache_watchdog_daemon1' | grep -v grep | awk ' { print $1 } '`
 	if [ "x$pid" == "x" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
 		
-		echo "apache_watchdog_daemon started"
-		./apache_watchdog_daemon.sh 2>&1 &
+		echo "apache_watchdog_daemon1 started"
+		./apache_watchdog_daemon1.sh 2>&1 &
 		
 	else
-		echo apache_watchdog_daemon is already running with PID $pid
+		echo apache_watchdog_daemon1 is already running with PID $pid
 	fi
 fi
 
@@ -61,27 +61,27 @@ if [ "x$1" == "xstop" ]; then
 	
         pid=`ps ax | grep 'tail' | grep 'error.log' | grep -v grep | awk ' { print $1 } '`
         if [ "x$pid" == "x" ]; then
-                echo apache_watchdog_daemon "tail" process not started
+                echo apache_watchdog_daemon1 "tail" process not started
         else
                 echo Launch kill to stop "tail" process with PID $pid
                 kill $pid
         fi
-        pid=`ps ax | grep 'apache_watchdog_daemon' | grep -v grep | awk ' { print $1 } '`
+        pid=`ps ax | grep 'apache_watchdog_daemon1' | grep -v grep | awk ' { print $1 } '`
         if [ "x$pid" == "x" ]; then
-                echo apache_watchdog_daemon not started
+                echo apache_watchdog_daemon1 not started
         else
-                echo Launch kill to stop apache_watchdog_daemon with PID $pid
+                echo Launch kill to stop apache_watchdog_daemon1 with PID $pid
                 kill $pid
         fi
 fi
 
 if [ "x$1" == "xstatus" ]; then
 
-	pid=`ps ax | grep 'apache_watchdog_daemon' | grep -v grep | awk ' { print $1 } '`
+	pid=`ps ax | grep 'apache_watchdog_daemon1' | grep -v grep | awk ' { print $1 } '`
 	if [ "x$pid" == "x" ]; then
-		echo apache_watchdog_daemon not started
+		echo apache_watchdog_daemon1 not started
 	else
-		echo apache_watchdog_daemon run with PID $pid
+		echo apache_watchdog_daemon1 run with PID $pid
 	fi
 	
 fi
