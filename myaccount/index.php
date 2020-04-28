@@ -2775,6 +2775,10 @@ if ($resqlproducts)
 						$priceinstance['user'] .= $tmpprodchild->price;
 						$priceinstance_ttc['user'] .= $tmpprodchild->price_ttc;
 					}
+					else if ($tmpprodchild->array_options['options_app_or_option'] == 'system')
+					{
+						// Don't add system services to global price, these are options with calculated quantities
+					}
 					else
 					{
 						$priceinstance['fix'] += $tmpprodchild->price;
@@ -3534,6 +3538,10 @@ if ($mode == 'instances')
 						{
 							$priceinstance['user'] += $tmpprodchild->price;
 							$priceinstance_ttc['user'] += $tmpprodchild->price_ttc;
+						}
+						else if($tmpprodchild->array_options['options_app_or_option'] == 'system')
+						{
+							// Don't add system services to global price, these are options with calculated quantities
 						}
 						else
 						{
