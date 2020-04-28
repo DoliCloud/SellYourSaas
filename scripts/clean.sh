@@ -27,9 +27,9 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 export targetdir="/home/jail/home"				
-export backupdir="/mnt/diskbackup/backup"
-export archivedirtest="/mnt/diskbackup/archives-test"
-export archivedirpaid="/mnt/diskbackup/archives-paid"
+export backupdir=`grep 'backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export archivedirtest=`grep 'archivedirtest=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export archivedirpaid=`grep 'archivedirpaid=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirbind="/etc/bind/archives"
 export archivedircron="/var/spool/cron/crontabs.disabled"
 
