@@ -791,8 +791,9 @@ else
 		$discount = $tmpthirdparty->remise_percent;
 
 		$productidtocreate = $tmpproduct->id;
+		$desc = $tmpproduct->description;
 
-		$contractlineid = $contract->addline('', $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $productidtocreate, $discount, $date_start, $date_end, 'HT', 0);
+		$contractlineid = $contract->addline($desc, $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $productidtocreate, $discount, $date_start, $date_end, 'HT', 0);
 		if ($contractlineid < 0)
 		{
 			dol_print_error_email('CREATECONTRACTLINE1', $contract->error, $contract->errors, 'alert alert-error');
@@ -824,13 +825,14 @@ else
 			$localtax2_tx = get_default_localtax($mysoc, $object, 2, $prodid);
 
 			$price = $tmpsubproduct->price;
+			$desc = $tmpsubproduct->description;
 			$discount = 0;
 
 			if ($qty > 0)
 			{
 				$j++;
 
-				$contractlineid = $contract->addline('', $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $prodid, $discount, $date_start, $date_end, 'HT', 0);
+				$contractlineid = $contract->addline($desc, $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $prodid, $discount, $date_start, $date_end, 'HT', 0);
 				if ($contractlineid < 0)
 				{
 					dol_print_error_email('CREATECONTRACTLINE'.$j, $contract->error, $contract->errors, 'alert alert-error');
