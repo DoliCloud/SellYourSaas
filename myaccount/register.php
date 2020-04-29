@@ -238,8 +238,10 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 ?>
 
 <div id="waitMask" style="display:none;">
-    <font size="3em" style="color:#888; font-weight: bold;"><?php echo $langs->trans("InstallingInstance") ?><br><?php echo $langs->trans("PleaseWait") ?><br></font>
-    <img id="waitMaskImg" width="100px" src="<?php echo 'ajax-loader.gif'; ?>" alt="Loading" />
+	<div style="font-size: 3em; color:#888; font-weight: bold; top: 25%; left: 25%; position: fixed;">
+		<?php echo $langs->trans("InstallingInstance") ?><br><?php echo $langs->trans("PleaseWait") ?><br>
+		<i class="fas fa-spinner fa-pulse" style="font-size: inherit;"></i>
+	</div>
 </div>
 
 
