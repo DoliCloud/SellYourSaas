@@ -494,6 +494,8 @@ else
 			dol_print_error_email('FETCHTP'.$reusesocid, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
 			exit(-1);
 		}
+
+		$email = $tmpthirdparty->email;
 	}
 	else
 	{
