@@ -2164,12 +2164,12 @@ Choisir:
 
 * Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
 
-* Créer un lien symbolique vers ce certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
+* Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
 ---------------
 cd /etc/apache2
-ln -fs with.mysaasdomainname.com.key with.sellyoursaas.com.crt
-ln -fs with.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
 ---------------
 
 
