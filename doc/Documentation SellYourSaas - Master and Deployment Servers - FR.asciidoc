@@ -3482,7 +3482,7 @@ Voici le détail des évennement ou URL qui peuvent etre trackées:
 - URL: Aucune
 - Event DataDog: *sellyoursaas.payment*
 
-* Client perdu, lorsqu'une instance payante est désinstallé (avec la valeur 1)
+* Client perdu, lorsqu'une instance payante est désinstallé (avec la valeur 1), que ce soit par le batch en automatique ou sur demande du client depuis l'espace client
 - URL: Aucune
 - Event DataDog: *sellyoursaas.payingcustomerlost*
 
