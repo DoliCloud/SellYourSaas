@@ -7066,7 +7066,7 @@ if ($mode == 'myaccount')
 					<br>
                   <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" placeholder="'.$placeholderforvat.'">
                     ';
-					if (empty($conf->global->MAIN_DISABLEVATCHECK) && isInEEC($mythirdpartyaccount) && (GETPOST('admin','alpha')))
+					if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC() && (GETPOST('admin','alpha')))
 					{
 					    if (! empty($conf->use_javascript_ajax))
 					    {
