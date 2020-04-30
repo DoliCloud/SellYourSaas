@@ -194,6 +194,7 @@ if (empty($reshook))
  */
 
 $form=new Form($db);
+$package = new Packages($db);
 
 $now=dol_now();
 
@@ -347,7 +348,7 @@ print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 print '<input type="hidden" name="page" value="'.$page.'">';
 print '<input type="hidden" name="contextpage" value="'.$contextpage.'">';
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'title_companies', 0, '', '', $limit);
+print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, $package->picto, 0, '', '', $limit);
 
 if ($sall)
 {
