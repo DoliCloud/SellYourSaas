@@ -569,9 +569,10 @@ if ($action == 'updatemythirdpartyaccount')
 
 if ($action == 'updatemythirdpartylogin')
 {
-	$email = GETPOST('email','nohtml');
-	$firstname = GETPOST('firstName','nohtml');
-	$lastname = GETPOST('lastName','nohtml');
+	$email = trim(GETPOST('email', 'nohtml'));
+	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
+	$firstname = trim(GETPOST('firstName', 'nohtml'));
+	$lastname = trim(GETPOST('lastName', 'nohtml'));
 
 	if (empty($email))
 	{
@@ -584,6 +585,16 @@ if ($action == 'updatemythirdpartylogin')
 		setEventMessages($langs->trans("ErrorBadValueForEmail"), null, 'errors');
 		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
 		exit;
+	}
+	if ($oldemail != $email) {		// A request to change email was done.
+		// Test if email already exists
+		$tmpthirdparty = new Societe($db);
+		$tmpthirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $email);
+		if ($tmpthirdparty->id > 0) {
+			setEventMessages($langs->trans("SorryEmailExistsforAnotherAccount", $email), null, 'errors');
+			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
+			exit;
+		}
 	}
 
 	$db->begin();	// Start transaction
@@ -7132,6 +7143,7 @@ if ($mode == 'myaccount')
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Email").'</label>
 	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->email.'" name="email">
+	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->email.'" name="oldemail">
 	                </div>
 	                <div class="row">
 	                  <div class="col-md-6">
