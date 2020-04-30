@@ -284,7 +284,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'Packages',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_packages',
-			'url'=>'/sellyoursaas/packages_list.php?search_options_dolicloud=y',
+			'url'=>'/sellyoursaas/packages_list.php',
 			'langs'=>'',
 			'position'=>210,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -391,7 +391,7 @@ class modSellYourSaas extends DolibarrModules
 		'titre'=>'Prospects',
 		'mainmenu'=>'sellyoursaas',
 		'leftmenu'=>'mysaas_customers_prospects',
-		'url'=>'/societe/list.php?&search_options_dolicloud=y&search_type=2,3&sortfield=s.tms&sortorder=desc',
+		'url'=>'/societe/list.php?search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=2,3&sortfield=s.tms&sortorder=desc',
 		'langs'=>'',
 		'position'=>233,
 		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -406,7 +406,7 @@ class modSellYourSaas extends DolibarrModules
 		'titre'=>'Customers',
 		'mainmenu'=>'sellyoursaas',
 		'leftmenu'=>'mysaas_customers_customers',
-		'url'=>'/societe/list.php?&search_options_dolicloud=y&search_type=1,3&sortfield=s.tms&sortorder=desc',
+		'url'=>'/societe/list.php?search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=1,3&sortfield=s.tms&sortorder=desc',
 		'langs'=>'',
 		'position'=>234,
 		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
