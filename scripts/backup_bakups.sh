@@ -42,7 +42,7 @@ export EMAILFROM=support@$DOMAIN
 export EMAILTO=supervision@$DOMAIN
 #export OPTIONS="-v --stats -a --delete";
 #export OPTIONS="-v --stats -a --delete --delete-excluded";
-export OPTIONS="-v --stats -rltgoD --noatime -z --backup --suffix=.old";
+export OPTIONS="-v --stats -rlt --noatime --backup --suffix=.old";
 
 echo >> /var/log/backup_backups.log
 

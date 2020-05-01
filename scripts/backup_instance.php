@@ -278,9 +278,10 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param=array();
 	if ($mode != 'confirm' && $mode != 'confirmrsync') $param[]="-n";
 	//$param[]="-a";
-	$param[]="-rltz";
+	$param[]="-rlt";
 	//$param[]="-vv";
 	$param[]="-v";
+	$param[]="--noatime";
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
 	$param[]="--exclude .gitignore";
