@@ -195,6 +195,7 @@ if (! in_array($mode,array('confirm','confirmunlock','confirmclean'))) $param[]=
 if (! in_array($mode,array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
 $param[]="-v";
+$param[]="--noatime";
 $param[]="--exclude .buildpath";
 $param[]="--exclude .git";
 $param[]="--exclude .gitignore";
