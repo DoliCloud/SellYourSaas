@@ -2926,7 +2926,7 @@ AND engine IS NOT NULL GROUP BY engine WITH ROLLUP) B,
 (SELECT 3 pw) A ORDER BY TSize;
 
 
-=== Consultation deadlocks
+=== Consultation des deadlocks de la base de données
 
 [source,bash]
 ---------------
@@ -2941,7 +2941,7 @@ kill ...
 
 
 
-=== Suivi fichiers modifiés
+=== Suivi des fichiers modifiés
 
 Pour détecter la liste des fichiers modifiés depuis la dernière mise à jour afick:
 
@@ -3026,6 +3026,21 @@ Pour pousser une image sur un projet:
 - Pour recréer un serveur depuis une image
 
 Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+
+
+=== Passage en mode rescue d'un serveur
+
+Aller sur l'interface du service Cloud pour passer en mode rescue. Le serveur sera rebooté et un lien pour se logué sera fourni.
+
+Trouver les disques attachées et montez le disque système.
+
+[source,bash]
+---------------
+lsblk
+mount /dev/sdXY /mnt
+---------------
+
+Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
 
 
 === Déplacement de la base de données (var/lib/mysql vers /mnt/diskhome/mysql/)
