@@ -410,7 +410,7 @@ if ($action == 'send')
 	if ($contractid > 0)
 	{
 		$tmpcontract = $listofcontractid[$contractid];
-		$topic = '[Ticket for '.$tmpcontract->ref_customer.'] '.$topic;
+		$topic = '[Ticket - '.$tmpcontract->ref_customer.'] '.$topic;
 		$content .= "<br><br>\n";
 		$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
 		$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
@@ -420,6 +420,7 @@ if ($action == 'send')
 		if (is_object($tmpcontract->thirdparty))
 		{
 			$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
+			$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
 			$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
 		}
 		// Add the support type
