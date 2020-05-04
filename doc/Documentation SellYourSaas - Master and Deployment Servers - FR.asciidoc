@@ -2196,7 +2196,7 @@ Avoir dans le cron du user *root*
 47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
-40 4 * * * /home/admin/tools/backup_ext_rsync.pl >> /home/admin/logs/backup_ext_rsync.log 2>&1
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 30 3 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 ---------------
@@ -2222,7 +2222,7 @@ Avoir dans le cron du user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment root
-40 4 * * * /home/admin/tools/backup_ext_rsync.pl >> /home/admin/logs/backup_ext_rsync.log 2>&1
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 30 3 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 ---------------
@@ -2515,108 +2515,7 @@ Voir chapitre <<Clonage d une instance serveur pour production bis ou pour déve
 
 ===== Sauvegarde distante
 
-- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/tools/backup_ext_rsync.pl* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script ne fait pas partie du projet *sellyoursaas*, il vous revient de le réaliser. Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
-
-Voici un exemple de script (remplacer les variables de la rubrique *Sources* et *Target*, et pensez à autoriser le rsync entre les 2 serveurs si vous utilisez ce script):
-
-[source,perl]
----------------
-#!/usr/bin/perl
-#-------------------------------------------------------
-# Script sauvegarde vers exterieur par rsync
-#-------------------------------------------------------
-#use strict;
-
-#-------------------------------------------------------
-# Defines
-#-------------------------------------------------------
-use vars qw/ $REVISION $VERSION /;
-$REVISION='$Revision: 1.1 $'; $REVISION =~ /\s(.*)\s/; $REVISION=$1;
-$VERSION="1.1 (build $REVISION)";
-
-# Source
-$DIRSOURCE1="/home";
-$DIRSOURCE2="/mnt/diskbackup/backup";
-
-# Target
-$SERVDESTI="myserverbackup";
-$USER="userbackup";
-$DIRDESTI1="/mnt/diskbackup/home_servertobackup";
-$DIRDESTI2="/mnt/diskbackup/backup_servertobackup";
-
-# Options
-#my $OPTIONS="-vv --stats -a --delete";
-#my $OPTIONS="-vv --stats -a --delete --delete-excluded";
-my $OPTIONS="-v --stats -a";
-
-
-
-#-------------------------------------------------------
-# MAIN
-# Usage: backup_ext_rsync.pl [--delete]
-#-------------------------------------------------------
-
-# Get current time
-($nowsec,$nowmin,$nowhour,$nowday,$nowmonth,$nowyear,$nowwday,$nowyday,$nowisdst) = localtime(time);
-if ($nowyear < 100) { $nowyear+=2000; } else { $nowyear+=1900; }
-$nowsmallyear=$nowyear;
-$nowsmallyear =~ s/^..//;
-if (++$nowmonth < 10) { $nowmonth = "0$nowmonth"; }
-if ($nowday < 10) { $nowday = "0$nowday"; }
-if ($nowhour < 10) { $nowhour = "0$nowhour"; }
-if ($nowmin < 10) { $nowmin = "0$nowmin"; }
-
-if ($ARGV[0]) { $OPTIONS.=" ".$ARGV[0]; }
-
-print "***** $nowyear-$nowmonth-$nowday $nowhour:$nowmin:$nowsec Synchronization de $DIRSOURCE1 vers $USER\@$SERVDESTI:$DIRDESTI1...\n";
-$command="rsync -x --delete --delete-excluded --exclude '_sessions' --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log//
-*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER\@$SERVDESTI:$DIRDESTI1";
-print "$command\n";
-
-#my $ret=`$command`;
-#print "$ret\n";
-$pid = open(PH, "$command 2>&1 |");       # or with an open pipe
-while (<PH>) {
-    print "$_";
-}
-close(PH);
-$ret1=$?;
-
-
-print "***** $nowyear-$nowmonth-$nowday $nowhour:$nowmin:$nowsec Synchronization de $DIRSOURCE2 vers $USER\@$SERVDESTI:$DIRDESTI2...\n";
-
-$ret2=0;
-foreach my $i ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', ''
-4', '5', '6', '7', '8', '9') {
-        $command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DII
-RSOURCE2/osu$i* $USER\@$SERVDESTI:$DIRDESTI2";
-        print "$command\n";
-
-        #my $ret=`$command`;
-        #print "$ret\n";
-        $pid = open(PH, "$command 2>&1 |");       # or with an open pipe
-        while (<PH>) {
-            print "$_";
-        }
-        close(PH);
-        $ret2=$ret2+($? ? 1 : 0);
-}
-
-
-# Get current time
-($endsec,$endmin,$endhour,$endday,$endmonth,$endyear,$endwday,$endyday,$endisdst) = localtime(time);
-if ($endyear < 100) { $endyear+=2000; } else { $endyear+=1900; }
-$endsmallyear=$endyear;
-$endsmallyear =~ s/^..//;
-if (++$endmonth < 10) { $endmonth = "0$endmonth"; }
-if ($endday < 10) { $endday = "0$endday"; }
-if ($endhour < 10) { $endhour = "0$endhour"; }
-if ($endmin < 10) { $endmin = "0$endmin"; }
-
-print "***** $endyear-$endmonth-$endday $endhour:$endmin:$endsec Done ret1=$ret1 ret2=$ret2\n";
----------------
-
-TODO Ajouter un envoi d'email à supervision@mysellyoursaasdomain en cas d'erreur de copie.
+- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
 
 
 - Pour une sauvegarde chez AWS:
