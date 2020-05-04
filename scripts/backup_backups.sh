@@ -117,19 +117,20 @@ for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r'
 		echo
 done
 
+echo $now" End ret1=$ret1 ret2=$ret2"
+echo $now" End ret1=$ret1 ret2=$ret2" >> /var/log/backup_backups.log 
+
 if [ "x$ret1" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo "Failed to make copy backup on remote backup" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
+	echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
 	exit $ret1
 else
 	if [ "x$ret2" != "x0" ]; then
 		echo "Send email to $EMAILTO to warn about backup error"
-		echo "Failed to make copy backup on remote backup" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
+		echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
 		exit $ret2
 	fi 
 fi
 
-echo $now" End ret1=$ret1 ret2=$ret2" >> /var/log/backup_backups.log 
-echo $now" End ret1=$ret1 ret2=$ret2"
 
 exit 0
