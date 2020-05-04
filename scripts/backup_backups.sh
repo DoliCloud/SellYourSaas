@@ -92,14 +92,23 @@ echo "$command\n";
 $command >>/var/log/backup_backups.log
 export ret1=$?
 
-echo "Do a rsync for second part"
+echo "Do a rsync for second part..."
 
-for i in {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}; do
-        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER\@$SERVDESTI:$DIRDESTI2";
-        echo "$command\n";
-
-        $command >>/var/log/backup_backups.log
-        export ret2=$ret2+($? ? 1 : 0);
+export ret2=0
+for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
+		echo
+		nbofdir=`ls -d /mnt/diskbackup/backup/osu$i* | wc -l`
+		if [ "x$nbofdir" != "x0" ]; then
+	        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER\@$SERVDESTI:$DIRDESTI2";
+        	echo "$command\n";
+        	
+	        $command >>/var/log/backup_backups.log
+	        if [ "x$?" != "x0" ]; then
+	        	export ret2=$(($ret2 + 1));
+	        fi
+	    else
+	    	echo No directory found starting with name /mnt/diskbackup/backup/osu$i
+	    fi
 done
 
 if [ "x$ret1" != "x0" ]; then
