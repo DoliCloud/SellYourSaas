@@ -79,6 +79,11 @@ if [[ "x$1" == "x" ]]; then
 	exit 1
 fi
 
+if [ "x$SERVDESTI" == "x" ]; then
+	echo "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+fi
+
 export testorconfirm=$1
 
 # For debug
@@ -92,11 +97,11 @@ echo "$command\n";
 $command >>/var/log/backup_backups.log
 export ret1=$?
 
+echo
 echo "Do a rsync for second part..."
 
 export ret2=0
 for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-		echo
 		nbofdir=`ls -d /mnt/diskbackup/backup/osu$i* | wc -l`
 		if [ "x$nbofdir" != "x0" ]; then
 	        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER\@$SERVDESTI:$DIRDESTI2";
@@ -109,17 +114,22 @@ for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r'
 	    else
 	    	echo No directory found starting with name /mnt/diskbackup/backup/osu$i
 	    fi
+		echo
 done
 
 if [ "x$ret1" != "x0" ]; then
+	echo "Send email to $EMAILTO to warn about backup error"
 	echo "Failed to make copy backup on remote backup" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
 	exit $ret1
-fi 
-if [ "x$ret2" != "x0" ]; then
-	echo "Failed to make copy backup on remote backup" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
-	exit $ret2
-fi 
+else
+	if [ "x$ret2" != "x0" ]; then
+		echo "Send email to $EMAILTO to warn about backup error"
+		echo "Failed to make copy backup on remote backup" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
+		exit $ret2
+	fi 
+fi
 
 echo $now" End ret1=$ret1 ret2=$ret2" >> /var/log/backup_backups.log 
+echo $now" End ret1=$ret1 ret2=$ret2"
 
 exit 0
