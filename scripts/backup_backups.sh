@@ -40,9 +40,9 @@ export DIRDESTI2="/mnt/diskbackup/backup_"`hostname`;
 
 export EMAILFROM=support@$DOMAIN
 export EMAILTO=supervision@$DOMAIN
-#export OPTIONS="-v --stats -a --delete";
-#export OPTIONS="-v --stats -a --delete --delete-excluded";
-export OPTIONS="-v --stats -rlt --noatime --backup --suffix=.old";
+#export OPTIONS="-v -4 --stats -a --delete";
+#export OPTIONS="-v -4 --stats -a --delete --delete-excluded";
+export OPTIONS="-v -4 --stats -rlt --noatime --backup --suffix=.old";
 
 echo >> /var/log/backup_backups.log
 
