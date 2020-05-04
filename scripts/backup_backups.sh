@@ -94,7 +94,7 @@ echo "Do a rsync first part"
 export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
 echo "$command\n";
 
-$command >>/var/log/backup_backups.log
+$command >>/var/log/backup_backups.log 2>&1
 export ret1=$?
 
 echo
@@ -108,7 +108,7 @@ if [ "x$ret1" == "x0" ]; then
 		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
 	        	echo "$command\n";
 	        	
-		        $command >>/var/log/backup_backups.log
+		        $command >>/var/log/backup_backups.log 2>&1
 		        if [ "x$?" != "x0" ]; then
 		        	export ret2=$(($ret2 + 1));
 		        fi
