@@ -793,7 +793,10 @@ else
 		$discount = $tmpthirdparty->remise_percent;
 
 		$productidtocreate = $tmpproduct->id;
-		$desc = $tmpproduct->description;
+		$desc = '';
+		if (empty($conf->global->SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT)) {
+			$desc = $tmpproduct->description;
+		}
 
 		$contractlineid = $contract->addline($desc, $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $productidtocreate, $discount, $date_start, $date_end, 'HT', 0);
 		if ($contractlineid < 0)
@@ -827,7 +830,10 @@ else
 			$localtax2_tx = get_default_localtax($mysoc, $object, 2, $prodid);
 
 			$price = $tmpsubproduct->price;
-			$desc = $tmpsubproduct->description;
+			$desc = '';
+			if (empty($conf->global->SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT)) {
+				$desc = $tmpsubproduct->description;
+			}
 			$discount = 0;
 
 			if ($qty > 0)
