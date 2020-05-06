@@ -34,7 +34,7 @@ export DIRSOURCE2=`grep 'backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 # Target
 export SERVDESTI=`grep 'remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export USER="admin";
+export USER=`grep 'remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export DIRDESTI1="/mnt/diskbackup/home_"`hostname`;
 export DIRDESTI2="/mnt/diskbackup/backup_"`hostname`;
 
@@ -43,6 +43,10 @@ export EMAILTO=supervision@$DOMAIN
 #export OPTIONS="-v -4 --stats -a --delete";
 #export OPTIONS="-v -4 --stats -a --delete --delete-excluded";
 export OPTIONS="-v -4 --stats -rlt --noatime --backup --suffix=.old";
+
+if [ "x$USER" == "x" ]; then
+	export USER="admin"
+fi
 
 echo >> /var/log/backup_backups.log
 
@@ -83,6 +87,7 @@ if [ "x$SERVDESTI" == "x" ]; then
 	echo "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 fi
+
 
 export testorconfirm=$1
 
