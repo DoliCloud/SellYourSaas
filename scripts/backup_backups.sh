@@ -34,7 +34,7 @@ export DIRSOURCE2=`grep 'backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 # Target
 export SERVDESTI=`grep 'remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export USER=`grep 'remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export USER=`grep 'remotebackupuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export DIRDESTI1="/mnt/diskbackup/home_"`hostname`;
 export DIRDESTI2="/mnt/diskbackup/backup_"`hostname`;
 
