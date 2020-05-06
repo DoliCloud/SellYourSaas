@@ -410,7 +410,7 @@ if ($action == 'send')
 	if ($contractid > 0)
 	{
 		$tmpcontract = $listofcontractid[$contractid];
-		$topic = '[Ticket for '.$tmpcontract->ref_customer.'] '.$topic;
+		$topic = '[Ticket - '.$tmpcontract->ref_customer.'] '.$topic;
 		$content .= "<br><br>\n";
 		$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
 		$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
@@ -420,6 +420,7 @@ if ($action == 'send')
 		if (is_object($tmpcontract->thirdparty))
 		{
 			$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
+			$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
 			$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
 		}
 		// Add the support type
@@ -569,9 +570,10 @@ if ($action == 'updatemythirdpartyaccount')
 
 if ($action == 'updatemythirdpartylogin')
 {
-	$email = GETPOST('email','nohtml');
-	$firstname = GETPOST('firstName','nohtml');
-	$lastname = GETPOST('lastName','nohtml');
+	$email = trim(GETPOST('email', 'nohtml'));
+	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
+	$firstname = trim(GETPOST('firstName', 'nohtml'));
+	$lastname = trim(GETPOST('lastName', 'nohtml'));
 
 	if (empty($email))
 	{
@@ -584,6 +586,16 @@ if ($action == 'updatemythirdpartylogin')
 		setEventMessages($langs->trans("ErrorBadValueForEmail"), null, 'errors');
 		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
 		exit;
+	}
+	if ($oldemail != $email) {		// A request to change email was done.
+		// Test if email already exists
+		$tmpthirdparty = new Societe($db);
+		$tmpthirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $email);
+		if ($tmpthirdparty->id > 0) {
+			setEventMessages($langs->trans("SorryEmailExistsforAnotherAccount", $email), null, 'errors');
+			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
+			exit;
+		}
 	}
 
 	$db->begin();	// Start transaction
@@ -2775,6 +2787,10 @@ if ($resqlproducts)
 						$priceinstance['user'] .= $tmpprodchild->price;
 						$priceinstance_ttc['user'] .= $tmpprodchild->price_ttc;
 					}
+					else if ($tmpprodchild->array_options['options_app_or_option'] == 'system')
+					{
+						// Don't add system services to global price, these are options with calculated quantities
+					}
 					else
 					{
 						$priceinstance['fix'] += $tmpprodchild->price;
@@ -3534,6 +3550,10 @@ if ($mode == 'instances')
 						{
 							$priceinstance['user'] += $tmpprodchild->price;
 							$priceinstance_ttc['user'] += $tmpprodchild->price_ttc;
+						}
+						else if($tmpprodchild->array_options['options_app_or_option'] == 'system')
+						{
+							// Don't add system services to global price, these are options with calculated quantities
 						}
 						else
 						{
@@ -7066,7 +7086,7 @@ if ($mode == 'myaccount')
 					<br>
                   <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" placeholder="'.$placeholderforvat.'">
                     ';
-					if (empty($conf->global->MAIN_DISABLEVATCHECK) && isInEEC($mythirdpartyaccount) && (GETPOST('admin','alpha')))
+					if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC() && (GETPOST('admin','alpha')))
 					{
 					    if (! empty($conf->use_javascript_ajax))
 					    {
@@ -7132,6 +7152,7 @@ if ($mode == 'myaccount')
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Email").'</label>
 	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->email.'" name="email">
+	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->email.'" name="oldemail">
 	                </div>
 	                <div class="row">
 	                  <div class="col-md-6">

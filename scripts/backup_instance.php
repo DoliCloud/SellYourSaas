@@ -278,9 +278,10 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param=array();
 	if ($mode != 'confirm' && $mode != 'confirmrsync') $param[]="-n";
 	//$param[]="-a";
-	$param[]="-rltz";
+	$param[]="-rlt";
 	//$param[]="-vv";
 	$param[]="-v";
+	$param[]="--noatime";
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
 	$param[]="--exclude .gitignore";
@@ -299,7 +300,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*/thumbs/'";
 	$param[]="--exclude '*/temp/'";
 	$param[]="--exclude '*/documents/admin/backup/'";
-	$param[]="--exclude '*/htdocs/install/filelist-*.xml'";
+	$param[]="--exclude '*/htdocs/install/filelist-*.xml*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/freefont-*'";

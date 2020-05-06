@@ -453,7 +453,7 @@ MarkAsSpamAndClose=Mark as spammer and close
 ChainOfRegistration=Chain of registration with same cookie
 AddService=Add service
 ServicesUsingThisPackage=Services deploying this package
-HelpOnAppOrOption='Application' if this is an application to deploy<br>'Option' if this is an option to activate or to deploy<br>'System' if this is a metric used for invoicing
+HelpOnAppOrOption='Application' if this is an main application to deploy<br>'Option' if this is an option to activate or to deploy. A metric rule can be defined for invoicing.<br>'System' if this is only a metric used for invoicing (will not be suggested as an 'Option')
 ChainOfRegistrations=Chain of subscriptions on same computer
 GetFileOfIps=Get file of IPs
 ParametersOnMasterServer=Parameters for Master server
@@ -495,3 +495,4 @@ LastPaymentTry=Last payment try
 SellYourSaasTimeZoneDesc=This timezone can be used to replace string TZ=UTC into cron file
 NoteForSupportUser=This user is used for maintenance purpose by your hosting provider. This user can be deleted at any time and you can also delete it yourself at any time, it will be recreated if necessary. If you have a paid instance, this user is not included into billing.
 TitleFactureRec=Template invoice for %s %s
+SorryEmailExistsforAnotherAccount=Sorry, the email '%s' is already used for another account

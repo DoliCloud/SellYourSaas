@@ -188,15 +188,8 @@ mysqlcheck --all-databases
 ---------------
 
 
-=== Shell par défaut
 
-Modifier le shell par défaut pour utiliser bash (au lieu dh sh ou dash)
-
-[source,bash]
----------------
-ln -fs /bin/bash sh
----------------
-
+=== SSH et sudo
 
 === Compte unix admin
 
@@ -204,7 +197,7 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 
 [source,bash]
 ---------------
-adduser admin
+useradd admin -g admin
 ---------------
 
 
@@ -216,30 +209,32 @@ adduser myunixlogin
 ---------------
 
 
-=== ssh et sudo
+==== Configuration ssh
 
-Modifier */etc/ssh/sshd_config* pour changer les autorisations de login:
+Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas* pour changer les autorisations de login avec le contenu suivant:
 
 [source,conf]
 ---------------
 #Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
-
 PermitRootLogin no
 StrictModes yes
 
-RSAAuthentication yes
 PubkeyAuthentication yes
 
 PermitEmptyPasswords no
-
-ChallengeResponseAuthentication no
 PasswordAuthentication yes
-
-Subsystem sftp /usr/lib/openssh/sftp-server
 
 AllowUsers myunixlogin admin osu*
 ---------------
+
+Attention, à bien remplacer myunixlogin par la bonne valeur avant de prendre en compte les modifications par:
+
+[source,conf]
+---------------
+/etc/init.d/ssh reload
+---------------
+
 
 Ajouter la ligne suivante dans le fichier */etc/sudoers* pour repositionner le HOME selon le user apres un sudo -s:
 
@@ -256,6 +251,7 @@ myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
 
+
 Ajouter votre clé publique à votre compte unix.
 
 [source,bash]
@@ -266,10 +262,22 @@ ssh-copy-id myunixlogin@x.y.z.a
 
 Définir ou redéfinir le mot de passe de *root*, *admin*, et de *myunixlogin* avec un mot de passe sure.
 
+Lancer ssh-keygen sur chacun de ces 3 comptes
+
+
+==== Shell par défaut
+
+Modifier le shell par défaut pour utiliser bash (au lieu dh sh ou dash)
+
+[source,bash]
+---------------
+ln -fs /bin/bash /usr/bin/sh
+---------------
+
 
 === Timeout des lancements de serveurs
 
-Sur Ubuntu 18.04 et avec MariaDb migré depuis un MySql:
+Sur Ubuntu 18.04+ et avec MariaDb migré depuis un MySql:
 
 Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long en cas de plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
 
@@ -292,7 +300,7 @@ systemctl reload nom_du_service.service
 
 === Suppression des fichiers d'information au login
 
-Afin de ne pas donner d'information aux utilisateurs qui feront du SSH:
+Afin de ne pas donner d'information aux utilisateurs qui feront du SSH, sur les serveurs de déploiements:
 
 [source,bash]
 ---------------
@@ -303,7 +311,7 @@ rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgr
 
 === Modification de /etc/skel
 
-Editer le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys* avec 
+Editer sur les serveurs de déploiement le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys* avec 
 * la clé publique ssh du ou des utilisateurs *myunixlogin*
 * la clé publique ssh de l'utilisateur *admin* du serveur master
 
@@ -319,7 +327,6 @@ Ainsi tout nouveau compte linux créé (ceux des instances des clients) sera acc
 
     
 
-
 === Ajout alias
 
 Ajouter à la fin de */etc/bash.bashrc*:
@@ -332,7 +339,7 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 
 === Augmentation taille max UID
 
-Modifier */etc/login.defs* pour mettre le 
+Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le 
 
 [source,conf]
 ---------------
@@ -376,7 +383,7 @@ ipduserveurprincipale   nomduserveur.mysaasdomainname.com
 
 === Ajout du support de l'IP v6
 
-==== Avec ifupdown
+==== Avec ifupdown (apt install ifupdown)
 
 - Pour ajouter une IP v6 de manière dynamique à des fins de test dans un premier temps: 
 
@@ -432,6 +439,7 @@ network:
 				- "2002:41d0:1234:1000::1234/64"
 			gateway6: "2002:41d0:1234:1000::1"
 ---------------
+Note: Use 4 spaces for tabulation.
  
 [source,bash]
 ---------------
@@ -2164,12 +2172,12 @@ Choisir:
 
 * Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
 
-* Créer un lien symbolique vers ce certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
+* Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
 ---------------
 cd /etc/apache2
-ln -fs with.mysaasdomainname.com.key with.sellyoursaas.com.crt
-ln -fs with.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
 ---------------
 
 
@@ -2188,7 +2196,7 @@ Avoir dans le cron du user *root*
 47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
-40 4 * * * /home/admin/tools/backup_ext_rsync.pl >> /home/admin/logs/backup_ext_rsync.log 2>&1
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 30 3 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 ---------------
@@ -2214,7 +2222,7 @@ Avoir dans le cron du user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment root
-40 4 * * * /home/admin/tools/backup_ext_rsync.pl >> /home/admin/logs/backup_ext_rsync.log 2>&1
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 30 3 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 ---------------
@@ -2507,108 +2515,7 @@ Voir chapitre <<Clonage d une instance serveur pour production bis ou pour déve
 
 ===== Sauvegarde distante
 
-- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/tools/backup_ext_rsync.pl* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script ne fait pas partie du projet *sellyoursaas*, il vous revient de le réaliser. Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
-
-Voici un exemple de script (remplacer les variables de la rubrique *Sources* et *Target*, et pensez à autoriser le rsync entre les 2 serveurs si vous utilisez ce script):
-
-[source,perl]
----------------
-#!/usr/bin/perl
-#-------------------------------------------------------
-# Script sauvegarde vers exterieur par rsync
-#-------------------------------------------------------
-#use strict;
-
-#-------------------------------------------------------
-# Defines
-#-------------------------------------------------------
-use vars qw/ $REVISION $VERSION /;
-$REVISION='$Revision: 1.1 $'; $REVISION =~ /\s(.*)\s/; $REVISION=$1;
-$VERSION="1.1 (build $REVISION)";
-
-# Source
-$DIRSOURCE1="/home";
-$DIRSOURCE2="/mnt/diskbackup/backup";
-
-# Target
-$SERVDESTI="myserverbackup";
-$USER="userbackup";
-$DIRDESTI1="/mnt/diskbackup/home_servertobackup";
-$DIRDESTI2="/mnt/diskbackup/backup_servertobackup";
-
-# Options
-#my $OPTIONS="-vv --stats -a --delete";
-#my $OPTIONS="-vv --stats -a --delete --delete-excluded";
-my $OPTIONS="-v --stats -a";
-
-
-
-#-------------------------------------------------------
-# MAIN
-# Usage: backup_ext_rsync.pl [--delete]
-#-------------------------------------------------------
-
-# Get current time
-($nowsec,$nowmin,$nowhour,$nowday,$nowmonth,$nowyear,$nowwday,$nowyday,$nowisdst) = localtime(time);
-if ($nowyear < 100) { $nowyear+=2000; } else { $nowyear+=1900; }
-$nowsmallyear=$nowyear;
-$nowsmallyear =~ s/^..//;
-if (++$nowmonth < 10) { $nowmonth = "0$nowmonth"; }
-if ($nowday < 10) { $nowday = "0$nowday"; }
-if ($nowhour < 10) { $nowhour = "0$nowhour"; }
-if ($nowmin < 10) { $nowmin = "0$nowmin"; }
-
-if ($ARGV[0]) { $OPTIONS.=" ".$ARGV[0]; }
-
-print "***** $nowyear-$nowmonth-$nowday $nowhour:$nowmin:$nowsec Synchronization de $DIRSOURCE1 vers $USER\@$SERVDESTI:$DIRDESTI1...\n";
-$command="rsync -x --delete --delete-excluded --exclude '_sessions' --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log//
-*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER\@$SERVDESTI:$DIRDESTI1";
-print "$command\n";
-
-#my $ret=`$command`;
-#print "$ret\n";
-$pid = open(PH, "$command 2>&1 |");       # or with an open pipe
-while (<PH>) {
-    print "$_";
-}
-close(PH);
-$ret1=$?;
-
-
-print "***** $nowyear-$nowmonth-$nowday $nowhour:$nowmin:$nowsec Synchronization de $DIRSOURCE2 vers $USER\@$SERVDESTI:$DIRDESTI2...\n";
-
-$ret2=0;
-foreach my $i ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', ''
-4', '5', '6', '7', '8', '9') {
-        $command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DII
-RSOURCE2/osu$i* $USER\@$SERVDESTI:$DIRDESTI2";
-        print "$command\n";
-
-        #my $ret=`$command`;
-        #print "$ret\n";
-        $pid = open(PH, "$command 2>&1 |");       # or with an open pipe
-        while (<PH>) {
-            print "$_";
-        }
-        close(PH);
-        $ret2=$ret2+($? ? 1 : 0);
-}
-
-
-# Get current time
-($endsec,$endmin,$endhour,$endday,$endmonth,$endyear,$endwday,$endyday,$endisdst) = localtime(time);
-if ($endyear < 100) { $endyear+=2000; } else { $endyear+=1900; }
-$endsmallyear=$endyear;
-$endsmallyear =~ s/^..//;
-if (++$endmonth < 10) { $endmonth = "0$endmonth"; }
-if ($endday < 10) { $endday = "0$endday"; }
-if ($endhour < 10) { $endhour = "0$endhour"; }
-if ($endmin < 10) { $endmin = "0$endmin"; }
-
-print "***** $endyear-$endmonth-$endday $endhour:$endmin:$endsec Done ret1=$ret1 ret2=$ret2\n";
----------------
-
-TODO Ajouter un envoi d'email à supervision@mysellyoursaasdomain en cas d'erreur de copie.
+- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
 
 
 - Pour une sauvegarde chez AWS:
@@ -2926,7 +2833,7 @@ AND engine IS NOT NULL GROUP BY engine WITH ROLLUP) B,
 (SELECT 3 pw) A ORDER BY TSize;
 
 
-=== Consultation deadlocks
+=== Consultation des deadlocks de la base de données
 
 [source,bash]
 ---------------
@@ -2941,7 +2848,7 @@ kill ...
 
 
 
-=== Suivi fichiers modifiés
+=== Suivi des fichiers modifiés
 
 Pour détecter la liste des fichiers modifiés depuis la dernière mise à jour afick:
 
@@ -3026,6 +2933,21 @@ Pour pousser une image sur un projet:
 - Pour recréer un serveur depuis une image
 
 Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+
+
+=== Passage en mode rescue d'un serveur
+
+Aller sur l'interface du service Cloud pour passer en mode rescue. Le serveur sera rebooté et un lien pour se logué sera fourni.
+
+Trouver les disques attachées et montez le disque système.
+
+[source,bash]
+---------------
+lsblk
+mount /dev/sdXY /mnt
+---------------
+
+Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
 
 
 === Déplacement de la base de données (var/lib/mysql vers /mnt/diskhome/mysql/)
@@ -3482,7 +3404,7 @@ Voici le détail des évennement ou URL qui peuvent etre trackées:
 - URL: Aucune
 - Event DataDog: *sellyoursaas.payment*
 
-* Client perdu, lorsqu'une instance payante est désinstallé (avec la valeur 1)
+* Client perdu, lorsqu'une instance payante est désinstallé (avec la valeur 1), que ce soit par le batch en automatique ou sur demande du client depuis l'espace client
 - URL: Aucune
 - Event DataDog: *sellyoursaas.payingcustomerlost*
 
