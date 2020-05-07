@@ -53,7 +53,7 @@ while ($line = fgets($pointer)) {
         $emailfrom = trim($reg[1]);
     }
 
-    if(preg_match('/^references:/i', $line) ) {
+    if(preg_match('/^references:\s/i', $line) ) {
                 $referenceline .= trim($line)."\n";
         }
         $mail .= $line;
