@@ -126,16 +126,20 @@ if (empty($reshook))
 	if ($action == 'backupinstance') {
 		//$mode = 'test';
 		$mode = 'confirm';
-		$command=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.escapeshellarg($object->ref_customer).' '.escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH).' '.$mode;
+		$command='/usr/bin/sudo -u admin '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.escapeshellarg($object->ref_customer).' '.escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH).' '.$mode;
+
+		$command='/usr/bin/sudo -u admin '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php aaa bbb '.$mode;
+		$command = escapeshellcmd('/usr/bin/sudo').' -u admin whoami';
+		//$command = 'whoami';
 		$return_val = 0;
 
 		if ($action == 'backupinstance')
 		{
-			//$output = shell_exec($command);
-			ob_start();
+			$content_grabbed = shell_exec($command);
+			/*ob_start();
 			passthru($command, $return_val);
 			$content_grabbed=ob_get_contents();
-			ob_end_clean();
+			ob_end_clean();*/
 
 			$mesg = $command."<br>\n";
 			$mesg .= "Result: ".$return_val."<br>\n";
@@ -315,7 +319,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	print '<td>';
 	if (! empty($instanceoldid)) print $object->backup_status;
 	else {
+		print ($object->array_options['options_latestbackup_status'] == 'KO' ? '<span class="error">' : '');
 		print $object->array_options['options_latestbackup_status'];
+		print ($object->array_options['options_latestbackup_status'] == 'KO' ? '</span>' : '');
 	}
 	print '</td>';
 	print '</tr>';

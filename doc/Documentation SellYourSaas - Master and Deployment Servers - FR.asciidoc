@@ -200,6 +200,8 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 useradd admin -g admin
 ---------------
 
+Vérifiez que le id de ce user *admin* est bien supérieur ou égale à 1000.
+ 
 
 Créer un compte utilisateur pour vous même (ou d'autres administrateurs), par exemple: *myunixlogin*. Il sera utiliser pour vous logguer.
 
@@ -243,7 +245,7 @@ Ajouter la ligne suivante dans le fichier */etc/sudoers* pour repositionner le H
 Defaults        set_home
 ---------------
 
-Créer un fichier *myunixlogin* à mettre dans le répertoire */etc/sudoers.d* avec les permissions *r--r-----* et le contenu
+Créer un fichier *myunixlogin* à mettre dans le répertoire */etc/sudoers.d* avec le owner *root* et les permissions *r--r-----* et le contenu
 
 [source,conf]
 ---------------
@@ -350,12 +352,12 @@ Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le
 	GID_MAX                 500000
 ---------------
 
-Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* pour mettre 
+Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* pour mettre 
 
 [source,conf]
 ---------------
-	LimitUIDRange 0 500000
-	LimitGIDRange 0 500000
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 
