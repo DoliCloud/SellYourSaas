@@ -140,13 +140,14 @@ $langs->load("main");				// To load language file for default language
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
     print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter]\n";
-    print "Usage on deployment servers: ".$script_file." (backuptestrsync|backuptestdatabase|backup) [instancefilter]\n";
+    print "Usage on deployment servers: ".$script_file." (backuptest|backuptestrsync|backuptestdatabase|backup) [instancefilter]\n";
     print "\n";
+    print "- backuptest          test rsync+database backup\n";
     print "- backuptestrsync     test rsync backup\n";
-    print "- backuptestdatabase  test mysqldump backup\n";
+    print "- backuptestdatabase  test database backup\n";
     print "- backuprsync         creates backup (rsync)\n";
     print "- backupdatabase      creates backup (mysqldump)\n";
-    print "- backup              creates backup (rsync + mysqldump) ***** Used by cron on deployment servers *****\n";
+    print "- backup              creates backup (rsync + database) ***** Used by cron on deployment servers *****\n";
     print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats.\n";
     print "- updatecountsonly    updates counters of instances only (only nb of user for instances)\n";
     print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
@@ -314,7 +315,7 @@ print "Found ".count($instances)." not trial instances including ".$nbofactivesu
 
 
 //print "----- Start loop for backup_instance\n";
-if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
+if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 {
 	if (empty($conf->global->DOLICLOUD_BACKUP_PATH))
 	{
@@ -339,6 +340,7 @@ if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabas
 			$mode = ($action == 'backup'?'confirm':$mode);
 			$mode = ($action == 'backuprsync'?'confirmrsync':$mode);
 			$mode = ($action == 'backupdatabase'?'confirmdatabase':$mode);
+			$mode = ($action == 'backuptest'?'test':$mode);
 			$mode = ($action == 'backuptestdatabase'?'testdatabase':$mode);
 			$mode = ($action == 'backuptestrsync'?'testrsync':$mode);
 
@@ -561,7 +563,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 // Result
 $out = '';
-if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
     $out.= "\n";
     $out.= "***** Summary for host ".$ipserverdeployment."\n";
 } else {
@@ -617,7 +619,7 @@ if (! $nboferrors)
 {
 	print '--- end OK - '.strftime("%Y%m%d-%H%M%S")."\n";
 
-	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
+	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 	{
 		if (empty($instancefilter)) {
 			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
@@ -648,7 +650,7 @@ else
 {
 	print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
 
-	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
+	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 	{
 		if (empty($instancefilter)) {
 			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;

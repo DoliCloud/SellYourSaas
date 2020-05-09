@@ -124,10 +124,24 @@ if (empty($reshook))
 	include 'refresh_action.inc.php';
 
 	if ($action == 'backupinstance') {
+		$mode = 'backup';
 
+		$command=($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
+		echo $command."\n";
 
+		if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase')
+		{
+			//$output = shell_exec($command);
+			ob_start();
+			passthru($command, $return_val);
+			$content_grabbed=ob_get_contents();
+			ob_end_clean();
 
+			echo "Result: ".$return_val."\n";
+			echo "Output: ".$content_grabbed."\n";
+		}
 
+		if ($return_val != 0) $error++;
 	}
 
 	$action = 'view';
