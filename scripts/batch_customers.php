@@ -619,25 +619,29 @@ if (! $nboferrors)
 
 	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 	{
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-		$msg = 'Backup done without errors by '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
+		if (empty($instancefilter)) {
+			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+			$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+			$msg = 'Backup done without errors by '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
 
-		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
-		$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
+			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
+			$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
 
-		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
-		$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-		if (! empty($conf->global->$constforaltname))
-		{
-		    $sellyoursaasdomain = $domainname;
-		    $sellyoursaasname = $conf->global->$constforaltname;
+			$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
+			if (! empty($conf->global->$constforaltname))
+			{
+			    $sellyoursaasdomain = $domainname;
+			    $sellyoursaasname = $conf->global->$constforaltname;
+			}
+
+			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=['.$sellyoursaasname.' - '.gethostname().'] Success for backup'."\n";
+			$cmail = new CMailFile('['.$sellyoursaasname.' - '.gethostname().'] Success for backup', $to, $from, $msg);
+			$result = $cmail->sendfile();
+		} else {
+			print 'Script was called for a given instance. No email or indicator sent in such situation'."\n";
 		}
-
-		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=['.$sellyoursaasname.' - '.gethostname().'] Success for backup'."\n";
-		$cmail = new CMailFile('['.$sellyoursaasname.' - '.gethostname().'] Success for backup', $to, $from, $msg);
-		$result = $cmail->sendfile();
 	}
 }
 else
@@ -646,59 +650,63 @@ else
 
 	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 	{
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-		// Supervision tools are generic for all domain. No ay to target a specific supervision email.
+		if (empty($instancefilter)) {
+			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+			$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+			// Supervision tools are generic for all domain. No ay to target a specific supervision email.
 
-		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
+			$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
 
-		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
-		$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', 'emailing');
-		$result = $cmail->sendfile();
+			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
+			$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', 'emailing');
+			$result = $cmail->sendfile();
 
-		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
-		{
-		    try {
-		        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+			// Send to DataDog (metric + event)
+			if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
+			{
+			    try {
+			        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-		        $arrayconfig=array();
-		        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-		        {
-		            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-		        }
+			        $arrayconfig=array();
+			        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
+			        {
+			            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+			        }
 
-		        $statsd = new DataDog\DogStatsd($arrayconfig);
+			        $statsd = new DataDog\DogStatsd($arrayconfig);
 
-		        //$arraytags=array('result'=>'ko');
-		        //$statsd->increment('sellyoursaas.backup', 1, $arraytags);
+			        //$arraytags=array('result'=>'ko');
+			        //$statsd->increment('sellyoursaas.backup', 1, $arraytags);
 
-		        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
-		        $sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
+			        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
+			        $sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
 
-		        $domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
-		        $constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-		        if (! empty($conf->global->$constforaltname))
-		        {
-		            $sellyoursaasdomain = $domainname;
-		            $sellyoursaasname = $conf->global->$constforaltname;
-		        }
+			        $domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+			        $constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
+			        if (! empty($conf->global->$constforaltname))
+			        {
+			            $sellyoursaasdomain = $domainname;
+			            $sellyoursaasname = $conf->global->$constforaltname;
+			        }
 
-		        $titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Backup in error', 90);
-		        $statsd->event($titleofevent,
-		            array(
-		                'text'       => $titleofevent." : \n".$msg,
-		                'alert_type' => 'warning',
-		                'source_type_name' => 'API',
-		                'host'       => gethostname()
-		                )
-		            );
-		    }
-		    catch(Exception $e)
-		    {
+			        $titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Backup in error', 90);
+			        $statsd->event($titleofevent,
+			            array(
+			                'text'       => $titleofevent." : \n".$msg,
+			                'alert_type' => 'warning',
+			                'source_type_name' => 'API',
+			                'host'       => gethostname()
+			                )
+			            );
+			    }
+			    catch(Exception $e)
+			    {
 
-		    }
+			    }
+			}
+		} else {
+			print 'Script was called for a given instance. No email or indicator sent in such situation'."\n";
 		}
 	}
 }

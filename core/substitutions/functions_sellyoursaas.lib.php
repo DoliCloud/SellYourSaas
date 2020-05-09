@@ -43,6 +43,13 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
     $langs->load("sellyoursaas@sellyoursaas");
 
+    if (isset($parameters['needforkey'])) {
+    	$substitutionarray['BackupInstanceTabTitle'] = $langs->trans('BackupInstance');
+    	if ($object->array_options['options_latestbackup_status'] == 'KO') {
+    		$substitutionarray['BackupInstanceTabTitle'] = $substitutionarray['BackupInstanceTabTitle'].img_warning($langs->trans("BackupError"));
+    	}
+    }
+
     if ((! empty($parameters['mode'])) && $parameters['mode'] == 'formemail')	// For exemple when called by FormMail::getAvailableSubstitKey()
     {
         if (is_object($object) && get_class($object) == 'Societe')

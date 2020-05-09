@@ -123,6 +123,13 @@ if (empty($reshook))
 
 	include 'refresh_action.inc.php';
 
+	if ($action == 'backupinstance') {
+
+
+
+
+	}
+
 	$action = 'view';
 }
 
@@ -298,27 +305,25 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	print '</td>';
 	print '</tr>';
 
-	print "</table><br>";
+	print "</table>";
 
 
 	print "</div>";
 
+
 	// Barre d'actions
-/*	if (! $user->societe_id)
+	if (! $user->societe_id)
 	{
 		print '<div class="tabsAction">';
 
 		if ($user->rights->sellyoursaas->write)
 		{
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=upgrade">'.$langs->trans('Upgrade').'</a>';
+			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=backupinstance">'.$langs->trans('BackupNow').'</a>';
 		}
 
 		print "</div><br>";
 	}
-*/
 }
-
-print '<br>';
 
 
 // Backup link
