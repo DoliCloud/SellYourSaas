@@ -52,8 +52,6 @@ $langs->load("contracts");
 $langs->load("commercial");
 $langs->load("sellyoursaas@sellyoursaas");
 
-$mesg='';
-
 $action		= (GETPOST('action','alpha') ? GETPOST('action','alpha') : 'view');
 $confirm	= GETPOST('confirm','alpha');
 $backtopage = GETPOST('backtopage','alpha');
@@ -61,6 +59,8 @@ $id			= GETPOST('id','int');
 $instanceoldid = GETPOST('instanceoldid','int');
 $ref        = GETPOST('ref','alpha');
 $refold     = GETPOST('refold','alpha');
+
+$mesg = '';
 
 $error=0; $errors=array();
 
@@ -124,12 +124,12 @@ if (empty($reshook))
 	include 'refresh_action.inc.php';
 
 	if ($action == 'backupinstance') {
-		$mode = 'backup';
+		//$mode = 'test';
+		$mode = 'confirm';
+		$command=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.escapeshellarg($object->ref_customer).' '.escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH).' '.$mode;
+		$return_val = 0;
 
-		$command=($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
-		echo $command."\n";
-
-		if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase')
+		if ($action == 'backupinstance')
 		{
 			//$output = shell_exec($command);
 			ob_start();
@@ -137,8 +137,9 @@ if (empty($reshook))
 			$content_grabbed=ob_get_contents();
 			ob_end_clean();
 
-			echo "Result: ".$return_val."\n";
-			echo "Output: ".$content_grabbed."\n";
+			$mesg = $command."<br>\n";
+			$mesg .= "Result: ".$return_val."<br>\n";
+			$mesg .= "Output: ".$content_grabbed."<br>\n";
 		}
 
 		if ($return_val != 0) $error++;
@@ -354,6 +355,10 @@ print 'Restore command line string<br>';
 print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" size="160"><br>';
 print ajax_autoselect('restorestring');
 
+if (! empty($mesg)) {
+	print '<br><br>';
+	print $mesg;
+}
 
 llxFooter();
 

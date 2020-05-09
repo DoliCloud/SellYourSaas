@@ -235,7 +235,9 @@ if (empty($login) || empty($dirdb))
 	exit(-5);
 }
 
-print 'Backup instance '.$instance.' from '.(in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":").' to '.$dirroot.'/'.$login."\n";
+//$fromserver = (in_array($server, array('127.0.0.1','localhost')) ? $server : $login.'@'.$server.":");
+$fromserver = $login.'@'.$server.":";
+print 'Backup instance '.$instance.' from '.$fromserver.' to '.$dirroot.'/'.$login." (mode=".$mode.")\n";
 //print 'SFTP password '.$object->password_web."\n";
 //print 'Database password '.$object->password_db."\n";
 
@@ -316,9 +318,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 	//var_dump($param);
-	//print "- Backup documents dir ".$dirroot."/".$instance."\n";
-	$param[]=(in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
-	$param[]=$dirroot.'/'.$login;
+	//$param[] = (in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
+	$param[] = $login.'@'.$server.":" . $sourcedir;
+	$param[] = $dirroot.'/'.$login;
 	$fullcommand=$command." ".join(" ",$param);
 	$output=array();
 	$return_var=0;
@@ -326,7 +328,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	print $datebeforersync.' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
 	$dateafterrsync = strftime("%Y%m%d-%H%M%S");
-	print $dateafterrsync.' rsync done'."\n";
+	print $dateafterrsync.' rsync done (return='.$return_var.')'."\n";
 
 	// Output result
 	foreach($output as $outputline)
@@ -421,6 +423,9 @@ $now=dol_now();
 // Update database
 if (empty($return_var) && empty($return_varmysql))
 {
+	print "RESULT into backup process of rsync: ".$return_var."\n";
+	print "RESULT into backup process of mysqldump: ".$return_varmysql."\n";
+
 	if ($mode == 'confirm')
 	{
 		print 'Update date of full backup (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
