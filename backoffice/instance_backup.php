@@ -45,13 +45,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php");
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaasutils.class.php");
 
-$langs->load("admin");
-$langs->load("companies");
-$langs->load("users");
-$langs->load("other");
-$langs->load("contracts");
-$langs->load("commercial");
-$langs->load("sellyoursaas@sellyoursaas");
+$langs->loadLangs(array("admin", "companies", "users", "other", "contracts", "commercial", "sellyoursaas@sellyoursaas"));
 
 $action		= (GETPOST('action','alpha') ? GETPOST('action','alpha') : 'view');
 $confirm	= GETPOST('confirm','alpha');
@@ -81,9 +75,9 @@ $hookmanager->initHooks(array('contractcard','globalcard'));
 
 if ($id > 0 || $ref)
 {
-	$result=$object->fetch($id?$id:$instanceoldid, $ref?$ref:$refold);
-	if ($result < 0) dol_print_error($db,$object->error);
-	$id=$object->id;
+	$result = $object->fetch($id?$id:$instanceoldid, $ref?$ref:$refold);
+	if ($result < 0) dol_print_error($db, $object->error);
+	$i = $object->id;
 }
 
 $backupstring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.$object->ref_customer.' '.$conf->global->DOLICLOUD_BACKUP_PATH;
@@ -147,6 +141,9 @@ if (empty($reshook))
 		} else {
 			setEventMessages('BackupOK', null, 'mesgs');
 		}
+
+		// Reload object to get updated values
+		$result = $object->fetch($object->id);
 
 		if (! $errorforlocaltransaction)
 		{
