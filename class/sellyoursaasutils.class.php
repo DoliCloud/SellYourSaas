@@ -2980,7 +2980,7 @@ class SellYourSaasUtils
 
 
     /**
-     * Make a remote action on a contract (deploy/undeploy/suspend/unsuspend/rename/...).
+     * Make a remote action on a contract (deploy/undeploy/suspend/unsuspend/rename/backup...).
      * This function is called on Master but remote action is done on remote agent.
      *
      * @param	string					$remoteaction	Remote action ('suspend/unsuspend/rename'=change apache virtual file, 'deploy/undeploy'=create/delete database, 'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics)
@@ -3224,6 +3224,7 @@ class SellYourSaasUtils
     	$ispaidinstance = 0;
 
     	// Loop on each line of contract ($tmpobject is a ContractLine)
+    	// to set or not $doremoteaction
     	foreach($listoflines as $tmpobject)
     	{
     		if (empty($tmpobject))
@@ -3246,7 +3247,7 @@ class SellYourSaasUtils
     		// Note remote action 'undeployall' is used to undeploy test instances
     		// Note remote action 'undeploy' is used to undeploy paying instances
     		$doremoteaction = 0;
-    		if (in_array($remoteaction, array('deploy','deployall','rename','suspend','unsuspend','undeploy','undeployall')) &&
+    		if (in_array($remoteaction, array('backup','deploy','deployall','rename','suspend','unsuspend','undeploy','undeployall')) &&
     			($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
     		if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
     			($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
@@ -3957,7 +3958,7 @@ class SellYourSaasUtils
 
 
     	// Send to DataDog (metric + event)
-    	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
+    	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && $remoteaction != 'backup')
     	{
     	    try {
         	    dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');

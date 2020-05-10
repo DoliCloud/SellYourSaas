@@ -133,10 +133,37 @@ if (in_array($tmparray[0], array('rename', 'suspend', 'unsuspend')))
 	exit();
 }
 
+if (in_array($tmparray[0], array('backup')))
+{
+	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3]."\n");
+	else fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' ...'."\n");
+
+	exec('./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' 2>&1', $output, $return_var);
+
+	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
+	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n",$output)."\n");
+	fwrite($fh, join(', ', $paramarray));
+	fclose($fh);
+
+
+	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
+	if ($return_var == 0)
+	{
+		$httpresponse = 200;
+	}
+	http_response_code($httpresponse);
+
+	print 'backup_instance.php for action '.$tmparray[0].' on '.$paramarray[2].'.'.$paramarray[3].' return '.$return_var.", so remote agent returns http code ".$httpresponse."\n";
+
+	exit();
+}
+
 fwrite($fh, date('Y-m-d H:i:s').' action code "'.$tmparray[0].'" not supported'."\n");
 fclose($fh);
 
 http_response_code(404);
+
+print 'action code "'.$tmparray[0].'" not supported'."\n";
 
 exit();
 

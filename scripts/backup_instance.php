@@ -36,7 +36,7 @@ $path=dirname(__FILE__).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-	exit;
+	exit(1);
 }
 
 // Global variables
@@ -51,6 +51,56 @@ $mode=isset($argv[3])?$argv[3]:'';
 @set_time_limit(0);							// No timeout for this script
 define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
+// Read /etc/sellyoursaas.conf file
+$databasehost='localhost';
+$database='';
+$databaseuser='sellyoursaas';
+$databasepass='';
+$dolibarrdir='';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach($array as $val)
+	{
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'ipserverdeployment')
+		{
+			$ipserverdeployment = $tmpline[1];
+		}
+		if ($tmpline[0] == 'instanceserver')
+		{
+			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasehost')
+		{
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database')
+		{
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseuser')
+		{
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass')
+		{
+			$databasepass = $tmpline[1];
+		}
+		if ($tmpline[0] == 'dolibarrdir')
+		{
+			$dolibarrdir = $tmpline[1];
+		}
+	}
+}
+else
+{
+	print "Failed to open /etc/sellyoursaas.conf file\n";
+	exit;
+}
+
+
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
@@ -64,53 +114,11 @@ if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.i
 if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
 if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
 if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include($dolibarrdir."/htdocs/master.inc.php");
 if (! $res) die("Include of master fails");
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
-// Read /etc/sellyoursaas.conf file
-$databasehost='localhost';
-$database='';
-$databaseuser='sellyoursaas';
-$databasepass='';
-$fp = @fopen('/etc/sellyoursaas.conf', 'r');
-// Add each line to an array
-if ($fp) {
-    $array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
-    foreach($array as $val)
-    {
-        $tmpline=explode("=", $val);
-        if ($tmpline[0] == 'ipserverdeployment')
-        {
-            $ipserverdeployment = $tmpline[1];
-        }
-        if ($tmpline[0] == 'instanceserver')
-        {
-            $instanceserver = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databasehost')
-        {
-            $databasehost = $tmpline[1];
-        }
-        if ($tmpline[0] == 'database')
-        {
-            $database = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databaseuser')
-        {
-            $databaseuser = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databasepass')
-        {
-            $databasepass = $tmpline[1];
-        }
-    }
-}
-else
-{
-    print "Failed to open /etc/sellyoursaas.conf file\n";
-    exit;
-}
 
 
 

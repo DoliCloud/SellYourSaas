@@ -11,12 +11,11 @@ $langs->load("errors");
 
 if ($action == 'addauthorizedkey')
 {
-	// SFTP connect
+	// SSH connect
 	if (! function_exists("ssh2_connect")) {
 		dol_print_error('','ssh2_connect function does not exists'); exit;
 	}
 
-	$instance = 'xxxx';
 	$type_db = $conf->db->type;
 
 	$instance = $object->ref_customer;
@@ -94,12 +93,11 @@ if ($action == 'addauthorizedkey')
 
 if ($action == 'addinstalllock')
 {
-	// SFTP connect
+	// SSH connect
 	if (! function_exists("ssh2_connect")) {
 		dol_print_error('','ssh2_connect function does not exists'); exit;
 	}
 
-	$instance = 'xxxx';
 	$type_db = $conf->db->type;
 
 	$instance = $object->ref_customer;
@@ -156,12 +154,11 @@ if ($action == 'addinstalllock')
 
 if ($action == 'delauthorizedkey')
 {
-	// SFTP connect
+	// SSH connect
 	if (! function_exists("ssh2_connect")) {
 		dol_print_error('','ssh2_connect function does not exists'); exit;
 	}
 
-	$instance = 'xxxx';
 	$type_db = $conf->db->type;
 
 	$instance = $object->ref_customer;
@@ -207,12 +204,11 @@ if ($action == 'delauthorizedkey')
 }
 if ($action == 'delinstalllock')
 {
-	// SFTP connect
+	// SSH connect
 	if (! function_exists("ssh2_connect")) {
 		dol_print_error('','ssh2_connect function does not exists'); exit;
 	}
 
-	$instance = 'xxxx';
 	$type_db = $conf->db->type;
 
 	$instance = $object->ref_customer;

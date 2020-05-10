@@ -43,6 +43,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php");
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/class/sellyoursaasutils.class.php");
 
 $langs->load("admin");
 $langs->load("companies");
@@ -123,30 +124,38 @@ if (empty($reshook))
 
 	include 'refresh_action.inc.php';
 
-	if ($action == 'backupinstance') {
-		//$mode = 'test';
-		$mode = 'confirm';
-		$command='/usr/bin/sudo -u admin '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.escapeshellarg($object->ref_customer).' '.escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH).' '.$mode;
+	if ($action == 'backupinstance')
+	{
+		// Launch the remote action backup
+		$sellyoursaasutils = new SellYourSaasUtils($db);
 
-		$command='/usr/bin/sudo -u admin '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php aaa bbb '.$mode;
-		$command = escapeshellcmd('/usr/bin/sudo').' -u admin whoami';
-		//$command = 'whoami';
-		$return_val = 0;
+		dol_syslog("Launch the remote action backup for ".$object->ref);
 
-		if ($action == 'backupinstance')
+		$db->begin();
+
+		$errorforlocaltransaction = 0;
+
+		$comment = 'Launch backup from backoffice on contract '.$object->ref;
+		// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines + linked template invoice
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction('backup', $object, 'admin', '', '', '0', $comment);	// This include add of event if qty has changed
+
+		if ($result <= 0)
 		{
-			$content_grabbed = shell_exec($command);
-			/*ob_start();
-			passthru($command, $return_val);
-			$content_grabbed=ob_get_contents();
-			ob_end_clean();*/
-
-			$mesg = $command."<br>\n";
-			$mesg .= "Result: ".$return_val."<br>\n";
-			$mesg .= "Output: ".$content_grabbed."<br>\n";
+			$error++;
+			$errorforlocaltransaction++;
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+		} else {
+			setEventMessages('BackupOK', null, 'mesgs');
 		}
 
-		if ($return_val != 0) $error++;
+		if (! $errorforlocaltransaction)
+		{
+			$db->commit();
+		}
+		else
+		{
+			$db->rollback();
+		}
 	}
 
 	$action = 'view';

@@ -2335,12 +2335,14 @@ subdomain=with.mysaasdomainname.com
 allowed_hosts=127.0.0.1,ipduservermaster
 # Set to 1 if this server is the master server
 masterserver=1
-# Set to its own if if it is a deployment server
-ipserverdeployment=ipduserverdeployment
-# Set to 1 if this server hosts a dns for the pool (deployment server)
-dnsserver=1
 # Set to 1 if this server host instances for the pool (deployment server)
 instanceserver=1
+# Set to 1 if this server hosts a dns for the pool (deployment server)
+dnsserver=1
+# Set to its own IP if it is a deployment server
+ipserverdeployment=ipduserverdeployment
+# Set this to directory where dolibarr repository is installed
+dolibarrdir=/home/admin/wwwroot/dolibarr
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
 database=databaseduservermaster
@@ -2349,6 +2351,12 @@ databaseuser=sellyoursaas
 databasepass=...
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
+# Set directory where backup are stored
+backupdir=/mnt/diskbackup/backup
+# Set directory where archives of tests instances are stored
+archivedirtest=/mnt/diskbackup/archives-test
+# Set directory where archives of paid instances are stored
+archivedirpaid=/mnt/diskbackup/archives-paid
 ---------------
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
@@ -3289,7 +3297,7 @@ services souscrit, ou encore le nom du revendeur).
 
 
 [[remote_actions]]
-=== Description des 6 remote actions
+=== Description des 8 remote actions
 
 ==== deploy / deployall
 
@@ -3315,7 +3323,7 @@ Les étapes réalisées par l'agent et la remote action "undeploy" sont:
 
 Les étapes réalisées par l'agent et la remote action "suspend" sont:
 
-- Désactivation du virtual host.
+- Désactivation du virtual host et reload apache.
 
 Le but est de bloquer l'accès à l'instance avec un lien vers la dashboard pour mettre à jour son mode de paiement, sans toucher à l'instance.
 
@@ -3323,7 +3331,7 @@ Le but est de bloquer l'accès à l'instance avec un lien vers la dashboard pour
 
 Les étapes réalisées par l'agent et la remote action "unsuspend" sont:
 
-- Réactivation du virtual host.
+- Réactivation du virtual host et reload apache.
 
 ==== rename
 
@@ -3337,8 +3345,15 @@ Les étapes réalisées par l'agent et la remote action "refresh" sont:
 
 - Execution du calcul des métriques shell et renvoi des valeurs.
 
+==== backup
+
+Les étapes réalisées par l'agent et la remote action "backup" sont:
+
+- Appel du script backup_instance pour exécuter le sauvegarde d'une instance
+
 ==== recreateauthorizedkeys
 
+Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inutile et inutilisé pour le déploiement d'autres logiciels.
 Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys":
 
 - Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
