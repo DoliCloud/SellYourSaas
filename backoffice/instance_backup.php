@@ -142,12 +142,12 @@ if (empty($reshook))
 			setEventMessages('BackupOK', null, 'mesgs');
 		}
 
-		// Reload object to get updated values
-		$result = $object->fetch($object->id);
-
 		if (! $errorforlocaltransaction)
 		{
 			$db->commit();
+
+			// Reload object to get updated values
+			$result = $object->fetch($object->id);
 		}
 		else
 		{
