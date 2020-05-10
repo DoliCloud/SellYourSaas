@@ -147,7 +147,6 @@ if (in_array($tmparray[0], array('backup')))
 
 	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
 	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n",$output)."\n");
-	fwrite($fh, join(', ', $paramarray));
 	fclose($fh);
 
 	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
