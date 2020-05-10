@@ -329,7 +329,7 @@ if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabas
 		$i = 0;
 		foreach($instances as $instance)
 		{
-			$now=dol_now();
+			$now = dol_now();
 
 			$return_val=0; $error=0; $errors=array();	// No error by default into each loop
 

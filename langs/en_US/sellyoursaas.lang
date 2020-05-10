@@ -53,6 +53,7 @@ SellYourSaasInstance=SellYourSaas Instance
 DirForDoliCloudInstances=Dir for customer instances
 DirForScriptPath=Dir for tools
 DirForLastStableVersionOfDolibarr=Dir of default package (for upgrades)
+DirForBackupTestInstances=Dir for test customer instances backups
 DirForBackupInstances=Dir for paid customer instances backups
 SELLYOURSAAS_TEST_ARCHIVES_PATH=Dir for archives of test instances
 SELLYOURSAAS_PAID_ARCHIVES_PATH=Dir for archives of paid instances
@@ -496,3 +497,5 @@ SellYourSaasTimeZoneDesc=This timezone can be used to replace string TZ=UTC into
 NoteForSupportUser=This user is used for maintenance purpose by your hosting provider. This user can be deleted at any time and you can also delete it yourself at any time, it will be recreated if necessary. If you have a paid instance, this user is not included into billing.
 SorryEmailExistsforAnotherAccount=Sorry, the email '%s' is already used for another account
 BackupNow=Backup now
+ArchiveInstanceDesc=Directory where instance will be archived when it is destroyed. 
+ArchiveTestInstanceDesc=WARNING: Check that the feature is enabled by having the entry archivetestinstance=1 into sellyoursaas.conf file

@@ -109,7 +109,7 @@ else
  */
 
 if (0 == posix_getuid()) {
-    echo "Script must not be ran with root (but with admin sellyoursaas account).\n";
+    echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
     exit(-1);
 }
 

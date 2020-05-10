@@ -673,25 +673,39 @@ print '</td>';
 print '<td>/home/jail/home</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("DirForBackupInstances").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("DirForBackupTestInstances"), '').'</td>';
+print '<td>';
+//print '<input size="40" type="text" name="DOLICLOUD_TEST_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_TEST_BACKUP_PATH.'">';
+print '<span class="opacitymedium">'.$langs->trans("FeatureNotYetAvailable").'</span>';
+print '</td>';
+print '<td>';
+//print '/home/jail/backup, /mnt/diskbackup/backup';
+print '</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("DirForBackupInstances"), '').'</td>';
 print '<td>';
 print '<input size="40" type="text" name="DOLICLOUD_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_BACKUP_PATH.'">';
 print '</td>';
-print '<td>/home/jail/backup</td>';
+print '<td>/home/jail/backup, /mnt/diskbackup/backup</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_TEST_ARCHIVES_PATH").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_TEST_ARCHIVES_PATH"), $langs->trans("ArchiveInstanceDesc").'<br><br>'.$langs->trans("ArchiveTestInstanceDesc")).'</td>';
 print '<td>';
 print '<input size="40" type="text" name="SELLYOURSAAS_TEST_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'">';
 print '</td>';
-print '<td>/home/jail/archives-test</td>';
+print '<td>/home/jail/archives-test, /mnt/diskbackup/archives-test</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PAID_ARCHIVES_PATH").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_PAID_ARCHIVES_PATH"), $langs->trans("ArchiveInstanceDesc")).'</td>';
 print '<td>';
 print '<input size="40" type="text" name="SELLYOURSAAS_PAID_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'">';
 print '</td>';
-print '<td>/home/jail/archives-paid</td>';
+print '<td>/home/jail/archives-paid, /mnt/diskbackup/archives-paid</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';

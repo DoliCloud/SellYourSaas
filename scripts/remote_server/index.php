@@ -16,6 +16,7 @@ if (empty($fh))
 $allowed_hosts_array = array();
 $dnsserver = '';
 $instanceserver = '';
+$backupdir = '';
 
 // Read /etc/sellyoursaas.conf file
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
@@ -36,6 +37,10 @@ if ($fp) {
 		if ($tmpline[0] == 'instanceserver')
 		{
 		    $instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupdir')
+		{
+			$backupdir = $tmpline[1];
 		}
 	}
 }
@@ -135,16 +140,15 @@ if (in_array($tmparray[0], array('rename', 'suspend', 'unsuspend')))
 
 if (in_array($tmparray[0], array('backup')))
 {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3]."\n");
-	else fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' ...'."\n");
+	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
+	else fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
 
-	exec('./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' 2>&1', $output, $return_var);
+	exec('sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir.' confirm 2>&1', $output, $return_var);
 
 	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
 	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n",$output)."\n");
 	fwrite($fh, join(', ', $paramarray));
 	fclose($fh);
-
 
 	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
 	if ($return_var == 0)
