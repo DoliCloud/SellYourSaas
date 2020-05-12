@@ -4209,7 +4209,7 @@ if ($mode == 'instances')
 	    				                    <div class="col-md-3">
 	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
 	    				                    </div>
-	    				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
+	    				                    <label class="col-md-3 control-label">'.$langs->trans("PasswordReadOnly").'</label>
 	    				                    <div class="col-md-3">
 	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
 	    				                    </div>

@@ -18,6 +18,7 @@ DateLastLogin=Date last login
 SFTPLogin=Login SFTP
 DatabaseLogin=Login database
 DatabaseLoginReadOnly=Login (read-only) database
+PasswordReadOnly=Password (read-only)
 NeedRefresh=Need refresh
 RevenuePerMonth=Revenue per month
 AverageRevenuePerCustomer=Revenue per customer
