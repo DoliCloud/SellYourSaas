@@ -4190,17 +4190,33 @@ if ($mode == 'instances')
     				                    <div class="col-md-3">
     				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_database_db'].'">
     				                    </div>
+    				                  </div>
+    				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLogin").'</label>
     				                    <div class="col-md-3">
     				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_db'].'">
     				                    </div>
-    				                  </div>
-    				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
     				                    <div class="col-md-3">
     				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
     				                    </div>
-    				                  </div>
+    				                  </div>';
+
+    								if (! empty($contract->array_options['options_username_ro_db'])) {
+	    								print '
+	    				                  <div class="form-group col-md-12 row">
+	    				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLoginReadOnly").'</label>
+	    				                    <div class="col-md-3">
+	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
+	    				                    </div>
+	    				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
+	    				                    <div class="col-md-3">
+	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
+	    				                    </div>
+	    				                  </div>';
+    								}
+
+    								print '
     				                </div>
 
     				                </form>

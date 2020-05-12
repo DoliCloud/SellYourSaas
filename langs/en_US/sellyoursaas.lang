@@ -16,7 +16,8 @@ NbOfUsers=Nb users
 LastLogin=Last login
 DateLastLogin=Date last login
 SFTPLogin=Login SFTP
-DatabaseLogVn=Login database
+DatabaseLogin=Login database
+DatabaseLoginReadOnly=Login (read-only) database
 NeedRefresh=Need refresh
 RevenuePerMonth=Revenue per month
 AverageRevenuePerCustomer=Revenue per customer
@@ -500,4 +501,4 @@ BackupNow=Backup now
 BackupOK=Backup successfull
 ArchiveInstanceDesc=Directory where instance will be archived when it is destroyed. 
 ArchiveTestInstanceDesc=WARNING: Check that the feature is enabled by having the entry archivetestinstance=1 into sellyoursaas.conf file
-ToCreateDBUserManualy=To create a db user manually, you can do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;
+ToCreateDBUserManualy=To create a db user manually on SELECT only, you can do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;
