@@ -500,3 +500,4 @@ BackupNow=Backup now
 BackupOK=Backup successfull
 ArchiveInstanceDesc=Directory where instance will be archived when it is destroyed. 
 ArchiveTestInstanceDesc=WARNING: Check that the feature is enabled by having the entry archivetestinstance=1 into sellyoursaas.conf file
+ToCreateDBUserManualy=To create a db user manually, you can do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;
