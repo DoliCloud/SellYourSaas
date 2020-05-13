@@ -220,14 +220,18 @@ Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas* pour changer les autoris
 #Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
 PermitRootLogin no
+# Permissions on files must be correct to allow login
 StrictModes yes
 
+# Define list of allowed method to authenticate
+ChallengeResponseAuthentication yes
+PasswordAuthentication yes
 PubkeyAuthentication yes
 
 PermitEmptyPasswords no
-PasswordAuthentication yes
 
 AllowUsers myunixlogin admin osu*
+DenyUsers guest
 ---------------
 
 Attention, à bien remplacer myunixlogin par la bonne valeur avant de prendre en compte les modifications par:
@@ -2209,7 +2213,7 @@ Mettre dans le cron du user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php cronsecuritykey firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php `hostname`secondpartofsecuritykey firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 7 7 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 # cron master and deployment root
@@ -2256,7 +2260,11 @@ Sur tous les serveurs (Master et Déploiement):
 
 * Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr*)
 
-* Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du relai. 
+* Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
+
+Sur le serveur Master:
+
+* Activez le module "Cron/Travaux programmés"  et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
 
 
 === Installation de Geoip2
