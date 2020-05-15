@@ -2130,7 +2130,7 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 				}
 			}
 
-			$comment = 'Services for '.$contract->ref.' closed after an undeploy request from Customer dashboard';
+			$comment = 'Services for '.$contract->ref.' closed after an undeploy request from Customer dashboard. Current status when receiving request is '.$contract->array_options['options_deployment_status'];
 
 			if (! $error)
 			{
