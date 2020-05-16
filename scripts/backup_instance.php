@@ -310,6 +310,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*/thumbs/'";
 	$param[]="--exclude '*/temp/'";
 	$param[]="--exclude '*/documents/admin/backup/'";
+	$param[]="--exclude '*/documents/admin/documents/'";
+	$param[]="--exclude '*/documents/admin/temp/documents/'";
 	$param[]="--exclude '*/htdocs/install/filelist-*.xml*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*'";
