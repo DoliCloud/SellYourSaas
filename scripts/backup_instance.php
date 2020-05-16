@@ -47,6 +47,9 @@ $RSYNCDELETE=0;
 $instance=isset($argv[1])?$argv[1]:'';
 $dirroot=isset($argv[2])?$argv[2]:'';
 $mode=isset($argv[3])?$argv[3]:'';
+if (isset($argv[4]) && $argv[4] == 'delete') {
+	$RSYNCDELETE=1;
+}
 
 @set_time_limit(0);							// No timeout for this script
 define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
@@ -156,7 +159,7 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode))
 {
     print "This script must be ran as 'admin' user.\n";
-    print "Usage:   $script_file instance    backup_dir  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
+    print "Usage:   $script_file instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [test]\n";
 	print "Example: $script_file myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have testrsync and confirmrsync working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
