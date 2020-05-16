@@ -2318,10 +2318,6 @@ Sur tous les serveurs (Master et Déploiement):
 ** Module Utilisateurs et Groupes
 *** Créer/modifier ses propres informations utilisateur
 
-* Activer le module SellYourSaas dans Dolibarr et configurer le.
-
-TODO Description de la page de setup.
-
 * Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
 
 [source,bash]
@@ -2369,16 +2365,30 @@ archivedirpaid=/mnt/diskbackup/archives-paid
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 
+* Activer le module SellYourSaas dans Dolibarr et configurer le.
+
+TODO Ajouter desc des variables de config du module...
+
 * Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
 
-Voir l'exemple dans le document *Exemple config de package pour appli Dolibarr sellyoursaas.pdf*
+Voir le chapitre "Configuration des packages" plus loin.
 
-* Créer un *Service* de type application pour définir la politique de tarification d'un abonnement et le *Package* associé.
+* Créer un *Service* de type *Application* pour définir la politique de tarification d'un abonnement et le *Package* associé.
 
-Voir l'exemple dans le document *Exemple config de package pour appli Dolibarr sellyoursaas.pdf*
+Voir le chapitre "Configuration des services" pour un description des champs.
+
+* Créer éventuellement des *Services* de type *Metric*. 
+
+Voir le chapitre "Configuration des services" pour un description des champs.
+
+* Créer éventuellement des *Services* de type *Options*. 
+
+Voir le chapitre "Configuration des services" pour un description des champs.
 
 
-Les URL pour réaliser les déploiements sont visibles dans le menu *SellYourSaas - URL de déploiement*
+Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
+
+Remarque: Les URL pour réaliser les déploiements des packages de type *Applications* seront visibles dans le menu *SellYourSaas - URL de déploiement*
 
 
 <<<<
@@ -3276,18 +3286,36 @@ UPDATE llx_const set value = 'ip.server.deployment1, ip.servr.deployment2' where
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_USING_PHPMAIL', 0, '1', 'chaine', 1);
 ---------------
 
-=== Configuration du service
 
-Le service représente la politique de tarification.
+=== Configuration des services
+
+Les services représentent la politique de tarification.
 
 Il faut créer un service de type *Application* qui sera lié au *Package* pour permettre le déploiement.
 
-Le service de type *Application* peut ensuite avoir dans l'onglet *Produit virtuel*, d'autres services de type *Options* ou "Métrique*.
+Le service de type *Application* peut ensuite avoir dans l'onglet *Produit virtuel*, d'autres services de type *Options* ou *Métrique*.
+
+
+Exemple de service de type Application pour déployer l'application PHP Dolibarr ERP CRM:
+
+image::Example_service_application.png[Exemple service application]
+
+Exemple pour un service qui ajoute une métrique de tarification par Utilisateur:
+
+image::Example_service_metric_USER.png[Exemple service metric]
+
+Exemple pour un service qui ajoute une option pour plus de Go:
+
+image::Example_service_option_GO.png[Exemple service option GO]
+
+
+Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
+
 
 
 === Récupérer l'URL d'inscritpion
 
-Aller dans le menu *SellYourSaas - Pages d'inscriptions* pour obtenir l'URL à utiliser pour souscrire à une instance. 
+Aller dans le menu *SellYourSaas - Pages d'inscriptions* pour obtenir l'URL à utiliser pour souscrire à une instance (package de type Application et ses dépendances). 
 
 
 
@@ -3436,7 +3464,7 @@ Voici le détail des évennement ou URL qui peuvent etre trackées:
 
 Exemple de supervision de sellyoursaas avec DataDog:
 
-image::Example_ecran_datadog.png[Ecran supervision DataDog]
+image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 
 === Options cachées

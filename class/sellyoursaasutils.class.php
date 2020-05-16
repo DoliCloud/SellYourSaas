@@ -3745,19 +3745,33 @@ class SellYourSaasUtils
 
     				            $newqty = 0;
 
-    				            //$stream = @ssh2_exec($connection, $bashformula);
-    				            if ($stream)
+    				            $respass = @ssh2_auth_password($connection, $object->array_options['options_username_os'], $object->array_options['options_password_os']);
+    				            if ($respass)
     				            {
-        				            stream_set_blocking( $stream, true );
-        				            $resultstring = fread($stream, 4096);
+	    				            $stream = @ssh2_exec($connection, $bashformula);
+	    				            if ($stream)
+	    				            {
+	        				            $errorStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+	        				            stream_set_blocking($errorStream, true);
+	        				            stream_set_blocking($stream, true);
 
-    				                // TODO
-
+	        				            $resultstring = stream_get_contents($stream, 4096);
+	        				            if ($resultstring) {
+	        				            	$tmparray = explode(' ', $resultstring);
+	        				            	$newqty = (int) $tmparray[1];
+	        				            } else {
+	        				            	$resultstring .= stream_get_contents($errorStream);
+	        				            }
+	    				            } else {
+	    				            	dol_syslog("Get resource BASH failed to ssh2_exec");
+	    				            }
+    				            } else {
+    				            	dol_syslog("Get resource BASH failed to ssh2_auth_password");
     				            }
 
     				            if (function_exists('ssh2_disconnect'))
     				            {
-    				                //ssh2_disconnect($connection);     // Hang on some config
+    				                ssh2_disconnect($connection);     // Hang on some config
     				                $connection = null;
     				                unset($connection);
     				            }
