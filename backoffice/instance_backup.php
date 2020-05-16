@@ -362,7 +362,7 @@ print ajax_autoselect('backupstring');
 print '<br>';
 
 // Restore link
-$restorestringtoshow=$restorestring.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]';
+$restorestringtoshow=$restorestring.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
 print 'Restore command line string<br>';
 print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" size="160"><br>';
 print ajax_autoselect('restorestring');
