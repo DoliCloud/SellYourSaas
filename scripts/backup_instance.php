@@ -312,13 +312,20 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	//$param[]="--exclude '*/test/'";
 	$param[]="--exclude '*/thumbs/'";
 	$param[]="--exclude '*/temp/'";
+	// Excludes for Dolibarr
 	$param[]="--exclude '*/documents/admin/backup/'";		// Exclude backup of database
 	$param[]="--exclude '*/documents/admin/documents/'";	// Exclude backup of documents directory
 	$param[]="--exclude '*/htdocs/install/filelist-*.xml*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/freefont-*'";
-	// For old versions
+	// Excludes for GLPI
+	$param[]="--exclude '*/_cache/*'";
+	$param[]="--exclude '*/_dumps/*'";
+	$param[]="--exclude '*/_log/*'";
+	$param[]="--exclude '*/_sessions/*'";
+	$param[]="--exclude '*/_tmp/*'";
+	// Excludes for other
 	$param[]="--exclude '*/_source/*'";
 
 	//$param[]="--backup --suffix=.old";
