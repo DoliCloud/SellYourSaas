@@ -354,7 +354,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 
 
 // Backup link
-$backupstringtoshow=$backupstring.' testrsync|testdatabase|confirmrsync|confirmdatabase|confirm';
+$backupstringtoshow=$backupstring.' testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm';
 print 'Backup command line string<br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" size="160"><br>';
 print ajax_autoselect('backupstring');
@@ -362,7 +362,7 @@ print ajax_autoselect('backupstring');
 print '<br>';
 
 // Restore link
-$restorestringtoshow=$restorestring.' testrsync|testdatabase|confirmrsync|confirmdatabase|confirm';
+$restorestringtoshow=$restorestring.' testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm';
 print 'Restore command line string<br>';
 print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" size="160"><br>';
 print ajax_autoselect('restorestring');
