@@ -154,7 +154,7 @@ if (! isset($argv[1])) {	// Check parameters
     print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
     exit;
 }
-print '--- start '.$argv[1]."\n";
+print '--- start script with mode '.$argv[1]."\n";
 //print 'Argument 1='.$argv[1]."\n";
 //print 'Argument 2='.$argv[2]."\n";
 
