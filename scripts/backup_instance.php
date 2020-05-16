@@ -309,9 +309,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	//$param[]="--exclude '*/test/'";
 	$param[]="--exclude '*/thumbs/'";
 	$param[]="--exclude '*/temp/'";
-	$param[]="--exclude '*/documents/admin/backup/'";
-	$param[]="--exclude '*/documents/admin/documents/'";
-	$param[]="--exclude '*/documents/admin/temp/documents/'";
+	$param[]="--exclude '*/documents/admin/backup/'";		// Exclude backup of database
+	$param[]="--exclude '*/documents/admin/documents/'";	// Exclude backup of documents directory
 	$param[]="--exclude '*/htdocs/install/filelist-*.xml*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*'";
