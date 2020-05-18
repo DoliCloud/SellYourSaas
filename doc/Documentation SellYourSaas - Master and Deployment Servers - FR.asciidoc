@@ -1985,7 +1985,7 @@ shutdown -Fr now
 Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php*
 
 
-==== Définition taille upload
+==== Définition taille upload et durée sessions
 
 Modifier le fichier *php.ini* pour permettre l'upload de plus gros fichiers.
 
@@ -1994,6 +1994,8 @@ Modifier le fichier *php.ini* pour permettre l'upload de plus gros fichiers.
 upload_max_filesize = 20M
 
 post_max_size = 25M
+
+session.gc_maxlifetime = 3600
 ---------------
 
 
