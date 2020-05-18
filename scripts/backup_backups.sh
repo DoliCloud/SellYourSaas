@@ -72,6 +72,8 @@ echo "SERVDESTI=$SERVDESTI"
 echo "EMAILFROM=$EMAILFROM"
 echo "EMAILTO=$EMAILTO"
 echo "PID=$PID"
+echo "backupdir=$backupdir" >> /var/log/backup_backups.log
+echo "remotebackupdir=$remotebackupdir" >> /var/log/backup_backups.log
 
 
 echo "**** ${0} started" >> /var/log/backup_backups.log
