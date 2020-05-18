@@ -102,7 +102,7 @@ echo "testorconfirm = $testorconfirm"
 
 echo "Do a rsync first part"
 export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
-echo "$command\n";
+echo "$command";
 
 $command >>/var/log/backup_backups.log 2>&1
 export ret1=$?
@@ -117,7 +117,7 @@ if [ "x$ret1" == "x0" ]; then
 			nbofdir=`ls -d $backupdir/osu$i* | wc -l`
 			if [ "x$nbofdir" != "x0" ]; then
 		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
-	        	echo "$command\n";
+	        	echo "$command";
 	        	
 		        $command >>/var/log/backup_backups.log 2>&1
 		        if [ "x$?" != "x0" ]; then
