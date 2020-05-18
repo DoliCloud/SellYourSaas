@@ -35,11 +35,11 @@ fi
 
 # Source
 export DIRSOURCE1="/home";
-export DIRSOURCE2=`grep 'backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export DIRSOURCE2=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 # Target
-export SERVDESTI=`grep 'remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export USER=`grep 'remotebackupuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export SERVDESTI=`grep '^remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export USER=`grep '^remotebackupuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export DIRDESTI1="$remotebackupdir/home_"`hostname`;
 export DIRDESTI2="$remotebackupdir/backup_"`hostname`;
 
@@ -62,6 +62,8 @@ echo "SERVDESTI=$SERVDESTI" >> /var/log/backup_backups.log
 echo "EMAILFROM=$EMAILFROM" >> /var/log/backup_backups.log
 echo "EMAILTO=$EMAILTO" >> /var/log/backup_backups.log
 echo "PID=$PID" >> /var/log/backup_backups.log
+echo "backupdir=$backupdir" >> /var/log/backup_backups.log
+echo "remotebackupdir=$remotebackupdir" >> /var/log/backup_backups.log
 
 echo "DOMAIN=$DOMAIN"
 echo "DIRSOURCE1=$DIRSOURCE1"
