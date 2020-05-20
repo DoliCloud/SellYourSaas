@@ -217,11 +217,16 @@ width: 500px;
 min-width: 500px;
 margin-top: 20px;
 }
-.block.medium {
-margin-top: 25px;
-}
 
-.large { margin: 0 auto; padding-top: 20px;}
+.large {
+	margin: 0 auto;
+}
+.block.medium {
+}
+.page-header-top {
+	margin-bottom: 25px;
+	padding-top: 20px;
+}
 
 .nowrap { white-space: nowrap; }
 
