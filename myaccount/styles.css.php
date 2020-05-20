@@ -224,8 +224,9 @@ margin-top: 20px;
 .block.medium {
 }
 .page-header-top {
-	margin-bottom: 25px;
+    background: #f4f4f4;
 	padding-top: 20px;
+	padding-bottom: 25px;
 }
 
 .nowrap { white-space: nowrap; }
