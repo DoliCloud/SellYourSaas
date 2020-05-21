@@ -2234,7 +2234,7 @@ su root syslog
         create 666 syslog adm
 }
 
-/var/log/remote_server.log {
+/var/log/remote_server.log /var/log/backup_backups.log {
         su root root
         weekly
         rotate 4
