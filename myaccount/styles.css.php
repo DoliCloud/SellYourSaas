@@ -67,6 +67,10 @@ margin-top: .4rem;
 label,input,button,select,textarea {font-weight: normal;line-height: 20px;}
 input,button,select,textarea {font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;}label {display: block;margin-bottom: 5px;}
 
+.usernamepasswordforgotten {
+	width: 290px;
+}
+
 select,textarea,input[type='text'],input[type='password'],input[type='datetime'],input[type='datetime-local'],input[type='date'],input[type='month'],input[type='time'],input[type='week'],input[type='number'],input[type='email'],input[type='url'],input[type='search'],input[type='tel'],input[type='color'],.uneditable-input
 {
 display: inline-block;padding: 4px 6px;
