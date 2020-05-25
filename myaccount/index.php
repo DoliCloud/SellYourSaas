@@ -934,6 +934,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                     $result = $contract->fetchObjectLinked();
                     if ($result < 0)
                     {
+                    	dol_syslog("--- Error during fetchObjectLinked, we discard this contract", LOG_ERR, 0);
                         continue;							// There is an error, so we discard this contract to avoid to create template twice
                     }
                     if (! empty($contract->linkedObjectsIds['facturerec']))
@@ -941,18 +942,18 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                         $templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
                         if ($templateinvoice > 0)			// There is already a template invoice, so we discard this contract to avoid to create template twice
                         {
-                            dol_syslog("--- There is already a recurring invoice on this contract.", LOG_DEBUG, 0);
+                            dol_syslog("--- There is already a recurring invoice on the contract contract_id = ".$contract->id, LOG_DEBUG, 0);
                             continue;
                         }
                     }
 
-                    dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id." that is not null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
+                    dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
                     $comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice';
                     // First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
                     $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
 
-                    dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id.", so we create it then create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
+                    dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
                     // Now create invoice draft
                     $dateinvoice = $contract->array_options['options_date_endfreeperiod'];
