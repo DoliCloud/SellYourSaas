@@ -3,7 +3,7 @@
 
 ## Features
 
-SellYourSaas is a module working with the framework of Dolibarr ERP CRM Open Source software - so it is able to manage and sell any Web application as a Saas service.
+SellYourSaas is a tool to manage and sell any Web application as a Saas service.
 It covers definition of the packages to sell (which application, where to sources and database image, how to install it), the tools to deploy the application on a remote server, but also a customer dashboard for your subscribers, automatic invoicing and renewal. The administration / backoffice is Dolibarr ERP CRM Open Source software.
 
 This is a list of some features supported by this project:
