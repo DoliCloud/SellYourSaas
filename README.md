@@ -3,30 +3,37 @@
 
 ## Features
 
-SellYourSaas is a tool to manage and sell any Web application as a Saas service.
-It covers definition of the packages to sell (which application, where to sources and database image, how to install it), the tools to deploy the application on a remote server, but also a customer dashboard for your subscribers, automatic invoicing and renewal. The administration / backoffice is Dolibarr ERP CRM Open Source software.
+SellYourSaas is a tool to offer any Web application as a Saas service (for a free or paid offer).
+
+<span style="color: #268260">100% of the needs, from customer acquisition to generation of information for end-of-year accounting, including deployment, management and backup of customer instances are taken care of by the project.</span>
+ 
+The project provides ready to use and friendly interfaces to record definition of the packages to sell (which application, where to find sources and database images, how to deploy them), the tools to deploy the application on a remote server (on a simple mono server infrastructure or into a scalable farm), but also a customer dashboard for your subscribers, automatic invoicing and renewal. The administration and backoffice of solution is based on Dolibarr ERP CRM Open Source software.
 
 This is a list of some features supported by this project:
 
 - Creation of profiles of packages - to define what to deploy when a subscription to this package is done: files or directories to deploy, databases dump to load, cron entry to add, SSH public keys of administrator to deploy and any other command lines to launch.
-- Create services that define the plan (which package and option) and price policy to use for invoicing: per application, per user, per Gigabytes or any combination of this.
-- Option to support free trial periods (with no credit card required) on some plans.
-- Provides ready to use URLs for an online subscription to a hosting service by your prospects or customers.
+- Create services that define the plan (which package and which options) and the price policy to use for invoicing: free, per application, per user, per Gigabytes, ... (or any combination).
+- Customizable SQL or CLI commands for each sold services to define how to count the quantity to bill (For example a SQL request to count the number of users or a CLI command to get the consummed disk space).
+- Get ready to use URLs of public online subscription forms to register to the hosting service.
+- Autofill and autodetection of country and language in the subscription page using GeoIP, recording a probability of VPN usage for each subscriber (for fight against spammer or evil users).
 - Each customer has its own system and data environment (jail).
-- Each customer can deploy more applications/services with their existing account.
-- Provide a customer dashboard for customers to manage their subscription, download their invoices.
-- Can define the SQL or CLI command for each sold services to define how to count the quantity to bill (For example a SQL request to count the number of users).
-- Autofill and autodetect country in the subscription page using GeoIP.
-- Include a probability of VPN usage for each subscriber (to fight against spammer).
-- Can decide if customer has direct access to the MySQL/MariaDB database and restricted (or not) SSH access to its instance.
-- Add a system layer to replace the php mail function to track and stop evil users using their created instance to try to make Spams.  
+- Option to support free subscription, time limited trial periods (with no credit card required) or payment instances.
+- Define quotas (deployment per customer, per ip, per hour, ...).
+- Provide a customer dashboard for customers to manage their subscription, download their invoices. You also decide if customers can deploy more applications or options with the same existing account from their customer dashboard. 
+- Decide if customer has a direct access to the database and a restricted (or not) SSH access to its instance.
+- Add a system layer to replace the php "mail" function to track and stop evil users using their created instance to try to make Spams.  
 - Manage a network of reseller with commission dedicated to each reseller (a reseller has its own URL to register/create a new instances of an application and any customer that use it to create its instance is linked to the reseller. Reseller will gain a commission for each invoice paid by the customer). 
-- Payment of customers can be done automatically by credit card using Stripe (Stripe may not be visible by user) or semi-automatic by SEPA mandate.
+- Payment of customers can be done automatically by credit card (currently using Stripe service) or semi-automatically by SEPA mandate.
 - Billing rules (date, amount, frequency of next payment) can be modified differently for each customer.
-- Provide a lot of predefined email templates in several languages for the subscription management (subscription, trial expiration, cancellation, ...)
-- Can manage each customer/subscription from the backoffice (for example to deploy, suspend, unsuspend, undeploy an instance manually).
+- Provide a lot of predefined email templates in several languages for the management of service (subscription, trial expiration, cancellation, ...)
+- Can manage each customer and subscription from the backoffice (deploy, suspend, unsuspend, undeploy an instance manually, create a maintenance account, backup, ...).
 - Provide statistics reports on trial instances, customers, etc.
-- A lot of ready in the box tools (backups, migration, upgrades, ...) 
+- Scalable solution (install more servers if you have too much customers or users).
+- A lot of "ready in the box" tools (backups, migration, upgrades, ...) 
+- Multilang (both front anb backoffice)
+- A cost of infrastucture lower than 0.2 USD per instance/customer.
+- A 100% automated workflow.
+
 
 
 Licenses
