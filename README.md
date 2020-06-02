@@ -5,7 +5,7 @@
 
 SellYourSaas is a tool to offer any Web application as a Saas service (for a free or paid offer).
 
-<span style="color: #268260">100% of the needs, from customer acquisition to generation of information for end-of-year accounting, including deployment, management and backup of customer instances are taken care of by the project.</span>
+<span style="color: #268260">100% of the needs, from customer acquisition to generation of information for end-of-year accounting, including deployment, management and backup of customer instances are provided by the project.</span>
  
 The project provides ready to use and friendly interfaces to record definition of the packages to sell (which application, where to find sources and database images, how to deploy them), the tools to deploy the application on a remote server (on a simple mono server infrastructure or into a scalable farm), but also a customer dashboard for your subscribers, automatic invoicing and renewal. The administration and backoffice of solution is based on Dolibarr ERP CRM Open Source software.
 
