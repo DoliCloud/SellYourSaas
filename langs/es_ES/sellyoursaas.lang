@@ -1,6 +1,6 @@
 # Dolibarr language file - es_ES - sellyoursaas
 CHARSET=UTF-8
-DoliCloudCustomers=Clientes DoliCloud
+DoliCloudCustomers=Clientes Saas
 DoliCloudInstances=Instancias DoliCloud
 CustStatus=Estado cliente
 DateRegistration=Fecha inscripción
@@ -59,7 +59,7 @@ ImportCustomers=Importar clientes
 ImportPayments=Importar pagos
 CurrentBackupStatus=Estado última copia de seguridad
 SearchIntoDoliCloud=DoliCloud
-DoliCloudCustomer=Cliente DoliCloud
+DoliCloudCustomer=Cliente Saas
 FromLiveTables=Desde tabla de clientes en tiempo real
 FromHistoryStatsTables=De la tabla de historial de estadísticas, actualizada por script "batch_customers updatedatabase"
 SellYourSaasHomePage=Página de inicio de SellYourSaas

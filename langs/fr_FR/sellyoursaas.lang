@@ -1,7 +1,7 @@
 # Dolibarr language file - fr_FR - sellyoursaas
 CHARSET=UTF-8
-DoliCloudCustomers=Clients DoliCloud
-DoliCloudInstances=Instances DoliCloud
+DoliCloudCustomers=Clients Saas
+DoliCloudInstances=Instances Saas
 CustStatus=Statut client
 DateRegistration=Date inscription
 DateDeployment=Date déploiement
