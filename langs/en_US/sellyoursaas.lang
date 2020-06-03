@@ -158,6 +158,7 @@ DateFileauthorizekey=Date of authorize key
 DateFilelock=Date of lock file
 InstanceNameAlreadyExists=An instance with address name <strong>%s</strong> already exists. Please choose another one...
 Registration=Registration
+InstanceCreation=Instance creation
 RegistrationAsReseller=Registration as reseller
 YourCustomerDashboard=Your customer dashboard
 YourCustomerOrResellerDashboard=Your customer or reseller dashboard

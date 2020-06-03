@@ -142,6 +142,7 @@ LastNbEnabledUsers=Dernier nb d'utilisateurs activés
 LastNbOfGb=Dernier nb de Gb
 InstanceNameAlreadyExists=Une instance avec le nom d'adresse <strong>%s</strong> existe déjà. Merci d'en choisir un autre...
 Registration=Inscription
+InstanceCreation=Création d'instance
 RegistrationAsReseller=Inscription revendeur
 YourCustomerDashboard=Votre espace client
 YourCustomerOrResellerDashboard=Votre espace client ou revendeur

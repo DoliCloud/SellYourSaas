@@ -124,6 +124,7 @@ AccountAlreadyExistsForEmail=Ya existe una cuenta para este e-mail. Si ya tiene 
 AnonymousUser=Usuario anónimo
 InstanceNameAlreadyExists=Ya existe una instancia con el nombre de dirección <strong>%s</strong>. Elija otro...
 Registration=Inscripción
+InstanceCreation=Creación de instancia
 RegistrationAsReseller=Inscripción revendedor
 YourCustomerDashboard=Su área cliente
 YourCustomerOrResellerDashboard=Su área cliente o revendedor
