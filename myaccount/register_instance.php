@@ -978,19 +978,30 @@ if (! $error)
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		$formmail=new FormMail($db);
 
+		$emailtemplate = '';
 		if ($productref != 'none')
 		{
-			$arraydefaultmessage=$formmail->getEMailTemplate($db, 'contract', $user, $langs, 0, 1, 'InstanceDeployed');				// Templates are init into data.sql
+			$emailtemplate = 'InstanceDeployed';
+			$arraydefaultmessage=$formmail->getEMailTemplate($db, 'contract', $user, $langs, 0, 1, $emailtemplate);		// Templates were initialiazed into data.sql
 		}
 		else
 		{
-			$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, '(ChannelPartnerCreated)');	// Templates are init into data.sql
+			$emailtemplate = '(ChannelPartnerCreated)';
+			$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, $emailtemplate);	// Templates were initialized into data.sql
 		}
 
 		$substitutionarray=getCommonSubstitutionArray($langs, 0, null, $contract);
 		$substitutionarray['__PACKAGELABEL__']=$tmppackage->label;
 		$substitutionarray['__APPUSERNAME__']=$_SESSION['initialapplogin'];
 		$substitutionarray['__APPPASSWORD__']=$password;
+
+		dol_syslog('Set substitution var for __EMAIL_FOOTER__ and $tmppackage->label='.strtoupper($tmppackage->label));
+		$substitutionarray['__EMAIL_FOOTER__']='';
+		if ($emailtemplate) {
+			if ($langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->label)) != "EMAIL_FOOTER_".strtoupper($tmppackage->label)) {
+				$substitutionarray['__EMAIL_FOOTER__'] = $langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->label));
+			}
+		}
 
 		complete_substitutions_array($substitutionarray, $langs, $contract);
 
