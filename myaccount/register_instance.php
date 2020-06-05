@@ -991,15 +991,19 @@ if (! $error)
 		}
 
 		$substitutionarray=getCommonSubstitutionArray($langs, 0, null, $contract);
+		$substitutionarray['__PACKAGEREF__']=$tmppackage->ref;
 		$substitutionarray['__PACKAGELABEL__']=$tmppackage->label;
+		$substitutionarray['__PACKAGEEMAILHEADER__']=$tmppackage->header;	// TODO
+		$substitutionarray['__PACKAGEEMAILFOOTER__']=$tmppackage->footer;	// TODO
 		$substitutionarray['__APPUSERNAME__']=$_SESSION['initialapplogin'];
 		$substitutionarray['__APPPASSWORD__']=$password;
 
-		dol_syslog('Set substitution var for __EMAIL_FOOTER__ and $tmppackage->label='.strtoupper($tmppackage->label));
+		// TODO Replace this with $tmppackage->header and $tmppackage->footer
+		dol_syslog('Set substitution var for __EMAIL_FOOTER__ and $tmppackage->ref='.strtoupper($tmppackage->ref));
 		$substitutionarray['__EMAIL_FOOTER__']='';
 		if ($emailtemplate) {
-			if ($langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->label)) != "EMAIL_FOOTER_".strtoupper($tmppackage->label)) {
-				$substitutionarray['__EMAIL_FOOTER__'] = $langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->label));
+			if ($langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->ref)) != "EMAIL_FOOTER_".strtoupper($tmppackage->ref)) {
+				$substitutionarray['__EMAIL_FOOTER__'] = $langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->ref));
 			}
 		}
 
