@@ -29,7 +29,7 @@ fi
 
 if [ "x$1" = "xall" ]
 then
-	for dir in `find htdocs/langs/* -type d`
+	for dir in `find langs/* -type d`
 	do
 	    fic=`basename $dir`
 	    if [ $fic != "en_US" ]
@@ -45,4 +45,4 @@ else
 fi
 
 echo Think to launch also: 
-echo "> dev/fixaltlanguages.sh fix all"
+echo "> dev/tools/fixaltlanguages.sh fix all"
