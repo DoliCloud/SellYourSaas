@@ -371,6 +371,8 @@ if ($restorestringfrombackup) {
 	print 'Restore command line string<br>';
 	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" size="160"><br>';
 	print ajax_autoselect('restorestring');
+
+	print '<br>';
 }
 
 // Restore link from archive
@@ -379,10 +381,12 @@ if ($restorestringfromarchive) {
 	print 'Restore command line string<br>';
 	print '<input type="text" name="restorestringfromarchive" id="restorestringfromarchive" value="'.$restorestringtoshow.'" size="160"><br>';
 	print ajax_autoselect('restorestringfromarchive');
+
+	print '<br>';
 }
 
 if (! empty($mesg)) {
-	print '<br><br>';
+	print '<br>';
 	print $mesg;
 }
 
