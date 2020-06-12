@@ -77,7 +77,7 @@ if ($id > 0 || $ref)
 {
 	$result = $object->fetch($id?$id:$instanceoldid, $ref?$ref:$refold);
 	if ($result < 0) dol_print_error($db, $object->error);
-	$i = $object->id;
+	$id = $object->id;
 }
 
 $backupstring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.$object->ref_customer.' '.$conf->global->DOLICLOUD_BACKUP_PATH;
