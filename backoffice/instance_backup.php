@@ -368,7 +368,7 @@ print '<br>';
 // Restore link from backup
 if ($restorestringfrombackup) {
 	$restorestringtoshow=$restorestringfrombackup.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
-	print 'Restore command line string<br>';
+	print 'Restore command line string from Backup<br>';
 	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" size="160"><br>';
 	print ajax_autoselect('restorestring');
 
@@ -378,7 +378,7 @@ if ($restorestringfrombackup) {
 // Restore link from archive
 if ($restorestringfromarchive) {
 	$restorestringtoshow=$restorestringfromarchive.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
-	print 'Restore command line string<br>';
+	print 'Restore command line string from Archive<br>';
 	print '<input type="text" name="restorestringfromarchive" id="restorestringfromarchive" value="'.$restorestringtoshow.'" size="160"><br>';
 	print ajax_autoselect('restorestringfromarchive');
 
