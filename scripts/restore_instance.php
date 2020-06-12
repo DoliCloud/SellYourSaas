@@ -179,7 +179,7 @@ if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
 
 if ($result <= 0)
 {
-	print "Error: instance ".$instance." not found.\n";
+	print "Error: No instance named '".$instance."' with status 'done' could be found.\n";
 	exit(-2);
 }
 
