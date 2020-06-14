@@ -95,9 +95,9 @@ if ($ispaid)
     	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
     	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+    	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
     }
     else
     {
@@ -107,9 +107,9 @@ if ($ispaid)
     	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
     	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+    	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
     }
 }
 else
@@ -119,9 +119,9 @@ else
 	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].$object->array_options['options_username_os'].'.tar.gz'."\n";
 	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-	$restorestringpretoshow .= "sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 }
 
 
@@ -403,7 +403,8 @@ if ($restorestringfromarchive) {
 	print 'Restore command line string from Archive<br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent">';
 	print $restorestringpretoshow."\n";
-	print $restorestringtoshow;
+	print $restorestringtoshow."\n";
+	print $restorestringposttoshow;
 	print '</textarea>';
 	//print ajax_autoselect('restorestringfromarchive');
 
