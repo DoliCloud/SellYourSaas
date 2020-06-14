@@ -91,10 +91,11 @@ if ($ispaid)
     {
     	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31) '.$object->ref_customer;
     	$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+    	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringpretoshow .= "tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
     	$restorestringpretoshow .= "mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringpretoshow .= "mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
     }
@@ -102,10 +103,11 @@ if ($ispaid)
     {
     	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31) '.$object->ref_customer;
     	$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+    	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringpretoshow .= "tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
     	$restorestringpretoshow .= "mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringpretoshow .= "mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
     	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
     }
@@ -113,10 +115,11 @@ if ($ispaid)
 else
 {
 	$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 	$restorestringpretoshow .= "tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
 	$restorestringpretoshow .= "mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-	$restorestringpretoshow .= "rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 	$restorestringpretoshow .= "mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
 }
