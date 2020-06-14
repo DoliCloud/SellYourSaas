@@ -547,6 +547,8 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					echo `date +%Y%m%d%H%M%S`
 					echo chown -R root $archivedir/$osusername/$dbname
 					chown -R root $archivedir/$osusername/$dbname
+					echo chmod -R o-rwx $archivedir/$osusername/$dbname
+					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
 						echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$dbname/$osusername.tar.gz $targetdir/$osusername/$dbname"
@@ -560,6 +562,8 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					echo `date +%Y%m%d%H%M%S`
 					echo chown -R root $archivedir/$osusername/$dbname
 					chown -R root $archivedir/$osusername/$dbname
+					echo chmod -R o-rwx $archivedir/$osusername/$dbname
+					chmod -R o-rwx $archivedir/$osusername/$dbname
 				fi
 			fi
 		fi
