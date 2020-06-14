@@ -375,7 +375,7 @@ if (empty($return_var) && empty($return_varmysql))
 {
 	if ($mode == 'confirm')
 	{
-		print 'Update date of full backup (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
+		//print 'Update date of full restore (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
 
 		// Update database
 		/*$object->array_options['options_latestbackup_date']=$now;	// date latest files and database rsync backup
