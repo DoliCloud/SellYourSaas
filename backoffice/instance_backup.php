@@ -383,11 +383,11 @@ if ($restorestringfrombackup) {
 if ($restorestringfromarchive) {
 	$restorestringtoshow=$restorestringfromarchive.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
 	print 'Restore command line string from Archive<br>';
-	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive">';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent">';
 	print $restorestringpretoshow."\n";
 	print $restorestringtoshow;
 	print '</textarea>';
-	print ajax_autoselect('restorestringfromarchive');
+	//print ajax_autoselect('restorestringfromarchive');
 
 	print '<br>';
 }
