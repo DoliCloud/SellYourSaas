@@ -3,7 +3,7 @@ page:
   margin: [0.75in, 1in, 0.75in, 1in]
   size: Letter
 base:
-  font-color: #ff0000
+  font-color: #000000
   font-family: Times-Roman
   font-size: 12
   line-height-length: 17
