@@ -62,7 +62,7 @@ Funded by the Open Source companies https://www.nltechno.com [NLTechno] and http
     * ...
      
 
-The project has been available as a community since 2020 on GitHub: https://github.com/eldy/sellyoursaas
+The project has been available as a community project since 2020 on GitHub: https://github.com/eldy/sellyoursaas
 
 It is composed:
 
