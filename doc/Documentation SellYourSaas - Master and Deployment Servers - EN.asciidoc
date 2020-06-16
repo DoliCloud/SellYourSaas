@@ -32,6 +32,7 @@ SellYourSaas is an Open Source project, born out of the need to provide, in real
 * Real-time deployment.
 * Offer full and private access to the proposed application, including administration, with full access without restricting functionality or configuration.
 * Offer an open SaaS, with SSH, SFTP access and direct database possible to users.
+* Multi-language.
 
 Following the deployment of v1 and at the request of users to perpetuate their instance via a subscription, the platform evolved to add other objectives:
 
@@ -45,21 +46,21 @@ Following the deployment of v1 and at the request of users to perpetuate their i
 
 Funded by the Open Source companies https://www.nltechno.com [NLTechno] and https://www.teclib.com [TecLib], SellYourSaas v2 has achieved these objectives and is now in production for several companies offering Saas services (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], https://www.doliondemand.fr[DoliOnDemand],...). Here is a summary of its capabilities:
 
-    * Deployment of any WAMP application. Management of multiple solutions / different applications at the same time.
-    * Free distribution of proceedings without request for confidential information or bank cards.
-    * Distribution of paid instances with different pricing levels.
-    * Ready-to-use showcase website (optional) to sell your application.
-    * Dedicated customer area (invoicing, ticket, customer account).
-    * Pre-wired for supervision via DataDog.
-    * Pre-wired for performance analysis, conversion rate via Google Analytics.
-    * Payment by bank card via Stripe, SCA (Strong Customer Authentication) compliant.
-    * Payment by SEPA direct debit (but no direct interface to submit SEPA files to the bank).
-    * Anti-abuse systems for applications.
-    * Instance subscription quota systems.
-    * Tools facilitating maintenance, customer support, application updates.
-    * Management of a reseller network. Dedicated reseller area (invoicing, customer account).
-    * Infrastructure cost per instance <20 cents (Cost observed on the DoliCloud sales department providing Dolibarr ERP CRM).
-    * ...
+* Deployment of any WAMP application. Management of multiple solutions / different applications at the same time.
+* Free distribution of proceedings without request for confidential information or bank cards.
+* Distribution of paid instances with different pricing levels.
+* Ready-to-use showcase website (optional) to sell your application.
+* Dedicated customer area (invoicing, ticket, customer account).
+* Pre-wired for supervision via DataDog.
+* Pre-wired for performance analysis, conversion rate via Google Analytics.
+* Payment by bank card via Stripe, SCA (Strong Customer Authentication) compliant.
+* Payment by SEPA direct debit (but no direct interface to submit SEPA files to the bank).
+* Anti-abuse systems for applications.
+* Instance subscription quota systems.
+* Tools facilitating maintenance, customer support, application updates.
+* Management of a reseller network. Dedicated reseller area (invoicing, customer account).
+* Infrastructure cost per instance <20 cents (Cost observed on the DoliCloud sales department providing Dolibarr ERP CRM).
+* ...
      
 
 The project has been available as a community project since 2020 on GitHub: https://github.com/eldy/sellyoursaas
