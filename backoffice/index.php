@@ -191,7 +191,7 @@ print $langs->trans("AnnounceOnCustomerDashboard");
 print '<br>';
 print '<span class="opacitymedium">';
 print $langs->trans("Example").': (AnnounceMajorOutage), (AnnounceMinorOutage), (AnnounceMaintenanceInProgress), Any custom text...</span><br>';
-print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE">';
+print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_6.'">';
 print $conf->global->SELLYOURSAAS_ANNOUNCE;
 print '</textarea>';
 print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button" value="'.$langs->trans("Save").'"></center>';
