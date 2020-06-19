@@ -129,6 +129,7 @@ if ($action == 'set')
 
 		dolibarr_set_const($db,"SELLYOURSAAS_ANONYMOUSUSER",GETPOST("SELLYOURSAAS_ANONYMOUSUSER",'none'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_LOGIN_FOR_SUPPORT",GETPOST("SELLYOURSAAS_LOGIN_FOR_SUPPORT",'none'),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_PASSWORD_FOR_SUPPORT",GETPOST("SELLYOURSAAS_PASSWORD_FOR_SUPPORT",'none'),'chaine',0,'',$conf->entity);
 
 		$dir=GETPOST("DOLICLOUD_INSTANCES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
@@ -314,7 +315,9 @@ print '</td>';
 print '<td>1</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAIN_FAQ_URL").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
+print '</td>';
 print '<td colspan="2">';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.$conf->global->SELLYOURSAAS_MAIN_FAQ_URL.'">';
 print '</td>';
@@ -720,6 +723,13 @@ print '<td>';
 print '<input type="text" name="SELLYOURSAAS_LOGIN_FOR_SUPPORT" value="'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT.'">';
 print '</td>';
 print '<td>Login to use to create a support user account on customer instances</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("PasswordForSupport").'</td>';
+print '<td>';
+print '<input type="text" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.$conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT.'">';
+print '</td>';
+print '<td>Password to use to create a support user account on customer instances</td>';
 print '</tr>';
 
 print '</table>';
