@@ -406,7 +406,7 @@ if ($restorestringfrombackup) {
 if ($restorestringfromarchive) {
 	$restorestringtoshow=$restorestringfromarchive.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
 	print 'Restore command line string from Archive<br>';
-	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent">';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_5.'">';
 	print $restorestringpretoshow."\n";
 	print $restorestringtoshow."\n";
 	print $restorestringposttoshow;
