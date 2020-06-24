@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2004-2019 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2004-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -349,12 +349,17 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("CurrentBackupStatus").'</td>';
 	print '<td>';
-	if (! empty($instanceoldid)) print $object->backup_status;
-	else {
-		print ($object->array_options['options_latestbackup_status'] == 'KO' ? '<span class="error">' : '');
-		print $object->array_options['options_latestbackup_status'];
-		print ($object->array_options['options_latestbackup_status'] == 'KO' ? '</span>' : '');
-	}
+	print ($object->array_options['options_latestbackup_status'] == 'KO' ? '<span class="error">' : '');
+	print $object->array_options['options_latestbackup_status'];
+	print ($object->array_options['options_latestbackup_status'] == 'KO' ? '</span>' : '');
+	print '</td>';
+	print '</tr>';
+
+	// Current backup status
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("LatestBackupMessage").'</td>';
+	print '<td>';
+	print $object->array_options['options_latestbackup_message'];
 	print '</td>';
 	print '</tr>';
 
