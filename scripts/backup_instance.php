@@ -118,7 +118,10 @@ if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../ma
 if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
 if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
 if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include($dolibarrdir."/htdocs/master.inc.php");
-if (! $res) die("Include of master fails");
+if (! $res) {
+	print ("Include of master fails");
+	exit(-1);
+}
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
