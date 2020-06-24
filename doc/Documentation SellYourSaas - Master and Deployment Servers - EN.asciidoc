@@ -243,14 +243,14 @@ Please note: replace myunixlogin with the correct value before taking changes in
 ---------------
 
 
-Add the following line in the * / etc / sudoers * file to reposition the HOME according to the user after a sudo -s:
+Add the following line in the */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
 
 [source, conf]
 ---------------
 Defaults set_home
 ---------------
 
-Create a file * myunixlogin * to put in the directory * / etc / sudoers.d * with the owner * root * and the permissions * r - r ----- * and the content
+Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root* and the permissions *r-r-----* and the content
 
 [source, conf]
 ---------------

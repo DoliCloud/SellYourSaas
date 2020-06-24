@@ -100,9 +100,13 @@ if ($fp) {
 else
 {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
-	exit;
+	exit(-1);
 }
 
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
 
 // Load Dolibarr environment
 $res=0;
