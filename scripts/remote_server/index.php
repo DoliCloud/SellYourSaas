@@ -142,6 +142,7 @@ if (in_array($tmparray[0], array('backup')))
 {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
 	else fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
+	fwrite($fh, "getcwd() = ".getcwd()."\n");
 
 	exec('sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir.' confirm 2>&1', $output, $return_var);
 
