@@ -535,8 +535,8 @@ ln -fs /mnt/diskhome/home /home/jail/home
 
 mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
-ln -fs /mnt/diskbackup/backup /home/jail/backup; 
-ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test; 
+ln -fs /mnt/diskbackup/backup /home/jail/backup 
+ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
 ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
@@ -1473,6 +1473,7 @@ broken_sasl_auth_clients = yes
 ==== Configuration
 
 Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par *sudo systemctl show -p DefaultLimitNOFILE*) par défaut de systemd:
+
 [source,bash]
 ---------------
 LimitNOFILE=50000
@@ -1480,6 +1481,7 @@ Restart=on-watchdog
 ---------------
 
 Prendre en compte le changement en lançant:
+
 [source,bash]
 ---------------
 systemctl daemon-reload

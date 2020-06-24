@@ -78,7 +78,7 @@ This document presents the steps for implementing your own SaaS business platfor
 
 == Installation of the machine and OS
 
-The first step is to make one (or more) server available. If we are going on several servers, one will be * Master * server (management and invoicing) and the others will be * Deployment servers * (customer instances). The * Master * server can also be * Deployment server *, it is possible to start with a single server.
+The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be * Deployment servers * (customer instances). The *Master* server can also be * Deployment server *, it is possible to start with a single server.
 
 === Choice of machine and OS
 
@@ -87,7 +87,7 @@ The first step is to make one (or more) server available. If we are going on sev
 
 _Example with Amazon Standard Medium: _
 
-Server * m1.medium * hosted in EU @ $ 0.18 per hour plus $ 10 for storage and bandwidth then switch to * m1.large * @ $ 0.18 per hour
+Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and bandwidth then switch to *m1.large* @ $ 0.18 per hour
 
 _Example with OVH Public Cloud: _
  
@@ -104,7 +104,7 @@ With OVH Public Cloud:
 
 * Create the data disc. For the deployment server, take 250MB per instance.
 * Associate the disk with the server (each additional disk is added in / dev / vdb, / dev / vdc, / dev / vdd, ...).
-Note, the disk becomes visible with * fdisk -l * and * lsblk *
+Note, the disk becomes visible with *fdisk -l* and *lsblk*
 * If it is a disk never partitioned, add the partition on the disk (Linux type) and format it by doing:
 
 [source, bash]
@@ -121,9 +121,9 @@ mkfs.ext4 / dev / vdxY
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
 
-* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command * blkid *
+* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command *blkid*
 
-* Declare the assembly for an automatic assembly at each reboot by adding a line in * / etc / fstab *
+* Declare the assembly for an automatic assembly at each reboot by adding a line in */etc/fstab*
 
 [source, bash]
 ---------------
@@ -155,11 +155,11 @@ return
 Filesystem features: has_journal ext_attr resize_inode dir_index filetype needs_recovery extent flex_bg sparse_super large_file huge_file uninit_bg dir_nlink extra_isize
 
 
-To add -noatime to the filesystem in the * / etc / fstab * file:
+To add -noatime to the filesystem in the */etc/fstab* file:
 
 [source, bash]
 ---------------
-UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 / mnt / diskX ext4 noatime, nofail 0 0
+UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
 ---------------
 
 To take the change into account:
@@ -194,17 +194,17 @@ mysqlcheck --all-databases
 
 === Unix admin account
 
-Create the user account * admin *. It will be used to install and administer the system when root is not required.
+Create the user account *admin*. It will be used to install and administer the system when root is not required.
 
 [source, bash]
 ---------------
 useradd admin -g admin
 ---------------
 
-Check that the id of this user * admin * is greater than or equal to 1000.
+Check that the id of this user *admin* is greater than or equal to 1000.
  
 
-Create a user account for yourself (or other administrators), for example: * myunixlogin *. It will be used to log in.
+Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
 
 [source, bash]
 ---------------
@@ -214,7 +214,7 @@ adduser myunixlogin
 
 ==== Ssh configuration
 
-Create a file * / etc / ssh / sshd_config.d / sellyoursaas * to change login permissions with the following content:
+Create a file */etc/ssh/sshd_config.d/sellyoursaas* to change login permissions with the following content:
 
 [source, conf]
 ---------------
@@ -267,7 +267,7 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Define or redefine the password for * root *, * admin *, and * myunixlogin * with a secure password.
+Define or redefine the password for *root*, *admin*, and *myunixlogin* with a secure password.
 
 Launch ssh-keygen on each of these 3 accounts
 
@@ -278,7 +278,7 @@ Modify the default shell to use bash (instead of dh sh or dash)
 
 [source, bash]
 ---------------
-ln -fs / bin / bash / usr / bin / sh
+ln -fs /bin/bash /usr/bin/sh
 ---------------
 
 
@@ -286,7 +286,7 @@ ln -fs / bin / bash / usr / bin / sh
 
 On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
 
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to crash. To do this, modify the file * / etc / systemd / system / mariadb.service.d / migrated-from-my.cnf-settings.conf * and put
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
 
 [source, bash]
 ---------------
@@ -295,7 +295,7 @@ TimeoutStartSec = 3600s
 TimeoutStopSec = 3600s
 ---------------
 
-Rem: Instead of putting * 3600s *, it is possible to put * infinity *
+Rem: Instead of putting *3600s*, it is possible to put *infinity*
 
 Then reload the new configuration:
 
@@ -318,9 +318,9 @@ rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgr
 
 === Modification of / etc / skel
 
-Edit the contents of * / etc / skel * on the deployment servers in order to fill in the * .ssh / authorized_keys * with
-* the ssh public key of the user (s) * myunixlogin *
-* the ssh public key of the user * admin * of the master server
+Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys* with
+* the ssh public key of the user (s) *myunixlogin*
+* the ssh public key of the user *admin* of the master server
 
 [source, bash]
 ---------------
@@ -336,7 +336,7 @@ Thus any new linux account created (those of customer instances) will be accessi
 
 === Add alias
 
-Add at the end of * / etc / bash.bashrc *:
+Add at the end of */etc/bash.bashrc*:
 
 [source, bash]
 ---------------
@@ -346,7 +346,7 @@ alias psld = 'ps -fax -eo user: 12, pid, ppid, pcpu, pmem, vsz: 12, size: 12, tt
 
 === Max size increase UID
 
-On the deployment servers, modify * / etc / login.defs * to put the
+On the deployment servers, modify */etc/login.defs* to put the
 
 [source, conf]
 ---------------
@@ -357,7 +357,7 @@ GID_MIN 1000
 GID_MAX 500000
 ---------------
 
-Modify the file * / etc / apache2 / mods-enabled / mpm_itk.conf * (if it exists) or * / etc / apache2 / conf-enabled / security.conf * (otherwise)
+Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc/apache2/conf-enabled/security.conf* (otherwise)
 
 [source, conf]
 ---------------
@@ -372,7 +372,7 @@ Add an entry from the new server to the DNS provided by the domain provider.
 
 Go to the OVH IP management interface, to add the reverse on the server IP.
 
-Go to the management interface of OVH servers, to modify their short name. This will modify the * / etc / hostname * file automatically (if not manually modify) with the short name. The file will then have as sole content:
+Go to the management interface of OVH servers, to modify their short name. This will modify the */etc/hostname* file automatically (if not manually modify) with the short name. The file will then have as sole content:
 
 [source, bash]
 ---------------
@@ -380,7 +380,7 @@ Server name
 ---------------
 
 
-Connect and modify the file * / etc / hosts * with the entry of the new server
+Connect and modify the file */etc/hosts* with the entry of the new server
 
 [source, bash]
 ---------------
@@ -401,7 +401,7 @@ ip -6 route add 2002: 41d0: 1234: 1000 :: 1 dev eth0
 ip -6 route add default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
 ---------------
 
-- For a persistent reboot definition, declare the interface in * / etc / network / interfaces * or in a file in * / etc / network / interfaces.d * (Ubuntu <17.10)
+- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
 Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
 
@@ -418,7 +418,7 @@ iface eth0 inet6 static
         pre-down / sbin / ip -6 route del 2002: 41d0: 1234: 1000 :: 1 dev eth0
 ---------------
 
-Rem: * eth0 * can be something else, for example * ens3 *.
+Rem: *eth0* can be something else, for example *ens3*.
 
 To take this into account, try this, otherwise, reboot.
 
@@ -429,22 +429,22 @@ To take this into account, try this, otherwise, reboot.
 
 ==== With netplan (Ubuntu 18.04 +)
 
-Add a conf file * / etc / netplan / 51-ipv6-ovh.yaml *.
-Note: OVH provides a / 128 for ipv6 but netplan wants / 64
+Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
+Note: OVH provides a /128 for ipv6 but netplan wants /64
  
 Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
 
 [source, conf]
 ---------------
 network:
-version: 2
-ethernets:
-eth0:
-match:
-name: eth0
-addresses:
-- "2002: 41d0: 1234: 1000 :: 1234/64"
-gateway6: "2002: 41d0: 1234: 1000 :: 1"
+	version: 2
+	ethernets:
+		eth0:
+			match:
+				name: eth0
+			addresses:
+				- "2002:41d0:1234:1000::1234/64"
+			gateway6: "2002:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
  
@@ -454,7 +454,7 @@ netplan try
 netplan apply
 ---------------
 
-Rem: * eth0 * can be something else, for example * ens3 *.
+Rem: *eth0* can be something else, for example *ens3*.
 
 
 === Add virtual IP (optional)
@@ -477,7 +477,7 @@ Deletion:
 ifconfig eth0: 0 down
 ---------------
 
-- For a persistent reboot definition, declare the interface in * / etc / network / interfaces * or in a file in * / etc / network / interfaces.d * (Ubuntu <17.10)
+- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
 Example for 2 virtual IPs:
 
@@ -497,7 +497,7 @@ iface eth0: 1 inet static
             broadcast e.f.g.h
 ---------------
 
-Rem: * eth0 * can be something else, for example * ens3 *.
+Rem: *eth0* can be something else, for example *ens3*.
 
 To take this into account, try this, otherwise, reboot.
 
@@ -518,58 +518,58 @@ Check if swap exists:
 swapon --summary
 ---------------
 
-Add a swap on * / swap / swap.img * if the disk is not SSD, otherwise on the non SSD disk * / mnt / sdX / swap / swap.img *. If all the disks are SSD, do not swap.
+Add a swap on */swap/swap.img* if the disk is not SSD, otherwise on the non SSD disk */mnt/sdX/swap/swap.img*. If all the disks are SSD, do not swap.
 
 https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory-swap-file-on-a-vps#4
 
 
 === Creation of working directories
 
-On the * Master * server and the * Deployment * servers, create the directories to store backups and archives.
+On the *Master* server and the *Deployment* servers, create the directories to store backups and archives.
 
 Create directories required to store data and backups:
 
 [source, bash]
 ---------------
-mkdir / mnt / diskhome / home
-ln -fs / mnt / diskhome / home / home / jail / home
+mkdir /mnt/diskhome/home
+ln -fs /mnt/diskhome/home /home/jail/home
 
-mkdir / mnt / diskbackup / backup; mkdir / mnt / diskbackup / archives-test; mkdir / mnt / diskbackup / archives-paid
-chown admin.root / mnt / diskbackup / backup / mnt / diskbackup / archives-test / mnt / diskbackup / archives-paid
-ln -fs / mnt / diskbackup / backup / home / jail / backup;
-ln -fs / mnt / diskbackup / archives-test / home / jail / archives-test;
-ln -fs / mnt / diskbackup / archives-paid / home / jail / archives-paid
+mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
+chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
+ln -fs /mnt/diskbackup/backup /home/jail/backup 
+ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
+ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
 
 === Installing the nfs share
 
-NFS sharing will allow the * Deployment * servers to recover the application images to be installed which are centralized on the
-* Master * server.
+NFS sharing will allow the *Deployment* servers to recover the application images to be installed which are centralized on the
+*Master* server.
 
 ==== On the Master server
 
-Install the NFS server and share on * / home / admin / wwwroot / dolibarr_documents / sellyoursaas *
+Install the NFS server and share on */home/admin/wwwroot/dolibarr_documents/sellyoursaas*
     
 [source, bash]
 ---------------
 sudo apt install nfs-kernel-server
-vi / etc / exports
+vi /etc/exports
 ---------------
 
 [source, bash]
 ---------------
-# / etc / exports: the access control list for filesystems which may be exported
-# to NFS clients. See exports (5).
+# /etc/exports: the access control list for filesystems which may be exported
+#               to NFS clients.  See exports(5).
 #
 # Example for NFSv2 and NFSv3:
-# / srv / homes hostname1 (rw, sync, no_subtree_check) hostname2 (ro, sync, no_subtree_check)
+# /srv/homes       hostname1(rw,sync,no_subtree_check) hostname2(ro,sync,no_subtree_check)
 #
 # Example for NFSv4:
-# / srv / nfs4 gss / krb5i (rw, sync, fsid = 0, crossmnt, no_subtree_check)
-# / srv / nfs4 / homes gss / krb5i (rw, sync, no_subtree_check)
+# /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)
+# /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)
 #
-/ home / admin / wwwroot / dolibarr_documents / sellyoursaas i.p.deployment.server (ro, no_root_squash, sync, no_subtree_check)
+/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
 [source, bash]
@@ -592,15 +592,15 @@ Install the NFS client and install it manually. Editing is performed by default 
 [source, bash]
 ---------------
 sudo apt-get install nfs-common
-sudo mount -t nfs i.p.server.master: / home / admin / wwwroot / dolibarr_documents / sellyoursaas / home / admin / wwwroot / dolibarr_documents / sellyoursaas
-sudo umount / home / admin / wwwroot / dolibarr_documents / sellyoursaas
+sudo mount -t nfs i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+sudo umount /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 ---------------
 
-Add the line to the * / etc / fstab * file to have automatic reboot mounting
+Add the line to the */etc/fstab* file to have automatic reboot mounting
 
 [source, bash]
 ---------------
-i.p.server.master: / home / admin / wwwroot / dolibarr_documents / sellyoursaas / home / admin / wwwroot / dolibarr_documents / sellyoursaas nfs defaults 0 0
+i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
 
@@ -608,7 +608,7 @@ i.p.server.master: / home / admin / wwwroot / dolibarr_documents / sellyoursaas 
 
 ==== On the master and deployment server
 
-Generate a public and private ssh key for the * admin * account.
+Generate a public and private ssh key for the *admin* account.
 
 [source, bash]
 ---------------
@@ -617,7 +617,7 @@ ssh-keygen
 
 ==== On deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh * admin * account to /home/admin/.ssh/id_rsa_sellyoursaas ... (This key is the one common for maintenance to access user accounts). Put the right rights.
+On the deployment servers, copy the public and private key of the master's ssh *admin* account to /home/admin/.ssh/id_rsa_sellyoursaas ... (This key is the one common for maintenance to access user accounts). Put the right rights.
 
 [source, bash]
 ---------------
@@ -656,7 +656,7 @@ sudo apt-get install bind9
 
 === Disabling automatic update
 
-Uninstall the package * unattended-upgrades *
+Uninstall the package *unattended-upgrades*
 
 [source, bash]
 ---------------
@@ -678,12 +678,12 @@ On the Deployment servers:
 
 [source, bash]
 ---------------
-cd / etc / apache2
+cd /etc/apache2
 mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
-ln -fs / etc / apache2 / sellyoursaas-online / etc / apache2 / sellyoursaas-enabled
+ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* On Ubuntu 18.04+, check that the * PrivateTmp * parameter is * false * in the Apache launch configuration. This will make it possible to have a directory * / tmp * which is not unique to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
+* On Ubuntu 18.04+, check that the *PrivateTmp* parameter is *false* in the Apache launch configuration. This will make it possible to have a directory */tmp* which is not unique to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
 
 [source, bash]
 ---------------
@@ -691,44 +691,44 @@ vi /etc/systemd/system/multi-user.target.wants/apache2.service
 systemctl reload apache2
 ---------------
 
-* Addition of the directive to take into account the directory for the * virtual hosts * of the user instances in the config * / etc / apache2 / apache2.conf *
+* Addition of the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
 
 [source, conf]
 ---------------
-# Include virtual host for sellyoursaas instances:
-IncludeOptional sellyoursaas-enabled / *. Conf
+	# Include virtual host for sellyoursaas instances:
+	IncludeOptional sellyoursaas-enabled/*.conf
 ---------------
 
-* Added directives to define the default error log in * / etc / apache2 / conf-enabled / other-vhosts-access-log.conf *
+* Added directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
 
 [source, conf]
 ---------------
-ErrorLogFormat "[% v] [% {u} t] [% -m:% l] [pid% P: tid% T]% 7F:% E: [client \% a]% M%, \ referer \% {Referer} i "
-ErrorLog $ {APACHE_LOG_DIR} /other_vhosts_error.log
+ErrorLogFormat "[%v] [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\ %a] %M% ,\ referer\ %{Referer}i"
+ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
 ---------------
 
 
 
 On the Master server:
 
-* Create a virtual host * admin.mycompany.com * on the Dolibarr * Master * for the administration of SellyourSaas
+* Create a virtual host *admin.mycompany.com* on the Dolibarr *Master* for the administration of SellyourSaas
 
 [source, bash]
 ---------------
-###########################
+##########################
 # Admin Dolibarr Master
-###########################
-<VirtualHost *: 80>
-        #php_admin_value sendmail_path "/ usr / sbin / sendmail -t -i"
+##########################
+<VirtualHost *:80>
+        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
         #php_admin_value mail.force_extra_parameters "-f postmaster@mycompany.com"
-        #php_admin_value sendmail_path "/ usr / sbin / sendmail -t -i -f webmaster@mycompany.com"
-        php_admin_value open_basedir / tmp /: / home / admin / wwwroot /: / usr / share / GeoIP: / home / jail / home: / home / admin / backup / dump: / home / admin / tools /
+        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster@mycompany.com"
+        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/jail/home:/home/admin/backup/dump:/home/admin/tools/
         php_admin_value memory_limit 64M
 
-        ServerName admin.mycompany.com
-        DocumentRoot / home / admin / wwwroot / dolibarr / htdocs /
-        ErrorLog / home / admin / logs / mycompany_admin_error_log
-        CustomLog / home / admin / logs / mycompany_admin_access_log combined
+        ServerName      admin.mycompany.com
+        DocumentRoot /home/admin/wwwroot/dolibarr/htdocs/
+        ErrorLog     /home/admin/logs/mycompany_admin_error_log
+        CustomLog    /home/admin/logs/mycompany_admin_access_log combined
 
         UseCanonicalName Off
 
@@ -739,37 +739,37 @@ On the Master server:
         KeepAliveTimeout 5
         MaxKeepAliveRequests 20
 
-        <Directory / home / admin / wwwroot>
+        <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
-        Options + FollowSymLinks
-        Order allow, deny
-        Deny from env = bad_bots
+        Options +FollowSymLinks
+        Order allow,deny
+        Deny from env=bad_bots
         Allow from all
         Require all granted
         </Directory>
 
         # Add alias git on sellyoursaas git dir
-        Alias ​​"/ git" "/ home / admin / wwwroot / dolibarr_documents / sellyoursaas / git"
-        <Directory / home / admin / wwwroot>
+        Alias "/git" "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git"
+        <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
-        Options + Indexes
+        Options +Indexes
         Require ip 1.2.3.4
         </Directory>
 
         ExpiresActive On
-        ExpiresByType image / x-icon A2592000
-        ExpiresByType image / gif A2592000
-        ExpiresByType image / png A2592000
-        ExpiresByType image / jpeg A2592000
-        ExpiresByType text / css A2592000
-        ExpiresByType text / javascript A2592000
-        ExpiresByType application / x-javascript A2592000
-        ExpiresByType application / javascript A2592000
+        ExpiresByType image/x-icon A2592000
+        ExpiresByType image/gif A2592000
+        ExpiresByType image/png A2592000
+        ExpiresByType image/jpeg A2592000
+        ExpiresByType text/css A2592000
+        ExpiresByType text/javascript A2592000
+        ExpiresByType application/x-javascript A2592000
+        ExpiresByType application/javascript A2592000
 
 RewriteEngine On
-RewriteCond% {SERVER_NAME} = admin.mycompany.com
-RewriteCond% {REQUEST_URI}! Fileserver \ .php
-RewriteRule ^ https: //% {SERVER_NAME}% {REQUEST_URI} [END, NE, R = permanent]
+RewriteCond %{SERVER_NAME} =admin.mycompany.com
+RewriteCond %{REQUEST_URI} !fileserver\.php
+RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
@@ -778,62 +778,62 @@ RewriteRule ^ https: //% {SERVER_NAME}% {REQUEST_URI} [END, NE, R = permanent]
 
 [source, bash]
 ---------------
-##########################
-# MyAccount
-##########################
-<VirtualHost *: 80>
-   #php_admin_value sendmail_path "/ usr / sbin / sendmail -t -i"
+#########################                                                                                               
+# MyAccount                                                                                        
+#########################                                                                                               
+<VirtualHost *:80>
+   #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
    #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
-   #php_admin_value sendmail_path "/ usr / sbin / sendmail -t -i -f postmaster@mysaasdomainname.com"
-   php_admin_value open_basedir / tmp /: / home / admin / wwwroot /: / home / admin / tools /
+   #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f postmaster@mysaasdomainname.com"
+   php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/home/admin/tools/
 
    UseCanonicalName On
-   ServerName myaccount.mysaasdomainname.com
-   ErrorLog / home / admin / logs / mysaas_myaccount_error_log
-   CustomLog / home / admin / logs / mysaas_myaccount_access_log combined
+   ServerName   myaccount.mysaasdomainname.com
+   ErrorLog     /home/admin/logs/mysaas_myaccount_error_log
+   CustomLog    /home/admin/logs/mysaas_myaccount_access_log combined
 
-   DocumentRoot / home / admin / wwwroot / dolibarr_sellyoursaas / myaccount
+   DocumentRoot /home/admin/wwwroot/dolibarr_sellyoursaas/myaccount
 
-   <Directory / home / admin / wwwroot / dolibarr_sellyoursaas / myaccount>
+   <Directory /home/admin/wwwroot/dolibarr_sellyoursaas/myaccount>
    AllowOverride FileInfo Options
-   Options -Indexes -MultiViews + FollowSymLinks -ExecCGI
+   Options       -Indexes -MultiViews +FollowSymLinks -ExecCGI
    Require all granted
    </Directory>
 
    # To access images
-   <Directory / home / admin / wwwroot / dolibarr_documents>
+   <Directory /home/admin/wwwroot/dolibarr_documents>
    AllowOverride FileInfo Options
-   Options -Indexes -MultiViews + FollowSymLinks -ExecCGI
+   Options       -Indexes -MultiViews +FollowSymLinks -ExecCGI
    Require all granted
    </Directory>
 
-   AddOutputFilterByType DEFLATE text / html text / plain text / xml
+   AddOutputFilterByType DEFLATE text/html text/plain text/xml
    AddDefaultCharset utf-8
 
-ExpiresActive On
-ExpiresByType image / x-icon A2592000
-ExpiresByType image / gif A2592000
-ExpiresByType image / png A2592000
-ExpiresByType image / jpeg A2592000
-ExpiresByType text / css A2592000
-ExpiresByType text / javascript A2592000
-ExpiresByType application / x-javascript A2592000
-ExpiresByType application / javascript A2592000
+	    ExpiresActive On
+	    ExpiresByType image/x-icon A2592000
+	    ExpiresByType image/gif A2592000
+	    ExpiresByType image/png A2592000
+	    ExpiresByType image/jpeg A2592000
+	    ExpiresByType text/css A2592000
+	    ExpiresByType text/javascript A2592000
+	    ExpiresByType application/x-javascript A2592000
+	    ExpiresByType application/javascript A2592000
 
 RewriteEngine on
-RewriteCond% {SERVER_NAME} = myaccount.mysaasdomainname.com
-RewriteRule ^ https: //% {SERVER_NAME}% {REQUEST_URI} [END, NE, R = permanent]
+RewriteCond %{SERVER_NAME} =myaccount.mysaasdomainname.com
+RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
 
 === Installation of the firewall ===
 
-* Create a firewall launch file in * / home / admin / tools / firewall *. Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
+* Create a firewall launch file in */home/admin/tools/firewall*. Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
 
 [source, bash]
 ---------------
-ln -fs / home / admin / tools / firewall /etc/init.d/firewallsellyoursaas
+ln -fs /home/admin/tools/firewall /etc/init.d/firewallsellyoursaas
 systemctl daemon-reload
 systemctl enable firewallsellyoursaas
 systemctl is-enabled firewallsellyoursaas
@@ -843,7 +843,7 @@ systemctl status firewallsellyoursaas
 
 === Installation of unix watchdog (optional) ===
 
-* Installation and activation of watchdog Linux with configs in * / etc / watchdog *
+* Installation and activation of watchdog Linux with configs in */etc/watchdog*
 
 To consult, no longer launch at startup, launch at startup, stop, launch:
 
@@ -860,7 +860,7 @@ systemctl start watchdog
 
 === Installation of the Apache watchdog ===
 
-* Installation and activation of the apache watchdog in * / home / admin / wwwroot / dolibarr_sellyoursaas / scripts / apache_watchdog_launcher.sh * by creating a link by
+* Installation and activation of the apache watchdog in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher.sh* by creating a link by
 
 [source, bash]
 ---------------
@@ -880,7 +880,7 @@ systemctl status apache_watchdog_launcher2
 
 === Installation of the instance deployment agent ===
 
-* Agent installation and activation in * / home / admin / wwwroot / dolibarr_sellyoursaas / scripts / remote_server_launcher.sh * by creating a link by
+* Agent installation and activation in */home/admin/wwwroot /dolibarr_sellyoursaas/scripts/remote_server_launcher.sh* by creating a link by
 
 [source, bash]
 ---------------
@@ -895,15 +895,15 @@ systemctl status remote_server_launcher
 === Installation of fail2ban ===
 
 * Installation of fail2ban and activation of the following fail2ban rules:
-  * apache-shellshock *, * php-url-fopen *, * webmin-auth *, * postfix-sasl *, * mysqld-auth *, * xinetd-fail *
-  * apache-badbots *, * apache-noscript *, * apache-overflows *, * apache-nohome *, * apache-botsearch *
+  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
   
   As well as the specific rules for sellyoursaas:
   
-  * email-dol-blacklist *, * email-dol-perday *, * email-dol-perhour *, * email-dol-perhouradmin *, * web-dol-passforgotten *
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
 
 
-To do this, create a * / etc / fail2ban / jail.local * file with this content:
+To do this, create a */etc/fail2ban/jail.local* file with this content:
 
 NOTE: The rules available may vary depending on the version of the OS installed.
 
@@ -934,7 +934,7 @@ NOTE: Remember to also modify "mybusinessips" by your ip (s) separated by spaces
 ignoreip = 127.0.0.1/8 mybusinessips
 
 # "bantime" is the number of seconds that a host is banned.
-bantime = 3600
+bantime  = 3600
 
 # A host is banned if it has generated "maxretry" during the last "findtime"
 # seconds.
@@ -942,11 +942,11 @@ findtime = 600
 maxretry = 3
 
 # "backend" specifies the backend used to get files modification.
-# Available options are "pyinotify", "kid", "polling" and "auto".
+# Available options are "pyinotify", "gamin", "polling" and "auto".
 # This option can be overridden in each jail as well.
 #
 # pyinotify: requires pyinotify (a file alteration monitor) to be installed.
-# If pyinotify is not installed, Fail2ban will use auto.
+#            If pyinotify is not installed, Fail2ban will use auto.
 # gamin:     requires Gamin (a file alteration monitor) to be installed.
 #            If Gamin is not installed, Fail2ban will use auto.
 # polling:   uses a polling algorithm which does not require external libraries.
@@ -1170,7 +1170,7 @@ To test spamassassin client or message, create a file */tmp/testspam* with conte
 
     You should send this test mail from an account outside of your network.
 
-Tester avec:
+Test with:
 
 [source,bash]
 ---------------
@@ -1202,9 +1202,9 @@ clamscand /tmp/testvirus --fdpass
 Note: Removing the apparmor profile for usr.sbin.clamd may be required if called from web process (otherwise error on "getattr").
 
 
-=== Installation de Afick
+=== Installation of Afick
 
-* Installer afick.pl tool from the debian package found on afick web site.
+* Install afick.pl tool from the debian package found on afick web site.
 
 * Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
 
@@ -1271,18 +1271,18 @@ exclude_suffix := cache
 
 === Configuration de cpulimit (optionnel)
 
-* Lancement de cpulimit au démarrage pour exécuter:
+* Launch cpulimit at startup to execute:
 
 [source,conf]
 ---------------
 cpulimit launched with script  cpulimit --exe=apache2 --limit=20
 ---------------
 
-Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
+See script *cpulimit_daemon* to put into */etc/init.d*.
 
 
 
-=== Configuration de /etc/security/limits.conf (optionnel)
+=== Setup of /etc/security/limits.conf (optionnel)
 
 * Editer le fichier */etc/security/limits.conf* par exemple pour augmenter le nombre de fichiers max ouvert par processus
 
@@ -1469,11 +1469,12 @@ broken_sasl_auth_clients = yes
 
 
 
-=== Configuration de Mysql ou Mariadb
+=== Configuration of Mysql or Mariadb
 
 ==== Configuration
 
 Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par *sudo systemctl show -p DefaultLimitNOFILE*) par défaut de systemd:
+
 [source,bash]
 ---------------
 LimitNOFILE=50000
@@ -1481,6 +1482,7 @@ Restart=on-watchdog
 ---------------
 
 Prendre en compte le changement en lançant:
+
 [source,bash]
 ---------------
 systemctl daemon-reload
@@ -1489,14 +1491,14 @@ systemctl daemon-reload
 Edition du fichier de config *mysqld.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
 ou *50-server.cnf* dans */etc/mysql/mariadb.conf.d* (si mariadb) pour changer :
 
-Remplacer le 
+Replace the 
 
 [source,bash]
 ---------------
 bind-address = 127.0.0.1
 ---------------
 
-par 
+with 
 
 [source,bash]
 ---------------
@@ -3623,7 +3625,7 @@ Voici le détail des évennement ou URL qui peuvent etre trackées:
 - Event DataDog: *sellyoursaas.payingcustomerlost*
 
 
-Exemple de supervision de sellyoursaas avec DataDog:
+Example of supervision of sellyoursaas using DataDog:
 
 image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
