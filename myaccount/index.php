@@ -796,7 +796,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                             elseif($payment_method_obj->customer != $cu->id)
                             {
                                 $error++;
-                                $errormsg = "The payment method ".$payment_method->id." is already attached to customer ".$payment_method_obj->customer." that is not ".$cu->id;
+                                $errormsg = "The payment method ".$payment_method->id." is already attached to the customer ".$payment_method_obj->customer." that is not ".$cu->id;
                                 dol_syslog($errormsg, LOG_ERR);
                             }
                         }
@@ -912,7 +912,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                 }
             }
 
-            // Create a recurring invoice (+real invoice + contract renewal) if there is no reccuring invoice yet
+            // Create a recurring invoice (+real invoice + contract renewal) if there is no recurring invoice yet
             if (! $error)
             {
                 foreach ($listofcontractid as $contract)
@@ -1045,7 +1045,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                                 $date_start = $now;
                                 $date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
 
-                                // BecauseWe update the end date planned of contract too
+                                // Because we update the end date planned of contract too
                                 $sqltoupdateenddate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$db->idate($date_end)."' WHERE fk_contrat = ".$srcobject->id;
                                 $resqltoupdateenddate = $db->query($sqltoupdateenddate);
                             }
@@ -1139,6 +1139,12 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
                         $date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
                         $invoice_rec->date_when = $date_next_execution;
+
+                        // Add discount into the template invoice
+                        $discountcode = GETPOST('discountcode', 'alpha');
+                        if ($discountcode) {
+                        	$invoice_rec->array_options['options_discountcode'] = $discountcode;
+                        }
 
                         // Get first contract linked to invoice used to generate template
                         if ($invoice_draft->id > 0)
