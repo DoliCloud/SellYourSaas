@@ -117,15 +117,16 @@ if ($action == 'set')
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 
-		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",'none'),'chaine',0,'Nb days before stopping invoice payment try',$conf->entity);
-		dolibarr_set_const($db,"SELLYOURSAAS_NBHOURSBETWEENTRIES",GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES",'none'),'chaine',0,'Nb hours minium between each invoice payment try',$conf->entity);
-
 		dolibarr_set_const($db,"SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",'alpha'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_HASHALGOFORPASSWORD",GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD",'alpha'),'chaine',0,'',$conf->entity);
 
 		dolibarr_set_const($db,'SELLYOURSAAS_MAXDEPLOYMENTPERIP',GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIP",'int'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,'SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR',GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR",'int'),'chaine',0,'',$conf->entity);
+
 		dolibarr_set_const($db,'SELLYOURSAAS_INFRA_COST',GETPOST("SELLYOURSAAS_INFRA_COST",'int'),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_ACCEPT_DISCOUNTCODE",GETPOST("SELLYOURSAAS_ACCEPT_DISCOUNTCODE",'none'),'chaine',0,'Accept discount code when entering payment mode',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_NBHOURSBETWEENTRIES",GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES",'none'),'chaine',0,'Nb hours minium between each invoice payment try',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",'none'),'chaine',0,'Nb days before stopping invoice payment try',$conf->entity);
 
 		dolibarr_set_const($db,"SELLYOURSAAS_ANONYMOUSUSER",GETPOST("SELLYOURSAAS_ANONYMOUSUSER",'none'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_LOGIN_FOR_SUPPORT",GETPOST("SELLYOURSAAS_LOGIN_FOR_SUPPORT",'none'),'chaine',0,'',$conf->entity);
@@ -389,7 +390,7 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("DefaultProductForInstances").'</td>';
 print '<td>';
 $defaultproductid=$conf->global->SELLYOURSAAS_DEFAULT_PRODUCT;
-print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT');
+print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
 print '</td>';
 print '<td>My SaaS service for instance</td>';
 print '</tr>';
@@ -588,6 +589,13 @@ print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_INFRA_COST" value="'.(empty($conf->global->SELLYOURSAAS_INFRA_COST)?0:$conf->global->SELLYOURSAAS_INFRA_COST).'">';
 print '</td>';
 print '<td>5</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ACCEPT_DISCOUNTCODE").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_ACCEPT_DISCOUNTCODE" value="'.(empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)?0:$conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE).'">';
+print '</td>';
+print '<td>0 or 1</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBHOURSBETWEENTRIES").'</td>';

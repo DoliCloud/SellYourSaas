@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2007-2019	Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2020	Laurent Destailleur	<eldy@users.sourceforge.net>
  * Copyright (C) 2008-2012	Regis Houssin		<regis.houssin@capnetworks.com>
  * Copyright (C) 2008-2011	Juanjo Menent		<jmenent@2byte.es>
  * Copyright (C) 2014       Teddy Andreotti    	<125155@supinfo.com>
@@ -4078,12 +4078,25 @@ if ($mode == 'instances')
 													else
 													{
 														print ' - '.$langs->trans("APaymentModeWasRecorded");
+														// Discount code entered
+														if ($contract->array_options['options_discountcode']) {
+															print '<br><span class="opacitymedium">'.$langs->trans("DiscountCode").'</span> : <span class="bold">';
+															print $contract->array_options['options_discountcode'];
+															print '</span>';
+														}
 													}
 												}
 											}
 										}
 										elseif ($datenextinvoice)
 										{
+											// Discount code entered
+											if ($contract->array_options['options_discountcode']) {
+												print '<br><span class="opacitymedium">'.$langs->trans("DiscountCode").'</span> : <span class="bold">';
+												print $contract->array_options['options_discountcode'];
+												print '</span>';
+											}
+											// Date of next invoice
 											print '<br><span class="opacitymedium">'.$langs->trans("NextInvoice").'</span> : <span class="bold">'.dol_print_date($datenextinvoice, 'day').'</span>';
 										}
 									}
@@ -5639,7 +5652,36 @@ if ($mode == 'registerpaymentmode')
             	    }
         	    }
         	    print '</small></div>';
-        	    print '<br><br>';
+        	    print '<br>';
+
+        	    // Show input text for the discount code
+        	    $acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE == 1 ? 1 : 0);
+        	    if ($acceptdiscountcode) {
+        	    	print '<br>';
+        	    	print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode"><br>';
+        	    	print '<div class="discountcodetext" id="discountcodetext"></div>';
+        	    	print '<script type="text/javascript" language="javascript">'."\n";
+        	    	print '
+						jQuery(document).ready(function() {
+	        	    		jQuery("#discountcode").keyup(function() {
+	        	    			console.log("Discount code modified, we update the text section");
+								if (jQuery("#discountcode").val()) {
+									result = "";
+									// TODO Call ajax to check coupon code and retun text to show in result
+									if (result) {
+										jQuery("#discountcodetext").html(result);
+									}
+
+								} else {
+									jQuery("#discountcodetext").html("");
+								}
+	        	    		});
+	        	    	});';
+
+					print '</script>';
+					print '<hr>';
+        	    }
+        	    print '<br>';
         	} else {
         	    print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
         	    print '<br><br>';
