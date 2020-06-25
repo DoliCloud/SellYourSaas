@@ -172,7 +172,6 @@ $nbofactiveok=0;
 $nbofactive=0;
 $nbofactivesusp=0;
 $nbofactivepaymentko=0;
-$nbofalltime=0;
 $nboferrors=0;
 $instancefilter=(isset($argv[2])?$argv[2]:'');
 $instancefiltercomplete=$instancefilter;
@@ -248,7 +247,7 @@ if ($resql)
 				{
 					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; }
 					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; }
-					elseif ($object->array_options['options_deployment_status'] == 'done')       {
+					elseif ($object->array_options['options_deployment_status'] == 'done')       {										// should be here due to test into SQL request
                         $instance_status = 'DEPLOYED';
                         $nbofinstancedeployed++;
 					}
@@ -272,28 +271,20 @@ if ($resql)
 				print "Analyze instance ".($i+1)." ".$instance." instance_status=".$instance_status." payment_status=".$payment_status."\n";
 
 				// Count
-				if (! in_array($payment_status,array('TRIAL')))
+				if (! in_array($payment_status, array('TRIAL')))
 				{
-					$nbofalltime++;
-					if (! in_array($instance_status,array('PROCESSING', 'UNDEPLOYED')))		// Nb of active
-					{
-						$nbofactive++;
+					$nbofactive++;
 
-						if (in_array($instance_status,array('SUSPENDED')))
-						{
-							$nbofactivesusp++;
-							$instancesactivebutsuspended[$obj->id]=$obj->ref.' ('.$instance.')';
-						}
-						else if (in_array($payment_status,array('FAILURE','PAST_DUE'))) $nbofactivepaymentko++;
-						else $nbofactiveok++; // not suspended, not close request
-
-						$instances[$obj->id]=$instance;
-						print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
-					}
-					else
+					if (in_array($instance_status, array('SUSPENDED')))
 					{
-						//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
+						$nbofactivesusp++;
+						$instancesactivebutsuspended[$obj->id]=$obj->ref.' ('.$instance.')';
 					}
+					else if (in_array($payment_status, array('FAILURE','PAST_DUE'))) $nbofactivepaymentko++;
+					else $nbofactiveok++; // not suspended, not close request
+
+					$instances[$obj->id]=$instance;
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				}
 				elseif ($instancefiltercomplete)
 				{
@@ -578,7 +569,6 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
     $out.= "***** Summary for all deployment servers\n";
 }
 $out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
-$out.= "Nb of paying instances (all time): ".$nbofalltime."\n";
 $out.= "Nb of paying instances (deployed with or without payment error): ".$nbofactive."\n";
 $out.= "Nb of paying instances (deployed but suspended): ".$nbofactivesusp;
 $out.= (count($instancesactivebutsuspended)?", suspension on ".join(', ',$instancesactivebutsuspended):"");
