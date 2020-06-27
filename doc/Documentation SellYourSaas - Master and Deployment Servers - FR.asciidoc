@@ -2195,8 +2195,7 @@ mail.log = /var/log/phpmail.log
 
 [source,conf]
 ---------------
-# use the syslog group by default, since this is the owning group
-# of /var/log/syslog.
+# use the syslog group by default, since this is the owning group of /var/log/syslog.
 su root syslog
 ---------------
 
@@ -2245,6 +2244,16 @@ su root syslog
         missingok
         notifempty
         create 600 root root
+}
+
+/home/admin/wwwroot/dolibarr_documents/*.log {
+        su admin www-data
+        daily
+        rotate 7
+        compress
+        delaycompress
+        missingok
+        notifempty
 }
 ---------------
 

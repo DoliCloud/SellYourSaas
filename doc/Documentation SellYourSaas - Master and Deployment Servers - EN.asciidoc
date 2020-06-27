@@ -2196,8 +2196,7 @@ mail.log = /var/log/phpmail.log
 
 [source,conf]
 ---------------
-# use the syslog group by default, since this is the owning group
-# of /var/log/syslog.
+# use the syslog group by default, since this is the owning group of /var/log/syslog.
 su root syslog
 ---------------
 
