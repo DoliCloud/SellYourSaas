@@ -993,6 +993,20 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                             $error++;
                         }
                     }
+
+                    $frequency=1;
+                    $frequency_unit='m';
+                    $discountcode = strtoupper(trim(GETPOST('discountcode', 'alpha')));	// If a discount code was prodived on page
+                    /* If a discount code exists on contract level, it was used to prefill the payment page, so it is received into the GETPOST('discountcode', 'int').
+                    if (empty($discountcode) && ! empty($contract->array_options['options_discountcode'])) {	// If no discount code provided, but we find one on contract, we use this one
+                    	$discountcode = $contract->array_options['options_discountcode'];
+                    }*/
+
+                    $discounttype = '';
+                    $discountval = 0;
+                    $validdiscountcodearray = array();
+					$nbofproductapp = 0;
+
                     // Add lines on invoice
                     if (! $error)
                     {
@@ -1005,9 +1019,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                             $srcobject->fetch_lines();
                             $lines = $srcobject->lines;
                         }
-
-                        $frequency=1;
-                        $frequency_unit='m';
 
                         $date_start = false;
                         $fk_parent_line=0;
@@ -1074,6 +1085,52 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                             //$price_invoice_template_line = $lines[$i]->subprice * GETPOST('frequency_multiple','int');
                             $price_invoice_template_line = $lines[$i]->subprice;
 
+
+                            // Get data from product (frequency, discount type and val)
+                            $tmpproduct->fetch($lines[$i]->fk_product);
+
+                            dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
+                            if ($tmpproduct->array_options['options_app_or_option'] == 'app')
+                            {
+                            	// Protection to avoid to validate contract with several 'app' products.
+                            	$nbofproductapp++;
+                            	if ($nbofproductapp > 1) {
+                            		dol_syslog("--- Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
+                            		$error++;
+                            		break;
+                            	}
+                            	$frequency = $tmpproduct->duration_value;
+                            	$frequency_unit = $tmpproduct->duration_unit;
+
+                            	if ($tmpproduct->array_options['options_register_discountcode']) {
+                            		$tmpvaliddiscountcodearray = explode(',', $tmpproduct->array_options['options_register_discountcode']);
+                            		foreach($tmpvaliddiscountcodearray as $valdiscount) {
+                            			$valdiscountarray = explode(':', $valdiscount);
+                            			$tmpcode = strtoupper(trim($valdiscountarray[0]));
+                            			$tmpval = str_replace('%', '', trim($valdiscountarray[1]));
+                            			if (is_numeric($tmpval)) {
+                            				$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
+                            			} else {
+                            				dol_syslog("--- Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
+                            			}
+                            		}
+									// If we entered a discountcode or get it from contract
+                            		if (! empty($validdiscountcodearray[$discountcode])) {
+                            			$discounttype = $validdiscountcodearray[$discountcode]['type'];
+                            			$discountval = $validdiscountcodearray[$discountcode]['value'];
+                            		} else {
+                            			$discountcode = '';
+                            		}
+                            		//var_dump($validdiscountcodearray); var_dump($discountcode); var_dump($discounttype); var_dump($discountval); exit;
+                            		if ($discounttype == 'percent') {
+                            			if ($discountval > $discount) {
+											$discount = $discountval;		// If discount with coupon code is higher than the one defined into contract.
+                            			}
+                            		}
+                            	}
+                            }
+
+                            // Insert the line
                             $result = $invoice_draft->addline($desc, $price_invoice_template_line, $lines[$i]->qty, $tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $discount, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $invoice_draft->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_options, $lines[$i]->situation_percent, $lines[$i]->fk_prev_id, $lines[$i]->fk_unit);
 
                             if ($result > 0) {
@@ -1087,15 +1144,6 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                             // Defined the new fk_parent_line
                             if ($result > 0 && $lines[$i]->product_type == 9) {
                                 $fk_parent_line = $result;
-                            }
-
-                            $tmpproduct->fetch($lines[$i]->fk_product);
-
-                            dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
-                            if ($tmpproduct->array_options['options_app_or_option'] == 'app')
-                            {
-                                $frequency = $tmpproduct->duration_value;
-                                $frequency_unit = $tmpproduct->duration_unit;
                             }
                         }
                     }
@@ -1140,8 +1188,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
                         $date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
                         $invoice_rec->date_when = $date_next_execution;
 
-                        // Add discount into the template invoice
-                        $discountcode = GETPOST('discountcode', 'alpha');
+                        // Add discount into the template invoice (it was already added into lines)
                         if ($discountcode) {
                         	$invoice_rec->array_options['options_discountcode'] = $discountcode;
                         }
@@ -2831,7 +2878,7 @@ if ($mythirdpartyaccount->isareseller)
 	print '
 		<!-- Info reseller -->
 		<div class="note note-info">
-		<h4 class="block">'.$langs->trans("YouAreAReseller").'</h4>
+		<h4 class="block">'.$langs->trans("YouAreAReseller").'.</h4>
 		';
 	print $langs->trans("YourURLToCreateNewInstance").' : ';
 
@@ -3001,7 +3048,7 @@ if (empty($welcomecid))
 				{
 					if (! $isASuspendedContract)
 					{
-						$firstline = reset($contract->lines);
+						//$firstline = reset($contract->lines);
 						print '
 							<!-- XDaysBeforeEndOfTrial -->
 							<div class="note note-warning">
@@ -3019,16 +3066,20 @@ if (empty($welcomecid))
 					}
 					else
 					{
-						$firstline = reset($contract->lines);
+						//$firstline = reset($contract->lines);
 						print '
 							<!-- TrialInstanceWasSuspended -->
 							<div class="note note-warning">
-							<h4 class="block">'.$langs->trans("TrialInstanceWasSuspended", $contract->ref_customer).' !</h4>
-							<p>
-							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
-						print $langs->trans("AddAPaymentModeToRestoreInstance");
-						print '</a>
-							</p>
+							<h4 class="block">'.$langs->trans("TrialInstanceWasSuspended", $contract->ref_customer).' !</h4>';
+						if ($mode != 'registerpaymentmode') {
+							print '
+								<p>
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+							print $langs->trans("AddAPaymentModeToRestoreInstance");
+							print '</a>
+								</p>';
+						}
+						print '
 							</div>
 						';
 					}
@@ -3039,16 +3090,20 @@ if (empty($welcomecid))
 
 					$messageforinstance[$contract->ref_customer] = 1;
 
-					$firstline = reset($contract->lines);
+					//$firstline = reset($contract->lines);
 					print '
 						<!-- XDaysAfterEndOfTrial -->
 						<div class="note note-warning">
-						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrial", $contract->ref_customer, abs($delayindays)).' !</h4>
-						<p>
-						<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
-					print $langs->trans("AddAPaymentModeToRestoreInstance");
-					print '</a>
-						</p>
+						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrial", $contract->ref_customer, abs($delayindays)).' !</h4>';
+					if ($mode != 'registerpaymentmode') {
+						print '
+							<p>
+							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+						print $langs->trans("AddAPaymentModeToRestoreInstance");
+						print '</a>
+							</p>';
+					}
+					print '
 						</div>
 					';
 				}
@@ -3059,7 +3114,7 @@ if (empty($welcomecid))
 				{
 					if ($contract->array_options['options_deployment_status'] != 'processing')
 					{
-						$firstline = reset($contract->lines);
+						//$firstline = reset($contract->lines);
 						print '
 							<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
 							<div class="note note-info">
@@ -4027,6 +4082,7 @@ if ($mode == 'instances')
 								// Billing
 								if ($statuslabel != 'undeployed')
 								{
+									print '<!-- Billing information of contract -->'."\n";
 									print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.$langs->trans("Billing").' : </span>';
 									if ($foundtemplate > 1)
 									{
@@ -4042,12 +4098,15 @@ if ($mode == 'instances')
 									}
 									else
 									{
+										// Invoice maount line
 										if ($foundtemplate != 0 && $priceinvoicedht != $contract->total_ht)
 										{
 											if ($pricetoshow != '') print $langs->trans("FlatOrDiscountedPrice").' = ';
 										}
 										print '<span class="bold">'.$pricetoshow.'</span>';
-										if ($foundtemplate == 0)	// foundtemplate is same than ispaid
+
+										// Discount and next invoice line
+										if ($foundtemplate == 0)	// foundtemplate means there is at least one template invoice (so contract is a paying contract)
 										{
 											if ($contract->array_options['options_date_endfreeperiod'] < $now) $color='orange';
 
@@ -4087,6 +4146,7 @@ if ($mode == 'instances')
 													else
 													{
 														print ' - '.$langs->trans("APaymentModeWasRecorded");
+
 														// Discount code entered
 														if ($contract->array_options['options_discountcode']) {
 															print '<br><span class="opacitymedium">'.$langs->trans("DiscountCode").'</span> : <span class="bold">';
@@ -4100,9 +4160,9 @@ if ($mode == 'instances')
 										elseif ($datenextinvoice)
 										{
 											// Discount code entered
-											if ($contract->array_options['options_discountcode']) {
+											if ($templateinvoice->array_options['options_discountcode']) {
 												print '<br><span class="opacitymedium">'.$langs->trans("DiscountCode").'</span> : <span class="bold">';
-												print $contract->array_options['options_discountcode'];
+												print $templateinvoice->array_options['options_discountcode'];
 												print '</span>';
 											}
 											// Date of next invoice
@@ -5620,6 +5680,9 @@ if ($mode == 'registerpaymentmode')
     	        }
     	    }
 
+    	    $defaultdiscountcode = GETPOST('discountcode', 'aZ09');
+    	    $acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE == 1 ? 1 : 0);
+
     	    // We are not yet a customer
         	if ($amounttopayasfirstinvoice) {
         	    print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("AFirstInvoiceOfWillBeDone", price($amounttopayasfirstinvoice, 0, $langs, 1, -1, -1, $conf->currency));
@@ -5634,10 +5697,14 @@ if ($mode == 'registerpaymentmode')
         	        print ')';
         	    } else {
         	        $parenthesisopen = 0;
-        	        if (count($amounttopayasfirstinvoicetinstances) == 1) {   // If 1 instance
+        	        if (count($amounttopayasfirstinvoicetinstances) == 1) {   // If 1 instance to pay (the most common case)
             	        foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
             	            $parenthesisopen = 1;
             	            print ' ('.$langs->trans("Instance").': <strong>'.$key.'</strong>';
+							// If there is only one contract waiting for payment, we can get the discount code of it, if there is one and if a value is not already provided in POST.
+            	            if (! GETPOSTISSET('discountcode')) {
+            	            	$defaultdiscountcode = $tmpcontracttopay->array_options['options_discountcode'];
+            	            }
             	        }
         	        }
 
@@ -5664,10 +5731,9 @@ if ($mode == 'registerpaymentmode')
         	    print '<br>';
 
         	    // Show input text for the discount code
-        	    $acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE == 1 ? 1 : 0);
         	    if ($acceptdiscountcode) {
         	    	print '<br>';
-        	    	print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode"><br>';
+        	    	print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'"><br>';
         	    	print '<div class="discountcodetext" id="discountcodetext"></div>';
         	    	print '<script type="text/javascript" language="javascript">'."\n";
         	    	print '

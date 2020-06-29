@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2006-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2006-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 /**
  *	    \file       htdocs/core/lib/dolicloud.lib.php
- *		\brief      Ensemble de fonctions de base pour le module SellYourSaas
+ *		\brief      Some functions for module Sell-Your-Saas
  */
 
 /**

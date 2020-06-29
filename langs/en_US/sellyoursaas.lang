@@ -313,7 +313,7 @@ CommandToPutInstancesOnOffline=Command to put all instances online/offline
 InstanceWasDeployed=Instance has been deployed
 YourPaymentModeWillExpireFixItSoon=Your payment mode is about to expire. Please <a href="%s">update your payment mode</a> to avoid any interruption of service.
 YouAreAReseller=You are a reseller
-YourURLToCreateNewInstance=To have new users being linked to your account and appear in your dashboard, you/they must use the following URL to register
+YourURLToCreateNewInstance=To have new users being linked to your account and appear in your dashboard, you or they must use the following URL to register
 YourCommissionsAppearsInMenu=Your commissions (current rate <strong>%s%%</strong>) are visible into menu %s
 InvoicingSuspended=Billing suspended
 LoginWithCustomerAccount=Login with customer account
@@ -487,7 +487,7 @@ StripeAccount=Stripe Account
 StripeAccountForCustomerHelp=The Stripe account to use to collect the customer invoices. Fill something here only if you need to collect money using another Stripe account than the default value.<br>Example: cus_ABCD@pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Max number of instances
 ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>
-AFirstInvoiceOfWillBeDone=Taking into account the chosen plan and data of your existing instance(s), your subscription will start with a first invoice of <span class="nowrap bold">%s tax included</span> 
+AFirstInvoiceOfWillBeDone=Taking into account the chosen plan and data of your existing instance(s), your subscription will start with a first invoice of <span class="nowrap bold">%s tax included</span>, discounts excluded
 SeeOurPrices=See prices for each plan <a href="%s" target="_blank">here</a>
 NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.
 PayingInstanceLost=Paying instance lost
@@ -506,3 +506,4 @@ ArchiveTestInstanceDesc=WARNING: Check that the feature is enabled by having the
 ToCreateDBUserManualy=To create a db user manually on SELECT only, you can do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;
 LatestBackupMessage=Latest backup message
 SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accept discount code when entering payment mode
+DiscountCodeDesc=The discount code used to register or to enter payment. The effective discount code used to define the real discount for invoice generation is the one saved at the recurring invoice level.

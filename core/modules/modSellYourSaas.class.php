@@ -648,7 +648,8 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('latestbackup_message',          "LatestBackupMessage",     'text', 162,'8192',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('cookieregister_counter',                    "RegistrationCounter",     'int', 170,  '10',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 1);
 		$resultx=$extrafields->addExtraField('cookieregister_previous_instance', "RegistrationPreviousInstance", 'varchar', 171, '128',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('spammer',                                              "EvilUser", 'varchar', 172,   '8',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('discountcode', 	    	 			             "DiscountCode", 'varchar', 200, '255',    'contrat', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('spammer',                                              "EvilUser", 'varchar', 300,   '8',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Invoice
 		$param=array('options'=>array(1=>1));
@@ -659,7 +660,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('delayautopayment',    "DelayAutomaticPayment",     'date', 1035,    '', 'facture', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 'DelayAutomaticPaymentDesc');
 
 		// Invoice rec
-		$resultx=$extrafields->addExtraField('discountcode', 	    	     "DiscountCode",  'varchar',  200,  '255',   'facture_rec', 0, 0,  '',      '', 1, '',  1, 'DiscountCode', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('discountcode', 	    	     "DiscountCode",  'varchar',  200,  '255',   'facture_rec', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Create/import website called 'sellyoursaas'
 		//include_once DOL_DOCUMENT_ROOT.'/website/class/website.class.php';
