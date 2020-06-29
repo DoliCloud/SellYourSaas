@@ -133,7 +133,7 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 
 
 /**
- * Process refresh of database for customer $object
+ * Process refresh of database for contrat $object
  * This also update database field lastcheck.
  * This set a lot of object->xxx properties
  * 	->lastlogin_admin, ->lastpass_admin,
@@ -185,18 +185,44 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 
 		if ($newdb->connected && $newdb->database_selected)
 		{
+			$sqltocountusers = '';
+			// Now search the real SQL request to count users
+			foreach($object->lines as $contractline)
+			{
+				if (empty($contractline->fk_product)) continue;
+				$producttmp = new Product($db);
+				$producttmp->fetch($contractline->fk_product);
+
+				// If this is a line for a metric
+				if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
+					&& $producttmp->array_options['options_resource_label'] == 'User')
+				{
+					$dbprefix = ($object->array_options['options_prefix_db']?$object->array_options['options_prefix_db']:'llx_');
+
+					$sqltocountusers = $producttmp->array_options['options_resource_formula'];
+					// Example: $sqltocountusers="SELECT COUNT(login) as nb FROM llx_user WHERE statut <> 0 AND login <> '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__';
+					$sqltocountusers = preg_replace('/^SQL:/', '', $sqltocountusers);
+					$sqltocountusers = preg_replace('/__SELLYOURSAAS_LOGIN_FOR_SUPPORT__/', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT, $sqltocountusers);
+					$sqltocountusers = preg_replace('/__INSTANCEDBPREFIX__/', $dbprefix, $sqltocountusers);
+					break;
+				}
+			}
+
+			$sqltogetlastloginadmin = "SELECT login, pass, datelastlogin FROM llx_user WHERE admin = 1 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+			$sqltogetmodules = "SELECT name, value FROM llx_const WHERE name LIKE 'MAIN_MODULE_%' or name = 'MAIN_VERSION_LAST_UPGRADE' or name = 'MAIN_VERSION_LAST_INSTALL'";
+			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM llx_user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY datelastlogin DESC LIMIT 1";
+
 			// Get user/pass of last admin user
 			if (! $error)
 			{
-				$sql="SELECT login, pass FROM llx_user WHERE admin = 1 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
-				$resql=$newdb->query($sql);
+				$resql=$newdb->query($sqltogetlastloginadmin);
 				if ($resql)
 				{
 					$obj = $newdb->fetch_object($resql);
-					$object->lastlogin_admin=$obj->login;
-					$object->lastpass_admin=$obj->pass;
-					$lastloginadmin=$object->lastlogin_admin;
-					$lastpassadmin=$object->lastpass_admin;
+					$object->lastlogin_admin = $obj->login;
+					$object->lastpass_admin = $obj->pass;
+					$lastloginadmin = $object->lastlogin_admin;
+					$lastpassadmin = $object->lastpass_admin;
 				}
 				else $error++;
 			}
@@ -205,8 +231,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 			if (! $error)
 			{
 				$modulesenabled=array(); $lastinstall=''; $lastupgrade='';
-				$sql="SELECT name, value FROM llx_const WHERE name LIKE 'MAIN_MODULE_%' or name = 'MAIN_VERSION_LAST_UPGRADE' or name = 'MAIN_VERSION_LAST_INSTALL'";
-				$resql=$newdb->query($sql);
+				$resql=$newdb->query($sqltogetmodules);
 				if ($resql)
 				{
 					$num=$newdb->num_rows($resql);
@@ -235,17 +260,23 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 				else $error++;
 			}
 
-			// Get nb of users
+			// Get nb of users (special case for hard coded field into some GUI tabs)
 			if (! $error)
 			{
-				$sql="SELECT COUNT(login) as nbofusers FROM llx_user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."'";
-				$resql=$newdb->query($sql);
-				if ($resql)
-				{
-					$obj = $newdb->fetch_object($resql);
-					$object->nbofusers	= $obj->nbofusers;
+				if ($sqltocountusers) {
+					$resql=$newdb->query($sqltocountusers);
+					if ($resql)
+					{
+						$obj = $newdb->fetch_object($resql);
+						$object->nbofusers	= $obj->nb;
+					}
+					else {
+						$error++;
+						setEventMessages($newdb->lasterror(), null, 'errors');
+					}
+				} else {
+					setEventMessages('NoResourceToCountUsersFound', null, 'warnings');
 				}
-				else $error++;
 			}
 
 			$deltatzserver=(getServerTimeZoneInt()-0)*3600;	// Diff between TZ of NLTechno and DoliCloud
@@ -253,8 +284,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 			// Get last login of users
 			if (! $error)
 			{
-				$sql="SELECT login, pass, datelastlogin FROM llx_user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY datelastlogin DESC LIMIT 1";
-				$resql=$newdb->query($sql);
+				$resql=$newdb->query($sqltogetlastloginuser);
 				if ($resql)
 				{
 					$obj = $newdb->fetch_object($resql);
@@ -329,7 +359,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
  * order by sum(im.value) desc
  *
  * @param	Database	$db			Database handler
- * @param	date		$datelim	Date limit
+ * @param	integer		$datelim	Date limit
  * @return	array					Array of data
  */
 function dolicloud_calculate_stats($db, $datelim)

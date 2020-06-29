@@ -109,7 +109,7 @@ else
  */
 
 if (0 == posix_getuid()) {
-    echo "Script must not be ran with root (but with admin sellyoursaas account).\n";
+    echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
     exit(-1);
 }
 
@@ -179,7 +179,7 @@ if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
 
 if ($result <= 0)
 {
-	print "Error: instance ".$instance." not found.\n";
+	print "Error: No instance named '".$instance."' with status 'done' could be found.\n";
 	exit(-2);
 }
 
@@ -375,7 +375,7 @@ if (empty($return_var) && empty($return_varmysql))
 {
 	if ($mode == 'confirm')
 	{
-		print 'Update date of full backup (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
+		//print 'Update date of full restore (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
 
 		// Update database
 		/*$object->array_options['options_latestbackup_date']=$now;	// date latest files and database rsync backup

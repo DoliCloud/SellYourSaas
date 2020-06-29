@@ -117,18 +117,20 @@ if ($action == 'set')
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 
-		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",'none'),'chaine',0,'Nb days before stopping invoice payment try',$conf->entity);
-		dolibarr_set_const($db,"SELLYOURSAAS_NBHOURSBETWEENTRIES",GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES",'none'),'chaine',0,'Nb hours minium between each invoice payment try',$conf->entity);
-
 		dolibarr_set_const($db,"SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",'alpha'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_HASHALGOFORPASSWORD",GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD",'alpha'),'chaine',0,'',$conf->entity);
 
 		dolibarr_set_const($db,'SELLYOURSAAS_MAXDEPLOYMENTPERIP',GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIP",'int'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,'SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR',GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR",'int'),'chaine',0,'',$conf->entity);
+
 		dolibarr_set_const($db,'SELLYOURSAAS_INFRA_COST',GETPOST("SELLYOURSAAS_INFRA_COST",'int'),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_ACCEPT_DISCOUNTCODE",GETPOST("SELLYOURSAAS_ACCEPT_DISCOUNTCODE",'none'),'chaine',0,'Accept discount code when entering payment mode',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_NBHOURSBETWEENTRIES",GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES",'none'),'chaine',0,'Nb hours minium between each invoice payment try',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",'none'),'chaine',0,'Nb days before stopping invoice payment try',$conf->entity);
 
 		dolibarr_set_const($db,"SELLYOURSAAS_ANONYMOUSUSER",GETPOST("SELLYOURSAAS_ANONYMOUSUSER",'none'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_LOGIN_FOR_SUPPORT",GETPOST("SELLYOURSAAS_LOGIN_FOR_SUPPORT",'none'),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_PASSWORD_FOR_SUPPORT",GETPOST("SELLYOURSAAS_PASSWORD_FOR_SUPPORT",'none'),'chaine',0,'',$conf->entity);
 
 		$dir=GETPOST("DOLICLOUD_INSTANCES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
@@ -314,7 +316,9 @@ print '</td>';
 print '<td>1</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAIN_FAQ_URL").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
+print '</td>';
 print '<td colspan="2">';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.$conf->global->SELLYOURSAAS_MAIN_FAQ_URL.'">';
 print '</td>';
@@ -386,7 +390,7 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("DefaultProductForInstances").'</td>';
 print '<td>';
 $defaultproductid=$conf->global->SELLYOURSAAS_DEFAULT_PRODUCT;
-print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT');
+print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
 print '</td>';
 print '<td>My SaaS service for instance</td>';
 print '</tr>';
@@ -587,6 +591,13 @@ print '</td>';
 print '<td>5</td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ACCEPT_DISCOUNTCODE").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_ACCEPT_DISCOUNTCODE" value="'.(empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)?0:$conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE).'">';
+print '</td>';
+print '<td>0 or 1</td>';
+print '</tr>';
+
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBHOURSBETWEENTRIES").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBHOURSBETWEENTRIES" value="'.$conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES.'">';
@@ -673,25 +684,39 @@ print '</td>';
 print '<td>/home/jail/home</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("DirForBackupInstances").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("DirForBackupTestInstances"), '').'</td>';
+print '<td>';
+//print '<input size="40" type="text" name="DOLICLOUD_TEST_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_TEST_BACKUP_PATH.'">';
+print '<span class="opacitymedium">'.$langs->trans("FeatureNotYetAvailable").'</span>';
+print '</td>';
+print '<td>';
+//print '/home/jail/backup, /mnt/diskbackup/backup';
+print '</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("DirForBackupInstances"), '').'</td>';
 print '<td>';
 print '<input size="40" type="text" name="DOLICLOUD_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_BACKUP_PATH.'">';
 print '</td>';
-print '<td>/home/jail/backup</td>';
+print '<td>/home/jail/backup, /mnt/diskbackup/backup</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_TEST_ARCHIVES_PATH").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_TEST_ARCHIVES_PATH"), $langs->trans("ArchiveInstanceDesc").'<br><br>'.$langs->trans("ArchiveTestInstanceDesc")).'</td>';
 print '<td>';
 print '<input size="40" type="text" name="SELLYOURSAAS_TEST_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'">';
 print '</td>';
-print '<td>/home/jail/archives-test</td>';
+print '<td>/home/jail/archives-test, /mnt/diskbackup/archives-test</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PAID_ARCHIVES_PATH").'</td>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_PAID_ARCHIVES_PATH"), $langs->trans("ArchiveInstanceDesc")).'</td>';
 print '<td>';
 print '<input size="40" type="text" name="SELLYOURSAAS_PAID_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'">';
 print '</td>';
-print '<td>/home/jail/archives-paid</td>';
+print '<td>/home/jail/archives-paid, /mnt/diskbackup/archives-paid</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';
@@ -706,6 +731,13 @@ print '<td>';
 print '<input type="text" name="SELLYOURSAAS_LOGIN_FOR_SUPPORT" value="'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT.'">';
 print '</td>';
 print '<td>Login to use to create a support user account on customer instances</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("PasswordForSupport").'</td>';
+print '<td>';
+print '<input type="text" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.$conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT.'">';
+print '</td>';
+print '<td>Password to use to create a support user account on customer instances</td>';
 print '</tr>';
 
 print '</table>';

@@ -39,6 +39,7 @@ CREATE TABLE llx_packages(
 	cliafter text, 
 	sqlafter text, 
 	crontoadd text,
+	version_formula text,
 	allowoverride varchar(255), 
 	status integer,
 	register_text varchar(255),

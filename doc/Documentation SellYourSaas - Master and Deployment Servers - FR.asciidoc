@@ -7,7 +7,7 @@ Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas 
 :creator: Laurent Destailleur
 :title: Document installation et exploitation de SellYourSaas
 :subject: Ce document décrit la mise en oeuvre technique et fonctionnelle de SellYourSaas (système de déploiement et vente automatisé en SaaS d'une application WAMP (comme Dolibarr ERP CRM, GLPI, ...).
-:keywords: sellyoursaas, saas, dolibarr, wamp
+:keywords: sellyoursaas, saas, dolibarr, wamp, glpi
 :imagesdir: ./img
 :city: Bordeaux
 :toc: manual
@@ -43,7 +43,7 @@ Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser 
 	* Gestion d'un réseau de revendeur.
 	* Disponible en OpenSource.
 	
-Financé par les sociétés Open Source https://www.nltechno.com[NLTechno] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (DoliCloud, NovaFirstCloud, GLPI-Network, ...). Voici un synthèse de ses capacités:
+Financé par les sociétés Open Source https://www.nltechno.com[NLTechno] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici un synthèse de ses capacités:
 
     * Déploiment de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
     * Diffusion d'instance gratuites sans demande d'informations confidentiels ni cartes bancaires.
@@ -200,6 +200,8 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 useradd admin -g admin
 ---------------
 
+Vérifiez que le id de ce user *admin* est bien supérieur ou égale à 1000.
+ 
 
 Créer un compte utilisateur pour vous même (ou d'autres administrateurs), par exemple: *myunixlogin*. Il sera utiliser pour vous logguer.
 
@@ -218,14 +220,18 @@ Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas* pour changer les autoris
 #Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
 PermitRootLogin no
+# Permissions on files must be correct to allow login
 StrictModes yes
 
+# Define list of allowed method to authenticate
+ChallengeResponseAuthentication yes
+PasswordAuthentication yes
 PubkeyAuthentication yes
 
 PermitEmptyPasswords no
-PasswordAuthentication yes
 
 AllowUsers myunixlogin admin osu*
+DenyUsers guest
 ---------------
 
 Attention, à bien remplacer myunixlogin par la bonne valeur avant de prendre en compte les modifications par:
@@ -243,7 +249,7 @@ Ajouter la ligne suivante dans le fichier */etc/sudoers* pour repositionner le H
 Defaults        set_home
 ---------------
 
-Créer un fichier *myunixlogin* à mettre dans le répertoire */etc/sudoers.d* avec les permissions *r--r-----* et le contenu
+Créer un fichier *myunixlogin* à mettre dans le répertoire */etc/sudoers.d* avec le owner *root* et les permissions *r--r-----* et le contenu
 
 [source,conf]
 ---------------
@@ -350,12 +356,12 @@ Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le
 	GID_MAX                 500000
 ---------------
 
-Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* pour mettre 
+Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* (sinon) pour mettre 
 
 [source,conf]
 ---------------
-	LimitUIDRange 0 500000
-	LimitGIDRange 0 500000
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 
@@ -529,8 +535,8 @@ ln -fs /mnt/diskhome/home /home/jail/home
 
 mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
-ln -fs /mnt/diskbackup/backup /home/jail/backup; 
-ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test; 
+ln -fs /mnt/diskbackup/backup /home/jail/backup 
+ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
 ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
@@ -641,7 +647,7 @@ Host ipserveurdeploiment
 ---------------
 sudo apt-get update
 sudo apt-get install ntp git zip memcached rrdtool ncdu
-sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl
+sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2
 sudo apt-get install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit spamc spamassassin
 sudo apt-get install bind9
 ---------------
@@ -887,16 +893,174 @@ systemctl status remote_server_launcher
 
 === Installation de fail2ban ===
 
-* Installation de fail2ban et activation des règles fail2ban suivante dans */etc/fail2ban/jail.conf* :
-  *apache-shellshock*, *php-url-fopen*, *suhosin*, *webmin-auth*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
-  *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*, 
+* Installation de fail2ban et activation des règles fail2ban suivantes:
+  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
+  
+  Ainsi que les règles spécifiques à sellyoursaas:
+  
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
 
-NOTE: Les règles par défaut disponibles peuvent varier selon la version de l'OS installé.
 
-* Ajouter les règles antispammeur dans fail2ban en les mettant dans */etc/jail.local*
+Pour cela, créer un fichier */etc/fail2ban/jail.local* avec ce contenu:
+
+NOTE: Les règles disponibles peuvent varier selon la version de l'OS installé.
+
+NOTE: Penser à modifier aussi "mybusinessips" par votre ou vos ips séparés par des espaces ainsi que la valeur de destemail par l'email de supervision de votre société.
+
 
 [source,bash]
 ---------------
+# Fail2Ban configuration file.
+#
+# This file was composed for Debian systems from the original one
+# provided now under /usr/share/doc/fail2ban/examples/jail.conf
+# for additional examples.
+#
+# Comments: use '#' for comment lines and ';' for inline comments
+#
+# To avoid merges during upgrades DO NOT MODIFY THIS FILE
+# and rather provide your changes in /etc/fail2ban/jail.local
+#
+
+# The DEFAULT allows a global definition of the options. They can be overridden
+# in each jail afterwards.
+
+[DEFAULT]
+# "ignoreip" can be an IP address, a CIDR mask or a DNS host. Fail2ban will not
+# ban a host which matches an address in this list. Several addresses can be
+# defined using space separator.
+ignoreip = 127.0.0.1/8 mybusinessips
+
+# "bantime" is the number of seconds that a host is banned.
+bantime  = 3600
+
+# A host is banned if it has generated "maxretry" during the last "findtime"
+# seconds.
+findtime = 600
+maxretry = 3
+
+# "backend" specifies the backend used to get files modification.
+# Available options are "pyinotify", "gamin", "polling" and "auto".
+# This option can be overridden in each jail as well.
+#
+# pyinotify: requires pyinotify (a file alteration monitor) to be installed.
+#            If pyinotify is not installed, Fail2ban will use auto.
+# gamin:     requires Gamin (a file alteration monitor) to be installed.
+#            If Gamin is not installed, Fail2ban will use auto.
+# polling:   uses a polling algorithm which does not require external libraries.
+# auto:      will try to use the following backends, in order:
+#            pyinotify, gamin, polling.
+backend = auto
+
+# "usedns" specifies if jails should trust hostnames in logs,
+#   warn when reverse DNS lookups are performed, or ignore all hostnames in logs
+#
+# yes:   if a hostname is encountered, a reverse DNS lookup will be performed.
+# warn:  if a hostname is encountered, a reverse DNS lookup will be performed,
+#        but it will be logged as a warning.
+# no:    if a hostname is encountered, will not be used for banning,
+#        but it will be logged as info.
+usedns = warn
+
+#
+# Destination email address used solely for the interpolations in
+# jail.{conf,local} configuration files.
+destemail = supervision@mydomain.com
+
+#
+# Name of the sender for mta actions
+sendername = Fail2Ban
+
+
+#
+# ACTIONS
+#
+
+# Default banning action (e.g. iptables, iptables-new,
+# iptables-multiport, shorewall, etc) It is used to define
+# action_* variables. Can be overridden globally or per
+# section within jail.local file
+banaction = iptables-multiport
+
+# email action. Since 0.8.1 upstream fail2ban uses sendmail
+# MTA for the mailing. Change mta configuration parameter to mail
+# if you want to revert to conventional 'mail'.
+mta = sendmail
+
+
+[apache-shellshock]
+
+enabled = true
+
+
+[php-url-fopen]
+
+enabled = true
+
+
+[postfix-sasl]
+
+enabled = true
+
+
+[sshd]
+
+enabled = true
+
+
+[webmin-auth]
+
+enabled = true
+
+
+[xinetd-fail]
+
+enabled = true
+
+
+[apache-badbots]
+# Ban hosts which agent identifies spammer robots crawling the web
+# for email addresses. The mail outputs are buffered.
+port     = http,https
+logpath  = %(apache_access_log)s
+bantime  = 172800
+maxretry = 1
+enabled  = true
+
+
+[apache-noscript]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 6
+enabled  = true
+
+
+[apache-overflows]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[apache-nohome]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[apache-botsearch]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
 [mysqld-auth]
 
 port     = 3306
@@ -1309,6 +1473,7 @@ broken_sasl_auth_clients = yes
 ==== Configuration
 
 Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par *sudo systemctl show -p DefaultLimitNOFILE*) par défaut de systemd:
+
 [source,bash]
 ---------------
 LimitNOFILE=50000
@@ -1316,6 +1481,7 @@ Restart=on-watchdog
 ---------------
 
 Prendre en compte le changement en lançant:
+
 [source,bash]
 ---------------
 systemctl daemon-reload
@@ -1979,7 +2145,7 @@ shutdown -Fr now
 Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php*
 
 
-==== Définition taille upload
+==== Définition taille upload et durée sessions
 
 Modifier le fichier *php.ini* pour permettre l'upload de plus gros fichiers.
 
@@ -1988,6 +2154,8 @@ Modifier le fichier *php.ini* pour permettre l'upload de plus gros fichiers.
 upload_max_filesize = 20M
 
 post_max_size = 25M
+
+session.gc_maxlifetime = 3600
 ---------------
 
 
@@ -2027,8 +2195,7 @@ mail.log = /var/log/phpmail.log
 
 [source,conf]
 ---------------
-# use the syslog group by default, since this is the owning group
-# of /var/log/syslog.
+# use the syslog group by default, since this is the owning group of /var/log/syslog.
 su root syslog
 ---------------
 
@@ -2068,7 +2235,7 @@ su root syslog
         create 666 syslog adm
 }
 
-/var/log/remote_server.log {
+/var/log/remote_server.log /var/log/backup_backups.log {
         su root root
         weekly
         rotate 4
@@ -2077,6 +2244,16 @@ su root syslog
         missingok
         notifempty
         create 600 root root
+}
+
+/home/admin/wwwroot/dolibarr_documents/*.log {
+        su admin www-data
+        daily
+        rotate 7
+        compress
+        delaycompress
+        missingok
+        notifempty
 }
 ---------------
 
@@ -2207,7 +2384,7 @@ Mettre dans le cron du user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php cronsecuritykey firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php `hostname`secondpartofsecuritykey firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 7 7 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 # cron master and deployment root
@@ -2254,7 +2431,11 @@ Sur tous les serveurs (Master et Déploiement):
 
 * Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr*)
 
-* Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du relai. 
+* Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
+
+Sur le serveur Master:
+
+* Activez le module "Cron/Travaux programmés"  et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
 
 
 === Installation de Geoip2
@@ -2308,10 +2489,6 @@ Sur tous les serveurs (Master et Déploiement):
 ** Module Utilisateurs et Groupes
 *** Créer/modifier ses propres informations utilisateur
 
-* Activer le module SellYourSaas dans Dolibarr et configurer le.
-
-TODO Description de la page de setup.
-
 * Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
 
 [source,bash]
@@ -2333,12 +2510,14 @@ subdomain=with.mysaasdomainname.com
 allowed_hosts=127.0.0.1,ipduservermaster
 # Set to 1 if this server is the master server
 masterserver=1
-# Set to its own if if it is a deployment server
-ipserverdeployment=ipduserverdeployment
-# Set to 1 if this server hosts a dns for the pool (deployment server)
-dnsserver=1
 # Set to 1 if this server host instances for the pool (deployment server)
 instanceserver=1
+# Set to 1 if this server hosts a dns for the pool (deployment server)
+dnsserver=1
+# Set to its own IP if it is a deployment server
+ipserverdeployment=ipduserverdeployment
+# Set this to directory where dolibarr repository is installed
+dolibarrdir=/home/admin/wwwroot/dolibarr
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
 database=databaseduservermaster
@@ -2347,20 +2526,40 @@ databaseuser=sellyoursaas
 databasepass=...
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
+# Set directory where backup are stored
+backupdir=/mnt/diskbackup/backup
+# Set directory where archives of tests instances are stored
+archivedirtest=/mnt/diskbackup/archives-test
+# Set directory where archives of paid instances are stored
+archivedirpaid=/mnt/diskbackup/archives-paid
 ---------------
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 
+* Activer le module SellYourSaas dans Dolibarr et configurer le.
+
+TODO Ajouter desc des variables de config du module...
+
 * Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
 
-Voir l'exemple dans le document *Exemple config de package pour appli Dolibarr sellyoursaas.pdf*
+Voir le chapitre "Configuration des packages" plus loin.
 
-* Créer un *Service* de type application pour définir la politique de tarification d'un abonnement et le *Package* associé.
+* Créer un *Service* de type *Application* pour définir la politique de tarification d'un abonnement et le *Package* associé.
 
-Voir l'exemple dans le document *Exemple config de package pour appli Dolibarr sellyoursaas.pdf*
+Voir le chapitre "Configuration des services" pour un description des champs.
+
+* Créer éventuellement des *Services* de type *Metric*. 
+
+Voir le chapitre "Configuration des services" pour un description des champs.
+
+* Créer éventuellement des *Services* de type *Options*. 
+
+Voir le chapitre "Configuration des services" pour un description des champs.
 
 
-Les URL pour réaliser les déploiements sont visibles dans le menu *SellYourSaas - URL de déploiement*
+Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
+
+Remarque: Les URL pour réaliser les déploiements des packages de type *Applications* seront visibles dans le menu *SellYourSaas - URL de déploiement*
 
 
 <<<<
@@ -3258,18 +3457,36 @@ UPDATE llx_const set value = 'ip.server.deployment1, ip.servr.deployment2' where
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_USING_PHPMAIL', 0, '1', 'chaine', 1);
 ---------------
 
-=== Configuration du service
 
-Le service représente la politique de tarification.
+=== Configuration des services
+
+Les services représentent la politique de tarification.
 
 Il faut créer un service de type *Application* qui sera lié au *Package* pour permettre le déploiement.
 
-Le service de type *Application* peut ensuite avoir dans l'onglet *Produit virtuel*, d'autres services de type *Options* ou "Métrique*.
+Le service de type *Application* peut ensuite avoir dans l'onglet *Produit virtuel*, d'autres services de type *Options* ou *Métrique*.
+
+
+Exemple de service de type Application pour déployer l'application PHP Dolibarr ERP CRM:
+
+image::Example_service_application.png[Exemple service application]
+
+Exemple pour un service qui ajoute une métrique de tarification par Utilisateur:
+
+image::Example_service_metric_USER.png[Exemple service metric]
+
+Exemple pour un service qui ajoute une option pour plus de Go:
+
+image::Example_service_option_GO.png[Exemple service option GO]
+
+
+Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
+
 
 
 === Récupérer l'URL d'inscritpion
 
-Aller dans le menu *SellYourSaas - Pages d'inscriptions* pour obtenir l'URL à utiliser pour souscrire à une instance. 
+Aller dans le menu *SellYourSaas - Pages d'inscriptions* pour obtenir l'URL à utiliser pour souscrire à une instance (package de type Application et ses dépendances). 
 
 
 
@@ -3287,7 +3504,7 @@ services souscrit, ou encore le nom du revendeur).
 
 
 [[remote_actions]]
-=== Description des 6 remote actions
+=== Description des 8 remote actions
 
 ==== deploy / deployall
 
@@ -3313,7 +3530,7 @@ Les étapes réalisées par l'agent et la remote action "undeploy" sont:
 
 Les étapes réalisées par l'agent et la remote action "suspend" sont:
 
-- Désactivation du virtual host.
+- Désactivation du virtual host et reload apache.
 
 Le but est de bloquer l'accès à l'instance avec un lien vers la dashboard pour mettre à jour son mode de paiement, sans toucher à l'instance.
 
@@ -3321,7 +3538,7 @@ Le but est de bloquer l'accès à l'instance avec un lien vers la dashboard pour
 
 Les étapes réalisées par l'agent et la remote action "unsuspend" sont:
 
-- Réactivation du virtual host.
+- Réactivation du virtual host et reload apache.
 
 ==== rename
 
@@ -3335,8 +3552,15 @@ Les étapes réalisées par l'agent et la remote action "refresh" sont:
 
 - Execution du calcul des métriques shell et renvoi des valeurs.
 
+==== backup
+
+Les étapes réalisées par l'agent et la remote action "backup" sont:
+
+- Appel du script backup_instance pour exécuter le sauvegarde d'une instance
+
 ==== recreateauthorizedkeys
 
+Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inutile et inutilisé pour le déploiement d'autres logiciels.
 Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys":
 
 - Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
@@ -3411,7 +3635,7 @@ Voici le détail des évennement ou URL qui peuvent etre trackées:
 
 Exemple de supervision de sellyoursaas avec DataDog:
 
-image::Example_ecran_datadog.png[Ecran supervision DataDog]
+image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 
 === Options cachées
@@ -3436,6 +3660,7 @@ To enable native Datadog reporting (datadog-agent must just be installed)
 
 === TroubleShooting
 
+==== ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
 On deployment server in */var/log/syslog* when using IMAP PHP function:
 
@@ -3444,6 +3669,8 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
 => Check that you have less than 1024 instances on same deployment server.
 => Check that error log file for instances is shared (instead one log file is open per instance with same unix account leading to troubles).
 
+
+==== Error when sending email in */var/log/mail.log*
 
 Error when sending email in */var/log/mail.log*:
 

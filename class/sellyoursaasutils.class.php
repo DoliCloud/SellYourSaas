@@ -160,12 +160,12 @@ class SellYourSaasUtils
 											$outputlangs->setDefaultLang($newlang);
 											$outputlangs->loadLangs(array('main','bills','products'));
 										}
-										$model=$invoice->modelpdf;
+										$model_pdf = ($invoice->model_pdf ? $invoice->model_pdf : $invoice->modelpdf);
 										$ret = $invoice->fetch($id); // Reload to get new records
 
 										dol_syslog("GETPOST('lang_id','aZ09')=".GETPOST('lang_id','aZ09')." invoice->thirdparty->default_lang=".(is_object($invoice->thirdparty)?$invoice->thirdparty->default_lang:'invoice->thirdparty not defined')." newlang=".$newlang." outputlangs->defaultlang=".$outputlangs->defaultlang);
 
-										$result = $invoice->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref);
+										$result = $invoice->generateDocument($model_pdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
 									}
 									else
 									{
@@ -2980,7 +2980,7 @@ class SellYourSaasUtils
 
 
     /**
-     * Make a remote action on a contract (deploy/undeploy/suspend/unsuspend/rename/...).
+     * Make a remote action on a contract (deploy/undeploy/suspend/unsuspend/rename/backup...).
      * This function is called on Master but remote action is done on remote agent.
      *
      * @param	string					$remoteaction	Remote action ('suspend/unsuspend/rename'=change apache virtual file, 'deploy/undeploy'=create/delete database, 'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics)
@@ -3224,6 +3224,7 @@ class SellYourSaasUtils
     	$ispaidinstance = 0;
 
     	// Loop on each line of contract ($tmpobject is a ContractLine)
+    	// to set or not $doremoteaction
     	foreach($listoflines as $tmpobject)
     	{
     		if (empty($tmpobject))
@@ -3246,7 +3247,7 @@ class SellYourSaasUtils
     		// Note remote action 'undeployall' is used to undeploy test instances
     		// Note remote action 'undeploy' is used to undeploy paying instances
     		$doremoteaction = 0;
-    		if (in_array($remoteaction, array('deploy','deployall','rename','suspend','unsuspend','undeploy','undeployall')) &&
+    		if (in_array($remoteaction, array('backup','deploy','deployall','rename','suspend','unsuspend','undeploy','undeployall')) &&
     			($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
     		if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
     			($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
@@ -3744,19 +3745,33 @@ class SellYourSaasUtils
 
     				            $newqty = 0;
 
-    				            //$stream = @ssh2_exec($connection, $bashformula);
-    				            if ($stream)
+    				            $respass = @ssh2_auth_password($connection, $object->array_options['options_username_os'], $object->array_options['options_password_os']);
+    				            if ($respass)
     				            {
-        				            stream_set_blocking( $stream, true );
-        				            $resultstring = fread($stream, 4096);
+	    				            $stream = @ssh2_exec($connection, $bashformula);
+	    				            if ($stream)
+	    				            {
+	        				            $errorStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+	        				            stream_set_blocking($errorStream, true);
+	        				            stream_set_blocking($stream, true);
 
-    				                // TODO
-
+	        				            $resultstring = stream_get_contents($stream, 4096);
+	        				            if ($resultstring) {
+	        				            	$tmparray = explode(' ', $resultstring);
+	        				            	$newqty = (int) $tmparray[1];
+	        				            } else {
+	        				            	$resultstring .= stream_get_contents($errorStream);
+	        				            }
+	    				            } else {
+	    				            	dol_syslog("Get resource BASH failed to ssh2_exec");
+	    				            }
+    				            } else {
+    				            	dol_syslog("Get resource BASH failed to ssh2_auth_password");
     				            }
 
     				            if (function_exists('ssh2_disconnect'))
     				            {
-    				                //ssh2_disconnect($connection);     // Hang on some config
+    				                ssh2_disconnect($connection);     // Hang on some config
     				                $connection = null;
     				                unset($connection);
     				            }
@@ -3957,7 +3972,7 @@ class SellYourSaasUtils
 
 
     	// Send to DataDog (metric + event)
-    	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
+    	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && $remoteaction != 'backup')
     	{
     	    try {
         	    dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');

@@ -9,7 +9,7 @@
         <Directory "/var/www/html">
         Require all granted
 		__AllowOverride__
-        Options +Indexes +FollowSymLinks
+        Options -Indexes +FollowSymLinks
         </Directory>
 
         # Possible values include: debug, info, notice, warn, error, crit, alert, emerg.

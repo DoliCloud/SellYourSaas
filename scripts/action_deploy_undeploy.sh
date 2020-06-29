@@ -539,20 +539,22 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					echo tar cz --exclude-vcs -f $archivedir/$osusername/$dbname/$osusername.tar.gz $targetdir/$osusername/$dbname
-					tar cz --exclude-vcs -f $archivedir/$osusername/$dbname/$osusername.tar.gz $targetdir/$osusername/$dbname
+					echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+					tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 					echo `date +%Y%m%d%H%M%S`
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
 					echo `date +%Y%m%d%H%M%S`
 					echo chown -R root $archivedir/$osusername/$dbname
 					chown -R root $archivedir/$osusername/$dbname
+					echo chmod -R o-rwcd x $archivedir/$osusername/$dbname
+					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
-						echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$dbname/$osusername.tar.gz $targetdir/$osusername/$dbname"
+						echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 					else
-						echo tar cz --exclude-vcs -f $archivedir/$osusername/$dbname/$osusername.tar.gz $targetdir/$osusername/$dbname
-						tar cz --exclude-vcs -f $archivedir/$osusername/$dbname/$osusername.tar.gz $targetdir/$osusername/$dbname
+						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 					fi
 					echo `date +%Y%m%d%H%M%S`
 					echo rm -fr $targetdir/$osusername/$dbname
@@ -560,6 +562,8 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					echo `date +%Y%m%d%H%M%S`
 					echo chown -R root $archivedir/$osusername/$dbname
 					chown -R root $archivedir/$osusername/$dbname
+					echo chmod -R o-rwx $archivedir/$osusername/$dbname
+					chmod -R o-rwx $archivedir/$osusername/$dbname
 				fi
 			fi
 		fi

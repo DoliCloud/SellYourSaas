@@ -88,5 +88,4 @@ if [ "x$1" == "xstatus" ]; then
 	else
 		echo Server run with PID $pid
 	fi
-	
 fi

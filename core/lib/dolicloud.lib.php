@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2006-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2006-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 /**
  *	    \file       htdocs/core/lib/dolicloud.lib.php
- *		\brief      Ensemble de fonctions de base pour le module SellYourSaas
+ *		\brief      Some functions for module Sell-Your-Saas
  */
 
 /**
@@ -185,7 +185,8 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Home
-	$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+	//$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+	$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os;
 	$links.='Home dir: ';
 	$links.='<input type="text" name="homestring" id="homestring" value="'.$homestring.'" size="50"> ';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('homestring');
@@ -193,10 +194,12 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	// ArchiveDir
 	$ispaid = sellyoursaasIsPaidInstance($object);
-	$archivestring=$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+	$archivestring = $conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->username_os;
+	$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
 	if ($ispaid)
 	{
-	    $archivestring=$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+		$archivestring = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->username_os;
+		$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
 	}
 	$links.='Archive dir: ';
 	$links.='<input type="text" name="archivestring" id="archivestring" value="'.$archivestring.'" size="50"><br>';
@@ -275,7 +278,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Rsync to Restore Program directory
-	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' '.$archivestring.'/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/';
+	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' '.$archivestringwithdb.'/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite application dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';

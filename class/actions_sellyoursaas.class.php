@@ -726,7 +726,7 @@ class ActionsSellyoursaas
 	        $this->results['searchintocontract']=$parameters['arrayresult']['searchintocontract'];
 	        $this->results['searchintocontract']['position']=22;
 
-	        $this->results['searchintodolicloud']=array('position'=>23, 'img'=>'object_generic', 'label'=>$langs->trans("SearchIntoOldDoliCloudInstances", $search_boxvalue), 'text'=>img_picto('','object_generic').' '.$langs->trans("OldDoliCloudInstances", $search_boxvalue), 'url'=>dol_buildpath('/sellyoursaas/backoffice/dolicloud_list.php',1).'?search_multi='.urlencode($search_boxvalue));
+	        $this->results['searchintodolicloud']=array('position'=>23, 'img'=>'object_generic', 'label'=>$langs->trans("XXX", $search_boxvalue), 'text'=>img_picto('','object_generic').' '.$langs->trans("XXX", $search_boxvalue), 'url'=>dol_buildpath('/sellyoursaas/backoffice/dolicloud_list.php',1).'?search_multi='.urlencode($search_boxvalue));
 	        */
         }
 

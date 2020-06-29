@@ -1,5 +1,9 @@
 To generate PDF:
 
+gem install asciidoctor
+gem install asciidoctor-pdf
+gem install rouge
+
 asciidoctor-pdf -a pdf-themesdir=. -a pdf-theme=sellyoursaas 'Name of file.asciidoc'
 
 Note: Template seems ignored ! I don't know why.

@@ -36,7 +36,7 @@ $path=dirname(__FILE__).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-	exit;
+	exit(1);
 }
 
 // Global variables
@@ -47,9 +47,66 @@ $RSYNCDELETE=0;
 $instance=isset($argv[1])?$argv[1]:'';
 $dirroot=isset($argv[2])?$argv[2]:'';
 $mode=isset($argv[3])?$argv[3]:'';
+if (isset($argv[4]) && $argv[4] == 'delete') {
+	$RSYNCDELETE=1;
+}
 
 @set_time_limit(0);							// No timeout for this script
 define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+
+// Read /etc/sellyoursaas.conf file
+$databasehost='localhost';
+$database='';
+$databaseuser='sellyoursaas';
+$databasepass='';
+$dolibarrdir='';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach($array as $val)
+	{
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'ipserverdeployment')
+		{
+			$ipserverdeployment = $tmpline[1];
+		}
+		if ($tmpline[0] == 'instanceserver')
+		{
+			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasehost')
+		{
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database')
+		{
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseuser')
+		{
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass')
+		{
+			$databasepass = $tmpline[1];
+		}
+		if ($tmpline[0] == 'dolibarrdir')
+		{
+			$dolibarrdir = $tmpline[1];
+		}
+	}
+}
+else
+{
+	print "Failed to open /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
 
 // Load Dolibarr environment
 $res=0;
@@ -64,53 +121,14 @@ if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.i
 if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
 if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
 if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
-if (! $res) die("Include of master fails");
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include($dolibarrdir."/htdocs/master.inc.php");
+if (! $res) {
+	print ("Include of master fails");
+	exit(-1);
+}
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
-// Read /etc/sellyoursaas.conf file
-$databasehost='localhost';
-$database='';
-$databaseuser='sellyoursaas';
-$databasepass='';
-$fp = @fopen('/etc/sellyoursaas.conf', 'r');
-// Add each line to an array
-if ($fp) {
-    $array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
-    foreach($array as $val)
-    {
-        $tmpline=explode("=", $val);
-        if ($tmpline[0] == 'ipserverdeployment')
-        {
-            $ipserverdeployment = $tmpline[1];
-        }
-        if ($tmpline[0] == 'instanceserver')
-        {
-            $instanceserver = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databasehost')
-        {
-            $databasehost = $tmpline[1];
-        }
-        if ($tmpline[0] == 'database')
-        {
-            $database = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databaseuser')
-        {
-            $databaseuser = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databasepass')
-        {
-            $databasepass = $tmpline[1];
-        }
-    }
-}
-else
-{
-    print "Failed to open /etc/sellyoursaas.conf file\n";
-    exit;
-}
 
 
 
@@ -119,7 +137,7 @@ else
  */
 
 if (0 == posix_getuid()) {
-    echo "Script must not be ran with root (but with admin sellyoursaas account).\n";
+    echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
     exit(-1);
 }
 if (empty($ipserverdeployment))
@@ -148,7 +166,7 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode))
 {
     print "This script must be ran as 'admin' user.\n";
-    print "Usage:   $script_file instance    backup_dir  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
+    print "Usage:   $script_file instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [test]\n";
 	print "Example: $script_file myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have testrsync and confirmrsync working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
@@ -235,7 +253,9 @@ if (empty($login) || empty($dirdb))
 	exit(-5);
 }
 
-print 'Backup instance '.$instance.' from '.(in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":").' to '.$dirroot.'/'.$login."\n";
+//$fromserver = (in_array($server, array('127.0.0.1','localhost')) ? $server : $login.'@'.$server.":");
+$fromserver = $login.'@'.$server.":";
+print 'Backup instance '.$instance.' from '.$fromserver.' to '.$dirroot.'/'.$login." (mode=".$mode.")\n";
 //print 'SFTP password '.$object->password_web."\n";
 //print 'Database password '.$object->password_db."\n";
 
@@ -299,12 +319,20 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	//$param[]="--exclude '*/test/'";
 	$param[]="--exclude '*/thumbs/'";
 	$param[]="--exclude '*/temp/'";
-	$param[]="--exclude '*/documents/admin/backup/'";
+	// Excludes for Dolibarr
+	$param[]="--exclude '*/documents/admin/backup/'";		// Exclude backup of database
+	$param[]="--exclude '*/documents/admin/documents/'";	// Exclude backup of documents directory
 	$param[]="--exclude '*/htdocs/install/filelist-*.xml*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/freefont-*'";
-	// For old versions
+	// Excludes for GLPI
+	$param[]="--exclude '*/_cache/*'";
+	$param[]="--exclude '*/_dumps/*'";
+	$param[]="--exclude '*/_log/*'";
+	$param[]="--exclude '*/_sessions/*'";
+	$param[]="--exclude '*/_tmp/*'";
+	// Excludes for other
 	$param[]="--exclude '*/_source/*'";
 
 	//$param[]="--backup --suffix=.old";
@@ -316,9 +344,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 	//var_dump($param);
-	//print "- Backup documents dir ".$dirroot."/".$instance."\n";
-	$param[]=(in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
-	$param[]=$dirroot.'/'.$login;
+	//$param[] = (in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
+	$param[] = $login.'@'.$server.":" . $sourcedir;
+	$param[] = $dirroot.'/'.$login;
 	$fullcommand=$command." ".join(" ",$param);
 	$output=array();
 	$return_var=0;
@@ -326,7 +354,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	print $datebeforersync.' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
 	$dateafterrsync = strftime("%Y%m%d-%H%M%S");
-	print $dateafterrsync.' rsync done'."\n";
+	print $dateafterrsync.' rsync done (return='.$return_var.')'."\n";
 
 	// Output result
 	foreach($output as $outputline)
@@ -421,13 +449,17 @@ $now=dol_now();
 // Update database
 if (empty($return_var) && empty($return_varmysql))
 {
+	print "RESULT into backup process of rsync: ".$return_var."\n";
+	print "RESULT into backup process of mysqldump: ".$return_varmysql."\n";
+
 	if ($mode == 'confirm')
 	{
 		print 'Update date of full backup (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
 
 		// Update database
-		$object->array_options['options_latestbackup_date']=$now;	// date latest files and database rsync backup
-		$object->array_options['options_latestbackup_status']='OK';
+		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup
+		$object->array_options['options_latestbackup_status'] = 'OK';
+		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)
@@ -462,8 +494,9 @@ else
 	if ($mode == 'confirm')
 	{
 		// Update database
-		$object->array_options['options_latestbackup_date']=$now;	// date latest files and database rsync backup
-		$object->array_options['options_latestbackup_status']='KO';
+		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup
+		$object->array_options['options_latestbackup_status'] = 'KO';
+		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)

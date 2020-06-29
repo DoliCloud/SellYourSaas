@@ -35,7 +35,7 @@ $path=dirname($_SERVER['PHP_SELF']).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
     echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-    exit;
+    exit(1);
 }
 
 // Global variables
@@ -60,7 +60,10 @@ if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.i
 if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
 if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
 if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
-if (! $res) die("Include of master fails");
+if (! $res) {
+	print "Include of master fails";
+	exit(-1);
+}
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
@@ -140,19 +143,21 @@ $langs->load("main");				// To load language file for default language
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
     print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter]\n";
-    print "Usage on deployment servers: ".$script_file." (backuptestrsync|backuptestdatabase|backup) [instancefilter]\n";
+    print "Usage on deployment servers: ".$script_file." (backuptest|backuptestrsync|backuptestdatabase|backup|backupdelete) [instancefilter]\n";
     print "\n";
+    print "- backuptest          test rsync+database backup\n";
     print "- backuptestrsync     test rsync backup\n";
-    print "- backuptestdatabase  test mysqldump backup\n";
+    print "- backuptestdatabase  test database backup\n";
     print "- backuprsync         creates backup (rsync)\n";
     print "- backupdatabase      creates backup (mysqldump)\n";
-    print "- backup              creates backup (rsync + mysqldump) ***** Used by cron on deployment servers *****\n";
+    print "- backup              creates backup (rsync + database) ***** Used by cron on deployment servers *****\n";
+    print "- backupdelete        creates backup (rsync with delete + database)\n";
     print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats.\n";
     print "- updatecountsonly    updates counters of instances only (only nb of user for instances)\n";
     print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
     exit;
 }
-print '--- start '.$argv[1]."\n";
+print '--- start script with mode '.$argv[1]."\n";
 //print 'Argument 1='.$argv[1]."\n";
 //print 'Argument 2='.$argv[2]."\n";
 
@@ -167,7 +172,6 @@ $nbofactiveok=0;
 $nbofactive=0;
 $nbofactivesusp=0;
 $nbofactivepaymentko=0;
-$nbofalltime=0;
 $nboferrors=0;
 $instancefilter=(isset($argv[2])?$argv[2]:'');
 $instancefiltercomplete=$instancefilter;
@@ -207,7 +211,7 @@ if ($instancefiltercomplete) {
 else $sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 $sql.= " AND ce.deployment_status IS NOT NULL";
 // Add filter on deployment server
-if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
+if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 {
     $sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
 }
@@ -243,7 +247,7 @@ if ($resql)
 				{
 					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; }
 					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; }
-					elseif ($object->array_options['options_deployment_status'] == 'done')       {
+					elseif ($object->array_options['options_deployment_status'] == 'done')       {										// should be here due to test into SQL request
                         $instance_status = 'DEPLOYED';
                         $nbofinstancedeployed++;
 					}
@@ -267,28 +271,20 @@ if ($resql)
 				print "Analyze instance ".($i+1)." ".$instance." instance_status=".$instance_status." payment_status=".$payment_status."\n";
 
 				// Count
-				if (! in_array($payment_status,array('TRIAL')))
+				if (! in_array($payment_status, array('TRIAL')))
 				{
-					$nbofalltime++;
-					if (! in_array($instance_status,array('PROCESSING', 'UNDEPLOYED')))		// Nb of active
-					{
-						$nbofactive++;
+					$nbofactive++;
 
-						if (in_array($instance_status,array('SUSPENDED')))
-						{
-							$nbofactivesusp++;
-							$instancesactivebutsuspended[$obj->id]=$obj->ref.' ('.$instance.')';
-						}
-						else if (in_array($payment_status,array('FAILURE','PAST_DUE'))) $nbofactivepaymentko++;
-						else $nbofactiveok++; // not suspended, not close request
-
-						$instances[$obj->id]=$instance;
-						print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
-					}
-					else
+					if (in_array($instance_status, array('SUSPENDED')))
 					{
-						//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
+						$nbofactivesusp++;
+						$instancesactivebutsuspended[$obj->id]=$obj->ref.' ('.$instance.')';
 					}
+					else if (in_array($payment_status, array('FAILURE','PAST_DUE'))) $nbofactivepaymentko++;
+					else $nbofactiveok++; // not suspended, not close request
+
+					$instances[$obj->id]=$instance;
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				}
 				elseif ($instancefiltercomplete)
 				{
@@ -314,7 +310,7 @@ print "Found ".count($instances)." not trial instances including ".$nbofactivesu
 
 
 //print "----- Start loop for backup_instance\n";
-if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
+if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 {
 	if (empty($conf->global->DOLICLOUD_BACKUP_PATH))
 	{
@@ -328,7 +324,7 @@ if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabas
 		$i = 0;
 		foreach($instances as $instance)
 		{
-			$now=dol_now();
+			$now = dol_now();
 
 			$return_val=0; $error=0; $errors=array();	// No error by default into each loop
 
@@ -337,15 +333,20 @@ if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabas
 
 			$mode = 'unknown';
 			$mode = ($action == 'backup'?'confirm':$mode);
+			$mode = ($action == 'backupdelete'?'confirm':$mode);
 			$mode = ($action == 'backuprsync'?'confirmrsync':$mode);
 			$mode = ($action == 'backupdatabase'?'confirmdatabase':$mode);
+			$mode = ($action == 'backuptest'?'test':$mode);
 			$mode = ($action == 'backuptestdatabase'?'testdatabase':$mode);
 			$mode = ($action == 'backuptestrsync'?'testrsync':$mode);
 
-			$command=($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
+			$command = ($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
+			if ($action == 'backupdelete') {
+				$command .= ' delete';
+			}
 			echo $command."\n";
 
-			if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase')
+			if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase')
 			{
 				//$output = shell_exec($command);
 				ob_start();
@@ -561,14 +562,13 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 // Result
 $out = '';
-if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
     $out.= "\n";
     $out.= "***** Summary for host ".$ipserverdeployment."\n";
 } else {
     $out.= "***** Summary for all deployment servers\n";
 }
 $out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
-$out.= "Nb of paying instances (all time): ".$nbofalltime."\n";
 $out.= "Nb of paying instances (deployed with or without payment error): ".$nbofactive."\n";
 $out.= "Nb of paying instances (deployed but suspended): ".$nbofactivesusp;
 $out.= (count($instancesactivebutsuspended)?", suspension on ".join(', ',$instancesactivebutsuspended):"");
@@ -617,88 +617,96 @@ if (! $nboferrors)
 {
 	print '--- end OK - '.strftime("%Y%m%d-%H%M%S")."\n";
 
-	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
+	if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 	{
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-		$msg = 'Backup done without errors by '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
+		if (empty($instancefilter)) {
+			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+			$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+			$msg = 'Backup done without errors by '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
 
-		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
-		$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
+			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
+			$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
 
-		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
-		$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-		if (! empty($conf->global->$constforaltname))
-		{
-		    $sellyoursaasdomain = $domainname;
-		    $sellyoursaasname = $conf->global->$constforaltname;
+			$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
+			if (! empty($conf->global->$constforaltname))
+			{
+			    $sellyoursaasdomain = $domainname;
+			    $sellyoursaasname = $conf->global->$constforaltname;
+			}
+
+			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=['.$sellyoursaasname.' - '.gethostname().'] Success for backup'."\n";
+			$cmail = new CMailFile('['.$sellyoursaasname.' - '.gethostname().'] Success for backup', $to, $from, $msg);
+			$result = $cmail->sendfile();
+		} else {
+			print 'Script was called for a given instance. No email or indicator sent in such situation'."\n";
 		}
-
-		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=['.$sellyoursaasname.' - '.gethostname().'] Success for backup'."\n";
-		$cmail = new CMailFile('['.$sellyoursaasname.' - '.gethostname().'] Success for backup', $to, $from, $msg);
-		$result = $cmail->sendfile();
 	}
 }
 else
 {
 	print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
 
-	if ($action == 'backup' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
+	if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase')
 	{
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-		// Supervision tools are generic for all domain. No ay to target a specific supervision email.
+		if (empty($instancefilter)) {
+			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+			$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+			// Supervision tools are generic for all domain. No ay to target a specific supervision email.
 
-		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
+			$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
 
-		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
-		$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', 'emailing');
-		$result = $cmail->sendfile();
+			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
+			$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', 'emailing');
+			$result = $cmail->sendfile();
 
-		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
-		{
-		    try {
-		        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+			// Send to DataDog (metric + event)
+			if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
+			{
+			    try {
+			        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-		        $arrayconfig=array();
-		        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-		        {
-		            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-		        }
+			        $arrayconfig=array();
+			        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
+			        {
+			            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+			        }
 
-		        $statsd = new DataDog\DogStatsd($arrayconfig);
+			        $statsd = new DataDog\DogStatsd($arrayconfig);
 
-		        //$arraytags=array('result'=>'ko');
-		        //$statsd->increment('sellyoursaas.backup', 1, $arraytags);
+			        //$arraytags=array('result'=>'ko');
+			        //$statsd->increment('sellyoursaas.backup', 1, $arraytags);
 
-		        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
-		        $sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
+			        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
+			        $sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
 
-		        $domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
-		        $constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-		        if (! empty($conf->global->$constforaltname))
-		        {
-		            $sellyoursaasdomain = $domainname;
-		            $sellyoursaasname = $conf->global->$constforaltname;
-		        }
+			        $domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+			        $constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
+			        if (! empty($conf->global->$constforaltname))
+			        {
+			            $sellyoursaasdomain = $domainname;
+			            $sellyoursaasname = $conf->global->$constforaltname;
+			        }
 
-		        $titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Backup in error', 90);
-		        $statsd->event($titleofevent,
-		            array(
-		                'text'       => $titleofevent." : \n".$msg,
-		                'alert_type' => 'warning',
-		                'source_type_name' => 'API',
-		                'host'       => gethostname()
-		                )
-		            );
-		    }
-		    catch(Exception $e)
-		    {
+			        $titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Backup in error', 90);
+			        $statsd->event($titleofevent,
+			            array(
+			                'text'       => $titleofevent." : \n".$msg,
+			                'alert_type' => 'warning',
+			                'source_type_name' => 'API',
+			                'host'       => gethostname()
+			                )
+			            );
+			    }
+			    catch(Exception $e)
+			    {
 
-		    }
+			    }
+			}
+		} else {
+			print 'Script was called for a given instance. No email or indicator sent in such situation'."\n";
 		}
 	}
 }

@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2004-2019 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2004-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,16 +43,9 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php");
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/class/sellyoursaasutils.class.php");
 
-$langs->load("admin");
-$langs->load("companies");
-$langs->load("users");
-$langs->load("other");
-$langs->load("contracts");
-$langs->load("commercial");
-$langs->load("sellyoursaas@sellyoursaas");
-
-$mesg='';
+$langs->loadLangs(array("admin", "companies", "users", "other", "contracts", "commercial", "sellyoursaas@sellyoursaas"));
 
 $action		= (GETPOST('action','alpha') ? GETPOST('action','alpha') : 'view');
 $confirm	= GETPOST('confirm','alpha');
@@ -61,6 +54,8 @@ $id			= GETPOST('id','int');
 $instanceoldid = GETPOST('instanceoldid','int');
 $ref        = GETPOST('ref','alpha');
 $refold     = GETPOST('refold','alpha');
+
+$mesg = '';
 
 $error=0; $errors=array();
 
@@ -80,27 +75,53 @@ $hookmanager->initHooks(array('contractcard','globalcard'));
 
 if ($id > 0 || $ref)
 {
-	$result=$object->fetch($id?$id:$instanceoldid, $ref?$ref:$refold);
-	if ($result < 0) dol_print_error($db,$object->error);
-	$id=$object->id;
+	$result = $object->fetch($id?$id:$instanceoldid, $ref?$ref:$refold);
+	if ($result < 0) dol_print_error($db, $object->error);
+	$id = $object->id;
 }
 
 $backupstring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.$object->ref_customer.' '.$conf->global->DOLICLOUD_BACKUP_PATH;
 
-if (sellyoursaasIsPaidInstance($object))
+$restorestringfrombackup = '';
+$restorestringfromarchive = '';
+$ispaid = sellyoursaasIsPaidInstance($object);
+if ($ispaid)
 {
     if ($object->array_options['options_deployment_status'] != 'undeployed')
     {
-        $restorestring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfile|31 '.$object->ref_customer;
+    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31) '.$object->ref_customer;
+    	//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+    	$restorestringpretoshow = "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+    	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
+    	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+    	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
     }
     else
     {
-        $restorestring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].'|'.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfile|31 '.$object->ref_customer;
+    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31) '.$object->ref_customer;
+    	//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+    	$restorestringpretoshow = "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+    	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
+    	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+    	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
     }
 }
 else
 {
-    $restorestring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfile|31 '.$object->ref_customer;
+	//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+	$restorestringpretoshow = "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+	$restorestringpretoshow .= "sudo rm -fr /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].$object->array_options['options_username_os'].'.tar.gz'."\n";
+	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."/home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+	$restorestringpretoshow .= "sudo mkdir /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os']." /home/jail/home/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 }
 
 
@@ -122,6 +143,43 @@ if (empty($reshook))
 	}
 
 	include 'refresh_action.inc.php';
+
+	if ($action == 'backupinstance')
+	{
+		// Launch the remote action backup
+		$sellyoursaasutils = new SellYourSaasUtils($db);
+
+		dol_syslog("Launch the remote action backup for ".$object->ref);
+
+		$db->begin();
+
+		$errorforlocaltransaction = 0;
+
+		$comment = 'Launch backup from backoffice on contract '.$object->ref;
+		// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines + linked template invoice
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction('backup', $object, 'admin', '', '', '0', $comment);	// This include add of event if qty has changed
+
+		if ($result <= 0)
+		{
+			$error++;
+			$errorforlocaltransaction++;
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+		} else {
+			setEventMessages('BackupOK', null, 'mesgs');
+		}
+
+		if (! $errorforlocaltransaction)
+		{
+			$db->commit();
+
+			// Reload object to get updated values
+			$result = $object->fetch($object->id);
+		}
+		else
+		{
+			$db->rollback();
+		}
+	}
 
 	$action = 'view';
 }
@@ -291,50 +349,77 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("CurrentBackupStatus").'</td>';
 	print '<td>';
-	if (! empty($instanceoldid)) print $object->backup_status;
-	else {
-		print $object->array_options['options_latestbackup_status'];
-	}
+	print ($object->array_options['options_latestbackup_status'] == 'KO' ? '<span class="error">' : '');
+	print $object->array_options['options_latestbackup_status'];
+	print ($object->array_options['options_latestbackup_status'] == 'KO' ? '</span>' : '');
 	print '</td>';
 	print '</tr>';
 
-	print "</table><br>";
+	// Current backup status
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("LatestBackupMessage").'</td>';
+	print '<td>';
+	print $object->array_options['options_latestbackup_message'];
+	print '</td>';
+	print '</tr>';
+
+	print "</table>";
 
 
 	print "</div>";
 
+
 	// Barre d'actions
-/*	if (! $user->societe_id)
+	if (! $user->societe_id)
 	{
 		print '<div class="tabsAction">';
 
 		if ($user->rights->sellyoursaas->write)
 		{
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=upgrade">'.$langs->trans('Upgrade').'</a>';
+			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=backupinstance">'.$langs->trans('BackupNow').'</a>';
 		}
 
 		print "</div><br>";
 	}
-*/
 }
-
-print '<br>';
 
 
 // Backup link
-$backupstringtoshow=$backupstring.' testrsync|testdatabase|confirmrsync|confirmdatabase|confirm';
+$backupstringtoshow=$backupstring.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]';
 print 'Backup command line string<br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" size="160"><br>';
 print ajax_autoselect('backupstring');
 
 print '<br>';
 
-// Restore link
-$restorestringtoshow=$restorestring.' testrsync|testdatabase|confirmrsync|confirmdatabase|confirm';
-print 'Restore command line string<br>';
-print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" size="160"><br>';
-print ajax_autoselect('restorestring');
+// Restore link from backup
+if ($restorestringfrombackup) {
+	$restorestringtoshow=$restorestringfrombackup.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
+	print 'Restore command line string from Backup<br>';
+	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" size="160"><br>';
+	print ajax_autoselect('restorestring');
 
+	print '<br>';
+}
+
+// Restore link from archive
+if ($restorestringfromarchive) {
+	$restorestringtoshow=$restorestringfromarchive.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
+	print 'Restore command line string from Archive<br>';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_5.'">';
+	print $restorestringpretoshow."\n";
+	print $restorestringtoshow."\n";
+	print $restorestringposttoshow;
+	print '</textarea>';
+	//print ajax_autoselect('restorestringfromarchive');
+
+	print '<br>';
+}
+
+if (! empty($mesg)) {
+	print '<br>';
+	print $mesg;
+}
 
 llxFooter();
 

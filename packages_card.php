@@ -417,7 +417,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	    $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
 	    $genallowed = $user->rights->sellyoursaas->creer;
 	    $delallowed = $user->rights->sellyoursaas->supprimer;
-	    print $formfile->showdocuments('sellyoursaas', $comref, $filedir, $urlsource, $genallowed, $delallowed, $object->modelpdf, 1, 0, 0, 28, 0, '', '', '', $soc->default_lang);
+	    $model_pdf = ($object->model_pdf ? $object->model_pdf : $object->modelpdf);
+	    print $formfile->showdocuments('sellyoursaas', $comref, $filedir, $urlsource, $genallowed, $delallowed, $model_pdf, 1, 0, 0, 28, 0, '', '', '', $soc->default_lang);
 
 
 	    // Show links to link elements

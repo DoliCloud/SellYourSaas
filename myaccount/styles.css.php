@@ -67,6 +67,10 @@ margin-top: .4rem;
 label,input,button,select,textarea {font-weight: normal;line-height: 20px;}
 input,button,select,textarea {font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;}label {display: block;margin-bottom: 5px;}
 
+.usernamepasswordforgotten {
+	width: 290px;
+}
+
 select,textarea,input[type='text'],input[type='password'],input[type='datetime'],input[type='datetime-local'],input[type='date'],input[type='month'],input[type='time'],input[type='week'],input[type='number'],input[type='email'],input[type='url'],input[type='search'],input[type='tel'],input[type='color'],.uneditable-input
 {
 display: inline-block;padding: 4px 6px;
@@ -196,7 +200,15 @@ color: #334;
 .stats li {text-align: center;float: left;margin: 0 10px;}.stats .stats-value {font-weight: 300;font-size: 1.6em;}.stats .stats-label {font-size: 0.9em;}ul.urls {font-size: 1.3em;}ul.urls li {margin-bottom: 20px;}ul.urls li:last-child {margin-bottom: 0;}.btn-group.inpage {margin-bottom: 20px;display: table;width: 100%;}
 .btn-group.inpage .btn {display: table-cell;float: none;color: #008ee8;}.alert ul {margin: 0;}.nav-list {margin-left: 20px;}.clickable {cursor: pointer;}td .btn-group {display: inline-block;}.subsection-actions {padding: 0 0 20px 20px;}.subsection-actions form {margin: 0;}.domain-availability alert {margin: 10px 0;}#checkDomainForm {margin: 20px 0;}p.icon-padding {padding: 4px 8px;}a {cursor: pointer;}.delayed-alerts {position: relative;}.delayed-alerts .alert {position: absolute;left: 50%;-webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.2);-moz-box-shadow: 0 2px 4px rgba(0,0,0,0.2);box-shadow: 0 2px 4px rgba(0,0,0,0.2);}.delayed-alerts .alert .icon-remove {font-size: 0.9em;}.delayed-alerts .alert-success {border-color: #468847;}#appInstanceApp .modal {width: inherit;}#appInstanceApp .modal .modal-body {padding-right: 30px;}ul.invoices li {float: left;padding: 20px;margin: 20px;background: #fff;border: 1px solid #ccc;-webkit-border-radius: 2px;-moz-border-radius: 2px;border-radius: 2px;text-align: center;}ul.invoices li .invoice-total {font-size: 1.2em;}input.inline {display: inline-block;}table.results {margin: 40px 0px 0px 0px;font-size: 13px;width: 900px;}.filters {padding: 20px;}.filters input {text-align: center;}.filters label {display: block;}.settings .row-fluid {border-bottom: 1px solid #ccc;margin-bottom: 40px;padding-bottom: 3px;}.settings .span3 {text-align: right;}.settings .span9 {font-weight: bold;}.settings a {margin-right: 20px;}.row-fluid {overflow: auto;}th.currency,td.currency,input.currency {text-align: right;}.tabbable .tab-content {display: block;width: auto;}.underline {border-bottom: 1px solid #eee;padding-bottom: 1px;margin-bottom: 30px;}.attributes {margin-top: 30px;}.attributes li label {float: left;}.horizontal-fld label {display: block;}.navbar-fixed-top {min-width: 960px;}.attributes {margin-left: 0;}.attributes label {font-weight: bold;}button.paypal {background: transparent url('9cvNFViGtjRAK7hDW9FxFHOrEG7YJeQxTEFxnqRqUT4.gif') no-repeat left center;border: 0;color: #fff;cursor: pointer;text-decoration: none;font-size: 15px;line-height: 19px;padding: 5px 10px;display: block;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px;width: 145px;height: 42px;}button.paypal span {display: block;width: 0;height: 0;overflow: hidden;}.horizontal-fld {float: left;margin-right: 20px;}.navbar {font-size: 1.1em;font-weight: bold;}.input-small.date {width: 90px;}form .input-append input {margin-bottom: 0;}form .content {padding: 10px;}form {margin: 0;}[data-ng-click],[ng-click] {cursor: pointer;}.post {margin-bottom: 15px;margin-top: 15px;}.post-avatar border 1px solid #ccc img {width: 60px;}.post-actions {border-top: 1px solid #ccc;padding-top: 5px;margin-top: 10px;}.triangle-isosceles {position: relative;padding: 15px;margin: 0 0 1em;color: #000;background: #f3961c;background: -webkit-gradient(linear, 0 0, 0 100%, from(#ccc), to(#ccc));background: -moz-linear-gradient(#ccc, #eee);background: -o-linear-gradient(#ccc, #eee);background: linear-gradient(#ccc, #eee);-webkit-border-radius: 10px;-moz-border-radius: 10px;-webkit-border-radius: 10px;-moz-border-radius: 10px;border-radius: 10px;}.triangle-isosceles.left {margin-left: 30px;background: #eee;}
 .triangle-isosceles:after {content: '';position: absolute;bottom: -15px;left: 50px;border-width: 10px 10px 0;border-style: solid;border-color: #eee transparent;display: block;width: 0;}.triangle-isosceles.left:after {top: 15px;left: -20px;bottom: auto;border-width: 10px 20px 10px 0;border-color: transparent #eee;}.box-sizing {-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}article.editing {width: 100%;}header h1 {font-size: 25px;line-height: 25px;}form label {font-weight: bold;}
-.required label:after {color: #e32;content: '*';display: inline;}.centered {position: fixed;top: 50%;left: 50%;margin-top: -50px;margin-left: -100px;}.notifications {position: fixed;top: 100px;left: 50%;width: 560px;margin: 0 0 0 -280px;text-align: center;font-weight: bold;border: 1px solid #c09853;z-index: 9999;opacity: 0.7;}
+
+.required label:after {
+	/* color: #e32;
+	content: '*';
+	display: inline; */
+}
+
+.centered {position: fixed;top: 50%;left: 50%;margin-top: -50px;margin-left: -100px;}.notifications {position: fixed;top: 100px;left: 50%;width: 560px;margin: 0 0 0 -280px;text-align: center;font-weight: bold;border: 1px solid #c09853;z-index: 9999;opacity: 0.7;}
+
 .app-instance.nav-list {font-size: 1.2em;margin-bottom: 20px;}.app-instance.nav-list li {padding: 5px;}.app-instance.nav-list li a {padding: 5px;}.last-login {margin-right: 30px;text-align: center;}.last-login .stats-value {font-size: 1.1em;}p.intro {margin-bottom: 20px;}h4 {color: #585858;}[ngcloak],[ng-cloak],.ng-cloak {display: none;}.label.app-resource {margin-right: 5px;}.form-content {padding: 10px 20px;}.form-actions {padding: 10px 20px;background: #f5f5f5;border-top: 1px solid #e5e5e5;margin: 0;}
 .signUpAlert {width: 90%;margin: 0 auto;}
 header.inverse  h1 { padding-top: 5px; }
@@ -217,11 +229,17 @@ width: 500px;
 min-width: 500px;
 margin-top: 20px;
 }
-.block.medium {
-margin-top: 25px;
-}
 
-.large { margin: 0 auto; padding-top: 20px;}
+.large {
+	margin: 0 auto;
+}
+.block.medium {
+}
+.page-header-top {
+    background: #f4f4f4;
+	padding-top: 20px;
+	padding-bottom: 25px;
+}
 
 .nowrap { white-space: nowrap; }
 

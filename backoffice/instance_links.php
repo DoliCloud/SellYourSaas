@@ -71,7 +71,7 @@ if ($id > 0 || $ref)
 {
 	$result=$object->fetch($id, $ref);
 	if ($result < 0) dol_print_error($db,$object->error);
-	$id=$object->id;
+	$id = $object->id;
 }
 
 $now = dol_now();

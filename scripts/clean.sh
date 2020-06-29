@@ -27,9 +27,9 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 export targetdir="/home/jail/home"				
-export backupdir=`grep 'backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export archivedirtest=`grep 'archivedirtest=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export archivedirpaid=`grep 'archivedirpaid=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export archivedirtest=`grep '^archivedirtest=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export archivedirpaid=`grep '^archivedirpaid=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirbind="/etc/bind/archives"
 export archivedircron="/var/spool/cron/crontabs.disabled"
 
@@ -38,10 +38,10 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-export IPSERVERDEPLOYMENT=`grep 'ipserverdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export databasehost=`grep 'databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export database=`grep 'database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export databaseuser=`grep 'databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export IPSERVERDEPLOYMENT=`grep '^ipserverdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databasehost=`grep '^databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export database=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databaseuser=`grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 if [ "x$IPSERVERDEPLOYMENT" == "x" ]; then
    echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
