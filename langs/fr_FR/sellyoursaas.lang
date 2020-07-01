@@ -437,7 +437,7 @@ AccountToDelete=Compte à effacer
 PaymentDoneOnStripeTest=Paiement via Stripe - Test (%s réalisé)
 PaymentDoneOnStripeLive=Paiement via Stripe - Live (%s réalisé)
 PayBalance=Payer le solde
-QtyFormulaExamples=<u>Exemple de règles pour calculer les quantités:</u> <br><br> SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login <> '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__' <br><br> BASH: du -ks __INSTANCEDIR__ | cut -f 1 | php -r '$a=fgets(STDIN)/1000; print ($a > 0 ? $a : 0)." ".($a > 5 ? ($a - 5): 0);'
+QtyFormulaExamples=<u>Exemple de règles pour calculer les quantités:</u> <br><br> SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login <> '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__' <br><br> BASH: du -ks __INSTANCEDIR__ | cut -f 1 | php -r '$a=fgets(STDIN)/1000000; print ($a > 0 ? $a : 0).chr(32).($a > 5 ? ($a - 5): 0);'
 SourceURLOfEvent=URL source de l'événement
 SeeOnBackoffice=Voir via le backoffice
 PaymentModeAddedFrom=Mode de paiement ajouté depuis
