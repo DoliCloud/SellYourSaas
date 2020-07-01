@@ -2133,7 +2133,7 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
 
 	if (! $error && $action == 'undeploy')
 	{
-		$urlofinstancetodestroy = GETPOST('urlofinstancetodestroy','alpha');
+		$urlofinstancetodestroy = preg_replace('/^https:\/\//i', '', trim(GETPOST('urlofinstancetodestroy','alpha')));
 		if (empty($urlofinstancetodestroy))
 		{
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameOfInstanceToDestroy")), null, 'errors');
