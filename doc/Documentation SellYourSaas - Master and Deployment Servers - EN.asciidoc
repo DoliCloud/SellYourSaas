@@ -2246,6 +2246,17 @@ su root syslog
         notifempty
         create 600 root root
 }
+
+/home/admin/wwwroot/dolibarr_documents/*.log {
+        su admin www-data
+        daily
+        rotate 7
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 660 admin www-data
+}
 ---------------
 
 * Pour tester la rotation immédiatement:

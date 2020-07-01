@@ -2254,6 +2254,7 @@ su root syslog
         delaycompress
         missingok
         notifempty
+        create 660 admin www-data
 }
 ---------------
 
