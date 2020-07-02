@@ -420,22 +420,25 @@ print '</td>';
 print '<td>SaaS Customers</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSResellers").'</td>';
-print '<td>';
-$defaultcustomercategid=$conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG;
-print $formother->select_categories(Categorie::TYPE_SUPPLIER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_RESELLER_CATEG', 0, 1, 'miwidth300');
-print '</td>';
-print '<td>SaaS Resellers</td>';
-print '</tr>';
-
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM").'</td>';
 print '<td>';
-$allowresellerprogram=$conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM;
-print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
+if ($conf->use_javascript_ajax)
+{
+	print ajax_constantonoff('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', array(), null, 0, 0, 1);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM))
+	{
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+//print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
 print '<td>Set to yes if you want your customers being able to apply to become resellers</td>';
 print '</tr>';
 
+$allowresellerprogram=$conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM;
 if ($allowresellerprogram)
 {
     print '<tr class="oddeven"><td>'.$langs->trans("DefaultCommission");
@@ -445,6 +448,15 @@ if ($allowresellerprogram)
     print '</td>';
     print '<td>25</td>';
     print '</tr>';
+
+    print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSResellers").'</td>';
+    print '<td>';
+    $defaultcustomercategid=$conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG;
+    print $formother->select_categories(Categorie::TYPE_SUPPLIER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_RESELLER_CATEG', 0, 1, 'miwidth300');
+    print '</td>';
+    print '<td>SaaS Resellers</td>';
+    print '</tr>';
+
 }
 
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');
@@ -664,6 +676,24 @@ foreach($tmpservices as $key => $tmpservice)
     print '</td><td>';
     print '</td></tr>';
 }
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ACCEPT_DISCOUNTCODE").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax)
+{
+	print ajax_constantonoff('SELLYOURSAAS_ACCEPT_DISCOUNTCODE', array(), null, 0, 0, 0);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE))
+	{
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+//print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
+print '</td>';
+print '<td>Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
+print '</tr>';
 
 print '</table>';
 
