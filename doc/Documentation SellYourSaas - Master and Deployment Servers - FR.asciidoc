@@ -2247,7 +2247,7 @@ su root syslog
 }
 
 /home/admin/wwwroot/dolibarr_documents/*.log {
-        su admin www-data
+        su root root
         daily
         rotate 7
         compress
