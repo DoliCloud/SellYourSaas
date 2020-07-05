@@ -996,7 +996,7 @@ if ($action == 'createpaymentmode')		// Create credit card stripe
 
                     $frequency=1;
                     $frequency_unit='m';
-                    $discountcode = strtoupper(trim(GETPOST('discountcode', 'alpha')));	// If a discount code was prodived on page
+                    $discountcode = strtoupper(trim(GETPOST('discountcode', 'aZ09')));	// If a discount code was prodived on page
                     /* If a discount code exists on contract level, it was used to prefill the payment page, so it is received into the GETPOST('discountcode', 'int').
                     if (empty($discountcode) && ! empty($contract->array_options['options_discountcode'])) {	// If no discount code provided, but we find one on contract, we use this one
                     	$discountcode = $contract->array_options['options_discountcode'];
@@ -5681,7 +5681,7 @@ if ($mode == 'registerpaymentmode')
     	    }
 
     	    $defaultdiscountcode = GETPOST('discountcode', 'aZ09');
-    	    $acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE == 1 ? 1 : 0);
+    	    $acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE ? 1 : 0);
 
     	    // We are not yet a customer
         	if ($amounttopayasfirstinvoice) {
@@ -5734,19 +5734,27 @@ if ($mode == 'registerpaymentmode')
         	    if ($acceptdiscountcode) {
         	    	print '<br>';
         	    	print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'"><br>';
-        	    	print '<div class="discountcodetext" id="discountcodetext"></div>';
+        	    	print '<div class="discountcodetext margintoponly" id="discountcodetext" autocomplete="off"></div>';
+        	    	//var_dump($listofcontractid);
         	    	print '<script type="text/javascript" language="javascript">'."\n";
         	    	print '
 						jQuery(document).ready(function() {
 	        	    		jQuery("#discountcode").keyup(function() {
 	        	    			console.log("Discount code modified, we update the text section");
 								if (jQuery("#discountcode").val()) {
-									result = "";
-									// TODO Call ajax to check coupon code and retun text to show in result
-									if (result) {
-										jQuery("#discountcodetext").html(result);
+									var text = jQuery("#discountcode").val();
+									if (text.length >= 3) {
+										var url = "ajax/ajaxdiscount.php";
+										$.getJSON( url, {
+										    contractids: "'.join(',', array_keys($listofcontractid)).'",
+										    discountcode: text,
+										    format: "json"
+										})
+									    .done(function( data ) {
+											console.log(data.discountcodetext);
+											jQuery("#discountcodetext").html(data.discountcodetext);
+										});
 									}
-
 								} else {
 									jQuery("#discountcodetext").html("");
 								}

@@ -52,6 +52,16 @@ margin-bottom: .1rem;
 margin-top: .4rem;
 }
 
+input#discountcode {
+    text-transform: uppercase;
+}
+span.discountcodeok {
+	color: #080;
+}
+span.discountcodeko {
+	color: #800;
+}
+
 .badge-status1 {
     background-color: #bc9526 !important;
 }
