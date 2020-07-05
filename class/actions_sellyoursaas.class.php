@@ -1044,7 +1044,7 @@ class ActionsSellyoursaas
     	    if (! empty($parameters['obj']->rowid) && $parameters['linetype'] == 'stripecard')
     	    {
     	        $langs->load("sellyoursaas@sellyoursaas");
-    	        print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?socid='.$object->id.'&action=sellyoursaastakepayment&companymodeid='.$parameters['obj']->rowid.'">'.$langs->trans("PayBalance").'</a>';
+    	        print '<a class="sellyoursaastakepayment" href="'.$_SERVER["PHP_SELF"].'?socid='.$object->id.'&action=sellyoursaastakepayment&companymodeid='.$parameters['obj']->rowid.'">'.$langs->trans("PayBalance").'</a>';
     	    }
     	    print '</td>';
     	}
