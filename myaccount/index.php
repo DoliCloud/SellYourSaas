@@ -3877,7 +3877,7 @@ if ($mode == 'instances')
 
 				            <div class="tab-pane active" id="tab_resource_'.$contract->id.'">
 								<!-- <p class="opacitymedium" style="padding: 15px; margin-bottom: 5px;">'.$langs->trans("YourResourceAndOptionsDesc").' :</p> -->
-					            <div class="aaa" style="padding-bottom: 12px;">';
+					            <div class="areaforresources" style="padding-bottom: 12px;">';
 
 				     			$arrayoflines = $contract->lines;
 				     			//var_dump($arrayoflines);

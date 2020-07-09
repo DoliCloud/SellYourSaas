@@ -369,7 +369,7 @@ border-radius: 0 4px 4px 0;
     }
 
 	.boxresource {
-		width: 155px;
+		width: 155px !important;
 	}
 }
 
