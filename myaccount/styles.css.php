@@ -228,11 +228,6 @@ header.inverse  h1 { padding-top: 5px; }
 #logo {
     text-align: center;	max-width:200px; max-height: 60px;
 }
-@media (max-width: 600px) {
-    #logo {
-        text-align: center;	max-width:110px; max-height: 60px;
-    }
-}
 
 .block.small {
 width: 500px;
@@ -267,21 +262,6 @@ margin-top: 20px;
 
 .margintop {
     margin-top: 5px;
-}
-
-/* For smartphones */
-@media (max-width: 600px) {
-    .paddingtop20 {
-        padding-top: 0;
-    }
-
-    input.sldAndSubdomain {
-        max-width: 150px;
-    }
-
-    img#logo {
-        padding-top: 10px;
-    }
 }
 
 div#waitMask {
@@ -346,13 +326,38 @@ border-radius: 0 4px 4px 0;
 }
 
 .urlofinstancetodestroy {
-    min-width: 250px;
+    min-width: 300px;
 }
 
 .register_text {
     padding: 10px 20px;
     text-align: justify;
     opacity: 0.5;
+}
+
+
+/* For smartphones */
+
+@media (max-width: 760px) {
+    #logo {
+        text-align: center;	max-width:110px; max-height: 60px;
+    }
+
+	.urlofinstancetodestroy {
+	    min-width: 300px;
+	}
+
+    .paddingtop20 {
+        padding-top: 0;
+    }
+
+    input.sldAndSubdomain {
+        max-width: 150px;
+    }
+
+    img#logo {
+        padding-top: 10px;
+    }
 }
 
 ";
