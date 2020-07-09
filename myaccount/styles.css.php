@@ -344,7 +344,7 @@ border-radius: 0 4px 4px 0;
     }
 
 	.urlofinstancetodestroy {
-	    min-width: 300px;
+	    min-width: 250px;
 	}
 
     .paddingtop20 {
