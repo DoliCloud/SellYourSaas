@@ -335,6 +335,10 @@ border-radius: 0 4px 4px 0;
     opacity: 0.5;
 }
 
+.areaforresources {
+	padding-left: 12px;
+	padding-right: 12px;
+}
 
 /* For smartphones */
 
@@ -342,6 +346,11 @@ border-radius: 0 4px 4px 0;
     #logo {
         text-align: center;	max-width:110px; max-height: 60px;
     }
+
+	.areaforresources {
+		padding-left: 0px;
+		padding-right: 0px;
+	}
 
 	.urlofinstancetodestroy {
 	    min-width: 250px;
@@ -358,6 +367,10 @@ border-radius: 0 4px 4px 0;
     img#logo {
         padding-top: 10px;
     }
+
+	.boxresource {
+		width: 155px;
+	}
 }
 
 ";
