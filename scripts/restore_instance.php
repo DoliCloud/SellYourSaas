@@ -375,13 +375,6 @@ if (empty($return_var) && empty($return_varmysql))
 {
 	if ($mode == 'confirm')
 	{
-		//print 'Update date of full restore (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
-
-		// Update database
-		/*$object->array_options['options_latestbackup_date']=$now;	// date latest files and database rsync backup
-		$object->array_options['options_latestbackup_status']='OK';
-		$object->update(null);*/
-
 		// Send to DataDog (metric + event)
 		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
 		{
