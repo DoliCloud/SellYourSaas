@@ -188,7 +188,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	//$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
 	$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os;
 	$links.='Home dir: ';
-	$links.='<input type="text" name="homestring" id="homestring" value="'.$homestring.'" size="50"> ';
+	$links.='<input type="text" name="homestring" id="homestring" value="'.$homestring.'" class="maxwidth250"> ';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('homestring');
 	//$links.='<br>';
 
@@ -202,26 +202,26 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
 	}
 	$links.='Archive dir: ';
-	$links.='<input type="text" name="archivestring" id="archivestring" value="'.$archivestring.'" size="50"><br>';
+	$links.='<input type="text" name="archivestring" id="archivestring" value="'.$archivestring.'" class="maxwidth250"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('archivestring');
 
 	// User
 	$userstring=$object->username_os;
 	$links.='User: ';
-	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" size="30"><br>';
+	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" class="maxwidth200"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('userstring');
 
 	// SSH
     $sshconnectstring='ssh '.$object->username_os.'@'.$object->hostname_os;
     $links.='SSH connect string: ';
-    $links.='<input type="text" name="sshconnectstring" id="sshconnectstring" value="'.$sshconnectstring.'" size="50">';
+    $links.='<input type="text" name="sshconnectstring" id="sshconnectstring" value="'.$sshconnectstring.'" class="maxwidth250">';
     if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshconnectstring');
     $links.=' &nbsp; '.$langs->trans("or").' SU: ';
     $sustring='su '.$object->username_os;
-    $links.='<input type="text" name="sustring" id="sustring" value="'.$sustring.'" size="30">';
+    $links.='<input type="text" name="sustring" id="sustring" value="'.$sustring.'" class="maxwidth200">';
     if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sustring');
     $links.=' with password ';
-    $links.='<input type="text" name="sshpassword" id="sshpassword" value="'.$object->password_os.'" size="30">';
+    $links.='<input type="text" name="sshpassword" id="sshpassword" value="'.$object->password_os.'" class="maxwidth200">';
     if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshpassword');
     $links.='<br>';
     //$links.='<br>';
@@ -230,14 +230,14 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	//$sftpconnectstring=$object->username_os.':'.$object->password_web.'@'.$object->hostname_os.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
     $sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
     $links.='SFTP connect string: ';
-	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.$sftpconnectstring.'" size="110"><br>';
+	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.$sftpconnectstring.'"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sftpconnectstring');
 	//$links.='<br>';
 
 	// MySQL
 	$mysqlconnectstring='mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db;
 	$links.='Mysql connect string: ';
-	$links.='<input type="text" name="mysqlconnectstring" id="mysqlconnectstring" value="'.$mysqlconnectstring.'" size="110"><br>';
+	$links.='<input type="text" name="mysqlconnectstring" id="mysqlconnectstring" value="'.$mysqlconnectstring.'"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('mysqlconnectstring');
 
 	// MySQL backup
@@ -249,7 +249,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$jdbcconnectstring='jdbc:mysql://'.$object->hostname_db.'/';
 	//$jdbcconnectstring.=$object->database_db;
 	$links.='JDBC connect string: ';
-	$links.='<input type="text" name="jdbcconnectstring" id="jdbcconnectstring" value="'.$jdbcconnectstring.'" size="110"><br>';
+	$links.='<input type="text" name="jdbcconnectstring" id="jdbcconnectstring" value="'.$jdbcconnectstring.'"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('jdbcconnectstring');
 
 	$links.='<br>';
