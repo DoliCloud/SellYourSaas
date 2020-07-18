@@ -178,7 +178,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
 		$url=$conf->global->SELLYOURSAAS_ACCOUNT_URL.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
 	}
-	$link='<a href="'.$url.'" target="_blank" id="dashboardlink">'.$url.'</a>';
+	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.$url.'</a>';
 	$links.='Link to customer dashboard : ';
 	$links.=$link.'<br>';
 
