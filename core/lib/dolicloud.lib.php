@@ -148,20 +148,20 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
         if (! empty($object->array_options['options_deployment_init_adminpass']))
         {
             $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
-        	$link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+        	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
         	$links.='Link to application (initial install pass) : ';
         }
         else
         {
             $url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
-            $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+            $link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
             $links.='Link to application : ';
         }
     }
     else
     {
         $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
-		$link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+		$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
 		$links.='Link to application (last logged admin) : ';
     }
 	$links.=$link.'<br>';

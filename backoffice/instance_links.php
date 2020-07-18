@@ -593,6 +593,7 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
     print '<br>';
     print_barre_liste($langs->trans("ChainOfRegistrations"));
 
+    print '<div class="div-table-responsive-no-min">';
     print '<table class="noborder" width="100%">';
 
     print '<tr>';
@@ -648,6 +649,7 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
     print '</tr>';
 
     print '</table>';
+    print '</div>';
 }
 
 
