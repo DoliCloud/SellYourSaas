@@ -894,7 +894,7 @@ systemctl status remote_server_launcher
 === Installation de fail2ban ===
 
 * Installation de fail2ban et activation des règles fail2ban suivantes:
-  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
   
   Ainsi que les règles spécifiques à sellyoursaas:
@@ -995,6 +995,11 @@ enabled = true
 
 
 [php-url-fopen]
+
+enabled = true
+
+
+[pam-generic]
 
 enabled = true
 
@@ -1125,7 +1130,7 @@ maxretry = 10
 [web-dol-passforgotten]
 
 ; rule against call to passwordforgottenpage (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
-; disable this rule by setting enable to false on deployment servers
+; disable this rule by setting enable to false on deployment only servers
 enabled = true
 port    = http,https
 filter  = apache-dolibarr-rulespassforgotten
