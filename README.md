@@ -35,9 +35,15 @@ This is a list of some features supported by this project:
 - A 100% automated workflow.
 
 
+## Documentation
 
-Licenses
---------
+You may find asciidoc documentation here:
+
+* [doc/Documentation%20SellYourSaas%20-%20Master%20and%20Deployment%20Servers%20-%20EN.asciidoc](English version)
+* [doc/Documentation%20SellYourSaas%20-%20Master%20and%20Deployment%20Servers%20-%20FR.asciidoc](French version)
+
+
+## Licenses
 
 ### Main code
 
