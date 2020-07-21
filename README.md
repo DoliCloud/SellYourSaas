@@ -39,8 +39,8 @@ This is a list of some features supported by this project:
 
 You may find asciidoc documentation here:
 
-* [doc/Documentation%20SellYourSaas%20-%20Master%20and%20Deployment%20Servers%20-%20EN.asciidoc](English version)
-* [doc/Documentation%20SellYourSaas%20-%20Master%20and%20Deployment%20Servers%20-%20FR.asciidoc](French version)
+* [doc/Documentation SellYourSaas - Master and Deployment Servers - EN.asciidoc](English version)
+* [doc/Documentation SellYourSaas - Master and Deployment Servers - FR.asciidoc](French version)
 
 
 ## Licenses
