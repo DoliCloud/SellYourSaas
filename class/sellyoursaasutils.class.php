@@ -2971,7 +2971,7 @@ class SellYourSaasUtils
     		$this->error = $this->db->lasterror();
     	}
 
-    	$this->output = count($contractprocessed).' contract(s), in mode '.$mode.', suspended, with a planned end date before '.dol_print_date($datetotest, 'dayrfc').' undeployed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '');
+    	$this->output = count($contractprocessed).' contract(s), in mode '.$mode.', suspended, with a planned end date before '.dol_print_date($datetotest, 'dayrfc').', undeployed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '');
 
     	return ($error ? 1: 0);
     }
