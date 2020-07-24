@@ -2627,8 +2627,8 @@ class SellYourSaasUtils
    		{
    			$this->db->commit();
    			$this->output = $numofexpiredcontractlines.' expired contract lines found'."\n";
-   			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' suspended'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
-   			$this->output.= '. '.count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' converted into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
+   			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' suspended'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only).'."\n";
+   			$this->output.= count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' converted into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
    			if ($erroremail) $this->output.='. Got errors when sending some email : '.$erroremail;
    		}
    		else
@@ -2636,8 +2636,8 @@ class SellYourSaasUtils
    			$this->db->rollback();
    			$this->output = "Rollback after error\n";
    			$this->output.= $numofexpiredcontractlines.' expired contract lines found'."\n";
-   			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to suspend'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
-   			$this->output.='. '.count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to convert into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
+   			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to suspend'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only).'."\n";
+   			$this->output.= count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to convert into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
    			if ($erroremail) $this->output.='. Got errors when sending some email : '.$erroremail;
    		}
 
