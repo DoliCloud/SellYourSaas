@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -628,10 +628,16 @@ foreach($tmpservicessub as $key => $tmpservicesub)
     if ($key > 0) $tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
     else $tmpservices['0']=getDomainFromURL($tmpservicesub, 1);
 }
+$arrayofsuffixfound = array();
 foreach($tmpservices as $key => $tmpservice)
 {
     $suffix = '';
     if ($key != '0') $suffix='_'.strtoupper(str_replace('.', '_', $tmpservice));
+
+    if (in_array($suffix, $arrayofsuffixfound)) continue;
+    $arrayofsuffixfound[$suffix] = $suffix;
+
+    print '<!-- suffix = '.$suffix.' -->'."\n";
 
     // Logo
     print '<tr class="oddeven"><td><label for="logo">'.$tmpservice.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';
