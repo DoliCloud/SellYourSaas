@@ -120,7 +120,7 @@ class SellYourSaasUtils
 					    $tmparray = $invoice->thirdparty->getOutstandingBills('customer');
                         if ($tmparray['opened'] > 0)
                         {
-                            dol_syslog("This thirdparty has already opened invoices, so we don't validate any other invoices");     // So only 1 invoice is validated per thirdparty and pass
+                            dol_syslog("This thirdparty has already open invoices, so we don't validate any other invoices");     // So only 1 invoice is validated per thirdparty and pass
                         }
 
 					    // Search contract linked to invoice
@@ -140,6 +140,10 @@ class SellYourSaasUtils
 								// Note: if undeployed, this should not happen, because templates invoice should be disabled when an instance is undeployed
 								if ($nbservice && $contract->array_options['options_deployment_status'] != 'undeployed')
 								{
+									if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
+										$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
+									}
+
 									$result = $invoice->validate($user);
 									if ($result > 0)
 									{

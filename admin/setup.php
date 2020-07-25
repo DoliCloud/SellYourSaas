@@ -94,7 +94,7 @@ if ($action == 'set')
 
 		dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG",GETPOST("SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG"),'chaine',0,'',$conf->entity);
 
-		dolibarr_set_const($db,"SELLYOURSAAS_ALLOW_RESELLER_PROGRAM",GETPOST("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM"),'chaine',0,'',$conf->entity);
+		//dolibarr_set_const($db,"SELLYOURSAAS_ALLOW_RESELLER_PROGRAM",GETPOST("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM"),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_COMMISSION",GETPOST("SELLYOURSAAS_DEFAULT_COMMISSION"),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_RESELLER_CATEG",GETPOST("SELLYOURSAAS_DEFAULT_RESELLER_CATEG"),'chaine',0,'',$conf->entity);
 
@@ -124,7 +124,6 @@ if ($action == 'set')
 		dolibarr_set_const($db,'SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR',GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR",'int'),'chaine',0,'',$conf->entity);
 
 		dolibarr_set_const($db,'SELLYOURSAAS_INFRA_COST',GETPOST("SELLYOURSAAS_INFRA_COST",'int'),'chaine',0,'',$conf->entity);
-		dolibarr_set_const($db,"SELLYOURSAAS_ACCEPT_DISCOUNTCODE",GETPOST("SELLYOURSAAS_ACCEPT_DISCOUNTCODE",'none'),'chaine',0,'Accept discount code when entering payment mode',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_NBHOURSBETWEENTRIES",GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES",'none'),'chaine',0,'Nb hours minium between each invoice payment try',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES",'none'),'chaine',0,'Nb days before stopping invoice payment try',$conf->entity);
 
@@ -234,6 +233,10 @@ if ($action == 'set')
     			}
     		}
         }
+	}
+
+	if (! $error) {
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
 	}
 }
 
@@ -603,13 +606,6 @@ print '</td>';
 print '<td>5</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ACCEPT_DISCOUNTCODE").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_ACCEPT_DISCOUNTCODE" value="'.(empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)?0:$conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE).'">';
-print '</td>';
-print '<td>0 or 1</td>';
-print '</tr>';
-
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBHOURSBETWEENTRIES").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBHOURSBETWEENTRIES" value="'.$conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES.'">';
@@ -694,6 +690,27 @@ if ($conf->use_javascript_ajax)
 print '</td>';
 print '<td>Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
 print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax)
+{
+	print ajax_constantonoff('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION', array(), null, 0, 0, 0);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION))
+	{
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+//print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
+
+
 
 print '</table>';
 
