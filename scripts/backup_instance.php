@@ -466,6 +466,7 @@ if (empty($return_var) && empty($return_varmysql))
 		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
 		{
 		    try {
+		    	print "Send result of backup ok to DataDog\n";
 		        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 		        $arrayconfig=array();
@@ -503,7 +504,8 @@ else
 		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
 		{
 		    try {
-		        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+		    	print "Send result of backup ko to DataDog\n";
+		    	dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 		        $arrayconfig=array();
 		        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
