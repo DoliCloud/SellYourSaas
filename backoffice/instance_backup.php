@@ -124,6 +124,16 @@ else
 	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 }
 
+// Increase limit of time. Works only if we are not in safe mode
+$ExecTimeLimit = 1800; // 30mn
+if (!empty($ExecTimeLimit))
+{
+	$err = error_reporting();
+	error_reporting(0); // Disable all errors
+	//error_reporting(E_ALL);
+	@set_time_limit($ExecTimeLimit); // Need more than 240 on Windows 7/64
+	error_reporting($err);
+}
 
 
 /*
