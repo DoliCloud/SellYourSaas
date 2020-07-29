@@ -1185,9 +1185,9 @@ echo $?
 ---------------
 
 
-=== Installation de ClamAV
+=== Installation of ClamAV
 
-Installer clamav et clamav-daemon
+Install clamav and clamav-daemon
 
 To test clamav tool, create a file */tmp/testvirus* with content
 
@@ -1271,6 +1271,13 @@ Note: Removing the apparmor profile for usr.sbin.clamd may be required if called
 !/root/.mysql_history
 
 exclude_suffix := cache
+---------------
+
+Test that execution by crontab works correcly by running under root:
+
+[source,bash]
+---------------
+/etc/cron.dail/afick_cron
 ---------------
 
 

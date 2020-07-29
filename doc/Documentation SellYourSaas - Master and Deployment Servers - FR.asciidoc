@@ -1273,6 +1273,15 @@ exclude_suffix := cache
 ---------------
 
 
+Test que l'exécution par la crontab fonctionne correctent en lançant sous root:
+
+[source,bash]
+---------------
+/etc/cron.dail/afick_cron
+---------------
+
+
+
 === Configuration de cpulimit (optionnel)
 
 * Lancement de cpulimit au démarrage pour exécuter:
