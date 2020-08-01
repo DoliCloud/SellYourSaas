@@ -1608,7 +1608,7 @@ Note: Pour effacer les plugin actifs, vider la table *plugins* de mysql. Voir le
 [[creer_un_compte_db_sellyoursaas]]
 ==== Créer un utilisateur sellyoursaas pour administrer les bases des instances utilisateurs
 
-Sur le serveur *Master* et sur chaque *Serveur de déploiement*, donner l'accès localement au compte *sellyoursaas*:
+On the *Master* server and each *Deployment server*, donner l'accès localement au compte *sellyoursaas*:
 cd /var/log
 [source,sql]
 ---------------
@@ -2837,7 +2837,7 @@ resize2fs /dev/vdX9
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
 
-- Créer un snapshot du *Serveur de déploiement* à cloner.
+- Créer un snapshot du *Deployment server* à cloner.
 
 - Créer un nouveau serveur OVH depuis le snapshot en spécifiant le nom du snapshot source et en copiant dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
 
@@ -2894,9 +2894,9 @@ systemctl restart nfs-kernel-server
 ip.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
-- Autoriser l'accès entre le nouveau *Serveur de déploiement* et le *Serveur master* au niveau du firewall.
+- Allow access between the new server *Deployment server* and the *Master server* at firewall level.
 
-Par exemple, sur le *Serveur master*:
+For exemple, on the *Master server*:
 
 [source,bash]
 ---------------
@@ -2906,18 +2906,21 @@ ${IPTABLES} -t filter -A OUTPUT -p tcp -d ip.server.deploymeent --sport nfs -m s
 ${IPTABLES} -t filter -A OUTPUT -p udp -d ip.server.deploymeent --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
 
-Et sur le *Serveur de déploiement*
+And on the *Deployment servers*
 
-Si on a IP_SERVER et IP_SERVER2 récupéré ainsi:
+If we have a IP_SERVER and IP_SERVER2 get like this:
 
 [source,bash]
 ---------------
 IP_SERVER=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1`
 IP_SERVER_V6=`ifconfig | grep -i global | sed -En 's/127.0.0.1//;s/.*inet6 (addr:)?\s?([^\s]+)/\2/p' | cut -d' ' -f1 | cut -d'/' -f1 `
 IP_SERVER2=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | sed '2 ! d'
+---------------
 
-Il faudra ajouter
+You must add
 
+[source,bash]
+---------------
 ${IPTABLES} -t filter -A OUTPUT -s $IP_SERVER -d $IP_SELLYOURSAAS_ADMIN -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -s $IP_SELLYOURSAAS_ADMIN -d $IP_SERVER -j ACCEPT
 if [ "x$IP_SERVER2" != "x" ]
