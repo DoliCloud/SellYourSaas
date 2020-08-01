@@ -138,14 +138,22 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 [source,bash]
 ---------------
 sudo apt-get install ntp git zip memcached rrdtool
-sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php libapache2-mod-evasive php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt
+sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt
 sudo apt-get install cpulimit apparmor
+sudo libapache2-mod-php
+sudo php-fpm libapache2-mod-fcgid
 ---------------
 
 === Activation des modules apache
 
-actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers ident include info ldap log_forensic mem_cache mime mime_magic mod-evasive negotiation php5 proxy_ajp proxy_balancer proxy_connect proxy_ftp proxy_http proxy rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
+On active les *modules* pour un fonctionnement avec PHP FPM:
 
+a2enmod access_compat actions alias auth_basic authn_core authn_file authz_core authz_groupfile authz_host authz_user autoindex cgi deflate dir env a2enmod expires fcgid filter headers http2 mime mpm_event negotiation proxy proxy_fcgi proxy_http reqtimeout rewrite setenvif socache_shmcb ssl status vhost_alias
+a2enmod php7.2-fpm
+
+On active les *configurations* pour un fonctionnement avec PHP FPM:
+
+a2enconf charset javascript-common localized-error-pages other-vhosts-access-log php7.2-fpm security serve-cgi-bin
 
 
 === Installation de watchdog
@@ -407,8 +415,14 @@ ln -fs /home/admin/tools/phpsendmail.php /usr/local/bin/
 
 
 
-=== Crer un virtual host pour les Portails Web
+=== Créer un virtual host pour les Portails Web
 
+Note: Penser à ajouter la ligne suivant pour gérer le http2
+
+[source,bash]
+---------------
+Protocols h2 h2c http/1.1
+---------------
 
 
 === Installation de certificat ssl apache par letsencrypt
