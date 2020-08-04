@@ -511,24 +511,23 @@ echo You can execute
 echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e \"$SQL\""
 #$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e "$SQL"
 
+if [[ $testorconfirm == "test" ]]; then
+	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so they we can force to undeployed them correctly again"
+	rm -fr /tmp/idlistofdb 
+	for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`; 
+	do 
+		echo -n " '"$fic"'," >> /tmp/idlistofdb
+	done
+	export idlistofdb=`cat /tmp/idlistofdb | sed -e 's/,$//' `
+	echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
+	echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
+	echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
+	echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
+	echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
+	echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
+fi
 
-echo "***** We can also check databases that are present on disk but with status 'undeployed' so they will be undeployed correctly again"
-rm -fr /tmp/idlistofdb 
-for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`; 
-do 
-	echo -n " '"$fic"'," >> /tmp/idlistofdb
-done
-export idlistofdb=`cat /tmp/idlistofdb | sed -e 's/,$//' `
-echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
-echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
-echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
-echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
-echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
-echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
-
-
-# Clean backup dir
-echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
+# Clean backup dir of payed instances that are now archived
 > /tmp/deletedirs.sh
 for fic in `find $backupdir/*/last_mysqldump* -name "last_mysqldump*" -mtime +90`
 do
@@ -553,9 +552,8 @@ do
 	fi
 done
 if [ -s /tmp/deletedirs.sh ]; then
+	echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
 	echo You can execute commands into file /tmp/deletedirs.sh
-else
-	echo No directory to delete
 fi
 
 exit 0
