@@ -59,7 +59,7 @@ Funded by the Open Source companies https://www.nltechno.com [NLTechno] and http
 * Instance subscription quota systems.
 * Tools facilitating maintenance, customer support, application updates.
 * Management of a reseller network. Dedicated reseller area (invoicing, customer account).
-* Infrastructure cost per instance <20 cents (Cost observed on the DoliCloud sales department providing Dolibarr ERP CRM).
+* Infrastructure cost per instance <30 cents (Cost observed on the DoliCloud sales department providing Dolibarr ERP CRM).
 * ...
      
 

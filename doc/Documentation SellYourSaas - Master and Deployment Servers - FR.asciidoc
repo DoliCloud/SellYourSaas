@@ -58,7 +58,7 @@ Financé par les sociétés Open Source https://www.nltechno.com[NLTechno] et ht
     * Systèmes de quota de souscription d'instances.
     * Outils facilitant la maintenance, le support des clients, les mises à jour des applications.
     * Gestion d'un réseau de revendeur. Espace revendeur dédié (facturation, compte client).
-    * Coût d'infrastructure par instance < 20 centimes (Coût constaté sur le service commercial DoliCloud fournissant Dolibarr ERP CRM).
+    * Coût d'infrastructure par instance < 30 centimes (Coût constaté sur le service commercial DoliCloud fournissant Dolibarr ERP CRM).
     * ... 
      
 
