@@ -1642,18 +1642,18 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-Donner les droits d'accès sur le serveur *Master* et les *Serveurs de déploiement* pour administration à distance:
+Donner les droits d'accès sur le serveur *Master* et les *Serveurs de déploiement* pour administration à distance de toute base client:
 
 [source,sql]
 ---------------
 CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'sellyoursaas'@'ipserverdeployment';
-GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'sellyoursaas'@'ipserverdeployment';
+GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
+GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
 
 
-Si vous utilisez la supervision DataDog, créer un compte datadog pouvant accéder localement à la base (le mot de passe est celui dans */etc/datadog-agent/conf.d/mysql.d/conf.yaml*:
+Si vous utilisez un agent de supervision comme *DataDog* pour superviser la base de donnée, créer un compte pouvant accéder localement à la base (le mot de passe est celui dans */etc/datadog-agent/conf.d/mysql.d/conf.yaml*:
 
 [source,sql]
 ---------------
@@ -1692,7 +1692,7 @@ replicate_ignore_db=test
 #replicate_do_db       = onlythedatabasestoreplicate
 ---------------
 
-Sur le host, créer le compte de réplication:
+Sur le master, créer le compte de réplication:
 
 [source,sql]
 ---------------
@@ -1704,7 +1704,7 @@ Relancer les serveurs.
 
 Vérifier que le SLAVE peut atteindre le master sur un host fixe et via le port 3306.
 
-Sur le host:
+Sur le master:
 
 [source,sql]
 ---------------
@@ -2082,14 +2082,7 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration du DNS Bind sur les serveurs de Déploiement
-
-==== Pour le développement local
-
-Voir "Documentation Technique SellYourSaas - Poste maintenance.asciidoc"
-
-
-==== Pour le serveur de production (domain final)
+=== Configuration du serveur DNS Bind sur les serveurs de Déploiement
 
 Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -3716,7 +3709,7 @@ To enable native Datadog reporting (datadog-agent must just be installed)
 
 ==== ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
-On deployment server in */var/log/syslog* when using IMAP PHP function:
+Sur le serveur de déploiement dans */var/log/syslog* en utilisant la fonction IMAP PHP:
 
  ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
@@ -3724,9 +3717,9 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
 => Check that error log file for instances is shared (instead one log file is open per instance with same unix account leading to troubles).
 
 
-==== Error when sending email in */var/log/mail.log*
+==== Erreur lors de l'envoi d'email dans */var/log/mail.log*
 
-Error when sending email in */var/log/mail.log*:
+Erreur lors de l'envoi d'email dans */var/log/mail.log*:
 
 	Mar  2 22:41:59 novafirstcloud6 postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 

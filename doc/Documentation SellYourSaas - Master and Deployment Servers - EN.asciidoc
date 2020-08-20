@@ -1493,11 +1493,11 @@ broken_sasl_auth_clients = yes
 
 
 
-=== Configuration of Mysql or Mariadb
+=== Setup of Mysql or Mariadb
 
-==== Configuration
+==== Setup
 
-Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par *sudo systemctl show -p DefaultLimitNOFILE*) par défaut de systemd:
+Edit the config file */lib/systemd/system/mysql.service* to put into section *[Service]* a value that is a limit number of files that is higher than the default value of *4096* (visible with *sudo systemctl show -p DefaultLimitNOFILE*) of systemd:
 
 [source,bash]
 ---------------
@@ -1505,7 +1505,7 @@ LimitNOFILE=50000
 Restart=on-watchdog
 ---------------
 
-Prendre en compte le changement en lançant:
+Take the change into account with command:
 
 [source,bash]
 ---------------
@@ -1551,15 +1551,15 @@ innodb_log_buffer_size=32M
 log_warnings = 2
 ---------------
 
-Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
+This may also be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
-==== Securisation du compte root
+==== Secure the root account
 
-Afin de ne pas permettre le brut force cracking, si ce n'est pas déjà le cas, mettre le user *root* de base de donnée en authentification
-depuis le compte root système uniquement (utilisation de *auth_socket* ou *unix_socket*):
+In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
+from the system root account only (using *auth_socket* or *unix_socket*):
 
-For Mysql: Le plugin est *auth_socket* et il faut l'installer manuellement. Plus d'info sur: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
+For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
 
 [source,sql]
 ---------------
@@ -1567,18 +1567,18 @@ INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
 SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
 ---------------
 
-For MariaDb: Le plugin est *unix_socket* and is set by default on Ubuntu OS.
+For MariaDb: The plugin is *unix_socket* and is set by default on Ubuntu OS.
 
 
-Pour basculer en mode authentification par mot de passe / par compte unix socket:
+To switch in mode authentification by password / by unix socket account :
 
 For Mysql:
 
 [source,sql]
 ---------------
-# Identification par mot de passe
+# Identification by password
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
-# Identification par unix socket
+# Identification by unix socket
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
 
@@ -1586,14 +1586,14 @@ For MariaDb:
 
 [source,sql]
 ---------------
-# Identification par mot de passe
+# Identification by password
 update mysql.user set plugin='' where user='root' and host='localhost';
-# Identification par unix socket
+# Identification by unix socket
 update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
 
 
-Note: Pour afficher tous les paramètres spécifiques qui ne sont pas les valeurs par défaut, on peut lancer:
+Note: The show specific parameters that are not the default values, you can launch:
 
 [source,bash]
 ---------------
@@ -1601,12 +1601,12 @@ mysqld --print-defaults
 ---------------
 
 
-Note: Pour effacer les plugin actifs, vider la table *plugins* de mysql. Voir le <<Lancement de mysql sans permissions>> si cela bloque le lancement du serveur si nécessaire.
+Note: To delete active plugins, empty the mysql * plugins * table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
 
 
 
 [[creer_un_compte_db_sellyoursaas]]
-==== Créer un utilisateur sellyoursaas pour administrer les bases des instances utilisateurs
+==== Create a user sellyoursaas to administer database of user instances
 
 On the *Master* server and each *Deployment server*, donner l'accès localement au compte *sellyoursaas*:
 cd /var/log
@@ -1618,16 +1618,16 @@ GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT
 FLUSH PRIVILEGES;
 ---------------
 
-Donner les droits d'accès, sur le *Master*, au compte de chaque serveur de déploiement, sur la base *dolibarr*:
+Give permission, on the *Master server*, to the account of each deployment server, on the database *dolibarr*:
 
 [source,sql]
 ---------------
-CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf of the deployment server)
 GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON dolibarr.* TO 'sellyoursaas'@'ip.server.deployment';
 FLUSH PRIVILEGES;
 ---------------
 
-Rem: Si le user existe déjà, pour mettre à jour le mot de passe:
+Rem: If the user already exists, to set only the password:
 
 [source,sql]
 ---------------
@@ -1640,18 +1640,18 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-Donner les droits d'accès sur le serveur *Master* et les *Serveurs de déploiement* pour administration à distance:
+Give access rights to the *Master server* and *Deployment servers* for remote administration on all databases from a desktop:
 
 [source,sql]
 ---------------
 CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'sellyoursaas'@'ipserverdeployment';
-GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'sellyoursaas'@'ipserverdeployment';
+GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
+GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
 
 
-Si vous utilisez la supervision DataDog, créer un compte datadog pouvant accéder localement à la base (le mot de passe est celui dans */etc/datadog-agent/conf.d/mysql.d/conf.yaml*:
+If you use a supervision agent like *DataDog* to superize the database, create an accunt to access localy to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
 
 [source,sql]
 ---------------
@@ -1662,9 +1662,9 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-==== Mise en place de mariadb cluster en mode master-slave (optionnel, abandonné)
+==== Setup mariadb cluster in mode master-slave (optionnel, abandonned)
 
-Sur le serveur, activer le mode MASTER en ajoutant les directives:
+On the server, activate the mode MASTER by adding the directives:
 
 [source,bash]
 ---------------
@@ -1677,7 +1677,7 @@ binlog_format           = MIXED
 #binlog_ignore_db       = include_database_name
 ---------------
 
-Sur l'esclave, activer la configuration pour le SLAVE en ajoutant les directives:
+On slave, activate the setup for the SLAVE by adding the directives:
 
 [source,bash]
 ---------------
@@ -1690,7 +1690,7 @@ replicate_ignore_db=test
 #replicate_do_db       = onlythedatabasestoreplicate
 ---------------
 
-Sur le host, créer le compte de réplication:
+On master, create the replication account:
 
 [source,sql]
 ---------------
@@ -1702,7 +1702,7 @@ Relancer les serveurs.
 
 Vérifier que le SLAVE peut atteindre le master sur un host fixe et via le port 3306.
 
-Sur le host:
+On master:
 
 [source,sql]
 ---------------
@@ -1716,7 +1716,7 @@ SHOW MASTER STATUS;
 Dumper les bases de données et le mettre sur le Slave.
 
 
-Sur le slave:
+On slave:
 
 [source,sql]
 ---------------
@@ -1753,7 +1753,7 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 
 
 
-=== Configuration de AppArmor
+=== Setup of AppArmor
 
 Copy */bin/bash* or */bin/dash* into */bin/secureBash*
 
@@ -2031,7 +2031,7 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
 
 
 
-* Activer la règle apparmor en mode *enforce* (ou *complain*)
+* Activate the rule apparmor in mode *enforce* (or *complain*)
 
 [source,bash]
 ---------------
@@ -2042,7 +2042,7 @@ aa-status
 ---------------
 
 
-* Pour recharger une règle apparmor:
+* To reload an apparmor profile of rules:
 
 [source,bash]
 ---------------
@@ -2050,26 +2050,26 @@ aa-enforce usr.sbin.mysqld
 ---------------
 
 
-* Pour désactiver un profile
+* to disable a profile of rules
 
 [source,bash]
 ---------------
 apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
 ---------------
 
-Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour mettre *RemainAfterExit=no*
+To avois to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no*
 [source,bash]
 ---------------
 RemainAfterExit=no
 ---------------
 
-Puis
+Then
 ---------------
 systemctl daemon-reload
 ---------------
 
 
-=== Autoriser la génération de vignettes aperçus PNG depuis les PDF
+=== Allow generation of PNG thumbs from PDFs
 
 Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick
 
@@ -2080,14 +2080,7 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration du DNS Bind sur les serveurs de Déploiement
-
-==== Pour le développement local
-
-Voir "Documentation Technique SellYourSaas - Poste maintenance.asciidoc"
-
-
-==== Pour le serveur de production (domain final)
+=== Setup of DNS Bind server on deployment servers
 
 Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -2163,7 +2156,7 @@ shutdown -Fr now
 ---------------
 
 
-=== Configuration de PHP
+=== Setup of PHP
 
 ==== Securisation du répertoire des sessions PHP
 
