@@ -1,5 +1,5 @@
-= SellYourSaas installation and operation document
-This document describes the technical and functional implementation of SellYourSaas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...) - Laurent Destailleur - www.sellyoursaas.org
+= Sell-Your-Saas installation and operation document
+This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...) - Laurent Destailleur - www.sellyoursaas.org
 :source-highlighter: rouge
 :companyname: Teclib
 :corpname: Teclib
@@ -25,7 +25,7 @@ This document describes the technical and functional implementation of SellYourS
 
 == Introduction ==
 
-SellYourSaas is an Open Source project, born out of the need to provide, in real time, Web application instances (like Dolibarr ERP CRM) to users, for immediate use, with the following requirements:
+Sell-Your-Saas is an Open Source project, born out of the need to provide, in real time, Web application instances (like Dolibarr ERP CRM) to users, for immediate use, with the following requirements:
 
 * Able to manage a very high number of instances and users.
 * Very low costs (must be at least 10x lower than Cloud solutions by containers).
@@ -316,7 +316,7 @@ rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgr
 ---------------
 
 
-=== Modification of / etc / skel
+=== Modification of /etc/skel
 
 Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys* with
 * the ssh public key of the user (s) *myunixlogin*
@@ -3359,58 +3359,58 @@ Lancer le script:
 
 <<<<
 
-== Principe de fonctionnement de SellYourSaas
+== How Sell-Your-Saas works
 
-=== Configuration des packages
+=== Setup of packages
 
-Aller dans le menu *SellYourSaas - Packages* et créer un nouveau package.
+Go into menu *SellYourSaas - Packages* to create your new package.
 
-Par exemple, pour déployer une application comme Dolibarr dont les sources ont été placées dans le répertoire *documents/sellyoursaas/git*, saisissez les valeurs de champs suivants:
+For example, to deploy an application like Dolibarr with sources available into directory *documents/sellyoursaas/git*, enter the values of the following fields:
 
 
-Dans le champ *Dir with sources 1*
+Intof field *Dir with sources 1*
 
 [source,bash]
 ---------------
 __DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/htdocs
 ---------------
 
-Dans le champ *Dir with sources 2*
+Intof field *Dir with sources 2*
 
 [source,bash]
 ---------------
 __DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/htdocs/install/doctemplates
 ---------------
 
-Dans le champ *Dir with sources 3*
+Intof field *Dir with sources 3*
 
 [source,bash]
 ---------------
 __DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/scripts
 ---------------
 
-Dans *Target relative dir for sources 1*
+Intof field *Target relative dir for sources 1*
 
 [source,bash]
 ---------------
 __INSTANCEDIR__/htdocs
 ---------------
 
-Dans *Target relative dir for sources 2*
+Intof field *Target relative dir for sources 2*
 
 [source,bash]
 ---------------
 __INSTANCEDIR__/documents/doctemplates
 ---------------
 
-Dans *Target relative dir for sources 3*
+Intof field *Target relative dir for sources 3*
 
 [source,bash]
 ---------------
 __INSTANCEDIR__/scripts
 ---------------
 
-Dans le champ *Template of config file 1*:
+Intof field *Template of config file 1*:
 
 [source,bash]
 ---------------
@@ -3451,7 +3451,7 @@ $dolibarr_memcached_view_disable=1;
 ---------------
 
 
-Dans *Target relative file for config file 1*
+Intof field *Target relative file for config file 1*
 
 [source,bash]
 ---------------
@@ -3459,7 +3459,7 @@ __INSTANCEDIR__/htdocs/conf/conf.php
 ---------------
 
 
-Dans *Dir with dump files*
+Intof field *Dir with dump files*
 
 [source,bash]
 ---------------
@@ -3469,7 +3469,7 @@ Dans *Dir with dump files*
 (Avec cette valeur, il sera alors possible de soumettre le fichier dump à charger vi l'onglet *Fichiers joints*
 
 
-Dans *template fo cron file*
+Intof field *template fo cron file*
 
 [source,bash]
 ---------------
@@ -3480,7 +3480,7 @@ __INSTALLMINUTES__ __INSTALLHOURS__ * * * __INSTANCEDIR__/scripts/cron/cron_run_
 ---------------
 
 
-Dans *shell after*
+Intof field *shell after*
 
 [source,bash]
 ---------------
@@ -3489,7 +3489,7 @@ chown __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents/install.lock
 ---------------
 
 
-Dans *sql after*
+Intof field *sql after*
 
 [source,bash]
 ---------------
@@ -3505,7 +3505,7 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_U
 ---------------
 
 
-=== Configuration des services
+=== Setup of Services
 
 Les services représentent la politique de tarification.
 
@@ -3531,7 +3531,7 @@ Remarque: Les services de types *Options* et *Metrics* doivent être attachés �
 
 
 
-=== Récupérer l'URL d'inscritpion
+=== Get the URL for subscription
 
 Aller dans le menu *SellYourSaas - Pages d'inscriptions* pour obtenir l'URL à utiliser pour souscrire à une instance (package de type Application et ses dépendances). 
 
@@ -3551,11 +3551,13 @@ services souscrit, ou encore le nom du revendeur).
 
 
 [[remote_actions]]
-=== Description des 8 remote actions
+=== Description of the 8 remote actions
+
+A remote action is an action requested by the server to tha agent to be executed on the deployment server.
 
 ==== deploy / deployall
 
-Les étapes réalisées par l'agent et la remote action "deploy" ou "deployall" sont:
+Steps realized by the agent and the remote action *deploy* or *deployall* are:
 
 - Create unix user, pass and home with a restricted shell
 - Add a dns entry
@@ -3569,13 +3571,13 @@ Les étapes réalisées par l'agent et la remote action "deploy" ou "deployall" 
 
 ==== undeploy / undeployall
 
-Les étapes réalisées par l'agent et la remote action "undeploy" sont:
+Steps realized by the agent and the remote action *undeploy* are:
 
 - Toutes les actions inverses de le l'actions "deploy" (à l'exception de la première action pour le "undeploy": "undeploy" ne détruit pas l'utilisateur Unix, mais "undeployall" oui). 
 
 ==== suspend
 
-Les étapes réalisées par l'agent et la remote action "suspend" sont:
+Steps realized by the agent and the remote action *suspend* are:
 
 - Désactivation du virtual host et reload apache.
 
@@ -3583,37 +3585,38 @@ Le but est de bloquer l'accès à l'instance avec un lien vers la dashboard pour
 
 ==== unsuspend
 
-Les étapes réalisées par l'agent et la remote action "unsuspend" sont:
+Steps realized by the agent and the remote action *unsuspend* are:
 
 - Réactivation du virtual host et reload apache.
 
 ==== rename
 
-Les étapes réalisées par l'agent et la remote action "rename" sont:
+Steps realized by the agent and the remote action *rename* are:
 
 - Renommer le nom de domaine et/ou le nom de domaine personnalisé (recrée les fichiers virtual hosts).
 
 ==== refresh
 
-Les étapes réalisées par l'agent et la remote action "refresh" sont:
+Steps realized by the agent and the remote action *refresh* are:
 
 - Execution du calcul des métriques shell et renvoi des valeurs.
 
 ==== backup
 
-Les étapes réalisées par l'agent et la remote action "backup" sont:
+Steps realized by the agent and the remote action *backup* are:
 
 - Appel du script backup_instance pour exécuter le sauvegarde d'une instance
 
 ==== recreateauthorizedkeys
 
 Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inutile et inutilisé pour le déploiement d'autres logiciels.
-Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys":
+
+Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 - Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
 
 
-=== Quelques règles de fonctionnement métier de SellYourSaas
+=== Some business rules of Sell-Your-Saas
 
 - Le traitement qui valide les factures à l'état brouillon ne valide qu'une seule facture par client à la fois. Si il y en a 2 en attente, il faudra donc 2 lancements du batch de validation des factures pour les valider toutes les 2.
 
@@ -3641,15 +3644,15 @@ Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys"
 
 === Quelques URL type pour les objectifs Google Analytics ou Statistiques DataDog
 
-Pour activer les statistiques Google Analytics, mettre le tag dans la configuration du module sellyoursaas.
+To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
 
-Pour activer les statistiques DataDog, renseigner les constantes :
+To activate DataDog statistics, fill in the constants:
  
   - SELLYOURSAAS_DATADOG_ENABLED à 1
   - SELLYOURSAAS_DATADOG_APIKEY avec la clé API de DataDog
   - SELLYOURSAAS_DATADOG_APPKEY avec la clé APP de DataDog
 
-Voici le détail des évennement ou URL qui peuvent etre trackées:
+This is a detail of events or URL that can be tracked:
 
 * Page affichée lorsqu'on affiche le formulaire d'inscription
 - URL: /register.php   (peut servir d'objectif *Google Analytics "Prospect intéressé"*)                 
