@@ -948,6 +948,10 @@ class SellYourSaasUtils
     							$user->rights->facture->creer = 1;		// Force permission to user to validate invoices
     							$user->rights->facture->invoice_advance->validate = 1;
 
+    							if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
+    							    $conf->global->FAC_FORCE_DATE_VALIDATION = 1;
+    							}
+
     							$result = $invoice->validate($user);
 
     							// We do not create PDF here, it will be done when the payment->create is called
