@@ -104,18 +104,18 @@ export testorconfirm=$1
 echo "testorconfirm = $testorconfirm"
 
 
-echo "Do a rsync first part"
+echo `date +%Y%m%d%H%M%S`" Do rsync - first part..."
 export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
 echo "$command";
 
 $command >>/var/log/backup_backups.log 2>&1
 export ret1=$?
 
-echo
-echo `date +%Y%m%d%H%M%S`" Do a rsync for second part..."
-
 export ret2=0
 if [ "x$ret1" == "x0" ]; then
+	echo
+	echo `date +%Y%m%d%H%M%S`" Do rsync - second part..."
+
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 			echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
 			nbofdir=`ls -d $backupdir/osu$i* | wc -l`
