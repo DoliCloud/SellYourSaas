@@ -2406,11 +2406,11 @@ You may try later or create a new instance from scratch from page <a href="https
 
 
 [[installation_des_taches_cron]]
-=== Installation des taches Cron
+=== Installation of Cron tasks
 
-==== Sur le serveur Master
+==== On Master server
 
-Avoir dans le cron du user *root*
+You must have inside the cron of user *root*
 
 [source,bash]
 ---------------
@@ -2424,7 +2424,7 @@ Avoir dans le cron du user *root*
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 ---------------
 
-Mettre dans le cron du user *admin*:
+You must have inside the cron of user *admin*:
 
 [source,bash]
 ---------------
@@ -2437,9 +2437,9 @@ Mettre dans le cron du user *admin*:
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
-==== Sur les serveurs de Déploiement
+==== On deployment servers
 
-Avoir dans le cron du user *root*
+You must have inside the cron of user *root*
 
 [source,bash]
 ---------------
@@ -2450,7 +2450,7 @@ Avoir dans le cron du user *root*
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 ---------------
 
-Mettre dans le cron du user *admin*:
+You must have inside the cron of user *admin*:
 
 [source,bash]
 ---------------
@@ -2459,7 +2459,7 @@ Mettre dans le cron du user *admin*:
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
-==== Vérifier le lancement des cron
+==== Check that launching of cron is ok
 
 Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. Par exemple par:
 
@@ -2469,7 +2469,7 @@ cd / && run-parts --report /etc/cron.daily
 ---------------
 
 
-== Installation de Dolibarr
+== Installation of Dolibarr
 
 Sur tous les serveurs (Master et Déploiement):
 
@@ -2484,12 +2484,12 @@ Sur le serveur Master:
 * Activez le module "Cron/Travaux programmés"  et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
 
 
-=== Installation de Geoip2
+=== Installation of Geoip2
 
 * Installer la base de données de MaxMind. Activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
 
 
-== Installation du plugin SellYourSaas
+== Installation of plugin SellYourSaas
 
 Sur tous les serveurs (Master et Déploiement):
 
@@ -2545,7 +2545,7 @@ chmod g-wx /etc/sellyoursaas.conf
 chmod o-rwx /etc/sellyoursaas.conf
 ---------------
 
-Avec pour contenu:
+With the following content:
 
 [source,conf]
 ---------------
@@ -2632,27 +2632,25 @@ foreach $db (@dbs) {
     if ($db =~ /^dbn/) { next; }
 ---------------
 
-=== Installation de DataDog (optionnel pour supervision)
+=== Installation of DataDog (optionnel pour supervision)
 
-* Créer un compte DataDog.
+* Create an account on DataDog.
 
-* Installer l'agent sur le serveur par:
+* Install the agent on serveur with:
 
 [source,bash]
 ---------------
 DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 ---------------
 
-
-* Copier le fichier de config datadog pour superviser *mysql/mariadb*. Le fichier sera éditer pour renseigner le mot de passe du compte de base datadog un peu plus loin... 
+* Copy the datadog config file to supervize *mysql/mariadb*. The file will be edited to enter the password of the datadog account on database later... 
 
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
 ---------------
 
-
-* Copier le fichier de config datadog pour superviser *apache*.
+* Copy the datadog config file to supervize *apache*.
 
 [source,bash]
 ---------------
@@ -2660,7 +2658,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 ---------------
 
 
-* Copier le fichier de config datadog pour superviser *postfix*.
+* Copy the datadog config file to supervize *postfix*.
 
 [source,bash]
 ---------------
@@ -2670,7 +2668,7 @@ cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf
 Editer le fichier pour ajouter "min_collection_interval: 300" sous "postfix_user: postfix" et sous "queues: - deffered"
 
 
-* Copier le fichier de config datadog pour superviser *memcached*.
+* Copy the datadog config file to supervize *memcached*.
 
 [source,bash]
 ---------------
@@ -2678,7 +2676,7 @@ cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.
 ---------------
 
 
-* Copier le fichier de config datadog pour superviser certains *process*.
+* Copy the datadog config file to supervize *process*.
 
 [source,bash]
 ---------------
@@ -2729,25 +2727,25 @@ sudo service datadog-agent start
 
 == Exploitation - Supervision
 
-=== Sauvegarde / Restauration
+=== Backup / Restauration
 
-==== Sauvegarde système
+==== Backup system
 
 La sauvegarde du serveur+bases peut se faire par un snapshot d'image de la VM.
 Il est aussi possible de ne faire un snapshot que des disques complémentaires.
 
 Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
 
-==== Restauration système
+==== Restauration system
 
 Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure ou égale en terme de capacité de stockage.
 
 Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
 
 
-==== Sauvegarde fichiers et bases
+==== Backup files and database
 
-===== Sauvegarde locale
+===== Local backup
 
 - Une sauvegarde locale de la configuration du serveur et des instances payantes est assurée par le cron
 
@@ -2758,12 +2756,12 @@ Voir chapitre <<Clonage d une instance serveur pour production bis ou pour déve
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* de *admin* (voir <<installation_des_taches_cron>>) vers le disque */mnt/diskbackup/backup/osu*
 
 
-===== Sauvegarde distante
+===== Remote backup
 
 - Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
 
 
-- Pour une sauvegarde chez AWS:
+- For a remote backup as AWS:
 
 [source,bash]
 ---------------
@@ -2779,17 +2777,17 @@ pip install awscli --upgrade --user
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git*
 
 
-=== Mise à des statistiques SellYourSaas
+=== Update Sell-Your-Saas statistics
 
 - Un script cron permet de réaliser le calcul des statistiques en lançant le script sur le serveur *Master*: 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly*
 
 
-=== Augmenter la taille d'un disque
+=== Increase size of disk
 
 * Faire le snapshot du disque à redimensionner pour sauvegarde. Créer un nouveau disque depuis ce snapshot et le rattacher à un autre serveur (voir chapitre <<ajout_de_disque>>) pour s'assurer qu'il est lisible et ainsi avoir les fichiers de la sauvegarde sous la main.
 
-* Démonter le filesystem:
+* Unmount the filesystem:
 
 [source,bash]
 ---------------
@@ -2979,10 +2977,10 @@ fi
   
 - Effacer les répertoires */mnt/diskhome/home/osu...*
   
-- Détruire la base de données 
+- Destroy the database
 
-  - de *dolibarr* master si la source était le serveur *Master*.
-  - des instances utilisateurs si la source était un serveur de déploiement. Ceci peut se faire en lançant:
+  - of *dolibarr* master if source was the *Master* server.
+  - of user instances if source was a deployment server. This can be done by doing:
   
 [source,bash]
 ---------------
@@ -3041,7 +3039,7 @@ apt remove php-fpm php7-fpm
 
 
 
-=== Suivi espace utilisé en base
+=== Follow space used by database
 
 La requête suivante permet d'avoir une vision de l'espace réél (sans le gachis) en base de données.
 
@@ -3054,7 +3052,7 @@ WHERE table_schema LIKE 'dbna%'
 GROUP BY table_schema;
 ---------------
 
-Et par table
+And per table
 
 [source,sql]
 ---------------
@@ -3081,7 +3079,7 @@ AND engine IS NOT NULL GROUP BY engine WITH ROLLUP) B,
 (SELECT 3 pw) A ORDER BY TSize;
 
 
-=== Consultation des deadlocks de la base de données
+=== Read or find deadlocks on the database
 
 [source,bash]
 ---------------
@@ -3096,7 +3094,7 @@ kill ...
 
 
 
-=== Suivi des fichiers modifiés
+=== Follow files modified
 
 Pour détecter la liste des fichiers modifiés depuis la dernière mise à jour afick:
 
@@ -3198,7 +3196,7 @@ mount /dev/sdXY /mnt
 Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
 
 
-=== Déplacement de la base de données (var/lib/mysql vers /mnt/diskhome/mysql/)
+=== Move the database (var/lib/mysql into /mnt/diskhome/mysql/)
 
 From the MySQL prompt, select the data directory:
 
@@ -3348,9 +3346,9 @@ scripts/make_instance_offline.sh  https://myaccount.mydomain.com/offline.php  te
 
 
 
-=== Nettoyage fichiers debris
+=== Clean rubish files
 
-Lancer le script: 
+Launch the script: 
 
 [source,bash]
 ---------------
@@ -3370,49 +3368,49 @@ Go into menu *SellYourSaas - Packages* to create your new package.
 For example, to deploy an application like Dolibarr with sources available into directory *documents/sellyoursaas/git*, enter the values of the following fields:
 
 
-Intof field *Dir with sources 1*
+Into field *Dir with sources 1*
 
 [source,bash]
 ---------------
 __DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/htdocs
 ---------------
 
-Intof field *Dir with sources 2*
+Into field *Dir with sources 2*
 
 [source,bash]
 ---------------
 __DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/htdocs/install/doctemplates
 ---------------
 
-Intof field *Dir with sources 3*
+Into field *Dir with sources 3*
 
 [source,bash]
 ---------------
 __DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/scripts
 ---------------
 
-Intof field *Target relative dir for sources 1*
+Into field *Target relative dir for sources 1*
 
 [source,bash]
 ---------------
 __INSTANCEDIR__/htdocs
 ---------------
 
-Intof field *Target relative dir for sources 2*
+Into field *Target relative dir for sources 2*
 
 [source,bash]
 ---------------
 __INSTANCEDIR__/documents/doctemplates
 ---------------
 
-Intof field *Target relative dir for sources 3*
+Into field *Target relative dir for sources 3*
 
 [source,bash]
 ---------------
 __INSTANCEDIR__/scripts
 ---------------
 
-Intof field *Template of config file 1*:
+Into field *Template of config file 1*:
 
 [source,bash]
 ---------------
@@ -3453,7 +3451,7 @@ $dolibarr_memcached_view_disable=1;
 ---------------
 
 
-Intof field *Target relative file for config file 1*
+Into field *Target relative file for config file 1*
 
 [source,bash]
 ---------------
@@ -3461,7 +3459,7 @@ __INSTANCEDIR__/htdocs/conf/conf.php
 ---------------
 
 
-Intof field *Dir with dump files*
+Into field *Dir with dump files*
 
 [source,bash]
 ---------------
@@ -3471,7 +3469,7 @@ Intof field *Dir with dump files*
 (Avec cette valeur, il sera alors possible de soumettre le fichier dump à charger vi l'onglet *Fichiers joints*
 
 
-Intof field *template fo cron file*
+Into field *template fo cron file*
 
 [source,bash]
 ---------------
@@ -3482,7 +3480,7 @@ __INSTALLMINUTES__ __INSTALLHOURS__ * * * __INSTANCEDIR__/scripts/cron/cron_run_
 ---------------
 
 
-Intof field *shell after*
+Into field *shell after*
 
 [source,bash]
 ---------------
@@ -3491,7 +3489,7 @@ chown __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents/install.lock
 ---------------
 
 
-Intof field *sql after*
+Into field *sql after*
 
 [source,bash]
 ---------------
