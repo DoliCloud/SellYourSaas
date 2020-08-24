@@ -456,7 +456,7 @@ $now=dol_now();
 if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 {
 	print "RESULT into backup process of rsync: ".$return_var."\n";
-	print "RESULT into backup process of mysqldump: ".$return_varmysql." ".$return_outputmysql."\n";
+	print "RESULT into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
 
 	if ($mode == 'confirm')
 	{
@@ -496,7 +496,7 @@ if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 else
 {
 	if (! empty($return_var))      print "ERROR into backup process of rsync: ".$return_var."\n";
-	if (! empty($return_varmysql) || ! empty($return_outputmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql." ".$return_outputmysql."\n";
+	if (! empty($return_varmysql) || ! empty($return_outputmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
 
 	if ($mode == 'confirm')
 	{
