@@ -417,8 +417,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	exec($fullcommand, $output, $return_varmysql);
 	$dateaftermysqldump = strftime("%Y%m%d-%H%M%S");
 	foreach($output as $outputline) {
-		$return_outputmysql = strpos($output, 'Error 1412: Table definition has changed');
-		if ($return_outputmysql > 0) break;
+		$return_outputmysql = strpos($outputline, 'Error 1412: Table definition has changed');
+		if ($return_outputmysql > 0) {
+			print $dateaftermysqldump.' mysqldump found string error in outputline'."\n";
+			break;
+		}
 	}
 	if ($return_outputmysql === false) $return_outputmysql = 0;
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
