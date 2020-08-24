@@ -423,6 +423,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
 	if ($return_outputmysql > 0) {
 		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
+	} else {
+		$return_outputmysql = 0;
 	}
 
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
