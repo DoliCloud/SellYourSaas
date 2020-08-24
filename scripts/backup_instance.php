@@ -421,7 +421,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		if ($return_outputmysql > 0) break;
 	}
 	if ($return_outputmysql === false) $return_outputmysql = 0;
-	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.' error in output='.$return_outputmysql.')'."\n";
+	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
 
 	// Delete file with same name and bzip2 extension
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -453,10 +453,10 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 $now=dol_now();
 
 // Update database
-if (empty($return_var) && empty($return_varmysql))
+if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 {
 	print "RESULT into backup process of rsync: ".$return_var."\n";
-	print "RESULT into backup process of mysqldump: ".$return_varmysql."\n";
+	print "RESULT into backup process of mysqldump: ".$return_varmysql." ".$return_outputmysql."\n";
 
 	if ($mode == 'confirm')
 	{
@@ -496,7 +496,7 @@ if (empty($return_var) && empty($return_varmysql))
 else
 {
 	if (! empty($return_var))      print "ERROR into backup process of rsync: ".$return_var."\n";
-	if (! empty($return_varmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql."\n";
+	if (! empty($return_varmysql) || ! empty($return_outputmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql." ".$return_outputmysql."\n";
 
 	if ($mode == 'confirm')
 	{
