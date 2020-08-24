@@ -616,7 +616,7 @@ ssh-keygen
 
 ==== Sur les serveurs de déploiement
 
-Sur les serveurs de déploiement, copier la clé publique et privé du compte ssh *admin* du masteur en /home/admin/.ssh/id_rsa_sellyoursaas... (Cette clé est celle commune pour la maintenance pour accéder aux comptes utilisateurs). Mettre les bons droits.
+Sur les serveurs de déploiement, copier la clé publique et privé du compte ssh *admin* du master en /home/admin/.ssh/id_rsa_sellyoursaas... (Cette clé est celle commune pour la maintenance pour accéder aux comptes utilisateurs). Mettre les bons droits.
 
 [source,bash]
 ---------------
@@ -626,11 +626,13 @@ chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
 
 
-Compléter le fichier */home/admin/.ssh/config* pour indiquer d'utiliser cette clé publique lors d'accès à lui même au lieu de *id_rsa* par défaut. 
+Compléter le fichier */home/admin/.ssh/config* pour indiquer d'utiliser cette clé publique lors d'accès à lui même ou github au lieu de *id_rsa* par défaut.
 
 [source,bash]
 ---------------
 Host ipserveurdeploiment
+    IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
+Host github.com
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
 ---------------
 

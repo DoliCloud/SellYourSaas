@@ -627,12 +627,14 @@ chmod a + r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
 
 
-Complete the file * / home / admin / .ssh / config * to indicate to use this public key when accessing it itself instead of * id_rsa * by default.
+Complete the file */home/admin/.ssh/config* to indicate to use this public key when accessing to itself or github instead of *id_rsa* by default.
 
 [source, bash]
 ---------------
 Host ipserveurdeploiment
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
+Host github.com
+    IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas    
 ---------------
 
   
