@@ -411,11 +411,14 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	else $fullcommand.=" | gzip > ".$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
 	$output=array();
 	$return_varmysql=0;
+	$return_outputmysql=0;
 	$datebeforemysqldump = strftime("%Y%m%d-%H%M%S");
 	print $datebeforemysqldump.' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_varmysql);
 	$dateaftermysqldump = strftime("%Y%m%d-%H%M%S");
-	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.')'."\n";
+	$return_outputmysql=strpos($output, 'Error 1412: Table definition has changed');
+	if ($return_outputmysql === false) $return_outputmysql = 0;
+	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.' error in output='.$return_outputmysql.')'."\n";
 
 	// Delete file with same name and bzip2 extension
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
