@@ -407,8 +407,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--default-character-set=utf8";
 
 	$fullcommand=$command." ".join(" ",$param);
-	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=" | gzip > /dev/null";
-	else $fullcommand.=" | gzip > ".$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
+	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.err | gzip > /dev/null';
+	else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.err | gzip > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
 	$output=array();
 	$return_varmysql=0;
 	$return_outputmysql=0;
@@ -416,14 +416,15 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	print $datebeforemysqldump.' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_varmysql);
 	$dateaftermysqldump = strftime("%Y%m%d-%H%M%S");
-	foreach($output as $outputline) {
-		$return_outputmysql = strpos($outputline, 'Error 1412: Table definition has changed');
-		if ($return_outputmysql > 0) {
-			print $dateaftermysqldump.' mysqldump found string error in outputline'."\n";
-			break;
-		}
+
+	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.err');
+	print $outputerr;
+
+	$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
+	if ($return_outputmysql > 0) {
+		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
 	}
-	if ($return_outputmysql === false) $return_outputmysql = 0;
+
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
 
 	// Delete file with same name and bzip2 extension
