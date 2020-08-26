@@ -53,18 +53,6 @@ if [ "x$USER" == "x" ]; then
 	export USER="admin"
 fi
 
-echo >> /var/log/backup_backups.log
-
-echo "DOMAIN=$DOMAIN" >> /var/log/backup_backups.log
-echo "DIRSOURCE1=$DIRSOURCE1" >> /var/log/backup_backups.log
-echo "DIRSOURCE2=$DIRSOURCE2" >> /var/log/backup_backups.log
-echo "SERVDESTI=$SERVDESTI" >> /var/log/backup_backups.log
-echo "EMAILFROM=$EMAILFROM" >> /var/log/backup_backups.log
-echo "EMAILTO=$EMAILTO" >> /var/log/backup_backups.log
-echo "PID=$PID" >> /var/log/backup_backups.log
-echo "backupdir=$backupdir" >> /var/log/backup_backups.log
-echo "remotebackupdir=$remotebackupdir" >> /var/log/backup_backups.log
-
 echo "DOMAIN=$DOMAIN"
 echo "DIRSOURCE1=$DIRSOURCE1"
 echo "DIRSOURCE2=$DIRSOURCE2"
@@ -76,8 +64,8 @@ echo "backupdir=$backupdir"
 echo "remotebackupdir=$remotebackupdir"
 
 
-echo "**** ${0} started" >> /var/log/backup_backups.log
-echo `date +%Y%m%d%H%M%S`" Start to copy backups on a remote server" >> /var/log/backup_backups.log 
+echo "**** ${0} started"
+echo `date +%Y%m%d%H%M%S`" Start to copy backups on a remote server" 
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
@@ -108,7 +96,7 @@ echo `date +%Y%m%d%H%M%S`" Do rsync - first part..."
 export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
 echo "$command";
 
-$command >>/var/log/backup_backups.log 2>&1
+$command 2>&1
 export ret1=$?
 
 export ret2=0
@@ -123,7 +111,7 @@ if [ "x$ret1" == "x0" ]; then
 		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
 	        	echo "$command";
 	        	
-		        $command >>/var/log/backup_backups.log 2>&1
+		        $command 2>&1
 		        if [ "x$?" != "x0" ]; then
 		        	export ret2=$(($ret2 + 1));
 		        fi
@@ -135,7 +123,6 @@ if [ "x$ret1" == "x0" ]; then
 fi
 
 echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2"
-echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2" >> /var/log/backup_backups.log 
 
 if [ "x$ret1" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
