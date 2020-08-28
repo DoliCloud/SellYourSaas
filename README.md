@@ -31,7 +31,7 @@ This is a list of some features supported by this project:
 - Scalable solution (install more servers if you have too much customers or users).
 - A lot of "ready in the box" tools (backups, migration, upgrades, ...) 
 - Multilang (both front anb backoffice)
-- A cost of infrastucture lower than 0.2 USD per instance/customer.
+- A cost of infrastucture lower than 0.3 USD per instance/customer.
 - A 100% automated workflow.
 
 
