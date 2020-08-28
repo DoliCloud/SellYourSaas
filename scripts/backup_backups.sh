@@ -126,12 +126,12 @@ echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2"
 
 if [ "x$ret1" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
+	echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
 	exit $ret1
 else
 	if [ "x$ret2" != "x0" ]; then
 		echo "Send email to $EMAILTO to warn about backup error"
-		echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Alert] Backup on remote failed for "`hostname` $EMAILTO
+		echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
 		exit $ret2
 	fi 
 fi
