@@ -3728,4 +3728,12 @@ Erreur lors de l'envoi d'email dans */var/log/mail.log*:
 => Check you have a file */etc/resolv.conf* and that it point to 127.0.0.1 (if not, create it and restart postfix)
 
 
+==== php sessions files in /var/lib/php/sessions are not purged
+
+php session purge can be done by 
+	/etc/cron.d/php
+or if systemd is available by
+	systemctl status phpsessionclean.timer
+
+Check the correct one is enabled.
 
