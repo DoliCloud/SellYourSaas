@@ -1261,7 +1261,8 @@ class SellYourSaasUtils
 	    							// even if in batch mode (method doTakePaymentStripe), we will always make all action in one transaction with a forced commit.
 	    							$this->stripechargedone++;
 
-	    							$description='Stripe payment OK from doTakePaymentStripeForThirdparty: '.$FULLTAG;
+	    							// Default description used for label of event. Will be overwrite by another value later.
+	    							$description='Stripe payment OK ('.$charge->id.') from doTakePaymentStripeForThirdparty: '.$FULLTAG;
 
 	    							$db=$this->db;
 	    							$ipaddress = (empty($_SERVER['REMOTE_ADDR'])?'':$_SERVER['REMOTE_ADDR']);
@@ -1373,11 +1374,11 @@ class SellYourSaasUtils
 
 	    							if ($ispostactionok < 1)
 	    							{
-	    								$description='Stripe payment OK but post action KO from doTakePaymentStripeForThirdparty: '.$FULLTAG;
+	    								$description='Stripe payment OK ('.$charge->id.') but post action KO from doTakePaymentStripeForThirdparty: '.$FULLTAG;
 	    							}
 	    							else
 	    							{
-	    								$description='Stripe payment+post action OK from doTakePaymentStripeForThirdparty: '.$FULLTAG;
+	    								$description='Stripe payment+post action OK ('.$charge->id.') from doTakePaymentStripeForThirdparty: '.$FULLTAG;
 	    							}
 	    						}
 
