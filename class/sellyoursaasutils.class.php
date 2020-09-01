@@ -1255,7 +1255,7 @@ class SellYourSaasUtils
 	    						{
 	    							dol_syslog('Successfuly charge card '.$stripecard->id);
 
-	    							$postactionmessages[]='Success to charge card ('.$stripearrayofkeys['publishable_key'].')';
+	    							$postactionmessages[]='Success to charge card ('.$charge->id.' with '.$stripearrayofkeys['publishable_key'].')';
 
 	    							// Save a stripe payment was done in realy life so later we will be able to force a commit on recorded payments
 	    							// even if in batch mode (method doTakePaymentStripe), we will always make all action in one transaction with a forced commit.
@@ -1531,18 +1531,18 @@ class SellYourSaasUtils
 	    						// Insert record of payment (success or error)
 	    						$actioncomm = new ActionComm($this->db);
 
-	    						$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-	    						$actioncomm->code        = 'AC_'.$actioncode;
-	    						$actioncomm->label       = $description;
-	    						$actioncomm->note_private= join(', ', $postactionmessages);
-	    						$actioncomm->fk_project  = $invoice->fk_project;
-	    						$actioncomm->datep       = $now;
-	    						$actioncomm->datef       = $now;
-	    						$actioncomm->percentage  = -1;   // Not applicable
-	    						$actioncomm->socid       = $thirdparty->id;
-	    						$actioncomm->contactid   = 0;
-	    						$actioncomm->authorid    = $user->id;   // User saving action
-	    						$actioncomm->userownerid = $user->id;	// Owner of action
+	    						$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+	    						$actioncomm->code         = 'AC_'.$actioncode;
+	    						$actioncomm->label        = $description;
+	    						$actioncomm->note_private = join(",\n", $postactionmessages);
+	    						$actioncomm->fk_project   = $invoice->fk_project;
+	    						$actioncomm->datep        = $now;
+	    						$actioncomm->datef        = $now;
+	    						$actioncomm->percentage   = -1;   // Not applicable
+	    						$actioncomm->socid        = $thirdparty->id;
+	    						$actioncomm->contactid    = 0;
+	    						$actioncomm->authorid     = $user->id;   // User saving action
+	    						$actioncomm->userownerid  = $user->id;	// Owner of action
 	    						// Fields when action is en email (content should be added into note)
 	    						/*$actioncomm->email_msgid = $object->email_msgid;
 	    						 $actioncomm->email_from  = $object->email_from;
@@ -1552,9 +1552,9 @@ class SellYourSaasUtils
 	    						 $actioncomm->email_tobcc = $object->email_tobcc;
 	    						 $actioncomm->email_subject = $object->email_subject;
 	    						 $actioncomm->errors_to   = $object->errors_to;*/
-	    						$actioncomm->fk_element  = $invoice->id;
-	    						$actioncomm->elementtype = $invoice->element;
-	    						$actioncomm->extraparams = dol_trunc($extraparams, 250);
+	    						$actioncomm->fk_element   = $invoice->id;
+	    						$actioncomm->elementtype  = $invoice->element;
+	    						$actioncomm->extraparams  = dol_trunc($extraparams, 250);
 
 	    						$actioncomm->create($user);
 
