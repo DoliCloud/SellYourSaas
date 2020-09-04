@@ -3484,7 +3484,7 @@ class SellYourSaasUtils
     			    dol_syslog("No cli file to create or no content");
     			}
 
-    			// Remote action : unsuspend
+    			// Parameters for remote action
     			$commandurl = $generatedunixlogin.'&'.$generatedunixpassword.'&'.$sldAndSubdomain.'&'.$domainname;
     			$commandurl.= '&'.$generateddbname.'&'.$generateddbport.'&'.$generateddbusername.'&'.$generateddbpassword;
     			$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srcconffile1);
@@ -3507,7 +3507,8 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->allowoverride);
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
-    			//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
+				$commandurl.= '&'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action

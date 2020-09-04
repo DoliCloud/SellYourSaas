@@ -124,9 +124,10 @@ if [ "x$VIRTUALHOSTHEAD" == "x-" ]; then
 	VIRTUALHOSTHEAD=""
 fi
 export ispaidinstance=${36}
-export supportcloud=${37}
+export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 
 export ErrorLog='#ErrorLog'
+
 
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
@@ -162,7 +163,7 @@ echo "apachereload = $apachereload"
 echo "ALLOWOVERRIDE = $ALLOWOVERRIDE"
 echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
 echo "ispaidinstance = $ispaidinstance"
-echo "supportcloud = $supportcloud"
+echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +%Y%m%d%H%M%S`" calculated params:"

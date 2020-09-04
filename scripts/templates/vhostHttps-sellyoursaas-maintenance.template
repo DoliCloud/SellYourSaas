@@ -57,7 +57,7 @@
         RewriteEngine   on
         # This will enable the Rewrite capabilities
         
-        RewriteCond     "%{HTTP_USER_AGENT}"   "!__supportcloud__"
+        RewriteCond     "%{HTTP_USER_AGENT}"   "!__SELLYOURSAAS_LOGIN_FOR_SUPPORT__"
         RewriteRule     ^(.*)$ __webMyAccount__/maintenance.php?instance=%{SERVER_NAME} [L,R]
 		# This redirect to the maintenance page
 
