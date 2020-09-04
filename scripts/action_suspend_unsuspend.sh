@@ -124,11 +124,14 @@ if [ "x$VIRTUALHOSTHEAD" == "x-" ]; then
 	VIRTUALHOSTHEAD=""
 fi
 export ispaidinstance=${36}
+export supportcloud=${37}
+
 export ErrorLog='#ErrorLog'
 
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
+export CRONHEAD=${VIRTUALHOSTHEAD/php_value date.timezone /TZ=}
 
 export webSSLCertificateCRT=with.sellyoursaas.com.crt
 export webSSLCertificateKEY=with.sellyoursaas.com.key
@@ -159,6 +162,7 @@ echo "apachereload = $apachereload"
 echo "ALLOWOVERRIDE = $ALLOWOVERRIDE"
 echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
 echo "ispaidinstance = $ispaidinstance"
+echo "supportcloud = $supportcloud"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +%Y%m%d%H%M%S`" calculated params:"
