@@ -2030,6 +2030,8 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   owner @{HOME}/** rwl,
   owner /mnt/diskhome/home/** rixwlk,
   /mnt/diskhome/home/osu*/dbn*/*_error.log r,
+  /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+  /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
 }
 ---------------
 
@@ -2193,7 +2195,7 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendma
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
-Modifier le fichier *php.ini* de apache avec:
+Modifier le fichier *php.ini* de apache et le *php.ini* de cli avec:
 
 [source,bash]
 ---------------
@@ -2420,11 +2422,11 @@ Avoir dans le cron du user *root*
 # m h  dom mon dow   command
 # cron master root
 47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
-10 0 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
+10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
-30 3 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
-#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
+30 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
+#40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
 Mettre dans le cron du user *admin*:
@@ -2434,7 +2436,7 @@ Mettre dans le cron du user *admin*:
 # m h  dom mon dow   command
 # cron master admin
 */10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php `hostname`secondpartofsecuritykey firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
-7 7 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
+7 7 * * * /home/admin/wwwroot/dolibarr/htocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 # cron master and deployment root
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
@@ -2449,8 +2451,8 @@ Avoir dans le cron du user *root*
 # m h  dom mon dow   command
 # cron master and deployment root
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
-30 3 * * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
-#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
+30 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
+#40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
 Mettre dans le cron du user *admin*:
@@ -3354,7 +3356,7 @@ Lancer le script:
 
 [source,bash]
 ---------------
-/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
+/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
 
