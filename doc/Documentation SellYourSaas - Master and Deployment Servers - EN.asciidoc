@@ -98,7 +98,12 @@ For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server
 
 
 [[adding_disk]]
-=== Adding the data disc (home of user instances)
+=== Adding the data disc (home of user instances and home of backups)
+
+On va ajouter un disque indépendant pour les instances utilisateurs et sauvegardes. Il peut s'agir d'un disque pour les 2 ou bien de 2 disques différents.
+
+
+==== On *Deployment* server
 
 With OVH Public Cloud:
 
@@ -136,8 +141,10 @@ UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 / mnt / diskX ext4 [noatime,] nofail
 
 [source, bash]
 ---------------
-mkdir / mnt / diskhome or / mnt / diskbackup or / mnt / diskX
-mount / dev / vdxY / mnt / diskhome or mount / dev / vdxY / mnt / diskbackup or mount / dev / vdxY / mnt / diskX
+mkdir /mnt/diskhome
+mkdir /mnt/diskbackup
+mount /dev/vdxY /mnt/diskhome
+mount /dev/vdxZ /mnt/diskbackup
 
 blkid
 ---------------
@@ -282,29 +289,6 @@ ln -fs /bin/bash /usr/bin/sh
 ---------------
 
 
-=== Timeout of server launches
-
-On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
-
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
-
-[source, bash]
----------------
-[Service]
-TimeoutStartSec = 3600s
-TimeoutStopSec = 3600s
----------------
-
-Rem: Instead of putting *3600s*, it is possible to put *infinity*
-
-Then reload the new configuration:
-
-[source, bash]
----------------
-systemctl reload service_name.service
----------------
-
-
 === Deletion of information files at login
 
 In order not to give information to users doing SSH, on the deployment servers:
@@ -388,7 +372,7 @@ ipduserveurprincipale nomdserveur.mysaasdomainname.com
 ---------------
 
 
-=== Added support for IP v6
+=== Added support for IP v6 (optional)
 
 ==== With ifupdown (apt install ifupdown)
 
@@ -569,7 +553,9 @@ vi /etc/exports
 # /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)
 # /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)
 #
-/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
+/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server1(ro,no_root_squash,sync,no_subtree_check)
+...
+/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
 [source, bash]
@@ -725,7 +711,7 @@ ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
 
 On the Master server:
 
-* Create a virtual host *admin.mycompany.com* on the Dolibarr *Master* for the administration of SellyourSaas
+* Create a virtual host *admin.mysaasdomainname.com* on the Dolibarr *Master* for the administration of SellyourSaas
 
 [source, bash]
 ---------------
@@ -734,12 +720,12 @@ On the Master server:
 ##########################
 <VirtualHost *:80>
         #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
-        #php_admin_value mail.force_extra_parameters "-f postmaster@mycompany.com"
-        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster@mycompany.com"
+        #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
+        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster@mysaasdomainname.com"
         php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/jail/home:/home/admin/backup/dump:/home/admin/tools/
         php_admin_value memory_limit 64M
 
-        ServerName      admin.mycompany.com
+        ServerName      admin.mysaasdomainname.com
         DocumentRoot /home/admin/wwwroot/dolibarr/htdocs/
         ErrorLog     /home/admin/logs/mycompany_admin_error_log
         CustomLog    /home/admin/logs/mycompany_admin_access_log combined
@@ -781,14 +767,14 @@ On the Master server:
         ExpiresByType application/javascript A2592000
 
 RewriteEngine On
-RewriteCond %{SERVER_NAME} =admin.mycompany.com
+RewriteCond %{SERVER_NAME} =admin.mysaasdomainname.com
 RewriteCond %{REQUEST_URI} !fileserver\.php
 RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
 
-* Create a virtual host for the client area * myaccount.mycompany.com *
+* Create a virtual host for the client area * myaccount.mysaasdomainname.com *
 
 [source, bash]
 ---------------
@@ -840,6 +826,28 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
+=== Timeout of server launches
+
+On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
+
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
+
+[source, bash]
+---------------
+[Service]
+TimeoutStartSec = 3600s
+TimeoutStopSec = 3600s
+---------------
+
+Rem: Instead of putting *3600s*, it is possible to put *infinity*
+
+Then reload the new configuration:
+
+[source, bash]
+---------------
+systemctl reload service_name.service
+---------------
+
 
 === Installation of the firewall ===
 
@@ -853,6 +861,8 @@ systemctl enable firewallsellyoursaas
 systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
+
+TODO Graphic with flux and ports
 
 
 === Installation of unix watchdog (optional) ===
@@ -874,7 +884,9 @@ systemctl start watchdog
 
 === Installation of the Apache watchdog ===
 
-* Installation and activation of the apache watchdog in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher.sh* by creating a link by
+On the *Deployment servers* :
+
+* Installation and activation of the apache watchdogs provided in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/* by creating a link by
 
 [source, bash]
 ---------------
@@ -894,6 +906,8 @@ systemctl status apache_watchdog_launcher2
 
 === Installation of the instance deployment agent ===
 
+On the *Deployment servers* :
+
 * Agent installation and activation in */home/admin/wwwroot /dolibarr_sellyoursaas/scripts/remote_server_launcher.sh* by creating a link by
 
 [source, bash]
@@ -905,6 +919,8 @@ systemctl is-enabled remote_server_launcher
 systemctl status remote_server_launcher
 ---------------
 
+Note: The agent is launched on port 8080
+
 
 === Installation of fail2ban ===
 
@@ -912,7 +928,7 @@ systemctl status remote_server_launcher
   *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
   
-  As well as the specific rules for sellyoursaas:
+* As well as the specific rules for sellyoursaas:
   
   *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
 
@@ -1233,7 +1249,7 @@ Note: Removing the apparmor profile for usr.sbin.clamd may be required if called
 ---------------
 # used by cron job (afick_cron)
 # define the mail adress to send cron job result
-@@define MAILTO supervision@mycompany.com
+@@define MAILTO supervision@mysaasdomainname.com
 # truncate the result sended by mail to the number of lines (avoid too long mails)
 @@define LINES 1000
 # REPORT = 1 to enable mail reports, =0 to disable report
@@ -1358,7 +1374,7 @@ Compléter le fichier */etc/postfix/main.cf* avec:
 [source,bash]
 ---------------
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
-myhostname = myservername.mycompany.com
+myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
@@ -1409,7 +1425,7 @@ smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_
 # Here we declare we want mail to my domain, to specific email with SA filtering, otherwise refuse.
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
 
-#debug_peer_list = mysaasdomainname.com, mycompany.com
+#debug_peer_list = mysaasdomainname.com, mysaasdomainname.com
 #compatibility_level = 2
 ---------------
 
@@ -1611,7 +1627,7 @@ Note: To delete active plugins, empty the mysql * plugins * table. See "Starting
 ==== Create a user sellyoursaas to administer database of user instances
 
 On the *Master* server and each *Deployment server*, donner l'accès localement au compte *sellyoursaas*:
-cd /var/log
+
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'localhost' IDENTIFIED BY '...';
@@ -2095,7 +2111,7 @@ Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour aj
     *ns1with.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
     *ns2with.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
 
-Ajouter les enregistrements *GLUE record* auprès du registar pour 
+Ajouter les enregistrements *GLUE record* auprès du registar pour (optional)
 
     *ns1with.mysaasdomainname.com*
     *ns2with.mysaasdomainname.com*
@@ -2105,21 +2121,21 @@ Créer un fichier */etc/bind/with.mysaasdomainname.com.hosts* pour le DNS *with.
 [source,bash]
 ---------------
 $ttl 1d
-$ORIGIN with.mysaasdomainname.com.
-@               IN     SOA     ns1with.mysaasdomainname.com. admin.mysaasdomainname.com. ((
+$ORIGIN with1.mysaasdomainname.com.
+@               IN     SOA     ns1with1.mysaasdomainname.com. admin.mysaasdomainname.com. ((
                 140921009        ; serial number
                 600              ; refresh = 10 minutes
                 300              ; update retry = 5 minutes
                 604800           ; expiry = 1 week
                 660              ; negative ttl
                 )
-                NS              ns1with.mysaasdomainname.com.
-                NS              ns2with.mysaasdomainname.com.
+                NS              ns1with1.mysaasdomainname.com.
+                NS              ns2with1.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all".
 
-@               IN      A       176.34.178.17	; mettre ip du serveur qui heberge les instances prod
+@               IN      A       176.34.178.17	; mettre ip du serveur de déploiement qui héberge les applications dépoyés
 
-$ORIGIN with.mysaasdomainname.com.
+$ORIGIN with1.mysaasdomainname.com.
 
 ; other sub-domain records
 
