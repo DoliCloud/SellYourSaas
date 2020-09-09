@@ -75,14 +75,20 @@ Ce document présente les étapes pour mettre en oeuvre votre propre plateforme 
 	
 <<<<
 
+== Choix et acquisition d'un nom de domaine
+
+L'ensemble du service va tourner sur un nom de domaine. Dans la suite du document, nous utiliserons la valeur *mydomain.com*
+Il vous faut acquerrir ce nom de domaine auprès d'un registrar.
+
+
 == Installation de la machine et OS
 
 La première étape est de mettre à disposition un (ou plusieurs) serveur. Si on part sur plusieurs serveurs, l'un sera serveur *Master* (pilotage et facturation) et les autres seront *Serveurs de déploiement* (les instances des clients). Le serveur *Master* pouvant aussi être *Serveur de déploiement*, il est possible de démarrer avec un seul serveur.
 
 === Choix de la machine et de l'OS
 
-* Obtenir un serveur avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le serveur Master.
-* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le serveur de Déploiement. Remarque: Ce point peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master.
+* Obtenir un serveur avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal *16.04* ou *18.04*) pour le *Serveur Master*.
+* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le ou les *Serveurs de Déploiement*. Remarque: Ce point peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master (non recommandé en production).
 
 _Exemple avec Amazon Standard Medium:_
 
@@ -99,10 +105,9 @@ Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit se
 [[ajout_de_disque]]
 === Ajout du ou des disques de données (home des instances utilisateurs et home des sauvegardes)
 
-On va ajouter un disque indépendant pour les instances utilisateurs et sauvegardes. Il peut s'agir d'un disque pour les 2 ou bien de 2 disques différents.
+On va ajouter, sur le *Serveur de déploiement*, un disque indépendant pour les instances utilisateurs et les sauvegardes. Il peut s'agir d'un disque pour les 2 ou bien de 2 disques différents.
 
-
-==== Sur le serveur de *Déploiement*
+Sur le serveur de *Déploiement* :
 
 Avec OVH Public Cloud:
 
@@ -189,7 +194,7 @@ Rem: Pour information, si il faut récupérer des données d'un autre disque apr
 rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
-rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mysellyoursaasdomainname.com:/var/lib/mysql
+rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
 mysqlcheck --all-databases
 ---------------
@@ -636,14 +641,15 @@ Host github.com
 sudo apt-get update
 sudo apt-get install ntp git zip memcached rrdtool ncdu
 sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2
-sudo apt-get install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit spamc spamassassin
+sudo apt-get install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt-get install bind9
+sudo spamc spamassassin clamav and clamav-daemon
 ---------------
 
 
 === Désactivation de la mise a jour automatique
 
-Désinstaller le package *unattended-upgrades*
+Désinstaller le package *unattended-upgrades* au cas où il aurait été installé.
 
 [source,bash]
 ---------------
@@ -933,11 +939,11 @@ Remarque: L'agent se lance sur le port 8080
   *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
 
 
-Pour cela, créer un fichier */etc/fail2ban/jail.local* avec ce contenu:
+Pour cela, créer d'abord un fichier */etc/fail2ban/jail.local* avec ce contenu:
 
 NOTE: Les règles disponibles peuvent varier selon la version de l'OS installé.
 
-NOTE: Penser à modifier aussi "mybusinessips" par votre ou vos ips séparés par des espaces ainsi que la valeur de destemail par l'email de supervision de votre société.
+NOTE: Penser à modifier aussi "mybusinessips" par votre ou vos ips séparés par des espaces ainsi que le paramètre *destemail* par l'email de supervision de votre société.
 
 
 [source,bash]
@@ -1173,11 +1179,12 @@ maxretry = 10
 
 ---------------
 
+Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/filter.d* dans le répertoire du même nom */etc/fail2ban/filter.d*
 
 
 === Test spamassassin ===
 
-To test spamassassin client or message, create a file */tmp/testspam* with content
+Pour tester que le client spamassassin fonctionne, créer un fichier */tmp/testspam* avec ce contenu
 
     Subject: Test spam mail (GTUBE)
     Message-ID: <GTUBE1.1010101@example.net>
@@ -1205,7 +1212,7 @@ To test spamassassin client or message, create a file */tmp/testspam* with conte
 
     You should send this test mail from an account outside of your network.
 
-Tester avec:
+Puis tester avec:
 
 [source,bash]
 ---------------
@@ -1216,8 +1223,6 @@ echo $?
 
 
 === Installation de ClamAV
-
-Installer clamav et clamav-daemon
 
 To test clamav tool, create a file */tmp/testvirus* with content
 
@@ -2951,14 +2956,14 @@ fi
   */etc/postfix/generic*
   */etc/mailname*
 
-- Ajouter les entrées du nouveau serveur *mynewserverX.mysellyoursaasdomainname.com* dans le DNS du domaine *mysellyoursaasdomainname.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) attribué par OVH lors de la création du nouveau serveur.
+- Ajouter les entrées du nouveau serveur *mynewserverX.mydomain.com* dans le DNS du domaine *mydomain.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) attribué par OVH lors de la création du nouveau serveur.
 
 - Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *myserverX*).
 
 - Aller dans l'interface de gestion des IP OVH, pour ajouter aussi 
  
-  - le reverse sur l'IP du nouveau serveur: *myserverX.mysellyoursaasdomainname.com*
-  - le reverse sur l'IP virtuel si vous en avez pris une sur: *with.mysellyoursaasdomainname.com*
+  - le reverse sur l'IP du nouveau serveur: *myserverX.mydomain.com*
+  - le reverse sur l'IP virtuel si vous en avez pris une sur: *with.mydomain.com*
    
 - Se connecter et modifier le fichier */etc/hosts* avec le nom du nouveau serveur et nouvelle ip du serveur.
 
@@ -2972,7 +2977,7 @@ fi
 
 - Déclarer l'IP pour l'envoi d'emails:
   - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
-  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé *@mysellyoursaasmydomain.com* et pour chaque sous-domaines *@myserverX.mysellyoursaasmydomain.com*).
+  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé *@mydomain.com* et pour chaque sous-domaines *@myserverX.mydomain.com*).
 
 - Créer un compte *sellyoursaas* avec les permissions d'accès depuis le serveur de déploiement sur la base de donnée du *Master*. Voir <<creer_un_compte_db_sellyoursaas>>.
 
@@ -3008,13 +3013,13 @@ mysql -uroot -e "show databases" | grep dbn | gawk '{print "drop database `" $1 
 mysql -uroot < /tmp/dbntodelete.sql
 ---------------
   
-- Renommer le fichier DNS */etc/bind/withX.mysellyoursaasdomainname.com.hosts* en */etc/bind/with(X+1).mysellyoursaasdomainname.com.hosts* et l'éditer pour prendre en compte le nouveau prefix.
+- Renommer le fichier DNS */etc/bind/withX.mydomain.com.hosts* en */etc/bind/with(X+1).mydomain.com.hosts* et l'éditer pour prendre en compte le nouveau prefix.
 
 - Modifier le fichier */etc/bind/named.conf.local* pour prendre en compte le nouveau nom.
 
-- Ajouter l'entrée DNS A pour *ns1withX*, *ns2withX* au domain *mysellyoursaasdomainname.com* pointant sur l'IP du nouveau serveur de déploiement.
+- Ajouter l'entrée DNS A pour *ns1withX*, *ns2withX* au domain *mydomain.com* pointant sur l'IP du nouveau serveur de déploiement.
 
-- Ajouter l'entrée DNS NS pour *withX* au domain *mysellyoursaasdomainname.com* pointant sur *ns1withX.mysellyoursaasdomainname.com*.
+- Ajouter l'entrée DNS NS pour *withX* au domain *mydomain.com* pointant sur *ns1withX.mydomain.com*.
 
 - Arrêter, relancer le firewall, fail2ban, bind9, apache, postfix, remote_server et le datadog-agent si utilisé.
 
@@ -3028,7 +3033,7 @@ mkdir /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archi
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
 ---------------
 
-- Acquerir les certificats SSL du nouveau nom de domaine *withX.mysellyoursaasdomainname.com*, les déposer sur le serveur
+- Acquerir les certificats SSL du nouveau nom de domaine *withX.mydomain.com*, les déposer sur le serveur
 et créer les liens symboliques (Voir <<creation_certificat_ssl>>).
 
 - Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google et/ou SendGrid, pensez à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du relai. 
@@ -3559,7 +3564,7 @@ Aller dans le menu *SellYourSaas - Pages d'inscriptions* pour obtenir l'URL à u
 
 === Principe de déploiement d'une nouvelle instance SellYourSaas
 
-- Le visiteur va sur la page d'inscription  https://myaccount.mysellyoursaasdomainname.com/register.php et saisit son email et choisit un nom d'URL pour son instance (l'URL peut accepter des paramètres pour spécifier le
+- Le visiteur va sur la page d'inscription  https://myaccount.mdomain.com/register.php et saisit son email et choisit un nom d'URL pour son instance (l'URL peut accepter des paramètres pour spécifier le
 services souscrit, ou encore le nom du revendeur).
 
 - En cliquant sur La page d'inscription, les opérations suivantes sont réalisées :
