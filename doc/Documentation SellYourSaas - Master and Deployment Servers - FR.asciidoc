@@ -2192,7 +2192,7 @@ Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/
 
 ==== Définition taille upload et durée sessions
 
-Modifier le fichier *php.ini* pour permettre l'upload de plus gros fichiers.
+Modifier le fichier *php.ini* (celui de *apache* et celui de *cli*) pour permettre l'upload de plus gros fichiers.
 
 [source,bash]
 ---------------
@@ -2216,7 +2216,7 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendma
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
-Modifier le fichier *php.ini* de apache et le *php.ini* de cli avec:
+Modifier le fichier *php.ini* (celui de *apache* et celui de *cli*) avec:
 
 [source,bash]
 ---------------
@@ -2238,7 +2238,7 @@ mail.log = /var/log/phpmail.log
 
 * Ajouter une ligne si non déjà présente dans le fichier */etc/logrotate.conf*
 
-[source,conf]
+[source,bash]
 ---------------
 # use the syslog group by default, since this is the owning group of /var/log/syslog.
 su root syslog
