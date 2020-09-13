@@ -91,6 +91,7 @@ export testorconfirm=$1
 # For debug
 echo "testorconfirm = $testorconfirm"
 
+export errstring=""
 
 echo `date +%Y%m%d%H%M%S`" Do rsync - first part..."
 export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
@@ -113,25 +114,29 @@ if [ "x$ret1" == "x0" ]; then
 	        	
 		        $command 2>&1
 		        if [ "x$?" != "x0" ]; then
+		        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i"
 		        	export ret2=$(($ret2 + 1));
+		        	export errstring="$errstring osu$i"
 		        fi
 		    else
 		    	echo No directory found starting with name $backupdir/osu$i
 		    fi
 			echo
 	done
+else
+	export errstring="ERROR Failed to make $command"
 fi
 
-echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2"
+echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
 
 if [ "x$ret1" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
+	echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
 	exit $ret1
 else
 	if [ "x$ret2" != "x0" ]; then
 		echo "Send email to $EMAILTO to warn about backup error"
-		echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
+		echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
 		exit $ret2
 	fi 
 fi
