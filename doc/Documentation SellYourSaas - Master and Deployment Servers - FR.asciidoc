@@ -894,9 +894,12 @@ systemctl stop watchdog
 systemctl start watchdog
 ---------------
 
+Lorsque la charge devient très élevée ou lorsque la mémoire est très faible, le chien de garde lancera le script de réparation qui suivra l'état du serveur dans les fichiers */var/log/repair...log* puis redémarrera le serveur. Remarque: cela ne devrait jamais arriver.
 
 
 === Installation du watchdog Apache ===
+
+Obligatoire, nécessaire pour compenser un bug apache faisant planter apache au bout de trop de reload.
 
 Sur les *serveurs de déploiements* :
 

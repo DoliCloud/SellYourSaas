@@ -876,6 +876,11 @@ TODO Graphic with flux and ports
 
 * Installation and activation of watchdog Linux with configs in */etc/watchdog*
 
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/bin/repair
+---------------
+
 To consult, no longer launch at startup, launch at startup, stop, launch:
 
 [source, bash]
@@ -887,9 +892,12 @@ systemctl stop watchdog
 systemctl start watchdog
 ---------------
 
+When load become very high or when memory is very low, the watchdog will launch the repair script that will track status of server into files */var/log/repair...log* and then reboot the server. Note: This should never happen.
 
 
 === Installation of the Apache watchdog ===
+
+Required to compensate an apache bug making apache dying after a too high number of reload.
 
 On the *Deployment servers* :
 
