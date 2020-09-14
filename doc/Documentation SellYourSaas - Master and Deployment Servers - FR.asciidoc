@@ -878,6 +878,11 @@ TODO Graphic avec les flux et les ports.
 
 * Installation et activation de watchdog Linux avec les configs dans */etc/watchdog*
 
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/bin/repair
+---------------
+
 Pour consulter, ne plus lancer au démarrage, lancer au démarrage, arrêter, lancer:
 
 [source,bash]
