@@ -519,6 +519,8 @@ Create directories required to store data and backups:
 
 [source, bash]
 ---------------
+mkdir /home/jail;
+
 mkdir /mnt/diskhome/home
 ln -fs /mnt/diskhome/home /home/jail/home
 
