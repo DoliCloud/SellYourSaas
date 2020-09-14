@@ -369,7 +369,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 			else
 			{
 				$nboferrors++;
-				$instancesbackuperror[]=$instance;
+				$instancesbackuperror[$instance] = array('date' => dol_now('gmt'));
 				print '-> Backup process fails for '.$instance."\n";
 			}
 
@@ -427,7 +427,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 			else
 			{
 				$nboferrors++;
-				$instancesupdateerror[]=$instance;
+				$instancesupdateerror[$instance] = array('date' => dol_now('gmt'));
 				print 'KO. '.join(',',$errors)."\n";
 				$dbmaster->rollback();
 			}
@@ -579,8 +579,18 @@ if ($action != 'updatestatsonly')
 	$out.= "Nb of paying instances processed ok: ".$nbofok."\n";
 	$out.= "Nb of paying instances processed ko: ".$nboferrors;
 }
-$out.= (count($instancesbackuperror)?", error for backup on ".join(', ',$instancesbackuperror):"");
-$out.= (count($instancesupdateerror)?", error for update on ".join(', ',$instancesupdateerror):"");
+if (count($instancesbackuperror)) {
+	$out.= ", error for backup on ";
+	foreach($instancesbackuperror as $instance => $val) {
+		$out .= $instance.' ('.$val['date'].')';
+	}
+}
+if (count($instancesupdateerror)) {
+	$out.= ", error for update on ";
+	foreach($instancesupdateerror as $instance => $val) {
+		$out .= $instance.' ('.$val['date'].')';
+	}
+}
 $out.= "\n";
 print $out;
 
