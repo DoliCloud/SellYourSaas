@@ -116,7 +116,7 @@ if [ "x$ret1" == "x0" ]; then
 		        if [ "x$?" != "x0" ]; then
 		        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i"
 		        	export ret2=$(($ret2 + 1));
-		        	export errstring="$errstring osu$i"
+		        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
 		        fi
 		    else
 		    	echo No directory found starting with name $backupdir/osu$i
