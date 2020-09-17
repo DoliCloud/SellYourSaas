@@ -1159,7 +1159,7 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 
       <form action="register_instance" method="post" id="formregister">
         <div class="form-content">
-    	  <input type="hidden" name="token" value="<?php echo $_SESSION['newtoken']; ?>" />
+    	  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
           <input type="hidden" name="service" value="<?php echo dol_escape_htmltag($tmpproduct->ref); ?>" />
           <input type="hidden" name="extcss" value="<?php echo dol_escape_htmltag($extcss); ?>" />
           <input type="hidden" name="package" value="<?php echo dol_escape_htmltag($tmppackage->ref); ?>" />

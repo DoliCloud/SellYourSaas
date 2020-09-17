@@ -511,3 +511,5 @@ DiscountCodeDesc=The discount code used to register or to enter payment. The eff
 DiscountCodeNotValid=Discount code is not valid (will be ignored)
 DiscountCodeIsValid=Discount code is valid. Discount will be %s
 SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION=Force date of invoice to date of validation (instead of date of covered period) 
+LoginSupportHelp=Login to use to create a support user account on customer instances. This value is also used to bypass the maintenance mode when found into the User-Agent.
+

@@ -2570,7 +2570,7 @@ print '
 	  <!-- Search + Menu -->
 
 	  <form class="navbar-toggle navbar-toggler-right form-inline my-md-0" action="'.$_SERVER["PHP_SELF"].'">
-            <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+            <input type="hidden" name="token" value="'.newToken().'">
 			<input type="hidden" name="mode" value="'.dol_escape_htmltag($mode).'">
 			<!--
 				          <input class="form-control mr-sm-2" style="max-width: 100px;" type="text" placeholder="'.$langs->trans("Search").'">
@@ -3760,7 +3760,7 @@ if ($mode == 'instances')
 				      <div class="portlet-title">
 				        <div class="caption">';
 						  print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-						  print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+						  print '<input type="hidden" name="token" value="'.newToken().'">';
 
 				          // Instance name
 						  //print '<a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">';
@@ -4179,7 +4179,7 @@ if ($mode == 'instances')
 							<!-- tab domain -->
 				            <div class="tab-pane" id="tab_domain_'.$contract->id.'">
 								<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">
-                                    <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                                    <input type="hidden" name="token" value="'.newToken().'">
 									<input type="hidden" name="mode" value="instances"/>
 									<input type="hidden" name="action" value="updateurl" />
 									<input type="hidden" name="contractid" value="'.$contract->id.'" />
@@ -4213,7 +4213,7 @@ if ($mode == 'instances')
 								if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
     								print '
     				                <form class="form-horizontal" role="form">
-                                    <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                                    <input type="hidden" name="token" value="'.newToken().'">
 
     				                <div class="form-body">
     				                  <div class="form-group col-md-12 row">
@@ -4255,7 +4255,7 @@ if ($mode == 'instances')
 							    if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
     								print '
     				                <form class="form-horizontal" role="form">
-                                    <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                                    <input type="hidden" name="token" value="'.newToken().'">
 
     				                <div class="form-body">
     				                  <div class="form-group col-md-12 row">
@@ -4316,7 +4316,7 @@ if ($mode == 'instances')
 				            <div class="tab-pane" id="tab_danger_'.$contract->id.'">
 
 							<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">
-                            <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                            <input type="hidden" name="token" value="'.newToken().'">
 
 				              <div class="">
 								';
@@ -4398,7 +4398,7 @@ if ($mode == 'instances')
 
 	print '<!-- Form to add an instance -->'."\n";
 	print '<form id="formaddanotherinstance" class="form-group reposition" style="display: none;" action="register_instance.php" method="POST">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="deployall" />';
 	print '<input type="hidden" name="fromsocid" value="0" />';
 	print '<input type="hidden" name="reusesocid" value="'.$socid.'" />';
@@ -4547,7 +4547,7 @@ if ($mode == 'mycustomerinstances')
 	print '<div class="row"><div class="col-md-12"><div class="portlet light">';
 
 	print '<form name="refresh" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 
 	print $langs->trans("InstanceName").' : <input type="text" name="search_instance_name" value="'.$search_instance_name.'"><br>';
 	//$savsocid = $user->socid;	// Save socid of user
@@ -4672,7 +4672,7 @@ if ($mode == 'mycustomerinstances')
 				        <div class="caption">';
 
 			print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-			print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
 
 			// Customer
 			$tmpcustomer = new Societe($db);
@@ -5043,7 +5043,7 @@ if ($mode == 'mycustomerinstances')
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
 
                                 <form class="form-horizontal" role="form">
-                                <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                                <input type="hidden" name="token" value="'.newToken().'">
 
 				                <div class="form-body">
 				                  <div class="form-group col-md-12 row">
@@ -5075,7 +5075,7 @@ if ($mode == 'mycustomerinstances')
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc").' :</p>
 
                                 <form class="form-horizontal" role="form">
-                                <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                                <input type="hidden" name="token" value="'.newToken().'">
 
 				                <div class="form-body">
 				                  <div class="form-group col-md-12 row">
@@ -5162,7 +5162,7 @@ if ($mode == 'mycustomerinstances')
 	print '<br>';
 
 	print '<form id="formaddanotherinstance" class="form-group reposition" style="display: none;" action="register_instance.php" method="POST">';
-	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="deployall" />';
 	print '<input type="hidden" name="fromsocid" value="'.$mythirdpartyaccount->id.'" />';
 	print '<input type="hidden" name="mode" value="mycustomerinstances" />';
@@ -5651,7 +5651,7 @@ if ($mode == 'registerpaymentmode')
         print '<!-- Form payment-form STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION = '.$conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION.' STRIPE_USE_NEW_CHECKOUT = '.$conf->global->STRIPE_USE_NEW_CHECKOUT.' -->'."\n";
     	print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="payment-form">'."\n";
 
-    	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">'."\n";
+    	print '<input type="hidden" name="token" value="'.newToken().'">'."\n";
     	print '<input type="hidden" name="action" value="createpaymentmode">'."\n";
     	print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
     	//print '<input type="hidden" name="thirdparty_id" value="'.$mythirdpartyaccount->id.'">';
@@ -6781,7 +6781,7 @@ if ($mode == 'support')
 				        <div class="caption">';
 
 						print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-						print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+						print '<input type="hidden" name="token" value="'.newToken().'">';
 						print '<input type="hidden" name="mode" value="support">';
 						print '<input type="hidden" name="action" value="presend">';
 
@@ -6910,7 +6910,7 @@ if ($mode == 'support')
 						{
 							print '<br><br>';
 							print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-							print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+							print '<input type="hidden" name="token" value="'.newToken().'">';
 							print '<input type="hidden" name="mode" value="support">';
 							print '<input type="hidden" name="contractid" value="'.$id.'">';
 							print '<input type="hidden" name="action" value="send">';
@@ -7071,7 +7071,7 @@ if ($mode == 'becomereseller')
 				        <div class="caption">';
 
 		print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-		print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<input type="hidden" name="mode" value="becomereseller">';
 		print '<input type="hidden" name="action" value="sendbecomereseller">';
 
@@ -7174,7 +7174,7 @@ if ($mode == 'myaccount')
           <div class="portlet-body">
 
             <form action="'.$_SERVER["PHP_SELF"].'" method="post" name="formsoc">
-            <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+            <input type="hidden" name="token" value="'.newToken().'">
 			<input type="hidden" name="action" value="updatemythirdpartyaccount">
 			<input type="hidden" name="mode" value="'.dol_escape_htmltag($mode).'">
 
@@ -7286,7 +7286,7 @@ if ($mode == 'myaccount')
 	          <div class="portlet-body">
 
 	            <form action="'.$_SERVER["PHP_SELF"].'" method="post">
-                <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                <input type="hidden" name="token" value="'.newToken().'">
 				<input type="hidden" name="action" value="updatemythirdpartylogin">
 				<input type="hidden" name="mode" value="'.dol_escape_htmltag($mode).'">
 
@@ -7333,7 +7333,7 @@ if ($mode == 'myaccount')
 	          <div class="portlet-body">
 
                 <form action="'.$_SERVER["PHP_SELF"].'" method="post" id="updatepassword">
-                <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                <input type="hidden" name="token" value="'.newToken().'">
 				<input type="hidden" name="action" value="updatepassword">
 				<input type="hidden" name="mode" value="'.dol_escape_htmltag($mode).'">
 
@@ -7396,7 +7396,7 @@ if ($mode == 'myaccount')
 	          </div>
 	          <div class="portlet-body">
 							<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">
-                            <input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+                            <input type="hidden" name="token" value="'.newToken().'">
 
 				              <div class="">
 				                <p class="opacitymedium error" style="padding: 5px">

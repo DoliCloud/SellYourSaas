@@ -43,7 +43,7 @@ dol_include_once("/sellyoursaas/lib/sellyoursaas.lib.php");
 if (! $user->admin) accessforbidden();
 
 // Parameters
-$action = GETPOST('action', 'alpha');
+$action = GETPOST('action', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
 
 

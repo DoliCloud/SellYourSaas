@@ -376,7 +376,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 
 	      <form action="register_instance.php" method="post" id="formregister">
     	    <div class="form-content">
-	    	  <input type="hidden" name="token" value="<?php echo $_SESSION['newtoken']; ?>" />
+	    	  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
 	          <input type="hidden" name="service" value="<?php echo dol_escape_htmltag($tmpproduct->id); ?>" />
 	          <input type="hidden" name="productref" value="<?php echo ($productref == 'none' ? 'none' : dol_escape_htmltag($tmpproduct->ref)); ?>" />
 	          <input type="hidden" name="extcss" value="<?php echo dol_escape_htmltag($extcss); ?>" />
