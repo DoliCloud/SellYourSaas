@@ -582,13 +582,13 @@ if ($action != 'updatestatsonly')
 if (count($instancesbackuperror)) {
 	$out.= ", error for backup on ";
 	foreach($instancesbackuperror as $instance => $val) {
-		$out .= $instance.' ('.$val['date'].')';
+		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
 	}
 }
 if (count($instancesupdateerror)) {
 	$out.= ", error for update on ";
 	foreach($instancesupdateerror as $instance => $val) {
-		$out .= $instance.' ('.$val['date'].')';
+		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
 	}
 }
 $out.= "\n";
