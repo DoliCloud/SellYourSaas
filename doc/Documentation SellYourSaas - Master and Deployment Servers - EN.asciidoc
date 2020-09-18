@@ -780,6 +780,8 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
+You can create another virtual host for the HTTPS on port 443
+
 
 * Create a virtual host for the client area * myaccount.mysaasdomainname.com *
 
@@ -833,6 +835,9 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
+You can create another virtual host for the HTTPS on port 443
+
+
 === Timeout of server launches
 
 On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
@@ -858,7 +863,7 @@ systemctl reload service_name.service
 
 === Installation of the firewall ===
 
-* Create a firewall launch file in */home/admin/tools/firewall*. Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
+* Create a firewall launch file (for example in */home/admin/tools/firewall*). Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
 
 [source, bash]
 ---------------
@@ -1527,6 +1532,8 @@ broken_sasl_auth_clients = yes
 
 === Setup of Mysql or Mariadb
 
+On *Deployment servers*, use a dedicated setup of the database.
+
 ==== Setup
 
 Edit the config file */lib/systemd/system/mysql.service* to put into section *[Service]* a value that is a limit number of files that is higher than the default value of *4096* (visible with *sudo systemctl show -p DefaultLimitNOFILE*) of systemd:
@@ -1547,7 +1554,6 @@ systemctl daemon-reload
 Edition du fichier de config *mysqld.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
 ou *50-server.cnf* dans */etc/mysql/mariadb.conf.d* (si mariadb) pour changer :
 
-Replace the 
 
 [source,bash]
 ---------------
