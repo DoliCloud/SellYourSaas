@@ -210,6 +210,8 @@ Create the user account *admin*. It will be used to install and administer the s
 [source, bash]
 ---------------
 useradd admin -g admin
+mkdir /home/admin/logs
+chown root.adm /home/admin/logs
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -2132,7 +2134,7 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
-    *with.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *withX.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
     *ns1with1.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
     *ns2with1.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
 
@@ -2380,7 +2382,7 @@ apt-get install python-certbot-apache
 
 Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
 
-* Créer le fichier key *with.mysaasdomainname.com.key* et csr *with.mysaasdomainname.com.csr* ainsi:
+* Créer le fichier key *withX.mysaasdomainname.com.key* et csr *withX.mysaasdomainname.com.csr* ainsi:
 
 Pour générer le fichier .key:   
     
@@ -2424,10 +2426,10 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.key with.sel
 * Edit the default apache file */etc/init.d/apache2/000-default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
 
 ---------------
-SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
-SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
-SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
-SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+SSLCertificateFile /etc/apache2/witX.sellyoursaas.com.crt
+SSLCertificateKeyFile /etc/apache2/withX.sellyoursaas.com.key
+SSLCertificateChainFile /etc/apache2/withX.sellyoursaas.com-intermediate.crt
+SSLCACertificateFile /etc/apache2/withX.sellyoursaas.com-intermediate.crt
 ---------------
 
 So if a user is using an old URL with a delete virtual host, he will reach the default page */var/www/html/index.html*. 
@@ -2518,11 +2520,11 @@ Sur tous les serveurs (Master et Déploiement):
 
 * Sous le compte *admin*, récupérer les sources de *Dolibarr* (v11 ou +) à placer dans */home/admin/wwwroot/dolibarr*
 
-* Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr*)
+Sur le serveur master:
+
+* Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*)
 
 * Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
-
-Sur le serveur Master:
 
 * Activez le module "Cron/Travaux programmés"  et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
 
@@ -2539,6 +2541,10 @@ Sur tous les serveurs (Master et Déploiement):
 * Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
 
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+Se connecter à l'interface utilisateur de Dolibarr:
+
+* Activer le module SellYourSaas
 
 * Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants:
 
@@ -2594,7 +2600,7 @@ With the following content:
 ---------------
 # domain du service
 domain=mysaasdomainname.com
-subdomain=with.mysaasdomainname.com
+subdomain=withX.mysaasdomainname.com
 # ips autorisés à commander le déploiement
 allowed_hosts=127.0.0.1,ipduservermaster
 # Set to 1 if this server is the master server

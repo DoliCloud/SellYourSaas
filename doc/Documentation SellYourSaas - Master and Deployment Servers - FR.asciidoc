@@ -210,6 +210,8 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 [source,bash]
 ---------------
 useradd admin -g admin
+mkdir /home/admin/logs
+chown root.adm /home/admin/logs
 ---------------
 
 Vérifiez que le id de ce user *admin* est bien supérieur ou égale à 1000.
@@ -2144,7 +2146,7 @@ Ajouter les enregistrements *GLUE record* auprès du registar pour (optionnel)
     *ns1with1.mysaasdomainname.com*
     *ns2with1.mysaasdomainname.com*
 
-Créer un fichier */etc/bind/with.mysaasdomainname.com.hosts* pour le DNS *with.mysaasdomainname.com* sur le serveur de Déploiement:
+Créer un fichier */etc/bind/withX.mysaasdomainname.com.hosts* pour le DNS *withX.mysaasdomainname.com* sur le serveur de Déploiement:
 
 [source,bash]
 ---------------
@@ -2182,9 +2184,9 @@ Ajouter une entrée dans */etc/bind/named.conf.local* pour que ce nouveau fichie
 
 // mysaasdomainname.com
 
-zone "with.mysaasdomainname.com" {
+zone "withX.mysaasdomainname.com" {
         type master;
-        file "/etc/bind/with.mysaasdomainname.com.hosts";
+        file "/etc/bind/withX.mysaasdomainname.com.hosts";
         };
 
 ---------------
@@ -2383,22 +2385,22 @@ apt-get install python-certbot-apache
 
 Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
 
-* Créer le fichier key *with.mysaasdomainname.com.key* et csr *with.mysaasdomainname.com.csr* ainsi:
+* Créer le fichier key *withX.mysaasdomainname.com.key* et csr *withX.mysaasdomainname.com.csr* ainsi:
 
 Pour générer le fichier .key:   
     
 [source,bash]
 ---------------
 cd /etc/apache2
-openssl genrsa 2048 > with.mysaasdomainname.com.key
-chmod go-r with.mysaasdomainname.com.key
+openssl genrsa 2048 > withX.mysaasdomainname.com.key
+chmod go-r withX.mysaasdomainname.com.key
 ---------------
 
 Pour générer le fichier .csr:
 
 [source,bash]
 ---------------
-openssl req -nodes -newkey rsa:2048 -sha256 -keyout with.mysaasdomainname.com.key -out with.mysaasdomainname.com.csr
+openssl req -nodes -newkey rsa:2048 -sha256 -keyout withX.mysaasdomainname.com.key -out withX.mysaasdomainname.com.csr
 ---------------
 
 Choisir:
@@ -2522,11 +2524,9 @@ Sur tous les serveurs (Master et Déploiement):
 
 * Sous le compte *admin*, récupérer les sources de *Dolibarr* (v11 ou +) à placer dans */home/admin/wwwroot/dolibarr*
 
-* Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr*)
+* Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*)
 
 * Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
-
-Sur le serveur Master:
 
 * Activez le module "Cron/Travaux programmés"  et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
 
@@ -2543,6 +2543,10 @@ Sur tous les serveurs (Master et Déploiement):
 * Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
 
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+Se connecter à l'interface utilisateur de Dolibarr:
+
+* Activer le module SellYourSaas
 
 * Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants:
 
@@ -2598,7 +2602,7 @@ Avec pour contenu:
 ---------------
 # domain du service
 domain=mysaasdomainname.com
-subdomain=with.mysaasdomainname.com
+subdomain=withX.mysaasdomainname.com
 # ips autorisés à commander le déploiement
 allowed_hosts=127.0.0.1,ipduservermaster
 # Set to 1 if this server is the master server
