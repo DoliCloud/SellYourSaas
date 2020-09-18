@@ -2631,7 +2631,7 @@ archivedirpaid=/mnt/diskbackup/archives-paid
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 
-* Activer le module SellYourSaas dans Dolibarr et configurer le.
+Rebasculer sur l'instance Master Dolibarr (https://admin.mysaasdomainname.com) et aller sur la configuration du module SellYourSaas:
 
 TODO Ajouter desc des variables de config du module...
 
