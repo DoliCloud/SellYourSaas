@@ -2120,17 +2120,17 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration du serveur DNS Bind sur les serveurs Master
+=== Configuration du serveur DNS sur les serveurs Master
 
-Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
+Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
     *admin.mysaasdomainname.com*         Domain de l'outil d'administration pointant sur l'ip du serveur Master
     *myaccount.mysaasdomainname.com*     Domain de l'outil d'administration pointant sur l'ip du serveur Master
 
 
-=== Setup of DNS Bind server on deployment servers
+=== Setup of DNS server on deployment servers
 
-Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
+Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
     *with.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
     *ns1with1.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
