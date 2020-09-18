@@ -2137,12 +2137,12 @@ Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour aj
 
     *with1.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
     *ns1with1.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
-    *ns2with2.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *ns2with1.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
 
 Ajouter les enregistrements *GLUE record* auprès du registar pour (optionnel)
 
-    *ns1with.mysaasdomainname.com*
-    *ns2with.mysaasdomainname.com*
+    *ns1with1.mysaasdomainname.com*
+    *ns2with1.mysaasdomainname.com*
 
 Créer un fichier */etc/bind/with.mysaasdomainname.com.hosts* pour le DNS *with.mysaasdomainname.com* sur le serveur de Déploiement:
 

@@ -2120,21 +2120,26 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Setup of DNS Bind server on deployment servers
+=== Configuration du serveur DNS Bind sur les serveurs Master
 
 Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
     *admin.mysaasdomainname.com*         Domain de l'outil d'administration pointant sur l'ip du serveur Master
     *myaccount.mysaasdomainname.com*     Domain de l'outil d'administration pointant sur l'ip du serveur Master
-    
+
+
+=== Setup of DNS Bind server on deployment servers
+
+Mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
+
     *with.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
-    *ns1with.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
-    *ns2with.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *ns1with1.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *ns2with1.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
 
 Ajouter les enregistrements *GLUE record* auprès du registar pour (optional)
 
-    *ns1with.mysaasdomainname.com*
-    *ns2with.mysaasdomainname.com*
+    *ns1with1.mysaasdomainname.com*
+    *ns2with1.mysaasdomainname.com*
 
 Créer un fichier */etc/bind/with.mysaasdomainname.com.hosts* pour le DNS *with.mysaasdomainname.com* sur le serveur de Déploiement:
 
