@@ -2544,7 +2544,7 @@ Sur tous les serveurs (Master et Déploiement):
 
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
 
-Se connecter à l'interface utilisateur de Dolibarr:
+Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainname.com):
 
 * Activer le module SellYourSaas
 
