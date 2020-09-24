@@ -68,9 +68,9 @@ if ($action == 'set')
 
 	if (! $error)
 	{
-	    dolibarr_set_const($db,'SELLYOURSAAS_FORCE_STRIPE_TEST',GETPOST("SELLYOURSAAS_FORCE_STRIPE_TEST",'int'),'chaine',0,'',$conf->entity);
+		//dolibarr_set_const($db,'SELLYOURSAAS_FORCE_STRIPE_TEST',GETPOST("SELLYOURSAAS_FORCE_STRIPE_TEST",'int'),'chaine',0,'',$conf->entity);
 
-	    dolibarr_set_const($db,'SELLYOURSAAS_MAIN_FAQ_URL',GETPOST("SELLYOURSAAS_MAIN_FAQ_URL",'custom', 0, FILTER_VALIDATE_URL),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,'SELLYOURSAAS_MAIN_FAQ_URL',GETPOST("SELLYOURSAAS_MAIN_FAQ_URL",'custom', 0, FILTER_VALIDATE_URL),'chaine',0,'',$conf->entity);
 
 	    dolibarr_set_const($db,"SELLYOURSAAS_NAME",GETPOST("SELLYOURSAAS_NAME"),'chaine',0,'',$conf->entity);
 
@@ -309,12 +309,13 @@ print '<input type="hidden" name="action" value="set">';
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
 print '<td class="titlefield">'.$langs->trans("ParametersOnMasterServer").'</td><td>'.$langs->trans("Value").'</td>';
-print '<td class="opacitymedium">'.$langs->trans("Examples").'<div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+print '<td class="titlefield">'.$langs->trans("Examples").'<div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_FORCE_STRIPE_TEST").'</td>';
 print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_FORCE_STRIPE_TEST" value="'.$conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST.'">';
+//print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_FORCE_STRIPE_TEST" value="'.$conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST.'">';
+print ajax_constantonoff('SELLYOURSAAS_FORCE_STRIPE_TEST', array(), $conf->entity, 0, 0, 1);
 print '</td>';
 print '<td class="opacitymedium">1</td>';
 print '</tr>';
@@ -460,6 +461,12 @@ if ($allowresellerprogram)
     print '<td class="opacitymedium">SaaS Resellers</td>';
     print '</tr>';
 
+    print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasResellerUrl").'</td>';
+    print '<td>';
+    print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_URL" value="'.$conf->global->SELLYOURSAAS_RESELLER_URL.'">';
+    print '</td>';
+    print '<td class="opacitymedium">https://www.mysaasdomainname.com/en-become-a-dolicloud-reseller.php</td>';
+    print '</tr>';
 }
 
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');
@@ -489,13 +496,6 @@ print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_STATUS_URL" value="'.$conf->global->SELLYOURSAAS_STATUS_URL.'">';
 print '</td>';
 print '<td class="opacitymedium">https://status.mysaasdomainname.com</td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasResellerUrl").'</td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_URL" value="'.$conf->global->SELLYOURSAAS_RESELLER_URL.'">';
-print '</td>';
-print '<td class="opacitymedium">https://www.mysaasdomainname.com/en-become-a-dolicloud-reseller.php</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("FooterContent").'</td>';
@@ -694,7 +694,7 @@ if ($conf->use_javascript_ajax)
 }
 //print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
-print '<td class="opacitymedium">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
+print '<td><span class="opacitymedium">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION").'</td>';
@@ -712,7 +712,7 @@ if ($conf->use_javascript_ajax)
 }
 //print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
-print '<td class="opacitymedium"></td>';
+print '<td></td>';
 print '</tr>';
 
 
@@ -726,15 +726,15 @@ print '<br>';
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
-print '<td class="titlefield">'.$langs->trans("ParametersOnDeploymentServers").'</td><td>'.$langs->trans("Value").'</td>';
-print '<td class="opacitymedium">'.$langs->trans("Examples").'<div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+print '<td class="titlefield">'.$langs->trans("ParametersOnDeploymentServers").'</td><td class="titlefield">'.$langs->trans("Value").'</td>';
+print '<td class="titlefield"><div class="float valignmiddle">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("DirForDoliCloudInstances").'</td>';
 print '<td>';
 print '<input size="40" type="text" name="DOLICLOUD_INSTANCES_PATH" value="'.$conf->global->DOLICLOUD_INSTANCES_PATH.'">';
 print '</td>';
-print '<td class="opacitymedium">/home/jail/home</td>';
+print '<td><span class="opacitymedium">/home/jail/home</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>';
@@ -743,7 +743,7 @@ print '<td>';
 //print '<input size="40" type="text" name="DOLICLOUD_TEST_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_TEST_BACKUP_PATH.'">';
 print '<span class="opacitymedium">'.$langs->trans("FeatureNotYetAvailable").'</span>';
 print '</td>';
-print '<td class="opacitymedium">';
+print '<td>';
 //print '/home/jail/backup, /mnt/diskbackup/backup';
 print '</td>';
 print '</tr>';
@@ -753,7 +753,7 @@ print $form->textwithpicto($langs->trans("DirForBackupInstances"), '').'</td>';
 print '<td>';
 print '<input size="40" type="text" name="DOLICLOUD_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_BACKUP_PATH.'">';
 print '</td>';
-print '<td class="opacitymedium">/home/jail/backup, /mnt/diskbackup/backup</td>';
+print '<td><span class="opacitymedium">/home/jail/backup, /mnt/diskbackup/backup</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>';
@@ -761,7 +761,7 @@ print $form->textwithpicto($langs->trans("SELLYOURSAAS_TEST_ARCHIVES_PATH"), $la
 print '<td>';
 print '<input size="40" type="text" name="SELLYOURSAAS_TEST_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'">';
 print '</td>';
-print '<td class="opacitymedium">/home/jail/archives-test, /mnt/diskbackup/archives-test</td>';
+print '<td><span class="opacitymedium">/home/jail/archives-test, /mnt/diskbackup/archives-test</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>';
@@ -769,28 +769,28 @@ print $form->textwithpicto($langs->trans("SELLYOURSAAS_PAID_ARCHIVES_PATH"), $la
 print '<td>';
 print '<input size="40" type="text" name="SELLYOURSAAS_PAID_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'">';
 print '</td>';
-print '<td class="opacitymedium">/home/jail/archives-paid, /mnt/diskbackup/archives-paid</td>';
+print '<td><span class="opacitymedium">/home/jail/archives-paid, /mnt/diskbackup/archives-paid</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_PUBLIC_KEY" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_PUBLIC_KEY.'</textarea>';
 print '</td>';
-print '<td>Your SSH public key(s) deployed into each new instance</td>';
+print '<td><span class="opacitymedium">Your SSH public key(s) deployed into each new instance</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("LoginForSupport").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_LOGIN_FOR_SUPPORT" value="'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT.'">';
 print '</td>';
-print '<td class="opacitymedium">'.$langs->trans("LoginSupportHelp").'</td>';
+print '<td><span class="opacitymedium">'.$langs->trans("LoginSupportHelp").'</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("PasswordForSupport").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.$conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT.'">';
 print '</td>';
-print '<td class="opacitymedium">Password to use to create a support user account on customer instances</td>';
+print '<td><span class="opacitymedium">Password to use to create a support user account on customer instances</span></td>';
 print '</tr>';
 
 print '</table>';
