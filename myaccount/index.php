@@ -3771,7 +3771,7 @@ if ($mode == 'instances')
 						  // Instance status
 				          print '<span class="caption-helper floatright clearboth">';
 				          //print $langs->trans("Status").' : ';
-				          print '<span class="bold uppercase" style="color:'.$color.'">';
+				          print '<!-- status = '.$statuslabel.' --><span class="bold uppercase" style="color:'.$color.'">';
 				          if ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
 				          elseif ($statuslabel == 'done') print $langs->trans("Alive");
 				          elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning();
