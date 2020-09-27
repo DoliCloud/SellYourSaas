@@ -3440,7 +3440,7 @@ if ($mode == 'dashboard')
 						foreach($contract->linkedObjects['facture'] as $idinvoice => $invoice)
 						{
 							print '<!--';
-							print $invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->statut."-paye=".$invoice->paye."\n";
+							print dol_escape_htmltag($invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->statut."-paye=".$invoice->paye)."\n";
 							print '-->';
 							if ($invoice->statut == $invoice::STATUS_DRAFT) continue;
 							if ($invoice->statut == $invoice::STATUS_VALIDATED)
