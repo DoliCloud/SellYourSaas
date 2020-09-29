@@ -804,7 +804,7 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
    ErrorLog     /home/admin/logs/mysaas_myaccount_error_log
    CustomLog    /home/admin/logs/mysaas_myaccount_access_log combined
 
-   DocumentRoot /home/admin/wwwroot/dolibarr_sellyoursaas/myaccount
+   DocumentRoot /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
 
    <Directory /home/admin/wwwroot/dolibarr_sellyoursaas/myaccount>
    AllowOverride FileInfo Options
