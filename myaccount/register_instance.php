@@ -999,7 +999,7 @@ if (! $error)
 		$substitutionarray['__APPPASSWORD__']=$password;
 
 		// TODO Replace this with $tmppackage->header and $tmppackage->footer
-		dol_syslog('Set substitution var for __EMAIL_FOOTER__ and $tmppackage->ref='.strtoupper($tmppackage->ref));
+		dol_syslog('Set substitution var for __EMAIL_FOOTER__ with $tmppackage->ref='.strtoupper($tmppackage->ref));
 		$substitutionarray['__EMAIL_FOOTER__']='';
 		if ($emailtemplate) {
 			if ($langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->ref)) != "EMAIL_FOOTER_".strtoupper($tmppackage->ref)) {
