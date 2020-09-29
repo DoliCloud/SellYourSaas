@@ -68,7 +68,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->phpmin = array(4,1);						// Minimum version of PHP required by module
 		$this->langfiles = array("sellyoursaas@sellyoursaas");
-		$this->need_dolibarr_version = array(10,0,-5);	// Minimum version of Dolibarr required by module
+		$this->need_dolibarr_version = array(13,0,-5);	// Minimum version of Dolibarr required by module
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array('triggers' => 1,
