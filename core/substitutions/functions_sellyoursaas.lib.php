@@ -96,6 +96,13 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
             	        $substitutionarray['__APPUSERNAME__'] = $initialapplogin;
             	        $substitutionarray['__PACKAGELABEL__'] = $tmppackage->label;
             	        $substitutionarray['__APPPASSWORD__']='';
+
+            	        dol_syslog('Set substitution var for __EMAIL_FOOTER__ and $tmppackage->ref='.strtoupper($tmppackage->ref));
+            	        $substitutionarray['__EMAIL_FOOTER__']='';
+           	        	if ($langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->ref)) != "EMAIL_FOOTER_".strtoupper($tmppackage->ref)) {
+           	        		$substitutionarray['__EMAIL_FOOTER__'] = $langs->trans("EMAIL_FOOTER_".strtoupper($tmppackage->ref));
+            	        }
+
             	        break;
             	    }
         	    }
