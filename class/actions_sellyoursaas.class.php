@@ -586,7 +586,7 @@ class ActionsSellyoursaas
 			    }
 			}
 
-			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'suspendmaintenance')))
+			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenance')))
 			{
 				dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($db);
@@ -608,15 +608,18 @@ class ActionsSellyoursaas
 			}
 
 			// End of deployment is now OK / Complete
-			if (! $error && $action == 'suspendmaintenance')
+			if (! $error && in_array($action, array('unsuspend', 'suspendmaintenance')))
 			{
-				$object->array_options['options_suspendmaintenance_message'] = 'nomessage';
+				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenance' ? 'nomessage' : '');
 
 				$result = $object->update($user);
 				if ($result < 0)
 				{
 					// We ignore errors. This should not happen in real life.
 					//setEventMessages($contract->error, $contract->errors, 'errors');
+				} else {
+					if ($action == 'suspendmaintenance') setEventMessages('InstanceInMaintenanceMode', null, 'warnings');
+					else setEventMessages('InstanceUnsuspended', null, 'mesgs');
 				}
 			}
         }
@@ -659,8 +662,6 @@ class ActionsSellyoursaas
                 else
                 {
                     setEventMessages($langs->trans("PaymentDoneOn".ucfirst($service), $sellyoursaasutils->stripechargedone), null, 'mesgs');
-
-
                 }
             }
             else
