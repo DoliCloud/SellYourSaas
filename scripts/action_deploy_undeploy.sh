@@ -35,6 +35,8 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
 
 
 if [ "$(id -u)" != "0" ]; then
@@ -649,6 +651,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
@@ -664,6 +667,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
@@ -733,6 +737,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
+				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
@@ -748,6 +754,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
+				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf

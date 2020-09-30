@@ -2990,7 +2990,7 @@ class SellYourSaasUtils
 
 
     /**
-     * Make a remote action on a contract (deploy/undeploy/suspend/unsuspend/rename/backup...).
+     * Make a remote action on a contract (deploy/undeploy/suspend/suspendmaintenance/unsuspend/rename/backup...).
      * This function is called on Master but remote action is done on remote agent.
      *
      * @param	string					$remoteaction	Remote action ('suspend/unsuspend/rename'=change apache virtual file, 'deploy/undeploy'=create/delete database, 'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics)
@@ -3030,7 +3030,7 @@ class SellYourSaasUtils
     	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
 		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract, check install.lock file
-    	if (in_array($remoteaction, array('refresh','recreateauthorizedkeys','deletelock','recreatelock')) && get_class($object) == 'Contrat')
+    	if (in_array($remoteaction, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat')
     	{
     		// SFTP refresh
     		if (function_exists("ssh2_connect"))
@@ -3257,12 +3257,12 @@ class SellYourSaasUtils
     		// Note remote action 'undeployall' is used to undeploy test instances
     		// Note remote action 'undeploy' is used to undeploy paying instances
     		$doremoteaction = 0;
-    		if (in_array($remoteaction, array('backup','deploy','deployall','rename','suspend','unsuspend','undeploy','undeployall')) &&
+    		if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall')) &&
     			($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
     		if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
     			($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
 
-    		// remoteaction = 'deploy','deployall','deployoption','rename','suspend','unsuspend','undeploy'
+    		// remoteaction = 'deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
     		if ($doremoteaction)
     		{
     			dol_syslog("Enter into doremoteaction code, with contract id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);

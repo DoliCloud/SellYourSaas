@@ -52,8 +52,8 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance=$_GET['instance'];	// example: testldr3.with.dolicloud.com
-$messageonly=$_GET['messageonly'];	// example: testldr3.with.dolicloud.com
+$instance = GETPOST('instance');	// example: testldr3.with.dolicloud.com
+$messageonly = GETPOST('messageonly');	// example: testldr3.with.dolicloud.com
 
 // SEarch instance
 $contract = new Contrat($db);
@@ -115,12 +115,12 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 
 if (empty($messageonly))
 {
-    print $langs->trans("SorryInstancesAreOffLine", $instance).'<br>';
+    print $langs->trans("SorryInstancesAreOffLine", dol_escape_htmltag($instance)).'<br>';
     print '<br>';
     print '<br>';
     if ($instance)
     {
-        print '<a href="https://'.$instance.'">'.$langs->trans("RetryNow").'</a><br>';
+        print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("RetryNow").'</a><br>';
         print '<br>';
     }
     print '<br>';

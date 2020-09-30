@@ -205,8 +205,8 @@ class ActionsSellyoursaas
     	dol_syslog(get_class($this).'::addMoreActionsButtons action='.$action);
     	$langs->load("sellyoursaas@sellyoursaas");
 
-    	if (in_array($parameters['currentcontext'], array('contractcard'))
-    		&& ! empty($object->array_options['options_deployment_status']))		// do something only for the context 'somecontext1' or 'somecontext2'
+    	if (in_array($parameters['currentcontext'], array('contractcard'))				// do something only for the context 'contractcard'
+    		&& ! empty($object->array_options['options_deployment_status']))
     	{
 	    	if ($user->rights->sellyoursaas->write)
 	    	{
@@ -231,18 +231,23 @@ class ActionsSellyoursaas
 	    				print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreateauthorizedkeys">' . $langs->trans('RecreateAuthorizedKey') . '</a>';
 	    			}
 
-	    			if (empty($object->array_options['options_filelock']))
+	    			/*if (empty($object->array_options['options_filelock']))
 	    			{
 		    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreatelock">' . $langs->trans('RecreateLock') . '</a>';
 	    			}
 	    			else
 	    			{
 		    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletelock">' . $langs->trans('SellYourSaasRemoveLock') . '</a>';
-		    		}
+		    		}*/
 	    		}
 	    		else
 	    		{
 	    			print '<a class="butActionRefused" href="#" title="'.$langs->trans("ContractMustHaveStatusDone").'">' . $langs->trans('RefreshRemoteData') . '</a>';
+	    		}
+
+	    		if (in_array($object->array_options['options_deployment_status'], array('done')))
+	    		{
+	    			print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance">' . $langs->trans('Maintenance') . '</a>';
 	    		}
 
 	    		if (in_array($object->array_options['options_deployment_status'], array('done')))
@@ -577,7 +582,7 @@ class ActionsSellyoursaas
 			    }
 			}
 
-			if (in_array($action, array('refresh','recreateauthorizedkeys','deletelock','recreatelock')))
+			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'suspendmaintenance')))
 			{
 				dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($db);

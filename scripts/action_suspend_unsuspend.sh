@@ -32,6 +32,7 @@ export ZONES_PATH="/etc/bind/zones"
 export scriptdir=$(dirname $(realpath ${0}))
 export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+export vhostfilesuspendmaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
 
 
 if [ "$(id -u)" != "0" ]; then
@@ -40,7 +41,7 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 if [ "x$1" == "x" ]; then
-	echo "Missing parameter 1 - mode (suspend|unsuspend)" 1>&2
+	echo "Missing parameter 1 - mode (suspend|suspendmaintenance|unsuspend)" 1>&2
 	exit 1
 fi
 if [ "x$2" == "x" ]; then
@@ -219,6 +220,7 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
@@ -234,6 +236,7 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
@@ -307,6 +310,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
@@ -327,6 +331,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
@@ -408,11 +413,16 @@ fi
 
 # Suspend
 
-if [[ "$mode" == "suspend" ]]; then
+if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 	echo `date +%Y%m%d%H%M%S`" ***** Suspend instance in /home/jail/home/$osusername/$dbname"
 
+	export vhostfiletouse=$vhostfilesuspended;
+	if [[ $mode == "suspendmaintenance" ]]; then
+		export vhostfiletouse=$vhostfilesuspendmaintenance;
+	fi	
+	
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
-	echo "Create a suspended apache conf $apacheconf from $vhostfilesuspended"
+	echo "Create a suspended apache conf $apacheconf from $vhostfiletouse"
 
 	if [[ -s $apacheconf ]]
 	then
@@ -420,7 +430,7 @@ if [[ "$mode" == "suspend" ]]; then
 		rm -f $apacheconf
 	fi
 
-	echo "cat $vhostfilesuspended | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+	echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppLogName__/$instancename/g' | \
               sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
@@ -435,7 +445,7 @@ if [[ "$mode" == "suspend" ]]; then
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
-	cat $vhostfilesuspended | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+	cat $vhostfiletouse | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
               sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
@@ -461,7 +471,7 @@ if [[ "$mode" == "suspend" ]]; then
 	if [[ "x$customurl" != "x" ]]; then
 	
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
-		echo "Create a suspended apache conf $apacheconf from $vhostfilesuspended"
+		echo "Create a suspended apache conf $apacheconf from $vhostfiletouse"
 	
 		if [[ -s $apacheconf ]]
 		then
@@ -469,7 +479,7 @@ if [[ "$mode" == "suspend" ]]; then
 			rm -f $apacheconf
 		fi
 	
-		echo "cat $vhostfilesuspended | sed -e 's/__webAppDomain__/$customurl/g' | \
+		echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
                   sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
@@ -484,7 +494,7 @@ if [[ "$mode" == "suspend" ]]; then
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
-		cat $vhostfilesuspended | sed -e "s/__webAppDomain__/$customurl/g" | \
+		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
                   sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \

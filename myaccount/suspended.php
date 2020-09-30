@@ -52,7 +52,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance=$_GET['instance'];	// example: testldr3.with.dolicloud.com
+$instance = GETPOST('instance');	// example: testldr3.with.dolicloud.com
 
 // SEarch instance
 $contract = new Contrat($db);
@@ -80,9 +80,9 @@ top_htmlhead('' ,'Suspension Page');
 <div style="text-align: center">
 <span class="fa fa-desktop" style="font-size: 40px; opacity: 0.3"></span><br><br>
 <?php
-print $langs->trans("SorryInstanceSuspended", $instance);
+print $langs->trans("SorryInstanceSuspended", dol_escape_htmltag($instance));
 print '<br>';
-print '<a href="https://'.$instance.'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
+print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
 print '<br>';
 print '<br>';
 print $langs->trans("GoOnYourDashboardToGetMoreInfo", $_SERVER['SERVER_NAME'], $_SERVER['SERVER_NAME']);
