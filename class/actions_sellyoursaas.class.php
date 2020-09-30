@@ -247,7 +247,11 @@ class ActionsSellyoursaas
 
 	    		if (in_array($object->array_options['options_deployment_status'], array('done')))
 	    		{
-	    			print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance">' . $langs->trans('Maintenance') . '</a>';
+	    			if (empty($object->array_options['options_suspendmaintenance_message'])) {
+	    				print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance">' . $langs->trans('Maintenance') . '</a>';
+	    			} else {
+	    				print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unsuspend">' . $langs->trans('StopMaintenance') . '</a>';
+	    			}
 	    		}
 
 	    		if (in_array($object->array_options['options_deployment_status'], array('done')))
@@ -600,6 +604,19 @@ class ActionsSellyoursaas
 					if ($action == 'recreateauthorizedkeys') setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
 					if ($action == 'recreatelock') setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
 					if ($action == 'deletelock') setEventMessages($langs->trans("FilesDeleted"), null, 'mesgs');
+				}
+			}
+
+			// End of deployment is now OK / Complete
+			if (! $error && $action == 'suspendmaintenance')
+			{
+				$object->array_options['options_suspendmaintenance_message'] = 'nomessage';
+
+				$result = $object->update($user);
+				if ($result < 0)
+				{
+					// We ignore errors. This should not happen in real life.
+					//setEventMessages($contract->error, $contract->errors, 'errors');
 				}
 			}
         }

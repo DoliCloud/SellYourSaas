@@ -82,6 +82,10 @@ top_htmlhead('' ,'Maintenance Page');
 <?php
 print $langs->trans("SorryInstanceInMaintenance", dol_escape_htmltag($instance));
 print '<br>';
+if (! empty($contract->array_options['options_suspendmaintenance_message']) && $contract->array_options['options_suspendmaintenance_message'] != 'nomessage') {
+	print $langs->trans($contract->array_options['options_suspendmaintenance_message']).'<br>';
+}
+print '<br>';
 print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
 print '<br>';
 print '<br>';
