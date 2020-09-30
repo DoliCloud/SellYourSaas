@@ -618,7 +618,9 @@ class ActionsSellyoursaas
 					// We ignore errors. This should not happen in real life.
 					//setEventMessages($contract->error, $contract->errors, 'errors');
 				} else {
-					if ($action == 'suspendmaintenance') setEventMessages('InstanceInMaintenanceMode', null, 'warnings');
+					if ($action == 'suspendmaintenance') {
+						setEventMessages($langs->trans('InstanceInMaintenanceMode', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), null, 'warnings');
+					}
 					else setEventMessages('InstanceUnsuspended', null, 'mesgs');
 				}
 			}
@@ -780,7 +782,7 @@ class ActionsSellyoursaas
 				{
 					// Show warning if in maintenance mode
 					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
-						$ret .= img_warning($langs->trans("InstanceInMaintenanceMode"), '', 'marginrightonly');
+						$ret .= img_warning($langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), '', 'classfortooltip marginrightonly');
 					}
 					// Show payment status
 					if ($ispaid)
