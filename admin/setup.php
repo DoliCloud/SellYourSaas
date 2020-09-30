@@ -643,7 +643,7 @@ foreach($tmpservices as $key => $tmpservice)
     print '<tr class="oddeven"><td><label for="logo">'.$tmpservice.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';
     print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
     print '<input type="file" class="flat class=minwidth200" name="logo'.$suffix.'" id="logo'.$suffix.'">';
-    print '</td><td class="nocellnopadd" valign="middle" align="right">';
+    print '</td><td class="nocellnopadd" valign="middle">';
     $constname = 'SELLYOURSAAS_LOGO_MINI'.$suffix;
     print '<!-- constname = '.$constname.' -->';
     if (! empty($conf->global->$constname)) {
@@ -663,7 +663,7 @@ foreach($tmpservices as $key => $tmpservice)
     print '<tr class="oddeven"><td><label for="logo">'.$tmpservice.' - '.$langs->trans("LogoBlackBackground").' (png,jpg)</label></td><td>';
     print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
     print '<input type="file" class="flat class=minwidth200" name="logoblack'.$suffix.'" id="logoblack'.$suffix.'">';
-    print '</td><td class="nocellnopadd" valign="middle" align="right">';
+    print '</td><td class="nocellnopadd" valign="middle">';
     $constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
     if (! empty($conf->global->$constname)) {
     	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.$suffix.'">'.img_delete($langs->trans("Delete")).'</a>';
