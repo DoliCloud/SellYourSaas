@@ -778,34 +778,39 @@ class ActionsSellyoursaas
 				$ispaid = sellyoursaasIsPaidInstance($object);
 				if ($object->array_options['options_deployment_status'] == 'done')
 				{
-    				if ($ispaid)
+					// Show warning if in maintenance mode
+					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
+						$ret .= img_warning($langs->trans("InstanceInMaintenanceMode"), '', 'marginrightonly');
+					}
+					// Show payment status
+					if ($ispaid)
     				{
-    				    $ret .= '<span class="badge badge-status4 badge-status">'.$langs->trans("PayedMode").'</span>';
+    				    $ret .= '<span class="badge badge-status4 badge-status valignmiddle inline-block">'.$langs->trans("PayedMode").'</span>';
     				    // nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
     				    if (! $object->nbofservicesclosed)
     				    {
     				        $daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND;
-    				        $ret.='<span class="badge2 small marginleftonlyshort" title="Expiration = Date planed for end of service">Paid services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
+    				        $ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Paid services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
     				    }
     				    if ($object->nbofservicesclosed)
     				    {
     				        $daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT;
-    				        $ret.='<span class="badge2 small marginleftonlyshort" title="Expiration = Date planed for end of service">Paid instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
+    				        $ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Paid instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
     				    }
     				}
     				else
     				{
-    				    $ret .= '<span class="badge badge-status5 badge-status" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
+    				    $ret .= '<span class="badge badge-status5 badge-status valignmiddle inline-block" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
     				    // nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
     				    if (! $object->nbofservicesclosed)
     				    {
     				        $daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND;
-    				        $ret.='<span class="badge2 small marginleftonlyshort" title="Expiration = Date planed for end of service">Test services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
+    				        $ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Test services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
     				    }
     				    if ($object->nbofservicesclosed)
     				    {
     				        $daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT;
-    				        $ret.='<span class="badge2 small marginleftonlyshort" title="Expiration = Date planed for end of service">Test instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
+    				        $ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Test instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
     				    }
     				}
 				}
