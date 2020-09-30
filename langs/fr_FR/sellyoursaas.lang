@@ -208,6 +208,7 @@ DuringTestPeriodOnly=Pendant la période de test uniquement
 AppOrOption=Type de service Saas
 PricePerResource=Prix par ressource
 QuantityCalculationFormula=Formule de calcul de qté
+VersionFormula=Formule pour obtenir la version
 PleaseBeSure=Vous allez détruire votre instance. Toutes vos données stockées dans l'application seront détruites. Merci de saisir le nom de l'instance à détruire (<strong>%s</strong>) avant de cliquer sur le bouton 'Désinstaller et Détruire' ? Il n'y a pas de retour arrière possible!
 Deploy=Déployer
 Redeploy=Re-Déployer
@@ -312,7 +313,7 @@ CommandToPutInstancesOnOffline=Commande pour mettre toutes les instances en lign
 InstanceWasDeployed=L'instance a été déployé
 YourPaymentModeWillExpireFixItSoon=Votre mode de paiement est sur le point d'expirer. Merci de <a href="%s">mettre à jour votre mode de paiement</a> afin d'éviter toute interruption de service.
 YouAreAReseller=Vous êtes un revendeur
-YourURLToCreateNewInstance=Pour avoir de nouveaux utilisateurs liés à votre compte revendeur, il faut utiliser l'URL suivante lors de l'inscription
+YourURLToCreateNewInstance=Pour avoir de nouveaux utilisateurs liés à votre compte revendeur et apparaissant dans votre tableau de bord, il faut utiliser l'URL suivante lors de l'inscription
 YourCommissionsAppearsInMenu=Vos commissions (taux actuel <strong>%s%%</strong>) sont visibles dans le menu %s
 InvoicingSuspended=Facturation suspendue
 LoginWithCustomerAccount=Se connecter avec le compte client
@@ -350,7 +351,8 @@ CurrentCreditOrDebitCard=Carte de crédit ou débit actuelle
 NewCreditOrDebitCard=Nouvelle carte de credit ou debit
 CantActivateContractWhenUndeployed=Impossible d'activer une instance lorsque le contrat a été désinstallé.
 SELLYOURSAAS_FORCE_STRIPE_TEST=Forcer le mode Test de Stripe (quelquesoit le paramétrage du module Stripe)
-SELLYOURSAAS_MAIN_FAQ_URL=Forcer une page unique des FAQ
+SELLYOURSAAS_MAIN_FAQ_URL=URL d'une page avec FAQs à afficher
+SELLYOURSAAS_MAIN_FAQ_URLHelp=Si elle n'est pas définie, l'URL sera <br> https://www.__SELLYOURSAAS_MAIN_DOMAIN_NAME__/faq-__LANGCODE__.php
 MaxNumberOfInstanceReached=Vous avez atteint le nombre maximum d'instances (<strong>%s</strong>) que vous pouvez créer pour ce compte. Si vous avez besoin de plus d'instance, merci de nous contacter à <strong>%s</strong>
 whereXXXcanbe=où XXX peut être
 FailedToConnectToSftp=Impossible d'atteindre le serveur SSH avec ssh2_connect(%s)
@@ -364,6 +366,9 @@ EmailOfAccountToDestroy=Email de votre compte
 ErrorEmailMustMatch=Erreur, l'email du compte à supprimer doit correspondre à votre email
 YourAccountHasBeenClosed=Votre compte a été fermé.
 SorryInstanceSuspended=Désolé, votre instance <strong>%s</strong> a été suspendue.
+SorryInstanceInMaintenance=Désolé, votre instance <strong> %s </strong> est en mode maintenance. Merci de revenir plus tard...
+InstanceInMaintenanceMode=L'instance est en mode maintenance! <br> Utilisez un navigateur avec la valeur '<b> %s </b>' dans sa chaîne User-Agent pour le contourner.
+InstanceUnsuspended=L'instance est active
 SorryAccountDeleted=Désolé, ce compte semble détruit. Merci de nous contacter (%s) si vous désirez recréer un compte avec ce login/email.
 LatestResUpdateDate=Date dernière mise à jour resources
 GoOnYourDashboardToGetMoreInfo=Aller sur votre espace client <a href="https://%s"><span class="fa fa-link"></span> https://%s</a> pour obtenir plus d'information et résoudre le problème.
@@ -437,12 +442,14 @@ AccountToDelete=Compte à effacer
 PaymentDoneOnStripeTest=Paiement via Stripe - Test (%s réalisé)
 PaymentDoneOnStripeLive=Paiement via Stripe - Live (%s réalisé)
 PayBalance=Payer le solde
-QtyFormulaExamples=<u>Exemple de règles pour calculer les quantités:</u> <br><br> SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login <> '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__' <br><br> BASH: du -ks __INSTANCEDIR__ | cut -f 1 | php -r '$a=fgets(STDIN)/1000000; print ($a > 0 ? $a : 0).chr(32).($a > 5 ? ($a - 5): 0);'
+QtyFormulaExamples=<u>Exemple de règles pour calculer les quantités:</u> <br><br> SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login <> '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__' <br><br> BASH:du -ks __INSTANCEDIR__ | cut -f 1 | php -r '$a=fgets(STDIN)/1000000; print ($a > 0 ? $a : 0).chr(32).($a > 5 ? ($a - 5): 0);'
+VersionFormulaExamples= <u> Exemple de règles pour obtenir une version: </u> <br> <br> SQL:select field as version from __INSTANCEDBPREFIX__config where key = 'version'
 SourceURLOfEvent=URL source de l'événement
 SeeOnBackoffice=Voir via le backoffice
 PaymentModeAddedFrom=Mode de paiement ajouté depuis
 ErrorBadValueForIntraVAT=Erreur: la valeur '%s', entrée pour le champ '%s' n''est pas valide pour votre pays (%s).<br>Veuillez corriger votre pays ou votre numéro de TVA intracommunautaire (Vous pouvez également décocher le champ '%s' si vous n’êtes pas une entreprise ou si vous n’avez pas votre numéro de TVA intracommunautaire, une TVA pourra alors être ajoutée lors de la facturation du service afin de respecter les règles européennes de TVA applicables aux ventes B to C).
 LoginForSupport=Login pour le support
+PasswordForSupport=Mot de passe pour l'assistance
 SSHPublicKey=SSH public keys à deployer
 SELLYOURSAAS_MAXDEPLOYMENTPERIP=Nb. max de déploiement par IP
 SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR=Nb. max de déploiement par IP par heure
@@ -474,8 +481,8 @@ AnErrorOccuredDuringDeployment=Une erreur temporaire s'est produite lors du dép
 OurTeamHasBeenAlerted=Notre équipe a été alertée. Vous recevrez un email dès que le déploiement sera terminé.
 RegisterText=Texte sur la page d'inscription
 EnterHereTranslationKeyToUseOnRegisterPage=Entrez ici un petit texte qui apparaîtra en haut du formulaire d'inscription pour une nouvelle instance.<br>Vous pouvez aussi saisir une clé de traduction (et ajouter alors les textes traduits depuis le menu Accueil - Configuration - Traduction)
-DiscountCodes=Codes réduction
-DiscountCode=Code réduction
+DiscountCodes=Codes réductions
+DiscountCode=Code de réduction
 EnterHereListOfDiscountCodes=Entrez ici la liste des code de réduction avec la valeur de la réduction. Exemple: CHRISTMAS:10%%,VIEWONTV:5%%
 ErrSCAAuthentication=Il semble que votre carte requiert une authentification pour CHAQUE transaction. Ceci signifie que nous ne pouvons pas l'utiliser automatiquement pour les prochains paiements à votre abonnement, sans vous demandez, chaque mois, d'entrer à nouveau vos identifiants de carte.<br>- si ceci est exact, cela signifie que cette carte ne peut etre utilisé pour notre service.<br>- Si non, merci de saisir un ticket au support depuis votre espace client (menu Autre - Support) ...
 PaymentChargedButReversedByBank=Paiement encaissé puis annulé illégitimementt par la banque
@@ -483,7 +490,7 @@ StripeAccount=Compte Stripe
 StripeAccountForCustomerHelp=Le compte Stripe à utiliser pour collecter les factures clients. Remplissez quelque chose ici uniquement si vous devez collecter de l'argent en utilisant un autre compte Stripe que la valeur par défaut. <br> Exemple: cus_ABCD@pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Nb max d'instances
 ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL: <br> &forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une adresse IP<br>&extcss=mycssurl<br>
-AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instances existantes, votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span> hors réductions
+AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instances existantes, votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span>, hors remises
 SeeOurPrices=Voir les prix de chaque formule <a href="%s" target="_blank">ici</a>
 NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.
 PayingInstanceLost=Instance payant perdue
@@ -500,3 +507,13 @@ BackupOK=Sauvegarde réussie
 ArchiveInstanceDesc=Répertoire où l'instance sera archivée lorsqu'elle sera détruite.
 ArchiveTestInstanceDesc=AVERTISSEMENT: vérifiez que la fonctionnalité est activée en ayant l'entrée archivetestinstance=1 dans le fichier sellyoursaas.conf
 ToCreateDBUserManualy=Pour créer un utilisateur db manuellement sur SELECT uniquement, vous pouvez faire <br> GRANT SELECT ON nom_base_de_données.* to 'nom_utilisateur_en lecture seule@%%' IDENTIFIED PAR 'mot de passe'; FLUSH PRIVILEGES;
+LatestBackupMessage=Dernier message de sauvegarde
+SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accepter un code de réduction lors de l'entrée d'un mode de paiement
+DiscountCodeDesc=Le code de réduction utilisé pour vous inscrire ou pour entrer le paiement. Le code de réduction effectif utilisé pour définir la remise réelle pour la génération de facture est celui enregistré au niveau de la facture récurrente.
+DiscountCodeNotValid=Le code de réduction n'est pas valide (sera ignoré)
+DiscountCodeIsValid=Le code de réduction est valide. La remise sera de %s
+SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION=Forcer la date de la facture à la date de validation (au lieu de la date de la période couverte)
+LoginSupportHelp=Login à utiliser pour créer un compte utilisateur d'assistance sur les instances client. Cette valeur est également utilisée pour contourner le mode de maintenance lorsqu'elle est trouvée dans le User-Agent.
+SellYourSaasResellerUrl=URL de la description personnalisée du programme de revendeur
+Maintenance=Maintenance
+StopMaintenance=Fin de maintenance
