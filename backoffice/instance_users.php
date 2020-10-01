@@ -521,8 +521,8 @@ if (! $user->societe_id)
 
     if ($user->rights->sellyoursaas->write)
     {
-        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=createsupportuser">'.$langs->trans('CreateSupportUser').'</a>';
-        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=deletesupportuser">'.$langs->trans('DeleteSupportUser').'</a>';
+        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=createsupportuser&amp;token='.newToken().'">'.$langs->trans('CreateSupportUser').'</a>';
+        print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=deletesupportuser&amp;token='.newToken().'">'.$langs->trans('DeleteSupportUser').'</a>';
     }
 
     print "</div><br>";

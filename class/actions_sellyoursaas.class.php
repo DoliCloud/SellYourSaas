@@ -233,11 +233,11 @@ class ActionsSellyoursaas
 
 	    			/*if (empty($object->array_options['options_filelock']))
 	    			{
-		    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreatelock">' . $langs->trans('RecreateLock') . '</a>';
+		    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreatelock&token='.newToken().'">' . $langs->trans('RecreateLock') . '</a>';
 	    			}
 	    			else
 	    			{
-		    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletelock">' . $langs->trans('SellYourSaasRemoveLock') . '</a>';
+		    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletelock&token='.newToken().'">' . $langs->trans('SellYourSaasRemoveLock') . '</a>';
 		    		}*/
 	    		}
 	    		else
