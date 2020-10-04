@@ -166,8 +166,8 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode))
 {
     print "This script must be ran as 'admin' user.\n";
-    print "Usage:   $script_file instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [test]\n";
-	print "Example: $script_file myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
+    print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]\n";
+	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have testrsync and confirmrsync working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
 	print "Return code: 0 if success, <>0 if error\n";
