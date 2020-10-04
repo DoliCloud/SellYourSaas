@@ -249,48 +249,80 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 
 	if (is_object($newdb) && $newdb->connected)
 	{
-	    // Get user/pass of last admin user
-        // TODO Put the definition of sql to get last used admin user into the package.
-	    $sql="SELECT login, pass FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
-        if (preg_match('/glpi-network\.cloud/', $object->ref_customer))
-        {
-            $sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
-        }
+		// Get $lastloginadmin, $lastpassadmin, $stringoflistofmodules
+		$lastloginadmin = '';
+		$lastpassadmin = '';
+		$stringoflistofmodules='';
 
-		$resql=$newdb->query($sql);
-		if ($resql)
-		{
-			$obj = $newdb->fetch_object($resql);
-			$object->lastlogin_admin=$obj->login;
-			$object->lastpass_admin=$obj->pass;
-			$lastloginadmin=$object->lastlogin_admin;
-			$lastpassadmin=$object->lastpass_admin;
+		$fordolibarr = 1;
+		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			$forglpi = 1;
 		}
-		else
-		{
-			setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
+
+		// Get user/pass of last admin user
+		if ($fordolibarr) {
+	        // TODO Put the definition of sql to get last used admin user into the package.
+		    $sql="SELECT login, pass FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+	        if (preg_match('/glpi-network\.cloud/', $object->ref_customer))
+	        {
+	            $sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
+	        }
+
+			$resql=$newdb->query($sql);
+			if ($resql)
+			{
+				$obj = $newdb->fetch_object($resql);
+				$object->lastlogin_admin = $obj->login;
+				$object->lastpass_admin = $obj->pass;
+				$lastloginadmin = $object->lastlogin_admin;
+				$lastpassadmin = $object->lastpass_admin;
+			}
+			else
+			{
+				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
+			}
+		}
+
+		// Get user/pass of last admin user
+		if ($forglpi) {
+			// TODO Put the definition of sql to get last used admin user into the package.
+			$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
+
+			$resql=$newdb->query($sql);
+			if ($resql)
+			{
+				$obj = $newdb->fetch_object($resql);
+				$object->lastlogin_admin = $obj->login;
+				$object->lastpass_admin = $obj->pass;
+				$lastloginadmin = $object->lastlogin_admin;
+				$lastpassadmin = $object->lastpass_admin;
+			}
+			else
+			{
+				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
+			}
 		}
 
 		// Get $stringofversion and $stringoflistofmodules
 		// TODO Put the defintion in a sql into package
+		if ($fordolibarr) {
+			$confinstance = new Conf();
+			$confinstance->setValues($newdb);
 
-		$confinstance = new Conf();
-		$confinstance->setValues($newdb);
+			// Define $stringofversion
+			$stringofversion = 'MAIN_VERSION_LAST_INSTALL='.$confinstance->global->MAIN_VERSION_LAST_INSTALL.' / MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
 
-		// Define $stringofversion
-		$stringofversion = 'MAIN_VERSION_LAST_INSTALL='.$confinstance->global->MAIN_VERSION_LAST_INSTALL.' / MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
-
-		// Define $stringoflistofmodules
-		$i=0;
-		$stringoflistofmodules='';
-		foreach($confinstance->global as $key => $val)
-		{
-		    if (preg_match('/^MAIN_MODULE_[^_]+$/',$key) && ! empty($val))
-		    {
-		        if ($i > 0) $stringoflistofmodules .= ', ';
-		        $stringoflistofmodules .= preg_replace('/^MAIN_MODULE_/','',$key);
-		        $i++;
-		    }
+			// Define $stringoflistofmodules
+			$i=0;
+			foreach($confinstance->global as $key => $val)
+			{
+			    if (preg_match('/^MAIN_MODULE_[^_]+$/',$key) && ! empty($val))
+			    {
+			        if ($i > 0) $stringoflistofmodules .= ', ';
+			        $stringoflistofmodules .= preg_replace('/^MAIN_MODULE_/','',$key);
+			        $i++;
+			    }
+			}
 		}
 	}
 

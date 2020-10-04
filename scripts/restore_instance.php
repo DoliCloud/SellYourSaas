@@ -141,7 +141,7 @@ if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.ho
 {
     $tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
     $tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
-    $instance=$instance.".".$tmpstring;   // Automatically concat first domain name
+    $instance = $instance.".".$tmpstring;   // Automatically concat first domain name
 }
 
 
@@ -163,7 +163,7 @@ if (! $resql)
 $num_rows = $dbmaster->num_rows($resql);
 if ($num_rows > 1)
 {
-	print 'Error: several instance '.$instance.' found.'."\n";
+	print 'Error: several instance with name '.$instance.' were found. We stop here.'."\n";
 	exit(-2);
 }
 else
@@ -215,10 +215,14 @@ if (empty($login) || empty($dirdb))
 	exit(-5);
 }
 
-print 'Restore instance '.$instance.' from '.$dirroot." to ".$targetdir."\n";
+print 'Restore on instance '.$instance.' from '.$dirroot." to ".$targetdir."\n";
 print 'Target SFTP password '.$object->password_web."\n";
 print 'Target Database password '.$object->password_db."\n";
 
+if (! in_array($mode, array('testrsync', 'testdatabase', 'test', 'confirmrsync', 'confirmdatabase', 'confirm'))) {
+	print "Error: Bad value for last parameter (action must be testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm).\n";
+	exit(-6);
+}
 
 // Backup files
 if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm')
@@ -324,8 +328,9 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	// Define filename
 	if (is_numeric($dayofmysqldump))
 	{
+		$src_database_db = basename($dirroot);
 	    $dateselected=sprintf("%02s", $dayofmysqldump);
-	    $dumpfiletoload='mysqldump_'.$object->database_db.'_'.$dateselected.".sql.gz";
+	    $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.gz";
 	}
 	else
 	{
