@@ -3536,6 +3536,8 @@ Dans *shell after*
 ---------------
 touch __INSTANCEDIR__/documents/install.lock;
 chown __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents/install.lock
+chmod -R a-w __INSTANCEDIR__/htdocs
+chmod -R u+w __INSTANCEDIR__/htdocs/custom
 ---------------
 
 
