@@ -22,7 +22,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	// CHANGE THIS: Put here a name not already used
 	var $name='mailinglist_sellyoursaas';
 	// CHANGE THIS: Put here a description of your selector module
-	var $desc='Clients DoliCloud';
+	var $desc = 'Prospects or Customers SellYourSaas';
 	// CHANGE THIS: Set to 1 if selector is available for admin users only
 	var $require_admin=0;
 
