@@ -647,7 +647,7 @@ sudo apt-get install ntp git zip memcached rrdtool ncdu
 sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php- rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2
 sudo apt-get install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit 
 sudo apt-get install bind9
-sudo apt-get install spamc spamassassin clamav clamav-daemon 
+sudo apt-get install spamc spamassassin clamav clamav-daemon
 ---------------
 
 
@@ -1200,6 +1200,8 @@ Then place the filter files supplied with the project in *etc/fail2ban/filter.d*
 
 === Test spamassassin ===
 
+The process *spamd* must be running. Start it manually if it is not the case the first time.
+
 To test that spamassassin client is working, create a file */tmp/testspam* with content
 
     Subject: Test spam mail (GTUBE)
@@ -1240,6 +1242,8 @@ echo $?
 
 === Installation of ClamAV
 
+The process *freshclam* and *clamd* must be running. Start them manually the first time.
+
 To test clamav tool, create a file */tmp/testvirus* with content
 
 [source,bash]
@@ -1247,7 +1251,7 @@ To test clamav tool, create a file */tmp/testvirus* with content
 X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
 ---------------
 
-And to test
+And to test *clamav* command line and daemon:
 
 [source,bash]
 ---------------

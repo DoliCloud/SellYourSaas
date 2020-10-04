@@ -1200,6 +1200,8 @@ Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/fi
 
 === Test spamassassin ===
 
+Le process *spamd* doit tourner. Lancer le manuellement la première fois si ce n'est pas le cas.
+
 Pour tester que le client spamassassin fonctionne, créer un fichier */tmp/testspam* avec ce contenu
 
     Subject: Test spam mail (GTUBE)
@@ -1240,14 +1242,16 @@ echo $?
 
 === Installation de ClamAV
 
-To test clamav tool, create a file */tmp/testvirus* with content
+Le process *freshclam* et *clamd* doit tourner. Lancer les manuellement la première fois si ce n'est pas le cas.
+
+Pour tester l'outil *clamav*, créez un fichier */tmp/testvirus* avec le contenu
 
 [source,bash]
 ---------------
 X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
 ---------------
 
-And to test
+Et pour tester *clamav* en ligne de commande et le démon:
 
 [source,bash]
 ---------------
