@@ -215,7 +215,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links .= $langs->trans("Password").': ';
 	$links.='<input type="text" name="sshpassword" id="sshpassword" value="'.$object->password_os.'" class="maxwidth200">';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshpassword');
-	print '<br>'."\n";
+	$links.='<br>'."\n";
 
 	// SSH
     $sshconnectstring='ssh '.$object->username_os.'@'.$object->hostname_os;
