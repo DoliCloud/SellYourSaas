@@ -425,7 +425,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 // Backup link
 $backupstringtoshow=$backupstring.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]';
 print 'Backup command line string<br>';
-print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingpercent"><br>';
+print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
 print ajax_autoselect('backupstring');
 
 print '<br>';
@@ -434,7 +434,7 @@ print '<br>';
 if ($restorestringfrombackup) {
 	$restorestringtoshow=$restorestringfrombackup.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
 	print 'Restore command line string from Backup<br>';
-	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingpercent"><br>';
+	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
 	print ajax_autoselect('restorestring');
 
 	print '<br>';
@@ -444,7 +444,7 @@ if ($restorestringfrombackup) {
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
 	print 'Restore command line string from Backup into another instance<br>';
-	print '<input type="text" name="restorestringtoanother" id="restorestringtoanother" value="'.$restorestringtoshow.'nameoftargetinstance" class="quatrevingpercent"><br>';
+	print '<input type="text" name="restorestringtoanother" id="restorestringtoanother" value="'.$restorestringtoshow.'nameoftargetinstance" class="quatrevingtpercent"><br>';
 	print ajax_autoselect('restorestringtoanother');
 
 	print '<br>';
