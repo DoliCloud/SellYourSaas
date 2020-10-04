@@ -209,7 +209,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// User
 	$userstring=$object->username_os;
 	$links.=$langs->trans("User").': ';
-	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" class="maxwidth200"><br>';
+	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" class="maxwidth200">';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('userstring');
 	$links .= ' &nbsp; ';
 	$links .= $langs->trans("Password").': ';
