@@ -32,6 +32,6 @@ foreach ($envVars as $key) {
     putenv("$key=$value");
 }
 
-$dolibarr_force_antivir_command = '/usr/bin/clamdscan';
-$dolibarr_force_antivir_param = '--fdpass';
+define('MAIN_ANTIVIRUS_COMMAND', '/usr/bin/clamdscan');
+define('MAIN_ANTIVIRUS_PARAM', '--fdpass');
 
