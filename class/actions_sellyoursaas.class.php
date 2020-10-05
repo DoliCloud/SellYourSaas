@@ -1139,7 +1139,7 @@ class ActionsSellyoursaas
     	}
 
     	// Is second logo is same than main logo ?
-    	if ($secondlogo == $conf->global->MAIN_INFO_SOCIETE_LOGO_SMALL)
+    	if ($secondlogo == $conf->global->MAIN_INFO_SOCIETE_LOGO_SMALL || empty($secondlogo))
     	{
     		return 0;
     	}
@@ -1174,15 +1174,19 @@ class ActionsSellyoursaas
     	$pagecounttmp = $pdf->setSourceFile($file);
     	if ($pagecounttmp)
     	{
-    		$tplidx = $pdf->ImportPage(1);
-    		$s = $pdf->getTemplatesize($tplidx);
-    		$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
-    		$pdf->useTemplate($tplidx);
+    		try {
+	    		$tplidx = $pdf->ImportPage(1);
+	    		$s = $pdf->getTemplatesize($tplidx);
+	    		$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
+	    		$pdf->useTemplate($tplidx);
+	    		$logo = $conf->mycompany->dir_output.'/logos/thumbs/'.$secondlogo;
 
-    		$logo = $conf->mycompany->dir_output.'/logos/thumbs/'.$secondlogo;
-
-    		$height=pdf_getHeightForLogo($logo);
-    		$pdf->Image($logo, 80, $this->marge_haute, 0, 10);	// width=0 (auto)
+	    		$height=pdf_getHeightForLogo($logo);
+	    		$pdf->Image($logo, 80, $this->marge_haute, 0, 10);	// width=0 (auto)
+    		} catch (Exception $e) {
+    			dol_syslog("Failed to add the second image by the sellyoursaas hook", LOG_ERR);
+    			$this->error = $e->getMessage();
+    		}
     	}
     	else
     	{
