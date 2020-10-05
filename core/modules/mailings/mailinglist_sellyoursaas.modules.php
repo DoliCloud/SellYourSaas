@@ -70,38 +70,9 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
         $s.=' ';
 
-        $s.=$langs->trans("DeploymentStatus").': ';
-        $s.='<select name="filter" class="flat">';
-        $s.='<option value="none">&nbsp;</option>';
-        foreach($arraystatus as $key => $status)
-        {
-	        $s.='<option value="'.$key.'">'.$status.'</option>';
-        }
-        $s.='</select>';
-
-        $s.=' ';
-
-        $listofipwithinstances=array();
-        $sql="SELECT DISTINCT deployment_host FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
-        $resql=$this->db->query($sql);
-        if ($resql)
-        {
-            while($obj = $this->db->fetch_object($resql))
-            {
-                $listofipwithinstances[]=$obj->deployment_host;
-            }
-            $this->db->free($resql);
-        }
-        else dol_print_error($this->db);
-
-        $s.=$langs->trans("DeploymentHost").': ';
-        $s.='<select name="filterip" class="flat">';
-        $s.='<option value="none">&nbsp;</option>';
-        foreach($listofipwithinstances as $val)
-        {
-            $s.='<option value="'.$val.'">'.$val.'</option>';
-        }
-        $s.='</select>';
+        $s.=$langs->trans("Country").': ';
+        $formother=new FormAdmin($db);
+        $s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id');
 
         $s.='<br> ';
 
@@ -115,9 +86,60 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
         $s.='<br> ';
 
-        $s.=$langs->trans("Country").': ';
-        $formother=new FormAdmin($db);
-        $s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id');
+        $s.=$langs->trans("DeploymentStatus").': ';
+        $s.='<select name="filter" class="flat">';
+        $s.='<option value="none">&nbsp;</option>';
+        foreach($arraystatus as $key => $status)
+        {
+        	$s.='<option value="'.$key.'">'.$status.'</option>';
+        }
+        $s.='</select>';
+
+        $s.=' ';
+
+        $listofipwithinstances=array();
+        $sql = "SELECT DISTINCT deployment_host";
+        $sql .= " FROM ".MAIN_DB_PREFIX."contrat_extrafields";
+        $sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+        $resql=$this->db->query($sql);
+        if ($resql)
+        {
+        	while($obj = $this->db->fetch_object($resql))
+        	{
+        		$listofipwithinstances[]=$obj->deployment_host;
+        	}
+        	$this->db->free($resql);
+        }
+        else dol_print_error($this->db);
+
+        $s.=$langs->trans("DeploymentHost").': ';
+        $s.='<select name="filterip" class="flat">';
+        $s.='<option value="none">&nbsp;</option>';
+        foreach($listofipwithinstances as $val)
+        {
+        	$s.='<option value="'.$val.'">'.$val.'</option>';
+        }
+        $s.='</select>';
+
+        $s.='<br> ';
+
+        $listofpackages=array();
+        $sql = "SELECT DISTINCT ref";
+        $sql .= " FROM ".MAIN_DB_PREFIX."packages";
+        //$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+        $resql=$this->db->query($sql);
+        if ($resql)
+        {
+        	while($obj = $this->db->fetch_object($resql))
+        	{
+        		$listofpackages[]=$obj->ref;
+        	}
+        	$this->db->free($resql);
+        }
+        else dol_print_error($this->db);
+
+        $s.=$langs->trans("Product").': ';
+        $s.=$form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 
         return $s;
     }
@@ -157,19 +179,22 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		    if (empty($val)) unset($_POST['not_lang_id'][$key]);
 		}
 
+		$productid = GETPOST('productid', 'int');
+
 		$sql = " SELECT s.rowid as id, email, nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label";
 		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
 		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
-		    (! empty($_POST['filterip']) && $_POST['filterip'] != 'none'))
+		    (! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
+			($productid > 0))
 		{
 			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
 			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
 		}
 		$sql.= ", ".MAIN_DB_PREFIX."categorie_societe as cs";
 		$sql.= " WHERE email IS NOT NULL AND email <> ''";
-		$sql.= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".$conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG;
+		$sql.= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
 		/*if (! empty($_POST['options_dolicloud']) && $_POST['options_dolicloud'] != 'none')
 		{
 			$sql.= " AND se.dolicloud = '".$this->db->escape($_POST['options_dolicloud'])."'";
@@ -187,8 +212,13 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		}
 		if (! empty($_POST['client']) && $_POST['client'] != '-1')
 		{
-		    $sql.= ' AND s.client IN ('.$this->db->escape($_POST['client']).')';
+		    $sql.= ' AND s.client IN ('.$this->db->sanitize($this->db->escape($_POST['client'])).')';
 		}
+
+		if ($productid > 0) {
+			$sql .= ' AND co.rowid IN (SELECT fk_contrat FROM '.MAIN_DB_PREFIX.'contratdet as cd WHERE fk_product IN ('.$this->db->sanitize($this->db->escape($productid)).'))';
+		}
+
 		$sql.= " ORDER BY email";
 
 		// Stocke destinataires dans cibles
