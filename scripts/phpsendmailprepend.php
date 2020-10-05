@@ -31,3 +31,7 @@ foreach ($envVars as $key) {
     $value = str_replace($sanitizeChars, '', @$_SERVER[$key]);
     putenv("$key=$value");
 }
+
+$dolibarr_force_antivir_command = '/usr/bin/clamdscan';
+$dolibarr_force_antivir_param = '--fdpass';
+
