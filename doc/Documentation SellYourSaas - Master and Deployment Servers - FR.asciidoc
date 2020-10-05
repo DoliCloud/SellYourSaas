@@ -693,7 +693,8 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* Sur Ubuntu 18.04+, vérifiez que le paramètre *PrivateTmp* est à *false* dans la configuration de lancement Apache. Ceci permettra d'avoir un répertoire */tmp* non unique à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam.
+* Sur Ubuntu 18.04 et plus, vérifiez que le paramètre *PrivateTmp* est à *false* dans la configuration de lancement Apache. Ceci permettra d'avoir un 
+répertoire */tmp* non unique et isolé à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam.
 
 [source,bash]
 ---------------
@@ -1259,7 +1260,18 @@ clamscan /tmp/testvirus
 clamscand /tmp/testvirus --fdpass
 ---------------
 
-Note: Removing the apparmor profile for usr.sbin.clamd may be required if called from web process (otherwise error on "getattr").
+Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
+
+[source,bash]
+---------------
+cd /etc/apparmor.d/disable
+ln -fs /etc/apparmor.d/usr.sbin.clamd
+service apparmor reload
+service apparmor status
+---------------
+
+You should see into the status a line saying that Profile *usr/sbin/clamd* is disabled.
+It seems we must also restart apache to have this effective inside apache.
 
 
 === Installation de Afick
@@ -2107,6 +2119,7 @@ apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
 ---------------
 
 Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour mettre *RemainAfterExit=no*
+
 [source,bash]
 ---------------
 RemainAfterExit=no
