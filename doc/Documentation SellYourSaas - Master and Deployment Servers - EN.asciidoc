@@ -1257,7 +1257,7 @@ And to test *clamav* command line and daemon:
 [source,bash]
 ---------------
 clamscan /tmp/testvirus
-clamscand /tmp/testvirus --fdpass
+clamdscan /tmp/testvirus --fdpass
 ---------------
 
 Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
