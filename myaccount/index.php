@@ -2390,9 +2390,9 @@ if ($action == 'undeploy' || $action == 'undeployconfirmed')
         		            if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
         		        }
 
-        		        $titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("PayingInstanceLost").': '.$mythirdpartyaccount->name, 90);
+        		        $titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name, 90);
         		        $messageofevent = ' - '.$langs->trans("IPAddress").' '.getUserRemoteIP()."\n";
-        		        $messageofevent.= $langs->trans("PayingInstanceLost").': '.$mythirdpartyaccount->name.' - ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
+        		        $messageofevent.= $langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' - ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
         		        $messageofevent.= 'Lost after suspension of instance + recurring invoice after a destroy request.';
 
         		        // See https://docs.datadoghq.com/api/?lang=python#post-an-event
