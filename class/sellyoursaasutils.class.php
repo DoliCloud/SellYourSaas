@@ -1375,11 +1375,11 @@ class SellYourSaasUtils
 
 	    							if ($ispostactionok < 1)
 	    							{
-	    								$description='Stripe payment OK ('.$charge->id.') but post action KO from doTakePaymentStripeForThirdparty: '.$FULLTAG;
+	    								$description='Stripe payment OK ('.$charge->id.' - '.$amounttopay.' '.$conf->currency.') but post action KO from doTakePaymentStripeForThirdparty: '.$FULLTAG;
 	    							}
 	    							else
 	    							{
-	    								$description='Stripe payment+post action OK ('.$charge->id.') from doTakePaymentStripeForThirdparty: '.$FULLTAG;
+	    								$description='Stripe payment+post action OK ('.$charge->id.' - '.$amounttopay.' '.$conf->currency.') from doTakePaymentStripeForThirdparty: '.$FULLTAG;
 	    							}
 	    						}
 
