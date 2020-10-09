@@ -397,12 +397,13 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 
         		if (isset($object->oldcopy)	&&
         		(($object->oldcopy->tva_intra != $object->tva_intra)
-        		|| $object->oldcopy->country_id != $object->country_id))
+        		|| ($object->oldcopy->tva_assuj != $object->tva_assuj)
+        		|| ($object->oldcopy->country_id != $object->country_id)))
         		{
         			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
         			include_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
-        			dol_syslog("We change intra vat or country id, so we must change vat into contract and into template invoices");
+        			dol_syslog("We change intra VAT information or country id, so we must also change VAT into contract and into template invoices");
 
         			$object->country_code = getCountry($object->country_id, 2);
 
