@@ -7209,6 +7209,7 @@ if ($mode == 'myaccount')
 				$countryselected = (GETPOSTISSET('country_id')?GETPOST('country_id','aZ09'):$mythirdpartyaccount->country_id);
 				$exclude_country_code = array();
 				if (! empty($conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES)) $exclude_country_code = explode(',', $conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES);
+				print '<input type="hidden" name="country_id_old" value="'.countryselected.'">'."\n";
 				print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1, 0, $exclude_country_code);
 				print '
                 </div>
@@ -7227,8 +7228,10 @@ if ($mode == 'myaccount')
 
 					print '
 					<br>
+                  <input type="hidden" name="vatassuj_old" value="'.($mythirdpartyaccount->tva_assuj).'">
                   <input type="checkbox" style="vertical-align: top" class="inline-block"'.($mythirdpartyaccount->tva_assuj?' checked="checked"':'').'" id="vatassuj" name="vatassuj"> '.$langs->trans("VATIsUsed").'
 					<br>
+                  <input type="hidden" name="vatnumber_old" value="'.$mythirdpartyaccount->tva_intra.'">
                   <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" placeholder="'.$placeholderforvat.'">
                     ';
 					if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC() && (GETPOST('admin','alpha')))
