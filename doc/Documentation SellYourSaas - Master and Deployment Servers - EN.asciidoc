@@ -2157,38 +2157,38 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
     *ns1with1.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
     *ns2with1.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
 
-Ajouter les enregistrements *GLUE record* auprès du registar pour (optional)
+You can also add record *GLUE record* on your register side for (optional)
 
     *ns1with1.mysaasdomainname.com*
     *ns2with1.mysaasdomainname.com*
 
-Créer un fichier */etc/bind/with.mysaasdomainname.com.hosts* pour le DNS *with.mysaasdomainname.com* sur le serveur de Déploiement:
+Create a file */etc/bind/withX.mysaasdomainname.com.hosts* for the DNS *withX.mysaasdomainname.com* on the *Deployment server* (replace X):
 
 [source,bash]
 ---------------
 $ttl 1d
 $ORIGIN with1.mysaasdomainname.com.
-@               IN     SOA     ns1with1.mysaasdomainname.com. admin.mysaasdomainname.com. ((
+@               IN     SOA     ns1withXmysaasdomainname.com. admin.mysaasdomainname.com. ((
                 140921009        ; serial number
                 600              ; refresh = 10 minutes
                 300              ; update retry = 5 minutes
                 604800           ; expiry = 1 week
                 660              ; negative ttl
                 )
-                NS              ns1with1.mysaasdomainname.com.
-                NS              ns2with1.mysaasdomainname.com.
+                NS              ns1withX.mysaasdomainname.com.
+                NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       176.34.178.17	; mettre ip du serveur de déploiement qui héberge les applications dépoyés
+@               IN      A       1.2.3.4		; set here the ip of deployment server that hosts the deployed applications
 
-$ORIGIN with1.mysaasdomainname.com.
+$ORIGIN withX.mysaasdomainname.com.
 
 ; other sub-domain records
+; other sub-domain records
+; here will be added entry like this one
+; client1  A   ip.of.server.deployment
 
-client1   A   176.34.178.17
-client2   A   176.34.178.17
-client3   A   176.34.178.17
-...
+
 ---------------
 
 
