@@ -264,7 +264,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	$password_web = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, 3306);
+	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
 	if (is_object($object->db2))
 	{

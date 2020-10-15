@@ -56,6 +56,7 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to 
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
+$databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
@@ -78,6 +79,10 @@ if ($fp) {
 		if ($tmpline[0] == 'databasehost')
 		{
 			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport')
+		{
+		    $databaseport = $tmpline[1];
 		}
 		if ($tmpline[0] == 'database')
 		{
@@ -151,10 +156,10 @@ if (empty($instanceserver))
     exit(-1);
 }
 
-$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error)
 {
-    dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+    dol_print_error($dbmaster,"host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
     exit;
 }
 if ($dbmaster)
@@ -224,6 +229,8 @@ if ($result <= 0)
 $object->instance        = $object->ref_customer;
 $object->username_web    = $object->array_options['options_username_os'];
 $object->password_web    = $object->array_options['options_password_os'];
+$object->hostname_db     = $object->array_options['options_hostname_db'];
+$object->port_db         = $object->array_options['options_port_db'];
 $object->username_db     = $object->array_options['options_username_db'];
 $object->password_db     = $object->array_options['options_password_db'];
 $object->database_db     = $object->array_options['options_database_db'];
@@ -383,9 +390,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
     $serverdb = $server;
-    if (filter_var($object->array_options['options_hostname_db'], FILTER_VALIDATE_IP) !== false) {
+    if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
         print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
-        $serverdb = $object->array_options['options_hostname_db'];
+        $serverdb = $object->hostname_db;
     }
 
 	$command="mysqldump";
@@ -393,6 +400,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]=$object->database_db;
 	$param[]="-h";
 	$param[]=$serverdb;
+	$param[]="-P";
+	$param[]=(! empty($object->port_db) ? $object->port_db : "3306");
 	$param[]="-u";
 	$param[]=$object->username_db;
 	$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$object->password_db).'"';

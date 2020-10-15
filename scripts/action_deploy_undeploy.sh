@@ -204,10 +204,24 @@ echo "CRONHEAD = $CRONHEAD"
 MYSQL=`which mysql`
 MYSQLDUMP=`which mysqldump`
 
-echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
-passsellyoursaas=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$passsellyoursaas" == "x" ]]; then
-	echo Failed to get password for mysql user sellyoursaas 
+echo "Search database server name and port in /etc/sellyoursaas.conf"
+dbserverhost=`grep 'databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbserverhost" == "x" ]]; then
+	dbserverhost="localhost"
+fi 
+dbserverport=`grep 'databaseport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbserverport" == "x" ]]; then
+	dbserverhost="3306"
+fi
+
+echo "Search admin database credential in /etc/sellyoursaas.conf"
+dbadminuser=`grep 'databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbadminuser" == "x" ]]; then
+	dbadminuser="sellyoursaas"
+fi 
+dbadminpass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbadminpass" == "x" ]]; then
+	echo Failed to get password for mysql admin user 
 	exit 1
 fi 
 
@@ -896,14 +910,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	Q2="CREATE USER '$dbusername'@'localhost' IDENTIFIED BY '$dbpassword'; "
 	SQL="${Q1}${Q2}"
 	echo "$MYSQL -A -usellyoursaas -pXXXXXX -e \"$SQL\""
-	$MYSQL -A -usellyoursaas -p$passsellyoursaas -e "$SQL"
+	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 	
 	Q1="CREATE DATABASE IF NOT EXISTS $dbname; "
 	#Q2="CREATE USER IF NOT EXISTS '$dbusername'@'%' IDENTIFIED BY '$dbpassword'; "
 	Q2="CREATE USER '$dbusername'@'%' IDENTIFIED BY '$dbpassword'; "
 	SQL="${Q1}${Q2}"
 	echo "$MYSQL -A -usellyoursaas -pXXXXXX -e \"$SQL\""
-	$MYSQL -A -usellyoursaas -p$passsellyoursaas -e "$SQL"
+	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 	
 	Q1="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'localhost'; "
 	Q2="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'%'; "
@@ -917,7 +931,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	Q4="FLUSH PRIVILEGES; "
 	SQL="${Q1}${Q2}${Q3}${Q4}"
 	echo "$MYSQL -A -usellyoursaas -e \"$SQL\""
-	$MYSQL -A -usellyoursaas -p$passsellyoursaas -e "$SQL"
+	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
 	echo "You can test with mysql $dbname -h $REMOTEIP -u $dbusername -p$dbpassword"
 
@@ -925,8 +939,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo Search dumpfile into $dirwithdumpfile
 	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
 	do
-		echo "$MYSQL -A -usellyoursaas -p$passsellyoursaas -D $dbname < $dumpfile"
-		$MYSQL -A -usellyoursaas -p$passsellyoursaas -D $dbname < $dumpfile
+		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile"
+		$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile
 		result=$?
 		if [[ "x$result" != "x0" ]]; then
 			echo Failed to load dump file $dumpfile
@@ -946,14 +960,14 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
-	echo "$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
-	$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
+	echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
+	$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
 
 	if [[ "x$?" == "x0" ]]; then
 		echo "Now drop the database"
-		echo "echo 'DROP DATABASE $dbname;' | $MYSQL -usellyoursaas -p$passsellyoursaas $dbname"
+		echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname"
 		if [[ $testorconfirm == "confirm" ]]; then
-			echo "DROP DATABASE $dbname;" | $MYSQL -usellyoursaas -p$passsellyoursaas $dbname
+			echo "DROP DATABASE $dbname;" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname
 		fi
 	else
 		echo "ERROR in dumping database, so we don't try to drop it"	

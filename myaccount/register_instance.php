@@ -554,7 +554,7 @@ else
 	$generateddbusername = 'dbu'.substr(getRandomPassword(true, array('I')), 0, 9);
 	$generateddbpassword = substr(getRandomPassword(true, array('I')), 0, 10);
 	$generateddbhostname = $sldAndSubdomain.'.'.$domainname;
-	$generateddbport = 3306;
+	$generateddbport = 3306; // FIXME
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
 
 

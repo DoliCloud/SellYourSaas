@@ -70,6 +70,7 @@ include_once(DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php');
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
+$databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
@@ -83,6 +84,10 @@ if ($fp) {
         if ($tmpline[0] == 'databasehost')
         {
             $databasehost = $tmpline[1];
+        }
+        if ($tmpline[0] == 'databaseport')
+        {
+            $databaseport = $tmpline[1];
         }
         if ($tmpline[0] == 'database')
         {
@@ -110,10 +115,10 @@ else
  *	Main
  */
 
-$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error)
 {
-    dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+    dol_print_error($dbmaster,"host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
     exit;
 }
 if ($dbmaster)
