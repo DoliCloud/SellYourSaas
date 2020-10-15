@@ -1060,6 +1060,8 @@ enabled = true
 
 [postfix-sasl]
 
+# Overwrite param port since it is wrong into file jail.conf because it contains 'imap3' instead of 'imap' that does not exists
+port    = smtp,465,submission,imap,imaps,pop3,pop3s
 enabled = true
 
 
@@ -3810,3 +3812,10 @@ or if systemd is available by
 Check the correct one is enabled.
 
 
+==== Error fail2ban does not work on postfix-sasl rule
+
+We found into log file /var/log/fail2ban.log
+
+	2020-09-19 00:57:16,902 fail2ban.actions        [1182]: ERROR   Failed to execute ban jail 'postfix-sasl' action 'iptables-multiport' info 'ActionInfo
+	
+Edit the file /etc/fail2ban/jail/conf to replace *imap3* (it does not exists) into *imap* for rule postfix-sasl
