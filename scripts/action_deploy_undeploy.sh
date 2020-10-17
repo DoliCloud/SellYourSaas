@@ -909,14 +909,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	#Q2="CREATE USER IF NOT EXISTS '$dbusername'@'localhost' IDENTIFIED BY '$dbpassword'; "
 	Q2="CREATE USER '$dbusername'@'localhost' IDENTIFIED BY '$dbpassword'; "
 	SQL="${Q1}${Q2}"
-	echo "$MYSQL -A -usellyoursaas -pXXXXXX -e \"$SQL\""
+	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 	
 	Q1="CREATE DATABASE IF NOT EXISTS $dbname; "
 	#Q2="CREATE USER IF NOT EXISTS '$dbusername'@'%' IDENTIFIED BY '$dbpassword'; "
 	Q2="CREATE USER '$dbusername'@'%' IDENTIFIED BY '$dbpassword'; "
 	SQL="${Q1}${Q2}"
-	echo "$MYSQL -A -usellyoursaas -pXXXXXX -e \"$SQL\""
+	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 	
 	Q1="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'localhost'; "
@@ -930,7 +930,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	fi
 	Q4="FLUSH PRIVILEGES; "
 	SQL="${Q1}${Q2}${Q3}${Q4}"
-	echo "$MYSQL -A -usellyoursaas -e \"$SQL\""
+	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
 	echo "You can test with mysql $dbname -h $REMOTEIP -u $dbusername -p$dbpassword"
