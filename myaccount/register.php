@@ -477,8 +477,10 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 				<label class="control-label" for="address_country"><?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 			<?php
-			$countryselected=strtoupper(dolGetCountryCodeFromIp($_SERVER["REMOTE_ADDR"]));
-			print '<!-- Autodetected IP/Country: '.$_SERVER["REMOTE_ADDR"].'/'.$countryselected.' -->'."\n";
+			// If server use a proxy, eg Cloudflare, possibility to use HTTP_CF_CONNECTING_IP or HTTP_X_FORWARDED_FOR
+			$phpServerEnvName = (! empty($conf->global->SELLYOURSAAS_SERVER_REMOTE_ADDR_VARNAME) ? $conf->global->SELLYOURSAAS_SERVER_REMOTE_ADDR_VARNAME : "REMOTE_ADDR");
+			$countryselected=strtoupper(dolGetCountryCodeFromIp($_SERVER[$phpServerEnvName]));
+			print '<!-- Autodetected IP/Country: '.$_SERVER[$phpServerEnvName].'/'.$countryselected.' -->'."\n";
 			if (empty($countryselected)) $countryselected='US';
 			if (GETPOST('address_country','alpha')) $countryselected=GETPOST('address_country','alpha');
 			print $form->select_country($countryselected, 'address_country', 'optionsValue="name"'.$disabled, 0, 'minwidth300', 'code2', 1, 1);
