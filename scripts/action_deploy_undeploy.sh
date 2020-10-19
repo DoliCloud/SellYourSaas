@@ -211,6 +211,12 @@ if [[ "x$passsellyoursaas" == "x" ]]; then
 	exit 1
 fi 
 
+dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dnsserver" == "x" ]]; then
+	echo Failed to get dns server parameters 
+	exit 1
+fi 
+
 if [[ ! -d $archivedir ]]; then
 	echo Failed to find archive directory $archivedir
 	echo "Failed to $mode instance $instancename.$domainname with: Failed to find archive directory $archivedir" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deploy/undeploy" $EMAILTO
@@ -270,178 +276,179 @@ fi
 
 
 # Create/Remove DNS entry
+if [[ "$dnsserver" == "1" ]]; then
 
-if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
-
-	export ZONE="$domainname.hosts" 
+	if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
-	#$ttl 1d
-	#$ORIGIN with.dolicloud.com.
-	#@               IN     SOA   ns1with.dolicloud.com. admin.dolicloud.com. (
-	#                2017051526       ; serial number
-	#                600              ; refresh = 10 minutes
-	#                300              ; update retry = 5 minutes
-	#                604800           ; expiry = 3 weeks + 12 hours
-	#                660              ; negative ttl
-	#                )
-	#                NS              ns1with.dolicloud.com.
-	#                NS              ns2with.dolicloud.com.
-	#                IN      TXT     "v=spf1 mx ~all".
-	#
-	#@               IN      A       79.137.96.15
-	#
-	#
-	#$ORIGIN with.dolicloud.com.
-	#
-	#; other sub-domain records
-
-	echo `date +%Y%m%d%H%M%S`" ***** Add DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename ' 2>&1"
-
-	cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
-	notfound=$?
-	echo notfound=$notfound
-
-	if [[ $notfound == 0 ]]; then
-		echo "entry $instancename already found into host /etc/bind/${ZONE}"
-	else
-		echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
-		cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
-
-		echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
-		echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
-
-		# we're looking line containing this comment
-		export DATE=`date +%y%m%d%H`
-		export NEEDLE="serial"
-		curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
-		# replace if current date is shorter (possibly using different format)
-		echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
-		echo "Current bind counter during $mode is $curr"
-		if [ "x$curr" == "x" ]; then
-			echo Error when editing the DNS file during a deployment. Failed to find bind counter in file /tmp/${ZONE}.$PID. Sending email to $EMAILTO
-			echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. Failed to find bind counter in file /tmp/${ZONE}.$PID" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-			exit 1
-		fi
-		if [ ${#curr} -lt ${#DATE} ]; then
-		  serial="${DATE}00"
+		export ZONE="$domainname.hosts" 
+		
+		#$ttl 1d
+		#$ORIGIN with.dolicloud.com.
+		#@               IN     SOA   ns1with.dolicloud.com. admin.dolicloud.com. (
+		#                2017051526       ; serial number
+		#                600              ; refresh = 10 minutes
+		#                300              ; update retry = 5 minutes
+		#                604800           ; expiry = 3 weeks + 12 hours
+		#                660              ; negative ttl
+		#                )
+		#                NS              ns1with.dolicloud.com.
+		#                NS              ns2with.dolicloud.com.
+		#                IN      TXT     "v=spf1 mx ~all".
+		#
+		#@               IN      A       79.137.96.15
+		#
+		#
+		#$ORIGIN with.dolicloud.com.
+		#
+		#; other sub-domain records
+	
+		echo `date +%Y%m%d%H%M%S`" ***** Add DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename ' 2>&1"
+	
+		cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
+		notfound=$?
+		echo notfound=$notfound
+	
+		if [[ $notfound == 0 ]]; then
+			echo "entry $instancename already found into host /etc/bind/${ZONE}"
 		else
-		  prefix=${curr::-2}
-		  if [ "$DATE" -eq "$prefix" ]; then # same day
-		    num=${curr: -2} # last two digits from serial number
-		    num=$((10#$num + 1)) # force decimal representation, increment
-		    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
-		  else
-		    serial="${DATE}00" # just update date
-		  fi
-		fi
-		echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
-		/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
-		
-		echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
-		
-		named-checkzone $domainname /tmp/${ZONE}.$PID
-		if [[ "$?x" != "0x" ]]; then
-			echo Error when editing the DNS file during a deployment. File /tmp/${ZONE}.$PID is not valid. Sending email to $EMAILFROM
-			echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
-			exit 1
-		fi
-		
-		echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-		cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
-		
-		echo `date +%Y%m%d%H%M%S`" **** Move new host file"
-		mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-		
-		echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
-		rndc reload $domainname
-		#/etc/init.d/bind9 reload
-		
-		echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
-		nslookup $fqn 127.0.0.1
-		if [[ "$?x" != "0x" ]]; then
-			echo Error after reloading DNS. nslookup of $fqn fails on first try. We wait a little bit to make another try.
-			sleep 3
-			nslookup $fqn 127.0.0.1
-			if [[ "$?x" != "0x" ]]; then
-				echo Error after reloading DNS. nslookup of $fqn fails on second try too.
-				echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails of 2 tries." | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
+			echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
+			cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
+	
+			echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
+			echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
+	
+			# we're looking line containing this comment
+			export DATE=`date +%y%m%d%H`
+			export NEEDLE="serial"
+			curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
+			# replace if current date is shorter (possibly using different format)
+			echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
+			echo "Current bind counter during $mode is $curr"
+			if [ "x$curr" == "x" ]; then
+				echo Error when editing the DNS file during a deployment. Failed to find bind counter in file /tmp/${ZONE}.$PID. Sending email to $EMAILTO
+				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. Failed to find bind counter in file /tmp/${ZONE}.$PID" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 				exit 1
 			fi
-		fi 
+			if [ ${#curr} -lt ${#DATE} ]; then
+			  serial="${DATE}00"
+			else
+			  prefix=${curr::-2}
+			  if [ "$DATE" -eq "$prefix" ]; then # same day
+			    num=${curr: -2} # last two digits from serial number
+			    num=$((10#$num + 1)) # force decimal representation, increment
+			    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
+			  else
+			    serial="${DATE}00" # just update date
+			  fi
+			fi
+			echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
+			/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
+			
+			echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
+			
+			named-checkzone $domainname /tmp/${ZONE}.$PID
+			if [[ "$?x" != "0x" ]]; then
+				echo Error when editing the DNS file during a deployment. File /tmp/${ZONE}.$PID is not valid. Sending email to $EMAILFROM
+				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
+				exit 1
+			fi
+			
+			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+			
+			echo `date +%Y%m%d%H%M%S`" **** Move new host file"
+			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+			
+			echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
+			rndc reload $domainname
+			#/etc/init.d/bind9 reload
+			
+			echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
+			nslookup $fqn 127.0.0.1
+			if [[ "$?x" != "0x" ]]; then
+				echo Error after reloading DNS. nslookup of $fqn fails on first try. We wait a little bit to make another try.
+				sleep 3
+				nslookup $fqn 127.0.0.1
+				if [[ "$?x" != "0x" ]]; then
+					echo Error after reloading DNS. nslookup of $fqn fails on second try too.
+					echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails of 2 tries." | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
+					exit 1
+				fi
+			fi 
+		fi
 	fi
-fi
-
-if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
-
-	export ZONE="$domainname.hosts" 
-
-	echo `date +%Y%m%d%H%M%S`" ***** Remove DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename '"
-
-	cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
-	notfound=$?
-	echo notfound=$notfound
-
-	if [[ $notfound == 1 ]]; then
-		echo `date +%Y%m%d%H%M%S`" entry $instancename already not found into host /etc/bind/${ZONE}"
-	else
-		echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
-		cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
-
-		#echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
-		#echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
-
-		# we're looking line containing this comment
-		export DATE=`date +%y%m%d%H`
-		export NEEDLE="serial"
-		curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
-		# replace if current date is shorter (possibly using different format)
-		echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
-		echo "Current bind counter during $mode is $curr"
-		if [ ${#curr} -lt ${#DATE} ]; then
-		  serial="${DATE}00"
+	
+	if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
+	
+		export ZONE="$domainname.hosts" 
+	
+		echo `date +%Y%m%d%H%M%S`" ***** Remove DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename '"
+	
+		cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
+		notfound=$?
+		echo notfound=$notfound
+	
+		if [[ $notfound == 1 ]]; then
+			echo `date +%Y%m%d%H%M%S`" entry $instancename already not found into host /etc/bind/${ZONE}"
 		else
-		  prefix=${curr::-2}
-		  if [ "$DATE" -eq "$prefix" ]; then # same day
-		    num=${curr: -2} # last two digits from serial number
-		    num=$((10#$num + 1)) # force decimal representation, increment
-		    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
-		  else
-		    serial="${DATE}00" # just update date
-		  fi
+			echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
+			cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
+	
+			#echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
+			#echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
+	
+			# we're looking line containing this comment
+			export DATE=`date +%y%m%d%H`
+			export NEEDLE="serial"
+			curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
+			# replace if current date is shorter (possibly using different format)
+			echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
+			echo "Current bind counter during $mode is $curr"
+			if [ ${#curr} -lt ${#DATE} ]; then
+			  serial="${DATE}00"
+			else
+			  prefix=${curr::-2}
+			  if [ "$DATE" -eq "$prefix" ]; then # same day
+			    num=${curr: -2} # last two digits from serial number
+			    num=$((10#$num + 1)) # force decimal representation, increment
+			    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
+			  else
+			    serial="${DATE}00" # just update date
+			  fi
+			fi
+			echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
+			/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
+			
+			echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
+			
+			named-checkzone $domainname /tmp/${ZONE}.$PID
+			if [[ "$?x" != "0x" ]]; then
+				echo Error when editing the DNS file un undeployment. File /tmp/${ZONE}.$PID is not valid 
+				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+				exit 1
+			fi
+			
+			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+			
+			echo `date +%Y%m%d%H%M%S`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
+			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+			
+			echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
+			rndc reload $domainname
+			#/etc/init.d/bind9 reload
+			
+			#echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
+			#nslookup $fqn 127.0.0.1
+			#if [[ "$?x" != "0x" ]]; then
+			#	echo Error after reloading DNS. nslookup of $fqn fails. 
+			#	echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails. " | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+			#	exit 1
+			#fi 
 		fi
-		echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
-		/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
-		
-		echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
-		
-		named-checkzone $domainname /tmp/${ZONE}.$PID
-		if [[ "$?x" != "0x" ]]; then
-			echo Error when editing the DNS file un undeployment. File /tmp/${ZONE}.$PID is not valid 
-			echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-			exit 1
-		fi
-		
-		echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-		cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
-		
-		echo `date +%Y%m%d%H%M%S`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
-		mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-		
-		echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
-		rndc reload $domainname
-		#/etc/init.d/bind9 reload
-		
-		#echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
-		#nslookup $fqn 127.0.0.1
-		#if [[ "$?x" != "0x" ]]; then
-		#	echo Error after reloading DNS. nslookup of $fqn fails. 
-		#	echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails. " | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-		#	exit 1
-		#fi 
+	
 	fi
-
 fi
-
 
 
 # Deploy files
