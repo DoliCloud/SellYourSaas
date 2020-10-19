@@ -211,7 +211,7 @@ if [[ "x$dbserverhost" == "x" ]]; then
 fi 
 dbserverport=`grep 'databaseport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbserverport" == "x" ]]; then
-	dbserverhost="3306"
+	dbserverport="3306"
 fi
 
 echo "Search admin database credential in /etc/sellyoursaas.conf"
