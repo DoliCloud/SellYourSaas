@@ -933,7 +933,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
-	echo "You can test with mysql $dbname -h $REMOTEIP -u $dbusername -p$dbpassword"
+	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -p$dbpassword"
 
 	# Load dump file
 	echo Search dumpfile into $dirwithdumpfile
