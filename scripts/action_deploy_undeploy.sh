@@ -224,6 +224,10 @@ if [[ "x$dbadminpass" == "x" ]]; then
 	echo Failed to get password for mysql admin user 
 	exit 1
 fi 
+dbforcesetpassword=`grep 'dbforcesetpassword=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbforcesetpassword" == "x" ]]; then
+	$dbforcesetpassword="0"
+fi
 
 if [[ ! -d $archivedir ]]; then
 	echo Failed to find archive directory $archivedir
@@ -921,13 +925,19 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
 	Q1="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'localhost'; "
 	Q2="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'%'; "
-	Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
-	# If we use mysql and not mariadb, we set password differently
-	dpkg -l | grep mariadb > /dev/null
-	if [ $? == "1" ]; then
-		# For mysql
+	
+	if [ $dbforcesetpassword == "1" ]; then
 		Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+	else
+		Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
+		# If we use mysql and not mariadb, we set password differently
+		dpkg -l | grep mariadb > /dev/null
+		if [ $? == "1" ]; then
+			# For mysql
+			Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+		fi
 	fi
+	
 	Q4="FLUSH PRIVILEGES; "
 	SQL="${Q1}${Q2}${Q3}${Q4}"
 	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -e \"$SQL\""
