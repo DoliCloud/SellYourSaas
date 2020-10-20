@@ -151,6 +151,18 @@ export webSSLCertificateCRT=with.sellyoursaas.com.crt
 export webSSLCertificateKEY=with.sellyoursaas.com.key
 export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 
+# possibility to change the path of sellyoursass directory
+olddoldataroot=`grep 'olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+newdoldataroot=`grep 'newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$olddoldataroot" != "x" &&  "x$newdoldataroot" != "x"]]; then
+	fileforconfig1=${fileforconfig1/$olddoldataroot/$newdoldataroot}
+	dirwithdumpfile=${dirwithdumpfile/$olddoldataroot/$newdoldataroot}
+	dirwithsources1=${dirwithsources1/$olddoldataroot/$newdoldataroot}
+	dirwithsources2=${dirwithsources2/$olddoldataroot/$newdoldataroot}
+	dirwithsources3=${dirwithsources3/$olddoldataroot/$newdoldataroot}
+	cronfile=${cronfile/$olddoldataroot/$newdoldataroot}
+	cliafter=${cliafter/$olddoldataroot/$newdoldataroot}
+fi
 
 # For debug
 echo `date +%Y%m%d%H%M%S`" input params for $0:"
