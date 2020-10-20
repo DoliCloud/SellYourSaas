@@ -3536,6 +3536,9 @@ class SellYourSaasUtils
 			    	{
 			    		dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
+			    		// When database server is different of deployment server. eg Mariadb cluster
+			    		$serverdeployment = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $serverdeployment);
+
 			    		//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
 			    		//var_dump($serverdeployment);		// just ip of deployement server
 			    		//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
