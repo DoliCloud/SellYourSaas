@@ -238,7 +238,7 @@ if [[ "x$dbadminpass" == "x" ]]; then
 fi 
 dbforcesetpassword=`grep 'dbforcesetpassword=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbforcesetpassword" == "x" ]]; then
-	$dbforcesetpassword="0"
+	dbforcesetpassword="0"
 fi
 dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
