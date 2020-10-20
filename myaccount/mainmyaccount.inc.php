@@ -721,6 +721,8 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	// Include login page template
 	include $template_dir.'loginmyaccount.tpl.php';
 
+	// Global html output events ($mesgs, $errors, $warnings)
+	dol_htmloutput_events(0);
 
 	$_SESSION["dol_loginmesg"] = '';
 }
