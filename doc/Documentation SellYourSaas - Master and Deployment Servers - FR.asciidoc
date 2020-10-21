@@ -2635,10 +2635,15 @@ ipserverdeployment=ipduserverdeployment
 dolibarrdir=/home/admin/wwwroot/dolibarr
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
+# Set port of the master database (default is 3306)
+databaseport=3306
+# Set database name of the master server
 database=databaseduservermaster
 # Set credential for the master and deployment database
 databaseuser=sellyoursaas
 databasepass=...
+# Set this to 1 if you use Mysql or MariaDB > 10.4 (for "SET PASSWORD" method)
+#dbforcesetpassword=0
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
 # Set directory where backup are stored
@@ -2647,6 +2652,13 @@ backupdir=/mnt/diskbackup/backup
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+# Set remote server launcher ip (default is 0.0.0.0)
+remoteserverlistenip=0.0.0.0
+# Set remote server launcher port (default is 8080)
+remoteserverlistenport=8080
+# Options for use a different path of dataroot in deployment server
+#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
+#newdoldataroot=/new/path/of/documents
 ---------------
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
@@ -3773,7 +3785,12 @@ To define account to use getipintel API for VPN probability.
 To enable native Datadog reporting (datadog-agent must just be installed)
 * SELLYOURSAAS_DATADOG_ENABLED = 1
 
+If you use an external db server (same value of "databasehost" and "databaseport" in sellyoursaas.conf)
+* SELLYOURSAAS_FORCE_DATABASE_HOST = ip or host name of your external mysql server
+* SELLYOURSAAS_FORCE_DATABASE_PORT = port of your external mysql server
 
+To check customer ip in register page when server is behind proxy
+* SELLYOURSAAS_SERVER_REMOTE_ADDR_VARNAME = HTTP_X_FORWARDED_FOR
 
 === TroubleShooting
 
