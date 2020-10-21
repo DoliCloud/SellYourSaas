@@ -92,6 +92,9 @@ $username_web = $object->array_options['options_username_os'];
 $password_web = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
+// If you use an external database server host
+$hostname_db = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $hostname_db);
+
 if (empty($prefix_db)) $prefix_db = 'llx_';
 
 
@@ -113,8 +116,6 @@ if (empty($reshook))
 
 	if ($action == "createsupportuser")
 	{
-	    $hostname_db = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $hostname_db);
-
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 	    if (is_object($newdb))
 	    {
