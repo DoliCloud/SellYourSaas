@@ -113,6 +113,8 @@ if (empty($reshook))
 
 	if ($action == "createsupportuser")
 	{
+	    $hostname_db = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $hostname_db);
+
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 	    if (is_object($newdb))
 	    {
