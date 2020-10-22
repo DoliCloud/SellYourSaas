@@ -291,6 +291,14 @@ if [[ "$mode" == "deployall" ]]; then
 		mkdir /home/jail/home/$osusername
 		chmod -R go-rwx /home/jail/home/$osusername
 	fi
+	
+	if [[ -d /home/jail/home/$osusername/.ssh ]]
+	then
+		echo "generate ssh key in /home/jail/home/$osusername/.ssh"
+		ssh-keygen -t rsa -f /home/jail/home/$osusername/.ssh/id_rsa -q -P ""
+		chown -R $osusername.$osusername /home/jail/home/$osusername/.ssh
+		cat /home/jail/home/$osusername/.ssh/id_rsa.pub >> /home/jail/home/$osusername/.ssh/authorized_keys
+	fi
 fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
