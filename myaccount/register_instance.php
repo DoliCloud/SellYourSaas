@@ -553,7 +553,7 @@ else
 	$generateddbname = 'dbn'.substr(getRandomPassword(true, array('I')), 0, 8);
 	$generateddbusername = 'dbu'.substr(getRandomPassword(true, array('I')), 0, 9);
 	$generateddbpassword = substr(getRandomPassword(true, array('I')), 0, 10);
-	$generateddbhostname = $sldAndSubdomain.'.'.$domainname;
+	$generateddbhostname = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $sldAndSubdomain.'.'.$domainname);
 	$generateddbport = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
 
