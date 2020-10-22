@@ -61,7 +61,6 @@ $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
-$sudowithsshkey=false;
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -100,10 +99,6 @@ if ($fp) {
 		if ($tmpline[0] == 'dolibarrdir')
 		{
 			$dolibarrdir = $tmpline[1];
-		}
-		if ($tmpline[0] == 'sudowithsshkey')
-		{
-		    $sudowithsshkey = true;
 		}
 	}
 }
@@ -353,11 +348,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		$param[]=" --delete --delete-excluded";
 	}
 	$param[]="--stats";
-	if ($sudowithsshkey) {
-	    $param[]="-e 'sudo -u ".$login." ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
-	} else {
-	    $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
-	}
+	$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 	//var_dump($param);
 	//$param[] = (in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
