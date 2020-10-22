@@ -209,7 +209,8 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 
 [source,bash]
 ---------------
-useradd admin -g admin
+groupadd admin
+useradd -m -g admin admin
 mkdir /home/admin/logs
 chown root.adm /home/admin/logs
 ---------------
