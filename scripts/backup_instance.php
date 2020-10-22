@@ -395,9 +395,6 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
         $serverdb = $object->hostname_db;
     }
 
-    // If you use an external database server host
-    $serverdb = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $serverdb);
-
 	$command="mysqldump";
 	$param=array();
 	$param[]=$object->database_db;
