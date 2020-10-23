@@ -5260,6 +5260,9 @@ if ($mode == 'mycustomerinstances')
 
 if ($mode == 'billing')
 {
+    // Instantiate hooks of myaccount only if not already define
+    $hookmanager->initHooks(array('myaccountbilling'));
+
 	print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
@@ -5360,9 +5363,18 @@ if ($mode == 'billing')
 
 					              <div class="col-md-6">
 									';
-									$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-									print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.' '.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').'</a>
-					              </div>
+
+            						// Execute hook getLoginPageExtraOptions (eg for js)
+            						$parameters=array('invoice' => $invoice, 'contract' => $contract);
+            						$reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
+            						if ($reshook > 0) {
+            						    print $hookmanager->resPrint;
+            						} else {
+            						    $url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
+            						    print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.' '.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').'</a>';
+            						}
+
+					              print '</div>
 					              <div class="col-md-2">
 									'.dol_print_date($invoice->date, 'day').'
 					              </div>
