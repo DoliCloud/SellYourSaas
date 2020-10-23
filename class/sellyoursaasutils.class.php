@@ -3782,7 +3782,7 @@ class SellYourSaasUtils
 
     				            if (function_exists('ssh2_disconnect'))
     				            {
-    				                ssh2_disconnect($connection);     // Hang on some config
+    				                //ssh2_disconnect($connection);     // Hang on some config
     				                $connection = null;
     				                unset($connection);
     				            }
