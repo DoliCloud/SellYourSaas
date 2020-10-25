@@ -80,28 +80,30 @@ function getListOfInstancesInChain($object)
     global $conf, $langs, $user, $db;
 
     $arrayofinstances = array();
-    $arrayofinstances[] = $object;
+    $arrayofinstances[$object->id] = $object;
 
     // Get next contracts
     $nextcontract = getNextInstanceInChain($object);
-    if ($nextcontract) $arrayofinstances[] = $nextcontract;
+    if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
     $i = 0;
     while ($nextcontract && $i < 1000)
     {
         $i++;
+        if (array_key_exists($nextcontract->id, $arrayofinstances)) continue;
         $nextcontract = getNextInstanceInChain($nextcontract);
-        if ($nextcontract) $arrayofinstances[] = $nextcontract;
+        if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
     }
 
     // Get previous contracts
     $previouscontract = getPreviousInstanceInChain($object);
-    if ($previouscontract) $arrayofinstances[] = $previouscontract;
+    if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
     $i = 0;
     while ($previouscontract && $i < 1000)
     {
         $i++;
+        if (array_key_exists($previouscontract->id, $arrayofinstances)) continue;
         $previouscontract = getPreviousInstanceInChain($previouscontract);
-        if ($previouscontract) $arrayofinstances[] = $previouscontract;
+        if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
     }
 
     $arrayofinstances = dol_sort_array($arrayofinstances, 'date_creation', 'asc');

@@ -209,7 +209,8 @@ Create the user account *admin*. It will be used to install and administer the s
 
 [source, bash]
 ---------------
-useradd admin -g admin
+groupadd admin
+useradd -m -g admin admin
 mkdir /home/admin/logs
 chown root.adm /home/admin/logs
 ---------------
