@@ -43,11 +43,20 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-if [ "x$1" == "xstart" ]; then
-	#echo "socat TCP4-LISTEN:8080,fork EXEC:$scriptdir/remote_server.sh > /var/log/remote_server.log"
-	#socat TCP4-LISTEN:8080,fork EXEC:$scriptdir/remote_server.sh & > /var/log/remote_server.log
+remoteserverlistenip=`grep 'remoteserverlistenip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$remoteserverlistenip" == "x" ]]; then
+	remoteserverlistenip="0.0.0.0"
+fi
+remoteserverlistenport=`grep 'remoteserverlistenport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$remoteserverlistenport" == "x" ]]; then
+	remoteserverlistenip="8080"
+fi
 
-	pid=`ps ax | grep 'php -S 0.0.0.0' | grep -v grep | awk ' { print $1 } '`
+if [ "x$1" == "xstart" ]; then
+	#echo "socat TCP4-LISTEN:$remoteserverlistenport,fork EXEC:$scriptdir/remote_server.sh > /var/log/remote_server.log"
+	#socat TCP4-LISTEN:$remoteserverlistenport,fork EXEC:$scriptdir/remote_server.sh & > /var/log/remote_server.log
+
+	pid=`ps ax | grep 'php -S $remoteserverlistenip' | grep -v grep | awk ' { print $1 } '`
 	if [ "x$pid" == "x" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
@@ -58,8 +67,8 @@ if [ "x$1" == "xstart" ]; then
 			export abc="index.php"
 		fi
 		
-		php -S 0.0.0.0:8080 -t remote_server $abc 2>&1 &
-		echo "Server started with php -S 0.0.0.0:8080 -t remote_server $abc"
+		php -S $remoteserverlistenip:$remoteserverlistenport -t remote_server $abc 2>&1 &
+		echo "Server started with php -S $remoteserverlistenip:$remoteserverlistenport -t remote_server $abc"
 		
 		echo "Logs of server will be in /var/log/remote_server.log"
 	else
@@ -70,7 +79,7 @@ fi
 if [ "x$1" == "xstop" ]; then
 	#killall socat
 	
-	pid=`ps ax | grep 'php -S 0.0.0.0' | grep -v grep | awk ' { print $1 } '`
+	pid=`ps ax | grep 'php -S $remoteserverlistenip' | grep -v grep | awk ' { print $1 } '`
 	if [ "x$pid" == "x" ]; then
 		echo Server not started
 	else
@@ -82,7 +91,7 @@ fi
 if [ "x$1" == "xstatus" ]; then
 	#killall socat
 	
-	pid=`ps ax | grep 'php -S 0.0.0.0' | grep -v grep | awk ' { print $1 } '`
+	pid=`ps ax | grep 'php -S $remoteserverlistenip' | grep -v grep | awk ' { print $1 } '`
 	if [ "x$pid" == "x" ]; then
 		echo Server not started
 	else

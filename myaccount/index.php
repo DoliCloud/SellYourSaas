@@ -3633,11 +3633,25 @@ if ($mode == 'instances')
 				if (empty($pricetoshow)) $pricetoshow = 0;
 				$arrayofplans[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 
-				if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
+				$tmpduration = '';
+				if ($tmpprod->duration) {
+				    if ($tmpprod->duration == '1m') {
+				        $tmpduration.=' / '.$langs->trans("Month");
+				    } else if ($tmpprod->duration == '1y') {
+				        $tmpduration.=' / '.$langs->trans("DurationYear");
+				    } else {
+				        preg_match('/^([0-9]+)([a-z]{1})$/', $tmpprod->duration, $regs);
+				        if (! empty($regs[1]) && ! empty($regs[2])) {
+				            $tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
+				        }
+				    }
+				}
+
+				if ($tmpprod->duration) $arrayofplans[$obj->rowid].=$tmpduration;
 				if ($priceinstance['user'])
 				{
 					$arrayofplans[$obj->rowid].=' + '.price(price2num($priceinstance['user'],'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
-					if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
+					if ($tmpprod->duration) $arrayofplans[$obj->rowid].=$tmpduration;
 				}
 				$arrayofplans[$obj->rowid].=')';
 			}
@@ -3957,6 +3971,20 @@ if ($mode == 'instances')
 										print '<span class="font-green-sharp counternumber">'.$line->qty.'</span>';
 										print '<br>';
 
+										$tmpduration = '';
+										if ($tmpproduct->duration) {
+										    if ($tmpproduct->duration == '1m') {
+										        $tmpduration.=' / '.$langs->trans("Month");
+										    } else if ($tmpproduct->duration == '1y') {
+										        $tmpduration.=' / '.$langs->trans("DurationYear");
+										    } else {
+										        preg_match('/^([0-9]+)([a-z]{1})$/', $tmpproduct->duration, $regs);
+										        if (! empty($regs[1]) && ! empty($regs[2])) {
+										            $tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
+										        }
+										    }
+										}
+
 										if ($line->price_ht)
 										{
 											print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
@@ -3964,15 +3992,28 @@ if ($mode == 'instances')
 											if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
 											elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
 											// TODO
-											print ' / '.$langs->trans("Month");
+											print $tmpduration;
 											print '</span>';
 										}
 										else
 										{
-											print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
-											// TODO
-											print ' / '.$langs->trans("Month");
-											print '</span>';
+										    if (empty($conf->global->SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL))
+										    {
+										        print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+										        // TODO
+										        print $tmpduration;
+										        print '</span>';
+										    }
+										    else
+										    {
+										        // TODO
+										        if (! empty($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL))
+										        {
+										            print '<span class="opacitymedium small">';
+										            print $langs->trans($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL);
+										            print '</span>';
+										        }
+										    }
 										}
 				                  	}
 				                  	else	// If there is no product, this is a free product

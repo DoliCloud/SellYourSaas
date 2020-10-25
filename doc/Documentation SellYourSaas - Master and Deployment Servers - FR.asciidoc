@@ -43,10 +43,10 @@ Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser 
 	* Gestion d'un réseau de revendeur.
 	* Disponible en OpenSource.
 	
-Financé par les sociétés Open Source https://www.nltechno.com[NLTechno] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici un synthèse de ses capacités:
+Financé par les sociétés Open Source https://www.nltechno.com[NLTechno] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici une synthèse de ses capacités:
 
-    * Déploiment de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
-    * Diffusion d'instance gratuites sans demande d'informations confidentiels ni cartes bancaires.
+    * Déploiement de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
+    * Diffusion d'instances gratuites sans demande d'informations confidentiels ni cartes bancaires.
     * Diffusion d'instances payantes avec différents niveaux de tarifications.
     * Site web vitrine (optionnel) prêt à l'emploi pour vendre votre application.
     * Espace client dédié (facturation, ticket, compte client).
