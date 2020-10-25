@@ -5261,7 +5261,7 @@ if ($mode == 'mycustomerinstances')
 if ($mode == 'billing')
 {
     // Instantiate hooks of myaccount only if not already define
-    $hookmanager->initHooks(array('myaccountbilling'));
+    $hookmanager->initHooks(array('sellyoursaas-myaccountbilling'));
 
 	print '
 	<div class="page-content-wrapper">
@@ -5364,7 +5364,7 @@ if ($mode == 'billing')
 					              <div class="col-md-6">
 									';
 
-            						// Execute hook getLoginPageExtraOptions (eg for js)
+                                    // Execute hook getLastMainDocLink
             						$parameters=array('invoice' => $invoice, 'contract' => $contract);
             						$reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
             						if ($reshook > 0) {
