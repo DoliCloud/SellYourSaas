@@ -478,7 +478,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 				<div class="controls">
 			<?php
 			$countryselected=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
-			print '<!-- Autodetected IP/Country: '.$_SERVER[$phpServerEnvName].'/'.$countryselected.' -->'."\n";
+			print '<!-- Autodetected IP/Country: '.getUserRemoteIP().'/'.$countryselected.' -->'."\n";
 			if (empty($countryselected)) $countryselected='US';
 			if (GETPOST('address_country','alpha')) $countryselected=GETPOST('address_country','alpha');
 			print $form->select_country($countryselected, 'address_country', 'optionsValue="name"'.$disabled, 0, 'minwidth300', 'code2', 1, 1);
