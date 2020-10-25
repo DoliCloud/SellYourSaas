@@ -159,7 +159,11 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 		$favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 		if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
-		if ($favicon) print '<link rel="shortcut icon" href="img/'.$favicon.'">'."\n";
+		if ($favicon) {
+		    $href = 'img/'.$favicon;
+		    if (preg_match('/^http/i', $favicon)) $href = $favicon;
+		    print '<link rel="shortcut icon" href="'.$href.'">'."\n";
+		}
 
 		// Displays title
 		$appli=constant('DOL_APPLICATION_TITLE');
@@ -721,6 +725,8 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	// Include login page template
 	include $template_dir.'loginmyaccount.tpl.php';
 
+	// Global html output events ($mesgs, $errors, $warnings)
+	dol_htmloutput_events(0);
 
 	$_SESSION["dol_loginmesg"] = '';
 }

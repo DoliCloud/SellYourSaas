@@ -1,6 +1,5 @@
 <?php
 /* Copyright (C) 2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -204,14 +203,14 @@ if ($object->id > 0)
 	// Actions buttons
 
     $out='';
-    $permok=$user->rights->produit->creer;
+    $permok=$user->rights->service->creer;
     $out.=(! empty($objcon->id)?'&packageid='.$id:'').'&backtopage=1';
 
 	print '<div class="tabsAction">';
 
-	if (! empty($user->rights->produit->creer))
+	if (! empty($user->rights->service->creer))
 	{
-    	print '<a class="butAction" href="'.DOL_URL_ROOT.'/product/card.php?action=create'.$out.'">'.$langs->trans("AddService").'</a>';
+    	print '<a class="butAction" href="'.DOL_URL_ROOT.'/product/card.php?action=create&type=1'.$out.'">'.$langs->trans("AddService").'</a>';
 	}
 	else
 	{
@@ -222,7 +221,7 @@ if ($object->id > 0)
 
 
     // List of services
-    if (! empty($user->rights->produit->lire))
+    if (! empty($user->rights->service->lire))
     {
         $param='&packageid='.$id;
         if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param.='&contextpage='.$contextpage;
