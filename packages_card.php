@@ -117,7 +117,7 @@ if (empty($reshook))
 
 	$permissiontoadd = $user->rights->sellyoursaas->write;
 	$permissiontodelete = $user->rights->sellyoursaas->delete;
-	if (empty($backtopage)) $backtopage = dol_buildpath('/sellyoursaas/packages_card.php',1).'?id=__ID__';
+	if (empty($backtopage)) $backtopage = dol_buildpath('/sellyoursaas/packages_card.php',1).'?id='.$object->id;
 	$backurlforlist = dol_buildpath('/sellyoursaas/packages_list.php',1);
 	$triggermodname = 'SELLYOURSAAS_PACKAGE_MODIFY';
 
