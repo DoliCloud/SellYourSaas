@@ -185,6 +185,8 @@ if ($socid > 0)
 	$mythirdparty->fetch($socid);
 }
 
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks(array('sellyoursaas-register'));
 
 
 /*
@@ -639,6 +641,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 
 
      </form> <!-- end form-content -->
+
+	<?php
+	// Execute hook getRegisterPageFooter
+    $parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct);
+    $reshook = $hookmanager->executeHooks('getRegisterPageFooter', $parameters); // Note that $action and $object may have been modified by some hooks.
+    print $hookmanager->resPrint;
+    ?>
 
 	</div>
 
