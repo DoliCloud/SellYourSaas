@@ -74,7 +74,7 @@ fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter 1 - test|confirm" 1>&2
-	echo "Usage: ${0} [test|confirm]"
+	echo "Usage: ${0} (test|confirm)"
 fi
 if [[ "x$1" == "x" ]]; then
 	exit 1
@@ -82,7 +82,7 @@ fi
 
 if [ "x$SERVDESTI" == "x" ]; then
 	echo "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf" 1>&2
-	echo "Usage: ${0} [test|confirm]"
+	echo "Usage: ${0} (test|confirm) [osux]"
 fi
 
 
@@ -109,6 +109,13 @@ if [ "x$ret1" == "x0" ]; then
 			echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
 			nbofdir=`ls -d $backupdir/osu$i* | wc -l`
 			if [ "x$nbofdir" != "x0" ]; then
+				# Test if we force backup on a given dir
+				if [ "x$2" != "x" ]; then
+					if [ "x$2" != "xosu$i" ]; then
+						break
+					fi
+				fi
+				
 		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
 	        	echo "$command";
 	        	
