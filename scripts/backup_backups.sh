@@ -45,9 +45,9 @@ export DIRDESTI2="$remotebackupdir/backup_"`hostname`;
 
 export EMAILFROM=support@$DOMAIN
 export EMAILTO=supervision@$DOMAIN
-#export OPTIONS="-v -4 --stats -a --delete";
-#export OPTIONS="-v -4 --stats -a --delete --delete-excluded";
-export OPTIONS="-v -4 --stats -rlt --noatime --backup --suffix=.old";
+#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
+#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
+export OPTIONS="-v -4 --stats -rlt --noatime --chmod=u=rwX --backup --suffix=.old";
 
 if [ "x$USER" == "x" ]; then
 	export USER="admin"
