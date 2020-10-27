@@ -3519,7 +3519,7 @@ class SellYourSaasUtils
     			{
     			    $urltoget='http://'.$serverdeployment.':8080/'.$remoteaction.'?'.urlencode($commandurl);
 	    			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-	    			$retarray = getURLContent($urltoget);   // Timeout is defined before
+	    			$retarray = getURLContent($urltoget, 'GET', '', 0, array(), array('http', 'https'), 2);   // Timeout is defined before
 
 	    			if ($retarray['curl_error_no'] != '' || $retarray['http_code'] != 200)
 	    			{

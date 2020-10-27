@@ -734,7 +734,7 @@ else
 			$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 			if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
 			$url = 'http://check.getipintel.net/check.php?ip='.$remoteip.'&contact='.urlencode($emailforvpncheck).'&flag=f';
-			$result = getURLContent($url);
+			$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
 			/* The proxy check system will return negative values on error. For standard format (non-json), an additional HTTP 400 status code is returned
 				-1 Invalid no input
 				-2 Invalid IP address
