@@ -251,6 +251,8 @@ margin-top: 20px;
 
 .signup { margin: 0 auto; max-width: 700px; padding-top: 20px;}
 
+.signup .block.medium { padding-top: 10px; }
+
 .signup2 { max-width: 700px; display: inline-block; text-align: initial; }
 
 .paddingtop20 {
