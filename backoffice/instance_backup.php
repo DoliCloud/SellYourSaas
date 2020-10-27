@@ -269,7 +269,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	if (is_object($object->db2))
 	{
 		$savdb=$object->db;
-		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = stratus5 database
+		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
 	}
 
 

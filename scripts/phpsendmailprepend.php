@@ -1,10 +1,11 @@
 <?php
 /**
-  This script is a prepend file so env is set for phpsendmail.php
-
-  Modify your php.ini file to add:
-  auto_prepend_file = /usr/local/bin/phpsendmailprepend.php
-*/
+ * This script is a prepend file so env is set for phpsendmail.php
+ * It allows also to force use of antivirus whatever is setup in application.
+ *
+ * Modify your php.ini file to add:
+ * auto_prepend_file = /usr/local/bin/phpsendmailprepend.php
+ */
 
 #if (! empty($_SERVER) && (preg_match('/phpsendmail/', @$_SERVER['SCRIPT_FILENAME']) || preg_match('/phpsendmail/', @$_SERVER['SCRIPT_NAME'])) )
 if (@$_POST['action'] == 'send' || @$_POST['action'] == 'sendallconfirmed')
