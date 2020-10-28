@@ -34,10 +34,18 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
-export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
-export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
-export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
 
+# possibility to change the path of vhostfile templates
+templatespath=`grep 'templatespath=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$templatespath" != "x" ]]; then
+	export vhostfile="$templatespath/vhostHttps-sellyoursaas.template"
+	export vhostfilesuspended="$templatespath/vhostHttps-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$templatespath/vhostHttps-sellyoursaas-maintenance.template"
+else
+	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+fi
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
