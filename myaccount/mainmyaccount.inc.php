@@ -159,7 +159,11 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 		$favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 		if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
-		if ($favicon) print '<link rel="shortcut icon" href="img/'.$favicon.'">'."\n";
+		if ($favicon) {
+		    $href = 'img/'.$favicon;
+		    if (preg_match('/^http/i', $favicon)) $href = $favicon;
+		    print '<link rel="shortcut icon" href="'.$href.'">'."\n";
+		}
 
 		// Displays title
 		$appli=constant('DOL_APPLICATION_TITLE');
@@ -271,8 +275,8 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 				print '<script type="text/javascript" src="'.$pathckeditor.$jsckeditor.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
 
-			// Browser notifications
-			if (! defined('DISABLE_BROWSER_NOTIF'))
+			// Browser notifications (if NOREQUIREMENU is on, it is mostly a page for popup, so we do not enable notif too. We hide also for public pages).
+			if (!defined('NOBROWSERNOTIF') && !defined('NOREQUIREMENU') && !defined('NOLOGIN'))
 			{
 				$enablebrowsernotif=false;
 				if (! empty($conf->agenda->enabled) && ! empty($conf->global->AGENDA_REMINDER_BROWSER)) $enablebrowsernotif=true;

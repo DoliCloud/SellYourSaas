@@ -11,6 +11,7 @@ if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't n
 if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 
 include ('./mainmyaccount.inc.php');
@@ -249,6 +250,8 @@ margin-top: 20px;
 .nowrap { white-space: nowrap; }
 
 .signup { margin: 0 auto; max-width: 700px; padding-top: 20px;}
+
+.signup .block.medium { padding-top: 10px; }
 
 .signup2 { max-width: 700px; display: inline-block; text-align: initial; }
 

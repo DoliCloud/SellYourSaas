@@ -26,7 +26,8 @@
  *      			update statistics
  */
 
-if (! defined('NOREQUIREDB'))              define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);

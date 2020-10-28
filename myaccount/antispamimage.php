@@ -21,15 +21,15 @@
  *		\brief      Return antispam image
  */
 
-define('NOLOGIN',1);
+if (! defined('NOLOGIN'))        define('NOLOGIN',1);
 if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
-
-if (! defined('NOREQUIREUSER'))   define('NOREQUIREUSER',1);
-if (! defined('NOREQUIREDB'))     define('NOREQUIREDB',1);
-if (! defined('NOREQUIRETRAN'))   define('NOREQUIRETRAN',1);
-if (! defined('NOREQUIREMENU'))   define('NOREQUIREMENU',1);
-if (! defined('NOREQUIRESOC'))    define('NOREQUIRESOC',1);
-if (! defined('NOTOKENRENEWAL'))  define('NOTOKENRENEWAL',1);
+if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER',1);
+if (! defined('NOREQUIREDB'))    define('NOREQUIREDB',1);
+if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN',1);
+if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU',1);
+if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC',1);
+if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL',1);
+if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 require_once './mainmyaccount.inc.php';
 

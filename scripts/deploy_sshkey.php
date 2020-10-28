@@ -23,6 +23,8 @@
  *      \brief      Script to deploy public key on authorized_keys of customers
  */
 
+if (!defined('NOSESSION')) define('NOSESSION', '1');
+
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
 $path=dirname($_SERVER['PHP_SELF']).'/';
