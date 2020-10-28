@@ -73,6 +73,8 @@ if ($action == 'addauthorizedkey')
 					$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 					fwrite($stream, $publickeystodeploy);
 					fclose($stream);
+					// File authorized_keys must have rw------- permissions
+					ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys', 0600);
 					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys');
 					setEventMessage($langs->transnoentitiesnoconv("FileCreated"),'mesgs');
 				}

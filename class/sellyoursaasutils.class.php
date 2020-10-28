@@ -3126,6 +3126,8 @@ class SellYourSaasUtils
     								fwrite($stream,$publickeystodeploy);
 
     								fclose($stream);
+    								// File authorized_keys must have rw------- permissions
+                                    ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys', 0600);
     								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys');
     							}
     						}
