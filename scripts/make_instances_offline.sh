@@ -24,10 +24,10 @@ fi
 
 export scriptdir=$(dirname $(realpath ${0}))
 
-# possibility to change the path of vhostfile templates
-templatespath=`grep 'templatespath=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$templatespath" != "x" ]]; then
-	export vhostfileoffline="$templatespath/vhostHttps-sellyoursaas-offline.template"
+# possibility to change the directory of vhostfile templates
+templatesdir=`grep 'templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$templatesdir" != "x" ]]; then
+	export vhostfileoffline="$templatesdir/vhostHttps-sellyoursaas-offline.template"
 else
 	export vhostfileoffline="$scriptdir/templates/vhostHttps-sellyoursaas-offline.template"
 fi

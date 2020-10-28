@@ -35,12 +35,12 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 
-# possibility to change the path of vhostfile templates
-templatespath=`grep 'templatespath=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$templatespath" != "x" ]]; then
-	export vhostfile="$templatespath/vhostHttps-sellyoursaas.template"
-	export vhostfilesuspended="$templatespath/vhostHttps-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$templatespath/vhostHttps-sellyoursaas-maintenance.template"
+# possibility to change the directory of vhostfile templates
+templatesdir=`grep 'templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$templatesdir" != "x" ]]; then
+	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
+	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
 else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
