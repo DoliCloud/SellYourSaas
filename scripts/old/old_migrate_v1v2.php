@@ -19,6 +19,8 @@
  * Update an instance on stratus5 server with new ref version.
  */
 
+if (!defined('NOSESSION')) define('NOSESSION', '1');
+
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
 $path=dirname(__FILE__).'/';
