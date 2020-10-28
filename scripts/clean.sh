@@ -42,6 +42,10 @@ export IPSERVERDEPLOYMENT=`grep '^ipserverdeployment=' /etc/sellyoursaas.conf | 
 export databasehost=`grep '^databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export database=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export databaseuser=`grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databaseport=`grep '^databaseport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databaseport" == "x" ]]; then
+	databaseport="3306"
+fi
 
 if [ "x$IPSERVERDEPLOYMENT" == "x" ]; then
    echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
@@ -63,12 +67,37 @@ if [ "x$databaseuser" == "x" ]; then
 	echo "Usage: ${0} [test|confirm]"
 	exit 1
 fi
+echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
+databasepass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databasepass" == "x" ]]; then
+	echo Failed to get password for mysql user sellyoursaas 
+	exit 1
+fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 1
 fi
+
+echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
+export databasehostdeployment=`grep 'databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databasehostdeployment" == "x" ]]; then
+	databasehostdeployment="localhost"
+fi 
+export databaseportdeployment=`grep 'databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbserverport" == "x" ]]; then
+	databaseportdeployment="3306"
+fi
+echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
+export databaseuserdeployment=`grep 'databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databaseuserdeployment" == "x" ]]; then
+	databaseuserdeployment=$databaseuser
+fi
+databasepassdeployment=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databasepassdeployment" == "x" ]]; then
+	databasepassdeployment=$databasepass
+fi 
 
 export testorconfirm=$1
 
@@ -78,13 +107,7 @@ echo "testorconfirm = $testorconfirm"
 
 
 MYSQL=`which mysql`
-MYSQLDUMP=`which mysqldump`
-echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
-passsellyoursaas=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$passsellyoursaas" == "x" ]]; then
-	echo Failed to get password for mysql user sellyoursaas 
-	exit 1
-fi 
+MYSQLDUMP=`which mysqldump` 
 
 if [[ ! -d $archivedirtest ]]; then
 	echo Failed to find archive directory $archivedirtest
@@ -152,8 +175,8 @@ Q1="use $database; "
 Q2="SELECT c.ref_customer, ce.username_os, ce.database_db, ce.deployment_status FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE ce.fk_object = c.rowid AND ce.deployment_status IS NOT NULL";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e '$SQL' | grep -v 'ref_customer'"
-$MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-dbinsellyoursaas
+echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL' | grep -v 'ref_customer'"
+$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-dbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make first SQL request to get instances. Exit 1."
 	exit 1
@@ -168,8 +191,8 @@ Q1="use $database; "
 Q2="SELECT c.ref_customer, ce.username_os, ce.database_db, ce.deployment_status, ce.deployment_host FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE ce.fk_object = c.rowid AND ce.deployment_status IN ('processing','done')";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e '$SQL' | grep -v 'ref_customer'"
-$MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-activedbinsellyoursaas
+echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL' | grep -v 'ref_customer'"
+$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-activedbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make second SQL request to get instances. Exit 1."
 	exit 1
@@ -183,7 +206,7 @@ Q2="SHOW DATABASES; ";
 SQL="${Q1}${Q2}"
 
 echo "$MYSQL -usellyoursaas -pxxxxxx -h localhost -e '$SQL' | grep 'dbn' "
-$MYSQL -usellyoursaas -p$passsellyoursaas -h localhost -e "$mysql" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
+$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
 	exit 1
@@ -252,8 +275,8 @@ Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce W
 Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";
 SQL="${Q1}${Q2}${Q3}"
 
-echo "$MYSQL -usellyoursaas -phidden -h $databasehost -e $SQL"
-$MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
+echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e $SQL"
+$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
 if [ -s /tmp/osutoclean-oldundeployed ]; then
 	for osusername in `cat /tmp/osutoclean-oldundeployed`
 	do
@@ -285,7 +308,6 @@ if [ -s /tmp/osutoclean ]; then
 		export dbname=""
 		export instancename=`grep $osusername /tmp/instancefound-dbinsellyoursaas | cut -f 1`
 		export dbname=`grep $osusername /tmp/instancefound-dbinsellyoursaas | cut -f 3`
-		export databasehostdeployment="localhost"
 		
 		echo For osusername=$osusername, dbname is $dbname, instancename is $instancename, databasehostdeployment is $databasehostdeployment
 		
@@ -294,13 +316,13 @@ if [ -s /tmp/osutoclean ]; then
 			if [[ "x$dbname" != "xNULL" ]]; then	
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
-				echo "$MYSQLDUMP -usellyoursaas -pxxxxxx -h $databasehostdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
-				$MYSQLDUMP -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+				echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
+				$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
 
 				echo "Now drop the database"
-				echo "echo 'DROP DATABASE $dbname;' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname"
+				echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname"
 				if [[ $testorconfirm == "confirm" ]]; then
-					echo "DROP DATABASE $dbname;" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname
+					echo "DROP DATABASE $dbname;" | $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname
 				fi	
 			fi
 		fi
@@ -504,12 +526,12 @@ echo TODO Manually...
 echo "***** We should also clean mysql record for permission on old databases and old users"
 SQL="use mysql; delete from db where Db NOT IN (SELECT schema_name FROM information_schema.schemata) and Db like 'dbn%';"
 echo You can execute
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e \"$SQL\""
-#$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e "$SQL"
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+#$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 SQL="use mysql; delete from user where User NOT IN (SELECT User from db) and User like 'dbu%';"
 echo You can execute
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e \"$SQL\""
-#$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e "$SQL"
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+#$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 
 if [[ $testorconfirm == "test" ]]; then
 	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so they we can force to undeployed them correctly again"
@@ -519,10 +541,10 @@ if [[ $testorconfirm == "test" ]]; then
 		echo -n " '"$fic"'," >> /tmp/idlistofdb
 	done
 	export idlistofdb=`cat /tmp/idlistofdb | sed -e 's/,$//' `
-	echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
-	echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
-	echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
-	echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
+	echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx $database"
+	echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass $database
+	echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database"
+	echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
 	echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
 	echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
 fi

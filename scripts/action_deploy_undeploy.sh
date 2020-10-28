@@ -224,22 +224,22 @@ echo "CRONHEAD = $CRONHEAD"
 MYSQL=`which mysql`
 MYSQLDUMP=`which mysqldump`
 
-echo "Search database server name and port in /etc/sellyoursaas.conf"
-dbserverhost=`grep 'databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
+dbserverhost=`grep 'databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbserverhost" == "x" ]]; then
 	dbserverhost="localhost"
 fi 
-dbserverport=`grep 'databaseport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dbserverport=`grep 'databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbserverport" == "x" ]]; then
 	dbserverport="3306"
 fi
 
-echo "Search admin database credential in /etc/sellyoursaas.conf"
-dbadminuser=`grep 'databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
+dbadminuser=`grep 'databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbadminuser" == "x" ]]; then
 	dbadminuser="sellyoursaas"
 fi 
-dbadminpass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dbadminpass=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbadminpass" == "x" ]]; then
 	echo Failed to get password for mysql admin user 
 	exit 1
@@ -976,7 +976,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
 	Q4="FLUSH PRIVILEGES; "
 	SQL="${Q1}${Q2}${Q3}${Q4}"
-	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -e \"$SQL\""
+	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
 	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -p$dbpassword"
@@ -985,7 +985,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo Search dumpfile into $dirwithdumpfile
 	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
 	do
-		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile"
+		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
 		$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile
 		result=$?
 		if [[ "x$result" != "x0" ]]; then
@@ -1006,12 +1006,12 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
-	echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
+	echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
 	$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
 
 	if [[ "x$?" == "x0" ]]; then
 		echo "Now drop the database"
-		echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname"
+		echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname"
 		if [[ $testorconfirm == "confirm" ]]; then
 			echo "DROP DATABASE $dbname;" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname
 		fi
