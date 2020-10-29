@@ -30,7 +30,8 @@ if ($action == 'addauthorizedkey')
 
 	$server=$hostname_os;
 
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		if (! @ssh2_auth_password($connection, $username_web, $password_web))
@@ -112,7 +113,8 @@ if ($action == 'addinstalllock')
 
 	$server=$hostname_os;
 
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $instance." ".$username_web." ".$password_web."<br>\n";
@@ -172,7 +174,8 @@ if ($action == 'delauthorizedkey')
 	$hostname_os = $object->array_options['options_hostname_os'];
 
 	$server=$hostname_os;
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $instance." ".$username_web." ".$password_web."<br>\n";
@@ -222,8 +225,8 @@ if ($action == 'delinstalllock')
 	$hostname_os = $object->array_options['options_hostname_os'];
 
 	$server=$hostname_os;
-
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $object->instance." ".$username_web." ".$password_web."<br>\n";

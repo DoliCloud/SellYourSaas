@@ -39,15 +39,19 @@ export DIRSOURCE2=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 # Target
 export SERVDESTI=`grep '^remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export SERVPORTDESTI=`grep '^remotebackupserverport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [ "x$SERVPORTDESTI" == "x" ]; then
+	export SERVPORTDESTI="22"
+fi
 export USER=`grep '^remotebackupuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export DIRDESTI1="$remotebackupdir/home_"`hostname`;
 export DIRDESTI2="$remotebackupdir/backup_"`hostname`;
 
 export EMAILFROM=support@$DOMAIN
 export EMAILTO=supervision@$DOMAIN
-#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
-#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS="-v -4 --stats -rlt --noatime --chmod=u=rwX --backup --suffix=.old";
+#export OPTIONS="-p $SERVPORTDESTI -v -4 --stats -a --chmod=u=rwX --delete";
+#export OPTIONS="-p $SERVPORTDESTI -v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
+export OPTIONS="-p $SERVPORTDESTI -v -4 --stats -rlt --noatime --chmod=u=rwX --backup --suffix=.old";
 
 if [ "x$USER" == "x" ]; then
 	export USER="admin"
@@ -57,6 +61,7 @@ echo "DOMAIN=$DOMAIN"
 echo "DIRSOURCE1=$DIRSOURCE1"
 echo "DIRSOURCE2=$DIRSOURCE2"
 echo "SERVDESTI=$SERVDESTI"
+echo "SERVPORTDESTI=$SERVPORTDESTI"
 echo "EMAILFROM=$EMAILFROM"
 echo "EMAILTO=$EMAILTO"
 echo "PID=$PID"

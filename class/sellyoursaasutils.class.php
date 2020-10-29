@@ -3038,7 +3038,8 @@ class SellYourSaasUtils
     		    $server=$object->array_options['options_hostname_os'];
     		    dol_syslog("Try to ssh2_connect to ".$server);
 
-    		    $connection = @ssh2_connect($server, 22);
+    		    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    		    $connection = @ssh2_connect($server, $server_port);
     			if ($connection)
     			{
     				//print ">>".$object->array_options['options_username_os']." - ".$object->array_options['options_password_os']."<br>\n";exit;
@@ -3749,7 +3750,8 @@ class SellYourSaasUtils
     				    {
     				        $server=$object->array_options['options_hostname_os'];
 
-    				        $connection = @ssh2_connect($server, 22);
+    				        $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    				        $connection = @ssh2_connect($server, $server_port);
     				        if ($connection)
     				        {
     				            dol_syslog("Get resource BASH ".$bashformula);
