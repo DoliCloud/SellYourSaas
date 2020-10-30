@@ -37,9 +37,11 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 	// SFTP refresh
 	if (function_exists("ssh2_connect"))
 	{
-		if ($printoutput) print "ssh2_connect ".$server." ".$username_web." ".$password_web."\n";
+	    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 
-		$connection = ssh2_connect($server, 22);
+	    if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_web." ".$password_web."\n";
+
+	    $connection = ssh2_connect($server, $server_port);
 		if ($connection)
 		{
 			if ($printoutput) print $instance." ".$username_web." ".$password_web."\n";
@@ -155,6 +157,10 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	$password_web = $object->password_web;
 	if (empty($password_web)) $password_web = $object->array_options['options_password_os'];
 
+	$hostname_db = $object->hostname_db;
+	if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];
+	$port_db = $object->port_db;
+	if (empty($port_db)) $port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
 	$username_db = $object->username_db;
 	if (empty($username_db)) $username_db = $object->array_options['options_username_db'];
 	$password_db = $object->password_db;
@@ -162,9 +168,9 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	$database_db = $object->database_db;
 	if (empty($database_db)) $database_db = $object->array_options['options_database_db'];
 
-	$server=$instance;
+	$server = (! empty($hostname_db) ? $hostname_db : $instance);
 
-	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, 3306);
+	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
 	$ret=1;
 
@@ -304,7 +310,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 		}
 		else
 		{
-			$errors[]='Failed to connect '.$conf->db->type.' '.$instance.'.on.dolicloud.com '.$username_db.' '.$password_db.' '.$database_db.' 3306';
+			$errors[]='Failed to connect '.$conf->db->type.' '.$instance.'.on.dolicloud.com '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
 			$ret=-1;
 		}
 
@@ -337,7 +343,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	}
 	else
 	{
-		$errors[]='Failed to connect '.$conf->db->type.' '.$server.' '.$username_db.' '.$password_db.' '.$database_db.' 3306';
+	    $errors[]='Failed to connect '.$conf->db->type.' '.$server.' '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
 		$ret=-1;
 	}
 

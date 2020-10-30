@@ -2636,6 +2636,9 @@ ipserverdeployment=ipduserverdeployment
 dolibarrdir=/home/admin/wwwroot/dolibarr
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
+# Set port of the master database (default is 3306)
+databaseport=3306
+# Set database name of the master server
 database=databaseduservermaster
 # Set credential for the master and deployment database
 databaseuser=sellyoursaas
@@ -2648,6 +2651,13 @@ backupdir=/mnt/diskbackup/backup
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+# Set remote server launcher ip (default is 0.0.0.0)
+remoteserverlistenip=0.0.0.0
+# Set remote server launcher port (default is 8080)
+remoteserverlistenport=8080
+# Options for use a different path of dataroot in deployment server
+#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
+#newdoldataroot=/new/path/of/documents
 ---------------
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
@@ -3774,6 +3784,15 @@ To define account to use getipintel API for VPN probability.
 To enable native Datadog reporting (datadog-agent must just be installed)
 * SELLYOURSAAS_DATADOG_ENABLED = 1
 
+If you use an external db server (same value of "databasehost" and "databaseport" in sellyoursaas.conf)
+* SELLYOURSAAS_FORCE_DATABASE_HOST = ip or host name of your external mysql server
+* SELLYOURSAAS_FORCE_DATABASE_PORT = port of your external mysql server
+
+If you use an ssh port other than 22
+* SELLYOURSAAS_SSH_SERVER_PORT = port of your ssh server
+
+If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (same value of "newdoldataroot" in sellyoursaas.conf)
+* SELLYOURSAAS_FORCE_DOL_DATA_ROOT = /path/of/dolibarr/documents/in/deployment/server
 
 
 === TroubleShooting

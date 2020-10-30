@@ -70,6 +70,7 @@ dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
+$databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
@@ -83,6 +84,10 @@ if ($fp) {
         if ($tmpline[0] == 'databasehost')
         {
             $databasehost = $tmpline[1];
+        }
+        if ($tmpline[0] == 'databaseport')
+        {
+            $databaseport = $tmpline[1];
         }
         if ($tmpline[0] == 'database')
         {
@@ -114,10 +119,10 @@ if (0 == posix_getuid()) {
     exit(-1);
 }
 
-$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error)
 {
-    dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+    dol_print_error($dbmaster,"host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
     exit;
 }
 if ($dbmaster)
@@ -317,11 +322,19 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 // Restore database
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
+    $serverdb = $server;
+    if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
+        print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
+        $serverdb = $object->hostname_db;
+    }
+
 	$command="mysql";
 	$param=array();
 	$param[]=$object->database_db;
 	$param[]="-h";
-	$param[]=$server;
+	$param[]=$serverdb;
+	$param[]="-P";
+	$param[]=(! empty($object->port_db) ? $object->port_db : "3306");
 	$param[]="-u";
 	$param[]=$object->username_db;
 	$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$object->password_db).'"';

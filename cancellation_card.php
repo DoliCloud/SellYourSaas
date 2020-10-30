@@ -1,6 +1,5 @@
 <?php
 /* Copyright (C) 2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,8 +116,16 @@ if (empty($reshook))
 
 	$permissiontoadd = $user->rights->sellyoursaas->write;
 	$permissiontodelete = $user->rights->sellyoursaas->delete;
-	if (empty($backtopage)) $backtopage = dol_buildpath('/sellyoursaas/cancellation_card.php',1).'?id=__ID__';
-	$backurlforlist = dol_buildpath('/sellyoursaas/cancellation_list.php',1);
+	
+	$backurlforlist = dol_buildpath('/sellyoursaas/cancellation_list.php', 1);
+
+	if (empty($backtopage) || ($cancel && empty($id))) {
+		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
+			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) $backtopage = $backurlforlist;
+			else $backtopage = dol_buildpath('/sellyoursaas/cancellation_card.php', 1).'?id='.($id > 0 ? $id : '__ID__');
+		}
+	}
+
 	$triggermodname = 'SELLYOURSAAS_CANCELLATION_MODIFY';
 
 	// Actions cancel, add, update or delete

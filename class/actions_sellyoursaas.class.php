@@ -915,6 +915,10 @@ class ActionsSellyoursaas
     	{
         	// Read version
         	$server = $contract->ref_customer;
+        	$hostname_db = $object->hostname_db;
+        	if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];
+        	$port_db = $object->port_db;
+        	if (empty($port_db)) $port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
         	$username_db = $contract->username_db;
         	if (empty($username_db)) $username_db = $contract->array_options['options_username_db'];
         	$password_db = $object->password_db;
@@ -922,7 +926,9 @@ class ActionsSellyoursaas
         	$database_db = $object->database_db;
         	if (empty($database_db)) $database_db = $contract->array_options['options_database_db'];
 
-        	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, 3306);
+        	$server = (! empty($hostname_db) ? $hostname_db : $instance);
+
+        	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
         	if ($newdb->connected)
         	{

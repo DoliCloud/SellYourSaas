@@ -68,6 +68,7 @@ include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
+$databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
@@ -93,6 +94,10 @@ if ($fp) {
 		if ($tmpline[0] == 'databasehost')
 		{
 			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport')
+		{
+		    $databaseport = $tmpline[1];
 		}
 		if ($tmpline[0] == 'database')
 		{
@@ -166,11 +171,11 @@ if (empty($instanceserver))
 	exit(-1);
 }*/
 
-//$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+//$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 $dbmaster = $db;
 if ($dbmaster->error)
 {
-	dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+	dol_print_error($dbmaster,"host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
 	exit;
 }
 if ($dbmaster)
@@ -411,7 +416,8 @@ if ($mode == 'confirmunlock')
 	if (! function_exists("ssh2_connect")) { dol_print_error('','ssh2_connect function does not exists'); exit(1); }
 
 	$newserver=$newobject->instance.'.with.dolicloud.com';
-	$connection = ssh2_connect($newserver, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($newserver, $server_port);
 	if ($connection)
 	{
 		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";

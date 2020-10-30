@@ -3038,7 +3038,8 @@ class SellYourSaasUtils
     		    $server=$object->array_options['options_hostname_os'];
     		    dol_syslog("Try to ssh2_connect to ".$server);
 
-    		    $connection = @ssh2_connect($server, 22);
+    		    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    		    $connection = @ssh2_connect($server, $server_port);
     			if ($connection)
     			{
     				//print ">>".$object->array_options['options_username_os']." - ".$object->array_options['options_password_os']."<br>\n";exit;
@@ -3126,6 +3127,8 @@ class SellYourSaasUtils
     								fwrite($stream,$publickeystodeploy);
 
     								fclose($stream);
+    								// File authorized_keys must have rw------- permissions
+                                    ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys', 0600);
     								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys');
     							}
     						}
@@ -3210,7 +3213,9 @@ class SellYourSaasUtils
 
     				if (function_exists('ssh2_disconnect'))
     				{
-    				    //ssh2_disconnect($connection);     // Hang on some config
+    				    if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				        //ssh2_disconnect($connection);     // Hang on some config
+    				    }
     				    $connection = null;
     				    unset($connection);
     				}
@@ -3391,7 +3396,7 @@ class SellYourSaasUtils
     			$substitarray=array(
         			'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,
         			'__INSTANCEDBPREFIX__'=>$generateddbprefix,
-        			'__DOL_DATA_ROOT__'=>DOL_DATA_ROOT,
+    				'__DOL_DATA_ROOT__'=>(empty($conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT) ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT),
         			'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
         			'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
         			'__OSHOSTNAME__'=>$generatedunixhostname,
@@ -3536,10 +3541,17 @@ class SellYourSaasUtils
 			    	{
 			    		dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
+			    		$serverdb = $serverdeployment;
+
+			    		// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+			    		if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+			    		    $serverdb = $generateddbhostname;
+			    		}
+
 			    		//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
 			    		//var_dump($serverdeployment);		// just ip of deployement server
 			    		//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-			    		$dbinstance = @getDoliDBInstance('mysqli', $serverdeployment, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+			    		$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 			    		if (! $dbinstance || ! $dbinstance->connected)
 			    		{
 			    			$error++;
@@ -3749,7 +3761,8 @@ class SellYourSaasUtils
     				    {
     				        $server=$object->array_options['options_hostname_os'];
 
-    				        $connection = @ssh2_connect($server, 22);
+    				        $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    				        $connection = @ssh2_connect($server, $server_port);
     				        if ($connection)
     				        {
     				            dol_syslog("Get resource BASH ".$bashformula);
@@ -3782,7 +3795,9 @@ class SellYourSaasUtils
 
     				            if (function_exists('ssh2_disconnect'))
     				            {
-    				                ssh2_disconnect($connection);     // Hang on some config
+    				                if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				                    ssh2_disconnect($connection);     // Hang on some config
+    				                }
     				                $connection = null;
     				                unset($connection);
     				            }
