@@ -2173,7 +2173,7 @@ Créer un fichier */etc/bind/withX.mysaasdomainname.com.hosts* pour le DNS *with
 $ttl 1d
 $ORIGIN with1.mysaasdomainname.com.
 @               IN     SOA     ns1withX.mysaasdomainname.com. supervision.mysaasdomainname.com. (
-                140921009        ; serial number
+                140921009        ; serial
                 600              ; refresh = 10 minutes
                 300              ; update retry = 5 minutes
                 604800           ; expiry = 1 week

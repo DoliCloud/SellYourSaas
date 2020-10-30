@@ -334,7 +334,7 @@ if [[ "$dnsserver" == "1" ]]; then
 		#$ttl 1d
 		#$ORIGIN with.dolicloud.com.
 		#@               IN     SOA   ns1with.dolicloud.com. admin.dolicloud.com. (
-		#                2017051526       ; serial number
+		#                2017051526       ; serial
 		#                600              ; refresh = 10 minutes
 		#                300              ; update retry = 5 minutes
 		#                604800           ; expiry = 3 weeks + 12 hours
