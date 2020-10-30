@@ -2643,8 +2643,6 @@ database=databaseduservermaster
 # Set credential for the master and deployment database
 databaseuser=sellyoursaas
 databasepass=...
-# Set this to 1 if you use Mysql or MariaDB > 10.4 (for "SET PASSWORD" method)
-#dbforcesetpassword=0
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
 # Set directory where backup are stored
