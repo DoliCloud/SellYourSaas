@@ -30,10 +30,18 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export ZONES_PATH="/etc/bind/zones"
 export scriptdir=$(dirname $(realpath ${0}))
-export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
-export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
-export vhostfilesuspendmaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
 
+# possibility to change the directory of vhostfile templates
+templatesdir=`grep 'templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$templatesdir" != "x" ]]; then
+	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
+	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
+else
+	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+fi
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
@@ -139,6 +147,18 @@ export webSSLCertificateCRT=with.sellyoursaas.com.crt
 export webSSLCertificateKEY=with.sellyoursaas.com.key
 export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 
+# possibility to change the path of sellyoursass directory
+olddoldataroot=`grep 'olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+newdoldataroot=`grep 'newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
+	fileforconfig1=${fileforconfig1/$olddoldataroot/$newdoldataroot}
+	dirwithdumpfile=${dirwithdumpfile/$olddoldataroot/$newdoldataroot}
+	dirwithsources1=${dirwithsources1/$olddoldataroot/$newdoldataroot}
+	dirwithsources2=${dirwithsources2/$olddoldataroot/$newdoldataroot}
+	dirwithsources3=${dirwithsources3/$olddoldataroot/$newdoldataroot}
+	cronfile=${cronfile/$olddoldataroot/$newdoldataroot}
+	cliafter=${cliafter/$olddoldataroot/$newdoldataroot}
+fi
 
 # For debug
 echo `date +%Y%m%d%H%M%S`" input params for $0:"

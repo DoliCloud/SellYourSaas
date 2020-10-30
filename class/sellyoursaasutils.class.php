@@ -3213,7 +3213,9 @@ class SellYourSaasUtils
 
     				if (function_exists('ssh2_disconnect'))
     				{
-    				    //ssh2_disconnect($connection);     // Hang on some config
+    				    if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				        //ssh2_disconnect($connection);     // Hang on some config
+    				    }
     				    $connection = null;
     				    unset($connection);
     				}
@@ -3539,10 +3541,17 @@ class SellYourSaasUtils
 			    	{
 			    		dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
+			    		$serverdb = $serverdeployment;
+
+			    		// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+			    		if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+			    		    $serverdb = $generateddbhostname;
+			    		}
+
 			    		//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
 			    		//var_dump($serverdeployment);		// just ip of deployement server
 			    		//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-			    		$dbinstance = @getDoliDBInstance('mysqli', $serverdeployment, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+			    		$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 			    		if (! $dbinstance || ! $dbinstance->connected)
 			    		{
 			    			$error++;
@@ -3786,7 +3795,9 @@ class SellYourSaasUtils
 
     				            if (function_exists('ssh2_disconnect'))
     				            {
-    				                ssh2_disconnect($connection);     // Hang on some config
+    				                if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				                    ssh2_disconnect($connection);     // Hang on some config
+    				                }
     				                $connection = null;
     				                unset($connection);
     				            }
