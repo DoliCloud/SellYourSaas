@@ -3790,8 +3790,12 @@ If you use an external db server (same value of "databasehost" and "databaseport
 * SELLYOURSAAS_FORCE_DATABASE_HOST = ip or host name of your external mysql server
 * SELLYOURSAAS_FORCE_DATABASE_PORT = port of your external mysql server
 
-To check customer ip in register page when server is behind proxy
-* SELLYOURSAAS_SERVER_REMOTE_ADDR_VARNAME = HTTP_X_FORWARDED_FOR
+If you use an ssh port other than 22
+* SELLYOURSAAS_SSH_SERVER_PORT = port of your ssh server
+
+If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (same value of "newdoldataroot" in sellyoursaas.conf)
+* SELLYOURSAAS_FORCE_DOL_DATA_ROOT = /path/of/dolibarr/documents/in/deployment/server
+
 
 === TroubleShooting
 
