@@ -3786,9 +3786,9 @@ if ($mode == 'instances')
 						  // Instance status
 				          print '<span class="caption-helper floatright clearboth">';
 				          //print $langs->trans("Status").' : ';
-				          print '<!-- status = '.$statuslabel.' -->';
+				          print '<!-- status = '.dol_escape_htmltag($statuslabel).' -->';
 
-				          print '<span class="bold uppercase" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
+				          print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
 				          if ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
 				          elseif ($statuslabel == 'done') print $langs->trans("Alive");
 				          elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning();
@@ -4728,9 +4728,9 @@ if ($mode == 'mycustomerinstances')
 
 			// Instance status
 			print '<span class="caption-helper floatright clearboth">';
-			print '<!-- status = '.$statuslabel.' -->';
+			print '<!-- status = '.dol_escape_htmltag($statuslabel).' -->';
 
-			print '<span class="bold uppercase" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
+			print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
 			if ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
 			elseif ($statuslabel == 'done') print $langs->trans("Alive");
 			elseif ($statuslabel == 'suspended') print $langs->trans("Suspended");

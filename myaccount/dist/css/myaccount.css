@@ -310,9 +310,17 @@ div.tab-content {
 	.maxwidth125 { max-width: 125px; }
 	.maxwidth150 { max-width: 150px; }
 	.maxwidth200 { max-width: 200px; }
-	.maxwidth300 { max-width: 280px; }
-	.maxwidth400 { max-width: 280px; }
-	.maxwidth500 { max-width: 280px; }
+	.maxwidth300 { max-width: 260px; }
+	.maxwidth400 { max-width: 260px; }
+	.maxwidth500 { max-width: 260px; }
+	
+	.caption-helper {
+		font-size: 0.9rem;
+	}
+	
+	.badge-myaccount-status {
+		display: inline-block;
+	}
 }
 
 
@@ -1293,8 +1301,10 @@ font-weight: 400;}.portlet > .portlet-title > .caption > i {float:
 left;margin-top: 4px;display: inline-block;font-size: 13px;
 margin-right: 5px;color: #666;}.portlet > .portlet-title > .caption >
 i.glyphicon {margin-top: 2px;}.portlet > .portlet-title > .caption >
-.caption-helper {padding: 0;margin: 0;line-height: 13px;color: 
-#9eacb4;font-size: 13px;font-weight: 400;}.portlet > .portlet-title >
+
+.caption-helper {padding: 0;margin: 0;line-height: 13px;color:#9eacb4;font-size: 13px;font-weight: 400;}
+
+.portlet > .portlet-title >
 .actions {float: right;display: inline-block;padding: 6px 0;}.
 portlet > .portlet-title > .actions > .dropdown-menu i {color: 
 #555555;}.portlet > .portlet-title > .actions > .btn,.portlet > .
