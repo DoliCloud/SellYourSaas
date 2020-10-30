@@ -241,8 +241,11 @@ if [[ "x$dbadminuser" == "x" ]]; then
 fi 
 dbadminpass=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbadminpass" == "x" ]]; then
-	echo Failed to get password for mysql admin user 
-	exit 1
+	dbadminpass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	if [[ "x$dbadminpass" == "x" ]]; then
+		echo Failed to get password for mysql admin user 
+		exit 1
+	fi
 fi 
 dbforcesetpassword=`grep 'dbforcesetpassword=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbforcesetpassword" == "x" ]]; then
