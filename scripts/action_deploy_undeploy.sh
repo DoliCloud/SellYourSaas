@@ -34,10 +34,18 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
-export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
-export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
-export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
 
+# possibility to change the directory of vhostfile templates
+templatesdir=`grep 'templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$templatesdir" != "x" ]]; then
+	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
+	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
+else
+	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+fi
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
@@ -151,6 +159,18 @@ export webSSLCertificateCRT=with.sellyoursaas.com.crt
 export webSSLCertificateKEY=with.sellyoursaas.com.key
 export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 
+# possibility to change the path of sellyoursass directory
+olddoldataroot=`grep 'olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+newdoldataroot=`grep 'newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
+	fileforconfig1=${fileforconfig1/$olddoldataroot/$newdoldataroot}
+	dirwithdumpfile=${dirwithdumpfile/$olddoldataroot/$newdoldataroot}
+	dirwithsources1=${dirwithsources1/$olddoldataroot/$newdoldataroot}
+	dirwithsources2=${dirwithsources2/$olddoldataroot/$newdoldataroot}
+	dirwithsources3=${dirwithsources3/$olddoldataroot/$newdoldataroot}
+	cronfile=${cronfile/$olddoldataroot/$newdoldataroot}
+	cliafter=${cliafter/$olddoldataroot/$newdoldataroot}
+fi
 
 # For debug
 echo `date +%Y%m%d%H%M%S`" input params for $0:"
@@ -204,12 +224,38 @@ echo "CRONHEAD = $CRONHEAD"
 MYSQL=`which mysql`
 MYSQLDUMP=`which mysqldump`
 
-echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
-passsellyoursaas=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$passsellyoursaas" == "x" ]]; then
-	echo Failed to get password for mysql user sellyoursaas 
-	exit 1
+echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
+dbserverhost=`grep 'databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbserverhost" == "x" ]]; then
+	dbserverhost="localhost"
 fi 
+dbserverport=`grep 'databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbserverport" == "x" ]]; then
+	dbserverport="3306"
+fi
+
+echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
+dbadminuser=`grep 'databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbadminuser" == "x" ]]; then
+	dbadminuser="sellyoursaas"
+fi 
+dbadminpass=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbadminpass" == "x" ]]; then
+	dbadminpass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	if [[ "x$dbadminpass" == "x" ]]; then
+		echo Failed to get password for mysql admin user 
+		exit 1
+	fi
+fi 
+dbforcesetpassword=`grep 'dbforcesetpassword=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dbforcesetpassword" == "x" ]]; then
+	dbforcesetpassword="0"
+fi
+dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dnsserver" == "x" ]]; then
+	echo Failed to get dns server parameters 
+	exit 1
+fi
 
 if [[ ! -d $archivedir ]]; then
 	echo Failed to find archive directory $archivedir
@@ -256,6 +302,14 @@ if [[ "$mode" == "deployall" ]]; then
 		mkdir /home/jail/home/$osusername
 		chmod -R go-rwx /home/jail/home/$osusername
 	fi
+	
+	#if [[ -d /home/jail/home/$osusername/.ssh ]]
+	#then
+	#	echo "generate ssh key in /home/jail/home/$osusername/.ssh"
+	#	ssh-keygen -t rsa -f /home/jail/home/$osusername/.ssh/id_rsa -q -P ""
+	#	chown -R $osusername.$osusername /home/jail/home/$osusername/.ssh
+	#	cat /home/jail/home/$osusername/.ssh/id_rsa.pub >> /home/jail/home/$osusername/.ssh/authorized_keys
+	#fi
 fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
@@ -271,177 +325,180 @@ fi
 
 # Create/Remove DNS entry
 
-if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
+if [[ "$dnsserver" == "1" ]]; then
 
-	export ZONE="$domainname.hosts" 
+	if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
-	#$ttl 1d
-	#$ORIGIN with.dolicloud.com.
-	#@               IN     SOA   ns1with.dolicloud.com. admin.dolicloud.com. (
-	#                2017051526       ; serial number
-	#                600              ; refresh = 10 minutes
-	#                300              ; update retry = 5 minutes
-	#                604800           ; expiry = 3 weeks + 12 hours
-	#                660              ; negative ttl
-	#                )
-	#                NS              ns1with.dolicloud.com.
-	#                NS              ns2with.dolicloud.com.
-	#                IN      TXT     "v=spf1 mx ~all".
-	#
-	#@               IN      A       79.137.96.15
-	#
-	#
-	#$ORIGIN with.dolicloud.com.
-	#
-	#; other sub-domain records
-
-	echo `date +%Y%m%d%H%M%S`" ***** Add DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename ' 2>&1"
-
-	cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
-	notfound=$?
-	echo notfound=$notfound
-
-	if [[ $notfound == 0 ]]; then
-		echo "entry $instancename already found into host /etc/bind/${ZONE}"
-	else
-		echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
-		cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
-
-		echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
-		echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
-
-		# we're looking line containing this comment
-		export DATE=`date +%y%m%d%H`
-		export NEEDLE="serial"
-		curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
-		# replace if current date is shorter (possibly using different format)
-		echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
-		echo "Current bind counter during $mode is $curr"
-		if [ "x$curr" == "x" ]; then
-			echo Error when editing the DNS file during a deployment. Failed to find bind counter in file /tmp/${ZONE}.$PID. Sending email to $EMAILTO
-			echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. Failed to find bind counter in file /tmp/${ZONE}.$PID" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-			exit 1
-		fi
-		if [ ${#curr} -lt ${#DATE} ]; then
-		  serial="${DATE}00"
+		export ZONE="$domainname.hosts" 
+		
+		#$ttl 1d
+		#$ORIGIN with.dolicloud.com.
+		#@               IN     SOA   ns1with.dolicloud.com. admin.dolicloud.com. (
+		#                2017051526       ; serial number
+		#                600              ; refresh = 10 minutes
+		#                300              ; update retry = 5 minutes
+		#                604800           ; expiry = 3 weeks + 12 hours
+		#                660              ; negative ttl
+		#                )
+		#                NS              ns1with.dolicloud.com.
+		#                NS              ns2with.dolicloud.com.
+		#                IN      TXT     "v=spf1 mx ~all".
+		#
+		#@               IN      A       79.137.96.15
+		#
+		#
+		#$ORIGIN with.dolicloud.com.
+		#
+		#; other sub-domain records
+	
+		echo `date +%Y%m%d%H%M%S`" ***** Add DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename ' 2>&1"
+	
+		cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
+		notfound=$?
+		echo notfound=$notfound
+	
+		if [[ $notfound == 0 ]]; then
+			echo "entry $instancename already found into host /etc/bind/${ZONE}"
 		else
-		  prefix=${curr::-2}
-		  if [ "$DATE" -eq "$prefix" ]; then # same day
-		    num=${curr: -2} # last two digits from serial number
-		    num=$((10#$num + 1)) # force decimal representation, increment
-		    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
-		  else
-		    serial="${DATE}00" # just update date
-		  fi
-		fi
-		echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
-		/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
-		
-		echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
-		
-		named-checkzone $domainname /tmp/${ZONE}.$PID
-		if [[ "$?x" != "0x" ]]; then
-			echo Error when editing the DNS file during a deployment. File /tmp/${ZONE}.$PID is not valid. Sending email to $EMAILFROM
-			echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
-			exit 1
-		fi
-		
-		echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-		cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
-		
-		echo `date +%Y%m%d%H%M%S`" **** Move new host file"
-		mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-		
-		echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
-		rndc reload $domainname
-		#/etc/init.d/bind9 reload
-		
-		echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
-		nslookup $fqn 127.0.0.1
-		if [[ "$?x" != "0x" ]]; then
-			echo Error after reloading DNS. nslookup of $fqn fails on first try. We wait a little bit to make another try.
-			sleep 3
-			nslookup $fqn 127.0.0.1
-			if [[ "$?x" != "0x" ]]; then
-				echo Error after reloading DNS. nslookup of $fqn fails on second try too.
-				echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails of 2 tries." | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
+			echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
+			cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
+	
+			echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
+			echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
+	
+			# we're looking line containing this comment
+			export DATE=`date +%y%m%d%H`
+			export NEEDLE="serial"
+			curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
+			# replace if current date is shorter (possibly using different format)
+			echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
+			echo "Current bind counter during $mode is $curr"
+			if [ "x$curr" == "x" ]; then
+				echo Error when editing the DNS file during a deployment. Failed to find bind counter in file /tmp/${ZONE}.$PID. Sending email to $EMAILTO
+				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. Failed to find bind counter in file /tmp/${ZONE}.$PID" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 				exit 1
 			fi
-		fi 
+			if [ ${#curr} -lt ${#DATE} ]; then
+			  serial="${DATE}00"
+			else
+			  prefix=${curr::-2}
+			  if [ "$DATE" -eq "$prefix" ]; then # same day
+			    num=${curr: -2} # last two digits from serial number
+			    num=$((10#$num + 1)) # force decimal representation, increment
+			    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
+			  else
+			    serial="${DATE}00" # just update date
+			  fi
+			fi
+			echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
+			/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
+			
+			echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
+			
+			named-checkzone $domainname /tmp/${ZONE}.$PID
+			if [[ "$?x" != "0x" ]]; then
+				echo Error when editing the DNS file during a deployment. File /tmp/${ZONE}.$PID is not valid. Sending email to $EMAILFROM
+				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
+				exit 1
+			fi
+			
+			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+			
+			echo `date +%Y%m%d%H%M%S`" **** Move new host file"
+			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+			
+			echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
+			rndc reload $domainname
+			#/etc/init.d/bind9 reload
+			
+			echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
+			nslookup $fqn 127.0.0.1
+			if [[ "$?x" != "0x" ]]; then
+				echo Error after reloading DNS. nslookup of $fqn fails on first try. We wait a little bit to make another try.
+				sleep 3
+				nslookup $fqn 127.0.0.1
+				if [[ "$?x" != "0x" ]]; then
+					echo Error after reloading DNS. nslookup of $fqn fails on second try too.
+					echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails of 2 tries." | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
+					exit 1
+				fi
+			fi 
+		fi
 	fi
-fi
-
-if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
-
-	export ZONE="$domainname.hosts" 
-
-	echo `date +%Y%m%d%H%M%S`" ***** Remove DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename '"
-
-	cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
-	notfound=$?
-	echo notfound=$notfound
-
-	if [[ $notfound == 1 ]]; then
-		echo `date +%Y%m%d%H%M%S`" entry $instancename already not found into host /etc/bind/${ZONE}"
-	else
-		echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
-		cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
-
-		#echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
-		#echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
-
-		# we're looking line containing this comment
-		export DATE=`date +%y%m%d%H`
-		export NEEDLE="serial"
-		curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
-		# replace if current date is shorter (possibly using different format)
-		echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
-		echo "Current bind counter during $mode is $curr"
-		if [ ${#curr} -lt ${#DATE} ]; then
-		  serial="${DATE}00"
+	
+	if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
+	
+		export ZONE="$domainname.hosts" 
+	
+		echo `date +%Y%m%d%H%M%S`" ***** Remove DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename '"
+	
+		cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
+		notfound=$?
+		echo notfound=$notfound
+	
+		if [[ $notfound == 1 ]]; then
+			echo `date +%Y%m%d%H%M%S`" entry $instancename already not found into host /etc/bind/${ZONE}"
 		else
-		  prefix=${curr::-2}
-		  if [ "$DATE" -eq "$prefix" ]; then # same day
-		    num=${curr: -2} # last two digits from serial number
-		    num=$((10#$num + 1)) # force decimal representation, increment
-		    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
-		  else
-		    serial="${DATE}00" # just update date
-		  fi
+			echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
+			cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
+	
+			#echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
+			#echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
+	
+			# we're looking line containing this comment
+			export DATE=`date +%y%m%d%H`
+			export NEEDLE="serial"
+			curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
+			# replace if current date is shorter (possibly using different format)
+			echo "/bin/grep -e \"${NEEDLE}$\" /tmp/${ZONE}.$PID | /bin/sed -n \"s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p\""
+			echo "Current bind counter during $mode is $curr"
+			if [ ${#curr} -lt ${#DATE} ]; then
+			  serial="${DATE}00"
+			else
+			  prefix=${curr::-2}
+			  if [ "$DATE" -eq "$prefix" ]; then # same day
+			    num=${curr: -2} # last two digits from serial number
+			    num=$((10#$num + 1)) # force decimal representation, increment
+			    serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
+			  else
+			    serial="${DATE}00" # just update date
+			  fi
+			fi
+			echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
+			/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
+			
+			echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
+			
+			named-checkzone $domainname /tmp/${ZONE}.$PID
+			if [[ "$?x" != "0x" ]]; then
+				echo Error when editing the DNS file un undeployment. File /tmp/${ZONE}.$PID is not valid 
+				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+				exit 1
+			fi
+			
+			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+			
+			echo `date +%Y%m%d%H%M%S`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
+			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+			
+			echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
+			rndc reload $domainname
+			#/etc/init.d/bind9 reload
+			
+			#echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
+			#nslookup $fqn 127.0.0.1
+			#if [[ "$?x" != "0x" ]]; then
+			#	echo Error after reloading DNS. nslookup of $fqn fails. 
+			#	echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails. " | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+			#	exit 1
+			#fi 
 		fi
-		echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
-		/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
-		
-		echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
-		
-		named-checkzone $domainname /tmp/${ZONE}.$PID
-		if [[ "$?x" != "0x" ]]; then
-			echo Error when editing the DNS file un undeployment. File /tmp/${ZONE}.$PID is not valid 
-			echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-			exit 1
-		fi
-		
-		echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-		cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
-		
-		echo `date +%Y%m%d%H%M%S`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
-		mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-		
-		echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
-		rndc reload $domainname
-		#/etc/init.d/bind9 reload
-		
-		#echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
-		#nslookup $fqn 127.0.0.1
-		#if [[ "$?x" != "0x" ]]; then
-		#	echo Error after reloading DNS. nslookup of $fqn fails. 
-		#	echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails. " | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-		#	exit 1
-		#fi 
+	
 	fi
 
 fi
-
 
 
 # Deploy files
@@ -895,38 +952,44 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	#Q2="CREATE USER IF NOT EXISTS '$dbusername'@'localhost' IDENTIFIED BY '$dbpassword'; "
 	Q2="CREATE USER '$dbusername'@'localhost' IDENTIFIED BY '$dbpassword'; "
 	SQL="${Q1}${Q2}"
-	echo "$MYSQL -A -usellyoursaas -pXXXXXX -e \"$SQL\""
-	$MYSQL -A -usellyoursaas -p$passsellyoursaas -e "$SQL"
+	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
+	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 	
 	Q1="CREATE DATABASE IF NOT EXISTS $dbname; "
 	#Q2="CREATE USER IF NOT EXISTS '$dbusername'@'%' IDENTIFIED BY '$dbpassword'; "
 	Q2="CREATE USER '$dbusername'@'%' IDENTIFIED BY '$dbpassword'; "
 	SQL="${Q1}${Q2}"
-	echo "$MYSQL -A -usellyoursaas -pXXXXXX -e \"$SQL\""
-	$MYSQL -A -usellyoursaas -p$passsellyoursaas -e "$SQL"
+	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
+	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 	
 	Q1="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'localhost'; "
 	Q2="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'%'; "
-	Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
-	# If we use mysql and not mariadb, we set password differently
-	dpkg -l | grep mariadb > /dev/null
-	if [ $? == "1" ]; then
-		# For mysql
+	
+	if [ $dbforcesetpassword == "1" ]; then
 		Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+	else
+		Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
+		# If we use mysql and not mariadb, we set password differently
+		dpkg -l | grep mariadb > /dev/null
+		if [ $? == "1" ]; then
+			# For mysql
+			Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+		fi
 	fi
+	
 	Q4="FLUSH PRIVILEGES; "
 	SQL="${Q1}${Q2}${Q3}${Q4}"
-	echo "$MYSQL -A -usellyoursaas -e \"$SQL\""
-	$MYSQL -A -usellyoursaas -p$passsellyoursaas -e "$SQL"
+	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
+	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
-	echo "You can test with mysql $dbname -h $REMOTEIP -u $dbusername -p$dbpassword"
+	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -p$dbpassword"
 
 	# Load dump file
 	echo Search dumpfile into $dirwithdumpfile
 	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
 	do
-		echo "$MYSQL -A -usellyoursaas -p$passsellyoursaas -D $dbname < $dumpfile"
-		$MYSQL -A -usellyoursaas -p$passsellyoursaas -D $dbname < $dumpfile
+		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
+		$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile
 		result=$?
 		if [[ "x$result" != "x0" ]]; then
 			echo Failed to load dump file $dumpfile
@@ -946,14 +1009,14 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
-	echo "$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
-	$MYSQLDUMP -usellyoursaas -p$passsellyoursaas $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
+	echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
+	$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
 
 	if [[ "x$?" == "x0" ]]; then
 		echo "Now drop the database"
-		echo "echo 'DROP DATABASE $dbname;' | $MYSQL -usellyoursaas -p$passsellyoursaas $dbname"
+		echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname"
 		if [[ $testorconfirm == "confirm" ]]; then
-			echo "DROP DATABASE $dbname;" | $MYSQL -usellyoursaas -p$passsellyoursaas $dbname
+			echo "DROP DATABASE $dbname;" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname
 		fi
 	else
 		echo "ERROR in dumping database, so we don't try to drop it"	

@@ -121,6 +121,10 @@ if (empty($reshook))
 	    $tmpcontract->fetch($idtoclose);
 
 	    $server = $tmpcontract->ref_customer;
+	    $hostname_db = $tmpcontract->hostname_db;
+	    if (empty($hostname_db)) $hostname_db = $tmpcontract->array_options['options_hostname_db'];
+	    $port_db = $tmpcontract->port_db;
+	    if (empty($port_db)) $port_db = (! empty($tmpcontract->array_options['options_port_db']) ? $tmpcontract->array_options['options_port_db'] : 3306);
 	    $username_db = $tmpcontract->username_db;
 	    if (empty($username_db)) $username_db = $tmpcontract->array_options['options_username_db'];
 	    $password_db = $object->password_db;
@@ -128,7 +132,9 @@ if (empty($reshook))
 	    $database_db = $object->database_db;
 	    if (empty($database_db)) $database_db = $tmpcontract->array_options['options_database_db'];
 
-	    $newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, 3306);
+	    $server = (! empty($hostname_db) ? $hostname_db : $server);
+
+	    $newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
 	    if ($newdb)
 	    {
@@ -242,7 +248,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	$object->password_web = $password_web;
 	$object->hostname_web = $hostname_os;
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db?$port_db:3306);
+	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, ($port_db?$port_db:3306));
 
 	$stringofversion = '';
 	$stringoflistofmodules = '';
