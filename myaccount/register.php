@@ -553,9 +553,11 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	}
 
 	                	// Defined a preselected domain
-	                	$randomselect = '';
-	                	if (empty($tldid) && ! GETPOSTISSET('forcesubdomain') && ! GETPOSTISSET('tldid')) {
-	                		$randomselect = $domainstosuggest[rand(0, 2)];
+	                	$randomselect = ''; $randomindex = 0;
+	                	if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
+	                		$maxforrandom = (count($domainstosuggest) - 1);
+	                		$randomindex = mt_rand(0, $maxforrandom);
+	                		$randomselect = $domainstosuggest[$randomindex];
 	                	}
 	                	foreach($domainstosuggest as $val) {
 	                		print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
