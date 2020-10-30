@@ -3391,7 +3391,7 @@ class SellYourSaasUtils
     			$substitarray=array(
         			'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,
         			'__INSTANCEDBPREFIX__'=>$generateddbprefix,
-    			    '__DOL_DATA_ROOT__'=>(! empty($conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT)?$conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT:DOL_DATA_ROOT),
+    				'__DOL_DATA_ROOT__'=>(empty($conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT) ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT),
         			'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
         			'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
         			'__OSHOSTNAME__'=>$generatedunixhostname,
