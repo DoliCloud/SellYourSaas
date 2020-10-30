@@ -16,8 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * or see http://www.gnu.org/
  *
- * Update an instance on stratus5 server with new ref version.
+ * Migrate an old instance on a new server. Script must be ran with admin.
  */
+
+if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -409,7 +411,8 @@ if ($mode == 'confirmunlock')
 	if (! function_exists("ssh2_connect")) { dol_print_error('','ssh2_connect function does not exists'); exit(1); }
 
 	$newserver=$newobject->instance.'.with.dolicloud.com';
-	$connection = ssh2_connect($newserver, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($newserver, $server_port);
 	if ($connection)
 	{
 		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";

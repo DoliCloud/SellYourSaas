@@ -30,6 +30,7 @@
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -733,7 +734,7 @@ else
 			$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 			if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
 			$url = 'http://check.getipintel.net/check.php?ip='.$remoteip.'&contact='.urlencode($emailforvpncheck).'&flag=f';
-			$result = getURLContent($url);
+			$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
 			/* The proxy check system will return negative values on error. For standard format (non-json), an additional HTTP 400 status code is returned
 				-1 Invalid no input
 				-2 Invalid IP address

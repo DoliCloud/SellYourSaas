@@ -507,7 +507,7 @@ while ($i < min($num, $limit))
 	// Link
 	print '<td class="nowrap">';
 	$helponurl=$langs->trans('ShowMoreParametersForRegisterUrls');
-	print '<a class="classfortooltip" href="'.getRootUrlForAccount($object).'/register.php?origin=backofficelink&plan='.$obj->ref.'&partner=&partnerkey=md5aliaspartner" target="_register" title="'.dol_escape_htmltag($helponurl).'">';
+	print '<a class="classfortooltip" href="'.getRootUrlForAccount($object).'/register.php?origin=backofficelink&plan='.$obj->ref.(empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM) ? '' : '&partner=&partnerkey=md5aliaspartner').'" target="_register" title="'.dol_escape_htmltag($helponurl).'">';
 	print img_picto('', 'object_globe');
 	print ' URL';
 	print '</a>';

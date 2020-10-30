@@ -57,6 +57,24 @@ $langs->loadLangs(array("admin", "errors", "install", "sellyoursaas@sellyoursaas
 
 //exit;
 
+$tmpservices=array();
+$tmpservicessub = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+foreach($tmpservicessub as $key => $tmpservicesub)
+{
+    $tmpservicesub = preg_replace('/:.*$/', '', $tmpservicesub);
+    if ($key > 0) $tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
+    else $tmpservices['0']=getDomainFromURL($tmpservicesub, 1);
+}
+$arrayofsuffixfound = array();
+foreach($tmpservices as $key => $tmpservice)
+{
+    $suffix = '';
+    if ($key != '0') $suffix='_'.strtoupper(str_replace('.', '_', $tmpservice));
+
+    if (in_array($suffix, $arrayofsuffixfound)) continue;
+    $arrayofsuffixfound[$tmpservice] = $suffix;
+}
+
 
 /*
  * Actions
@@ -87,7 +105,9 @@ if ($action == 'set')
 		if (! dol_is_dir($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
 		dolibarr_set_const($db,"DOLICLOUD_SCRIPTS_PATH",GETPOST("DOLICLOUD_SCRIPTS_PATH"),'chaine',0,'',$conf->entity);
 
-		dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_PRODUCT",GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT"),'chaine',0,'',$conf->entity);
+		foreach($arrayofsuffixfound as $suffix) {
+		    dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_PRODUCT".$suffix,GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT".$suffix),'chaine',0,'',$conf->entity);
+		}
 		//dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_PRODUCT_FOR_USERS",GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT_FOR_USERS"),'chaine',0,'',$conf->entity);
 
 		dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_PRODUCT_CATEG",GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT_CATEG"),'chaine',0,'',$conf->entity);
@@ -301,7 +321,6 @@ print "<br>\n";
 
 $error=0;
 
-
 print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP_SELF"].'" name="form_index">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
@@ -391,13 +410,20 @@ print '</td>';
 print '<td class="opacitymedium">'.dol_buildpath('sellyoursaas/scripts').'</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("DefaultProductForInstances").'</td>';
-print '<td>';
-$defaultproductid=$conf->global->SELLYOURSAAS_DEFAULT_PRODUCT;
-print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
-print '</td>';
-print '<td class="opacitymedium">My SaaS service for instance</td>';
-print '</tr>';
+foreach($arrayofsuffixfound as $service => $suffix)
+{
+    print '<!-- suffix = '.$suffix.' -->'."\n";
+
+    print '<tr class="oddeven"><td>'.$service.' - '.$langs->trans("DefaultProductForInstances").'</td>';
+    print '<td>';
+    $constname = 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix;
+    print '<!-- constname = '.$constname.' -->';
+    $defaultproductid=$conf->global->$constname;
+    print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix, '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
+    print '</td>';
+    print '<td class="opacitymedium">My SaaS service for instance</td>';
+    print '</tr>';
+}
 
 /*print '<tr class="oddeven"><td>'.$langs->trans("DefaultProductForUsers").'</td>';
 print '<td>';
@@ -620,27 +646,12 @@ print '</td>';
 print '<td class="opacitymedium">35</td>';
 print '</tr>';
 
-$tmpservices=array();
-$tmpservicessub = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-foreach($tmpservicessub as $key => $tmpservicesub)
+foreach($arrayofsuffixfound as $service => $suffix)
 {
-    $tmpservicesub = preg_replace('/:.*$/', '', $tmpservicesub);
-    if ($key > 0) $tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
-    else $tmpservices['0']=getDomainFromURL($tmpservicesub, 1);
-}
-$arrayofsuffixfound = array();
-foreach($tmpservices as $key => $tmpservice)
-{
-    $suffix = '';
-    if ($key != '0') $suffix='_'.strtoupper(str_replace('.', '_', $tmpservice));
-
-    if (in_array($suffix, $arrayofsuffixfound)) continue;
-    $arrayofsuffixfound[$suffix] = $suffix;
-
     print '<!-- suffix = '.$suffix.' -->'."\n";
 
     // Logo
-    print '<tr class="oddeven"><td><label for="logo">'.$tmpservice.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';
+    print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';
     print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
     print '<input type="file" class="flat class=minwidth200" name="logo'.$suffix.'" id="logo'.$suffix.'">';
     print '</td><td class="nocellnopadd" valign="middle">';
@@ -660,7 +671,7 @@ foreach($tmpservices as $key => $tmpservice)
     print '</td></tr>';
 
     // Logo font black
-    print '<tr class="oddeven"><td><label for="logo">'.$tmpservice.' - '.$langs->trans("LogoBlackBackground").' (png,jpg)</label></td><td>';
+    print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoBlackBackground").' (png,jpg)</label></td><td>';
     print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
     print '<input type="file" class="flat class=minwidth200" name="logoblack'.$suffix.'" id="logoblack'.$suffix.'">';
     print '</td><td class="nocellnopadd" valign="middle">';

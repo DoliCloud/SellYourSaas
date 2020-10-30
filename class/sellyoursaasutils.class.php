@@ -3038,7 +3038,8 @@ class SellYourSaasUtils
     		    $server=$object->array_options['options_hostname_os'];
     		    dol_syslog("Try to ssh2_connect to ".$server);
 
-    		    $connection = @ssh2_connect($server, 22);
+    		    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    		    $connection = @ssh2_connect($server, $server_port);
     			if ($connection)
     			{
     				//print ">>".$object->array_options['options_username_os']." - ".$object->array_options['options_password_os']."<br>\n";exit;
@@ -3126,6 +3127,8 @@ class SellYourSaasUtils
     								fwrite($stream,$publickeystodeploy);
 
     								fclose($stream);
+    								// File authorized_keys must have rw------- permissions
+                                    ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys', 0600);
     								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys');
     							}
     						}
@@ -3391,7 +3394,7 @@ class SellYourSaasUtils
     			$substitarray=array(
         			'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,
         			'__INSTANCEDBPREFIX__'=>$generateddbprefix,
-        			'__DOL_DATA_ROOT__'=>DOL_DATA_ROOT,
+    				'__DOL_DATA_ROOT__'=>(empty($conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT) ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT),
         			'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
         			'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
         			'__OSHOSTNAME__'=>$generatedunixhostname,
@@ -3519,7 +3522,7 @@ class SellYourSaasUtils
     			{
     			    $urltoget='http://'.$serverdeployment.':8080/'.$remoteaction.'?'.urlencode($commandurl);
 	    			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-	    			$retarray = getURLContent($urltoget);   // Timeout is defined before
+	    			$retarray = getURLContent($urltoget, 'GET', '', 0, array(), array('http', 'https'), 2);   // Timeout is defined before
 
 	    			if ($retarray['curl_error_no'] != '' || $retarray['http_code'] != 200)
 	    			{
@@ -3749,7 +3752,8 @@ class SellYourSaasUtils
     				    {
     				        $server=$object->array_options['options_hostname_os'];
 
-    				        $connection = @ssh2_connect($server, 22);
+    				        $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    				        $connection = @ssh2_connect($server, $server_port);
     				        if ($connection)
     				        {
     				            dol_syslog("Get resource BASH ".$bashformula);

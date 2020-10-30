@@ -25,7 +25,8 @@
  *      \brief      Script to upgrade an instant
  */
 
-if (! defined('NOREQUIREDB'))              define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -240,7 +241,8 @@ if ($mode == 'confirmunlock')
 	// SFTP connect
 	if (! function_exists("ssh2_connect")) { dol_print_error('','ssh2_connect function does not exists'); exit(1); }
 
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";

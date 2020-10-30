@@ -28,6 +28,7 @@
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 // Add specific definition to allow a dedicated session management
 include ('./mainmyaccount.inc.php');
@@ -91,6 +92,10 @@ if (empty($productid) && empty($productref))
 	    // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 	    $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
+	    $suffix='_'.strtoupper(str_replace('.', '_', $domainname));
+	    $constname="SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
+	    $defaultproduct=(! empty($conf->global->$constname) ? $conf->global->$constname : $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT);
+
 		// Take first plan found
 		$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pa.restrict_domains';
 		$sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
@@ -100,6 +105,7 @@ if (empty($productid) && empty($productref))
 		$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
 		// restict_domains can be empty (it's ok), can be mydomain.com or can be with.mydomain.com
 		$sqlproducts.= " AND (pa.restrict_domains IS NULL OR pa.restrict_domains = '".$db->escape($domainname)."' OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."')";
+		if (! empty($defaultproduct)) $sqlproducts.= " AND p.rowid = ".((int) $defaultproduct);
 		$sqlproducts.= " ORDER BY p.datec";
 		//print $_SERVER["SERVER_NAME"].' - '.$sqlproducts;
 		$resqlproducts = $db->query($sqlproducts);
@@ -185,6 +191,8 @@ if ($socid > 0)
 	$mythirdparty->fetch($socid);
 }
 
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks(array('sellyoursaas-register'));
 
 
 /*
@@ -477,8 +485,8 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 				<label class="control-label" for="address_country"><?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 			<?php
-			$countryselected=strtoupper(dolGetCountryCodeFromIp($_SERVER["REMOTE_ADDR"]));
-			print '<!-- Autodetected IP/Country: '.$_SERVER["REMOTE_ADDR"].'/'.$countryselected.' -->'."\n";
+			$countryselected=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
+			print '<!-- Autodetected IP/Country: '.dol_escape_htmltag(getUserRemoteIP()).'/'.$countryselected.' -->'."\n";
 			if (empty($countryselected)) $countryselected='US';
 			if (GETPOST('address_country','alpha')) $countryselected=GETPOST('address_country','alpha');
 			print $form->select_country($countryselected, 'address_country', 'optionsValue="name"'.$disabled, 0, 'minwidth300', 'code2', 1, 1);
@@ -552,9 +560,11 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	}
 
 	                	// Defined a preselected domain
-	                	$randomselect = '';
-	                	if (empty($tldid) && ! GETPOSTISSET('forcesubdomain') && ! GETPOSTISSET('tldid')) {
-	                		$randomselect = $domainstosuggest[rand(0, 2)];
+	                	$randomselect = ''; $randomindex = 0;
+	                	if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
+	                		$maxforrandom = (count($domainstosuggest) - 1);
+	                		$randomindex = mt_rand(0, $maxforrandom);
+	                		$randomselect = $domainstosuggest[$randomindex];
 	                	}
 	                	foreach($domainstosuggest as $val) {
 	                		print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
@@ -639,6 +649,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 
 
      </form> <!-- end form-content -->
+
+	<?php
+	// Execute hook getRegisterPageFooter
+    $parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct);
+    $reshook = $hookmanager->executeHooks('getRegisterPageFooter', $parameters); // Note that $action and $object may have been modified by some hooks.
+    print $hookmanager->resPrint;
+    ?>
 
 	</div>
 

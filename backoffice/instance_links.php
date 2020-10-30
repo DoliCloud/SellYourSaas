@@ -330,7 +330,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	if (is_object($object->db2))
 	{
 		$savdb=$object->db;
-		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = stratus5 database
+		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
 	}
 
 
@@ -623,7 +623,7 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
     $arraylistofinstances = getListOfInstancesInChain($object);
 
     print '<br>';
-    print_barre_liste($langs->trans("ChainOfRegistrations"));
+    print_barre_liste($langs->trans("ChainOfRegistrations"),'','');
 
     print '<div class="div-table-responsive-no-min">';
     print '<table class="noborder" width="100%">';

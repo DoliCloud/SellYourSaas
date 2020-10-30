@@ -24,17 +24,18 @@
 //if (! defined('NOREQUIREDB'))    define('NOREQUIREDB','1');
 //if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC','1');
 //if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
-//if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			    // Do not check anti CSRF attack test (we can go on this page after a stripe payment recording)
-if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+//if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test (we can go on this page after a stripe payment recording)
+if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
 //if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
 //if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
-if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
+if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');			// If there is no need to load and show top and left menu
 //if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 //if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    	// If this page is public (can be called outside logged session)
-if (! defined("MAIN_LANG_DEFAULT")) define('MAIN_LANG_DEFAULT','auto');
-if (! defined("MAIN_AUTHENTICATION_MODE")) define('MAIN_AUTHENTICATION_MODE','sellyoursaas');
-if (! defined("MAIN_AUTHENTICATION_POST_METHOD")) define('MAIN_AUTHENTICATION_POST_METHOD','0');
+if (! defined("MAIN_LANG_DEFAULT")) define('MAIN_LANG_DEFAULT', 'auto');
+if (! defined("MAIN_AUTHENTICATION_MODE")) define('MAIN_AUTHENTICATION_MODE', 'sellyoursaas');
+if (! defined("MAIN_AUTHENTICATION_POST_METHOD")) define('MAIN_AUTHENTICATION_POST_METHOD', '0');
+if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 // Load Dolibarr environment
 include ('./mainmyaccount.inc.php');
@@ -3633,11 +3634,25 @@ if ($mode == 'instances')
 				if (empty($pricetoshow)) $pricetoshow = 0;
 				$arrayofplans[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 
-				if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
+				$tmpduration = '';
+				if ($tmpprod->duration) {
+				    if ($tmpprod->duration == '1m') {
+				        $tmpduration.=' / '.$langs->trans("Month");
+				    } else if ($tmpprod->duration == '1y') {
+				        $tmpduration.=' / '.$langs->trans("DurationYear");
+				    } else {
+				        preg_match('/^([0-9]+)([a-z]{1})$/', $tmpprod->duration, $regs);
+				        if (! empty($regs[1]) && ! empty($regs[2])) {
+				            $tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
+				        }
+				    }
+				}
+
+				if ($tmpprod->duration) $arrayofplans[$obj->rowid].=$tmpduration;
 				if ($priceinstance['user'])
 				{
 					$arrayofplans[$obj->rowid].=' + '.price(price2num($priceinstance['user'],'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
-					if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
+					if ($tmpprod->duration) $arrayofplans[$obj->rowid].=$tmpduration;
 				}
 				$arrayofplans[$obj->rowid].=')';
 			}
@@ -3957,6 +3972,20 @@ if ($mode == 'instances')
 										print '<span class="font-green-sharp counternumber">'.$line->qty.'</span>';
 										print '<br>';
 
+										$tmpduration = '';
+										if ($tmpproduct->duration) {
+										    if ($tmpproduct->duration == '1m') {
+										        $tmpduration.=' / '.$langs->trans("Month");
+										    } else if ($tmpproduct->duration == '1y') {
+										        $tmpduration.=' / '.$langs->trans("DurationYear");
+										    } else {
+										        preg_match('/^([0-9]+)([a-z]{1})$/', $tmpproduct->duration, $regs);
+										        if (! empty($regs[1]) && ! empty($regs[2])) {
+										            $tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
+										        }
+										    }
+										}
+
 										if ($line->price_ht)
 										{
 											print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
@@ -3964,15 +3993,28 @@ if ($mode == 'instances')
 											if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
 											elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
 											// TODO
-											print ' / '.$langs->trans("Month");
+											print $tmpduration;
 											print '</span>';
 										}
 										else
 										{
-											print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
-											// TODO
-											print ' / '.$langs->trans("Month");
-											print '</span>';
+										    if (empty($conf->global->SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL))
+										    {
+										        print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+										        // TODO
+										        print $tmpduration;
+										        print '</span>';
+										    }
+										    else
+										    {
+										        // TODO
+										        if (! empty($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL))
+										        {
+										            print '<span class="opacitymedium small">';
+										            print $langs->trans($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL);
+										            print '</span>';
+										        }
+										    }
 										}
 				                  	}
 				                  	else	// If there is no product, this is a free product
@@ -4213,6 +4255,7 @@ if ($mode == 'instances')
                                 ';
 
 								if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
+								    $ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
     								print '
     				                <form class="form-horizontal" role="form">
                                     <input type="hidden" name="token" value="'.newToken().'">
@@ -4225,7 +4268,7 @@ if ($mode == 'instances')
     				                    </div>
     				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
     				                    <div class="col-md-3">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:22).'">
+    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
@@ -5040,6 +5083,7 @@ if ($mode == 'mycustomerinstances')
 				              </div>';
 
 			// SSH
+			$ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
 			print '
 
 				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
@@ -5056,7 +5100,7 @@ if ($mode == 'mycustomerinstances')
 				                    </div>
 				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
 				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:22).'">
+				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
 				                    </div>
 				                  </div>
 				                  <div class="form-group col-md-12 row">
@@ -5260,6 +5304,9 @@ if ($mode == 'mycustomerinstances')
 
 if ($mode == 'billing')
 {
+    // Instantiate hooks of myaccount only if not already define
+    $hookmanager->initHooks(array('sellyoursaas-myaccountbilling'));
+
 	print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
@@ -5360,9 +5407,18 @@ if ($mode == 'billing')
 
 					              <div class="col-md-6">
 									';
-									$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-									print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.' '.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').'</a>
-					              </div>
+
+                                    // Execute hook getLastMainDocLink
+            						$parameters=array('invoice' => $invoice, 'contract' => $contract);
+            						$reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
+            						if ($reshook > 0) {
+            						    print $hookmanager->resPrint;
+            						} else {
+            						    $url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
+            						    print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.' '.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').'</a>';
+            						}
+
+					              print '</div>
 					              <div class="col-md-2">
 									'.dol_print_date($invoice->date, 'day').'
 					              </div>
