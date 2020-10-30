@@ -241,7 +241,8 @@ if ($mode == 'confirmunlock')
 	// SFTP connect
 	if (! function_exists("ssh2_connect")) { dol_print_error('','ssh2_connect function does not exists'); exit(1); }
 
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";
