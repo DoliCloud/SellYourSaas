@@ -37,9 +37,11 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 	// SFTP refresh
 	if (function_exists("ssh2_connect"))
 	{
-		if ($printoutput) print "ssh2_connect ".$server." ".$username_web." ".$password_web."\n";
+	    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 
-		$connection = ssh2_connect($server, 22);
+	    if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_web." ".$password_web."\n";
+
+	    $connection = ssh2_connect($server, $server_port);
 		if ($connection)
 		{
 			if ($printoutput) print $instance." ".$username_web." ".$password_web."\n";

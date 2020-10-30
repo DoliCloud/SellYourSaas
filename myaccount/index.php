@@ -4255,6 +4255,7 @@ if ($mode == 'instances')
                                 ';
 
 								if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
+								    $ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
     								print '
     				                <form class="form-horizontal" role="form">
                                     <input type="hidden" name="token" value="'.newToken().'">
@@ -4267,7 +4268,7 @@ if ($mode == 'instances')
     				                    </div>
     				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
     				                    <div class="col-md-3">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:22).'">
+    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
@@ -5082,6 +5083,7 @@ if ($mode == 'mycustomerinstances')
 				              </div>';
 
 			// SSH
+			$ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
 			print '
 
 				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
@@ -5098,7 +5100,7 @@ if ($mode == 'mycustomerinstances')
 				                    </div>
 				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
 				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:22).'">
+				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
 				                    </div>
 				                  </div>
 				                  <div class="form-group col-md-12 row">
@@ -5302,6 +5304,9 @@ if ($mode == 'mycustomerinstances')
 
 if ($mode == 'billing')
 {
+    // Instantiate hooks of myaccount only if not already define
+    $hookmanager->initHooks(array('sellyoursaas-myaccountbilling'));
+
 	print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
@@ -5402,9 +5407,18 @@ if ($mode == 'billing')
 
 					              <div class="col-md-6">
 									';
-									$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-									print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.' '.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').'</a>
-					              </div>
+
+                                    // Execute hook getLastMainDocLink
+            						$parameters=array('invoice' => $invoice, 'contract' => $contract);
+            						$reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
+            						if ($reshook > 0) {
+            						    print $hookmanager->resPrint;
+            						} else {
+            						    $url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
+            						    print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.' '.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').'</a>';
+            						}
+
+					              print '</div>
 					              <div class="col-md-2">
 									'.dol_print_date($invoice->date, 'day').'
 					              </div>

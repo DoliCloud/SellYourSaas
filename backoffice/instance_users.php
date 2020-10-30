@@ -341,6 +341,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 		else
 		{
 			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(),'','warnings');
+			$error++;
 		}
 	}
 	//	else print 'Error, failed to connect';
@@ -443,7 +444,7 @@ $hostname_os = $object->array_options['options_hostname_os'];
 
 $dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
-if (is_object($dbcustomerinstance) && $dbcustomerinstance->connected)
+if (!$error && is_object($dbcustomerinstance) && $dbcustomerinstance->connected)
 {
 	// Get user/pass of last admin user
 	$sql="SELECT login, pass, pass_crypted FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
@@ -480,42 +481,48 @@ if ($action == 'resetpassword') {
 	print $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&remoteid=' . GETPOST('remoteid','int'), $langs->trans('ResetPassword'), $langs->trans('ConfirmResetPassword'), 'confirm_resetpassword', $formquestion, 0, 1);
 }
 
-print '<table class="border" width="100%">';
+if (!$error)
+{
+    print '<table class="border" width="100%">';
 
-print_user_table($dbcustomerinstance, $object);
+    print_user_table($dbcustomerinstance, $object);
 
-print "</table><br>";
+    print "</table><br>";
+}
 
 
 // Application instance url
-if (empty($lastpassadmin))
+if (!$error)
 {
-    if (! empty($object->array_options['options_deployment_init_adminpass']))
+    if (empty($lastpassadmin))
     {
-        $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
-        $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-        $links.='Link to application (initial install pass) : ';
+        if (! empty($object->array_options['options_deployment_init_adminpass']))
+        {
+            $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
+            $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+            $links.='Link to application (initial install pass) : ';
+        }
+        else
+        {
+            $url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
+            $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+            $links.='Link to application : ';
+        }
     }
     else
     {
-        $url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
+        $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
         $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-        $links.='Link to application : ';
+        $links.='Link to application (last logged admin) : ';
     }
-}
-else
-{
-    $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
-    $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-    $links.='Link to application (last logged admin) : ';
-}
-print $links.$link;
+    print $links.$link;
 
-print '<br>';
+    print '<br>';
+}
 
 
 // Barre d'actions
-if (! $user->societe_id)
+if (!$error && ! $user->societe_id)
 {
     print '<div class="tabsAction">';
 
