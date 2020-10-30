@@ -3213,7 +3213,9 @@ class SellYourSaasUtils
 
     				if (function_exists('ssh2_disconnect'))
     				{
-    				    //ssh2_disconnect($connection);     // Hang on some config
+    				    if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				        //ssh2_disconnect($connection);     // Hang on some config
+    				    }
     				    $connection = null;
     				    unset($connection);
     				}
@@ -3786,7 +3788,9 @@ class SellYourSaasUtils
 
     				            if (function_exists('ssh2_disconnect'))
     				            {
-    				                //ssh2_disconnect($connection);     // Hang on some config
+    				                if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				                    ssh2_disconnect($connection);     // Hang on some config
+    				                }
     				                $connection = null;
     				                unset($connection);
     				            }
