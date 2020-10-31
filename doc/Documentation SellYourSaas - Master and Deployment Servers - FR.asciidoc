@@ -2541,9 +2541,18 @@ cd / && run-parts --report /etc/cron.daily
 
 Sur tous les serveurs (Master et Déploiement):
 
-* Sous le compte *admin*, récupérer les sources de *Dolibarr* (v11 ou +) à placer dans */home/admin/wwwroot/dolibarr*
+* Sous le compte *admin*, récupérer les sources de *Dolibarr* (v13 ou +) à placer dans */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+---------------
 
 * Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*)
+Attention: Choisissez comme nom de répertoire document lors de l'assistant d'installation */home/admin/wwwroot/dolibarr_documents* plutôt que
+*/home/admin/wwwroot/dolibarr/documents*
+
 
 * Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
 
@@ -2560,6 +2569,12 @@ Sur tous les serveurs (Master et Déploiement):
 Sur tous les serveurs (Master et Déploiement):
 
 * Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+---------------
 
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
 
