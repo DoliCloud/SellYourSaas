@@ -99,7 +99,8 @@ echo "testorconfirm = $testorconfirm"
 export errstring=""
 
 echo `date +%Y%m%d%H%M%S`" Do rsync - first part..."
-export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*.log.old' --exclude '*log.*.gz' --exclude '*log.*.gz.old' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e 'ssh -p $SERVPORTDESTI' $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
+export RSYNC_RSH='ssh -p $SERVPORTDESTI'
+export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*.log.old' --exclude '*log.*.gz' --exclude '*log.*.gz.old' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
 echo "$command";
 
 $command 2>&1
@@ -121,7 +122,8 @@ if [ "x$ret1" == "x0" ]; then
 					fi
 				fi
 				
-		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e 'ssh -p $SERVPORTDESTI' $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
+				export RSYNC_RSH='ssh -p $SERVPORTDESTI'
+		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
 	        	echo "$command";
 	        	
 		        $command 2>&1
