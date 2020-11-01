@@ -49,9 +49,9 @@ export DIRDESTI2="$remotebackupdir/backup_"`hostname`;
 
 export EMAILFROM=support@$DOMAIN
 export EMAILTO=supervision@$DOMAIN
-#export OPTIONS="'-p $SERVPORTDESTI' -v -4 --stats -a --chmod=u=rwX --delete";
-#export OPTIONS="'-p $SERVPORTDESTI' -v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS="'-p $SERVPORTDESTI' -v -4 --stats -rlt --noatime --chmod=u=rwX --backup --suffix=.old";
+#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
+#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
+export OPTIONS="-v -4 --stats -rlt --noatime --chmod=u=rwX --backup --suffix=.old";
 
 if [ "x$USER" == "x" ]; then
 	export USER="admin"
@@ -99,7 +99,7 @@ echo "testorconfirm = $testorconfirm"
 export errstring=""
 
 echo `date +%Y%m%d%H%M%S`" Do rsync - first part..."
-export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*.log.old' --exclude '*log.*.gz' --exclude '*log.*.gz.old' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
+export command="rsync -x --delete --delete-excluded --exclude '*_log' --exclude '*.log' --exclude '*.log.old' --exclude '*log.*.gz' --exclude '*log.*.gz.old' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e 'ssh -p $SERVPORTDESTI' $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
 echo "$command";
 
 $command 2>&1
@@ -121,7 +121,7 @@ if [ "x$ret1" == "x0" ]; then
 					fi
 				fi
 				
-		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e ssh $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
+		        export command="rsync -x --exclude '*_log' --exclude '*.log' --exclude '*log.*.gz' --exclude '_sessions/*' --exclude '_log/*' --exclude '_tmp/*' -e 'ssh -p $SERVPORTDESTI' $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
 	        	echo "$command";
 	        	
 		        $command 2>&1
