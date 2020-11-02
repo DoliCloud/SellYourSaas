@@ -222,7 +222,11 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
-if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
+if ($favicon) {
+    $href = 'img/'.$favicon;
+    if (preg_match('/^http/i', $favicon)) $href = $favicon;
+    $head.='<link rel="icon" href="'.$href.'">'."\n";
+}
 $head.='<!-- Bootstrap core CSS -->
 <!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
 <link href="dist/css/bootstrap.css" rel="stylesheet">';
