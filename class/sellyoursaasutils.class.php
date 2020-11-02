@@ -1153,6 +1153,8 @@ class SellYourSaasUtils
 	    						{
     	    						dol_syslog("* Create charge on card ".$stripecard->id.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
+    	    						$ipaddress = getUserRemoteIP();
+
     	    						$charge = null;		// Force reset of $charge, so, if already set from a previous fetch, it will be empty even if there is an exception at next step
     	    						try {
     		    						$charge = \Stripe\Charge::create(array(
@@ -1160,7 +1162,7 @@ class SellYourSaasUtils
     			    						'currency' => $currency,
     			    						'capture'  => true,							// Charge immediatly
     			    						'description' => $description,
-    			    						'metadata' => array("FULLTAG" => $FULLTAG, 'Recipient' => $mysoc->name, 'dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>(empty($_SERVER['REMOTE_ADDR'])?'':$_SERVER['REMOTE_ADDR'])),
+    		    							'metadata' => array("FULLTAG" => $FULLTAG, 'Recipient' => $mysoc->name, 'dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>$ipaddress),
     		    							'customer' => $customer->id,
     		    							//'customer' => 'bidon_to_force_error',		// To use to force a stripe error
     			    						'source' => $stripecard,
@@ -1271,7 +1273,9 @@ class SellYourSaasUtils
 	    							$description='Stripe payment OK ('.$charge->id.') from doTakePaymentStripeForThirdparty: '.$FULLTAG;
 
 	    							$db=$this->db;
-	    							$ipaddress = (empty($_SERVER['REMOTE_ADDR'])?'':$_SERVER['REMOTE_ADDR']);
+
+	    							$ipaddress = getUserRemoteIP();
+
 	    							$TRANSACTIONID = $charge->id;
 	    							$currency=$conf->currency;
 	    							$paymentmethod='stripe';
@@ -3963,7 +3967,7 @@ class SellYourSaasUtils
     	        $tmpcontract->fetch($object->fk_contrat);
     	    }
 
-    	    $remoteip = getUserRemoteIP();
+    	    $ipaddress = getUserRemoteIP();
 
     	    // Create a new connection to record event in an other transaction
     	    global $dolibarr_main_db_type, $dolibarr_main_db_host, $dolibarr_main_db_user;
@@ -3982,7 +3986,7 @@ class SellYourSaasUtils
         	    $actioncomm = new ActionComm($independantdb);
         		$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
         		$actioncomm->code        = 'AC_'.strtoupper($remoteaction);
-        		$actioncomm->label       = $prefixlabel.'Remote action '.$remoteaction.(preg_match('/PROV/', $tmpcontract->ref) ? '' : ' on '.$tmpcontract->ref).' by '.($remoteip?$remoteip:'localhost');
+        		$actioncomm->label       = $prefixlabel.'Remote action '.$remoteaction.(preg_match('/PROV/', $tmpcontract->ref) ? '' : ' on '.$tmpcontract->ref).' by '.($ipaddress?$ipaddress:'localhost');
         		$actioncomm->datep       = $now;
         		$actioncomm->datef       = $now;
         		$actioncomm->percentage  = -1;            // Not applicable
