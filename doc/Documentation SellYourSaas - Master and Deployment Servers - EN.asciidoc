@@ -2465,7 +2465,7 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
 ---------------
 
-* Edit the default apache file */etc/init.d/apache2/000-default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
+* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
 
 ---------------
 SSLCertificateFile /etc/apache2/witX.sellyoursaas.com.crt

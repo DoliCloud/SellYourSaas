@@ -1096,47 +1096,49 @@ class SellYourSaasUtils
 
     				if ($resultthirdparty > 0 && ! empty($customer))
     				{
-    					// Test if last AC_PAYMENT_STRIPE_KO event is an old error lower than $nbhoursbetweentries hours.
-    					$recentfailedpayment = false;
-    					$sqlonevents = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'actioncomm WHERE fk_soc = '.$thirdparty->id." AND code ='AC_PAYMENT_STRIPE_KO' AND datep > '".$this->db->idate($now - ($nbhoursbetweentries * 3600))."'";
-						$resqlonevents = $this->db->query($sqlonevents);
-						if ($resqlonevents)
-						{
-							$obj = $this->db->fetch_object($resqlonevents);
-							if ($obj && $obj->nb > 0) $recentfailedpayment = true;
-						}
-						if ($recentfailedpayment && empty($nocancelifpaymenterror))	// If we are not in a mode that ask to avoid cancelation, we cancel payment.
-						{
-							$errmsg='Payment try was canceled (recent payment, in last '.$nbhoursbetweentries.' hours, with error AC_PAYMENT_STRIPE_KO for this customer)';
-							dol_syslog($errmsg, LOG_DEBUG);
+    					if (!$error && !empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
+    						$errmsg='Payment try was canceled (invoice qualified by the automatic payment was delayed after the '.dol_print_date($invoice->array_options['options_delayautopayment'], 'day').')';
+    						dol_syslog($errmsg, LOG_DEBUG);
 
-							$error++;
-							$errorforinvoice++;
-							$this->errors[]=$errmsg;
-						}
-						elseif (! empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
-						    $errmsg='Payment try was canceled (invoice qualified by the automatic payment was delayed after the '.dol_print_date($invoice->array_options['options_delayautopayment'], 'day').')';
-						    dol_syslog($errmsg, LOG_DEBUG);
+    						$error++;
+    						$errorforinvoice++;
+    						$this->errors[]=$errmsg;
+    					}
+    					if (!$error && ($invoice->date < ($now - ($nbdaysbeforeendoftries * 24 * 3600)))                                 // We try until we reach $nbdaysbeforeendoftries
+    						&& ($invoice->date < ($now - (62 * 24 * 3600)) || $invoice->date > ($now - (60 * 24 * 3600)))     // or when we have 60 days
+    						&& ($invoice->date < ($now - (92 * 24 * 3600)) || $invoice->date > ($now - (90 * 24 * 3600)))     // or when we have 90 days
+    						&& empty($nocancelifpaymenterror))
+    					{
+    						$errmsg='Payment try was canceled (invoice date is older than '.$nbdaysbeforeendoftries.' days and not 60 days old and not 90 days old) - You can still take payment from backoffice.';
+    						dol_syslog($errmsg, LOG_DEBUG);
 
-						    $error++;
-						    $errorforinvoice++;
-						    $this->errors[]=$errmsg;
-						}
-						elseif (
-						    ($invoice->date < ($now - ($nbdaysbeforeendoftries * 24 * 3600)))                                 // We try until we reach $nbdaysbeforeendoftries
-						    && ($invoice->date < ($now - (62 * 24 * 3600)) || $invoice->date > ($now - (60 * 24 * 3600)))     // or when we have 60 days
-						    && ($invoice->date < ($now - (92 * 24 * 3600)) || $invoice->date > ($now - (90 * 24 * 3600)))     // or when we have 90 days
-						    && empty($nocancelifpaymenterror))
+    						$error++;
+    						$errorforinvoice++;
+    						$this->errors[]=$errmsg;
+    					}
+    					if (!$error && empty($nocancelifpaymenterror))	// If we are not in a mode that ask to avoid cancelation, we cancel payment.
 						{
-							$errmsg='Payment try was canceled (invoice date is older than '.$nbdaysbeforeendoftries.' days and not 60 days old and not 90 days old) - You can still take payment from backoffice.';
-							dol_syslog($errmsg, LOG_DEBUG);
+							// Test if last AC_PAYMENT_STRIPE_KO event is an old error lower than $nbhoursbetweentries hours.
+							$recentfailedpayment = false;
+							$sqlonevents = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'actioncomm WHERE fk_soc = '.$thirdparty->id." AND code ='AC_PAYMENT_STRIPE_KO' AND datep > '".$this->db->idate($now - ($nbhoursbetweentries * 3600))."'";
+							$resqlonevents = $this->db->query($sqlonevents);
+							if ($resqlonevents)
+							{
+								$obj = $this->db->fetch_object($resqlonevents);
+								if ($obj && $obj->nb > 0) $recentfailedpayment = true;
+							}
 
-							$error++;
-							$errorforinvoice++;
-							$this->errors[]=$errmsg;
+							if ($recentfailedpayment) {
+								$errmsg='Payment try was canceled (recent payment, in last '.$nbhoursbetweentries.' hours, with error AC_PAYMENT_STRIPE_KO for this customer)';
+								dol_syslog($errmsg, LOG_DEBUG);
+
+								$error++;
+								$errorforinvoice++;
+								$this->errors[]=$errmsg;
+							}
 						}
-						else
-						{
+
+						if (!$error) {
 	    					$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
 	    					if ($stripecard)  // Can be card_... (old mode) or pm_... (new mode)
 	    					{
