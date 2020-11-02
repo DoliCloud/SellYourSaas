@@ -103,8 +103,14 @@ if (empty($productid) && empty($productref))
 		$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 		$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 		$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
-		// restict_domains can be empty (it's ok), can be mydomain.com or can be with.mydomain.com
-		$sqlproducts.= " AND (pa.restrict_domains IS NULL OR pa.restrict_domains = '".$db->escape($domainname)."' OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."')";
+		$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
+		$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
+		$sqlproducts.= ")";
 		if (! empty($defaultproduct)) $sqlproducts.= " AND p.rowid = ".((int) $defaultproduct);
 		$sqlproducts.= " ORDER BY p.datec";
 		//print $_SERVER["SERVER_NAME"].' - '.$sqlproducts;
@@ -216,7 +222,11 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
-if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
+if ($favicon) {
+    $href = 'img/'.$favicon;
+    if (preg_match('/^http/i', $favicon)) $href = $favicon;
+    $head.='<link rel="icon" href="'.$href.'">'."\n";
+}
 $head.='<!-- Bootstrap core CSS -->
 <!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
 <link href="dist/css/bootstrap.css" rel="stylesheet">';
