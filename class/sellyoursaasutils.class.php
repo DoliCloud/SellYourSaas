@@ -1075,9 +1075,9 @@ class SellYourSaasUtils
 
     				if ($foundalternativestripeaccount) {
     				    if (empty($stripeacc)) {				// If the Stripe connect account not set, we use common API usage
-    				        $customer = \Stripe\Customer::retrieve("$foundalternativestripeaccount");
+    				    	$customer = \Stripe\Customer::retrieve(array('id'=>"$foundalternativestripeaccount", 'expand[]'=>'sources'));
     				    } else {
-    				        $customer = \Stripe\Customer::retrieve("$foundalternativestripeaccount", array("stripe_account" => $stripeacc));
+    				    	$customer = \Stripe\Customer::retrieve(array('id'=>"$foundalternativestripeaccount", 'expand[]'=>'sources'), array("stripe_account" => $stripeacc));
     				    }
     				} else {
         				$customer = $stripe->customerStripe($thirdparty, $stripeacc, $servicestatus, 0);
@@ -1085,6 +1085,10 @@ class SellYourSaasUtils
     					{
     						$this->errors[] = $stripe->error;
     					}
+    					/*if (!empty($customer) && empty($customer->sources)) {
+							$customer = null;
+    						$this->errors[] = '\Stripe\Customer::retrieve did not returned the sources';
+    					}*/
     				}
 
     				$nbhoursbetweentries    = (empty($conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES) ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
