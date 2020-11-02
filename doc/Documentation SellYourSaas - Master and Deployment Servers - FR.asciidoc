@@ -1320,9 +1320,28 @@ It seems we must also restart apache to have this effective inside apache.
 ########## put your local config below ####################
 !/var/log/mysql
 !/var/log/letsencrypt
+!/var/log/datadog
+
+!/etc/apache2/sellyoursaas-available
+!/etc/apache2/sellyoursaas-online
+!/etc/bind/archives
+!/etc/bind/
+!/etc/group
+!/etc/group-
+!/etc/gshadow
+!/etc/gshadow-
+!/etc/passwd
+!/etc/passwd-
+!/etc/shadow
+!/etc/shadow-
+!/etc/subgid
+!/etc/subgid-
+!/etc/subuid
+!/etc/subuid-
 
 /home MyRule
 /home/admin/logs Logs
+/var/log/datadog Logs
 !/home/admin/backup
 !/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
@@ -1348,7 +1367,7 @@ Test que l'exécution par la crontab fonctionne correctent en lançant sous root
 
 [source,bash]
 ---------------
-/etc/cron.dail/afick_cron
+/etc/cron.daily/afick_cron
 ---------------
 
 
