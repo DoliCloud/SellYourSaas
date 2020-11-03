@@ -56,7 +56,7 @@ if [ "x$1" == "xstart" ]; then
 	#echo "socat TCP4-LISTEN:$remoteserverlistenport,fork EXEC:$scriptdir/remote_server.sh > /var/log/remote_server.log"
 	#socat TCP4-LISTEN:$remoteserverlistenport,fork EXEC:$scriptdir/remote_server.sh & > /var/log/remote_server.log
 
-	pid=`ps ax | grep 'php -S $remoteserverlistenip' | grep -v grep | awk ' { print $1 } '`
+	pid=$(ps ax | grep "php -S $remoteserverlistenip" | grep -v grep | awk ' { print $1 } ')
 	if [ "x$pid" == "x" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
@@ -79,7 +79,7 @@ fi
 if [ "x$1" == "xstop" ]; then
 	#killall socat
 	
-	pid=`ps ax | grep 'php -S $remoteserverlistenip' | grep -v grep | awk ' { print $1 } '`
+	pid=$(ps ax | grep "php -S $remoteserverlistenip" | grep -v grep | awk ' { print $1 } ')
 	if [ "x$pid" == "x" ]; then
 		echo Server not started
 	else
@@ -91,7 +91,7 @@ fi
 if [ "x$1" == "xstatus" ]; then
 	#killall socat
 	
-	pid=`ps ax | grep 'php -S $remoteserverlistenip' | grep -v grep | awk ' { print $1 } '`
+	pid=$(ps ax | grep "php -S $remoteserverlistenip" | grep -v grep | awk ' { print $1 } ')
 	if [ "x$pid" == "x" ]; then
 		echo Server not started
 	else
