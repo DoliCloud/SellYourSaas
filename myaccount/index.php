@@ -4103,6 +4103,7 @@ if ($mode == 'instances')
 									$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 									$sqlproducts.= ")";
 									$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
+									$sqlproducts.= " ORDER BY pe.position ASC";
 									$resqlproducts = $db->query($sqlproducts);
 									if ($resqlproducts)
 									{
@@ -4466,7 +4467,7 @@ if ($mode == 'instances')
 	<div class="portlet light">';
 
 	//var_dump($arrayofplans);
-	natcasesort($arrayofplans);
+	//natcasesort($arrayofplans);
 
 	$MAXINSTANCES = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? 4 : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
 	if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES)
@@ -4951,6 +4952,7 @@ if ($mode == 'mycustomerinstances')
 				$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 				$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 				$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
+				$sqlproducts.= " ORDER BY pe.position ASC";
 				$resqlproducts = $db->query($sqlproducts);
 				if ($resqlproducts)
 				{
