@@ -453,7 +453,7 @@ class modSellYourSaas extends DolibarrModules
 		    'titre'=>'CancellationForms',
 		    'mainmenu'=>'sellyoursaas',
 		    'leftmenu'=>'mysaas_cancellation_list',
-		    'url'=>'/sellyoursaas/cancellation_list.php?leftmenu=contracts&contextpage=sellyoursaasinstances',
+		    'url'=>'/sellyoursaas/cancellation_list.php?leftmenu=contracts&contextpage=cancellationlist',
 		    'langs'=>'sellyoursaas@sellyoursaas',
 		    'position'=>240,
 		    'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
