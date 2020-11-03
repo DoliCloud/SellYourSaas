@@ -325,6 +325,8 @@ function getRootUrlForAccount($object)
     // If $object is a product, we take package
     if (get_class($newobject) == 'Product')
     {
+        dol_include_once('/sellyoursaas/class/packages.class.php');
+
         $newobject->fetch_optionals();
 
         $tmppackage = new Packages($db);
