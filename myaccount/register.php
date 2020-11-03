@@ -660,14 +660,14 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 
      </form> <!-- end form-content -->
 
+	</div>
+
 	<?php
 	// Execute hook getRegisterPageFooter
 	$parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct, 'tmpproduct' => $tmpproduct);
     $reshook = $hookmanager->executeHooks('getRegisterPageFooter', $parameters); // Note that $action and $object may have been modified by some hooks.
     print $hookmanager->resPrint;
     ?>
-
-	</div>
 
   </div>
 </div>
