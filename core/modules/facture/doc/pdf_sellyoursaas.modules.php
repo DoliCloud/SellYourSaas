@@ -56,6 +56,10 @@ class pdf_sellyoursaas extends pdf_crabe
 
 		$this->name = strtolower($conf->global->SELLYOURSAAS_NAME);
 		$this->description = $langs->trans('PDFForSellYourSaas');
+
+		if (! empty($conf->global->SELLYOURSAAS_UPDATE_MAIN_DOC_FIELD_DISABLED)) {
+		    $this->update_main_doc_field = 0;
+		}
 	}
 
 
