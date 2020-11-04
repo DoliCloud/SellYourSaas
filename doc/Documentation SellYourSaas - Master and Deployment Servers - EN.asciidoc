@@ -211,8 +211,10 @@ Create the user account *admin*. It will be used to install and administer the s
 ---------------
 groupadd admin
 useradd -m -g admin admin
+usermod -a -G adm admin
 mkdir /home/admin/logs
 chown root.adm /home/admin/logs
+chmod 770 /home/admin/logs
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
