@@ -490,7 +490,7 @@ class modSellYourSaas extends DolibarrModules
 		'position'=>500,
 		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 		'perms'=>'$user->rights->sellyoursaas->read',
-		'target'=>'_sellyoursaas_register',
+		'target'=>'',
 		'user'=>0);
 		$r++;
 
