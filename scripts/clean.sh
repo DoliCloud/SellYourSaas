@@ -153,7 +153,7 @@ fi
 
 
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
-for fic in `ls /etc/apache2/sellyoursaas-available/*.*.*.*.conf /etc/apache2/sellyoursaas-available/*.*.*.*.custom.conf /etc/apache2/sellyoursaas-available/*.home.lan 2>/dev/null`
+for fic in `ls /etc/apache2/sellyoursaas-available/*.*.*.*.conf /etc/apache2/sellyoursaas-available/*.home.lan 2>/dev/null`
 do
 	basfic=`basename $fic` 
 	if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
