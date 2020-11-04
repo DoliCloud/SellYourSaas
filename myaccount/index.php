@@ -71,9 +71,9 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-dol_include_once('./sellyoursaas/class/packages.class.php');
-dol_include_once('./sellyoursaas/lib/sellyoursaas.lib.php');
-dol_include_once('./sellyoursaas/class/sellyoursaasutils.class.php');
+dol_include_once('/sellyoursaas/class/packages.class.php');
+dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
 $conf->global->SYSLOG_FILE_ONEPERSESSION=2;
 

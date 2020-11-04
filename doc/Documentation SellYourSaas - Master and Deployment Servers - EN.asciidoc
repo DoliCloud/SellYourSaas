@@ -946,6 +946,40 @@ systemctl status remote_server_launcher
 Note: The agent is launched on port 8080
 
 
+Pour utiliser systemd créer un fichier /etc/systemd/system/remote-server-launcher.service :
+
+[source,bash]
+---------------
+# /etc/systemd/system/remote-server-launcher.service
+[Unit]
+ Description=Remote Server Launcher
+ RequiresMountsFor=/home/admin/wwwroot/dolibarr_documents/sellyoursaas
+
+[Service]
+ Type=forking
+ ExecStart=/etc/init.d/remote_server_launcher start
+ TimeoutSec=0
+ StandardOutput=tty
+ RemainAfterExit=yes
+ Restart=on-failure
+
+[Install]
+ WantedBy=multi-user.target
+---------------
+
+La directive "RequiresMountsFor" permet d'attendre la disponibilité du répertoire où se trouve le script "remote_server_launcher.sh"
+
+Activation du service :
+
+[source,bash]
+---------------
+systemctl enable remote-server-launcher.service
+systemctl start remote-server-launcher.service
+systemctl status remote-server-launcher.service
+systemctl stop remote-server-launcher.service
+---------------
+
+
 === Installation of fail2ban ===
 
 * Installation of fail2ban and activation of the following fail2ban rules:
