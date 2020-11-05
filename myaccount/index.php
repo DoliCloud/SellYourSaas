@@ -4905,21 +4905,50 @@ if ($mode == 'mycustomerinstances')
 
 					print '<span class="font-green-sharp counternumber">'.$line->qty.'</span>';
 					print '<br>';
-					if ($line->price)
+
+					$tmpduration = '';
+					if ($tmpproduct->duration) {
+					    if ($tmpproduct->duration == '1m') {
+					        $tmpduration.=' / '.$langs->trans("Month");
+					    } else if ($tmpproduct->duration == '1y') {
+					        $tmpduration.=' / '.$langs->trans("DurationYear");
+					    } else {
+					        preg_match('/^([0-9]+)([a-z]{1})$/', $tmpproduct->duration, $regs);
+					        if (! empty($regs[1]) && ! empty($regs[2])) {
+					            $tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
+					        }
+					    }
+					}
+
+					if ($line->price_ht)
 					{
-						print '<span class="opacitymedium small">'.price($line->price, 1, $langs, 0, -1, -1, $conf->currency);
-						if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
-						elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
-						// TODO
-						print ' / '.$langs->trans("Month");
-						print '</span>';
+					    print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+					    //if ($line->qty > 1 && $labelprodsing) print ' / '.$labelprodsing;
+					    if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
+					    elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
+					    // TODO
+					    print $tmpduration;
+					    print '</span>';
 					}
 					else
 					{
-						print '<span class="opacitymedium small">'.price($line->price, 1, $langs, 0, -1, -1, $conf->currency);
-						// TODO
-						print ' / '.$langs->trans("Month");
-						print '</span>';
+					    if (empty($conf->global->SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL))
+					    {
+					        print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+					        // TODO
+					        print $tmpduration;
+					        print '</span>';
+					    }
+					    else
+					    {
+					        // TODO
+					        if (! empty($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL))
+					        {
+					            print '<span class="opacitymedium small">';
+					            print $langs->trans($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL);
+					            print '</span>';
+					        }
+					    }
 					}
 				}
 				else	// If there is no product, this is users
