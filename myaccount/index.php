@@ -2492,8 +2492,8 @@ if ($welcomecid > 0)
 	$contract->fetch($welcomecid);
 	$listofcontractid[$welcomecid]=$contract;
 	// Add a protection to avoid to see dashboard of others by changing welcomecid.
-	if (($mythirdpartyaccount->isareseller = 0 && $contract->fk_soc != $_SESSION['dol_loginsellyoursaas'])           // Not reseller, and contract is for another thirdparty
-	|| ($mythirdpartyaccount->isareseller = 1 && array_key_exists($contract->fk_soc, $listofcustomeridreseller))) // Is a reseller and contract is for a company that is a customer of reseller
+	if (($mythirdpartyaccount->isareseller == 0 && $contract->fk_soc != $_SESSION['dol_loginsellyoursaas'])           // Not reseller, and contract is for another thirdparty
+	|| ($mythirdpartyaccount->isareseller == 1 && array_key_exists($contract->fk_soc, $listofcustomeridreseller))) // Is a reseller and contract is for a company that is a customer of reseller
     {
 	    dol_print_error_email('DEPLOY-WELCOMEID'.$welcomecid, 'Bad value for welcomeid', null, 'alert alert-error');
 	    exit;
@@ -3245,7 +3245,7 @@ if (! empty($mode))
 {
     $fullpath = dol_buildpath("/sellyoursaas/myaccount/tpl/".$mode."tpl.php");
     if (file_exists($fullpath)) {
-        include $fullpath;;
+        include $fullpath;
     }
 }
 
