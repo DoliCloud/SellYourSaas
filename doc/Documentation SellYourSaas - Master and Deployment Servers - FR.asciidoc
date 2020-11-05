@@ -211,8 +211,10 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 ---------------
 groupadd admin
 useradd -m -g admin admin
+usermod -a -G adm admin
 mkdir /home/admin/logs
 chown root.adm /home/admin/logs
+chmod 770 /home/admin/logs
 ---------------
 
 Vérifiez que le id de ce user *admin* est bien supérieur ou égale à 1000.
