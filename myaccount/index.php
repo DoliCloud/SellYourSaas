@@ -3243,7 +3243,7 @@ if (empty($welcomecid))
 // Include mode with php template
 if (! empty($mode))
 {
-    $fullpath = dol_buildpath("/sellyoursaas/myaccount/tpl/".$mode."tpl.php");
+    $fullpath = dol_buildpath("/sellyoursaas/myaccount/tpl/".$mode.".tpl.php");
     if (file_exists($fullpath)) {
         include $fullpath;
     }
