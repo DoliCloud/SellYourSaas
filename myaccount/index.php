@@ -6540,7 +6540,7 @@ if ($mode == 'mycustomerbilling')
 					                '.dol_print_date($obj->datef, 'dayrfc', $langs).'
 					              </td>
 					              <td>
-					                '.img_mime('pdf.pdf', $titleinvoice).' '.($obj->ref_supplier ? $obj->ref_supplier : $obj->ref);
+					                '.img_mime('pdf.pdf', $titleinvoice).($obj->ref_supplier ? $obj->ref_supplier : $obj->ref);
 							$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
 
 							$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
@@ -6724,10 +6724,10 @@ if ($mode == 'mycustomerbilling')
             if ($reshook > 0) {
                 print $hookmanager->resPrint;
             } else {
-                //print img_mime('pdf.pdf').' '.$tmpinvoice->ref;
+                //print img_mime('pdf.pdf').$tmpinvoice->ref;
                 $publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
                 $urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-                print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf').' '.$tmpinvoice->ref.'</a>';
+                print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').$tmpinvoice->ref.'</a>';
             }
 
              print '
