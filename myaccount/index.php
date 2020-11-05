@@ -6380,6 +6380,9 @@ if ($mode == 'registerpaymentmode')
 
 if ($mode == 'mycustomerbilling')
 {
+    // Instantiate hooks of myaccount only if not already define
+    $hookmanager->initHooks(array('sellyoursaas-mycustomerbilling'));
+
     // TODO separate select 2 (commission earned) and select 1 (commissions received)
     $page2 = $page;
     $offset2 = $offset;
@@ -6680,15 +6683,22 @@ if ($mode == 'mycustomerbilling')
                 '.dol_print_date($obj->datef, 'dayrfc', $langs).'
               </td>
               <td>
-                '.img_mime('pdf.pdf').' '.$obj->ref;
-                	$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
+                ';
 
-                	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-                	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-                	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+            $sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+            include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+            $sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
-                	$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-             print '<br><a href="'.$urltouse.'" target="_download">'.$langs->trans("Download").'</a>';
+            $parameters=array('invoice' => $tmpinvoice, 'thirdparty' => $tmpthirdparty, 'sellyoursaasaccounturl' => $sellyoursaasaccounturl);
+            $reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
+            if ($reshook > 0) {
+                print $hookmanager->resPrint;
+            } else {
+                //print img_mime('pdf.pdf').' '.$tmpinvoice->ref;
+                $publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
+                $urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
+                print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf').' '.$tmpinvoice->ref.'</a>';
+            }
 
              print '
               </td>
