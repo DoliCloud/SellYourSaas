@@ -2492,8 +2492,9 @@ if ($welcomecid > 0)
 	$contract->fetch($welcomecid);
 	$listofcontractid[$welcomecid]=$contract;
 	// Add a protection to avoid to see dashboard of others by changing welcomecid.
-	if ($contract->fk_soc != $_SESSION['dol_loginsellyoursaas'])
-	{
+	if (($mythirdpartyaccount->isareseller = 0 && $contract->fk_soc != $_SESSION['dol_loginsellyoursaas'])           // Not reseller, and contract is for another thirdparty
+	|| ($mythirdpartyaccount->isareseller = 1 && array_key_exists($contract->fk_soc, $listofcustomeridreseller))) // Is a reseller and contract is for a company that is a customer of reseller
+    {
 	    dol_print_error_email('DEPLOY-WELCOMEID'.$welcomecid, 'Bad value for welcomeid', null, 'alert alert-error');
 	    exit;
 	}
@@ -2789,6 +2790,7 @@ $sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 $sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
 $sqlproducts.= " AND pe.availabelforresellers = 1";
 //$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
+$sqlproducts.= " ORDER BY pe.position ASC";
 $resqlproducts = $db->query($sqlproducts);
 if ($resqlproducts)
 {
@@ -4103,6 +4105,7 @@ if ($mode == 'instances')
 									$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 									$sqlproducts.= ")";
 									$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
+									$sqlproducts.= " ORDER BY pe.position ASC";
 									$resqlproducts = $db->query($sqlproducts);
 									if ($resqlproducts)
 									{
@@ -4466,7 +4469,7 @@ if ($mode == 'instances')
 	<div class="portlet light">';
 
 	//var_dump($arrayofplans);
-	natcasesort($arrayofplans);
+	//natcasesort($arrayofplans);
 
 	$MAXINSTANCES = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? 4 : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
 	if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES)
@@ -4905,21 +4908,50 @@ if ($mode == 'mycustomerinstances')
 
 					print '<span class="font-green-sharp counternumber">'.$line->qty.'</span>';
 					print '<br>';
-					if ($line->price)
+
+					$tmpduration = '';
+					if ($tmpproduct->duration) {
+					    if ($tmpproduct->duration == '1m') {
+					        $tmpduration.=' / '.$langs->trans("Month");
+					    } else if ($tmpproduct->duration == '1y') {
+					        $tmpduration.=' / '.$langs->trans("DurationYear");
+					    } else {
+					        preg_match('/^([0-9]+)([a-z]{1})$/', $tmpproduct->duration, $regs);
+					        if (! empty($regs[1]) && ! empty($regs[2])) {
+					            $tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
+					        }
+					    }
+					}
+
+					if ($line->price_ht)
 					{
-						print '<span class="opacitymedium small">'.price($line->price, 1, $langs, 0, -1, -1, $conf->currency);
-						if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
-						elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
-						// TODO
-						print ' / '.$langs->trans("Month");
-						print '</span>';
+					    print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+					    //if ($line->qty > 1 && $labelprodsing) print ' / '.$labelprodsing;
+					    if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
+					    elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
+					    // TODO
+					    print $tmpduration;
+					    print '</span>';
 					}
 					else
 					{
-						print '<span class="opacitymedium small">'.price($line->price, 1, $langs, 0, -1, -1, $conf->currency);
-						// TODO
-						print ' / '.$langs->trans("Month");
-						print '</span>';
+					    if (empty($conf->global->SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL))
+					    {
+					        print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+					        // TODO
+					        print $tmpduration;
+					        print '</span>';
+					    }
+					    else
+					    {
+					        // TODO
+					        if (! empty($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL))
+					        {
+					            print '<span class="opacitymedium small">';
+					            print $langs->trans($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL);
+					            print '</span>';
+					        }
+					    }
 					}
 				}
 				else	// If there is no product, this is users
@@ -4951,6 +4983,7 @@ if ($mode == 'mycustomerinstances')
 				$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 				$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 				$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
+				$sqlproducts.= " ORDER BY pe.position ASC";
 				$resqlproducts = $db->query($sqlproducts);
 				if ($resqlproducts)
 				{
@@ -5232,7 +5265,7 @@ if ($mode == 'mycustomerinstances')
 
 	<div class="portlet light">';
 
-	natcasesort($arrayofplans);
+	//natcasesort($arrayofplans);
 
 	print '
 		<div class="group">
@@ -6377,6 +6410,9 @@ if ($mode == 'registerpaymentmode')
 
 if ($mode == 'mycustomerbilling')
 {
+    // Instantiate hooks of myaccount only if not already define
+    $hookmanager->initHooks(array('sellyoursaas-mycustomerbilling'));
+
     // TODO separate select 2 (commission earned) and select 1 (commissions received)
     $page2 = $page;
     $offset2 = $offset;
@@ -6677,15 +6713,22 @@ if ($mode == 'mycustomerbilling')
                 '.dol_print_date($obj->datef, 'dayrfc', $langs).'
               </td>
               <td>
-                '.img_mime('pdf.pdf').' '.$obj->ref;
-                	$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
+                ';
 
-                	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-                	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-                	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+            $sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+            include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+            $sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
-                	$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-             print '<br><a href="'.$urltouse.'" target="_download">'.$langs->trans("Download").'</a>';
+            $parameters=array('invoice' => $tmpinvoice, 'thirdparty' => $tmpthirdparty, 'sellyoursaasaccounturl' => $sellyoursaasaccounturl);
+            $reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
+            if ($reshook > 0) {
+                print $hookmanager->resPrint;
+            } else {
+                //print img_mime('pdf.pdf').' '.$tmpinvoice->ref;
+                $publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
+                $urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
+                print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf').' '.$tmpinvoice->ref.'</a>';
+            }
 
              print '
               </td>
@@ -7277,7 +7320,7 @@ if ($mode == 'myaccount')
 				$countryselected = (GETPOSTISSET('country_id')?GETPOST('country_id','aZ09'):$mythirdpartyaccount->country_id);
 				$exclude_country_code = array();
 				if (! empty($conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES)) $exclude_country_code = explode(',', $conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES);
-				print '<input type="hidden" name="country_id_old" value="'.countryselected.'">'."\n";
+				print '<input type="hidden" name="country_id_old" value="'.$countryselected.'">'."\n";
 				print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1, 0, $exclude_country_code);
 				print '
                 </div>
