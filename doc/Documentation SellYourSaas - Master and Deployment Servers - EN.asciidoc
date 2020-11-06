@@ -228,7 +228,14 @@ adduser myunixlogin
 ---------------
 
 
-==== Ssh configuration
+==== ssh setup
+
+Fix permission on */etc/ssh/sshd_config so only root has read and write access:
+
+[source,conf]
+---------------
+chmod go-rw /etc/ssh/sshd_config
+---------------
 
 Create a file */etc/ssh/sshd_config.d/sellyoursaas* to change login permissions with the following content:
 

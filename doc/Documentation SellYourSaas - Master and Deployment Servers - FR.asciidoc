@@ -230,6 +230,13 @@ adduser myunixlogin
 
 ==== Configuration ssh
 
+Corriger les permissions du fichier */etc/ssh/sshd_config* pour etre en lecture/écriture pour root uniquement.
+
+[source,conf]
+---------------
+chmod go-rw /etc/ssh/sshd_config
+---------------
+
 Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas* pour changer les autorisations de login avec le contenu suivant:
 
 [source,conf]
@@ -251,7 +258,7 @@ AllowUsers myunixlogin admin osu*
 DenyUsers guest
 ---------------
 
-Attention, à bien remplacer myunixlogin par la bonne valeur avant de prendre en compte les modifications par:
+Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre en compte les modifications par:
 
 [source,conf]
 ---------------
