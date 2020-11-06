@@ -330,7 +330,7 @@ if (empty($conf) || ! is_object($conf))
                     {
                         $labelprod = $langs->trans("Application");
                     }
-                    elseif (preg_match('/user/i', $tmpproduct->ref) || preg_match('/user/i', $tmpproduct->label))
+                    elseif ($tmpproduct->array_options['options_resource_label'] == 'User')
                     {
                         $labelprod = $langs->trans("Users");
                     }

@@ -456,7 +456,7 @@ if ($object->nbofusers == 0)    // If value not already loaded
 
             // If this is a line for a metric
             if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
-                && $producttmp->array_options['options_resource_label'] == 'User')
+                && ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref)))
             {
                 $generatedunixlogin=$contract->array_options['options_username_os'];
                 $generatedunixpassword=$contract->array_options['options_password_os'];
