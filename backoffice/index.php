@@ -464,7 +464,7 @@ if ($resql)
 		{
 			// break
 			preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
-			$absice[0]=$regs[2].'/'.$regs[1]; // to show mm/yyyy
+			$absice[0]=$regs[2].'-'.$regs[1]; // to show mm/yyyy
 			$benefit=price2num($absice[1] * (1 - $part) - $serverprice - $absice[2], 'MT');
 			$absice[3]=$benefit;
 			ksort($absice);
@@ -483,7 +483,7 @@ if ($resql)
 	if ($oldx)
 	{
 	    preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
-	    $absice[0]=$regs[2].'/'.$regs[1]; // to show mm/yyyy
+	    $absice[0]=$regs[2].'-'.$regs[1]; // to show mm/yyyy
 		$benefit=price2num($absice[1] * (1 - $part) - $serverprice - $absice[2], 'MT');
 		$absice[3]=$benefit;
 		ksort($absice);
