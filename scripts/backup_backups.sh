@@ -100,7 +100,7 @@ export errstring=""
 
 echo `date +%Y%m%d%H%M%S`" Do rsync - first part..."
 export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-export command="rsync -x --delete --delete-excluded --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS '$DIRSOURCE1/*' $USER@$SERVDESTI:$DIRDESTI1";
+export command="rsync -x --delete --delete-excluded --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
 echo "$command";
 
 $command 2>&1
