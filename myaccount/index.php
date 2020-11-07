@@ -2790,7 +2790,7 @@ $sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 $sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
 $sqlproducts.= " AND pe.availabelforresellers = 1";
 //$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
-$sqlproducts.= " ORDER BY pe.position ASC";
+$sqlproducts.= " ORDER BY LENGTH(pe.position) ASC, pe.position ASC";
 $resqlproducts = $db->query($sqlproducts);
 if ($resqlproducts)
 {
