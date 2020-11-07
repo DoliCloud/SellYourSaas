@@ -143,9 +143,19 @@ export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 export CRONHEAD=${VIRTUALHOSTHEAD/php_value date.timezone /TZ=}
 
-export webSSLCertificateCRT=with.sellyoursaas.com.crt
-export webSSLCertificateKEY=with.sellyoursaas.com.key
-export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
+# possibility to change the ssl certificates name
+export webSSLCertificateCRT=`grep 'websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateCRT" == "x" ]]; then
+	export webSSLCertificateCRT=with.sellyoursaas.com.crt
+fi
+export webSSLCertificateKEY=`grep 'websslcertificatekey=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateKEY" == "x" ]]; then
+	export webSSLCertificateKEY=with.sellyoursaas.com.key
+fi
+export webSSLCertificateIntermediate=`grep 'websslcertificateintermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
+	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
+fi
 
 # possibility to change the path of sellyoursass directory
 olddoldataroot=`grep 'olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
