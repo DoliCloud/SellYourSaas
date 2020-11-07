@@ -2254,25 +2254,27 @@ $ORIGIN withX.mysaasdomainname.com.
 ; here will be added entry like this one
 ; client1  A   ip.of.server.deployment
 
-
 ---------------
-
 
 
 Ajouter une entrée dans */etc/bind/named.conf.local* pour que ce nouveau fichier soit pris en compte
 
 [source,bash]
 ---------------
-
 // mysaasdomainname.com
-
 zone "with.mysaasdomainname.com" {
         type master;
         file "/etc/bind/with.mysaasdomainname.com.hosts";
         };
-
 ---------------
 
+
+Créer un répertoire */etc/bind/archives*
+
+[source,bash]
+---------------
+mkdir /etc/bind/archives
+---------------
 
 
 Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
@@ -2640,6 +2642,21 @@ git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot/dolibarr/htdocs/custom
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas sellyoursaas
+---------------
+
+* Créer un lien symoblique dans *source* dans myaccounts.
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
+ln -fs /home/admin/wwwroot/dolibarr/htdocs source
+---------------
+
 
 Se connecter à l'interface utilisateur du master Dolibarr (https://admin.mysaasdomainname.com):
 
