@@ -254,7 +254,7 @@ print '
             print '</tr>';
         }
 
-        $sortfield2 = 'f.datef';
+        $sortfield2 = 'f.datef,f.rowid';
         $sortorder2 = 'DESC';
 
         $sql ='SELECT f.rowid, f.ref as ref, f.fk_soc, f.datef, total as total_ht, total_ttc, f.paye, f.fk_statut, fe.commission';
