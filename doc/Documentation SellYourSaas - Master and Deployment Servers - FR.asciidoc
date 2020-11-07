@@ -2506,8 +2506,8 @@ Choisir:
 
 ---------------
 cd /etc/apache2
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.crt
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
 * Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
