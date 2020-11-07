@@ -1156,8 +1156,10 @@ elseif ($action == 'createpaymentmode')		// Create credit card stripe
                         //var_dump(dol_print_date($date_start,'dayhour'));
                         //exit;
 
-                        $frequency=1;
-                        $frequency_unit='m';
+                        //$frequency=1;
+                        //$frequency_unit='m';
+                        $frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
+                        $frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
                         $tmp=dol_getdate($date_start?$date_start:$now);
                         $reyear=$tmp['year'];
                         $remonth=$tmp['mon'];
