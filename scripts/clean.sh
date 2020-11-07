@@ -199,14 +199,14 @@ if [ "x$?" != "x0" ]; then
 fi
 
 
-echo "***** Get list of databases available in mysql local and save it into /tmp/instancefound-dbinmysqldic"
+echo "***** Get list of databases available in mysql local and save it into /tmp/instancefound-dbinmysqldic (seems not used)"
 
 Q1="use mysql; "
 Q2="SHOW DATABASES; ";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL' | grep 'dbn' "
-$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e '$SQL' | grep 'dbn' "
+$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
 	exit 1
