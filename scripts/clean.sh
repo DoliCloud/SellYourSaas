@@ -205,7 +205,7 @@ Q1="use mysql; "
 Q2="SHOW DATABASES; ";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h localhost -e '$SQL' | grep 'dbn' "
+echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL' | grep 'dbn' "
 $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
