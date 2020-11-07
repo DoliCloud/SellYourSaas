@@ -2254,25 +2254,27 @@ $ORIGIN withX.mysaasdomainname.com.
 ; here will be added entry like this one
 ; client1  A   ip.of.server.deployment
 
-
 ---------------
-
 
 
 Ajouter une entrée dans */etc/bind/named.conf.local* pour que ce nouveau fichier soit pris en compte
 
 [source,bash]
 ---------------
-
 // mysaasdomainname.com
-
 zone "withX.mysaasdomainname.com" {
         type master;
         file "/etc/bind/withX.mysaasdomainname.com.hosts";
         };
-
 ---------------
 
+
+Créer un répertoire */etc/bind/archives*
+
+[source,bash]
+---------------
+mkdir /etc/bind/archives
+---------------
 
 
 Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
@@ -2496,16 +2498,16 @@ Choisir:
 	Email				Ne rien mettre !
 	Challenge password		Ne rien mettre !
 
-* Soumettre le fichier.
+* Soumettre le fichier *.csr* auprès du fournisseur de certificats.
 
-* Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
+* Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
 
 * Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
 ---------------
 cd /etc/apache2
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.crt
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
 * Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
@@ -2640,6 +2642,21 @@ git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot/dolibarr/htdocs/custom
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas sellyoursaas
+---------------
+
+* Créer un lien symoblique dans *source* dans myaccounts.
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
+ln -fs /home/admin/wwwroot/dolibarr/htdocs source
+---------------
+
 
 Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainname.com):
 
