@@ -330,7 +330,7 @@ if (empty($conf) || ! is_object($conf))
                     {
                         $labelprod = $langs->trans("Application");
                     }
-                    elseif (preg_match('/user/i', $tmpproduct->ref) || preg_match('/user/i', $tmpproduct->label))
+                    elseif ($tmpproduct->array_options['options_resource_label'] == 'User')
                     {
                         $labelprod = $langs->trans("Users");
                     }
@@ -429,15 +429,15 @@ if (empty($conf) || ! is_object($conf))
                 if ($resqlproducts)
                 {
                     $num = $db->num_rows($resqlproducts);
-                    $i=0;
-                    while($i < $num)
+                    $j=0;
+                    while($j < $num)
                     {
                         $obj = $db->fetch_object($resqlproducts);
                         if ($obj)
                         {
                             $arrayofplanstoswitch[$obj->rowid]=$obj->label;
                         }
-                        $i++;
+                        $j++;
                     }
                 }
                 print $form->selectarray('planid', $arrayofplanstoswitch, $planid, 0, 0, 0, '', 0, 0, 0, '', 'minwidth300');
@@ -521,8 +521,8 @@ if (empty($conf) || ! is_object($conf))
                                 $num_rowspaymentmodes = $db->num_rows($resqlpaymentmodes);
                                 if ($num_rowspaymentmodes)
                                 {
-                                    $i=0;
-                                    while ($i < $num_rowspaymentmodes)
+                                    $j=0;
+                                    while ($j < $num_rowspaymentmodes)
                                     {
                                         $objpaymentmodes = $db->fetch_object($resqlpaymentmodes);
                                         if ($objpaymentmodes)
@@ -534,7 +534,7 @@ if (empty($conf) || ! is_object($conf))
 
                                             $arrayofcompanypaymentmodeforthiscustomer[] = $companypaymentmodetemp;
                                         }
-                                        $i++;
+                                        $j++;
                                     }
                                 }
                             }

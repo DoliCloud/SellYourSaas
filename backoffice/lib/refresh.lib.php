@@ -201,7 +201,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 
 				// If this is a line for a metric
 				if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
-					&& $producttmp->array_options['options_resource_label'] == 'User')
+				    && ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref)))
 				{
 					$dbprefix = ($object->array_options['options_prefix_db']?$object->array_options['options_prefix_db']:'llx_');
 

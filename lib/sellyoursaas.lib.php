@@ -272,8 +272,14 @@ function sellyoursaasGetExpirationDate($contract)
 			}
 			if ($prodforline->array_options['options_app_or_option'] == 'system')
 			{
-				if (preg_match('/user/i', $prodforline->label)) $nbofusers = $line->qty;
-				if (preg_match('/\sgb\s/i', $prodforline->label)) $nbofgbs = $line->qty;
+			    if ($prodforline->array_options['options_resource_label'] == 'User'
+			    || preg_match('/user/i', $prodforline->ref)) {
+			        $nbofusers = $line->qty;
+			    }
+			    if ($prodforline->array_options['options_resource_label'] == 'Gb'
+			    || preg_match('/\sgb\s/i', $prodforline->ref)) {
+			        $nbofgbs = $line->qty;
+			    }
 			}
 		}
 	}

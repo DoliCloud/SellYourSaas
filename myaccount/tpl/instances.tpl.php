@@ -46,6 +46,7 @@ $sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; 
 $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
 $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 $sqlproducts.= ")";
+$sqlproducts.= " ORDER BY pe.position ASC";
 //$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
 //$sqlproducts.=' AND p.rowid = 202';
 //print $sqlproducts;
@@ -422,7 +423,7 @@ else
                                         {
                                             $labelprod = $langs->trans("Application");
                                         }
-                                        elseif (preg_match('/user/i', $tmpproduct->ref) || preg_match('/user/i', $tmpproduct->label))
+                                        elseif ($tmpproduct->array_options['options_resource_label'] == 'User')
                                         {
                                             $labelprod = $langs->trans("Users");
                                         }
