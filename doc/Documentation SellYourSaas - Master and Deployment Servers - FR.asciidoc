@@ -2498,9 +2498,9 @@ Choisir:
 	Email				Ne rien mettre !
 	Challenge password		Ne rien mettre !
 
-* Soumettre le fichier.
+* Soumettre le fichier *.csr* auprès du fournisseur de certificats.
 
-* Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
+* Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
 
 * Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
