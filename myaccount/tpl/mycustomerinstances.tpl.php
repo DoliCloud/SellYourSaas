@@ -424,7 +424,7 @@ if (empty($conf) || ! is_object($conf))
                 $sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
                 $sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
                 $sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
-                $sqlproducts.= " ORDER BY LENGTH(pe.position) ASC, pe.position ASC";
+                $sqlproducts.= " ORDER BY pe.position ASC";
                 $resqlproducts = $db->query($sqlproducts);
                 if ($resqlproducts)
                 {
