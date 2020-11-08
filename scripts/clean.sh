@@ -199,14 +199,14 @@ if [ "x$?" != "x0" ]; then
 fi
 
 
-echo "***** Get list of databases available in mysql local and save it into /tmp/instancefound-dbinmysqldic"
+echo "***** Get list of databases available in mysql local and save it into /tmp/instancefound-dbinmysqldic (seems not used)"
 
 Q1="use mysql; "
 Q2="SHOW DATABASES; ";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h localhost -e '$SQL' | grep 'dbn' "
-$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e '$SQL' | grep 'dbn' "
+$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
 	exit 1
@@ -541,12 +541,14 @@ if [[ $testorconfirm == "test" ]]; then
 		echo -n " '"$fic"'," >> /tmp/idlistofdb
 	done
 	export idlistofdb=`cat /tmp/idlistofdb | sed -e 's/,$//' `
-	echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx $database"
-	echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass $database
-	echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database"
-	echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
-	echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
-	echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
+	if [[ "x$idlistofdb" != "x" ]]; then
+		echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx $database"
+		echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass $database
+		echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -pxxxxxx -h $databasehost $database"
+		echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
+		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
+		echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
+	fi
 fi
 
 # Clean backup dir of payed instances that are now archived
