@@ -1,0 +1,11 @@
+.codeclimate.yml
+.editorconfig
+.github
+.gitmessage
+.mailmap
+.scrutinizer.yml
+.stickler.yml
+.travis.yml
+.tx
+gitcommit.txt
+phpstan.neon
