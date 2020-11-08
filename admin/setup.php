@@ -548,7 +548,7 @@ print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</td>';
 print '<td>';
-print '<input type="text" name="SELLYOURSAAS_NAME_RESERVED" value="'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_NAME_RESERVED" value="'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'">';
 print '</td>';
 print '<td class="opacitymedium">^mycompany[0-9]*\.</td>';
 print '</tr>';
@@ -556,7 +556,7 @@ print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION").'</td>';
 print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION.'">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION.'">';
 print '</td>';
 print '<td class="opacitymedium">Salt use to build substitution keys __APPPASSWORDxxxSALTED__</td>';
 print '</tr>';
