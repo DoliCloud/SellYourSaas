@@ -2469,6 +2469,10 @@ apt-get install python-certbot-apache
 
 Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
 
+==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
+
+===== From a SSL provider 
+
 * Créer le fichier key *withX.mysaasdomainname.com.key* et csr *withX.mysaasdomainname.com.csr* ainsi:
 
 Pour générer le fichier .key:   
@@ -2499,6 +2503,27 @@ Choisir:
 	Challenge password		Ne rien mettre !
 
 * Submit the *.csr* file to the SSL certificate provider.
+
+===== From LetsEncrypt
+
+* Run certbot-auto
+
+[source,bash]
+---------------
+/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.destailleur.fr"
+---------------
+
+Follow instructions to add DNS entries and validate generation.
+
+To read generated .pem files, run
+
+[source,bash]
+---------------
+openssl x509 -in fullchain.pem -text
+---------------
+
+
+==== Install certificates files
 
 * Get the SSL certificate files (file *.crt* of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
