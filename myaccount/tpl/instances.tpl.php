@@ -765,13 +765,13 @@ else
     				                </form>
                                     ';
                                 }
-                                elseif ($directaccess == 3 && empty($foundtemplate)) {
-                                    print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
-                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
-                                }
                                 else {
                                     print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
-                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    if ($directaccess == 3 && empty($foundtemplate)) {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+                                    } else {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    }
                                 }
 
                                 print '
@@ -834,13 +834,13 @@ else
     				                </form>
                                     ';
                                 }
-                                elseif ($directaccess == 3 && empty($foundtemplate)) {
-                                    print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
-                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
-                                }
                                 else {
                                     print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
-                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    if ($directaccess == 3 && empty($foundtemplate)) {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+                                    } else {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    }
                                 }
 
                                 print '
