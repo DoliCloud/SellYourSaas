@@ -46,7 +46,7 @@ $sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; 
 $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
 $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 $sqlproducts.= ")";
-$sqlproducts.= " ORDER BY pe.position ASC";
+$sqlproducts.= " ORDER BY LENGTH(pe.position) ASC, pe.position ASC";
 //$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
 //$sqlproducts.=' AND p.rowid = 202';
 //print $sqlproducts;
@@ -570,7 +570,7 @@ else
                                     $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
                                     $sqlproducts.= ")";
                                     $sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
-                                    $sqlproducts.= " ORDER BY pe.position ASC";
+                                    $sqlproducts.= " ORDER BY LENGTH(pe.position) ASC, pe.position ASC";
                                     $resqlproducts = $db->query($sqlproducts);
                                     if ($resqlproducts)
                                     {
@@ -734,7 +734,7 @@ else
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
                                 ';
 
-                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
+                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
                                     $ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
                                     print '
     				                <form class="form-horizontal" role="form">
@@ -777,7 +777,7 @@ else
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc").' :</p>
                                 ';
 
-                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
+                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
                                     print '
     				                <form class="form-horizontal" role="form">
                                     <input type="hidden" name="token" value="'.newToken().'">

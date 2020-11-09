@@ -205,6 +205,7 @@ NewCancellationForm=New cancellation form
 SoonAvailable=Soon available
 SorryFeatureNotAvailableInYourPlan=Sorry, this feature is not available in your plan. Please contact us.
 DuringTestPeriodOnly=During test period only
+AfterTestPeriodOnly=After test period only
 AppOrOption=Type of SaaS service
 PricePerResource=Price per resource
 QuantityCalculationFormula=Qty calculation formula
