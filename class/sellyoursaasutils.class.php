@@ -3466,6 +3466,13 @@ class SellYourSaasUtils
     			$tmppackage->targetsrcfile2 = make_substitutions($tmppackage->targetsrcfile2, $substitarray);
     			$tmppackage->targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
 
+    			// get direct access value
+    			$directaccess=0;
+    			if ($producttmp->array_options['options_app_or_option'] == 'app')
+    			{
+    			    $directaccess=$producttmp->array_options['options_directaccess'];
+    			}
+
     			dol_syslog("Create conf file ".$tmppackage->srcconffile1);
     			if ($tmppackage->srcconffile1 && $conffile)
     			{
@@ -3526,6 +3533,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
 				$commandurl.= '&'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+				$commandurl.= '&'.$directaccess;        // Param 38 in .sh
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 

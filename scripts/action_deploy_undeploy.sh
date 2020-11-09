@@ -146,6 +146,7 @@ if [ "x$VIRTUALHOSTHEAD" == "x-" ]; then
 fi
 export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
+export directaccess=${38}
 
 export ErrorLog='#ErrorLog'
 
@@ -221,6 +222,7 @@ echo "ALLOWOVERRIDE = $ALLOWOVERRIDE"
 echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
 echo "ispaidinstance = $ispaidinstance"
 echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
+echo "directaccess = $directaccess"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +%Y%m%d%H%M%S`" calculated params:"
@@ -265,6 +267,10 @@ dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
 	exit 1
+fi
+usejailkit=`grep 'usejailkit=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$usejailkit" == "x" ]]; then
+	usejailkit="0"
 fi
 
 if [[ ! -d $archivedir ]]; then
@@ -320,6 +326,37 @@ if [[ "$mode" == "deployall" ]]; then
 	#	chown -R $osusername.$osusername /home/jail/home/$osusername/.ssh
 	#	cat /home/jail/home/$osusername/.ssh/id_rsa.pub >> /home/jail/home/$osusername/.ssh/authorized_keys
 	#fi
+	
+	if [[ "$usejailkit" == "1" ]]; then
+		
+		if [[ ! -d "/etc/jailkit/jk_init.ini" ]]; then
+			echo "Failed to find jailkit package"
+			exit 1
+		fi
+
+		chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+		if [[ "x$chrootdir" == "x" ]]; then
+			echo "Failed to get chroot directory for jailkit"
+			exit 1
+		fi
+		
+		echo `date +%Y%m%d%H%M%S`" ***** Create jailkit chroot directory $chrootdir/$osusername"
+		
+		if [[ ! -d "$chrootdir/$osusername" ]]; then
+			echo "mkdir -p $chrootdir/$osusername/{home/$osusername,tmp}"
+			mkdir -p $chrootdir/$osusername/{home/$osusername,tmp}
+			echo "jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php"
+			jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php
+			echo "jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername"
+			jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername
+		fi
+		
+		echo "mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind"
+		mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind
+		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
+		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+		
+	fi
 fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
@@ -328,6 +365,30 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	rm -f /home/jail/home/$osusername/$dbname/*.log >/dev/null 2>&1 
 	echo rm -f /home/jail/home/$osusername/$dbname/*.log.*
 	rm -f /home/jail/home/$osusername/$dbname/*.log.* >/dev/null 2>&1 
+	
+	if [[ "$usejailkit" == "1" ]]; then
+		
+		if [[ ! -d "/etc/jailkit/jk_init.ini" ]]; then
+			echo "Failed to find jailkit package"
+			exit 1
+		fi
+
+		chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+		if [[ "x$chrootdir" == "x" ]]; then
+			echo "Failed to get chroot directory for jailkit"
+			exit 1
+		fi
+		
+		echo `date +%Y%m%d%H%M%S`" ***** Remove jailkit chroot directory $chrootdir/$osusername"
+		
+		echo "umount $chrootdir/$osusername$targetdir/$osusername"
+		umount $chrootdir/$osusername$targetdir/$osusername
+		#echo "rm -Rf $chrootdir/$osusername"
+		#rm -Rf $chrootdir/$osusername
+		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
+		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+		
+	fi
 
 fi
 
