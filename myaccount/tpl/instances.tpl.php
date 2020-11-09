@@ -570,7 +570,7 @@ else
                                     $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
                                     $sqlproducts.= ")";
                                     $sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
-                                    $sqlproducts.= " ORDER BY LENGTH(pe.position) ASC, pe.position ASC";
+                                    $sqlproducts.= " ORDER BY pe.position ASC";
                                     $resqlproducts = $db->query($sqlproducts);
                                     if ($resqlproducts)
                                     {
