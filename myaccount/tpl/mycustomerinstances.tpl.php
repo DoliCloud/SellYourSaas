@@ -575,9 +575,6 @@ if (empty($conf) || ! is_object($conf))
                         $ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
                         print '
 
-				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
-				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
-
                                 <form class="form-horizontal" role="form">
                                 <input type="hidden" name="token" value="'.newToken().'">
 
