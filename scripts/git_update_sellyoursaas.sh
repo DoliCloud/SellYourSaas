@@ -12,7 +12,7 @@ if [ "x$1" == "x" ]; then
    exit 1
 fi
 
-echo "Update git dirs found into $1 and generate the tgz image."
+echo "Update git dirs found into $1."
 
 for dir in `ls -d $1/dolibarr* | grep -v documents`
 do
