@@ -765,6 +765,10 @@ else
     				                </form>
                                     ';
                                 }
+                                elseif ($directaccess == 3 && empty($foundtemplate)) {
+                                    print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+                                }
                                 else {
                                     print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
                                     print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
@@ -829,6 +833,10 @@ else
 
     				                </form>
                                     ';
+                                }
+                                elseif ($directaccess == 3 && empty($foundtemplate)) {
+                                    print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
                                 }
                                 else {
                                     print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
