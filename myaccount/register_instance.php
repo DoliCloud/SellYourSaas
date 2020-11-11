@@ -775,7 +775,6 @@ else
 				$abusetest = 1;
 			}
 		}
-
 		// Refused TOR or bad networks
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
@@ -820,12 +819,21 @@ else
 				$formatted_parameters
 				);
 
-			// TODO
 			$result = getURLContent($url);
-var_dump($result);
-			if (1 == 2) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
-				$abusetest = 2;
+			if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
+				try {
+					$jsonreponse = dol_json_decode($result['content'], true);
+					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - tor=".$jsonreponse['tor']);
+					if ($jsonreponse['success']) {
+						//if ($jsonreponse['fraud_score'] >= 95) {
+						if (!$jsonreponse['tor']) {
+							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
+							$abusetest = 2;
+						}
+					}
+				} catch(Exception $e) {
+
+				}
 			}
 		}
 
