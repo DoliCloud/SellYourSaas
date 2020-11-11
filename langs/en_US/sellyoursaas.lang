@@ -520,3 +520,5 @@ SellYourSaasResellerUrl=URL of custom reseller program description
 Maintenance=Maintenance
 StopMaintenance=Stop maintenance
 GoogleSafeFalsePositive=The "GoogleSafe" technology of Google is reporting a red warning page when you are trying to access some pages of our domain. We have investigated and solved the trouble that triggered this alert on GoogleSafe tool. We can confirm that this is currenty a false positive. We are working with Google to fix this, but until Google has solved the problem, thanks to ignore this warning and bypass it by using the link "Consult this dangerous web site" (it is not but it needs time to have Google to fix this).
+OptinForCommercialMessages=Optin for commercial messages
+OptinForCommercialMessagesOnMyAccount=I agree to receive messages from %s including newsletters, promotional and commercial offers.
