@@ -826,7 +826,7 @@ else
 					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - tor=".$jsonreponse['tor']);
 					if ($jsonreponse['success']) {
 						//if ($jsonreponse['fraud_score'] >= 95) {
-						if (!$jsonreponse['tor']) {
+						if ($jsonreponse['tor']) {
 							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
 							$abusetest = 2;
 						}
