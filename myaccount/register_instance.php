@@ -644,6 +644,7 @@ else
 	}
 	else
 	{
+		$db->rollback();
 		dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default customer tag is not defined.', null, 'alert alert-error');
 		exit(-1);
 	}
@@ -664,6 +665,7 @@ else
 		}
 		else
 		{
+			$db->rollback();
 			dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default reseller tag is not defined.', null, 'alert alert-error');
 			exit(-1);
 		}
@@ -761,9 +763,47 @@ else
 			$contract->array_options['options_cookieregister_previous_instance'] = dol_decode($_COOKIE[$cookieregistrationb]);
 		}
 
+		// Add security controls
+		$abusetest = 0;
+
+		// Hard coded rule 1
+		if (empty($abusetest) && $vpnproba == 1 && preg_match('/[a-z]{10}/', $sldAndSubdomain)) {
+			dol_syslog("Instance creation blocked by anti abuse rule 1");
+			$abusetest = 1;
+		}
+
+		if (empty($abusetest) && ! empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
+			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
+			foreach($arrayofblacklistips as $blacklistip) {
+				if ($remoteip == $blacklistip) {
+					dol_syslog("Instance creation blocked by anti abuse rule 2");
+					$abusetest = 2;
+				}
+			}
+		}
+
+		if (empty($abusetest) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)
+			&& ! empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
+			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+			foreach($arrayofblacklistips as $blacklistip) {
+				if ($remoteip == $blacklistip) {
+					dol_syslog("Instance creation blocked by anti abuse rule 3");
+					$abusetest = 3;
+				}
+			}
+		}
+
+		if ($abusetest) {
+			$db->rollback();
+			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose"), null, 'errors');
+			header("Location: ".$newurl);
+			exit(-1);
+		}
+
 		$result = $contract->create($user);
 		if ($result <= 0)
 		{
+			$db->rollback();
 			dol_print_error_email('CREATECONTRACT', $contract->error, $contract->errors, 'alert alert-error');
 			exit(-1);
 		}

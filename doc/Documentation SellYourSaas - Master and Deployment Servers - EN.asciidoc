@@ -3040,6 +3040,8 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 
 - Créer un nouveau serveur OVH depuis le snapshot en spécifiant le nom du snapshot source et en copiant dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
 
+- Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
+
 - Une fois le serveur prêt: Se connecter pour désactiver les crons en doublons avec le serveur cloné (possibilité de désactiver le process cron complètement) par
 
 [source,bash]
@@ -3535,7 +3537,7 @@ innodb_force_recovery=1
 A partir de 3 ou +, risque de perte de données.
 
 
-NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouverts par ordre de dates sur le disque.
+NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouverts, soit par ordre de dates sur le disque, soit par ordre alphabétique du répertoire dbn... (en faire plusieurs de suite pour déterminer l'ordre).
 
 
 
