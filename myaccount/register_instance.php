@@ -776,12 +776,54 @@ else
 			}
 		}
 
-		// Refused TOR network
-		if (empty($abusetest) && empty($conf->global->SELLYOURSAAS_ACCEPT_TOR_NODES)) {
+		// Refused TOR or bad networks
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_EMAIL)) {
+			// Retrieve additional (optional) data points which help us enhance fraud scores.
+			$user_agent = $_SERVER['HTTP_USER_AGENT'];
+			$user_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
 
+			// Set the strictness for this query. (0 (least strict) - 3 (most strict))
+			$strictness = 1;
 
-			dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR node");
-			$abusetest = 2;
+			// You may want to allow public access points like coffee shops, schools, corporations, etc...
+			$allow_public_access_points = 'true';
+
+			// Reduce scoring penalties for mixed quality IP addresses shared by good and bad users.
+			$lighter_penalties = 'false';
+
+			// Create parameters array.
+			$parameters = array(
+				'user_agent' => $user_agent,
+				'user_language' => $user_language,
+				'strictness' => $strictness,
+				'allow_public_access_points' => $allow_public_access_points,
+				'lighter_penalties' => $lighter_penalties
+			);
+
+			/* User & Transaction Scoring
+			 * Score additional information from a user, order, or transaction for risk analysis
+			 * Please see the documentation and example code to include this feature in your scoring:
+			 * https://www.ipqualityscore.com/documentation/proxy-detection/transaction-scoring
+			 * This feature requires a Premium plan or greater
+			 */
+
+			// Format Parameters
+			$formatted_parameters = http_build_query($parameters);
+
+			// Create API URL
+			$url = sprintf(
+				'https://www.ipqualityscore.com/api/json/ip/%s/%s?%s',
+				$conf->global->SELLYOURSAAS_IPQUALITY_EMAIL,
+				$remoteip,
+				$formatted_parameters
+				);
+
+			// TODO
+			//$result = getURLContent($url);
+			if (1 == 2) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
+				$abusetest = 2;
+			}
 		}
 
 		// Block for some IPs
