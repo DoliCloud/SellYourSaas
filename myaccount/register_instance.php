@@ -771,7 +771,7 @@ else
 		// Refused if VPN probability is too high
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
 			if ($vpnproba >= $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability too high");
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
 				$abusetest = 1;
 			}
 		}
