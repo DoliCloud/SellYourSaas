@@ -823,7 +823,7 @@ else
 			if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
 				try {
 					dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
-					$jsonreponse = dol_json_decode($result['content'], true);
+					$jsonreponse = json_decode($result['content'], true);
 					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
 					if ($jsonreponse['success']) {
 						//if ($jsonreponse['fraud_score'] >= 95) {
