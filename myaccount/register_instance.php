@@ -777,7 +777,9 @@ else
 		}
 
 		// Refused TOR or bad networks
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_EMAIL)) {
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
+			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+
 			// Retrieve additional (optional) data points which help us enhance fraud scores.
 			$user_agent = $_SERVER['HTTP_USER_AGENT'];
 			$user_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
@@ -813,13 +815,14 @@ else
 			// Create API URL
 			$url = sprintf(
 				'https://www.ipqualityscore.com/api/json/ip/%s/%s?%s',
-				$conf->global->SELLYOURSAAS_IPQUALITY_EMAIL,
+				$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
 				$remoteip,
 				$formatted_parameters
 				);
 
 			// TODO
-			//$result = getURLContent($url);
+			$result = getURLContent($url);
+var_dump($result);
 			if (1 == 2) {
 				dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
 				$abusetest = 2;

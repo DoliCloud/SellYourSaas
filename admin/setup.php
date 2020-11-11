@@ -419,7 +419,7 @@ foreach($arrayofsuffixfound as $service => $suffix)
     $constname = 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix;
     print '<!-- constname = '.$constname.' -->';
     $defaultproductid=$conf->global->$constname;
-    print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix, '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
+    print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix, '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
     print '</td>';
     print '<td class="opacitymedium">My SaaS service for instance</td>';
     print '</tr>';
