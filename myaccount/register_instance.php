@@ -790,7 +790,7 @@ else
 			$allow_public_access_points = 'true';
 
 			// Reduce scoring penalties for mixed quality IP addresses shared by good and bad users.
-			$lighter_penalties = 'false';
+			$lighter_penalties = 'true';
 
 			// Create parameters array.
 			$parameters = array(
@@ -821,13 +821,17 @@ else
 
 			$result = getURLContent($url);
 			if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
-				dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
 				try {
+					dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
 					$jsonreponse = dol_json_decode($result['content'], true);
-					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - tor=".$jsonreponse['tor']);
+					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
 					if ($jsonreponse['success']) {
 						//if ($jsonreponse['fraud_score'] >= 95) {
-						if ($jsonreponse['tor']) {
+						if ($jsonreponse['recent_abuse']) {
+							dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
+							$abusetest = 2;
+						}
+						if ($jsonreponse['tor'] || $jsonreponse['active_tor']) {
 							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
 							$abusetest = 2;
 						}
