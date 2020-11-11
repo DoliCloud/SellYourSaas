@@ -767,7 +767,7 @@ else
 		$abusetest = 0;
 
 		// Hard coded rule 1
-		if (empty($abusetest) && $vpnproba == 1 && preg_match('/[a-z]{10}/', $sldAndSubdomain)) {
+		if (empty($abusetest) && $vpnproba == 1 && preg_match('/^[a-z]{10}$/', $sldAndSubdomain)) {
 			dol_syslog("Instance creation blocked by anti abuse rule 1");
 			$abusetest = 1;
 		}
