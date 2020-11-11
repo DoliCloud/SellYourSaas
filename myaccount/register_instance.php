@@ -706,7 +706,7 @@ else
 		$contract->array_options['options_undeployment_date'] = '';
 		$contract->array_options['options_undeployment_ip'] = '';
 		$contract->array_options['options_deployment_host'] = $serverdeployement;
-		$contract->array_options['options_deployment_ua'] = dol_trunc($_SERVER["HTTP_USER_AGENT"], 250);
+		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;
@@ -723,15 +723,17 @@ else
 		//$contract->array_options['options_nb_users'] = 1;
 		//$contract->array_options['options_nb_gb'] = 0.01;
 		// TODO Remove hardcoded code here
-		if (preg_match('/glpi|flyve/i', $productref) && ! empty($_POST["tz_string"]))
+		if (preg_match('/glpi|flyve/i', $productref) && GETPOST("tz_string"))
 		{
-		    $contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.$_POST["tz_string"].'"';
+		    $contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.GETPOST("tz_string").'"';
 		}
-		$contract->array_options['options_timezone'] = $_POST["tz_string"];
+		$contract->array_options['options_timezone'] = GETPOST("tz_string");
 		$contract->array_options['options_deployment_ip'] = $remoteip;
-		$contract->array_options['options_deployment_ua'] = dol_trunc($_SERVER["HTTP_USER_AGENT"], 250);
+		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
+
+		// Evaluate VPN probability
 		$vpnproba = '';
-		if (! empty($_SERVER["REMOTE_ADDR"]))
+		if (! empty($remoteip))
 		{
 			$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 			if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
@@ -766,29 +768,42 @@ else
 		// Add security controls
 		$abusetest = 0;
 
-		// Hard coded rule 1
-		if (empty($abusetest) && $vpnproba == 1 && preg_match('/^[a-z]{10}$/', $sldAndSubdomain)) {
-			dol_syslog("Instance creation blocked by anti abuse rule 1");
-			$abusetest = 1;
+		// Refused if VPN probability is too high
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+			if ($vpnproba >= $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability too high");
+				$abusetest = 1;
+			}
 		}
 
-		if (empty($abusetest) && ! empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
+		// Refused TOR network
+		if (empty($abusetest) && empty($conf->global->SELLYOURSAAS_ACCEPT_TOR_NODES)) {
+
+
+			dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR node");
+			$abusetest = 2;
+		}
+
+		// Block for some IPs
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
 			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
 			foreach($arrayofblacklistips as $blacklistip) {
 				if ($remoteip == $blacklistip) {
-					dol_syslog("Instance creation blocked by anti abuse rule 2");
-					$abusetest = 2;
+					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");
+					$abusetest = 3;
 				}
 			}
 		}
 
-		if (empty($abusetest) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)
-			&& ! empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
-			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
-			foreach($arrayofblacklistips as $blacklistip) {
-				if ($remoteip == $blacklistip) {
-					dol_syslog("Instance creation blocked by anti abuse rule 3");
-					$abusetest = 3;
+		// Block for some IPs if VPN proba is higher that an threshold
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
+			if ($vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
+				$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+				foreach($arrayofblacklistips as $blacklistip) {
+					if ($remoteip == $blacklistip) {
+						dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
+						$abusetest = 4;
+					}
 				}
 			}
 		}
