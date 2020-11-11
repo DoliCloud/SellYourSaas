@@ -826,7 +826,6 @@ else
 					$jsonreponse = json_decode($result['content'], true);
 					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
 					if ($jsonreponse['success']) {
-						//if ($jsonreponse['fraud_score'] >= 95) {
 						if ($jsonreponse['recent_abuse']) {
 							dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
 							$abusetest = 2;
