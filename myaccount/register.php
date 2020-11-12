@@ -276,7 +276,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
         }
 
         $linklogo = '';
-        $homepage = 'https://'.$sellyoursaasdomain;
+        $homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
         if ($partnerthirdparty->id > 0)     // Show logo of partner
         {
         	require_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
