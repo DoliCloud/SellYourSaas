@@ -558,7 +558,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.$conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD.'">';
 print '</td>';
-print '<td class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__ (\'md5\', \'sha256\', \'password_hash\', ...)</td>';
+print '<td class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__ (\'sha1md5\', \'sha256\', \'password_hash\', ...)</td>';
 print '</tr>';
 
 if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
