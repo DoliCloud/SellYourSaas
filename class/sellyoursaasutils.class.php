@@ -3036,7 +3036,7 @@ class SellYourSaasUtils
     		$listoflines = array($object);
     	}
 
-    	dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." email=".$email." password=".$password.(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, 1);
+    	dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." email=".$email." ".(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, 1);
 
     	include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
     	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
@@ -4052,7 +4052,7 @@ class SellYourSaasUtils
     	}
 
 
-    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." password=".$password." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
+    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
 
     	if ($error) return -1;
     	else return 1;
