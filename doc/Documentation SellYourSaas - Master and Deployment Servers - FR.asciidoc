@@ -2790,7 +2790,6 @@ Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et
 
 Rebasculer sur l'instance Master Dolibarr (https://admin.mysaasdomainname.com) et aller sur la configuration du module SellYourSaas:
 
-TODO Ajouter desc des variables de config du module...
 
 * Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
 
@@ -2812,6 +2811,9 @@ Voir le chapitre "Configuration des services" pour un description des champs.
 Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
 
 Remarque: Les URL pour réaliser les déploiements des packages de type *Applications* seront visibles dans le menu *SellYourSaas - URL de déploiement*
+
+
+* Aller dans la configuration du module *Tâches planifiées* et récupérez l'instruction à ajouter dans la cron du user *admin*. Vérifiez sinon ajouter cette instruction pour que les batch de Sell-Your-Saas puissent tourner.
 
 
 <<<<
