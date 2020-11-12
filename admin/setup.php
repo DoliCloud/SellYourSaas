@@ -137,8 +137,8 @@ if ($action == 'set')
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 
-		dolibarr_set_const($db,"SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",'alpha'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_HASHALGOFORPASSWORD",GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD",'alpha'),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",'alpha'),'chaine',0,'',$conf->entity);
 
 		dolibarr_set_const($db,'SELLYOURSAAS_MAXDEPLOYMENTPERIP',GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIP",'int'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,'SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR',GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR",'int'),'chaine',0,'',$conf->entity);
@@ -554,20 +554,21 @@ print '<td class="opacitymedium">^mycompany[0-9]*\.</td>';
 print '</tr>';
 
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION").'</td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION.'">';
-print '</td>';
-print '<td class="opacitymedium">Salt use to build substitution keys __APPPASSWORDxxxSALTED__</td>';
-print '</tr>';
-
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.$conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD.'">';
 print '</td>';
-print '<td class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__</td>';
+print '<td class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__ (\'md5\', \'sha256\', \'password_hash\', ...)</td>';
 print '</tr>';
 
+if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION").'</td>';
+	print '<td>';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION.'">';
+	print '</td>';
+	print '<td class="opacitymedium">Salt use to build substitution keys __APPPASSWORDxxxSALTED__</td>';
+	print '</tr>';
+}
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT").'</td>';
 print '<td>';
