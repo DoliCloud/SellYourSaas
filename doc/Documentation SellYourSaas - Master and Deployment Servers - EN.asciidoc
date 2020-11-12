@@ -3719,6 +3719,7 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_U
 Change the value 10.0.0 with version of the image you will build to deploy.
 
 Enable also request to set MAIN_SECURITY_HASH_ALGO and MAIN_SECURITY_SALT to the same values than the one set into setup of SellYourSaas.
+Also, if you use the MAIN_SECURITY_HASH_ALGO to 'password_hash', you must use the key __APPPASSWORD0__ for password encrypted instead of __APPPASSWORD0SALTED__ (because salt is included inside the encrypted value of password).
 
 
 === Setup of Services
