@@ -826,7 +826,7 @@ else
 					$jsonreponse = json_decode($result['content'], true);
 					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
 					if ($jsonreponse['success']) {
-						if ($jsonreponse['recent_abuse']) {
+						if ($jsonreponse['recent_abuse'] && !empty($conf->global->SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP)) {
 							dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
 							$abusetest = 2;
 						}
