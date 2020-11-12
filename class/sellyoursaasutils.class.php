@@ -3554,7 +3554,6 @@ class SellYourSaasUtils
 			    		dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
 			    		$serverdb = $serverdeployment;
-
 			    		// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
 			    		if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
 			    		    $serverdb = $generateddbhostname;
@@ -3567,7 +3566,7 @@ class SellYourSaasUtils
 			    		if (! $dbinstance || ! $dbinstance->connected)
 			    		{
 			    			$error++;
-			    			$this->error = $dbinstance->error;
+			    			$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
 			    			$this->errors = $dbinstance->errors;
 			    		}
 			    		else
@@ -3590,6 +3589,8 @@ class SellYourSaasUtils
 			    					$resql = $dbinstance->query($sqltoexecuteline);
 			    				}
 			    			}
+
+			    			$dbinstance->close();
 			    		}
 			    	}
     			}
@@ -3728,14 +3729,20 @@ class SellYourSaasUtils
 
     					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation");
 
+    					$serverdb = $serverdeployment;
+    					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+    					if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+    						$serverdb = $generateddbhostname;
+    					}
+
     					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
     					//var_dump($serverdeployment);		// just ip of deployment server
     					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-    					$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+    					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
     					if (! $dbinstance || ! $dbinstance->connected)
     					{
     						$error++;
-    						$this->error = $dbinstance->error.' ('.$generateddbusername.'@'.$generateddbhostname.'/'.$generateddbname.')';
+    						$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
     						$this->errors = $dbinstance->errors;
     					}
     					else
@@ -3762,6 +3769,8 @@ class SellYourSaasUtils
     							$this->error = $dbinstance->lasterror();
     							$this->errors[] = $dbinstance->lasterror();
     						}
+
+    						$dbinstance->close();
     					}
     				}
     				elseif ($tmparray[0] == 'BASH')
