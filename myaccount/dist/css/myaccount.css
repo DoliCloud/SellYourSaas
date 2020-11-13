@@ -189,6 +189,11 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
 #navbars {
 	font-size: 0.8em;
 }
+nav.navbar.bg-inverse {
+    position: sticky !important;
+    top: 0;
+    z-index: 10;
+}
 
 .portlet-title {
     padding-bottom: 10px;
