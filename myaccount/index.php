@@ -602,10 +602,10 @@ elseif ($action == 'updatemythirdpartylogin')
 	$db->begin();	// Start transaction
 
 	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
-
 	$mythirdpartyaccount->email = $email;
 	$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
 	$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
+	$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
 
 	$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
 

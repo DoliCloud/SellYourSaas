@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2011-2018 Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2011-2020 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,14 @@ if (empty($conf) || ! is_object($conf))
 ?>
 <!-- BEGIN PHP TEMPLATE myaccount.tpl.php -->
 <?php
+
+$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+{
+	$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+	if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+}
 
 print '
 	<div class="page-content-wrapper">
@@ -199,6 +207,11 @@ print '
 	                      <input type="text" class="inline-block" value="'.$mythirdpartyaccount->array_options['options_lastname'].'" name="lastName">
 	                    </div>
 	                  </div>
+	                </div>
+	                <div class="form-group">
+	                  <label>'.$langs->trans("OptinForCommercialMessages").'</label><br>
+	                  <input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1" '.($mythirdpartyaccount->array_options['options_optinmessages'] ? ' checked' : '').' name="optinmessages">
+						<span class="inline valignmiddle opacitymedium">'.$langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname).'</span>
 	                </div>
 	              </div>
 	              <div>
