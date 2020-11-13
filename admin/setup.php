@@ -137,6 +137,9 @@ if ($action == 'set')
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT",'int'),'chaine',0,'',$conf->entity);
 
+		dolibarr_set_const($db,"SELLYOURSAAS_GETIPINTEL_EMAIL",GETPOST("SELLYOURSAAS_GETIPINTEL_EMAIL",'alpha'),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_IPQUALITY_KEY",GETPOST("SELLYOURSAAS_IPQUALITY_KEY",'alpha'),'chaine',0,'',$conf->entity);
+
 		dolibarr_set_const($db,"SELLYOURSAAS_HASHALGOFORPASSWORD",GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD",'alpha'),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db,"SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION",'alpha'),'chaine',0,'',$conf->entity);
 
@@ -336,7 +339,7 @@ print '<td>';
 //print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_FORCE_STRIPE_TEST" value="'.$conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST.'">';
 print ajax_constantonoff('SELLYOURSAAS_FORCE_STRIPE_TEST', array(), $conf->entity, 0, 0, 1);
 print '</td>';
-print '<td class="opacitymedium">1</td>';
+print '<td><span class="opacitymedium">1</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>';
@@ -351,63 +354,63 @@ print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasName").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_NAME" value="'.$conf->global->SELLYOURSAAS_NAME.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">My SaaS service</td>';
+print '<td><span class="opacitymedium">My SaaS service</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainDomain").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_DOMAIN_NAME" value="'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">mysaasdomainname.com</td>';
+print '<td><span class="opacitymedium">mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</td>';
+print '<td><span class="opacitymedium">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_IP" value="'.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">192.168.0.1,123.456.789.012...</td>';
+print '<td><span class="opacitymedium">192.168.0.1,123.456.789.012...</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL" value="'.$conf->global->SELLYOURSAAS_MAIN_EMAIL.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">contact@mysaasdomainname.com</td>';
+print '<td><span class="opacitymedium">contact@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainEmail").' (Premium)</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL_PREMIUM" value="'.$conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">contact+premium@mysaasdomainname.com</td>';
+print '<td><span class="opacitymedium">contact+premium@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasSupervisionEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUPERVISION_EMAIL" value="'.$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">supervision@mysaasdomainname.com</td>';
+print '<td><span class="opacitymedium">supervision@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasNoReplyEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_NOREPLY_EMAIL" value="'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.'" class="minwidth300">';
 print '</td>';
-print '<td class="opacitymedium">noreply@mysaasdomainname.com</td>';
+print '<td><span class="opacitymedium">noreply@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("DirForScriptPath").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="DOLICLOUD_SCRIPTS_PATH" value="'.$conf->global->DOLICLOUD_SCRIPTS_PATH.'">';
 print '</td>';
-print '<td class="opacitymedium">'.dol_buildpath('sellyoursaas/scripts').'</td>';
+print '<td><span class="opacitymedium">'.dol_buildpath('sellyoursaas/scripts').'</span></td>';
 print '</tr>';
 
 foreach($arrayofsuffixfound as $service => $suffix)
@@ -421,7 +424,7 @@ foreach($arrayofsuffixfound as $service => $suffix)
     $defaultproductid=$conf->global->$constname;
     print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix, '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
     print '</td>';
-    print '<td class="opacitymedium">My SaaS service for instance</td>';
+    print '<td><span class="opacitymedium">My SaaS service for instance</span></td>';
     print '</tr>';
 }
 
@@ -439,7 +442,7 @@ print '<td>';
 $defaultproductcategid=$conf->global->SELLYOURSAAS_DEFAULT_PRODUCT_CATEG;
 print $formother->select_categories(Categorie::TYPE_PRODUCT, $defaultproductcategid, 'SELLYOURSAAS_DEFAULT_PRODUCT_CATEG', 0, 1, 'miwidth300');
 print '</td>';
-print '<td class="opacitymedium">SaaS Products</td>';
+print '<td><span class="opacitymedium">SaaS Products</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSCustomers").'</td>';
@@ -447,7 +450,7 @@ print '<td>';
 $defaultcustomercategid=$conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG;
 print $formother->select_categories(Categorie::TYPE_CUSTOMER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG', 0, 1, 'miwidth300');
 print '</td>';
-print '<td class="opacitymedium">SaaS Customers</td>';
+print '<td><span class="opacitymedium">SaaS Customers</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM").'</td>';
@@ -465,7 +468,7 @@ if ($conf->use_javascript_ajax)
 }
 //print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
-print '<td class="opacitymedium">Set to yes if you want your customers being able to apply to become resellers</td>';
+print '<td><span class="opacitymedium">Set to yes if you want your customers being able to apply to become resellers</span></td>';
 print '</tr>';
 
 $allowresellerprogram=$conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM;
@@ -476,7 +479,7 @@ if ($allowresellerprogram)
     print '<td>';
     print '<input class="maxwidth75" type="text" name="SELLYOURSAAS_DEFAULT_COMMISSION" value="'.$conf->global->SELLYOURSAAS_DEFAULT_COMMISSION.'">';
     print '</td>';
-    print '<td class="opacitymedium">25</td>';
+    print '<td><span class="opacitymedium">25</span></td>';
     print '</tr>';
 
     print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSResellers").'</td>';
@@ -484,14 +487,14 @@ if ($allowresellerprogram)
     $defaultcustomercategid=$conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG;
     print $formother->select_categories(Categorie::TYPE_SUPPLIER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_RESELLER_CATEG', 0, 1, 'miwidth300');
     print '</td>';
-    print '<td class="opacitymedium">SaaS Resellers</td>';
+    print '<td><span class="opacitymedium">SaaS Resellers</span></td>';
     print '</tr>';
 
     print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasResellerUrl").'</td>';
     print '<td>';
     print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_URL" value="'.$conf->global->SELLYOURSAAS_RESELLER_URL.'">';
     print '</td>';
-    print '<td class="opacitymedium">https://www.mysaasdomainname.com/en-become-a-dolicloud-reseller.php</td>';
+    print '<td><span class="opacitymedium">https://www.mysaasdomainname.com/en-become-a-dolicloud-reseller.php</span></td>';
     print '</tr>';
 }
 
@@ -500,49 +503,49 @@ print '</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_REFS_URL" value="'.$conf->global->SELLYOURSAAS_REFS_URL.'">';
 print '</td>';
-print '<td class="opacitymedium">https://admin.mysaasdomainname.com/git</td>';
+print '<td><span class="opacitymedium">https://admin.mysaasdomainname.com/git</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasAccountUrl").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_ACCOUNT_URL" value="'.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'">';
 print '</td>';
-print '<td class="opacitymedium">https://myaccount.mysaasdomainname.com<br>Note: Virtual hosts for such domains must link to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></td>';
+print '<td><span class="opacitymedium">https://myaccount.mysaasdomainname.com<br>Note: Virtual hosts for such domains must link to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasPricesUrl").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_PRICES_URL" value="'.$conf->global->SELLYOURSAAS_PRICES_URL.'">';
 print '</td>';
-print '<td class="opacitymedium">https://myaccount.mysaasdomainname.com/prices.html</td>';
+print '<td><span class="opacitymedium">https://myaccount.mysaasdomainname.com/prices.html</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_STATUS_URL" value="'.$conf->global->SELLYOURSAAS_STATUS_URL.'">';
 print '</td>';
-print '<td class="opacitymedium">https://status.mysaasdomainname.com</td>';
+print '<td><span class="opacitymedium">https://status.mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("FooterContent").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_MYACCOUNT_FOOTER" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER.'</textarea>';
 print '</td>';
-print '<td class="opacitymedium">&lt;script&gt;Your google analytics code&lt;/script&gt;</td>';
+print '<td><span class="opacitymedium">&lt;script&gt;Your google analytics code&lt;/script&gt;</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("ConversionContent").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_CONVERSION_FOOTER" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_CONVERSION_FOOTER.'</textarea>';
 print '</td>';
-print '<td class="opacitymedium">&lt;script&gt;Your conversion trackers&lt;/script&gt;</td>';
+print '<td><span class="opacitymedium">&lt;script&gt;Your conversion trackers&lt;/script&gt;</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("AnonymousUser").'</td>';
 print '<td>';
 print $form->select_dolusers($conf->global->SELLYOURSAAS_ANONYMOUSUSER, 'SELLYOURSAAS_ANONYMOUSUSER', 1);
 print '</td>';
-print '<td class="opacitymedium">User used for all anonymous action (registering, actions from customer dashboard, ...)</td>';
+print '<td><span class="opacitymedium">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
 print '</tr>';
 
 
@@ -550,7 +553,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_NAME_RESERVED" value="'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'">';
 print '</td>';
-print '<td class="opacitymedium">^mycompany[0-9]*\.</td>';
+print '<td><span class="opacitymedium">^mycompany[0-9]*\.</span></td>';
 print '</tr>';
 
 
@@ -558,7 +561,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.$conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD.'">';
 print '</td>';
-print '<td class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__ (\'sha1md5\', \'sha256\', \'password_hash\', ...)</td>';
+print '<td><span class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__ (\'sha1md5\', \'sha256\', \'password_hash\', ...)</span></td>';
 print '</tr>';
 
 if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
@@ -566,7 +569,7 @@ if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION.'">';
 	print '</td>';
-	print '<td class="opacitymedium">Salt use to build substitution keys __APPPASSWORDxxxSALTED__</td>';
+	print '<td><span class="opacitymedium">Salt use to build substitution keys __APPPASSWORDxxxSALTED__</span></td>';
 	print '</tr>';
 }
 
@@ -574,77 +577,77 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT" value="'.$conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT.'">';
 print '</td>';
-print '<td class="opacitymedium">7</td>';
+print '<td><span class="opacitymedium">7</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT" value="'.$conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT.'">';
 print '</td>';
-print '<td class="opacitymedium">1</td>';
+print '<td><span class="opacitymedium">1</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND" value="'.$conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND.'">';
 print '</td>';
-print '<td class="opacitymedium">2</td>';
+print '<td><span class="opacitymedium">2</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND" value="'.$conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND.'">';
 print '</td>';
-print '<td class="opacitymedium">12</td>';
+print '<td><span class="opacitymedium">12</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT" value="'.$conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT.'">';
 print '</td>';
-print '<td class="opacitymedium">30</td>';
+print '<td><span class="opacitymedium">30</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT" value="'.$conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT.'">';
 print '</td>';
-print '<td class="opacitymedium">120</td>';
+print '<td><span class="opacitymedium">120</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIP").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIP" value="'.(empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP)?20:$conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP).'">';
 print '</td>';
-print '<td class="opacitymedium">20</td>';
+print '<td><span class="opacitymedium">20</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR" value="'.(empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR)?5:$conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR).'">';
 print '</td>';
-print '<td class="opacitymedium">5</td>';
+print '<td><span class="opacitymedium">5</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INFRA_COST").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_INFRA_COST" value="'.(empty($conf->global->SELLYOURSAAS_INFRA_COST)?0:$conf->global->SELLYOURSAAS_INFRA_COST).'">';
 print '</td>';
-print '<td class="opacitymedium">5</td>';
+print '<td><span class="opacitymedium">5</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBHOURSBETWEENTRIES").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBHOURSBETWEENTRIES" value="'.$conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES.'">';
 print '</td>';
-print '<td class="opacitymedium">49</td>';
+print '<td><span class="opacitymedium">49</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES" value="'.$conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES.'">';
 print '</td>';
-print '<td class="opacitymedium">35</td>';
+print '<td><span class="opacitymedium">35</span></td>';
 print '</tr>';
 
 foreach($arrayofsuffixfound as $service => $suffix)
@@ -727,7 +730,19 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_GETIPINTEL_EMAIL").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_GETIPINTEL_EMAIL" value="'.$conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL.'">';
+print '</td>';
+print '<td><span class="opacitymedium">myemail@email.com</span></td>';
+print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_IPQUALITY_KEY").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_IPQUALITY_KEY" value="'.$conf->global->SELLYOURSAAS_IPQUALITY_KEY.'">';
+print '</td>';
+print '<td><span class="opacitymedium">1234567890123456</span></td>';
+print '</tr>';
 
 
 print '</table>';
