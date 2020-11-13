@@ -2595,6 +2595,8 @@ Mettre dans le cron du user *admin*:
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key you set into the setup of module *Scheduled jobs* on the Dolibarr master.
+
 ==== Sur les serveurs de Déploiement
 
 Avoir dans le cron du user *root*
