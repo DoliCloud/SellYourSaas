@@ -182,11 +182,12 @@ else
 }
 
 
-$urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-$urlstatus = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_STATUS_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $urlstatus);
 
-
+$urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
+if ($urlstatus) {
+	$urlstatus = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_STATUS_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $urlstatus);
+}
 
 $now =dol_now();
 $tmp=dol_getdate($now);
