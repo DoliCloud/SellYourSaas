@@ -3715,7 +3715,7 @@ class SellYourSaasUtils
     				);
 
 
-					// Now execute the formula
+					// Now execute the formula to set $newqty
     				$currentqty = $tmpobject->qty;
     				$newqty = null;
 
@@ -3836,9 +3836,9 @@ class SellYourSaasUtils
     				            $this->error = 'ssh2_connect function not supported by your PHP';
     				        }
     				    }
-    				}
-    				else
-    				{
+    				} elseif (is_numeric($tmparray[0]) && ((int) $tmparray[0]) > 0) {		// If value is just a number
+    					$newqty = ((int) $tmparray[0]);
+    				} else {
     					$error++;
     					$this->error = 'Bad definition of formula to calculate resource for product '.$producttmp->ref;
     				}
