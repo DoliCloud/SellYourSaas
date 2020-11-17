@@ -2427,8 +2427,17 @@ logrotate -f logrotate_sellyoursaas_log
 [source,conf]
 ---------------
 ...
-SystemMaxUse=100M
+SystemMaxUse=250M
+SystemMaxFileSize=50M
 ...
+---------------
+
+Prendre en compte la modification
+
+[source,bash]
+---------------
+systemctl stop systemd-journald
+systemctl start systemd-journald
 ---------------
 
 

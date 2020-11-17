@@ -2420,15 +2420,24 @@ logrotate -f logrotate_sellyoursaas_log
 ---------------
 
 
-=== Configuration de journalctl (sur Ubuntu 18.04+)
+=== Setup of journalctl (on Ubuntu 18.04+)
 
-* Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
+* Edit the file */etc/systemd/journald.conf* to define the max size for systemd journals
 
 [source,conf]
 ---------------
 ...
-SystemMaxUse=100M
+SystemMaxUse=250M
+SystemMaxFileSize=50M
 ...
+---------------
+
+Take into account the change with
+
+[source,bash]
+---------------
+systemctl stop systemd-journald
+systemctl start systemd-journald
 ---------------
 
 
