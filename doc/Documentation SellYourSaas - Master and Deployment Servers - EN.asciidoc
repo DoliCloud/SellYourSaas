@@ -1466,7 +1466,8 @@ Compiler le fichier par:
 postmap /etc/postfix/generic
 ---------------
 
-Editer le fichier /etc/mailname pour mettre le nom long du serveur *myshortservername.mysaasdomain.com*:
+Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
+
 [source,bash]
 ---------------
 vi /etc/mailname
@@ -2875,7 +2876,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
 ---------------
 
-Editer le fichier pour ajouter "min_collection_interval: 300" sous "postfix_user: postfix" et sous "queues: - deffered"
+Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deffered*
 
 
 * Copy the datadog config file to supervize *memcached*.
