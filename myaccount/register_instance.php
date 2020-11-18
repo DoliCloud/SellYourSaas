@@ -120,6 +120,8 @@ $password2 = trim(GETPOST('password2','alpha'));
 $country_code = trim(GETPOST('address_country','alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain','alpha'));
 $tldid = trim(GETPOST('tldid','alpha'));
+$optinmessages = (GETPOST('optinmessage','aZ09') == '1' ? 1 : 0);
+
 $origin = GETPOST('origin','aZ09');
 $partner=GETPOST('partner','int');
 $partnerkey=GETPOST('partnerkey','alpha');		// md5 of partner name_alias
@@ -579,6 +581,7 @@ else
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 	$tmpthirdparty->array_options['options_source']='REGISTERFORM'.($origin?'-'.$origin:'');
     $tmpthirdparty->array_options['options_password'] = $password;
+    $tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
 
 	if ($productref == 'none')	// If reseller
 	{

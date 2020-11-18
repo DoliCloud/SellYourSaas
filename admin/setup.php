@@ -694,6 +694,7 @@ foreach($arrayofsuffixfound as $service => $suffix)
     print '</td></tr>';
 }
 
+// SELLYOURSAAS_ACCEPT_DISCOUNTCODE
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ACCEPT_DISCOUNTCODE").'</td>';
 print '<td>';
 if ($conf->use_javascript_ajax)
@@ -707,9 +708,26 @@ if ($conf->use_javascript_ajax)
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
-//print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
 print '<td><span class="opacitymedium">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
+print '</tr>';
+
+// SELLYOURSAAS_ENABLE_OPTINMESSAGES
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_OPTINMESSAGES").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax)
+{
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_OPTINMESSAGES', array(), null, 0, 0, 0);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES))
+	{
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium">Set to yes to add a checkbox on register page to accept "Commercial offers".</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION").'</td>';

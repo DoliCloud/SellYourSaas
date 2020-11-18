@@ -511,6 +511,7 @@ ArchiveTestInstanceDesc=WARNING: Check that the feature is enabled by having the
 ToCreateDBUserManualy=To create a db user manually on SELECT only, you can do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;
 LatestBackupMessage=Latest backup message
 SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accept discount code when entering payment mode
+SELLYOURSAAS_ENABLE_OPTINMESSAGES=Add a checkbox on registration form to accept or not "Commercial offers"
 DiscountCodeDesc=The discount code used to register or to enter payment. The effective discount code used to define the real discount for invoice generation is the one saved at the recurring invoice level.
 DiscountCodeNotValid=Discount code is not valid (will be ignored)
 DiscountCodeIsValid=Discount code is valid. Discount will be %s

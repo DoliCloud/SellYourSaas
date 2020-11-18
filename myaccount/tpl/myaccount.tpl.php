@@ -222,11 +222,16 @@ print '
 	                    </div>
 	                  </div>
 	                </div>
-	                <div class="form-group">
-	                  <!--<label>'.$langs->trans("OptinForCommercialMessages").'</label><br>-->
-	                  <input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1" '.($mythirdpartyaccount->array_options['options_optinmessages'] ? ' checked' : '').' name="optinmessages">
-						<span class="inline valignmiddle opacitymedium">'.$langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname).'</span>
-	                </div>
+					';
+                    if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
+                    	print '
+		                <div class="form-group">
+		                  <!--<label>'.$langs->trans("OptinForCommercialMessages").'</label><br>-->
+		                  <input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1" '.($mythirdpartyaccount->array_options['options_optinmessages'] ? ' checked' : '').' name="optinmessages">
+							<span class="inline valignmiddle opacitymedium">'.$langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname).'</span>
+		                </div>';
+                    }
+                    print '
 	              </div>
 	              <div>
 	                <input type="submit" name="submit" value="'.$langs->trans("Save").'" class="btn green-haze btn-circle">

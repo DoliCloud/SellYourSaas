@@ -609,6 +609,17 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
           	}
 			?>
 
+
+
+			<!-- Selection of domain to create instance -->
+			<?php if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) { ?>
+			<br>
+	        <section id="optinmessagesid">
+				<input type="checkbox" id="optinmessages" name="optinmessages" class="valignmiddle inline" style="margin-top: 0" value="1">
+				<label for="optinmessages" class="valignmiddle small inline"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount"); ?></label>
+			</section>
+			<?php } ?>
+
 			<br>
 
        </div>
