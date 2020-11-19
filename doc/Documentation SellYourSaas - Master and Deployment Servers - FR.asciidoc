@@ -2933,6 +2933,18 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]
+      
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
 ---------------
 
 
