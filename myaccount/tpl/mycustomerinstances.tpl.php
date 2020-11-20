@@ -566,14 +566,14 @@ if (empty($conf) || ! is_object($conf))
 
             print '
     								  </div>
-    				              </div>';
+    				              </div>
+                            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
+                            <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
+                            ';
 
-            // SSH
-            $ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
-            print '
-
-				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
-				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
+                    if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
+                        $ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
+                        print '
 
                                 <form class="form-horizontal" role="form">
                                 <input type="hidden" name="token" value="'.newToken().'">
@@ -601,12 +601,26 @@ if (empty($conf) || ! is_object($conf))
 				                  </div>
 				                </div>
 
-				                </form>
-				              </div> <!-- END TAB PANE -->
+				                </form>';
+                            }
+                            else {
+                                print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+                                if ($directaccess == 3 && empty($foundtemplate)) {
+                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+                                } else {
+                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                }
+                            }
+
+                            print '
+				              </div> <!-- END TAB SSH PANE -->
 
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc").' :</p>
+                                ';
 
+                            if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
+                                print '
                                 <form class="form-horizontal" role="form">
                                 <input type="hidden" name="token" value="'.newToken().'">
 
@@ -640,11 +654,19 @@ if (empty($conf) || ! is_object($conf))
 				                </div>
 
 				                </form>
+					           ';
+                            }
+                            else {
+                                print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+                                if ($directaccess == 3 && empty($foundtemplate)) {
+                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+                                } else {
+                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                }
+                            }
 
-				              </div> <!-- END TAB PANE -->
-					';
-
-        print '
+                    print '
+                            </div> <!-- END TAB DB PANE -->
 				          </div> <!-- END TAB CONTENT -->
 				        </div> <!-- END TABABLE CUSTOM-->
 

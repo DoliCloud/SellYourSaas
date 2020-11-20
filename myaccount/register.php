@@ -276,6 +276,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
         }
 
         $linklogo = '';
+        $homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
         if ($partnerthirdparty->id > 0)     // Show logo of partner
         {
         	require_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
@@ -289,6 +290,12 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
         	if ($ecmfile->id > 0)
         	{
         		$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=societe&hashp='.$ecmfile->share;
+        	}
+        	$homepage = '';
+        	if (! empty($partnerthirdparty->url))
+        	{
+        	    $url = preg_replace('#^https?://#', '', rtrim($partnerthirdparty->url,'/'));
+        	    $homepage = 'https://'.$url;
         	}
         }
         if (empty($linklogo))               // Show main logo of Cloud service
@@ -343,20 +350,20 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 		    <div class="container">
 		      <div class="registerheader" style="display:flex; justify-content:space-between;">
 				  <div class="valignmiddle" style="padding-right: 25px;">
-		          <img class="logoheader"  src="<?php echo $linklogo; ?>" id="logo" /><br>
+		          <a href="<?php echo $homepage ?>"><img class="logoheader"  src="<?php echo $linklogo; ?>" id="logo" /></a><br>
 		          </div>
 				  <?php if (empty($mythirdparty->id)) {
 				    $langs->load("website");
 				      ?>
 		          <div class="paddingtop20" style="float: right;">
-		              <div class="padding: 4px 10px 5px 10px;">
+		              <div class="btn-sm">
 		              <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
 		              <?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
 		              <a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
 		              </div>
-		              <?php if (empty($partner) && empty($partnerkey)) { ?>
-		              <div class="padding: 4px 10px 5px 10px;">
-		              <span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="https://<?php echo $sellyoursaasdomain ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
+		              <?php if (! empty($homepage)) { ?>
+		              <div class="btn-sm home-page-url">
+		              <span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="<?php echo $homepage ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
 		              </div>
 		              <?php } ?>
 		          </div>

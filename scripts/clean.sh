@@ -24,9 +24,9 @@ echo "# realname -------> $(realpath ${0})"
 echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
+
 export PID=${$}
-export scriptdir=$(dirname $(realpath ${0}))
-export targetdir="/home/jail/home"				
+export scriptdir=$(dirname $(realpath ${0}))				
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirtest=`grep '^archivedirtest=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirpaid=`grep '^archivedirpaid=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -36,6 +36,12 @@ export archivedircron="/var/spool/cron/crontabs.disabled"
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
    exit 1
+fi
+
+# possibility to change the directory of instances are stored
+export targetdir=`grep 'targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$targetdir" == "x" ]]; then
+	export targetdir="/home/jail/home"
 fi
 
 export IPSERVERDEPLOYMENT=`grep '^ipserverdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -281,8 +287,8 @@ if [ -s /tmp/osutoclean-oldundeployed ]; then
 	for osusername in `cat /tmp/osutoclean-oldundeployed`
 	do
 		tmpvar1=`echo $osusername | awk -F ":" ' { print $1 } '`
-		if [ -d /home/jail/home/$osusername ]; then
-			nbdbn=`ls /home/jail/home/$osusername/ | grep ^dbn | wc -w`
+		if [ -d $targetdir/$osusername ]; then
+			nbdbn=`ls $targetdir/$osusername/ | grep ^dbn | wc -w`
 			if [[ "x$nbdbn" == "x0" ]]; then
 				echo "User $tmpvar1 is an ^osu user in /tmp/osutoclean-oldundeployed but has still a home dir with no more dbn... into, so we will remove it"
 				echo $tmpvar1 >> /tmp/osutoclean

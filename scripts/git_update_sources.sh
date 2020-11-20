@@ -12,6 +12,8 @@ if [ "x$1" == "x" ]; then
    exit 1
 fi
 
+export currentpath=$(dirname "$0")
+
 echo "Update git dirs found into $1 and generate the tgz image."
 
 for dir in `ls -d $1/* | grep -v tgz`
@@ -62,7 +64,7 @@ do
 	
 		# Create a deployment tar file
 		echo "Compress the repository into an archive $dir.tar.gz"
-		tar cz --exclude-vcs -f $dir/../$gitdir.tgz .
+		tar cz --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
 	
 	    cd -
 	fi
