@@ -7,5 +7,4 @@
 .stickler.yml
 .travis.yml
 .tx
-gitcommit.txt
 phpstan.neon
