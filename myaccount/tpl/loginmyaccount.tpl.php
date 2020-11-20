@@ -148,7 +148,7 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 
         <header class="inverse">
           <h1><?php echo dol_escape_htmltag($title); ?></h1>
-          <span class="opacitymedium" style="font-size: 0.85em; margin-top: 4px; line-height: 1;"><?php echo $langs->trans("MyAcountDesc", 'https://'.$sellyoursaasdomain, $sellyoursaasname); ?></span>
+          <span class="opacitymedium" style="font-size: 0.85em; margin-top: 4px; line-height: 1;"><?php echo $langs->trans("MyAcountDesc", $homepage, $sellyoursaasname); ?></span>
         </header>
 
 
