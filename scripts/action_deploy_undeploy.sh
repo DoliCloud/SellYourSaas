@@ -289,7 +289,7 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "deployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Create user $osusername with home into /home/jail/home/$osusername"
+	echo `date +%Y%m%d%H%M%S`" ***** Create user $osusername with home into $targetdir/$osusername"
 	
 	id -u $osusername
 	notfound=$?
@@ -301,30 +301,30 @@ if [[ "$mode" == "deployall" ]]; then
 	else
 		echo "perl -e'print crypt(\"'XXXXXX'\", "saltsalt")'"
 		export passcrypted=`perl -e'print crypt("'$ospassword'", "saltsalt")'`
-		echo "useradd -m -d /home/jail/home/$osusername -p 'YYYYYY' -s '/bin/secureBash' $osusername"
+		echo "useradd -m -d $targetdir/$osusername -p 'YYYYYY' -s '/bin/secureBash' $osusername"
 		useradd -m -d $targetdir/$osusername -p "$passcrypted" -s '/bin/secureBash' $osusername 
 		if [[ "$?x" != "0x" ]]; then
 			echo Error failed to create user $osusername 
 			echo "Failed to deployall instance $instancename.$domainname with: useradd -m -d $targetdir/$osusername -p $ospassword -s '/bin/secureBash' $osusername" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 			exit 1
 		fi
-		chmod -R go-rwx /home/jail/home/$osusername
+		chmod -R go-rwx $targetdir/$osusername
 	fi
 
-	if [[ -d /home/jail/home/$osusername ]]
+	if [[ -d $targetdir/$osusername ]]
 	then
-		echo "/home/jail/home/$osusername exists. good."
+		echo "$targetdir/$osusername exists. good."
 	else
-		mkdir /home/jail/home/$osusername
-		chmod -R go-rwx /home/jail/home/$osusername
+		mkdir $targetdir/$osusername
+		chmod -R go-rwx $targetdir/$osusername
 	fi
 	
-	#if [[ -d /home/jail/home/$osusername/.ssh ]]
+	#if [[ -d $targetdir/$osusername/.ssh ]]
 	#then
-	#	echo "generate ssh key in /home/jail/home/$osusername/.ssh"
-	#	ssh-keygen -t rsa -f /home/jail/home/$osusername/.ssh/id_rsa -q -P ""
-	#	chown -R $osusername.$osusername /home/jail/home/$osusername/.ssh
-	#	cat /home/jail/home/$osusername/.ssh/id_rsa.pub >> /home/jail/home/$osusername/.ssh/authorized_keys
+	#	echo "generate ssh key in $targetdir/$osusername/.ssh"
+	#	ssh-keygen -t rsa -f $targetdir/$osusername/.ssh/id_rsa -q -P ""
+	#	chown -R $osusername.$osusername $targetdir/$osusername/.ssh
+	#	cat $targetdir/$osusername/.ssh/id_rsa.pub >> $targetdir/$osusername/.ssh/authorized_keys
 	#fi
 	
 	if [[ "$usejailkit" == "1" ]]; then
@@ -361,10 +361,10 @@ fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
-	echo rm -f /home/jail/home/$osusername/$dbname/*.log
-	rm -f /home/jail/home/$osusername/$dbname/*.log >/dev/null 2>&1 
-	echo rm -f /home/jail/home/$osusername/$dbname/*.log.*
-	rm -f /home/jail/home/$osusername/$dbname/*.log.* >/dev/null 2>&1 
+	echo rm -f $targetdir/$osusername/$dbname/*.log
+	rm -f $targetdir/$osusername/$dbname/*.log >/dev/null 2>&1 
+	echo rm -f $targetdir/$osusername/$dbname/*.log.*
+	rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1
 	
 	if [[ "$usejailkit" == "1" ]]; then
 		
@@ -578,8 +578,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	echo `date +%Y%m%d%H%M%S`" ***** Deploy files"
 	
-	echo "Create dir for instance = /home/jail/home/$osusername/$dbname"
-	mkdir -p /home/jail/home/$osusername/$dbname
+	echo "Create dir for instance = $targetdir/$osusername/$dbname"
+	mkdir -p $targetdir/$osusername/$dbname
 	
 	echo "Check dirwithsources1=$dirwithsources1 targetdirwithsources1=$targetdirwithsources1"
 	if [ -d $dirwithsources1 ]; then
@@ -621,9 +621,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		fi
 	fi
 
-	echo "Force permissions and owner on /home/jail/home/$osusername/$dbname"
-	chown -R $osusername.$osusername /home/jail/home/$osusername/$dbname
-	chmod -R go-rwx /home/jail/home/$osusername/$dbname
+	echo "Force permissions and owner on $targetdir/$osusername/$dbname"
+	chown -R $osusername.$osusername $targetdir/$osusername/$dbname
+	chmod -R go-rwx $targetdir/$osusername/$dbname
 fi
 
 
@@ -776,7 +776,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 			  sed -e 's/__osUsername__/$osusername/g' | \
 			  sed -e 's/__osGroupname__/$osusername/g' | \
-			  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+			  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
@@ -792,7 +792,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 			  sed -e "s/__osUsername__/$osusername/g" | \
 			  sed -e "s/__osGroupname__/$osusername/g" | \
-			  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
@@ -862,7 +862,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
-				  sed -e 's;__osUserPath__;/home/jail/home/$osusername/$dbname;g' | \
+				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
@@ -879,7 +879,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
-				  sed -e "s;__osUserPath__;/home/jail/home/$osusername/$dbname;g" | \
+				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
@@ -1099,7 +1099,7 @@ fi
 
 if [[ "$mode" == "undeployall" ]]; then
 	
-	echo `date +%Y%m%d%H%M%S`" ***** Delete user $osusername with home into /home/jail/home/$osusername and archive it into $archivedir"
+	echo `date +%Y%m%d%H%M%S`" ***** Delete user $osusername with home into $targetdir/$osusername and archive it into $archivedir"
 
 	echo crontab -r -u $osusername
 	crontab -r -u $osusername

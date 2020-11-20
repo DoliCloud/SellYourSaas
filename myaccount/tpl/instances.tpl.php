@@ -734,7 +734,7 @@ else
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
                                 ';
 
-                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
+                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
                                     $ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
                                     print '
     				                <form class="form-horizontal" role="form">
@@ -767,7 +767,11 @@ else
                                 }
                                 else {
                                     print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
-                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    if ($directaccess == 3 && empty($foundtemplate)) {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+                                    } else {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    }
                                 }
 
                                 print '
@@ -777,7 +781,7 @@ else
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc").' :</p>
                                 ';
 
-                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate))) {
+                                if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
                                     print '
     				                <form class="form-horizontal" role="form">
                                     <input type="hidden" name="token" value="'.newToken().'">
@@ -832,7 +836,11 @@ else
                                 }
                                 else {
                                     print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
-                                    print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    if ($directaccess == 3 && empty($foundtemplate)) {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+                                    } else {
+                                        print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+                                    }
                                 }
 
                                 print '

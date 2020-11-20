@@ -641,6 +641,8 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	    $constlogosmall.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 	}
 
+	$homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
+
 	if (empty($urllogo) && ! empty($conf->global->$constlogosmall))
 	{
 	    if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall))

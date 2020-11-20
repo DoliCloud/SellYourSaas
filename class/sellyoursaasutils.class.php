@@ -3036,7 +3036,7 @@ class SellYourSaasUtils
     		$listoflines = array($object);
     	}
 
-    	dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." email=".$email." password=".$password.(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, 1);
+    	dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." email=".$email." ".(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, 1);
 
     	include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
     	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
@@ -3392,14 +3392,14 @@ class SellYourSaasUtils
     			$password0salted = dol_hash($password);
     			$passwordmd5salted = dol_hash($password, 'md5');
     			$passwordsha256salted = dol_hash($password, 'sha256');
-    			dol_syslog("passwordmd5salted=".$passwordmd5salted);
+    			dol_syslog("password0salted=".$password0salted." passwordmd5salted=".$passwordmd5salted." passwordsha256salted=".$passwordsha256salted, LOG_DEBUG);
 
     			$conf->global->MAIN_SECURITY_SALT = '';
     			dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
     			$password0 = dol_hash($password);
     			$passwordmd5 = dol_hash($password, 'md5');
     			$passwordsha256 = dol_hash($password, 'sha256');
-    			dol_syslog("passwordmd5=".$passwordmd5);
+    			dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
 
     			$conf->global->MAIN_SECURITY_SALT = $savsalt;
     			$conf->global->MAIN_SECURITY_HASH_ALGO = $savhashalgo;
@@ -3562,7 +3562,6 @@ class SellYourSaasUtils
 			    		dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
 			    		$serverdb = $serverdeployment;
-
 			    		// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
 			    		if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
 			    		    $serverdb = $generateddbhostname;
@@ -3575,7 +3574,7 @@ class SellYourSaasUtils
 			    		if (! $dbinstance || ! $dbinstance->connected)
 			    		{
 			    			$error++;
-			    			$this->error = $dbinstance->error;
+			    			$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
 			    			$this->errors = $dbinstance->errors;
 			    		}
 			    		else
@@ -3598,6 +3597,8 @@ class SellYourSaasUtils
 			    					$resql = $dbinstance->query($sqltoexecuteline);
 			    				}
 			    			}
+
+			    			$dbinstance->close();
 			    		}
 			    	}
     			}
@@ -3722,7 +3723,7 @@ class SellYourSaasUtils
     				);
 
 
-					// Now execute the formula
+					// Now execute the formula to set $newqty
     				$currentqty = $tmpobject->qty;
     				$newqty = null;
 
@@ -3736,14 +3737,20 @@ class SellYourSaasUtils
 
     					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation");
 
+    					$serverdb = $serverdeployment;
+    					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+    					if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+    						$serverdb = $generateddbhostname;
+    					}
+
     					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
     					//var_dump($serverdeployment);		// just ip of deployment server
     					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-    					$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+    					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
     					if (! $dbinstance || ! $dbinstance->connected)
     					{
     						$error++;
-    						$this->error = $dbinstance->error.' ('.$generateddbusername.'@'.$generateddbhostname.'/'.$generateddbname.')';
+    						$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
     						$this->errors = $dbinstance->errors;
     					}
     					else
@@ -3770,6 +3777,8 @@ class SellYourSaasUtils
     							$this->error = $dbinstance->lasterror();
     							$this->errors[] = $dbinstance->lasterror();
     						}
+
+    						$dbinstance->close();
     					}
     				}
     				elseif ($tmparray[0] == 'BASH')
@@ -3835,9 +3844,9 @@ class SellYourSaasUtils
     				            $this->error = 'ssh2_connect function not supported by your PHP';
     				        }
     				    }
-    				}
-    				else
-    				{
+    				} elseif (is_numeric($tmparray[0]) && ((int) $tmparray[0]) > 0) {		// If value is just a number
+    					$newqty = ((int) $tmparray[0]);
+    				} else {
     					$error++;
     					$this->error = 'Bad definition of formula to calculate resource for product '.$producttmp->ref;
     				}
@@ -4051,7 +4060,7 @@ class SellYourSaasUtils
     	}
 
 
-    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." password=".$password." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
+    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
 
     	if ($error) return -1;
     	else return 1;

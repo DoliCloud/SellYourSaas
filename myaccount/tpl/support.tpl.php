@@ -33,11 +33,11 @@ if (empty($conf) || ! is_object($conf))
         print '<div class="alert alert-success note note-success">'."\n";
         if ($urlfaq)
         {
-            print '<h4 class="block">'.$langs->trans("PleaseReadFAQFirst", $urlfaq).'</h4><br>'."\n";
+            print '<h4 class="block">'.$langs->trans("PleaseReadFAQFirst", $urlfaq).'</h4>'."\n";
         }
         if ($urlstatus)
         {
-            print $langs->trans("CurrentServiceStatus", $urlstatus).'<br>'."\n";
+            print '<br>'.$langs->trans("CurrentServiceStatus", $urlstatus)."\n";
         }
         print '</div>'."\n";
     }

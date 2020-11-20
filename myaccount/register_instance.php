@@ -120,6 +120,8 @@ $password2 = trim(GETPOST('password2','alpha'));
 $country_code = trim(GETPOST('address_country','alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain','alpha'));
 $tldid = trim(GETPOST('tldid','alpha'));
+$optinmessages = (GETPOST('optinmessage','aZ09') == '1' ? 1 : 0);
+
 $origin = GETPOST('origin','aZ09');
 $partner=GETPOST('partner','int');
 $partnerkey=GETPOST('partnerkey','alpha');		// md5 of partner name_alias
@@ -579,6 +581,7 @@ else
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 	$tmpthirdparty->array_options['options_source']='REGISTERFORM'.($origin?'-'.$origin:'');
     $tmpthirdparty->array_options['options_password'] = $password;
+    $tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
 
 	if ($productref == 'none')	// If reseller
 	{
@@ -644,6 +647,7 @@ else
 	}
 	else
 	{
+		$db->rollback();
 		dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default customer tag is not defined.', null, 'alert alert-error');
 		exit(-1);
 	}
@@ -664,6 +668,7 @@ else
 		}
 		else
 		{
+			$db->rollback();
 			dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default reseller tag is not defined.', null, 'alert alert-error');
 			exit(-1);
 		}
@@ -704,7 +709,7 @@ else
 		$contract->array_options['options_undeployment_date'] = '';
 		$contract->array_options['options_undeployment_ip'] = '';
 		$contract->array_options['options_deployment_host'] = $serverdeployement;
-		$contract->array_options['options_deployment_ua'] = dol_trunc($_SERVER["HTTP_USER_AGENT"], 250);
+		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;
@@ -721,15 +726,17 @@ else
 		//$contract->array_options['options_nb_users'] = 1;
 		//$contract->array_options['options_nb_gb'] = 0.01;
 		// TODO Remove hardcoded code here
-		if (preg_match('/glpi|flyve/i', $productref) && ! empty($_POST["tz_string"]))
+		if (preg_match('/glpi|flyve/i', $productref) && GETPOST("tz_string"))
 		{
-		    $contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.$_POST["tz_string"].'"';
+		    $contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.GETPOST("tz_string").'"';
 		}
-		$contract->array_options['options_timezone'] = $_POST["tz_string"];
+		$contract->array_options['options_timezone'] = GETPOST("tz_string");
 		$contract->array_options['options_deployment_ip'] = $remoteip;
-		$contract->array_options['options_deployment_ua'] = dol_trunc($_SERVER["HTTP_USER_AGENT"], 250);
+		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
+
+		// Evaluate VPN probability
 		$vpnproba = '';
-		if (! empty($_SERVER["REMOTE_ADDR"]))
+		if (! empty($remoteip))
 		{
 			$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 			if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
@@ -761,9 +768,118 @@ else
 			$contract->array_options['options_cookieregister_previous_instance'] = dol_decode($_COOKIE[$cookieregistrationb]);
 		}
 
+		// Add security controls
+		$abusetest = 0;
+
+		// Refused if VPN probability is too high
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+			if ($vpnproba >= $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
+				$abusetest = 1;
+			}
+		}
+		// Refused TOR or bad networks
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
+			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+
+			// Retrieve additional (optional) data points which help us enhance fraud scores.
+			$user_agent = $_SERVER['HTTP_USER_AGENT'];
+			$user_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+
+			// Set the strictness for this query. (0 (least strict) - 3 (most strict))
+			$strictness = 1;
+
+			// You may want to allow public access points like coffee shops, schools, corporations, etc...
+			$allow_public_access_points = 'true';
+
+			// Reduce scoring penalties for mixed quality IP addresses shared by good and bad users.
+			$lighter_penalties = 'true';
+
+			// Create parameters array.
+			$parameters = array(
+				'user_agent' => $user_agent,
+				'user_language' => $user_language,
+				'strictness' => $strictness,
+				'allow_public_access_points' => $allow_public_access_points,
+				'lighter_penalties' => $lighter_penalties
+			);
+
+			/* User & Transaction Scoring
+			 * Score additional information from a user, order, or transaction for risk analysis
+			 * Please see the documentation and example code to include this feature in your scoring:
+			 * https://www.ipqualityscore.com/documentation/proxy-detection/transaction-scoring
+			 * This feature requires a Premium plan or greater
+			 */
+
+			// Format Parameters
+			$formatted_parameters = http_build_query($parameters);
+
+			// Create API URL
+			$url = sprintf(
+				'https://www.ipqualityscore.com/api/json/ip/%s/%s?%s',
+				$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
+				$remoteip,
+				$formatted_parameters
+				);
+
+			$result = getURLContent($url);
+			if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
+				try {
+					dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
+					$jsonreponse = json_decode($result['content'], true);
+					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
+					if ($jsonreponse['success']) {
+						if ($jsonreponse['recent_abuse'] && !empty($conf->global->SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP)) {
+							dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
+							$abusetest = 2;
+						}
+						if ($jsonreponse['tor'] || $jsonreponse['active_tor']) {
+							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
+							$abusetest = 2;
+						}
+					}
+				} catch(Exception $e) {
+
+				}
+			}
+		}
+
+		// Block for some IPs
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
+			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
+			foreach($arrayofblacklistips as $blacklistip) {
+				if ($remoteip == $blacklistip) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");
+					$abusetest = 3;
+				}
+			}
+		}
+
+		// Block for some IPs if VPN proba is higher that an threshold
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
+			if ($vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
+				$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+				foreach($arrayofblacklistips as $blacklistip) {
+					if ($remoteip == $blacklistip) {
+						dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
+						$abusetest = 4;
+					}
+				}
+			}
+		}
+
+		if ($abusetest) {
+			$db->rollback();
+			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip), null, 'errors');
+			header("Location: ".$newurl);
+			exit(-1);
+		}
+
 		$result = $contract->create($user);
 		if ($result <= 0)
 		{
+			$db->rollback();
 			dol_print_error_email('CREATECONTRACT', $contract->error, $contract->errors, 'alert alert-error');
 			exit(-1);
 		}
