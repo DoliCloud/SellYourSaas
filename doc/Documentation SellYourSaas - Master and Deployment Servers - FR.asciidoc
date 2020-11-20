@@ -2766,6 +2766,8 @@ dnsserver=1
 ipserverdeployment=ipduserverdeployment
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
 # Set port of the master database (default is 3306)
