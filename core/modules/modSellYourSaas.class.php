@@ -578,6 +578,8 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('freeperioddays', 	          "DaysForFreePeriod",     'int',   113,    '6',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('0'=>'No','1'=>'Yes','2'=>'DuringTestPeriodOnly','3'=>'AfterTestPeriodOnly'));
 		$resultx=$extrafields->addExtraField('directaccess', 	          "AccessToResources",  'select',   114,     '',  'product', 0, 0,   '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$param=array('options'=>array('0'=>'SystemDefault','1'=>'CommonUserJail','2'=>'PrivateUserJail'));
+		$resultx=$extrafields->addExtraField('sshaccesstype', 	              "SshAccessType",  'select',   114,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', '(($conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_SSH_JAIL_ENABLED)?1:0)');
 		$param=array('options'=>array('basic'=>'Basic','premium'=>'Premium','none'=>'None'));
 		$resultx=$extrafields->addExtraField('typesupport', 	              "TypeOfSupport",  'select',   115,     '',  'product', 0, 0,   '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('register_text', 	               "RegisterText",  'varchar',  117,  '255',  'product', 0, 0,   '',     '', 1, '',  1, 'EnterHereTranslationKeyToUseOnRegisterPage', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
