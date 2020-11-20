@@ -582,7 +582,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('typesupport', 	              "TypeOfSupport",  'select',   115,     '',  'product', 0, 0,   '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('register_text', 	               "RegisterText",  'varchar',  117,  '255',  'product', 0, 0,   '',     '', 1, '',  1, 'EnterHereTranslationKeyToUseOnRegisterPage', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('register_discountcode', 	      "DiscountCodes",  'varchar',  119,  '255',  'product', 0, 0,   '',     '', 1, '',  1, 'EnterHereListOfDiscountCodes', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('position', 	                       "Position",  'varchar',  120,    '5',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('position', 	                       "Position",  'int',  120,    '5',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		//$resultx=$extrafields->addExtraField('separatorproductend',                   "Other",'separate',   199,     '',  'product', 0, 1,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Thirdparty
