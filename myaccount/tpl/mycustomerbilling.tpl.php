@@ -340,10 +340,9 @@ print '
             if ($reshook > 0) {
                 print $hookmanager->resPrint;
             } else {
-                //print img_mime('pdf.pdf').' '.$tmpinvoice->ref;
                 $publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
                 $urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-                print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf').' '.$tmpinvoice->ref.'</a>';
+                print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf').$tmpinvoice->ref.'</a>';
             }
 
             print '
