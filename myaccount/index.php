@@ -185,8 +185,11 @@ else
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 
 $urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
-if ($urlstatus) {
-	$urlstatus = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_STATUS_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $urlstatus);
+if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+{
+	$newnamekey = 'SELLYOURSAAS_STATUS_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+	if (! empty($conf->global->$newnamekey)) $urlstatus = $conf->global->$newnamekey;
 }
 
 $now =dol_now();
