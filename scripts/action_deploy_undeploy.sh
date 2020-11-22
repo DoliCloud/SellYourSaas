@@ -147,6 +147,7 @@ fi
 export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
+export sshaccesstype=${39}
 
 export ErrorLog='#ErrorLog'
 
@@ -223,6 +224,7 @@ echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
 echo "ispaidinstance = $ispaidinstance"
 echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
 echo "directaccess = $directaccess"
+echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +%Y%m%d%H%M%S`" calculated params:"
@@ -267,10 +269,6 @@ dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
 	exit 1
-fi
-usejailkit=`grep 'usejailkit=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$usejailkit" == "x" ]]; then
-	usejailkit="0"
 fi
 
 if [[ ! -d $archivedir ]]; then
@@ -327,35 +325,78 @@ if [[ "$mode" == "deployall" ]]; then
 	#	cat $targetdir/$osusername/.ssh/id_rsa.pub >> $targetdir/$osusername/.ssh/authorized_keys
 	#fi
 	
-	if [[ "$usejailkit" == "1" ]]; then
-		
-		if [[ ! -d "/etc/jailkit/jk_init.ini" ]]; then
-			echo "Failed to find jailkit package"
-			exit 1
+	if [[ "$sshaccesstype" > "0" ]]; then
+		if [[ ! -f "/etc/jailkit/jk_init.ini" ]]; then
+			echo "Error failed to find jailkit package in your system"
+		else
+			chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+			if [[ "x$chrootdir" == "x" ]]; then
+				echo "Error your jailkit chroot directory is not defined in sellyoursaas.conf"
+			else
+				if [[ ! -d "$chrootdir" ]]; then
+					echo "Create $chrootdir directory"
+					mkdir $chrootdir
+				fi
+				
+				privatejailtemplatename=`grep 'privatejailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+				commonjailtemplatename=`grep 'commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+				
+				echo `date +%Y%m%d%H%M%S`" ***** Create jailkit chroot directory for user $osusername"
+				echo "chrootdir = $chrootdir"
+				echo "privatejailtemplatename = $privatejailtemplatename"
+				echo "commonjailtemplatename = $commonjailtemplatename"
+				
+				# Common users jail
+				if [[ "$sshaccesstype" == "1" ]]; then
+					if [[ "x$commonjailtemplatename" == "x" ]]; then
+						echo "Error your jailkit common template name is not defined in sellyoursaas.conf"
+					else
+						if [[ ! -d "$chrootdir/$commonjailtemplatename" ]]; then
+							echo "Common jail directory $chrootdir/$commonjailtemplatename not exists, try to create it"
+							if [[ ! -f "$templatesdir/$commonjailtemplatename.tgz" ]]; then
+								echo "Failed to get jailkit common template $templatesdir/$commonjailtemplatename.tgz"
+								exit 1
+							fi
+							echo "tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/"
+							tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/
+						fi
+						if [[ ! -d "$chrootdir/$commonjailtemplatename$targetdir/$osusername" ]]; then
+							echo "mkdir -p $chrootdir/$commonjailtemplatename$targetdir/$osusername"
+							mkdir -p $chrootdir/$commonjailtemplatename$targetdir/$osusername
+						fi
+						echo "jk_jailuser -s /bin/bash -n -j $chrootdir/$commonjailtemplatename/ $osusername"
+						jk_jailuser -s /bin/bash -n -j $chrootdir/$commonjailtemplatename/ $osusername
+						echo "mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind"
+						mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind
+						echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
+						echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+					fi
+				else
+					# Private users jail
+					if [[ "$sshaccesstype" == "2" ]]; then
+						if [[ ! -d "$chrootdir/$osusername" ]]; then
+							if [[ "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tgz" ]]; then
+								echo "tar -xzf $templatesdir/$privatejailtemplatename.tgz --directory $chrootdir/"
+								tar -xzf $templatesdir/$privatejailtemplatename.tgz --directory $chrootdir/
+								echo "mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername"
+								mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername
+							else
+								echo "jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient"
+								jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient >/dev/null 2>&1
+							fi
+							echo "mkdir -p $chrootdir/$osusername$targetdir/$osusername"
+							mkdir -p $chrootdir/$osusername$targetdir/$osusername
+						fi
+						echo "jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername"
+						jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername
+						echo "mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind"
+						mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind
+						echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
+						echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+					fi
+				fi
+			fi
 		fi
-
-		chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-		if [[ "x$chrootdir" == "x" ]]; then
-			echo "Failed to get chroot directory for jailkit"
-			exit 1
-		fi
-		
-		echo `date +%Y%m%d%H%M%S`" ***** Create jailkit chroot directory $chrootdir/$osusername"
-		
-		if [[ ! -d "$chrootdir/$osusername" ]]; then
-			echo "mkdir -p $chrootdir/$osusername/{home/$osusername,tmp}"
-			mkdir -p $chrootdir/$osusername/{home/$osusername,tmp}
-			echo "jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php"
-			jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php
-			echo "jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername"
-			jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername
-		fi
-		
-		echo "mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind"
-		mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind
-		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
-		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
-		
 	fi
 fi
 
@@ -364,30 +405,63 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	echo rm -f $targetdir/$osusername/$dbname/*.log
 	rm -f $targetdir/$osusername/$dbname/*.log >/dev/null 2>&1 
 	echo rm -f $targetdir/$osusername/$dbname/*.log.*
-	rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1
+	rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1 
 	
-	if [[ "$usejailkit" == "1" ]]; then
+	if [[ "$sshaccesstype" > "0" ]]; then
 		
-		if [[ ! -d "/etc/jailkit/jk_init.ini" ]]; then
-			echo "Failed to find jailkit package"
-			exit 1
+		if [[ ! -f "/etc/jailkit/jk_init.ini" ]]; then
+			echo "Error failed to find jailkit package in your system"
+		else
+			chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+			if [[ "x$chrootdir" == "x" ]]; then
+				Error your jailkit chroot directory is not defined in sellyoursaas.conf
+			else
+				if [[ -d "$chrootdir" ]]; then
+				
+					commonjailtemplatename=`grep 'commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+					
+					echo `date +%Y%m%d%H%M%S`" ***** Remove jailkit chroot directory for user $osusername"
+					echo "chrootdir = $chrootdir"
+					echo "commonjailtemplatename = $commonjailtemplatename"
+					
+					# Common users jail
+					if [[ "$sshaccesstype" == "1" ]]; then
+						if [[ "x$commonjailtemplatename" == "x" ]]; then
+							echo "Error your jailkit common template name is not defined in sellyoursaas.conf"
+						else
+							if [[ -d "$chrootdir/$commonjailtemplatename" ]]; then
+								echo "umount $chrootdir/$commonjailtemplatename$targetdir/$osusername"
+								umount $chrootdir/$commonjailtemplatename$targetdir/$osusername
+								echo "rm -Rf $chrootdir/$commonjailtemplatename$targetdir/$osusername"
+								rm -Rf $chrootdir/$commonjailtemplatename$targetdir/$osusername
+								echo 'sed -i "/$osusername/d" $chrootdir/$commonjailtemplatename/etc/passwd'
+								sed -i "/$osusername/d" $chrootdir/$commonjailtemplatename/etc/passwd
+								echo 'sed -i "/$osusername/d" $chrootdir/$commonjailtemplatename/etc/group'
+								sed -i "/$osusername/d" $chrootdir/$commonjailtemplatename/etc/group
+							else
+								echo "Failed to find common jail $chrootdir/$commonjailtemplatename"
+							fi
+						fi
+					else
+						# Private users jail
+						if [[ "$sshaccesstype" == "2" ]]; then
+							if [[ -d "$chrootdir/$osusername" ]]; then
+								echo "umount $chrootdir/$osusername$targetdir/$osusername"
+								umount $chrootdir/$osusername$targetdir/$osusername
+								echo "rm -Rf $chrootdir/$osusername"
+								rm -Rf $chrootdir/$osusername
+							else
+								echo "Failed to find private jail $chrootdir/$osusername"
+							fi
+						fi
+					fi
+					echo 'sed -i "/$osusername/d" /etc/fstab'
+					sed -i "/$osusername/d" /etc/fstab
+					echo "usermod -d $targetdir/$osusername --shell /bin/false $osusername"
+					usermod -d $targetdir/$osusername --shell /bin/false $osusername
+				fi
+			fi
 		fi
-
-		chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-		if [[ "x$chrootdir" == "x" ]]; then
-			echo "Failed to get chroot directory for jailkit"
-			exit 1
-		fi
-		
-		echo `date +%Y%m%d%H%M%S`" ***** Remove jailkit chroot directory $chrootdir/$osusername"
-		
-		echo "umount $chrootdir/$osusername$targetdir/$osusername"
-		umount $chrootdir/$osusername$targetdir/$osusername
-		#echo "rm -Rf $chrootdir/$osusername"
-		#rm -Rf $chrootdir/$osusername
-		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
-		echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
-		
 	fi
 
 fi

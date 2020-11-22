@@ -3347,21 +3347,22 @@ class SellYourSaasUtils
    					$archivedir = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH;
    				}
 
-    			$generatedunixlogin   =$contract->array_options['options_username_os'];
-    			$generatedunixpassword=$contract->array_options['options_password_os'];
-    			$generateddbname      =$contract->array_options['options_database_db'];
-    			$generateddbport      =($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
-    			$generateddbusername  =$contract->array_options['options_username_db'];
-    			$generateddbpassword  =$contract->array_options['options_password_db'];
-    			$generateddbprefix    =($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
-    			$generatedunixhostname=$contract->array_options['options_hostname_os'];
-    			$generateddbhostname  =$contract->array_options['options_hostname_db'];
-    			$generateduniquekey   =getRandomPassword(true);
+    			$generatedunixlogin    =$contract->array_options['options_username_os'];
+    			$generatedunixpassword =$contract->array_options['options_password_os'];
+    			$generateddbname       =$contract->array_options['options_database_db'];
+    			$generateddbport       =($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
+    			$generateddbusername   =$contract->array_options['options_username_db'];
+    			$generateddbpassword   =$contract->array_options['options_password_db'];
+    			$generateddbprefix     =($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
+    			$generatedunixhostname =$contract->array_options['options_hostname_os'];
+    			$generateddbhostname   =$contract->array_options['options_hostname_db'];
+    			$generateduniquekey    =getRandomPassword(true);
 
-    			$customurl            =$contract->array_options['options_custom_url'];
-    			$customvirtualhostline=$contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
+    			$sshaccesstype         =$contract->array_options['options_sshaccesstype'];
+    			$customurl             =$contract->array_options['options_custom_url'];
+    			$customvirtualhostline =$contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
     			$SSLON='On';
-    			$CERTIFFORCUSTOMDOMAIN=$customurl;
+    			$CERTIFFORCUSTOMDOMAIN =$customurl;
     			if ($CERTIFFORCUSTOMDOMAIN)
     			{
     			    // Kept for backward compatibility
@@ -3534,6 +3535,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
 				$commandurl.= '&'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
 				$commandurl.= '&'.$directaccess;        // Param 38 in .sh
+				$commandurl.= '&'.$sshaccesstype;       // Param 39 in .sh
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 
