@@ -2212,7 +2212,7 @@ Jailkit nécessite de modifier l'accès au répertoire /mnt/diskhome/home car il
 rm -f /home/jail/home
 ---------------
 
-* Créer le répertoires home qui servira pour la montage de /mnt/diskhome/home
+* Créer le répertoires home qui servira pour le montage de /mnt/diskhome/home
 
 [source,bash]
 ---------------
@@ -2327,7 +2327,7 @@ mv commonjail.tgz privatejail.tgz /home/admin/wwwroot/dolibarr_documents/sellyou
 [source,bash]
 ---------------
 # Options for Jailkit
-chrootdir=/home/jeil/chroot
+chrootdir=/home/jail/chroot
 privatejailtemplatename=privatejail
 commonjailtemplatename=commonjail
 ---------------
