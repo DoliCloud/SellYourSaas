@@ -2211,13 +2211,11 @@ Jailkit nécessite de modifier l'accès au répertoire /mnt/diskhome/home car il
 rm -f /home/jail/home
 ---------------
 
-* Créer le répertoires home
+* Créer le répertoires home qui servira pour la montage de /mnt/diskhome/home
 
 [source,bash]
 ---------------
-mkdir /mnt/diskhome/chroot
 mkdir /home/jail/home
-mkdir /home/jail/chroot
 ---------------
 
 * Créer le répertoire qui contiendra les chroot/jail des utilisateurs
