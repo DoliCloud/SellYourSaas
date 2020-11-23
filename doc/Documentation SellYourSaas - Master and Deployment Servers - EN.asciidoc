@@ -2208,7 +2208,7 @@ Jailkit nécessite de modifier l'accès au répertoire /mnt/diskhome/home car il
 
 [source,bash]
 ---------------
-rm -r /home/jail/home
+rm -f /home/jail/home
 ---------------
 
 * Créer le répertoires home
