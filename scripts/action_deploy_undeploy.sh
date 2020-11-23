@@ -457,6 +457,9 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					fi
 					echo 'sed -i "/$osusername/d" /etc/fstab'
 					sed -i "/$osusername/d" /etc/fstab
+					# to prevent error "user osuxxxxx is currently used by process xxxx"
+					echo "killall -u $osusername; sleep 2"
+					killall -u $osusername; sleep 2
 					echo "usermod -d $targetdir/$osusername --shell /bin/false $osusername"
 					usermod -d $targetdir/$osusername --shell /bin/false $osusername
 				fi
