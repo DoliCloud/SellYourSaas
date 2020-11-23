@@ -712,7 +712,7 @@ else
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;
-		$contract->array_options['options_sshaccesstype'] = (empty($tmpproduct->array_options['options_sshaccesstype']?0:$tmpproduct->array_options['options_sshaccesstype']));
+		$contract->array_options['options_sshaccesstype'] = (empty($tmpproduct->array_options['options_sshaccesstype'])?0:$tmpproduct->array_options['options_sshaccesstype']);
 		$contract->array_options['options_hostname_db'] = $generateddbhostname;
 		$contract->array_options['options_database_db'] = $generateddbname;
 		$contract->array_options['options_port_db'] = $generateddbport;
