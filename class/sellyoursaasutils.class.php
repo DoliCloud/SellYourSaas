@@ -3358,7 +3358,7 @@ class SellYourSaasUtils
     			$generateddbhostname   =$contract->array_options['options_hostname_db'];
     			$generateduniquekey    =getRandomPassword(true);
 
-    			$sshaccesstype         =$contract->array_options['options_sshaccesstype'];
+    			$sshaccesstype         =(empty($contract->array_options['options_sshaccesstype'])?0:$contract->array_options['options_sshaccesstype']);
     			$customurl             =$contract->array_options['options_custom_url'];
     			$customvirtualhostline =$contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
     			$SSLON='On';
