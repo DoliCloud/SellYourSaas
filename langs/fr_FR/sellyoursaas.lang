@@ -506,7 +506,7 @@ BackupNow=Sauvegarder maintenant
 BackupOK=Sauvegarde réussie
 ArchiveInstanceDesc=Répertoire où l'instance sera archivée lorsqu'elle sera détruite.
 ArchiveTestInstanceDesc=AVERTISSEMENT: vérifiez que la fonctionnalité est activée en ayant l'entrée archivetestinstance=1 dans le fichier sellyoursaas.conf
-ToCreateDBUserManualy=Pour créer un utilisateur db manuellement sur SELECT uniquement, vous pouvez faire <br> GRANT SELECT ON nom_base_de_données.* to 'nom_utilisateur_en lecture seule@%%' IDENTIFIED PAR 'mot de passe'; FLUSH PRIVILEGES;
+ToCreateDBUserManualy=Pour créer un utilisateur db manuellement sur SELECT uniquement, vous pouvez faire <br> GRANT SELECT ON nom_base_de_données.* to 'nom_utilisateur_en lecture seule@%%' IDENTIFIED BY 'mot de passe'; FLUSH PRIVILEGES;
 LatestBackupMessage=Dernier message de sauvegarde
 SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accepter un code de réduction lors de l'entrée d'un mode de paiement
 DiscountCodeDesc=Le code de réduction utilisé pour vous inscrire ou pour entrer le paiement. Le code de réduction effectif utilisé pour définir la remise réelle pour la génération de facture est celui enregistré au niveau de la facture récurrente.
