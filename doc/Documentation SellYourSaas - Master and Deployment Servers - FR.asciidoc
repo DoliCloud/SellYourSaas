@@ -2200,12 +2200,12 @@ systemctl daemon-reload
 
 === Configuration de Jailkit (optionnel)
 
-Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
+Jailkit est un ensemble d'utilitaires pour limiter les comptes d'utilisateurs à des fichiers spécifiques en utilisant chroot() et/ou des commandes spécifiques. Mettre en place un shell chroot, un shell limité à une commande spécifique, ou un démon dans une prison chroot est beaucoup plus facile et peut être automatisé à l'aide de ces utilitaires.
 
 !! Important !!
 Jailkit nécessite de modifier l'accès au répertoire /mnt/diskhome/home car il ne fonctionnera pas avec un lien symbolique
 
-* supprimer le lien symbolique /home/jail/home qui pointe vers /mnt/diskhome/home
+* Supprimer le lien symbolique /home/jail/home qui pointe vers /mnt/diskhome/home
 
 [source,bash]
 ---------------
@@ -2333,7 +2333,7 @@ commonjailtemplatename=commonjail
 ---------------
 
 
-Add this constant in your backoffice to activate Jailkit
+Ajoutez cette constante dans votre backoffice pour activer Jailkit
 * SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 

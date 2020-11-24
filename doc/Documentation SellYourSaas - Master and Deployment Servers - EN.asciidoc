@@ -2197,28 +2197,28 @@ systemctl daemon-reload
 ---------------
 
 
-=== Configuration de Jailkit (optionnel)
+=== Jailkit configuration (optional)
 
 Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
 
 !! Important !!
-Jailkit nécessite de modifier l'accès au répertoire /mnt/diskhome/home car il ne fonctionnera pas avec un lien symbolique
+Jailkit requires changing the access to /mnt/diskhome/home directory as it will not work with a symbolic link
 
-* supprimer le lien symbolique /home/jail/home qui pointe vers /mnt/diskhome/home
+* Remove the symbolic link /home/jail/home that points to /mnt/diskhome/home
 
 [source,bash]
 ---------------
 rm -f /home/jail/home
 ---------------
 
-* Créer le répertoires home qui servira pour le montage de /mnt/diskhome/home
+* Create the home directory which will be used for mounting /mnt/diskhome/home
 
 [source,bash]
 ---------------
 mkdir /home/jail/home
 ---------------
 
-* Créer le répertoire qui contiendra les chroot/jail des utilisateurs
+* Create the directory that will contain the chroot/jail of users
 
 [source,bash]
 ---------------
@@ -2226,7 +2226,7 @@ mkdir /mnt/diskhome/chroot
 mkdir /home/jail/chroot
 ---------------
 
-* Ajouter les montages des répertoires dans /etc/fstab
+* Add mounts from directories to /etc/fstab
 
 [source,bash]
 ---------------
@@ -2236,7 +2236,7 @@ mkdir /home/jail/chroot
 /mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
 ---------------
 
-* Monter les répertoires
+* Mount directories
 
 [source,bash]
 ---------------
@@ -2244,14 +2244,14 @@ mount /home/jail/home
 mount /home/jail/chroot
 ---------------
 
-* Installation du package Jailkit
+* Installing the Jailkit package
 
 [source,bash]
 ---------------
 sudo apt install jailkit
 ---------------
 
-* Ajouter ceci à la fin du fichier de configuration /etc/jailkit/jk_init.ini
+* Add this to the end of the config file /etc/jailkit/jk_init.ini
 
 [source,bash]
 ---------------
@@ -2276,7 +2276,7 @@ paths = /usr/lib/x86_64-linux-gnu/libmysqlclient.so.21
 regularfiles = /etc/mysql/my.cf, /etc/mysql/conf.d/, /etc/mysql/mariadb.conf.d/
 ---------------
 
-* Ajouter ceci dans le fichier de configuration /etc/jailkit/jk_chrootsh.ini
+* Add this to the end of the config file /etc/jailkit/jk_chrootsh.ini
 
 [source,bash]
 ---------------
@@ -2284,14 +2284,14 @@ regularfiles = /etc/mysql/my.cf, /etc/mysql/conf.d/, /etc/mysql/mariadb.conf.d/
 env = TERM, PATH
 ---------------
 
-* Créer le répertoire qui contiendra le chroot/jail modèle qui servira pour créer les templates
+* Create the directory which will contain the chroot/jail model which will be used to create the templates
 
 [source,bash]
 ---------------
 mkdir /home/jail/chroot/template
 ---------------
 
-* Initialisation du chroot/jail avec les commandes que vous souhaitez rendre accessibles aux utilisateurs
+* Initializing the chroot/jail with the commands you want to make available to users
 
 [source,bash]
 ---------------
@@ -2301,11 +2301,11 @@ mkdir /home/jail/chroot/template/tmp
 chmod 1777 /home/jail/chroot/template/tmp
 ---------------
 
-Dans cette exemple le template commonjail.tgz servira à  créer le chroot/jail commun /home/jail/chroot/commonjail (si il n'existe pas)
+In this example the commonjail.tgz template will be used to create the chroot/jail common /home/jail/chroot/commonjail (if it does not exist)
 
-et le template privatejail.tgz servira à créer les chroot/jail privés (ex. /home/jail/chroot/osuxxxxx)
+and the privatejail.tgz template will be used to create private chroot/jail (eg. /home/jail/chroot/osuxxxxx)
 
-* Créer vos tgz qui serviront à installer les chroot/jail privés et à réinstaller le chroot/jail commun si besoin
+* Create your tgz which will be used to install the private chroot/jail and reinstall the common chroot/jail if necessary
 
 [source,bash]
 ---------------
@@ -2314,14 +2314,14 @@ tar czf commonjail.tgz template
 tar czf privatejail.tgz template
 ---------------
 
-* Déplacer vos templates dans le répertoire /sellyoursaas/scripts/templates accessible par votre serveur d'instances
+* Move your templates to the /sellyoursaas/scripts/templates directory accessible by your instances server
 
 [source,bash]
 ---------------
 mv commonjail.tgz privatejail.tgz /home/admin/wwwroot/dolibarr_documents/sellyoursaas/scripts/templates/
 ---------------
 
-* Modifier le fichier /etc/sellyoursaas.conf de votre serveur d'instances
+* Modify the /etc/sellyoursaas.conf file of your instances server
 
 [source,bash]
 ---------------
@@ -2336,12 +2336,12 @@ Add this constant in your backoffice to activate Jailkit
 * SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 
-Une nouvelle option "SSH access type" sera disponible dans votre service (Application) :
+A new "SSH access type" option will be available in your service (Application):
 
 image::config_jailkit_service.png[SSH access type]
 
 
-et dans les contrats (instances) :
+and in contracts (instances):
 
 image::config_jailkit_contrat.png[SSH access type]
 
