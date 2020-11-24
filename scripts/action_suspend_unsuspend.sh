@@ -448,7 +448,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 
 	export vhostfiletouse=$vhostfilesuspended;
 	if [[ $mode == "suspendmaintenance" ]]; then
-		export vhostfiletouse=$vhostfilesuspendmaintenance;
+		export vhostfiletouse=$vhostfilemaintenance;
 	fi	
 	
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
