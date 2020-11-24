@@ -430,7 +430,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
 	print $outputerr;
 
-	$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
+	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
+	$return_outputmysql = strpos($outputerr, ' Error ');
 	if ($return_outputmysql > 0) {
 		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
 	} else {
