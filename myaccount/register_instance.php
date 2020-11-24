@@ -120,7 +120,7 @@ $password2 = trim(GETPOST('password2','alpha'));
 $country_code = trim(GETPOST('address_country','alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain','alpha'));
 $tldid = trim(GETPOST('tldid','alpha'));
-$optinmessages = (GETPOST('optinmessage','aZ09') == '1' ? 1 : 0);
+$optinmessages = (GETPOST('optinmessages','aZ09') == '1' ? 1 : 0);
 
 $origin = GETPOST('origin','aZ09');
 $partner=GETPOST('partner','int');
