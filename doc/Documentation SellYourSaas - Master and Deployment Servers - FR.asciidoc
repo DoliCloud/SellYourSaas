@@ -43,7 +43,7 @@ Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser 
 	* Gestion d'un réseau de revendeur.
 	* Disponible en OpenSource.
 	
-Financé par les sociétés Open Source https://www.nltechno.com[NLTechno] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici une synthèse de ses capacités:
+Financé par les sociétés Open Source https://www.dolicloud.com[DoliCloud] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici une synthèse de ses capacités:
 
     * Déploiement de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
     * Diffusion d'instances gratuites sans demande d'informations confidentiels ni cartes bancaires.
@@ -1390,7 +1390,6 @@ It seems we must also restart apache to have this effective inside apache.
 !/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
 !/home/admin/wwwroot/dolibarr/.git
-!/home/admin/wwwroot/dolibarr_nltechno/.git
 !/home/admin/wwwroot/dolibarr_sellyoursaas/.git
 
 !/home/admin/.bash_history
@@ -4095,7 +4094,7 @@ You can force different values for some setup parameters when the customer has r
 * SELLYOURSAAS_RESELLER_URL-myseconddomain.com = https://www.myseconddomain.com/resellers.php
 
 To define account to use getipintel API for VPN probability.
-* SELLYOURSAAS_GETIPINTEL_EMAIL = contact+checkcustomer@nltechno.com
+* SELLYOURSAAS_GETIPINTEL_EMAIL = contact+checkcustomer@mydomain.com
 
 To enable native Datadog reporting (datadog-agent must just be installed)
 * SELLYOURSAAS_DATADOG_ENABLED = 1

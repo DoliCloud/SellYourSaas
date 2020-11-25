@@ -44,7 +44,7 @@ Following the deployment of v1 and at the request of users to perpetuate their i
 * Management of a reseller network.
 * Available in OpenSource.
 
-Funded by the Open Source companies https://www.nltechno.com [NLTechno] and https://www.teclib.com [TecLib], SellYourSaas v2 has achieved these objectives and is now in production for several companies offering Saas services (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], https://www.doliondemand.fr[DoliOnDemand],...). Here is a summary of its capabilities:
+Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and https://www.teclib.com [TecLib], SellYourSaas v2 has achieved these objectives and is now in production for several companies offering Saas services (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], https://www.doliondemand.fr[DoliOnDemand],...). Here is a summary of its capabilities:
 
 * Deployment of any WAMP application. Management of multiple solutions / different applications at the same time.
 * Free distribution of proceedings without request for confidential information or bank cards.
@@ -1391,7 +1391,6 @@ It seems we must also restart apache to have this effective inside apache.
 !/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
 !/home/admin/wwwroot/dolibarr/.git
-!/home/admin/wwwroot/dolibarr_nltechno/.git
 !/home/admin/wwwroot/dolibarr_sellyoursaas/.git
 
 !/home/admin/.bash_history
