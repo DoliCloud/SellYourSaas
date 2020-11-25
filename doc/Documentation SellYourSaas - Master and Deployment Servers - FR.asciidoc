@@ -3261,7 +3261,10 @@ vi /etc/exports
 
 Pour ajouter une ligne du type:
 
-	/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
+[source,bash]
+---------------
+/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
+---------------
 
 [source,bash]
 ---------------
@@ -3283,10 +3286,10 @@ Par exemple, sur le *Serveur master*:
 
 [source,bash]
 ---------------
-${IPTABLES} -t filter -A INPUT -p tcp -s ip.server.deploymeent --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A INPUT -p udp -s ip.server.deploymeent --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A OUTPUT -p tcp -d ip.server.deploymeent --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A OUTPUT -p udp -d ip.server.deploymeent --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A INPUT -p tcp -s ip.server.deployment --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A INPUT -p udp -s ip.server.deployment --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -p tcp -d ip.server.deployment --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -p udp -d ip.server.deployment --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
 
 Et sur le *Serveur de déploiement*
@@ -3297,9 +3300,14 @@ Si on a IP_SERVER et IP_SERVER2 récupéré ainsi:
 ---------------
 IP_SERVER=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1`
 IP_SERVER_V6=`ifconfig | grep -i global | sed -En 's/127.0.0.1//;s/.*inet6 (addr:)?\s?([^\s]+)/\2/p' | cut -d' ' -f1 | cut -d'/' -f1 `
-IP_SERVER2=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | sed '2 ! d'
+IP_SERVER2=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | sed '2 ! d'`
+---------------
 
-Il faudra ajouter
+Il faudra ajouter:
+
+[source,bash]
+---------------
+IP_SELLYOURSAAS_ADMIN=ip.server.master
 
 ${IPTABLES} -t filter -A OUTPUT -s $IP_SERVER -d $IP_SELLYOURSAAS_ADMIN -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -s $IP_SELLYOURSAAS_ADMIN -d $IP_SERVER -j ACCEPT
