@@ -709,10 +709,10 @@ else
 		$contract->array_options['options_undeployment_date'] = '';
 		$contract->array_options['options_undeployment_ip'] = '';
 		$contract->array_options['options_deployment_host'] = $serverdeployement;
-		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;
+		$contract->array_options['options_sshaccesstype'] = (empty($tmpproduct->array_options['options_sshaccesstype'])?0:$tmpproduct->array_options['options_sshaccesstype']);
 		$contract->array_options['options_hostname_db'] = $generateddbhostname;
 		$contract->array_options['options_database_db'] = $generateddbname;
 		$contract->array_options['options_port_db'] = $generateddbport;

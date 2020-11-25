@@ -134,6 +134,8 @@ if [ "x$VIRTUALHOSTHEAD" == "x-" ]; then
 fi
 export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
+export directaccess=${38}
+export sshaccesstype=${39}
 
 export ErrorLog='#ErrorLog'
 
@@ -195,6 +197,8 @@ echo "ALLOWOVERRIDE = $ALLOWOVERRIDE"
 echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
 echo "ispaidinstance = $ispaidinstance"
 echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
+echo "directaccess = $directaccess"
+echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +%Y%m%d%H%M%S`" calculated params:"
