@@ -2197,6 +2197,156 @@ systemctl daemon-reload
 ---------------
 
 
+=== Jailkit configuration (optional)
+
+Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
+
+!! Important !!
+Jailkit requires changing the access to /mnt/diskhome/home directory as it will not work with a symbolic link
+
+* Remove the symbolic link /home/jail/home that points to /mnt/diskhome/home
+
+[source,bash]
+---------------
+rm -f /home/jail/home
+---------------
+
+* Create the home directory which will be used for mounting /mnt/diskhome/home
+
+[source,bash]
+---------------
+mkdir /home/jail/home
+---------------
+
+* Create the directory that will contain the chroot/jail of users
+
+[source,bash]
+---------------
+mkdir /mnt/diskhome/chroot
+mkdir /home/jail/chroot
+---------------
+
+* Add mounts from directories to /etc/fstab
+
+[source,bash]
+---------------
+# /home/jail/home
+/mnt/diskhome/home /home/jail/home bind defaults,bind 0
+# /home/jail/chroot
+/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
+---------------
+
+* Mount directories
+
+[source,bash]
+---------------
+mount /home/jail/home
+mount /home/jail/chroot
+---------------
+
+* Installing the Jailkit package
+
+[source,bash]
+---------------
+sudo apt install jailkit
+---------------
+
+* Add this to the end of the config file /etc/jailkit/jk_init.ini
+
+[source,bash]
+---------------
+[groups]
+comment = Groups management
+executables = /usr/bin/groups
+
+[php]
+comment = The PHP Interpreter and Libraries
+executables = /usr/bin/php, /usr/bin/php7.4, /usr/bin/php7.3, /usr/bin/php7.2, /usr/bin/php5.6
+directories = /usr/lib/php, /usr/share/php, /usr/share/php, /etc/php, /usr/share/php-geshi, /usr/share/zoneinfo
+includesections = env
+
+[env]
+comment = environment variables
+executables = /usr/bin/env
+
+[mysqlclient]
+comment = mysql client
+executables = /usr/bin/mysql, /usr/bin/mysqldump
+paths = /usr/lib/x86_64-linux-gnu/libmysqlclient.so.21
+regularfiles = /etc/mysql/my.cf, /etc/mysql/conf.d/, /etc/mysql/mariadb.conf.d/
+---------------
+
+* Add this to the end of the config file /etc/jailkit/jk_chrootsh.ini
+
+[source,bash]
+---------------
+[DEFAULT]
+env = TERM, PATH
+---------------
+
+* Create the directory which will contain the chroot/jail model which will be used to create the templates
+
+[source,bash]
+---------------
+mkdir /home/jail/chroot/template
+---------------
+
+* Initializing the chroot/jail with the commands you want to make available to users
+
+[source,bash]
+---------------
+jk_init -c /etc/jailkit/jk_init.ini -j /home/jail/chroot/template extendedshell limitedshell groups sftp rsync editors git php mysqlclient
+mkdir /home/jail/chroot/template/home
+mkdir /home/jail/chroot/template/tmp
+chmod 1777 /home/jail/chroot/template/tmp
+---------------
+
+In this example the commonjail.tgz template will be used to create the chroot/jail common /home/jail/chroot/commonjail (if it does not exist)
+
+and the privatejail.tgz template will be used to create private chroot/jail (eg. /home/jail/chroot/osuxxxxx)
+
+* Create your tgz which will be used to install the private chroot/jail and reinstall the common chroot/jail if necessary
+
+[source,bash]
+---------------
+cd /home/jail/chroot
+tar czf commonjail.tgz template
+tar czf privatejail.tgz template
+---------------
+
+* Move your templates to the /sellyoursaas/scripts/templates directory accessible by your instances server
+
+[source,bash]
+---------------
+mv commonjail.tgz privatejail.tgz /home/admin/wwwroot/dolibarr_documents/sellyoursaas/scripts/templates/
+---------------
+
+* Modify the /etc/sellyoursaas.conf file of your instances server
+
+[source,bash]
+---------------
+# Options for Jailkit
+chrootdir=/home/jail/chroot
+privatejailtemplatename=privatejail
+commonjailtemplatename=commonjail
+---------------
+
+
+Add this constant in your backoffice to activate Jailkit
+* SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
+
+
+A new "SSH access type" option will be available in your service (Application):
+
+image::config_jailkit_service.png[SSH access type]
+
+
+and in contracts (instances):
+
+image::config_jailkit_contrat.png[SSH access type]
+
+
+
 === Allow generation of PNG thumbs from PDFs
 
 Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick
@@ -2798,6 +2948,10 @@ remoteserverlistenport=8080
 #websslcertificatecrt=with.sellyoursaas.com.crt
 #websslcertificatekey=with.sellyoursaas.com.key
 #websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+# Options for Jailkit
+#chrootdir=/home/jail/chroot
+#privatejailtemplatename=privatejail
+#commonjailtemplatename=commonjail
 ---------------
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
@@ -3960,6 +4114,9 @@ If you use an ssh port other than 22
 
 If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (same value of "newdoldataroot" in sellyoursaas.conf)
 * SELLYOURSAAS_FORCE_DOL_DATA_ROOT = /path/of/dolibarr/documents/in/deployment/server
+
+To activate Jailkit, a chroot security system (see Jailkit configuration)
+* SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 
 === TroubleShooting

@@ -120,7 +120,7 @@ $password2 = trim(GETPOST('password2','alpha'));
 $country_code = trim(GETPOST('address_country','alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain','alpha'));
 $tldid = trim(GETPOST('tldid','alpha'));
-$optinmessages = (GETPOST('optinmessage','aZ09') == '1' ? 1 : 0);
+$optinmessages = (GETPOST('optinmessages','aZ09') == '1' ? 1 : 0);
 
 $origin = GETPOST('origin','aZ09');
 $partner=GETPOST('partner','int');
@@ -709,10 +709,10 @@ else
 		$contract->array_options['options_undeployment_date'] = '';
 		$contract->array_options['options_undeployment_ip'] = '';
 		$contract->array_options['options_deployment_host'] = $serverdeployement;
-		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;
+		$contract->array_options['options_sshaccesstype'] = (empty($tmpproduct->array_options['options_sshaccesstype'])?0:$tmpproduct->array_options['options_sshaccesstype']);
 		$contract->array_options['options_hostname_db'] = $generateddbhostname;
 		$contract->array_options['options_database_db'] = $generateddbname;
 		$contract->array_options['options_port_db'] = $generateddbport;
