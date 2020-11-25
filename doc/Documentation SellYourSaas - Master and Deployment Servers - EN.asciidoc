@@ -3060,7 +3060,7 @@ resize2fs /dev/vdX9
 
 
 [Clonage d une instance serveur pour production bis ou pour développement]
-=== Clonage d une instance serveur pour production bis ou pour développement
+=== Clone an server instance for a another production server or for development
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
 
@@ -3105,7 +3105,7 @@ touch /mnt/diskhome/DATA_MYDEPLOYMENTSERVERX
 vi /etc/exports
 ---------------
 
-Pour ajouter une ligne du type:
+to add a line that looks like:
 
 	/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
 
@@ -3116,7 +3116,7 @@ exportfs
 systemctl restart nfs-kernel-server
 ---------------
 
-- Ajouter, dans le fichier */etc/fstab* du nouveau serveur de déploiement, l'entrée pour avoir le montage NFS au démarrage.
+- Add, into file */etc/fstab* of the new deployment server an entry to have the NFS mounted after a restart.
 
 [source,bash]
 ---------------
