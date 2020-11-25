@@ -49,7 +49,7 @@ if [[ "x$remoteserverlistenip" == "x" ]]; then
 fi
 remoteserverlistenport=`grep 'remoteserverlistenport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$remoteserverlistenport" == "x" ]]; then
-	remoteserverlistenip="8080"
+	remoteserverlistenport="8080"
 fi
 
 if [ "x$1" == "xstart" ]; then
