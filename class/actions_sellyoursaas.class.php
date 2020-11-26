@@ -89,41 +89,40 @@ class ActionsSellyoursaas
 	    	if ($user->admin && ! empty($object->array_options['options_dolicloud']))
 	    	{
 	    		$url = '';
-		    	if ($object->array_options['options_dolicloud'] == 'yesv2')
-		    	{
-		    	    $urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-		    	    if (! empty($object->array_options['options_domain_registration_page'])
-		    	        && $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-		    	    {
-		    	        $constforaltname = $object->array_options['options_domain_registration_page'];
-		    	        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-		    	        if (! empty($conf->global->$newnamekey))
-		    	        {
-		    	            $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
-		    	        }
-		    	    }
+	    		if ($object->array_options['options_dolicloud'] == 'yesv2')
+	    		{
+	    		    $urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+	    		    $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+	    		    if (! empty($object->array_options['options_domain_registration_page'])
+	    		        && $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+	    		    {
+	    		        $constforaltname = $object->array_options['options_domain_registration_page'];
+	    		        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
+	    		        if (! empty($conf->global->$newnamekey))
+	    		        {
+	    		            $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+	    		            if (! empty($conf->global->$newurlkey))
+	    		            {
+	    		                $urlmyaccount = $conf->global->$newurlkey;
+	    		            }
+	    		            else
+	    		            {
+	    		                $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
+	    		            }
 
-		    		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$object->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
-		    		$url=$urlmyaccount.'?mode=logout_dashboard&action=login&actionlogin=login&username='.$object->email.'&password=&login_hash='.$dol_login_hash;
-		    	}
+	    		            $sellyoursaasname = $conf->global->$newnamekey;
+	    		        }
+	    		    }
 
-		    	if ($url)
-		    	{
-		    	    $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-		    	    if (! empty($object->array_options['options_domain_registration_page'])
-		    	        && $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-		    	    {
-		    	        $constforaltname = $object->array_options['options_domain_registration_page'];
-		    	        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-		    	        if (! empty($conf->global->$newnamekey))
-		    	        {
-		    	            $sellyoursaasname = $conf->global->$newnamekey;
-		    	        }
-		    	    }
+	    		    $dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$object->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
+	    		    $url=$urlmyaccount.'?mode=logout_dashboard&action=login&actionlogin=login&username='.$object->email.'&password=&login_hash='.$dol_login_hash;
+	    		}
 
-		    	    $this->resprints = (empty($parameters['notiret'])?' -':'').'<!-- Added by getNomUrl hook of SellYourSaas -->';
-			    	$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
-		    	}
+	    		if ($url)
+	    		{
+	    		    $this->resprints = (empty($parameters['notiret'])?' -':'').'<!-- Added by getNomUrl hook of SellYourSaas -->';
+	    		    $this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
+	    		}
 	    	}
     	}
 

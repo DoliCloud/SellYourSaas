@@ -177,8 +177,27 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	elseif (is_object($object->thirdparty)) $thirdparty = $object->thirdparty;
 	if ($user->admin && is_object($thirdparty) && (! empty($thirdparty->array_options['options_dolicloud'])))
 	{
+	    $urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+	    if (! empty($thirdparty->array_options['options_domain_registration_page'])
+	        && $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+	    {
+	        $constforaltname = $thirdparty->array_options['options_domain_registration_page'];
+	        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
+	        if (! empty($conf->global->$newnamekey))
+	        {
+	            $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+	            if (! empty($conf->global->$newurlkey))
+	            {
+	                $urlmyaccount = $conf->global->$newurlkey;
+	            }
+	            else
+	            {
+	                $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+	            }
+	        }
+	    }
 		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
-		$url=$conf->global->SELLYOURSAAS_ACCOUNT_URL.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
+		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
 	}
 	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.$url.'</a>';
 	$links.='Link to customer dashboard : ';
