@@ -375,11 +375,19 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	print '<td>'.$backupdir.'/'.$login.'</td>';
 	print '</tr>';
 
-	// Last backup date
+	// Last backup date try
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("DateLastBackup").'</td>';
 	print '<td>';
 	if ($object->array_options['options_latestbackup_date']) print dol_print_date($object->array_options['options_latestbackup_date'], 'dayhour', 'tzuser');
+	print '</td>';
+	print '</tr>';
+
+	// Last backup date success
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("DateLastBackupOK").'</td>';
+	print '<td>';
+	if ($object->array_options['options_latestbackup_date_ok']) print dol_print_date($object->array_options['options_latestbackup_date_ok'], 'dayhour', 'tzuser');
 	print '</td>';
 	print '</tr>';
 

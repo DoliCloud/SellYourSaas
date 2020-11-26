@@ -480,7 +480,8 @@ if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 		print 'Update date of full backup (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
 
 		// Update database
-		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup
+		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
+		$object->array_options['options_latestbackup_date_ok'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'OK';
 		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
 		$object->update($user, 1);
@@ -518,7 +519,7 @@ else
 	if ($mode == 'confirm')
 	{
 		// Update database
-		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup
+		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'KO';
 		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
 		$object->update($user, 1);
