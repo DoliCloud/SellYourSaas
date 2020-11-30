@@ -141,7 +141,26 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
         $constforaltname = $tmpobject->array_options['options_domain_registration_page'];
         $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
         if (! empty($conf->global->$newnamekey)) $conf->global->SELLYOURSAAS_NAME = $conf->global->$newnamekey;
-        $conf->global->SELLYOURSAAS_ACCOUNT_URL        = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_ACCOUNT_URL);
+
+        $urlmyaccount = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
+        if (! empty($tmpobject->array_options['options_domain_registration_page'])
+            && $tmpobject->array_options['options_domain_registration_page'] != $savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+        {
+            $constforaltname = $tmpobject->array_options['options_domain_registration_page'];
+            $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
+            $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+            if (! empty($conf->global->$newurlkey))
+            {
+                $urlmyaccount = $conf->global->$newurlkey;
+            }
+            else
+            {
+                $urlmyaccount = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $urlmyaccount);
+            }
+        }
+
+
+        $conf->global->SELLYOURSAAS_ACCOUNT_URL        = $urlmyaccount;
         $conf->global->SELLYOURSAAS_MAIN_EMAIL         = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_MAIN_EMAIL);
         $conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM);
         $conf->global->SELLYOURSAAS_NOREPLY_EMAIL      = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_NOREPLY_EMAIL);

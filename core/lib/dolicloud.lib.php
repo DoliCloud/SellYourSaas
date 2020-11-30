@@ -182,18 +182,14 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	        && $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
 	    {
 	        $constforaltname = $thirdparty->array_options['options_domain_registration_page'];
-	        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-	        if (! empty($conf->global->$newnamekey))
+	        $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+	        if (! empty($conf->global->$newurlkey))
 	        {
-	            $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
-	            if (! empty($conf->global->$newurlkey))
-	            {
-	                $urlmyaccount = $conf->global->$newurlkey;
-	            }
-	            else
-	            {
-	                $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
-	            }
+	            $urlmyaccount = $conf->global->$newurlkey;
+	        }
+	        else
+	        {
+	            $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
 	        }
 	    }
 		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
