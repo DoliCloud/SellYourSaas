@@ -25,10 +25,7 @@ echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
 echo "# PWD ------------> $PWD" 
 echo "# arguments ------> ${@}"
-echo "# path to me -----> ${0}"
 echo "# parent path ----> ${0%/*}"
-echo "# my name --------> ${0##*/}"
-echo "# realname -------> $(realpath ${0})"
 echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
@@ -1133,7 +1130,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -p$dbpassword"
 
 	# Load dump file
-	echo Search dumpfile into $dirwithdumpfile
+	echo `date +%Y%m%d%H%M%S`" Search dumpfile into $dirwithdumpfile"
 	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
 	do
 		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
@@ -1203,7 +1200,7 @@ fi
 if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [[ "x$cliafter" != "x" ]]; then
 		if [ -f $cliafter ]; then
-			echo ". $cliafter"
+			echo `date +%Y%m%d%H%M%S`" Execute script with . $cliafter"
 			. $cliafter
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running the CLI script $cliafter 

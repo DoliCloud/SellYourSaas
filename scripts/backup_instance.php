@@ -431,7 +431,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	print $outputerr;
 
 	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
-	$return_outputmysql = strpos($outputerr, ' Error ');
+	//$return_outputmysql = strpos($outputerr, ' Error ');
+	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
 	if ($return_outputmysql > 0) {
 		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
 	} else {
