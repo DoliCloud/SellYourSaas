@@ -509,7 +509,9 @@ class ActionsSellyoursaas
 					$db->rollback();
 				}
 
-				$urlto=preg_replace('/action=[a-z]+/', '', $_SERVER['REQUEST_URI']);
+				$urlto=preg_replace('/action=[a-z_]+/', '', $_SERVER['REQUEST_URI']);
+				$urlto=preg_replace('/&confirm=yes/', '', $urlto);
+				$urlto=preg_replace('/&token=/', '&tokendisabled=', $urlto);
 				if ($urlto)
 				{
 					dol_syslog("Redirect to page urlto=".$urlto." to avoid to do action twice if we do back");
