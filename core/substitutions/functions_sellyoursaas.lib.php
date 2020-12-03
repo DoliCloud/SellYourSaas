@@ -147,7 +147,6 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
             && $tmpobject->array_options['options_domain_registration_page'] != $savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
         {
             $constforaltname = $tmpobject->array_options['options_domain_registration_page'];
-            $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
             $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
             if (! empty($conf->global->$newurlkey))
             {
