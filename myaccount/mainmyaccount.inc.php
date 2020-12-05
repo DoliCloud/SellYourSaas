@@ -494,12 +494,12 @@ if (! function_exists('dol_getprefix'))
 {
 	function dol_getprefix($mode='')
 	{
-	    global $conf;
-
-	    // If prefix is for email
+		// If prefix is for email (we need to have $conf alreayd loaded for this case)
 		if ($mode == 'email')
 		{
-		    if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID))	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
+			global $conf;
+
+			if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID))	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
 		    {
 		        if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
 		        elseif (isset($_SERVER["SERVER_NAME"])) return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
@@ -512,8 +512,14 @@ if (! function_exists('dol_getprefix'))
 		    return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
 		}
 
+		// If prefix is for session (no need to have $conf loaded)
+		global $dolibarr_main_instance_unique_id, $dolibarr_main_cookie_cryptkey;	// This is loaded by filefunc.inc.php
+		$tmp_instance_unique_id = empty($dolibarr_main_instance_unique_id) ? (empty($dolibarr_main_cookie_cryptkey) ? '' : $dolibarr_main_cookie_cryptkey) : $dolibarr_main_instance_unique_id; // Unique id of instance
+
 		// The recommended value (may be not defined for old versions)
-		if (! empty($conf->file->instance_unique_id)) return 'sellyoursaas'.$conf->file->instance_unique_id;
+		if (!empty($tmp_instance_unique_id)) {
+			return 'sellyoursaas'.$tmp_instance_unique_id;
+		}
 
 		// For backward compatibility
 		if (isset($_SERVER["SERVER_NAME"]) && isset($_SERVER["DOCUMENT_ROOT"]))
