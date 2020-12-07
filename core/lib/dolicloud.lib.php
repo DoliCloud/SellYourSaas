@@ -65,7 +65,7 @@ function getPreviousInstanceInChain($object)
     if (empty($object->array_options['options_cookieregister_previous_instance'])) return null;
 
     $contract = new Contrat($db);
-    $result = $contract->fetch(0, '', $object->array_options['options_cookieregister_previous_instance']);
+    $result = $contract->fetch(0, '', $object->array_options['options_cookieregister_previous_instance']);		// $object->array_options['options_cookieregister_previous_instance'] is ref_customer of previous instance
     if ($result > 0) return $contract;
     else return null;
 }
