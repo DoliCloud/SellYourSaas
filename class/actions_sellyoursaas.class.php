@@ -1106,6 +1106,12 @@ class ActionsSellyoursaas
     	global $conf,$langs;
     	global $hookmanager;
 
+    	if (! empty($conf->global->SELLYOURSAAS_AFTERPDFCREATION_HOOK_DISABLED))
+    	{
+    	    dol_syslog("Trigger afterPDFCreation was called but constant 'SELLYOURSAAS_AFTERPDFCREATION_HOOK_DISABLED' is defined.", LOG_WARNING);
+    	    return 0;
+    	}
+
     	if (! is_object($parameters['object']))
     	{
     	    dol_syslog("Trigger afterPDFCreation was called but parameter 'object' was not set by caller.", LOG_WARNING);
