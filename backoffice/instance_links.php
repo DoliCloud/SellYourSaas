@@ -651,7 +651,7 @@ print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
     $arraylistofinstances = getListOfInstancesInChain($object);
 
     print '<br>';
-    print_barre_liste($langs->trans("ChainOfRegistrations"),'','');
+    print_barre_liste($langs->trans("ChainOfRegistrations"),'','','','','','','',0);
 
     print '<div class="div-table-responsive-no-min">';
     print '<table class="noborder" width="100%">';
