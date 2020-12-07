@@ -645,8 +645,8 @@ print '<br>';
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 
-if (! empty($object->array_options['options_cookieregister_previous_instance']))
-{
+//if (! empty($object->array_options['options_cookieregister_previous_instance']))
+//{
     // Get all instances in chain
     $arraylistofinstances = getListOfInstancesInChain($object);
 
@@ -657,9 +657,9 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
     print '<table class="noborder" width="100%">';
 
     print '<tr>';
-    print '<td>'.$langs->trans("#").'</td>';
     print '<td>'.$langs->trans("Instance").'</td>';
     print '<td>'.$langs->trans("RefCustomer").'</td>';
+    print '<td>'.$langs->trans("RegistrationCounter").'</td>';
     print '<td>'.$langs->trans("IP").'</td>';
     print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
     print '<td>'.$langs->trans("Date").'</td>';
@@ -675,9 +675,9 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
 
         // Nb of users
         print '<tr>';
-        print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
         print '<td>'.$instance->getNomUrl(1).'</td>';
         print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
+        print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
         print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
         print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
         print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
@@ -686,10 +686,12 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
         if ($user->rights->sellyoursaas->write)
         {
             print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
-            print ' &nbsp; ';
-            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
-            print ' &nbsp; ';
-            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+            if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
+	            print ' &nbsp; ';
+	            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
+	            print ' &nbsp; ';
+	            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+            }
         }
         print '</td>';
         print '</tr>';
@@ -710,7 +712,7 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
 
     print '</table>';
     print '</div>';
-}
+//}
 
 
 llxFooter();

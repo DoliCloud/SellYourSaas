@@ -646,8 +646,9 @@ if ($action != 'edit')
 else
 {
 	print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="update">';
-	$doleditor=new DolEditor('NLTECHNO_NOTE',$conf->global->NLTECHNO_NOTE,'',480,'Full');
+	$doleditor=new DolEditor('NLTECHNO_NOTE', $conf->global->NLTECHNO_NOTE, '', 480, 'dolibarr_mailings');
 	print $doleditor->Create(1);
 	print '<br>';
 	print '<input class="button" type="submit" name="'.$langs->trans("Save").'">';
