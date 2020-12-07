@@ -535,3 +535,5 @@ OptinForCommercialMessages=Optin for commercial messages
 OptinForCommercialMessagesOnMyAccount=I agree to receive messages from %s including newsletters, promotional and commercial offers.
 SELLYOURSAAS_GETIPINTEL_EMAIL=API Key (email) to use GetIPIntelservice (IP VPN probability)
 SELLYOURSAAS_IPQUALITY_KEY=API Key to use IPQualityScore (IP TOR usage)
+SELLYOURSAAS_EMAIL_ADDRESSES_BANNED=List of email addresses or domain names that you want to ban during registration (separated by commas)
+ErrorEMailAddressBannedForSecurityReasons=This type of email address has been banned for security reasons. Use another email address or contact us if you cannot do otherwise.
