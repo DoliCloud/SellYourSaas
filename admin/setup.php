@@ -548,7 +548,6 @@ print '</td>';
 print '<td><span class="opacitymedium">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
 print '</tr>';
 
-
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_NAME_RESERVED" value="'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'">';
@@ -556,6 +555,12 @@ print '</td>';
 print '<td><span class="opacitymedium">^mycompany[0-9]*\.</span></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_EMAIL_ADDRESSES_BANNED" value="'.$conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED.'">';
+print '</td>';
+print '<td><span class="opacitymedium">yopmail.com,hotmail.com,spammer@gmail.com</span></td>';
+print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD").'</td>';
 print '<td>';

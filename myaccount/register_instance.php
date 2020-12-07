@@ -344,6 +344,22 @@ else                    // When we deploy from the register.php page
 		header("Location: ".$newurl);
 		exit(-1);
 	}
+	if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED))
+	{
+	    $listofbanned = explode(",",$conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
+	    if (! empty($listofbanned))
+	    {
+	        foreach($listofbanned as $banned)
+	        {
+	            if (preg_match('/'.$banned.'/i', $email))
+	            {
+	                setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
+	                header("Location: ".$newurl);
+	                exit(-1);
+	            }
+	        }
+	    }
+	}
 	if (empty($password) || empty($password2))
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
