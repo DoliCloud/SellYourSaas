@@ -351,7 +351,7 @@ else                    // When we deploy from the register.php page
 	    {
 	        foreach($listofbanned as $banned)
 	        {
-	            if (preg_match('/'.$banned.'/i', $email))
+	            if (preg_match('/'.preg_quote($banned, '/').'/i', $email))
 	            {
 	                setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
 	                header("Location: ".$newurl);
