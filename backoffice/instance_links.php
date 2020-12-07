@@ -138,8 +138,30 @@ if (empty($reshook))
 
 	    if ($newdb)
 	    {
+	        $urlmyaccount = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
+
+	        $tmpthirdparty = new Societe($db);
+	        $ret = $tmpthirdparty->fetch($tmpcontract->fk_soc);
+	        if ($ret > 0)
+	        {
+	            if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
+	                && $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+	            {
+	                $constforaltname = $tmpthirdparty->array_options['options_domain_registration_page'];
+	                $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+	                if (! empty($conf->global->$newurlkey))
+	                {
+	                    $urlmyaccount = $conf->global->$newurlkey;
+	                }
+	                else
+	                {
+	                    $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+	                }
+	            }
+	        }
+
 	        include_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-	        $stringtosave = '<script type="text/javascript" src="'.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/public/localdata.js"></script>';
+	        $stringtosave = '<script type="text/javascript" src="'.$urlmyaccount.'/public/localdata.js"></script>';
 	        if ($action == 'removespamtracker') $stringtosave = '';
 	        dolibarr_set_const($newdb, 'MAIN_HOME', $stringtosave);
     	    //$tmpcontract->array_options['spammer'] = 1;
