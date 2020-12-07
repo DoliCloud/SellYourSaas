@@ -166,7 +166,14 @@ class ActionsSellyoursaas
             }
             if ($isanurlofasellyoursaasinstance)
             {
-                $this->results['objref'] = $parameters['objref'].' <a href="https://'.$parameters['objref'].'" target="_blank">'.img_picto('https://'.$parameters['objref'], 'object_globe').'</a>';
+                $objref = $parameters['objref'];
+                $url = 'https://'.$parameters['objref'];
+                if (! empty($object->array_options['options_custom_url'])) {
+                    $objref = $object->array_options['options_custom_url'];
+                    $url = 'https://'.$object->array_options['options_custom_url'];
+                }
+
+                $this->results['objref'] = $objref.' <a href="'.$url.'" target="_blank">'.img_picto($url, 'object_globe').'</a>';
 
                 if ($parameters['currentcontext'] == 'contractcard')
                 {
