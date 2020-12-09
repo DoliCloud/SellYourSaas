@@ -897,32 +897,35 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
 			export pathforcertif=`dirname $fileforconfig1`
 			export pathforcertif=`dirname $pathforcertif`
+			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
+			export webCustomSSLCertificateKEY=$CERTIFFORCUSTOMDOMAIN.key
+			export webCustomSSLCertificateIntermediate=$CERTIFFORCUSTOMDOMAIN-intermediate.crt
 		
-			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt ]]; then
-				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt to /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.crt"
-				ln -fs /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt
+			if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+				echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to $pathforcertif/crt/$webCustomSSLCertificateCRT"
+				ln -fs $pathforcertif/crt/$webCustomSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
 				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt ]]; then
-					echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt to /etc/apache2/with.sellyoursaas.com.crt"
-					ln -fs /etc/apache2/with.sellyoursaas.com.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN.crt
+				if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+					echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to /etc/apache2/$webSSLCertificateCRT"
+					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/webCustomSSLCertificateCRT
 				fi
 			fi
-			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key ]]; then
-				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key to /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.key"
-				ln -fs /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN.key /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key
+			if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
+				echo "Create link /etc/apache2/$webCustomSSLCertificateKEY to $pathforcertif/crt/$webCustomSSLCertificateKEY"
+				ln -fs $pathforcertif/crt/$webCustomSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
 				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key ]]; then
-					echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key to /etc/apache2/with.sellyoursaas.com.key"
-					ln -fs /etc/apache2/with.sellyoursaas.com.key /etc/apache2/$CERTIFFORCUSTOMDOMAIN.key
+				if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
+					echo "Create link /etc/apache2/$webCustomSSLCertificateKEY to /etc/apache2/$webSSLCertificateKEY"
+					ln -fs /etc/apache2/$webSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
 				fi
 			fi
-			if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt ]]; then
-				echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt to /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN-intermediate.crt"
-				ln -fs /$pathforcertif/crt/$CERTIFFORCUSTOMDOMAIN-intermediate.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt
+			if [[ ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
+				echo "Create link /etc/apache2/$webCustomSSLCertificateIntermediate to $pathforcertif/crt/$webCustomSSLCertificateIntermediate"
+				ln -fs $pathforcertif/crt/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
 				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt ]]; then
-					echo "Create link /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt to /etc/apache2/with.sellyoursaas.com-intermediate.crt"
-					ln -fs /etc/apache2/with.sellyoursaas.com-intermediate.crt /etc/apache2/$CERTIFFORCUSTOMDOMAIN-intermediate.crt
+				if [[ ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
+					echo "Create link /etc/apache2/$webCustomSSLCertificateIntermediate to /etc/apache2/$webSSLCertificateIntermediate"
+					ln -fs /etc/apache2/$webSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
 				fi
 			fi
 		fi
@@ -930,9 +933,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
-                  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
-                  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+                  sed -e 's/__webSSLCertificateCRT__/$webCustomSSLCertificateCRT/g' | \
+                  sed -e 's/__webSSLCertificateKEY__/$webCustomSSLCertificateKEY/g' | \
+                  sed -e 's/__webSSLCertificateIntermediate__/$webCustomSSLCertificateIntermediate/g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -947,9 +950,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
-                  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
-                  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+                  sed -e "s/__webSSLCertificateCRT__/$webCustomSSLCertificateCRT/g" | \
+                  sed -e "s/__webSSLCertificateKEY__/$webCustomSSLCertificateKEY/g" | \
+                  sed -e "s/__webSSLCertificateIntermediate__/$webCustomSSLCertificateIntermediate/g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \

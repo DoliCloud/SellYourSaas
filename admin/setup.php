@@ -170,9 +170,8 @@ if ($action == 'set')
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
 		dolibarr_set_const($db,"SELLYOURSAAS_PAID_ARCHIVES_PATH",GETPOST("SELLYOURSAAS_PAID_ARCHIVES_PATH"),'chaine',0,'',$conf->entity);
 
-		$dir=GETPOST("SELLYOURSAAS_NAME_RESERVED");
-		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
 		dolibarr_set_const($db,"SELLYOURSAAS_NAME_RESERVED",GETPOST("SELLYOURSAAS_NAME_RESERVED"),'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db,"SELLYOURSAAS_EMAIL_ADDRESSES_BANNED",GETPOST("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED"),'chaine',0,'',$conf->entity);
 
 		// Save images
 		$dirforimage=$conf->mycompany->dir_output.'/logos/';
@@ -548,7 +547,6 @@ print '</td>';
 print '<td><span class="opacitymedium">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
 print '</tr>';
 
-
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_NAME_RESERVED" value="'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'">';
@@ -556,6 +554,12 @@ print '</td>';
 print '<td><span class="opacitymedium">^mycompany[0-9]*\.</span></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_EMAIL_ADDRESSES_BANNED" value="'.$conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED.'">';
+print '</td>';
+print '<td><span class="opacitymedium">yopmail.com,hotmail.com,spammer@gmail.com</span></td>';
+print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD").'</td>';
 print '<td>';
