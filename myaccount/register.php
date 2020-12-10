@@ -652,13 +652,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	          	if ($productref != 'none')
 	          	{
 	          	?>
-	            	<input type="submit"<?php echo $disabled; ?> name="submit" style="margin: 10px;" value="<?php echo $langs->trans("SignMeUp") ?>" class="btn btn-primary" id="submit" />
+	            	<input type="submit"<?php echo $disabled; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("SignMeUp") ?>" class="btn btn-primary" id="newinstance" />
 	            <?php
 	          	}
 	          	else
 	          	{
 	          	?>
-	            	<input type="submit"<?php echo $disabled; ?> name="submit" style="margin: 10px;" value="<?php echo $langs->trans("CreateMyAccount") ?>" class="btn btn-primary" id="submit" />
+	            	<input type="submit"<?php echo $disabled; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("CreateMyAccount") ?>" class="btn btn-primary" id="newinstance" />
 	          	<?php
 	          	}
 	          	?>

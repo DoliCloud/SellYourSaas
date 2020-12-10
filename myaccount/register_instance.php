@@ -112,6 +112,7 @@ if (empty($user->id))
 	$user->getrights();
 }
 
+$action = GETPOST('action','alpha');
 $orgname = ucfirst(trim(GETPOST('orgName','alpha')));
 $email = trim(GETPOST('username','alpha'));
 $domainemail = preg_replace('/^.*@/', '', $email);
