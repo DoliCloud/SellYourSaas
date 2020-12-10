@@ -290,6 +290,9 @@ elseif ($reusesocid)		// When we use the "Add another instance" from myaccount d
 }
 else                    // When we deploy from the register.php page
 {
+    // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
+    $hookmanager->initHooks(array('sellyoursaas-register-instance'));
+
 	if (! preg_match('/\?/', $newurl)) $newurl.='?';
 	if (! preg_match('/orgName/i', $newurl)) $newurl.='&orgName='.urlencode($orgname);
 	if (! preg_match('/username/i', $newurl)) $newurl.='&username='.urlencode($email);
@@ -300,6 +303,14 @@ else                    // When we deploy from the register.php page
 	if (! preg_match('/partner/i', $newurl)) $newurl.='&partner='.urlencode($partner);
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
+
+	$parameters = array('orgName' => $orgName, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
+	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+	if ($reshook < 0) {
+	    setEventMessages($hookmanager->error, null, 'errors');
+	    header("Location: ".$newurl);
+	    exit(-1);
+	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain))
 	{
