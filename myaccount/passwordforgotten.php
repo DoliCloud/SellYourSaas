@@ -84,7 +84,7 @@ $newpassword2   = GETPOST('newpassword2', 'none');
 $conf->entity 	= (GETPOST('entity','int') ? GETPOST('entity','int') : 1);
 
 // Instantiate hooks of thirdparty module only if not already define
-$hookmanager->initHooks(array('passwordforgottenpage'));
+$hookmanager->initHooks(array('sellyoursaas-passwordforgottenpage'));
 
 
 if (GETPOST('dol_hide_leftmenu','alpha') || ! empty($_SESSION['dol_hide_leftmenu']))               $conf->dol_hide_leftmenu=1;
