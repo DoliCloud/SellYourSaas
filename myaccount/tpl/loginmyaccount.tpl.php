@@ -66,6 +66,9 @@ if ($favicon) {
 
 print top_htmlhead_sellyoursaas($head, $titleofpage, 0, 0, $arrayofjs, array(), 0, $disablenofollow);
 
+// Disable captcha
+$_SESSION['dol_bypass_antispam'] = 1;
+
 ?>
 <!-- BEGIN PHP TEMPLATE LOGIN.TPL.PHP -->
 

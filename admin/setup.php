@@ -377,7 +377,7 @@ print '</td>';
 print '<td><span class="opacitymedium">192.168.0.1,123.456.789.012...</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainEmail").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL" value="'.$conf->global->SELLYOURSAAS_MAIN_EMAIL.'" class="minwidth300">';
 print '</td>';
@@ -391,14 +391,14 @@ print '</td>';
 print '<td><span class="opacitymedium">contact+premium@mysaasdomainname.com</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasSupervisionEmail").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSupervisionEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUPERVISION_EMAIL" value="'.$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL.'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium">supervision@mysaasdomainname.com</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasNoReplyEmail").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasNoReplyEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_NOREPLY_EMAIL" value="'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.'" class="minwidth300">';
 print '</td>';
