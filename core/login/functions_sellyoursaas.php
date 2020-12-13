@@ -48,8 +48,9 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 	}
 	else
 	{
-		// Test with hash
+		//dol_syslog("thirdparty found with id=".$thirdparty->id);
 
+		// Test with hash
 		if (GETPOST('login_hash', 'alpha', 1))
 		{
 			$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$usertotest.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one day
@@ -65,6 +66,9 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 					// Login is ok
 					$_SESSION["dol_loginsellyoursaas"] = $thirdparty->id;
 					return $tmpuser->login;
+				} else {
+					$_SESSION["dol_loginmesg"]='ErrorSetupOfModuleSellYourSaasNotComplete';		// Set invisible message
+					return '';
 				}
 			}
 		}

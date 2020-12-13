@@ -205,13 +205,12 @@ if ($action == 'buildnewpassword' && $username)
         		$hashreset = getRandomPassword(true, array('I'));
         		$thirdparty->array_options['options_pass_temp']=$hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now(), 1, 'd'), 'dayhourlog');
         		$result=$thirdparty->update($thirdparty->id, $user, 0);
-                if ($result < 0)
-                {
+                if ($result < 0) {
                     // Failed
-                    $message = '<div class="error">'.$langs->trans("ErrorFailedToSetTemporaryHash").'</div>';
-                }
-                else
-                {
+                    $message = '<div class="error">'.$langs->trans("ErrorFailedToSetTemporaryHash");
+                    $message .= join(', ', $thirdparty->errors);
+                    $message .= '</div>';
+                } else {
                     // Success
                 	include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 

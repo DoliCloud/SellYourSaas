@@ -128,6 +128,9 @@ esac
 exit 0
 ---------------
 
+Try to connect to webhog on:  http://localhost:8025
+
+
 === Installation de postfix
 
 Installer postfix par apt.

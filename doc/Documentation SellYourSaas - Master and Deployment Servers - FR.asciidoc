@@ -703,8 +703,7 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* Sur Ubuntu 18.04 et plus, vérifiez que le paramètre *PrivateTmp* est à *false* dans la configuration de lancement Apache. Ceci permettra d'avoir un 
-répertoire */tmp* non unique et isolé à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam.
+* Sur Ubuntu 18.04 et plus, vérifiez que le paramètre *PrivateTmp* est à *false* dans le fichier *apache2.service* de configuration de lancement Apache. Ceci permettra d'avoir un répertoire */tmp* non unique et isolé à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam.
 
 [source,bash]
 ---------------
