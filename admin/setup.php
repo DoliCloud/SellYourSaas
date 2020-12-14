@@ -349,35 +349,35 @@ print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" v
 print '</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasName").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasName").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_NAME" value="'.$conf->global->SELLYOURSAAS_NAME.'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium">My SaaS service</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainDomain").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainDomain").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_DOMAIN_NAME" value="'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium">mysaasdomainname.com</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES.'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_IP" value="'.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium">192.168.0.1,123.456.789.012...</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainEmail").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL" value="'.$conf->global->SELLYOURSAAS_MAIN_EMAIL.'" class="minwidth300">';
 print '</td>';
@@ -391,14 +391,14 @@ print '</td>';
 print '<td><span class="opacitymedium">contact+premium@mysaasdomainname.com</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasSupervisionEmail").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSupervisionEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUPERVISION_EMAIL" value="'.$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL.'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium">supervision@mysaasdomainname.com</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasNoReplyEmail").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasNoReplyEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_NOREPLY_EMAIL" value="'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.'" class="minwidth300">';
 print '</td>';
@@ -416,7 +416,7 @@ foreach($arrayofsuffixfound as $service => $suffix)
 {
     print '<!-- suffix = '.$suffix.' -->'."\n";
 
-    print '<tr class="oddeven"><td>'.$service.' - '.$langs->trans("DefaultProductForInstances").'</td>';
+    print '<tr class="oddeven"><td>'.($service ? $service.' - ' : '').$langs->trans("DefaultProductForInstances").'</td>';
     print '<td>';
     $constname = 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix;
     print '<!-- constname = '.$constname.' -->';
@@ -436,7 +436,7 @@ print '<td>My SaaS service for users</td>';
 print '</tr>';
 */
 
-print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSServices").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("DefaultCategoryForSaaSServices").'</td>';
 print '<td>';
 $defaultproductcategid=$conf->global->SELLYOURSAAS_DEFAULT_PRODUCT_CATEG;
 print $formother->select_categories(Categorie::TYPE_PRODUCT, $defaultproductcategid, 'SELLYOURSAAS_DEFAULT_PRODUCT_CATEG', 0, 1, 'miwidth300');
@@ -444,7 +444,7 @@ print '</td>';
 print '<td><span class="opacitymedium">SaaS Products</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSCustomers").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("DefaultCategoryForSaaSCustomers").'</td>';
 print '<td>';
 $defaultcustomercategid=$conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG;
 print $formother->select_categories(Categorie::TYPE_CUSTOMER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG', 0, 1, 'miwidth300');
@@ -505,7 +505,7 @@ print '</td>';
 print '<td><span class="opacitymedium">https://admin.mysaasdomainname.com/git</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasAccountUrl").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasAccountUrl").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_ACCOUNT_URL" value="'.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'">';
 print '</td>';
@@ -540,7 +540,7 @@ print '</td>';
 print '<td><span class="opacitymedium">&lt;script&gt;Your conversion trackers&lt;/script&gt;</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("AnonymousUser").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("AnonymousUser").'</td>';
 print '<td>';
 print $form->select_dolusers($conf->global->SELLYOURSAAS_ANONYMOUSUSER, 'SELLYOURSAAS_ANONYMOUSUSER', 1);
 print '</td>';
@@ -863,14 +863,16 @@ var_dump(DOL_MAIN_URL_ROOT);
 
 $message='';
 $url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
-$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", $url);
+$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
+$message = str_replace('{s1}', $url, $message);
 print $message;
 
 print '<br>';
 
 $message='';
 $url='<a href="'.dol_buildpath('/sellyoursaas/myaccount/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
-$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "Test", $url);
+$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "Test", '{s1}');
+$message = str_replace('{s1}', $url, $message);
 print $message;
 
 print "<br>";

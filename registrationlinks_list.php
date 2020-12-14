@@ -203,7 +203,7 @@ $title = $langs->trans('ListOfRegistrationLinks');
 
 if (empty($conf->global->SELLYOURSAAS_DEFAULT_PRODUCT_CATEG))
 {
-	print 'Error, setup of module SellYourSaas not complete';
+	print 'Error, setup of module SellYourSaas not complete (the category of product to sell with SellYourSaas has not been defined)';
 	llxFooter();
 	exit;
 }
@@ -366,6 +366,8 @@ $newcardbutton.= '</a>';
 */
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'title_companies', 0, $newcardbutton, '', $limit);
+
+print '<span class="opacitymedium">'.$langs->trans("RegistrationURLDesc").'</span><br><br>';
 
 if ($sall)
 {
