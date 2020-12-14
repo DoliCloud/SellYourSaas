@@ -58,7 +58,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->picto='sellyoursaas@sellyoursaas';
 
 		// Data directories to create when module is enabled
-		$this->dirs = array('/sellyoursaas/temp','/sellyoursaas/packages','/sellyoursaas/git','/sellyoursaas/crt');
+		$this->dirs = array('/sellyoursaas/temp','/sellyoursaas/packages','/sellyoursaas/git','/sellyoursaas/crt','/sellyoursaas/spam');
 
 		// Config pages. Put here list of php page names stored in admmin directory used to setup module
 		$this->config_page_url = array("setup.php@sellyoursaas");
