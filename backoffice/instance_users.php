@@ -157,10 +157,14 @@ if (empty($reshook))
 	    	$conf->global->MAIN_SECURITY_HASH_ALGO = $savMAIN_SECURITY_HASH_ALGO;
 	    	$conf->global->MAIN_SECURITY_SALT = $savMAIN_SECURITY_SALT;
 	    	$private_note = $newlangs->trans("NoteForSupportUser");
+	    	$emailsupport = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 	    	$signature = '--<br>Support team';
 
-	    	$sql="INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, signature)";
-	    	$sql.=" VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', 1, '".$conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT."', '".$newdb->escape($password_crypted_for_remote)."', 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($signature)."')";
+	    	$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature)";
+	    	$sql .= " VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."', 1,";
+	    	$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT)."'").",";
+	    	$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
+	    	$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."')";
 	        $resql=$newdb->query($sql);
 	        if (! $resql)
 	        {
