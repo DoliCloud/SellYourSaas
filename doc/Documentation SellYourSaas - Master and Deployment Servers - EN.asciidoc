@@ -103,9 +103,9 @@ For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server
 
 
 [[adding_disk]]
-=== Adding the data disk (home of user instances and home of backups)
+=== Adding the harddisk of data (home of user instances and home of backups)
 
-We will add, on the *Deployment server*, an independent disk for user instances and backups. It can be a disc for the 2 or 2 different discs.
+We will add, on the *Deployment server*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
 
 On *Deployment server* :
 
@@ -119,13 +119,13 @@ Note, the disk becomes visible with *fdisk -l* and *lsblk*
 [source, bash]
 ---------------
 fdisk -l
-fdisk / dev / vdx
+fdisk /dev/vdx
 option n then p (then choose the partition number, first and last sector) then w
 
 fdisk -l
 
-fsck -N / dev / vdxY
-mkfs.ext4 / dev / vdxY
+fsck -N /dev/vdxY
+mkfs.ext4 /dev/vdxY
 ---------------
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
@@ -136,9 +136,9 @@ Whether the disk has just been formatted or whether it is an added disk already 
 
 [source, bash]
 ---------------
-UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 / mnt / diskX ext4 defaults 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 or
-UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 / mnt / diskX ext4 [noatime,] nofail 0 0 (does not block the server from starting)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (does not block the server from starting)
 ---------------
 
 * Mount disk
@@ -159,7 +159,7 @@ To see options for optimizing filesystems:
 
 [source, bash]
 ---------------
-tune2fs -l / dev / vdxY | grep features
+tune2fs -l /dev/vdxY | grep features
 ---------------
 return
 
@@ -170,32 +170,32 @@ To add -noatime to the filesystem in the */etc/fstab* file:
 
 [source, bash]
 ---------------
-UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
 ---------------
 
 To take the change into account:
 
 [source, bash]
 ---------------
-mount -oremount / dev / diskX /
+mount -oremount /dev/diskX/
 ---------------
 
 To check:
 
 [source, bash]
 ---------------
-cat / proc / mounts | grep diskX
+cat /proc/mounts | grep diskX
 ---------------
 
 Rem: If you need to recover data from another disk, use:
 
 [source, bash]
 ---------------
-rsync --info = progress2 -to source servers: / mnt / diskSource / mnt / diskTarget
+rsync --info = progress2 -to source servers: /mnt/diskSource /mnt/diskTarget
 
 Example:
-rsync --info = progress2 --exclude 'dbn *' -au -e 'ssh'. loginuser@myserverdest.mydomain.com: / var / lib / mysql
-chown -R mysql.mysql / var / lib / mysql
+rsync --info = progress2 --exclude 'dbn *' -au -e 'ssh'. loginuser@myserverdest.mydomain.com: /var/lib/mysql
+chown -R mysql.mysql /var/lib/mysql
 mysqlcheck --all-databases
 ---------------
 

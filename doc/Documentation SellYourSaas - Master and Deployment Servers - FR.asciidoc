@@ -103,7 +103,7 @@ Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit se
 
 
 [[ajout_de_disque]]
-=== Ajout du ou des disques de données (home des instances utilisateurs et home des sauvegardes)
+=== Ajout du ou des disques durs de données (home des instances utilisateurs et home des sauvegardes)
 
 On va ajouter, sur le *Serveur de déploiement*, un disque indépendant pour les instances utilisateurs et les sauvegardes. Il peut s'agir d'un disque pour les 2 ou bien de 2 disques différents.
 
