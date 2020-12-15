@@ -2490,9 +2490,9 @@ mail.log = /var/log/phpmail.log
 ---------------
 
 
-=== Configuration de logrotate
+=== Setup of logrotate
 
-* Ajouter une ligne si non déjà présente dans le fichier */etc/logrotate.conf*
+* Add a line if not already present into file */etc/logrotate.conf*
 
 [source,bash]
 ---------------
@@ -2609,7 +2609,7 @@ sudo systemctl stop apport.service
 sudo systemctl status apport.service
 ---------------
 
-Note: Les rapports sont dans */var/crash*
+Note: Reports are into */var/crash*
 
 
 === Installer certbot (pour le SSL des sites hors instances utilisateurs)
@@ -2625,7 +2625,7 @@ apt-get install python-certbot-apache
 [[creation_certificat_ssl]]
 === Create a wildcard SSL certificate for user instances
 
-Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
+Into the following instructions, we will use X with value '', 2, 3, ... (numero of pool of instance = numero of the deployment server).
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
 
