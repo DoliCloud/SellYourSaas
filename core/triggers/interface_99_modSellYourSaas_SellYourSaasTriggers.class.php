@@ -100,6 +100,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
         	case 'CATEGORY_LINK':
 				// Test if this is a partner. If yes, send an email
         		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+
         		if ($object->type === Categorie::TYPE_SUPPLIER || Categorie::$MAP_ID_TO_CODE[$object->type] == Categorie::TYPE_SUPPLIER)
         		{
         			// We link a supplier categorie to a thirdparty
