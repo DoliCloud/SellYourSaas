@@ -806,7 +806,7 @@ else
 				$abusetest = 1;
 			}
 		}
-		
+
 		// Evaluate IP Quality, TOR or bad networks with IPQuality
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
@@ -880,6 +880,8 @@ else
 				$contract->array_options['options_ipquality'] .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
 			}
 		}
+
+		dol_syslog("options_ipquality = ".$contract->array_options['options_ipquality'], LOG_DEBUG);
 
 		// Block for some IPs
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
