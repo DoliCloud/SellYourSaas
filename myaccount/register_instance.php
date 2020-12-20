@@ -394,7 +394,7 @@ if ($reusecontractid)
 {
 	// Get contract
 	$result = $contract->fetch($reusecontractid);
-	if ($result < 0)
+	if ($result < 0) && !empty($result['content'
 	{
 		setEventMessages($langs->trans("NotFound"), null, 'errors');
 		header("Location: ".$newurl);
@@ -775,7 +775,7 @@ else
 			-6 You did not provide any contact information with your query or the contact information is invalid.
 			If you exceed the number of allowed queries, you'll receive a HTTP 429 error.
 		 */
-		if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
+		if (is_array($result) && $result['http_code'] == 200 && isset($result['content'])) {
 			$vpnproba = price2num($result['content'], 2, 1);
 			$contract->array_options['options_deployment_ipquality'] .= 'geti-vpn='.round($vpnproba,2).';';
 		} else {
