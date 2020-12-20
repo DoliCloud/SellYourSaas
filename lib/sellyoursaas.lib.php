@@ -110,12 +110,15 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
  */
 function sellyoursaasIsPaidInstance($contract, $mode=0)
 {
-	$contract->fetchObjectLinked();
+	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 0);
+
+	/*var_dump($contract->linkedObjectsIds);
+	var_dump($contract->linkedObjects);*/
 
 	$foundtemplate=0;
-	if (is_array($contract->linkedObjects['facturerec']))
+	if (is_array($contract->linkedObjectsIds['facturerec']))
 	{
-		foreach($contract->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice)
+		foreach($contract->linkedObjectsIds['facturerec'] as $idelementelement => $templateinvoiceid)
 		{
 			$foundtemplate++;
 			break;
@@ -127,9 +130,9 @@ function sellyoursaasIsPaidInstance($contract, $mode=0)
 	if ($mode == 0)
 	{
 		$foundinvoice=0;
-		if (is_array($contract->linkedObjects['facture']))
+		if (is_array($contract->linkedObjectsIds['facture']))
 		{
-			foreach($contract->linkedObjects['facture'] as $idinvoice => $invoice)
+			foreach($contract->linkedObjectsIds['facture'] as $idelementelement => $invoiceid)
 			{
 				$foundinvoice++;
 				break;

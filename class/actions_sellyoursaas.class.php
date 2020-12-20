@@ -1036,8 +1036,7 @@ class ActionsSellyoursaas
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo')))
     	{
-    		if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) // Field "Mode paid or free" not hidden
-    		{
+    		if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) { // Field "Mode paid or free" not hidden
     			global $contractmpforloop;
 	    		if (! is_object($contractmpforloop))
 	    		{
@@ -1045,15 +1044,14 @@ class ActionsSellyoursaas
 	    		}
 	    		$contractmpforloop->id = $parameters['obj']->rowid ? $parameters['obj']->rowid : $parameters['obj']->id;
 	    		$contractmpforloop->socid = $parameters['obj']->socid;
-	    		print '<td class="center">';
 
-	    		if (! preg_match('/\.on\./', $parameters['obj']->ref_customer))
-	    		{
-	    			if ($parameters['obj']->options_deployment_status != 'undeployed')
-	    			{
+	    		print '<td class="center">';
+	    		if (!empty($parameters['obj']->options_deployment_status) && $parameters['obj']->options_deployment_status != 'undeployed') {
+	    			if (! preg_match('/\.on\./', $parameters['obj']->ref_customer)) {
 		    			dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
+
 		    			$ret = '<div class="bold">';
-		    			$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);
+		    			$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);	// This call fetchObjectLinked
 		    			if ($ispaid) $ret .= '<span class="badge badge-status4" style="font-size: 1em;">'.$langs->trans("PayedMode").'</span>';
 		    			else $ret .= '<span class="badge" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
 		    			$ret .= '</div>';
@@ -1061,23 +1059,17 @@ class ActionsSellyoursaas
 		    			print $ret;
 	    			}
 	    		}
-
 	    		print '</td>';
     		}
-    		if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED))    // Field "Payment mode recorded" not hidden
-    		{
-    			global $companytmpforloop;
-    			if (! is_object($companytmpforloop))
-    			{
-    				$companytmpforloop = new Societe($db);
-    			}
-    			$companytmpforloop->id = $parameters['obj']->socid;
-
-    			$atleastonepaymentmode = sellyoursaasThirdpartyHasPaymentMode($companytmpforloop->id);
-
+    		if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {    // Field "Payment mode recorded" not hidden
     			print '<td class="center">';
-    			dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
-    			if ($atleastonepaymentmode) print $langs->trans("Yes");
+    			if (!empty($parameters['obj']->options_deployment_status)) {
+    				dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
+
+    				$atleastonepaymentmode = sellyoursaasThirdpartyHasPaymentMode($parameters['obj']->socid);
+
+    				if ($atleastonepaymentmode) print $langs->trans("Yes");
+    			}
     			print '</td>';
     		}
     	}
