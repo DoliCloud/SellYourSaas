@@ -750,7 +750,7 @@ else
 		$contract->array_options['options_deployment_ip'] = $remoteip;
 		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
 
-		$contract->array_options['options_ipquality'] = '';
+		$contract->array_options['options_deployment_ipquality'] = '';
 
 		if (empty($remoteip)) {
 			$db->rollback();
@@ -777,9 +777,9 @@ else
 		 */
 		if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
 			$vpnproba = price2num($result['content'], 2, 1);
-			$contract->array_options['options_ipquality'] .= 'geti-vpn'.round($vpnproba,2).';';
+			$contract->array_options['options_deployment_ipquality'] .= 'geti-vpn='.round($vpnproba,2).';';
 		} else {
-			$contract->array_options['options_ipquality'] .= 'geti-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
+			$contract->array_options['options_deployment_ipquality'] .= 'geti-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
 		}
 		$contract->array_options['options_deployment_vpn_proba'] = round($vpnproba, 2);
 
@@ -866,22 +866,22 @@ else
 							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
 							$abusetest = 3;
 						}
-						$contract->array_options['options_ipquality'] .= 'ipq-tor='.(($jsonreponse['tor'] || $jsonreponse['active_tor']) ? 1 : 0).';';
-						$contract->array_options['options_ipquality'] .= 'ipq-vpn='.(($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0).';';
-						$contract->array_options['options_ipquality'] .= 'ipq-recent_abuse='.($jsonreponse['recent_abuse'] ? 1 : 0).';';
-
+						$contract->array_options['options_deployment_ipquality'] .= 'ipq-tor='.(($jsonreponse['tor'] || $jsonreponse['active_tor']) ? 1 : 0).';';
+						$contract->array_options['options_deployment_ipquality'] .= 'ipq-vpn='.(($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0).';';
+						$contract->array_options['options_deployment_ipquality'] .= 'ipq-recent_abuse='.($jsonreponse['recent_abuse'] ? 1 : 0).';';
+						$contract->array_options['options_deployment_ipquality'] .= 'ipq-fraud_score='.$jsonreponse['fraud_score'].';';
 					} else {
-						$contract->array_options['options_ipquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
+						$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
 					}
 				} catch(Exception $e) {
-					$contract->array_options['options_ipquality'] .= 'ipq-check failed. Exception '.dol_trunc($e->getMessage(), 100).';';
+					$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. Exception '.dol_trunc($e->getMessage(), 100).';';
 				}
 			} else {
-				$contract->array_options['options_ipquality'] .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
+				$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
 			}
 		}
 
-		dol_syslog("options_ipquality = ".$contract->array_options['options_ipquality'], LOG_DEBUG);
+		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 
 		// Block for some IPs
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
