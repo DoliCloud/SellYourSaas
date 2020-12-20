@@ -2588,6 +2588,15 @@ systemctl stop systemd-journald
 systemctl start systemd-journald
 ---------------
 
+To force clear of journal:
+
+[source,bash]
+---------------
+journalctl --flush --rotate
+journalctl --vacuum-size=250M
+journalctl --vacuum-time=1d
+---------------
+
 
 === Désactivation ou activation de apport (optionnel, "on" recommandé)
 
