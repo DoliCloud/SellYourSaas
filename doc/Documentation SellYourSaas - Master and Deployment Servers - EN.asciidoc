@@ -895,7 +895,7 @@ TODO Graphic with flux and ports
 
 [source,bash]
 ---------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/bin/repair
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/sbin/repair
 ---------------
 
 To consult, no longer launch at startup, launch at startup, stop, launch:

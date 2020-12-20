@@ -896,7 +896,7 @@ TODO Graphic avec les flux et les ports.
 
 [source,bash]
 ---------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/bin/repair
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/sbin/repair
 ---------------
 
 Pour consulter, ne plus lancer au démarrage, lancer au démarrage, arrêter, lancer:

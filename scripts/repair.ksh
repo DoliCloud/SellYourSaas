@@ -62,7 +62,7 @@ done
 # Report usage status
 uptime > /var/log/repair06_uptime$$.log
 cat /proc/meminfo > /var/log/repair06_meminfo$$.log
-#/usr/bin/mysqladmin -h localhost -u process -pprocess-pr processlist > /var/log/repair06_mysqlprocesslist$$.log 2>&1
+#/usr/bin/mysqladmin -h localhost processlist > /var/log/repair06_mysqlprocesslist$$.log 2>&1
 
 
 #if [ "x$1" == "xwebmin" ]
@@ -76,7 +76,7 @@ cat /proc/meminfo > /var/log/repair06_meminfo$$.log
 # Report usage status
 uptime > /var/log/repair09_uptime$$.log
 cat /proc/meminfo > /var/log/repair09_meminfo$$.log
-/usr/bin/mysqladmin -h localhost -u process -pprocess-pr processlist > /var/log/repair09_mysqlprocesslist$$.log 2>&1
+/usr/bin/mysqladmin -h localhost processlist > /var/log/repair09_mysqlprocesslist$$.log 2>&1
 
 cp -p /var/log/mod_evasive/* /var/log/mod_evasive/archives 2>/dev/null
 rm -f /var/log/mod_evasive/* 2>/dev/null
@@ -88,4 +88,5 @@ then
         exit 0
 else
         exit $1
+        #exit 0
 fi
