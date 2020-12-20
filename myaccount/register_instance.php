@@ -394,8 +394,7 @@ if ($reusecontractid)
 {
 	// Get contract
 	$result = $contract->fetch($reusecontractid);
-	if ($result < 0) && !empty($result['content'
-	{
+	if ($result < 0) {
 		setEventMessages($langs->trans("NotFound"), null, 'errors');
 		header("Location: ".$newurl);
 		exit(-1);
