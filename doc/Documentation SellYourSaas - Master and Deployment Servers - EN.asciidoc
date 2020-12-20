@@ -191,10 +191,10 @@ Rem: If you need to recover data from another disk, use:
 
 [source, bash]
 ---------------
-rsync --info = progress2 -to source servers: /mnt/diskSource /mnt/diskTarget
+rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
-rsync --info = progress2 --exclude 'dbn *' -au -e 'ssh'. loginuser@myserverdest.mydomain.com: /var/lib/mysql
+rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
 mysqlcheck --all-databases
 ---------------
@@ -3645,7 +3645,7 @@ Find the line in the [mysqld] block that begins with datadir=, which is separate
 
 [source,bash]
 ---------------
-/etc/my.cnf
+vi /etc/my.cnf
 [mysqld]
 datadir=/mnt/volume-nyc1-01/mysql
 socket=/mnt/volume-nyc1-01/mysql/mysql.sock
@@ -3655,7 +3655,7 @@ After updating the existing lines, we’ll need to add configuration for the mys
 
 [source,bash]
 ---------------
-/etc/my.cnf
+vi /etc/my.cnf
 [client]
 port=3306
 socket=/mnt/volume-nyc1-01/mysql/mysql.sock
