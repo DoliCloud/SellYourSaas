@@ -416,8 +416,8 @@ ResourceUnitLabel=Label for unit of quantities
 ResourceUnitLabelDesc=Enter the translation key to use for the resource unit.<br>Must be 'User' if quantity is a number of users.<br>Must be 'Gb' if quantity is a number of GigaBytes.
 DeploymentIPVPNProba=Probability of using a VPN
 DeploymentIPVPNProbaDesc=When a subscription is done, a check is done on subscriber IP to http://check.getipintel.net/check.php?ip=IP&contact=%s&flag=f
-DeploymentIPTORProba=Probability of using a TOR
-DeploymentIPTORProbaDesc=When a subscription is done, a check is done on subscriber IP to https://www.ipqualityscore.com
+DeploymentIPQuality=IP Quality score
+DeploymentIPQualityDesc=When a subscription is done, a check is done on subscriber IP to https://www.ipqualityscore.com
 ListOfRegistrationLinks=List of registration links
 EnterVATHere=Enter your VAT or Sale tax number here...
 CreateMyAccount=Create my account
