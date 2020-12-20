@@ -750,26 +750,38 @@ else
 		$contract->array_options['options_deployment_ip'] = $remoteip;
 		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
 
-		// Evaluate VPN probability
-		$vpnproba = '';
-		if (! empty($remoteip))
-		{
-			$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
-			if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
-			$url = 'http://check.getipintel.net/check.php?ip='.$remoteip.'&contact='.urlencode($emailforvpncheck).'&flag=f';
-			$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
-			/* The proxy check system will return negative values on error. For standard format (non-json), an additional HTTP 400 status code is returned
-				-1 Invalid no input
-				-2 Invalid IP address
-				-3 Unroutable address / private address
-				-4 Unable to reach database, most likely the database is being updated. Keep an eye on twitter for more information.
-				-5 Your connecting IP has been banned from the system or you do not have permission to access a particular service. Did you exceed your query limits? Did you use an invalid email address? If you want more information, please use the contact links below.
-				-6 You did not provide any contact information with your query or the contact information is invalid.
-				If you exceed the number of allowed queries, you'll receive a HTTP 429 error.
-			 */
-			$vpnproba = price2num($result['content'], 2, 1);
+		$contract->array_options['options_ipquality'] = '';
+
+		if (empty($remoteip)) {
+			$db->rollback();
+			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
+			header("Location: ".$newurl);
+			exit(-1);
 		}
-		$contract->array_options['options_deployment_vpn_proba'] = $vpnproba;
+
+		// Evaluate VPN probability with Getintel
+		$vpnproba = '';
+		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
+		if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
+		$url = 'http://check.getipintel.net/check.php?ip='.$remoteip.'&contact='.urlencode($emailforvpncheck).'&flag=f';
+		$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
+		/* The proxy check system will return negative values on error. For standard format (non-json), an additional HTTP 400 status code is returned
+			-1 Invalid no input
+			-2 Invalid IP address
+			-3 Unroutable address / private address
+			-4 Unable to reach database, most likely the database is being updated. Keep an eye on twitter for more information.
+			-5 Your connecting IP has been banned from the system or you do not have permission to access a particular service. Did you exceed your query limits? Did you use an invalid email address? If you want more information, please use the contact links below.
+			-6 You did not provide any contact information with your query or the contact information is invalid.
+			If you exceed the number of allowed queries, you'll receive a HTTP 429 error.
+		 */
+		if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
+			$vpnproba = price2num($result['content'], 2, 1);
+			$contract->array_options['options_ipquality'] .= 'geti-vpn'.round($vpnproba,2).';';
+		} else {
+			$contract->array_options['options_ipquality'] .= 'geti-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
+		}
+		$contract->array_options['options_deployment_vpn_proba'] = round($vpnproba, 2);
 
 		$prefix=dol_getprefix('');
 		$cookieregistrationa='DOLREGISTERA_'.$prefix;
@@ -794,7 +806,8 @@ else
 				$abusetest = 1;
 			}
 		}
-		// Refused TOR or bad networks
+		
+		// Evaluate IP Quality, TOR or bad networks with IPQuality
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 
@@ -853,10 +866,18 @@ else
 							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
 							$abusetest = 3;
 						}
+						$contract->array_options['options_ipquality'] .= 'ipq-tor='.(($jsonreponse['tor'] || $jsonreponse['active_tor']) ? 1 : 0).';';
+						$contract->array_options['options_ipquality'] .= 'ipq-vpn='.(($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0).';';
+						$contract->array_options['options_ipquality'] .= 'ipq-recent_abuse='.($jsonreponse['recent_abuse'] ? 1 : 0).';';
+
+					} else {
+						$contract->array_options['options_ipquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
 					}
 				} catch(Exception $e) {
-
+					$contract->array_options['options_ipquality'] .= 'ipq-check failed. Exception '.dol_trunc($e->getMessage(), 100).';';
 				}
+			} else {
+				$contract->array_options['options_ipquality'] .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
 			}
 		}
 
