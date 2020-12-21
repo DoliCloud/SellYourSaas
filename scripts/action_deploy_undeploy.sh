@@ -366,18 +366,18 @@ if [[ "$mode" == "deployall" ]]; then
 						# check if already mounted
 						if mountpoint -q $chrootdir/$commonjailtemplatename$targetdir/$osusername
 						then
+							echo "$chrootdir/$commonjailtemplatename$targetdir/$osusername is already mounted"
+						else
 							echo "mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind"
 							mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind
-						else
-							echo "$chrootdir/$commonjailtemplatename$targetdir/$osusername is already mounted"
 						fi
 						# check if already declared in /etc/fstab
 						if grep -q "$chrootdir/$commonjailtemplatename$targetdir/$osusername" /etc/fstab
 						then
+							echo "$chrootdir/$commonjailtemplatename$targetdir/$osusername is already declared in /etc/fstab"
+						else
 							echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
 							echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
-						else
-							echo "$chrootdir/$commonjailtemplatename$targetdir/$osusername is already declared in /etc/fstab"
 						fi
 					fi
 				else
@@ -401,18 +401,18 @@ if [[ "$mode" == "deployall" ]]; then
 						# check if already mounted
 						if mountpoint -q $chrootdir/$osusername$targetdir/$osusername
 						then
+							echo "$chrootdir/$osusername$targetdir/$osusername is already mounted"
+						else
 							echo "mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind"
 							mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind
-						else
-							echo "$chrootdir/$osusername$targetdir/$osusername is already mounted"
 						fi
 						# check if already declared in /etc/fstab
 						if grep -q "$chrootdir/$osusername$targetdir/$osusername" /etc/fstab
 						then
+							echo "$chrootdir/$osusername$targetdir/$osusername is already declared in /etc/fstab"
+						else
 							echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
 							echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
-						else
-							echo "$chrootdir/$osusername$targetdir/$osusername is already declared in /etc/fstab"
 						fi
 					fi
 				fi
