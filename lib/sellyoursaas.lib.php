@@ -104,13 +104,14 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
  * Return if instance is a paid instance or not
  * Check if there is an invoice or template invoice (it was a paying customer) or just a template invoice (it is a current paying customer)
  *
- * @param 	Contrat $contract		Object contract
- * @param	int		$mode			0=Test invoice or template invoice of contract, 1=Test only templates invoices
- * @return	int						>0 if this is a paid contract
+ * @param 	Contrat $contract			Object contract
+ * @param	int		$mode				0=Test invoice or template invoice of contract, 1=Test only templates invoices
+ * @param	int		$loadalsoobjects	Load also array this->linkedObjects (Use 0 to increase performances)
+ * @return	int							>0 if this is a paid contract
  */
-function sellyoursaasIsPaidInstance($contract, $mode=0)
+function sellyoursaasIsPaidInstance($contract, $mode=0, $loadalsoobjects=0)
 {
-	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 0);
+	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', $loadalsoobjects);
 
 	/*var_dump($contract->linkedObjectsIds);
 	var_dump($contract->linkedObjects);*/

@@ -566,9 +566,9 @@ function sellyoursaas_calculate_stats($db, $datelim)
 					$totalinstances++;
 					$totalusers+=$nbofuser;
 
-					// Return true if instance $object is paying instance (template invoice exists)
-					$ispaid = sellyoursaasIsPaidInstance($object);										// This also load $object->linkedObjects['facturerec']
-					if (! $ispaid)		// This is a test only customer or expired or suspended
+					// Return true if instance $object is paying instance (invoice or template invoice exists)
+					$ispaid = sellyoursaasIsPaidInstance($object, 0, 1);										// This also load $object->linkedObjects['facturerec']
+					if (! $ispaid)		// This is a test only customer or expired or suspended (no invoice or template invoice at all)
 					{
 						if ($tmpdata['expirationdate'] < $now) {
 							$totalinstancesexpiredfree++;
@@ -599,7 +599,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 						$atleastonenotsuspended = 0;
 						if (is_array($object->linkedObjects['facturerec']))		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
 						{
-							foreach($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice)
+							foreach($object->linkedObjects['facturerec'] as $idelementelement => $templateinvoice)
 							{
 								if (! $templateinvoice->suspended)
 								{

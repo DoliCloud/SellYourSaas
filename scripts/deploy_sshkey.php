@@ -156,9 +156,9 @@ if ($resql)
 				}
 
 				$ispaid = sellyoursaasIsPaidInstance($object);
-				if (! $ispaid) $payment_status='TRIAL';
-				else
-				{
+				if (! $ispaid) {
+					$payment_status='TRIAL';
+				} else {
 					$ispaymentko = sellyoursaasIsPaymentKo($object);
 					if ($ispaymentko) $payment_status='FAILURE';
 				}
