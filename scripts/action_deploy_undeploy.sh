@@ -363,10 +363,22 @@ if [[ "$mode" == "deployall" ]]; then
 						fi
 						echo "jk_jailuser -s /bin/bash -n -j $chrootdir/$commonjailtemplatename/ $osusername"
 						jk_jailuser -s /bin/bash -n -j $chrootdir/$commonjailtemplatename/ $osusername
-						echo "mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind"
-						mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind
-						echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
-						echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+						# check if already mounted
+						if mountpoint -q $chrootdir/$commonjailtemplatename$targetdir/$osusername
+						then
+							echo "$chrootdir/$commonjailtemplatename$targetdir/$osusername is already mounted"
+						else
+							echo "mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind"
+							mount $targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername -o bind
+						fi
+						# check if already declared in /etc/fstab
+						if grep -q "$chrootdir/$commonjailtemplatename$targetdir/$osusername" /etc/fstab
+						then
+							echo "$chrootdir/$commonjailtemplatename$targetdir/$osusername is already declared in /etc/fstab"
+						else
+							echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
+							echo "$targetdir/$osusername $chrootdir/$commonjailtemplatename$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+						fi
 					fi
 				else
 					# Private users jail
@@ -386,10 +398,22 @@ if [[ "$mode" == "deployall" ]]; then
 						fi
 						echo "jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername"
 						jk_jailuser -s /bin/bash -n -j $chrootdir/$osusername/ $osusername
-						echo "mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind"
-						mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind
-						echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
-						echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+						# check if already mounted
+						if mountpoint -q $chrootdir/$osusername$targetdir/$osusername
+						then
+							echo "$chrootdir/$osusername$targetdir/$osusername is already mounted"
+						else
+							echo "mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind"
+							mount $targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername -o bind
+						fi
+						# check if already declared in /etc/fstab
+						if grep -q "$chrootdir/$osusername$targetdir/$osusername" /etc/fstab
+						then
+							echo "$chrootdir/$osusername$targetdir/$osusername is already declared in /etc/fstab"
+						else
+							echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0 >> /etc/fstab"
+							echo "$targetdir/$osusername $chrootdir/$osusername$targetdir/$osusername bind defaults,bind 0" >> /etc/fstab
+						fi
 					fi
 				fi
 			fi
