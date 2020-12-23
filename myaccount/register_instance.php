@@ -401,6 +401,20 @@ $error = 0;
 
 dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontractid.", reusesocid = ".$reusesocid.", domain name  = ".$fqdninstance.")");
 
+
+if (empty($remoteip)) {
+	$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+	setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
+	header("Location: ".$newurl);
+	exit(-1);
+}
+
+// TODO Move other check on abuse here
+
+
+
+
+
 $contract = new Contrat($db);
 if ($reusecontractid)
 {
@@ -567,7 +581,7 @@ else
 
 	if (! empty($conf->global->SELLYOURSAAS_NAME_RESERVED) && preg_match('/'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'/', $fqdninstance))
 	{
-	    // @TODO Eclude some thirdparties
+	    // @TODO Exclude some thirdparties
 
 
 	    setEventMessages($langs->trans("InstanceNameReseved", $fqdninstance), null, 'errors');
@@ -617,15 +631,9 @@ else
 		$tmpthirdparty->country_id = getCountry($country_code, 3, $db);
 	}
 
-	// TODO Move check on abuse here
 
-
-
-
-
-
-
-	$db->begin();	// Start transaction
+	// Start transaction
+	$db->begin();
 
 	if ($tmpthirdparty->id > 0)
 	{
@@ -758,6 +766,7 @@ else
 
 		//$contract->array_options['options_nb_users'] = 1;
 		//$contract->array_options['options_nb_gb'] = 0.01;
+
 		// TODO Remove hardcoded code here
 		if (preg_match('/glpi|flyve/i', $productref) && GETPOST("tz_string"))
 		{
@@ -765,17 +774,9 @@ else
 		}
 		$contract->array_options['options_timezone'] = GETPOST("tz_string");
 		$contract->array_options['options_deployment_ip'] = $remoteip;
-		$contract->array_options['options_deployment_ua'] = dol_trunc((empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]), 250);
+		$contract->array_options['options_deployment_ua'] = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : dol_trunc($_SERVER["HTTP_USER_AGENT"], 250));
 
 		$contract->array_options['options_deployment_ipquality'] = '';
-
-		if (empty($remoteip)) {
-			$db->rollback();
-			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
-			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
-			header("Location: ".$newurl);
-			exit(-1);
-		}
 
 		// Evaluate VPN probability with Getintel
 		$vpnproba = '';
