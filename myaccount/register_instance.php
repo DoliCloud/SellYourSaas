@@ -575,10 +575,6 @@ else
 	$generateddbport = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
 
-
-	$db->begin();	// Start transaction
-
-
 	// Create thirdparty
 
 	$tmpthirdparty->oldcopy = dol_clone($tmpthirdparty);
@@ -608,6 +604,16 @@ else
 	{
 		$tmpthirdparty->country_id = getCountry($country_code, 3, $db);
 	}
+
+	// TODO Move check on abuse here
+
+
+
+
+
+
+
+	$db->begin();	// Start transaction
 
 	if ($tmpthirdparty->id > 0)
 	{
@@ -838,9 +844,14 @@ else
 			 * https://www.ipqualityscore.com/documentation/proxy-detection/transaction-scoring
 			 * This feature requires a Premium plan or greater
 			 */
+			$transaction_parameters = array();
 
 			// Format Parameters
-			$formatted_parameters = http_build_query($parameters);
+			if (is_array($transaction_parameters) && count($transaction_parameters)) {
+				$formatted_parameters = http_build_query(array_merge($parameters, $transaction_parameters));
+			} else {
+				$formatted_parameters = http_build_query($parameters);
+			}
 
 			// Create API URL
 			$url = sprintf(
@@ -910,9 +921,13 @@ else
 			$db->rollback();
 			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip), null, 'errors');
+			//http_response_code(403);
 			header("Location: ".$newurl);
 			exit(-1);
 		}
+
+
+
 
 		$result = $contract->create($user);
 		if ($result <= 0)
