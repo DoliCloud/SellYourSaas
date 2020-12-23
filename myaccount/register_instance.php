@@ -886,13 +886,14 @@ else
 							$abusetest = 2;
 						}
 						if ($jsonreponse['tor'] || $jsonreponse['active_tor']) {
-							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP");
+							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP - host=".$jsonreponse['host']);
 							$abusetest = 3;
 						}
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-tor='.(($jsonreponse['tor'] || $jsonreponse['active_tor']) ? 1 : 0).';';
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-vpn='.(($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0).';';
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-recent_abuse='.($jsonreponse['recent_abuse'] ? 1 : 0).';';
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-fraud_score='.$jsonreponse['fraud_score'].';';
+						$contract->array_options['options_deployment_ipquality'] .= 'ipq-host='.$jsonreponse['host'].';';
 					} else {
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
 					}
@@ -903,6 +904,8 @@ else
 				$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
 			}
 		}
+
+		$contract->array_options['options_deployment_ipquality'] = dol_strlen($contract->array_options['options_deployment_ipquality'], 250);
 
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 
