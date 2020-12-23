@@ -211,7 +211,7 @@ maxretry = 10
 
 [web-dol-passforgotten]
 
-; rule against call to passwordforgottenpage (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
+; rule against call to myaccount/passwordforgottenpage.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
 ; disable this rule by setting enable to false on deployment servers
 enabled = true
 port    = http,https
@@ -221,4 +221,17 @@ action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 10
+
+[web-dol-registerinstance]
+
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
+; disable this rule by setting enable to false on deployment servers
+;enabled = true
+;port    = http,https
+;filter  = apache-dolibarr-rulesregisterinstance
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
+;action  = %(action_mw)s
+;bantime  = 4320000   ; 50 days
+;findtime = 86400     ; 1 day
+;maxretry = 10
 
