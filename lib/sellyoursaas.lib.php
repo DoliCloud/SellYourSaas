@@ -278,7 +278,7 @@ function sellyoursaasGetExpirationDate($contract)
 			{
 			    if ($prodforline->array_options['options_resource_label'] == 'User'
 			    || preg_match('/user/i', $prodforline->ref)) {
-			        $nbofusers = $line->qty;
+			        $nbofusers += $line->qty;
 			    }
 			    if ($prodforline->array_options['options_resource_label'] == 'Gb'
 			    || preg_match('/\sgb\s/i', $prodforline->ref)) {

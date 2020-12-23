@@ -274,7 +274,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					if ($resql)
 					{
 						$obj = $newdb->fetch_object($resql);
-						$object->nbofusers	= $obj->nb;
+						$object->nbofusers += $obj->nb;
 					}
 					else {
 						$error++;

@@ -550,7 +550,7 @@ if ($object->nbofusers == 0)    // If value not already loaded
                             $objsql = $dbinstance->fetch_object($resql);
                             if ($objsql)
                             {
-                                $object->nbofusers = $objsql->nb;
+                                $object->nbofusers += $objsql->nb;
                             }
                             else
                             {

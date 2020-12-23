@@ -84,7 +84,7 @@ $newpassword2   = GETPOST('newpassword2', 'none');
 $conf->entity 	= (GETPOST('entity','int') ? GETPOST('entity','int') : 1);
 
 // Instantiate hooks of thirdparty module only if not already define
-$hookmanager->initHooks(array('passwordforgottenpage'));
+$hookmanager->initHooks(array('sellyoursaas-passwordforgottenpage'));
 
 
 if (GETPOST('dol_hide_leftmenu','alpha') || ! empty($_SESSION['dol_hide_leftmenu']))               $conf->dol_hide_leftmenu=1;
@@ -100,111 +100,118 @@ $asknewpass=0;
  * Actions
  */
 
-// Validate new password
-if ($hashreset)
-{
-    $editthirdparty = new Societe($db);
-    if ($id > 0)
-    {
-    	$result=$editthirdparty->fetch($id);
-    }
-    if ($result <= 0)
-    {
-        $message = '<div class="error">'.$langs->trans("ErrorBadIdInLinkToResetPassword",$id).'</div>';
-    }
-    else
-    {
-    	$tmparray = explode(':', $editthirdparty->array_options['options_pass_temp']);
-
-    	if ($hashreset == $tmparray[0])
-        {
-        	$maxdate = dol_stringtotime($tmparray[1]);
-			if (dol_now() > $maxdate)
-			{
-				$langs->load("errors");
-				$message = '<div class="error">'.$langs->trans("ErrorLinkToResetPasswordHasExpired").'</div>';
-			}
-			else
-			{
-        		$username = $editthirdparty->email;
-        		if (GETPOST('confirmpasswordreset'))
-        		{
-        			$MINPASSWORDLENGTH = 6;
-        			if (empty($newpassword1) && empty($newpassword2))
-        			{
-        				$langs->load("install");
-        				$message = '<div class="error">'.$langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")).'</div>';
-        				$asknewpass = 1;
-        			}
-        			else if (empty($newpassword1) || empty($newpassword2) || ($newpassword1 != $newpassword2))
-        			{
-        				$langs->load("install");
-        				$message = '<div class="error">'.$langs->trans("PasswordsMismatch").'</div>';
-						$asknewpass = 1;
-        			}
-					elseif (strlen($newpassword1) < $MINPASSWORDLENGTH)
-					{
-						$langs->load("other");
-						$message = '<div class="error">'.$langs->trans("YourPasswordMustHaveAtLeastXChars", $MINPASSWORDLENGTH).'</div>';
-						$asknewpass = 1;
-					}
-					else
-					{
-						// Everything is ok to reset password
-						$editthirdparty->array_options['options_password']=dol_hash($newpassword1);
-						$editthirdparty->array_options['options_pass_temp']='';
-						$result=$editthirdparty->update($editthirdparty->id, $user, 0);
-						$message = '<div class="ok">'.$langs->trans("YourPasswordHasBeenReset").'</div>';
-						$asknewpass = 2;
-					}
-        		}
-				else
-				{
-        			$asknewpass = 1;
-				}
-			}
-        }
-        else
-        {
-        	$langs->load("errors");
-            $message = '<div class="error">'.$langs->trans("ErrorBadHashInLinkToResetPassword").'</div>';
-        }
-    }
+$parameters = array('username' => $username);
+$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) {
+    $message = $hookmanager->error;
 }
 
-// Action modif mot de passe
-if ($action == 'buildnewpassword' && $username)
-{
-    $sessionkey = 'dol_antispam_value';
-    $ok=(array_key_exists($sessionkey, $_SESSION) === true && (strtolower($_SESSION[$sessionkey]) == strtolower($_POST['code'])));
-
-    // Verify code
-    if (! $ok)
+if (empty($reshook)) {
+    // Validate new password
+    if ($hashreset)
     {
-        $message = '<div class="error">'.$langs->trans("ErrorBadValueForCode").'</div>';
-    }
-    else
-    {
-    	$thirdparty = new Societe($db);
-    	$result = $thirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $username);
-
+        $editthirdparty = new Societe($db);
+        if ($id > 0)
+        {
+            $result=$editthirdparty->fetch($id);
+        }
         if ($result <= 0)
         {
-            $message = '<div class="error">'.$langs->trans("ErrorLoginDoesNotExists",$username).'</div>';
-            $username='';
+            $message = '<div class="error">'.$langs->trans("ErrorBadIdInLinkToResetPassword",$id).'</div>';
         }
         else
         {
-            /*if (! $edituser->email)
+            $tmparray = explode(':', $editthirdparty->array_options['options_pass_temp']);
+
+            if ($hashreset == $tmparray[0])
             {
-                $message = '<div class="error">'.$langs->trans("ErrorLoginHasNoEmail").'</div>';
+                $maxdate = dol_stringtotime($tmparray[1]);
+                if (dol_now() > $maxdate)
+                {
+                    $langs->load("errors");
+                    $message = '<div class="error">'.$langs->trans("ErrorLinkToResetPasswordHasExpired").'</div>';
+                }
+                else
+                {
+                    $username = $editthirdparty->email;
+                    if (GETPOST('confirmpasswordreset'))
+                    {
+                        $MINPASSWORDLENGTH = 6;
+                        if (empty($newpassword1) && empty($newpassword2))
+                        {
+                            $langs->load("install");
+                            $message = '<div class="error">'.$langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")).'</div>';
+                            $asknewpass = 1;
+                        }
+                        else if (empty($newpassword1) || empty($newpassword2) || ($newpassword1 != $newpassword2))
+                        {
+                            $langs->load("install");
+                            $message = '<div class="error">'.$langs->trans("PasswordsMismatch").'</div>';
+                            $asknewpass = 1;
+                        }
+                        elseif (strlen($newpassword1) < $MINPASSWORDLENGTH)
+                        {
+                            $langs->load("other");
+                            $message = '<div class="error">'.$langs->trans("YourPasswordMustHaveAtLeastXChars", $MINPASSWORDLENGTH).'</div>';
+                            $asknewpass = 1;
+                        }
+                        else
+                        {
+                            // Everything is ok to reset password
+                            $editthirdparty->array_options['options_password']=dol_hash($newpassword1);
+                            $editthirdparty->array_options['options_pass_temp']='';
+                            $result=$editthirdparty->update($editthirdparty->id, $user, 0);
+                            $message = '<div class="ok">'.$langs->trans("YourPasswordHasBeenReset").'</div>';
+                            $asknewpass = 2;
+                        }
+                    }
+                    else
+                    {
+                        $asknewpass = 1;
+                    }
+                }
             }
             else
-            {*/
-        	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
-        		$hashreset = getRandomPassword(true, array('I'));
-        		$thirdparty->array_options['options_pass_temp']=$hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now(), 1, 'd'), 'dayhourlog');
-        		$result=$thirdparty->update($thirdparty->id, $user, 0);
+            {
+                $langs->load("errors");
+                $message = '<div class="error">'.$langs->trans("ErrorBadHashInLinkToResetPassword").'</div>';
+            }
+        }
+    }
+
+    // Action modif mot de passe
+    if ($action == 'buildnewpassword' && $username)
+    {
+        $sessionkey = 'dol_antispam_value';
+        $ok=(array_key_exists($sessionkey, $_SESSION) === true && (strtolower($_SESSION[$sessionkey]) == strtolower($_POST['code'])));
+
+        // Verify code
+        if (! $ok)
+        {
+            $message = '<div class="error">'.$langs->trans("ErrorBadValueForCode").'</div>';
+        }
+        else
+        {
+            $thirdparty = new Societe($db);
+            $result = $thirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $username);
+
+            if ($result <= 0)
+            {
+                $message = '<div class="error">'.$langs->trans("ErrorLoginDoesNotExists",$username).'</div>';
+                $username='';
+            }
+            else
+            {
+                /*if (! $edituser->email)
+                 {
+                 $message = '<div class="error">'.$langs->trans("ErrorLoginHasNoEmail").'</div>';
+                 }
+                 else
+                 {*/
+                include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+                $hashreset = getRandomPassword(true, array('I'));
+                $thirdparty->array_options['options_pass_temp']=$hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now(), 1, 'd'), 'dayhourlog');
+                $result=$thirdparty->update($thirdparty->id, $user, 0);
                 if ($result < 0) {
                     // Failed
                     $message = '<div class="error">'.$langs->trans("ErrorFailedToSetTemporaryHash");
@@ -212,50 +219,51 @@ if ($action == 'buildnewpassword' && $username)
                     $message .= '</div>';
                 } else {
                     // Success
-                	include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+                    include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 
-                	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-                	if (! empty($thirdparty->array_options['options_domain_registration_page'])
-                	    && $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_ACCOUNT_URL)
-                	{
-                	    $newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$thirdparty->array_options['options_domain_registration_page'];
-                	    if (! empty($conf->global->$newnamekey)) $sellyoursaasaccounturl = $conf->global->$newnamekey;
-                	}
-
-                	$url=$sellyoursaasaccounturl.'/passwordforgotten.php?id='.$thirdparty->id.'&hashreset='.$hashreset;
-
-                	$trackid='thi'.$thirdparty->id;
-
-                	// Send deployment email
-                	include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-                	include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-                	$formmail=new FormMail($db);
-
-                	$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, '(PasswordAssistance)');
-
-                	//$mesg.='You may find more information on all different user/password reset process onto <a href="https://www.dolicloud.com/en-faq-i-forgot-my-login-or-password">the following page</a>';
-
-                	$substitutionarray = getCommonSubstitutionArray($langs, 0, null, $thirdparty);
-                	complete_substitutions_array($substitutionarray, $langs, $thirdparty);
-
-                	$substitutionarray['__URL_TO_RESET__'] = $url;
-
-                	$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
-                	$mesg = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
-
-                	$newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_MAIN_EMAIL, $mesg, array(),array(),array(),'','',0,-1,'','',$trackid,'','standard');
-
-                	if ($newemail->sendfile() > 0)
+                    $sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+                    if (! empty($thirdparty->array_options['options_domain_registration_page'])
+                        && $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_ACCOUNT_URL)
                     {
-                    	$message = '<div class="ok">'.$langs->trans("PasswordChangeRequestSent", $username, $username).'</div>';
+                        $newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$thirdparty->array_options['options_domain_registration_page'];
+                        if (! empty($conf->global->$newnamekey)) $sellyoursaasaccounturl = $conf->global->$newnamekey;
+                    }
+
+                    $url=$sellyoursaasaccounturl.'/passwordforgotten.php?id='.$thirdparty->id.'&hashreset='.$hashreset;
+
+                    $trackid='thi'.$thirdparty->id;
+
+                    // Send deployment email
+                    include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+                    include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+                    $formmail=new FormMail($db);
+
+                    $arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, '(PasswordAssistance)');
+
+                    //$mesg.='You may find more information on all different user/password reset process onto <a href="https://www.dolicloud.com/en-faq-i-forgot-my-login-or-password">the following page</a>';
+
+                    $substitutionarray = getCommonSubstitutionArray($langs, 0, null, $thirdparty);
+                    complete_substitutions_array($substitutionarray, $langs, $thirdparty);
+
+                    $substitutionarray['__URL_TO_RESET__'] = $url;
+
+                    $subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
+                    $mesg = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
+
+                    $newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_MAIN_EMAIL, $mesg, array(),array(),array(),'','',0,-1,'','',$trackid,'','standard');
+
+                    if ($newemail->sendfile() > 0)
+                    {
+                        $message = '<div class="ok">'.$langs->trans("PasswordChangeRequestSent", $username, $username).'</div>';
                         $username='';
                     }
                     else
                     {
-                    	$message.= '<div class="error">'.$newemail->error.'</div>';
+                        $message.= '<div class="error">'.$newemail->error.'</div>';
                     }
                 }
-            //}
+                //}
+            }
         }
     }
 }
