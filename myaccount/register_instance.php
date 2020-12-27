@@ -905,7 +905,7 @@ else
 			}
 		}
 
-		$contract->array_options['options_deployment_ipquality'] = dol_strlen($contract->array_options['options_deployment_ipquality'], 250);
+		$contract->array_options['options_deployment_ipquality'] = dol_trunc($contract->array_options['options_deployment_ipquality'], 250);
 
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 
