@@ -450,6 +450,15 @@ if ($reusecontractid)
 
 	$tmpthirdparty = $contract->thirdparty;
 
+	// Check thirdparty is same than the one in session
+	$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
+	if ($thirdpartyidinsession != $tmpthirdparty->id) {
+		dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$tmpthirdparty->id." when id in session is ".$thirdpartyidinsession);
+		setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+		header("Location: index.php");
+		exit(-1);
+	}
+
 	$email = $tmpthirdparty->email;
 	$password = substr(getRandomPassword(true, array('I')), 0, 9);		// Password is no more known (no more in memory) when we make a retry/restart of deploy
 
@@ -539,7 +548,74 @@ else
 			exit(-1);
 		}
 
+		// Check that thirdparty is ok
+		$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
+		if ($fromsocid > 0) {
+			if ($thirdpartyidinsession != $fromsocid) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
+				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+				header("Location: index.php");
+				exit(-1);
+			}
+			if ($tmpthirdparty->parent != $thirdpartyidinsession) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
+				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+				header("Location: index.php");
+				exit(-1);
+			}
+		} else {
+			if ($thirdpartyidinsession != $reusesocid) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
+				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+				header("Location: index.php");
+				exit(-1);
+			}
+		}
+
 		$email = $tmpthirdparty->email;
+
+		// Check number of instances
+		$MAXINSTANCES = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
+
+		$listofcontractid = array();
+		$sql = 'SELECT c.rowid as rowid';
+		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid, '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
+		$sql.= " WHERE c.fk_soc = s.rowid AND s.rowid = ".$tmpthirdparty->id;
+		$sql.= " AND d.fk_contrat = c.rowid";
+		$sql.= " AND c.entity = ".$conf->entity;
+		$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
+		$resql=$db->query($sql);
+		if ($resql)
+		{
+			$num_rows = $db->num_rows($resql);
+			$i = 0;
+			while ($i < $num_rows)
+			{
+				$obj = $db->fetch_object($resql);
+				if ($obj)
+				{
+					$contract=new Contrat($db);
+					$contract->fetch($obj->rowid);					// This load also lines
+					$listofcontractid[$obj->rowid]=$contract;
+				}
+				$i++;
+			}
+		}
+
+		if (count($listofcontractid) >= $MAXINSTANCES)
+		{
+			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
+				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+			{
+				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpthirdparty->array_options['options_domain_registration_page'];
+				if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+			}
+
+			setEventMessages($langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail), null, 'errors');
+			header("Location: index.php");
+			exit(-1);
+		}
 	}
 	else
 	{

@@ -721,7 +721,7 @@ if (empty($conf) || ! is_object($conf))
     print '<input type="hidden" name="action" value="deployall" />';
     print '<input type="hidden" name="fromsocid" value="'.$mythirdpartyaccount->id.'" />';
     print '<input type="hidden" name="mode" value="mycustomerinstances" />';
-    //print '<input type="hidden" name="reusesocid" value="'.$socid.'" />';
+    print '<!-- thirdpartyidinsession = '.$_SESSION['dol_loginsellyoursaas'].' -->';
 
     print '<div class="row">
     	<div class="col-md-12">
@@ -770,6 +770,7 @@ if (empty($conf) || ! is_object($conf))
     foreach($listofdomain as $val)
     {
         $newval=$val;
+        $reg = array();
         if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
             $newval = preg_replace('/:.*$/', '', $newval);
             if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) continue;

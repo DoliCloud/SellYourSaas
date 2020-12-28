@@ -414,6 +414,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	          <input type="hidden" name="fromsocid" value="<?php echo dol_escape_htmltag($fromsocid); ?>" />
 	          <input type="hidden" name="origin" value="<?php echo dol_escape_htmltag($origin); ?>" />
 	          <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
+	          <!-- thirdpartyidinsession = <?php echo $_SESSION['dol_loginsellyoursaas']; ?> -->
 
 	          <section id="enterUserAccountDetails">
 

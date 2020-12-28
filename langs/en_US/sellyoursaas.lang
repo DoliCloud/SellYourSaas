@@ -541,3 +541,4 @@ SELLYOURSAAS_EMAIL_ADDRESSES_BANNED=List of email addresses or domain names that
 ErrorEMailAddressBannedForSecurityReasons=This type of email address has been banned for security reasons. Use another email address or contact us if you cannot do otherwise.
 RegistrationURLDesc=To get an URL to register an instance, you must have created a service in the good category and with the type "Application".
 ErrorFailedToSetTemporaryHash=Failed to send the temporary hash
+ErrorInvalidReuseIDSurelyAHackAttempt=Invalid reuse of an ID. Surely a hack attempt.

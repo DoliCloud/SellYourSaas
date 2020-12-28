@@ -935,6 +935,7 @@ else
     print '<input type="hidden" name="action" value="deployall" />';
     print '<input type="hidden" name="fromsocid" value="0" />';
     print '<input type="hidden" name="reusesocid" value="'.$socid.'" />';
+    print '<!-- thirdpartyidinsession = '.$_SESSION['dol_loginsellyoursaas'].' -->';
 
     print '<div class="row">
     	<div class="col-md-12">
@@ -944,7 +945,7 @@ else
     //var_dump($arrayofplans);
     //natcasesort($arrayofplans);
 
-    $MAXINSTANCES = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? 4 : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
+    $MAXINSTANCES = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
     if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES)
     {
         if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES))

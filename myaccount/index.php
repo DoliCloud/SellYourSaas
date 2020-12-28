@@ -2923,7 +2923,7 @@ if ($mythirdpartyaccount->isareseller)
     print '<br>';
 
 	$urformycustomerinstances = '<strong>'.$langs->transnoentitiesnoconv("MyCustomersBilling").'</strong>';
-	print $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], $urformycustomerinstances);
+	print str_replace('{s1}', $urformycustomerinstances, $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], '{s1}'));
 
 	print '
 		</div>
