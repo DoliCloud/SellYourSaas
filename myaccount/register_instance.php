@@ -305,7 +305,7 @@ else                    // When we deploy from the register.php page
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
 
-	$parameters = array('orgName' => $orgName, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
+	$parameters = array('tldid' => $tldid, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
 	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 	if ($reshook < 0) {
 	    setEventMessages($hookmanager->error, null, 'errors');
@@ -358,7 +358,7 @@ else                    // When we deploy from the register.php page
 	}
 	if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED))
 	{
-	    $listofbanned = explode(",",$conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
+	    $listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
 	    if (! empty($listofbanned))
 	    {
 	        foreach($listofbanned as $banned)
@@ -399,7 +399,7 @@ $errormessages = array();
 
 $error = 0;
 
-dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontractid.", reusesocid = ".$reusesocid.", domain name  = ".$fqdninstance.")");
+dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontractid.", reusesocid = ".$reusesocid.", fromsocid = ".$fromsocid.", sldAndSubdomain = ".$sldAndSubdomain.")");
 
 
 if (empty($remoteip)) {
@@ -896,7 +896,7 @@ else
 		// Refused if VPN probability is too high
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
 			if ($vpnproba >= $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
 				$abusetest = 1;
 			}
 		}
