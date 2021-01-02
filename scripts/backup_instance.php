@@ -342,6 +342,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*/_tmp/*'";
 	// Excludes for other
 	$param[]="--exclude '*/_source/*'";
+	$param[]="--exclude '*/__MACOSX/*'";
 
 	//$param[]="--backup --suffix=.old";
 	if ($RSYNCDELETE)
