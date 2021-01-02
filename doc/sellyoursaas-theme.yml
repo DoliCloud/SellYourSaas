@@ -1,24 +1,26 @@
+extends: default
 page:
   layout: portrait
-  margin: [0.75in, 1in, 0.75in, 1in]
-  size: Letter
+  margin: [0.4in, 0.6in, 0.4in, 0.6in]
+#  size: A4
+#  size: Letter
 base:
   font-color: #000000
-  font-family: Times-Roman
-  font-size: 12
-  line-height-length: 17
-  line-height: $base-line-height-length / $base-font-size
-vertical-spacing: $base-line-height-length
+  #font-family: Times-Roman
+  #font-size: 12
+  #line-height-length: 16
+  #line-height: $base-line-height-length / $base-font-size
+#vertical-spacing: $base-line-height-length
 heading:
-  font-color: #262626
-  font-size: 17
+  font-color: #b37d25
+  font-size: 16
   font-style: bold
-  line-height: 1.2
+  line-height: 1.05
   margin-bottom: $vertical-spacing
 link:
   font-color: #002FA7
-outline-list:
-  indent: $base-font-size * 1.5
+#outline-list:
+#  indent: $base-font-size * 1.5
 footer:
   height: $base-line-height-length * 2.5
   line-height: 1

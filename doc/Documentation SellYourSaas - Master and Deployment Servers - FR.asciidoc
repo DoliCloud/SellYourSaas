@@ -3700,7 +3700,7 @@ aa-enforce usr.sbin.mysqld
 
 
 
-[[Lancement de mysql sans permissions]]
+[[special_start_mysql_mariadb]]
 === Lancement spéciaux de mysql ou mariadb
 
 * Sans permissions :
