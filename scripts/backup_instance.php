@@ -447,7 +447,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 	// Delete file with same name and bzip2 extension (to clean rest of old behaviour)
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-	dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
+	unlink($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 
 	// Output result
 	foreach($output as $outputline)
