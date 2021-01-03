@@ -439,12 +439,13 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
 	} else {
 		$return_outputmysql = 0;
+		// Delete temporary file once backup is done when file is empty
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
 	}
 
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
 
-	// Delete file with same name and bzip2 extension
+	// Delete file with same name and bzip2 extension (to clean rest of old behaviour)
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 	dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 
