@@ -561,7 +561,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn.conf to hope to restore configtest ok.
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.conf
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
-		echo "Failed to suspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb when suspending $instancename.$domainname" $EMAILTO 
+		echo "Failed to suspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Warning] Pb when suspending $instancename.$domainname" $EMAILTO 
 		sleep 1
 		exit 5
 	fi 
@@ -571,7 +571,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload
-			echo "Failed to suspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb when suspending $instancename.$domainname" $EMAILTO
+			echo "Failed to suspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Warning] Pb when suspending $instancename.$domainname" $EMAILTO
 			sleep 1 
 			exit 6
 		fi
