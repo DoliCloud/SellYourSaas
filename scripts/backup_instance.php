@@ -432,6 +432,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
 	print $outputerr;
 
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
 	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
 	//$return_outputmysql = strpos($outputerr, ' Error ');
 	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
@@ -446,8 +448,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
 
 	// Delete file with same name and bzip2 extension (to clean rest of old behaviour)
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-	unlink($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
+	dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 
 	// Output result
 	foreach($output as $outputline)
