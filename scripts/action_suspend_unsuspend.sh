@@ -553,6 +553,15 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 		ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
 	
 	fi
+
+	
+	# remove virtual host for public web sites by deleting links into sellyoursaas-enabled
+	echo "Remove virtual host for possible virtual host for web sites"
+	for fic in `ls /etc/apache2/sellyoursaas-online/$fqn.website-*.conf`
+	do
+		echo Delete conf with rm -f /etc/apache2/sellyoursaas-online/$fqn.website-*.conf
+		rm -f /etc/apache2/sellyoursaas-online/$fqn.website-*.conf
+	done
 	
 	
 	echo /usr/sbin/apache2ctl configtest
@@ -680,9 +689,17 @@ if [[ "$mode" == "unsuspend" ]]; then
 		ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
 	
 	fi
-	
-	
-	
+
+
+	# restore virtual host for public web sites by deleting links into sellyoursaas-enabled
+	echo "Check if we have to enable virtual host for web sites"
+	for fic in `ls /etc/apache2/sellyoursaas-available/$fqn.website-*.conf`
+	do
+		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.website-*.conf /etc/apache2/sellyoursaas-online
+		ln -fs /etc/apache2/sellyoursaas-available/$fqn.website-*.conf /etc/apache2/sellyoursaas-online
+	done
+
+
 	echo /usr/sbin/apache2ctl configtest
 	/usr/sbin/apache2ctl configtest
 	if [[ "x$?" != "x0" ]]; then
