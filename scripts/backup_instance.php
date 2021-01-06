@@ -391,6 +391,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 // Backup database
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
+    include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
     $serverdb = $server;
     if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
         print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
@@ -438,8 +440,6 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
 	print $outputerr;
-
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
 	//$return_outputmysql = strpos($outputerr, ' Error ');
