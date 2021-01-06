@@ -595,7 +595,7 @@ Install the NFS client and install it manually. Editing is performed by default 
 
 [source, bash]
 ---------------
-sudo apt-get install nfs-common
+sudo apt install nfs-common
 sudo mount -t nfs i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 sudo umount /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 ---------------
@@ -652,12 +652,12 @@ Host github.com
 
 [source, bash]
 ---------------
-sudo apt-get update
-sudo apt-get install ntp git zip memcached rrdtool ncdu
-sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php- rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt-get install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit 
-sudo apt-get install bind9
-sudo apt-get install spamc spamassassin clamav clamav-daemon
+sudo apt update
+sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
+sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php- rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit 
+sudo apt install bind9
+sudo apt install spamc spamassassin clamav clamav-daemon
 ---------------
 
 
@@ -1551,7 +1551,7 @@ En cas de besoin d'utiliser postfix depuis un accès externe (et donc authentifi
 
 [source,bash]
 ---------------
-sudo apt-get install sasl2-bin
+sudo apt install sasl2-bin
 vi /etc/default/saslauthd  pour mettre START=yes
 ---------------
 
@@ -2625,10 +2625,10 @@ Note: Reports are into */var/crash*
 
 [source,bash]
 ---------------
-apt-get install software-properties-common python-software-properties
+apt install software-properties-common python-software-properties
 add-apt-repository ppa:certbot/certbot
-apt-get update
-apt-get install python-certbot-apache
+apt update
+apt install python-certbot-apache
 ---------------
 
 [[creation_certificat_ssl]]
@@ -3529,7 +3529,7 @@ Voir la documentation *afick.pl* pour plus d'options.
 
 [source,bash]
 ---------------
-apt-get install python3-openstackclient python3-novaclient -y
+apt install python3-openstackclient python3-novaclient -y
 ---------------
 
 - Récupérer le fichier OpenStack RC File v3
