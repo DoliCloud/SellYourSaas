@@ -592,11 +592,8 @@ else
 			while ($i < $num_rows)
 			{
 				$obj = $db->fetch_object($resql);
-				if ($obj)
-				{
-					$contract=new Contrat($db);
-					$contract->fetch($obj->rowid);					// This load also lines
-					$listofcontractid[$obj->rowid]=$contract;
+				if ($obj) {
+					$listofcontractid[$obj->rowid]=$obj->rowid;
 				}
 				$i++;
 			}
@@ -644,6 +641,7 @@ else
 		if ($result > 0)
 		{
 			if (substr($sapi_type, 0, 3) != 'cli') {
+				// Instance ref already exists, we redirect to register page with appropriate error message
 				setEventMessages($langs->trans("InstanceNameAlreadyExists", $fqdninstance), null, 'errors');
 				header("Location: ".$newurl);
 				exit(-1);
