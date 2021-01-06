@@ -624,7 +624,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 			<br>
 	        <section id="optinmessagesid">
 				<input type="checkbox" id="optinmessages" name="optinmessages" class="valignmiddle inline" style="margin-top: 0" value="1">
-				<label for="optinmessages" class="valignmiddle small inline"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount"); ?></label>
+				<label for="optinmessages" class="valignmiddle small inline"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>
 			</section>
 			<?php } ?>
 
