@@ -356,8 +356,14 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 	// Launch load
 	$fullcommand=$command." ".join(" ",$param);
-	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d > /dev/null';
-	else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d | '.$fullcommand;
+	if (command_exists("zstd")) {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q > /dev/null';
+	    else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q  | '.$fullcommand;
+	} else {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d > /dev/null';
+	    else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d | '.$fullcommand;
+	}
+
 	$output=array();
 	$return_varmysql=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
