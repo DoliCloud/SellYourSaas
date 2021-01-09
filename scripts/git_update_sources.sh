@@ -63,8 +63,13 @@ do
 	    fi
 	
 		# Create a deployment tar file
-		echo "Compress the repository into an archive $dir.tar.gz"
-		tar cz --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
+		if [[ -x /usr/bin/zstd ]]; then
+			echo "Compress the repository into an archive $gitdir.tar.zst"
+			tar c --zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
+		else
+			echo "Compress the repository into an archive $gitdir.tgz"
+			tar cz --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
+		fi
 	
 	    cd -
 	fi

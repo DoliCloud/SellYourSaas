@@ -344,7 +344,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	{
 		$src_database_db = basename($dirroot);
 	    $dateselected=sprintf("%02s", $dayofmysqldump);
-	    $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.gz";
+	    if (command_exists("zstd")) {
+	        $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.zst";
+	    } else {
+	        $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.gz";
+	    }
 	}
 	else
 	{
