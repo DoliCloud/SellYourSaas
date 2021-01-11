@@ -16,7 +16,7 @@ export currentpath=$(dirname "$0")
 
 echo "Update git dirs found into $1 and generate the tgz image."
 
-for dir in `ls -d $1/* | grep -v tgz`
+for dir in `ls -d $1/* | grep -v "tgz\|zstd"`
 do
 	# If a subdir is given, discard if not subdir
 	if [ "x$2" != "x" ]; then
