@@ -82,7 +82,7 @@ fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
-	echo "Usage: ${0} [test|confirm]"
+	echo "Usage: ${0} [test|confirm] (tempdirs)"
 	exit 1
 fi
 
@@ -525,6 +525,16 @@ echo "***** Now clean miscellaneous files"
 rm /var/log/repair.lock > /dev/null 2>&1
 
 
+# Clean archives 
+if [ "x$2" == "xtempdirs" ]; then
+	echo Clean archives dir from not expected files (should not be required anymore). Archives are tgz now sinc 1st of july 2019.
+	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
+	find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;
+	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
+	find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;
+fi
+
+
 echo
 echo TODO Manually...
 
@@ -585,5 +595,6 @@ if [ -s /tmp/deletedirs.sh ]; then
 	echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
 	echo You can execute commands into file /tmp/deletedirs.sh
 fi
+
 
 exit 0
