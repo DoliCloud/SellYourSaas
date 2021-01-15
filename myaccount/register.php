@@ -584,6 +584,11 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                		$randomindex = mt_rand(0, $maxforrandom);
 	                		$randomselect = $domainstosuggest[$randomindex];
 	                	}
+	                	// Force selection with no way to change value if SELLYOURSAAS_FORCE_RANDOM_SELECTION is set
+	                	if (!empty($conf->global->SELLYOURSAAS_FORCE_RANDOM_SELECTION) && !empty($randomselect)) {
+	                		$domainstosuggest = array();
+	                		$domainstosuggest[] = $randomselect;
+	                	}
 	                	foreach($domainstosuggest as $val) {
 	                		print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
 	                	}
