@@ -456,7 +456,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 												$invoicerecline = new FactureLigneRec($this->db);
 												$invoicerecline->fetch($objsearchline->rowid);
 
-												$invoicerecline->tva_tx = get_default_tva($mysoc, $object, 0);
+												$invoicerecline->tva_tx = get_default_tva($mysoc, $object, $invoicerecline->fk_product);
 
 												$tabprice = calcul_price_total($invoicerecline->qty, $invoicerecline->subprice, $invoicerecline->remise_percent, $invoicerecline->tva_tx, $invoicerecline->localtax1_tx, $invoicerecline->txlocaltax2, 0, 'HT', $invoicerecline->info_bits, $invoicerecline->product_type, $mysoc, array(), 100);
 
