@@ -535,3 +535,4 @@ OptinForCommercialMessages=Optez pour les messages commerciaux
 OptinForCommercialMessagesOnMyAccount=J'accepte de recevoir des messages de %s y compris des newsletters, des offres promotionnelles et commerciales.
 SELLYOURSAAS_GETIPINTEL_EMAIL=Clé API (e-mail) pour utiliser GetIPIntelservice (probabilité IP VPN)
 SELLYOURSAAS_IPQUALITY_KEY=Clé API pour utiliser IPQualityScore (utilisation IP TOR)
+IHaveAVATID=J'ai un numéro de TVA

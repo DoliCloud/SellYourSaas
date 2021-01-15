@@ -545,3 +545,4 @@ RegistrationURLDesc=To get an URL to register an instance, you must have created
 ErrorFailedToSetTemporaryHash=Failed to send the temporary hash
 ErrorInvalidReuseIDSurelyAHackAttempt=Invalid reuse of an ID. Surely a hack attempt.
 SecurityOfRegistrations=Security of registration
+IHaveAVATID=I have a Tax/VAT ID
