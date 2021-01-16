@@ -54,7 +54,7 @@ while read ; do
 	echo "$now Now restart apache..." >> /var/log/apache_watchdog1.log 2>&1
 	/etc/init.d/apache2 start >> /var/log/apache_watchdog1.log 2>&1
 	
-	echo "Apache seg fault detected by apache_watchdog_daemon1. Apache was killed and started." | mail -aFrom:$EMAILFROM -s "[Alert] Apache seg fault detected on "`hostname`". Apache was killed and started." $EMAILTO
+	echo "Apache seg fault detected by apache_watchdog_daemon1. Apache was killed and started." | mail -aFrom:$EMAILFROM -s "[Warning] Apache seg fault detected on "`hostname`". Apache was killed and started." $EMAILTO
 	sleep 5
 	export now=`date '+%Y%m%d%H%M%S'`
 	mv /var/crash/_usr_sbin_apache2.0.crash /var/crash/_usr_sbin_apache2.0.crash."$now" >> /var/log/apache_watchdog1.log 2>&1
