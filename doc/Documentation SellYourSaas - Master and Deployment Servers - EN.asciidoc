@@ -187,7 +187,7 @@ To check:
 cat /proc/mounts | grep diskX
 ---------------
 
-Rem: If you need to recover data from another disk, use:
+Rem: If you need to recover data files from another disk, use:
 
 [source, bash]
 ---------------
@@ -196,6 +196,7 @@ rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 Example:
 rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
+After launching mysql, you can test all databases with
 mysqlcheck --all-databases
 ---------------
 
@@ -1660,8 +1661,8 @@ read_buffer_size=1M
 join_buffer_size=2M
 max_heap_table_size=32M
 max_allowed_packet=32M
-# Mysql: max_execution_time = 300000 (milliseconds) or Mariadb: max_statement_time = 300 (seconds)
-#max_execution_time = 300000
+# Mysql: max_execution_time = 60000 (milliseconds) or Mariadb: max_statement_time = 60 (seconds)
+#max_execution_time = 60000
 
 innodb_buffer_pool_size=1G
 innodb_buffer_pool_instances=8
@@ -4101,7 +4102,7 @@ image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 === Hidden options
 
-You can force different values for some setup parameters when the customer has registered itself from a page with *mydomain.com* as main domain.
+You can force different values for some setup parameters to overwrite the default value when the customer has registered itself from a page with *mydomain.com* as main domain.
 
 * SELLYOURSAAS_NAME_FORDOMAIN-myseconddomain.com = My Service name bis 
 * SELLYOURSAAS_ACCOUNT_URL-myseconddomain.com = https://myaccount.myseconddomain.com
@@ -4150,9 +4151,14 @@ Error when sending email in */var/log/mail.log*:
 
 	Mar  2 22:41:59 novafirstcloud6 postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 
-=> Check you have a file */etc/resolv.conf* and that it point to 127.0.0.1 (if not, create it and restart postfix)
+=> Check you have a file */etc/resolv.conf* that is link to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
 
+nameserver 127.0.0.1
+or 
+nameserver 127.0.0.56
 
+If not, create it and restart postfix.
+     
 ==== php sessions files in /var/lib/php/sessions are not purged
 
 php session purge can be done by 
