@@ -336,9 +336,14 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/freefont-*'";
 	// Excludes for GLPI
 	$param[]="--exclude '*/_cache/*'";
+	$param[]="--exclude '*/_cron/*'";
 	$param[]="--exclude '*/_dumps/*'";
+	$param[]="--exclude '*/_graph/*'";
+	$param[]="--exclude '*/_lock/*'";
 	$param[]="--exclude '*/_log/*'";
+	$param[]="--exclude '*/_rss/*'";
 	$param[]="--exclude '*/_sessions/*'";
+	$param[]="--exclude '*/_uploads/*'";
 	$param[]="--exclude '*/_tmp/*'";
 	$param[]="--exclude '*/_plugins/fusioninventory/xml/*'";
 	// Excludes for other
