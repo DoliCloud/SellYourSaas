@@ -310,6 +310,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	//$param[]="-vv";
 	$param[]="-v";
 	$param[]="--noatime";
+	//$param[]="--exclude-from --exclude-from=$scriptdir/backup_backups.exclude";
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
 	$param[]="--exclude .gitignore";
@@ -319,12 +320,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*.log'";
 	$param[]="--exclude '*.pdf_preview*.png'";
 	$param[]="--exclude '(PROV*)'";
-	//$param[]="--exclude '*/build/'";
 	//$param[]="--exclude '*/doc/images/'";	    // To keep files into htdocs/core/module/xxx/doc/ dir
 	//$param[]="--exclude '*/doc/install/'";	// To keep files into htdocs/core/module/xxx/doc/ dir
 	//$param[]="--exclude '*/doc/user/'";		// To keep files into htdocs/core/module/xxx/doc/ dir
-	//$param[]="--exclude '*/dev/'";
-	//$param[]="--exclude '*/test/'";
 	$param[]="--exclude '*/thumbs/'";
 	$param[]="--exclude '*/temp/'";
 	// Excludes for Dolibarr
