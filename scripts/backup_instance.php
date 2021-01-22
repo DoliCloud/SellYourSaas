@@ -340,6 +340,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*/_log/*'";
 	$param[]="--exclude '*/_sessions/*'";
 	$param[]="--exclude '*/_tmp/*'";
+	$param[]="--exclude '*/_plugins/fusioninventory/xml/*'";
 	// Excludes for other
 	$param[]="--exclude '*/_source/*'";
 	$param[]="--exclude '*/__MACOSX/*'";
