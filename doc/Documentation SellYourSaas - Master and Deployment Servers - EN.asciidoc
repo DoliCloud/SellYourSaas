@@ -1661,8 +1661,8 @@ read_buffer_size=1M
 join_buffer_size=2M
 max_heap_table_size=32M
 max_allowed_packet=32M
-# Mysql: max_execution_time = 60000 (milliseconds) or Mariadb: max_statement_time = 60 (seconds)
-#max_execution_time = 60000
+# Mysql: max_execution_time = 120000 (milliseconds) or Mariadb: max_statement_time = 120 (seconds)
+#max_execution_time = 120000
 
 innodb_buffer_pool_size=1G
 innodb_buffer_pool_instances=8
