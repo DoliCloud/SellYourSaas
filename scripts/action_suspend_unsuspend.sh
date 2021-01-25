@@ -299,7 +299,8 @@ if [[ "$mode" == "rename" ]]; then
 				ln -fs $pathforcertif/crt/$webCustomSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
 				# It is better to link to a bad certificate than linking to non existing file
 				if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to /etc/apache2/$webSSLCertificateCRT"
+					echo "Previous link not valid, so we create it to /etc/apache2/$webSSLCertificateCRT"
+					echo "ln -fs /etc/apache2/$webSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY"
 					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/webCustomSSLCertificateCRT
 				fi
 			fi
@@ -308,7 +309,8 @@ if [[ "$mode" == "rename" ]]; then
 				ln -fs $pathforcertif/crt/$webCustomSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
 				# It is better to link to a bad certificate than linking to non existing file
 				if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateKEY to /etc/apache2/$webSSLCertificateKEY"
+					echo "Previous link not valid, so we create it to /etc/apache2/$webSSLCertificateKEY"
+					echo "ln -fs /etc/apache2/$webSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY"
 					ln -fs /etc/apache2/$webSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
 				fi
 			fi
@@ -317,7 +319,8 @@ if [[ "$mode" == "rename" ]]; then
 				ln -fs $pathforcertif/crt/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
 				# It is better to link to a bad certificate than linking to non existing file
 				if [[ ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateIntermediate to /etc/apache2/$webSSLCertificateIntermediate"
+					echo "Previous link not valid, so we recreate it to /etc/apache2/$webSSLCertificateIntermediate"
+					echo "ln -fs /etc/apache2/$webSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate"
 					ln -fs /etc/apache2/$webSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
 				fi
 			fi
