@@ -300,8 +300,8 @@ if [[ "$mode" == "rename" ]]; then
 				# It is better to link to a bad certificate than linking to non existing file
 				if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
 					echo "Previous link not valid, so we create it to /etc/apache2/$webSSLCertificateCRT"
-					echo "ln -fs /etc/apache2/$webSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY"
-					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/webCustomSSLCertificateCRT
+					echo "ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT"
+					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
 				fi
 			fi
 			if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
