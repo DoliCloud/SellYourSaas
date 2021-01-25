@@ -395,6 +395,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 // Backup database
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
+    include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
     $serverdb = $server;
     if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
         print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
@@ -423,8 +425,15 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--default-character-set=utf8";
 
 	$fullcommand=$command." ".join(" ",$param);
-	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip > /dev/null';
-	else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
+	if (command_exists("zstd")) {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > /dev/null';
+	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst';
+	    // Delete file with same name and gz extension (to clean rest of old behaviour)
+	    dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
+	} else {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
+	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
+	}
 	$output=array();
 	$return_varmysql=0;
 	$return_outputmysql=0;
@@ -435,8 +444,6 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
 	print $outputerr;
-
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
 	//$return_outputmysql = strpos($outputerr, ' Error ');

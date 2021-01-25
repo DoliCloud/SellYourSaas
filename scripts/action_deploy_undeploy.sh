@@ -350,12 +350,18 @@ if [[ "$mode" == "deployall" ]]; then
 					else
 						if [[ ! -d "$chrootdir/$commonjailtemplatename" ]]; then
 							echo "Common jail directory $chrootdir/$commonjailtemplatename not exists, try to create it"
-							if [[ ! -f "$templatesdir/$commonjailtemplatename.tgz" ]]; then
-								echo "Failed to get jailkit common template $templatesdir/$commonjailtemplatename.tgz"
-								exit 1
+							if [[ -f "$templatesdir/$commonjailtemplatename.tar.zst" ]]; then
+									echo "tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/"
+									tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/
+							else
+								if [[ -f "$templatesdir/$commonjailtemplatename.tgz" ]]; then
+									echo "tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/"
+									tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/
+								else
+									echo "Failed to get jailkit common template $templatesdir/$commonjailtemplatename.[tgz|tar.zst]"
+									exit 1
+								fi
 							fi
-							echo "tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/"
-							tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/
 						fi
 						if [[ ! -d "$chrootdir/$commonjailtemplatename$targetdir/$osusername" ]]; then
 							echo "mkdir -p $chrootdir/$commonjailtemplatename$targetdir/$osusername"
@@ -384,14 +390,21 @@ if [[ "$mode" == "deployall" ]]; then
 					# Private users jail
 					if [[ "$sshaccesstype" == "2" ]]; then
 						if [[ ! -d "$chrootdir/$osusername" ]]; then
-							if [[ "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tgz" ]]; then
-								echo "tar -xzf $templatesdir/$privatejailtemplatename.tgz --directory $chrootdir/"
-								tar -xzf $templatesdir/$privatejailtemplatename.tgz --directory $chrootdir/
+							if [[ "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tar.zst" ]]; then
+								echo "tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/"
+								tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/
 								echo "mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername"
 								mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername
 							else
-								echo "jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient"
-								jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient >/dev/null 2>&1
+								if [[ "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tgz" ]]; then
+									echo "tar -xzf $templatesdir/$privatejailtemplatename.tgz --directory $chrootdir/"
+									tar -xzf $templatesdir/$privatejailtemplatename.tgz --directory $chrootdir/
+									echo "mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername"
+									mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername
+								else
+									echo "jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient"
+									jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient >/dev/null 2>&1
+								fi
 							fi
 							echo "mkdir -p $chrootdir/$osusername$targetdir/$osusername"
 							mkdir -p $chrootdir/$osusername$targetdir/$osusername
@@ -683,12 +696,17 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
-			if [ -f $dirwithsources1.tgz ]; then
-				echo "tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
-				tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
+			if [ -f $dirwithsources1.tar.zst ]; then
+				echo "tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+				tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
-				echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
-				cp -pr  $dirwithsources1/. $targetdirwithsources1
+				if [ -f $dirwithsources1.tgz ]; then
+					echo "tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
+					tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
+				else
+					echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
+					cp -pr  $dirwithsources1/. $targetdirwithsources1
+				fi
 			fi
 		fi
 	fi
@@ -696,12 +714,17 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
-			if [ -f $dirwithsources2.tgz ]; then
-				echo "tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
-				tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
+			if [ -f $dirwithsources2.tar.zst ]; then
+				echo "tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+				tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
-				echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
-				cp -pr  $dirwithsources2/. $targetdirwithsources2
+				if [ -f $dirwithsources2.tgz ]; then
+					echo "tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
+					tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
+				else
+					echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
+					cp -pr  $dirwithsources2/. $targetdirwithsources2
+				fi
 			fi
 		fi
 	fi
@@ -709,12 +732,17 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
-			if [ -f $dirwithsources3.tgz ]; then
-				echo "tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
-				tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
+			if [ -f $dirwithsources3.tar.zst ]; then
+				echo "tar --zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+				tar --zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
-				echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
-				cp -pr  $dirwithsources3/. $targetdirwithsources3
+				if [ -f $dirwithsources3.tgz ]; then
+					echo "tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
+					tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
+				else
+					echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
+					cp -pr  $dirwithsources3/. $targetdirwithsources3
+				fi
 			fi
 		fi
 	fi
@@ -770,8 +798,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
-					tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+					if [[ -x /usr/bin/zstd ]]; then
+						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+					else
+						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+					fi
 					echo `date +%Y%m%d%H%M%S`
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
@@ -782,10 +815,19 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
-						echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
+						if [[ -x /usr/bin/zstd ]]; then
+							echo "Archive of test instances are disabled. We discard the tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
+						else
+							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
+						fi
 					else
-						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
-						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+						if [[ -x /usr/bin/zstd ]]; then
+							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+						else
+							echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+						fi
 					fi
 					echo `date +%Y%m%d%H%M%S`
 					echo rm -fr $targetdir/$osusername/$dbname
@@ -1181,8 +1223,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
-	echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
-	$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
+	if [[ -x /usr/bin/zstd ]]; then
+		echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$now.sql.zst"
+		$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$now.sql.zst
+	else
+		echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
+		$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz
+	fi
 
 	if [[ "x$?" == "x0" ]]; then
 		echo "Now drop the database"

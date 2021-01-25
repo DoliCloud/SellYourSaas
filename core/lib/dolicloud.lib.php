@@ -427,3 +427,25 @@ function dolicloud_prepare_head($object,$prefix='')
 
 	return $head;
 }
+
+/**
+ * Check if Windows system
+ *
+ * @return boolean  true or false
+ */
+function is_windows()
+{
+    return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+}
+
+/**
+ * Check if shell command exists and executable
+ *
+ * @param   string  $command    Name of shell command (eg zstd)
+ * @return  boolean             true or false
+ */
+function command_exists($command)
+{
+    $test = is_windows() ? "where" : "which";
+    return is_executable(trim(shell_exec("$test $command")));
+}

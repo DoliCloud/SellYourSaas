@@ -92,7 +92,7 @@ if [[ "x$databasehostdeployment" == "x" ]]; then
 	databasehostdeployment="localhost"
 fi 
 export databaseportdeployment=`grep 'databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$dbserverport" == "x" ]]; then
+if [[ "x$databaseportdeployment" == "x" ]]; then
 	databaseportdeployment="3306"
 fi
 echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
@@ -104,6 +104,12 @@ databasepassdeployment=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | 
 if [[ "x$databasepassdeployment" == "x" ]]; then
 	databasepassdeployment=$databasepass
 fi 
+
+dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dnsserver" == "x" ]]; then
+	echo Failed to get dns server parameters 
+	exit 1
+fi
 
 export testorconfirm=$1
 
@@ -322,8 +328,13 @@ if [ -s /tmp/osutoclean ]; then
 			if [[ "x$dbname" != "xNULL" ]]; then	
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
-				echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
-				$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+				if [[ -x /usr/bin/zstd ]]; then
+					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
+					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
+				else
+					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
+					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+				fi
 
 				echo "Now drop the database"
 				echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname"
@@ -380,58 +391,60 @@ if [ -s /tmp/osutoclean ]; then
 		if [ "x$instancenameshort" != "x" ]; then
 			if [ "x$instancenameshort" != "xNULL" ]; then
 
-				if [ -f /etc/bind/${ZONE} ]; then
-					echo "   ** Remove DNS entry for $instancenameshort from /etc/bind/${ZONE}"
-					cat /etc/bind/${ZONE} | grep "^$instancenameshort " > /dev/null 2>&1
-					notfound=$?
-					echo notfound=$notfound
-					
-					if [[ $notfound == 0 ]]; then
-			
-						echo "cat /etc/bind/${ZONE} | grep -v '^$instancenameshort ' > /tmp/${ZONE}.$PID"
-						cat /etc/bind/${ZONE} | grep -v "^$instancenameshort " > /tmp/${ZONE}.$PID
-					
-						# we're looking line containing this comment
-						export DATE=`date +%y%m%d%H`
-						export NEEDLE="serial number"
-					    curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
-					    # replace if current date is shorter (possibly using different format)
-					    echo "Current bind counter is $curr"
-					    if [ ${#curr} -lt ${#DATE} ]; then
-					      serial="${DATE}00"
-					    else
-					      prefix=${curr::-2}
-					      if [ "$DATE" -eq "$prefix" ]; then 	# same day
-					        num=${curr: -2} # last two digits from serial number
-					        num=$((10#$num + 1)) # force decimal representation, increment
-					        serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
-					      else
-					        serial="${DATE}00" # just update date
-					      fi
-					    fi
-					    echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
-					    /bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
-					    
-					    echo Test temporary file /tmp/${ZONE}.$PID
-						named-checkzone ${ZONENOHOST} /tmp/${ZONE}.$PID
-						if [[ "$?x" != "0x" ]]; then
-							echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid 
-							exit 1
-						fi 
+				if [[ "$dnsserver" == "1" ]]; then
+					if [ -f /etc/bind/${ZONE} ]; then
+						echo "   ** Remove DNS entry for $instancenameshort from /etc/bind/${ZONE}"
+						cat /etc/bind/${ZONE} | grep "^$instancenameshort " > /dev/null 2>&1
+						notfound=$?
+						echo notfound=$notfound
 						
-						echo "   ** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-						cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+						if [[ $notfound == 0 ]]; then
+				
+							echo "cat /etc/bind/${ZONE} | grep -v '^$instancenameshort ' > /tmp/${ZONE}.$PID"
+							cat /etc/bind/${ZONE} | grep -v "^$instancenameshort " > /tmp/${ZONE}.$PID
 						
-						echo "   ** Move new host file"
-						echo mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-						if [[ $testorconfirm == "confirm" ]]; then
-							mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-						fi
-						
-						echo "   ** Reload dns with rndc reload ${ZONENOHOST}"
-						if [[ $testorconfirm == "confirm" ]]; then
-							rndc reload ${ZONENOHOST}
-							#/etc/init.d/bind9 reload
+							# we're looking line containing this comment
+							export DATE=`date +%y%m%d%H`
+							export NEEDLE="serial number"
+						    curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
+						    # replace if current date is shorter (possibly using different format)
+						    echo "Current bind counter is $curr"
+						    if [ ${#curr} -lt ${#DATE} ]; then
+						      serial="${DATE}00"
+						    else
+						      prefix=${curr::-2}
+						      if [ "$DATE" -eq "$prefix" ]; then 	# same day
+						        num=${curr: -2} # last two digits from serial number
+						        num=$((10#$num + 1)) # force decimal representation, increment
+						        serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
+						      else
+						        serial="${DATE}00" # just update date
+						      fi
+						    fi
+						    echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
+						    /bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
+						    
+						    echo Test temporary file /tmp/${ZONE}.$PID
+							named-checkzone ${ZONENOHOST} /tmp/${ZONE}.$PID
+							if [[ "$?x" != "0x" ]]; then
+								echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid 
+								exit 1
+							fi 
+							
+							echo "   ** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+							cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+							
+							echo "   ** Move new host file"
+							echo mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+							if [[ $testorconfirm == "confirm" ]]; then
+								mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+							fi
+							
+							echo "   ** Reload dns with rndc reload ${ZONENOHOST}"
+							if [[ $testorconfirm == "confirm" ]]; then
+								rndc reload ${ZONENOHOST}
+								#/etc/init.d/bind9 reload
+							fi
 						fi
 					fi
 				fi
@@ -510,10 +523,12 @@ echo "***** Now clean also old dir in $archivedirtest - 15 days after being arch
 cd $archivedirtest
 find $archivedirtest -maxdepth 1 -type d -mtime +15 -exec rm -fr {} \;
 
-# Now clean also old files in $archivedirbind
-echo "***** Now clean also old files in $archivedirbind - 15 days after being archived"
-cd $archivedirbind
-find $archivedirbind -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+if [[ "$dnsserver" == "1" ]]; then
+	# Now clean also old files in $archivedirbind
+	echo "***** Now clean also old files in $archivedirbind - 15 days after being archived"
+	cd $archivedirbind
+	find $archivedirbind -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+fi
 
 # Now clean also old files in $archivedircron
 echo "***** Now clean also old files in $archivedircron - 15 days after being archived"
