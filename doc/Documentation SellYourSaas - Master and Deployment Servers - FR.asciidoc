@@ -4190,3 +4190,8 @@ The value for *max_execution_time* is too low or there is a table that has an ab
     SET GLOBAL MAX_EXECUTION_TIME=120000;
 - See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
 
+
+==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
+
+- Check the temp directory is writable by the web server user.
+
