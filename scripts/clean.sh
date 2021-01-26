@@ -544,9 +544,9 @@ rm /var/log/repair.lock > /dev/null 2>&1
 if [ "x$2" == "xtempdirs" ]; then
 	echo "Clean archives dir from not expected files (should not be required anymore). Archives are no more tree of files but an archive since 1st of july 2019".
 	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
-	find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;
+	find "$archivedirpaid" -type d -path '*/osu*/temp' -exec rm -fr {} \;
 	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
-	find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;
+	find "$archivedirtest" -type d -path '*/osu*/temp' -exec rm -fr {} \;
 fi
 
 
