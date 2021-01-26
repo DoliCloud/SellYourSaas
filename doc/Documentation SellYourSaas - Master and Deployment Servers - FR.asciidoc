@@ -85,10 +85,11 @@ Il vous faut acquerrir ce nom de domaine auprès d'un registrar.
 
 La première étape est de mettre à disposition un (ou plusieurs) serveur. Si on part sur plusieurs serveurs, l'un sera serveur *Master* (pilotage et facturation) et les autres seront *Serveurs de déploiement* (les instances des clients). Le serveur *Master* pouvant aussi être *Serveur de déploiement*, il est possible de démarrer avec un seul serveur.
 
-=== Choix de la machine et de l'OS
+=== Choix de la machine et de l'OS et création
 
-* Obtenir un serveur avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal *16.04* ou *18.04*) pour le *Serveur Master*.
-* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le ou les *Serveurs de Déploiement*. Remarque: Ce point peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master (non recommandé en production).
+* Obtenir un serveur avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal *16.04* ou *18.04* or *20.04*) pour le *Serveur Master*.
+
+* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04 or 20.04) pour le ou les *Serveurs de Déploiement*. Remarque: Ce point peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master (non recommandé en production).
 
 _Exemple avec Amazon Standard Medium:_
 
@@ -99,7 +100,7 @@ _Exemple avec OVH Public Cloud:_
 Pour le serveur master: VPS ou B2-15 ou +
 Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit server 2 core minimum - Mémoire 8 Go minimum - Coût en 2020: 22 euros / mois). Doublez les caractéristiques si vous visez 1 000 instances client par serveur.
 
-
+* Ajouter les entrées DNS entry du ou des serveurs (Entrée A pour IP4 et AAAA pour IP6)
 
 
 [[ajout_de_disque]]
@@ -138,7 +139,7 @@ Que le disque viennent d'etre formaté ou qu'il s'aggisse d'un disque ajouté d�
 ---------------
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 ou
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (ne bloque pas le démarrage du serveur)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (ne bloque pas le démarrage du serveur)
 ---------------
 
 * Monter les disques
@@ -146,8 +147,10 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (
 [source,bash]
 ---------------
 mkdir /mnt/diskhome
-mkdir /mnt/diskbackup
 mount /dev/vdxY /mnt/diskhome
+
+And if a disk was created for backup:
+mkdir /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid

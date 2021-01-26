@@ -85,10 +85,11 @@ You need to acquire this domain name from a registrar.
 
 The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be * Deployment servers * (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
 
-=== Choice of machine and OS
+=== Choice of machine and OS and create it
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04*) for the *Master server*.
-* Obtain one or n servers with SSH access that can pass root (We will use Ubuntu LTS minimum 16.04 or 18.04) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Master server*.
+
+* Obtain one or n servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
 _Example with Amazon Standard Medium: _
 
@@ -99,21 +100,23 @@ _Example with OVH Public Cloud: _
 For the master server: VPS or B2-15 or more
 For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
 
-
+* Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
 
 
 [[adding_disk]]
 === Adding the harddisk of data (home of user instances and home of backups)
 
-We will add, on the *Deployment server*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
+We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
 
 On *Deployment server* :
 
 With OVH Public Cloud:
 
-* Create the data disk. For the deployment server, take 250MB per instance.
-* Associate the disk with the server (each additional disk is added in / dev / vdb, / dev / vdc, / dev / vdd, ...).
+* Create the data disk. On a deployment server, you can imagine to reserve 250MB for each customer instance so choose a size in consideration.
+
+* Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
 Note, the disk becomes visible with *fdisk -l* and *lsblk*
+
 * If it is a disk never partitioned, add the partition on the disk (Linux type) and format it by doing:
 
 [source, bash]
@@ -138,7 +141,7 @@ Whether the disk has just been formatted or whether it is an added disk already 
 ---------------
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 or
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (does not block the server from starting)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (does not block the server from starting)
 ---------------
 
 * Mount disk
@@ -146,8 +149,10 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (
 [source, bash]
 ---------------
 mkdir /mnt/diskhome
-mkdir /mnt/diskbackup
 mount /dev/vdxY /mnt/diskhome
+
+And if a disk was created for backup:
+mkdir /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
