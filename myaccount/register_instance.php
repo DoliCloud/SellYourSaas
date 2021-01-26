@@ -422,6 +422,8 @@ else                    // When we deploy from the register.php page
 
 	                if ($resultData["request_status"] == "success")
 	                {
+	                    require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+
 	                    // domain is allowed
 	                    if ($resultData["domain_status"] == "ok") {
 	                        array_push($allowedemail, $domaintocheck);
