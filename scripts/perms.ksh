@@ -36,6 +36,9 @@ do
 	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/$fic
 	chmod -R ug+w /home/admin/wwwroot/dolibarr_documents/$fic
 done
+if [ -d /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf ]; then
+	chown www-data.www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
+fi
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_documents/sellyoursaas
