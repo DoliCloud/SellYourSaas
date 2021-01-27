@@ -408,7 +408,7 @@ else                    // When we deploy from the register.php page
 	        if ($disposable === false)
 	        {
 	            $emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
-	            $apikey = trim($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY);
+	            $apikey = $conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY;
 
 	            // Check if API account and credit are ok
 	            $request = "https://status.block-disposable-email.com/status/?apikey=".$apikey;
