@@ -407,6 +407,7 @@ else                    // When we deploy from the register.php page
 	        // Check in API Block Disposable E-mail database
 	        if ($disposable === false)
 	        {
+	            $emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 	            $apikey = trim($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY);
 
 	            // Check if API account and credit are ok
@@ -435,17 +436,17 @@ else                    // When we deploy from the register.php page
 	                        header("Location: ".$newurl);
 	                        exit(-1);
 	                    } else {
-	                        setEventMessages($langs->trans("ErrorTechnicalErrorOccuredContactWebmaster"), null, 'errors');
+	                        setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
 	                        header("Location: ".$newurl);
 	                        exit(-1);
 	                    }
 	                } else {
-	                    setEventMessages($langs->trans("ErrorTechnicalErrorOccuredContactWebmaster"), null, 'errors');
+	                    setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
 	                    header("Location: ".$newurl);
 	                    exit(-1);
 	                }
 	            } else {
-	                setEventMessages($langs->trans("ErrorTechnicalErrorOccuredContactWebmaster"), null, 'errors');
+	                setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
 	                header("Location: ".$newurl);
 	                exit(-1);
 	            }
