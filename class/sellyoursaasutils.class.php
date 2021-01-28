@@ -1192,15 +1192,28 @@ class SellYourSaasUtils
 	    						    $paymentintent = $stripe->getPaymentIntent($amounttopay, $currency, $FULLTAG, $description, $invoice, $customer->id, $stripeacc, $servicestatus, 0, 'automatic', true, $stripecard->id, 1);
 
 	    						    $charge = new stdClass();
-	    						    if ($paymentintent->status == 'succeeded')
+	    						    if ($paymentintent->status === 'succeeded')
 	    						    {
 	    						        $charge->status = 'ok';
 	    						        $charge->id = $paymentintent->id;
 	    						        $charge->customer = $customer->id;
 	    						    }
+	    						    elseif ($paymentintent->status === 'requires_action')
+	    						    {
+	    						    	//paymentintent->status may be => 'requires_action' (no error in such a case)
+	    						    	dol_syslog(var_export($paymentintent, true), LOG_DEBUG);
+
+	    						    	$charge->status = 'failed';
+	    						    	$charge->customer = $customer->id;
+	    						    	$charge->failure_code = $stripe->code;
+	    						    	$charge->failure_message = $stripe->error;
+	    						    	$charge->failure_declinecode = $stripe->declinecode;
+	    						    	$stripefailurecode = $stripe->code;
+	    						    	$stripefailuremessage = 'Action required. Contact the support at '.$conf->global->SELLYOURSAAS_MAIN_EMAIL;
+	    						    	$stripefailuredeclinecode = $stripe->declinecode;
+	    						    }
 	    						    else
 	    						    {
-	    						    	//paymentintent->status may be => 'requires_action' (no error in such a case) or 'requires_payment_method' if it fails (stripe->error, ->declinecode may be filled)
 	    						    	dol_syslog(var_export($paymentintent, true), LOG_DEBUG);
 
 	    						        $charge->status = 'failed';
