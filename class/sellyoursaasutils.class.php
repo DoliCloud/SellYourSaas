@@ -1200,6 +1200,9 @@ class SellYourSaasUtils
 	    						    }
 	    						    else
 	    						    {
+	    						    	//paymentintent->status may be => 'requires_action' (no error in such a case) or 'requires_payment_method' if it fails (stripe->error, ->declinecode may be filled)
+	    						    	dol_syslog(var_export($paymentintent, true), LOG_DEBUG);
+
 	    						        $charge->status = 'failed';
 	    						        $charge->customer = $customer->id;
                                         $charge->failure_code = $stripe->code;
