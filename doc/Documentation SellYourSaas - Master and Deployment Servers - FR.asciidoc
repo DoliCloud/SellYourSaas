@@ -241,22 +241,25 @@ Corriger les permissions du fichier */etc/ssh/sshd_config* pour etre en lecture/
 chmod go-rw /etc/ssh/sshd_config
 ---------------
 
-Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas* pour changer les autorisations de login avec le contenu suivant:
+Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas.conf* pour changer les autorisations de login avec le contenu suivant:
 
 [source,conf]
 ---------------
-#Privilege Separation is turned on for security
+# Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
-PermitRootLogin no
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+# Disallow login to root
+PermitRootLogin no
+# Disallow empty passwords
+PermitEmptyPasswords no
+# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
+ChallengeResponseAuthentication no
+ 
 # Define list of allowed method to authenticate
-ChallengeResponseAuthentication yes
 PasswordAuthentication yes
 PubkeyAuthentication yes
-
-PermitEmptyPasswords no
 
 AllowUsers myunixlogin admin osu*
 DenyUsers guest
@@ -268,7 +271,6 @@ Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre 
 ---------------
 /etc/init.d/ssh reload
 ---------------
-
 
 Ajouter la ligne suivante dans le fichier */etc/sudoers* pour repositionner le HOME selon le user apres un sudo -s:
 
@@ -285,6 +287,14 @@ myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
 
+Tester qu'il est possible de se connecter avec *myunixlogin* par
+
+[source,bash]
+---------------
+ssh -v myunixlogin@x.y.z.a
+sudo -s
+---------------
+
 
 Ajouter votre clé publique à votre compte unix.
 
@@ -294,9 +304,15 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Définir ou redéfinir le mot de passe de *root*, *admin*, et de *myunixlogin* avec un mot de passe sure.
+Définir ou redéfinir le mot de passe de *root*, *admin* avec un mot de passe sure.
 
-Lancer ssh-keygen sur chacun de ces 3 comptes
+[source,bash]
+---------------
+passwd root
+passwd admin
+---------------
+
+Lancer *ssh-keygen* sur les 3 comptes *root*, *admin* et *myunixlogin*
 
 
 ==== Shell par défaut

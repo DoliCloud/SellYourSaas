@@ -133,7 +133,12 @@ mkfs.ext4 /dev/vdxY
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
 
-* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command *blkid*
+* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
+
+[source, bash]
+---------------
+blkid
+---------------
 
 * Declare the assembly for an automatic assembly at each reboot by adding a line in */etc/fstab*
 
@@ -157,6 +162,8 @@ mount /dev/vdxZ /mnt/diskbackup
 
 blkid
 ---------------
+
+Note: A reboot may be required if disk or mount is not visible.
 
 * Optimize the filesystem by removing the update of the "atime" read access
 
@@ -215,12 +222,8 @@ Create the user account *admin*. It will be used to install and administer the s
 
 [source, bash]
 ---------------
-groupadd admin
-useradd -m -g admin admin
-usermod -a -G adm admin
-mkdir /home/admin/logs
-chown root.adm /home/admin/logs
-chmod 770 /home/admin/logs
+groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -236,35 +239,38 @@ adduser myunixlogin
 
 ==== ssh setup
 
-Fix permission on */etc/ssh/sshd_config so only root has read and write access:
+Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 
 [source,conf]
 ---------------
 chmod go-rw /etc/ssh/sshd_config
 ---------------
 
-Create a file */etc/ssh/sshd_config.d/sellyoursaas* to change login permissions with the following content:
+Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
 
 [source, conf]
 ---------------
-#Privilege Separation is turned on for security
+# Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
-PermitRootLogin no
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+# Disallow login to root
+PermitRootLogin no
+# Disallow empty passwords
+PermitEmptyPasswords no
+# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
+ChallengeResponseAuthentication no
+ 
 # Define list of allowed method to authenticate
-ChallengeResponseAuthentication yes
 PasswordAuthentication yes
 PubkeyAuthentication yes
 
-PermitEmptyPasswords no
-
-AllowUsers myunixlogin admin osu *
+AllowUsers myunixlogin admin osu*
 DenyUsers guest
 ---------------
 
-Please note: replace myunixlogin with the correct value before taking changes into account with:
+Please note: replace *myunixlogin* with the correct value before taking changes into account with:
 
 [source, conf]
 ---------------
@@ -279,13 +285,21 @@ Add the following line in the */etc/sudoers* file to reposition the HOME accordi
 Defaults set_home
 ---------------
 
-Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root* and the permissions *r-r-----* and the content
+Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root*.*root* and the permissions *r-r-----* and the content
 
 [source, conf]
 ---------------
 myunixlogin ALL = (ALL) NOPASSWD: ALL
 ---------------
 
+
+Test that you can connect using *myunixlogin* and make a sudo with
+
+[source,bash]
+---------------
+ssh -v myunixlogin@x.y.z.a
+sudo -s
+---------------
 
 
 Add your public key to your unix account.
@@ -296,9 +310,15 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Define or redefine the password for *root*, *admin*, and *myunixlogin* with a secure password.
+Define or redefine the password for *root*, *admin* with a secure password.
 
-Launch ssh-keygen on each of these 3 accounts
+[source,bash]
+---------------
+passwd root
+passwd admin
+---------------
+
+Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
 
 
 ==== Default shell
