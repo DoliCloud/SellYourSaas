@@ -551,14 +551,11 @@ Create directories required to store data and backups:
 
 [source,bash]
 ---------------
-mkdir /home/jail;
-
-mkdir /mnt/diskhome/home; 
-ln -fs /mnt/diskhome/home /home/jail/home
+mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail/home
 
 mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
-ln -fs /mnt/diskbackup/backup /home/jail/backup 
+ln -fs /mnt/diskbackup/backup /home/jail/backup
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
 ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
