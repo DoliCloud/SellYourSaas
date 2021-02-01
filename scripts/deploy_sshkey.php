@@ -20,7 +20,7 @@
 /**
  *      \file       sellyoursaas/scripts/deploy_sshkey.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to deploy public key on authorized_keys of customers
+ *      \brief      Script to run from master server to deploy public key into the authorized_keys file of all customers on deployment servers.
  */
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');
@@ -77,6 +77,7 @@ $langs->load("main");				// To load language file for default language
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
     print "Create or recreate the file authorized_keys. WARNING: Old file is erased if it already exists.\n";
+    print "Script must be ran from the master server.\n";
     print "Usage: ".$script_file." (test|confirm) [instancefilter]\n";
     print "\n";
     print "- test     test deploy of public key\n";

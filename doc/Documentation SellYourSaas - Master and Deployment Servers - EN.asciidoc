@@ -268,6 +268,8 @@ PubkeyAuthentication yes
 
 AllowUsers myunixlogin admin osu*
 DenyUsers guest
+
+AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 ---------------
 
 Please note: replace *myunixlogin* with the correct value before taking changes into account with:
@@ -351,12 +353,12 @@ Edit the contents of */etc/skel* on the deployment servers in order to fill in t
 [source, bash]
 ---------------
 sudo mkdir /etc/skel/.ssh
-sudo touch /etc/skel/.ssh/authorized_keys
+sudo touch /etc/skel/.ssh/authorized_keys_support
 sudo chmod -R go-rwx /etc/skel/.ssh
-sudo vi /etc/skel/.ssh/authorized_keys
+sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
-Thus any new linux account created (those of customer instances) will be accessible by the administrator (s).
+Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
     
 

@@ -263,6 +263,8 @@ PubkeyAuthentication yes
 
 AllowUsers myunixlogin admin osu*
 DenyUsers guest
+
+AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 ---------------
 
 Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre en compte les modifications par:
@@ -345,9 +347,9 @@ Editer sur les serveurs de déploiement le contenu de */etc/skel* afin de rempir
 [source,bash]
 ---------------
 sudo mkdir /etc/skel/.ssh
-sudo touch /etc/skel/.ssh/authorized_keys
+sudo touch /etc/skel/.ssh/authorized_keys_support
 sudo chmod -R go-rwx /etc/skel/.ssh
-sudo vi /etc/skel/.ssh/authorized_keys
+sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
 Ainsi tout nouveau compte linux créé (ceux des instances des clients) sera accessible par le ou les administrateurs.
