@@ -409,7 +409,7 @@ Go to the management interface of OVH servers, to modify their short name. This 
 
 [source, bash]
 ---------------
-Server name
+nameofserver
 ---------------
 
 
@@ -417,7 +417,7 @@ Connect and modify the file */etc/hosts* with the entry of the new server
 
 [source, bash]
 ---------------
-ipduserveurprincipale nomdserveur.mysaasdomainname.com
+main.ip.of.server nameofserver.mysaasdomainname.com
 ---------------
 
 

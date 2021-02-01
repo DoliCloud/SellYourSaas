@@ -411,7 +411,7 @@ Se connecter et modifier le fichier */etc/hosts* avec l'entrée du nouveau serve
 
 [source,bash]
 ---------------
-ipduserveurprincipale   nomduserveur.mysaasdomainname.com
+ip.principale.du.serveur   nomduserveur.mysaasdomainname.com
 ---------------
 
 
