@@ -264,10 +264,12 @@ ChallengeResponseAuthentication no
 PasswordAuthentication yes
 PubkeyAuthentication yes
 
-AllowUsers myunixlogin admin osu*
 DenyUsers guest
 
 AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
+
+AllowUsers admin osu*
+AllowUsers myunixlogin
 ---------------
 
 Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre en compte les modifications par:
