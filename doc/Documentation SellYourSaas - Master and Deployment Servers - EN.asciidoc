@@ -255,6 +255,9 @@ UsePrivilegeSeparation yes
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+# MaxSessions 10
+MaxSessions 25
+
 # Disallow login to root
 PermitRootLogin no
 # Disallow empty passwords
