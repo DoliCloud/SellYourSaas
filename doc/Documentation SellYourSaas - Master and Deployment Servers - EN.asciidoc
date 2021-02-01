@@ -291,7 +291,7 @@ Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the ow
 
 [source, conf]
 ---------------
-myunixlogin ALL = (ALL) NOPASSWD: ALL
+myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
 
