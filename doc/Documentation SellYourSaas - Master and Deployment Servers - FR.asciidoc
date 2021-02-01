@@ -417,7 +417,7 @@ ip.principale.du.serveur   nomduserveur.mysaasdomainname.com
 
 === Ajout du support de l'IP v6 (optionnel)
 
-==== Avec ifupdown (apt install ifupdown)
+==== Avec ifupdown (Ubuntu 16.04)
 
 - Pour ajouter une IP v6 de manière dynamique à des fins de test dans un premier temps: 
 

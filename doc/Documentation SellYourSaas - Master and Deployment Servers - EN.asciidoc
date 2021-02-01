@@ -423,7 +423,7 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 
 === Added support for IP v6 (optional)
 
-==== With ifupdown (apt install ifupdown)
+==== With ifupdown (Ubuntu 16.04)
 
 - To add a v6 IP dynamically for testing purposes at first:
 
