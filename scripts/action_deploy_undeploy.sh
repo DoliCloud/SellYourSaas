@@ -314,14 +314,6 @@ if [[ "$mode" == "deployall" ]]; then
 		chmod -R go-rwx $targetdir/$osusername
 	fi
 	
-	#if [[ -d $targetdir/$osusername/.ssh ]]
-	#then
-	#	echo "generate ssh key in $targetdir/$osusername/.ssh"
-	#	ssh-keygen -t rsa -f $targetdir/$osusername/.ssh/id_rsa -q -P ""
-	#	chown -R $osusername.$osusername $targetdir/$osusername/.ssh
-	#	cat $targetdir/$osusername/.ssh/id_rsa.pub >> $targetdir/$osusername/.ssh/authorized_keys
-	#fi
-	
 	if [[ "$sshaccesstype" > "0" ]]; then
 		if [[ ! -f "/etc/jailkit/jk_init.ini" ]]; then
 			echo "Error failed to find jailkit package in your system"

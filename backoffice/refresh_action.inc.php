@@ -45,7 +45,7 @@ if ($action == 'addauthorizedkey')
 
 			// Update ssl certificate
 			// Dir .ssh must have rwx------ permissions
-			// File authorized_keys must have rw------- permissions
+			// File authorized_keys_support must have rw------- permissions
 			$dircreated=0;
 			$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh');
 			if ($result) {
@@ -56,11 +56,11 @@ if ($action == 'addauthorizedkey')
 			}	// Creation fails or already exists
 
 			// Check if authorized_key exists
-			//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys';
-			$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys';  // With PHP 5.6.27+
-			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys');
+			//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';
+			$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
+			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support');
 
-			// Create authorized_keys file
+			// Create authorized_keys_support file
 			if (empty($fstat['atime']))		// Failed to connect or file does not exists
 			{
 				$stream = fopen($filecert, 'w');
@@ -74,9 +74,9 @@ if ($action == 'addauthorizedkey')
 					$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 					fwrite($stream, $publickeystodeploy);
 					fclose($stream);
-					// File authorized_keys must have rw------- permissions
-					ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys', 0600);
-					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys');
+					// File authorized_keys_support must have rw------- permissions
+					ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support', 0600);
+					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support');
 					setEventMessage($langs->transnoentitiesnoconv("FileCreated"),'mesgs');
 				}
 			}
@@ -189,8 +189,8 @@ if ($action == 'delauthorizedkey')
 		{
 			$sftp = ssh2_sftp($connection);
 
-			// Check if install.lock exists
-			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys';
+			// Check if authorized_keys_support exists
+			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"),'mesgs');

@@ -3098,9 +3098,9 @@ class SellYourSaasUtils
 		    					$fstatlock=@ssh2_sftp_stat($sftp, $fileinstalllock2);
 		    					$datelockfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
-		    					// Check if authorized_keys exists (created during os account creation, into skel dir)
+		    					// Check if authorized_keys_support exists (created during os account creation, into skel dir)
 		    					$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-		    					$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys';
+		    					$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 		    					$fstatlock=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
 		    					$dateauthorizedkeysfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 		    					//var_dump($datelockfile);
@@ -3124,7 +3124,7 @@ class SellYourSaasUtils
 
     						// Update ssl certificate
     						// Dir .ssh must have rwx------ permissions
-    						// File authorized_keys must have rw------- permissions
+    						// File authorized_keys_support must have rw------- permissions
     						$dircreated=0;
     						$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh');
     						if ($result) {
@@ -3135,11 +3135,11 @@ class SellYourSaasUtils
     						}	// Creation fails or already exists
 
     						// Check if authorized_key exists
-    						//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys';
-    						$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys';  // With PHP 5.6.27+
-    						$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys');
+    						//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
+    						$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
+    						$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
 
-    						// Create authorized_keys file
+    						// Create authorized_keys_support file
     						if (empty($fstat['atime']))		// Failed to connect or file does not exists
     						{
     							$stream = fopen($filecert, 'w');
@@ -3155,9 +3155,9 @@ class SellYourSaasUtils
     								fwrite($stream,$publickeystodeploy);
 
     								fclose($stream);
-    								// File authorized_keys must have rw------- permissions
-                                    ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys', 0600);
-    								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys');
+    								// File authorized_keys_support must have rw------- permissions
+                                    ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support', 0600);
+    								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
     							}
     						}
     						else

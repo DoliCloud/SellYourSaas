@@ -340,7 +340,7 @@ rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgr
 
 === Modification de /etc/skel
 
-Editer sur les serveurs de déploiement le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys* avec 
+Editer sur les serveurs de déploiement le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys_support* avec 
 * la clé publique ssh du ou des utilisateurs *myunixlogin*
 * la clé publique ssh de l'utilisateur *admin* du serveur master
 
@@ -4036,7 +4036,7 @@ Les étapes réalisées par l'agent et la remote action "backup" sont:
 Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inutile et inutilisé pour le déploiement d'autres logiciels.
 Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys":
 
-- Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
+- Mise à jour du fichier ssh */etc/skel/authorized_keys_support* avec les clés publiques passées en paramètres.
 
 
 === Quelques règles de fonctionnement métier de SellYourSaas

@@ -4053,7 +4053,7 @@ Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inut
 
 Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
-- Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
+- Mise à jour du fichier ssh */etc/skel/authorized_keys_support* avec les clés publiques passées en paramètres.
 
 
 === Some business rules of Sell-Your-Saas

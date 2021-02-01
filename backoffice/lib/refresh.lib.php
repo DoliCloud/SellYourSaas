@@ -18,7 +18,7 @@ include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
  * @param 	Contrat                  	$object	    			Customer (can modify caller)
  * @param	array						$errors	    			Array of errors
  * @param	int							$printoutput			Print output information
- * @param	int							$recreateauthorizekey	1=Recreate authorized key if not found
+ * @param	int							$recreateauthorizekey	1=Recreate authorized key if not found, 2=Recreate authorized key event if found
  * @return	int													1
  */
 function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0, $recreateauthorizekey=0)
@@ -66,14 +66,14 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 
 				// Update ssl certificate
 				// Dir .ssh must have rwx------ permissions
-				// File authorized_keys must have rw------- permissions
+				// File authorized_keys_support must have rw------- permissions
 
 				// Check if authorized_keys_support exists
-				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys';
+				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
 				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
 				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support');
-				// Create authorized_keys file
-				if (empty($fstat['atime']) || $recreateauthorizekey)
+				// Create authorized_keys_support file
+				if (empty($fstat['atime']) || $recreateauthorizekey == 2)
 				{
 					if ($recreateauthorizekey)
 					{
