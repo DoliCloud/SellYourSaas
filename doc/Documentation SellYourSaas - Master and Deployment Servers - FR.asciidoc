@@ -415,7 +415,7 @@ ip.principale.du.serveur   nomduserveur.mysaasdomainname.com
 ---------------
 
 
-=== Ajout du support de l'IP v6 (optionnel)
+=== Ajout du support de l'IP v6 (optionnel, si ipv6 désiré et pas encore paramétré)
 
 ==== Avec ifupdown (Ubuntu 16.04)
 
@@ -434,7 +434,6 @@ Exemple pour une IPv6 2002:41d0:1234:1000::1234 avec comme gateway 2002:41d0:123
 
 [source,conf]
 ---------------
-
 # Pour declarer une IP v6 persistente (le masque est 128 chez OVH en ipv6) 
 iface eth0 inet6 static
         address 2002:41d0:1234:1000::1234
@@ -459,7 +458,7 @@ Pour prendre en compte, essayer ceci, sinon, reboot.
 Ajouter un fichier de conf */etc/netplan/51-ipv6-ovh.yaml*.
 Remarque: OVH fourni un /128 pour l'ipv6 mais netplan veut du /64
  
-Exemple pour une IPv6 2002:41d0:1234:1000::1234 avec comme gateway 2002:41d0:1234:1000::1
+Exemple pour une IPv6 1234:41d0:1234:1000::1234 avec comme gateway 1234:41d0:1234:1000::1
 
 [source,conf]
 ---------------
@@ -470,8 +469,8 @@ network:
 			match:
 				name: eth0
 			addresses:
-				- "2002:41d0:1234:1000::1234/64"
-			gateway6: "2002:41d0:1234:1000::1"
+				- "1234:41d0:1234:1000::1234/64"
+			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
  

@@ -421,7 +421,7 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 ---------------
 
 
-=== Added support for IP v6 (optional)
+=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
 
 ==== With ifupdown (Ubuntu 16.04)
 
@@ -429,26 +429,25 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 
 [source, bash]
 ---------------
-ip addr add 2002: 41d0: 1234: 1000 :: 1234/128 dev eth0
-ip -6 route add 2002: 41d0: 1234: 1000 :: 1 dev eth0
-ip -6 route add default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
+ip addr add 2002:41d0:1234:1000::1234/128 dev eth0
+ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
 - For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
-Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
+Example for an IPv6 2002:41d0:1234:1000::1234 with as gateway 2002:41d0:1234:1000::1
 
 [source, conf]
 ---------------
-
 # To declare a persistent v6 IP (the mask is 128 at OVH in ipv6)
 iface eth0 inet6 static
-        address 2002: 41d0: 1234: 1000 :: 1234
+        address 2002:41d0:1234:1000::1234
         netmask 128
-        post-up / sbin / ip -6 route add 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        post-up / sbin / ip -6 route add default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        pre-down / sbin / ip -6 route del default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        pre-down / sbin / ip -6 route del 2002: 41d0: 1234: 1000 :: 1 dev eth0
+        post-up /sbin/ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+        post-up /sbin/ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
 Rem: *eth0* can be something else, for example *ens3*.
@@ -465,7 +464,7 @@ To take this into account, try this, otherwise, reboot.
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
  
-Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
+Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
 
 [source, conf]
 ---------------
@@ -476,8 +475,8 @@ network:
 			match:
 				name: eth0
 			addresses:
-				- "2002:41d0:1234:1000::1234/64"
-			gateway6: "2002:41d0:1234:1000::1"
+				- "1234:41d0:1234:1000::1234/64"
+			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
  
