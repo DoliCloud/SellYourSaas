@@ -600,6 +600,8 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
+Notez qu'il y aura dans ce fichier autant de lignes que de serveurs de déploiements.
+
 [source,bash]
 ---------------
 exportfs -v -a			(to validate new entries to add)

@@ -606,6 +606,9 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
+Note that you should have n lines per deployment server in this file.
+
+
 [source, bash]
 ---------------
 exportfs -v -a (to validate new entries to add)
@@ -616,6 +619,7 @@ systemctl restart nfs-kernel-server
 systemctl status nfs-kernel-server
 exportfs
 ---------------
+
 
 ==== On the Deployment Servers
 
