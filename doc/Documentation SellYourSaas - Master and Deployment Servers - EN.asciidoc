@@ -394,8 +394,8 @@ Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc
 
 [source, conf]
 ---------------
-LimitUIDRange 1,500,000
-LimitGIDRange 1,500,000
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 
@@ -638,26 +638,17 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 
-=== Creation of the ssh key of the admin account
-
-==== On the master and deployment server
-
-Generate a public and private ssh key for the *admin* account.
-
-[source, bash]
----------------
-ssh-keygen
----------------
+=== Deploy the public key of master on admin account
 
 ==== On deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh *admin* account to /home/admin/.ssh/id_rsa_sellyoursaas ... (This key is the one common for maintenance to access user accounts). Put the right rights.
+On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access user accounts). Put the right permissios.
 
 [source, bash]
 ---------------
-chmod u + rw /home/admin/.ssh/id_rsa_sellyoursaas*
+chmod u +rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod go-rw /home/admin/.ssh/id_rsa_sellyoursaas*
-chmod a + r /home/admin/.ssh/id_rsa_sellyoursaas.pub
+chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
 
 
