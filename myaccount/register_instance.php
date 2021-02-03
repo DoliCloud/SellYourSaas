@@ -174,6 +174,10 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 $remoteip = getUserRemoteIP();
 $domainname = preg_replace('/^\./', '', $tldid);
 
+// Sanitize $sldAndSubdomain. Remove start and end -
+$sldAndSubdomain = preg_replace('/^\-+/', '', $sldAndSubdomain);
+$sldAndSubdomain = preg_replace('/\-+$/', '', $sldAndSubdomain);
+
 $tmpproduct = new Product($db);
 $tmppackage = new Packages($db);
 
@@ -270,7 +274,7 @@ elseif ($reusesocid)		// When we use the "Add another instance" from myaccount d
 		header("Location: ".$newurl);
 		exit(-1);
 	}
-	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain))
+	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain))		// Only a-z A-Z 0-9 and - . Note: - is removed by javascript part of register page.
 	{
 		setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 		header("Location: ".$newurl);
