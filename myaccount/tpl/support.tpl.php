@@ -25,7 +25,31 @@ if (empty($conf) || ! is_object($conf))
 ?>
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
+    require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 
+    if(empty($_POST['token'])){
+        $token = newToken();
+    }
+
+    $tokenarray = explode('$',$token);
+    $tmpdir = str_replace('/','',$tokenarray[3]);
+    $upload_dir = $conf->sellyoursaas->dir_temp."/".$tmpdir.'.tmp';
+
+    if (!empty($_POST['addfile'])) {
+        // Set tmp user directory
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+        dol_add_file_process($upload_dir, 0, 0);
+
+        $action = "presend";
+    }
+
+    if (!empty($_POST["removedfile"])) {
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+		dol_remove_file_process($_POST['removedfile'], 0, 0); // We really delete file linked to mailing
+
+		$action = "presend";
+    }
+    
     // Print warning to read FAQ before
     print '<!-- Message to read FAQ and get status -->'."\n";
     if ($urlfaq || $urlstatus)
@@ -90,7 +114,7 @@ if (empty($conf) || ! is_object($conf))
 				        <div class="caption">';
 
                         print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-                        print '<input type="hidden" name="token" value="'.newToken().'">';
+                        print '<input type="hidden" name="token" value="'.$token.'">';
                         print '<input type="hidden" name="mode" value="support">';
                         print '<input type="hidden" name="action" value="presend">';
 
@@ -218,12 +242,51 @@ if (empty($conf) || ! is_object($conf))
                     if ($action == 'presend' && GETPOST('supportchannel','alpha'))
                     {
                         print '<br><br>';
-                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-                        print '<input type="hidden" name="token" value="'.newToken().'">';
-                        print '<input type="hidden" name="mode" value="support">';
-                        print '<input type="hidden" name="contractid" value="'.$id.'">';
+                        print '<tr><td>'.$langs->trans("MailFile").'</td>';
+                        print '<td colspan="3">';
+                        $trackid = '';
+			            dol_init_file_process($upload_dir, $trackid);
+                        // List of files
+                        $listofpaths = dol_dir_list($upload_dir, 'all', 0, '', '', 'name', SORT_ASC, 0);
+
+                        $out .= '<input type="hidden" class="removedfilehidden" name="removedfile" value="">'."\n";
+                        $out .= '<script type="text/javascript" language="javascript">';
+                        $out .= 'jQuery(document).ready(function () {';
+                        $out .= '    jQuery(".removedfile").click(function() {';
+                        $out .= '        jQuery(".removedfilehidden").val(jQuery(this).val());';
+                        $out .= '    });';
+                        $out .= '})';
+                        $out .= '</script>'."\n";
+                        if (count($listofpaths)) {
+                            foreach ($listofpaths as $key => $val) {
+                                $out .= '<div id="attachfile_'.$key.'">';
+                                $out .= img_mime($listofpaths[$key]['name']).' '.$listofpaths[$key]['name'];
+                                $out .= ' <input type="image" style="border: 0px;" src="'.img_picto($langs->trans("Search"), 'delete.png', '', '', 1).'" value="'.($key + 1).'" class="removedfile" id="removedfile_'.$key.'" name="removedfile_'.$key.'" />';
+                                $out .= '<br></div>';
+                            }
+                        } else {
+                            $out .= $langs->trans("NoAttachedFiles").'<br>';
+                        }
+                        
+                        // Add link to add file
+                        $hiddeninputs = '<input type="hidden" name="mode" value="support"> 
+                                         <input type="hidden" name="token" value="'.$token.'">
+                                         <input type="hidden" name="contractid" value="'.$id.'">
+                                         <input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel','alpha').'">';
+
+                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+                        print $out;
+                        print '<input type="hidden" name="action" value="addfile">';
+                        print $hiddeninputs;
+                        print '<input type="file" class="flat" id="addedfile" name="addedfile" value="'.$langs->trans("Upload").'" />';
+                        print ' ';
+                        print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
+                        print '</form>';
+
+                        print '<br><br>';
+                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
                         print '<input type="hidden" name="action" value="send">';
-                        print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel','alpha').'">';
+                        print $hiddeninputs;
 
                         $sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
                         if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
