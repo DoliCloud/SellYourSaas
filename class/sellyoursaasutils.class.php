@@ -1075,9 +1075,9 @@ class SellYourSaasUtils
 
     				if ($foundalternativestripeaccount) {
     				    if (empty($stripeacc)) {				// If the Stripe connect account not set, we use common API usage
-    				        $customer = \Stripe\Customer::retrieve("$foundalternativestripeaccount");
+    				    	$customer = \Stripe\Customer::retrieve(array('id'=>"$foundalternativestripeaccount", 'expand[]'=>'sources'));
     				    } else {
-    				        $customer = \Stripe\Customer::retrieve("$foundalternativestripeaccount", array("stripe_account" => $stripeacc));
+    				    	$customer = \Stripe\Customer::retrieve(array('id'=>"$foundalternativestripeaccount", 'expand[]'=>'sources'), array("stripe_account" => $stripeacc));
     				    }
     				} else {
         				$customer = $stripe->customerStripe($thirdparty, $stripeacc, $servicestatus, 0);
@@ -1085,6 +1085,10 @@ class SellYourSaasUtils
     					{
     						$this->errors[] = $stripe->error;
     					}
+    					/*if (!empty($customer) && empty($customer->sources)) {
+							$customer = null;
+    						$this->errors[] = '\Stripe\Customer::retrieve did not returned the sources';
+    					}*/
     				}
 
     				$nbhoursbetweentries    = (empty($conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES) ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
@@ -1092,47 +1096,49 @@ class SellYourSaasUtils
 
     				if ($resultthirdparty > 0 && ! empty($customer))
     				{
-    					// Test if last AC_PAYMENT_STRIPE_KO event is an old error lower than $nbhoursbetweentries hours.
-    					$recentfailedpayment = false;
-    					$sqlonevents = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'actioncomm WHERE fk_soc = '.$thirdparty->id." AND code ='AC_PAYMENT_STRIPE_KO' AND datep > '".$this->db->idate($now - ($nbhoursbetweentries * 3600))."'";
-						$resqlonevents = $this->db->query($sqlonevents);
-						if ($resqlonevents)
-						{
-							$obj = $this->db->fetch_object($resqlonevents);
-							if ($obj && $obj->nb > 0) $recentfailedpayment = true;
-						}
-						if ($recentfailedpayment && empty($nocancelifpaymenterror))	// If we are not in a mode that ask to avoid cancelation, we cancel payment.
-						{
-							$errmsg='Payment try was canceled (recent payment, in last '.$nbhoursbetweentries.' hours, with error AC_PAYMENT_STRIPE_KO for this customer)';
-							dol_syslog($errmsg, LOG_DEBUG);
+    					if (!$error && !empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
+    						$errmsg='Payment try was canceled (invoice qualified by the automatic payment was delayed after the '.dol_print_date($invoice->array_options['options_delayautopayment'], 'day').')';
+    						dol_syslog($errmsg, LOG_DEBUG);
 
-							$error++;
-							$errorforinvoice++;
-							$this->errors[]=$errmsg;
-						}
-						elseif (! empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
-						    $errmsg='Payment try was canceled (invoice qualified by the automatic payment was delayed after the '.dol_print_date($invoice->array_options['options_delayautopayment'], 'day').')';
-						    dol_syslog($errmsg, LOG_DEBUG);
+    						$error++;
+    						$errorforinvoice++;
+    						$this->errors[]=$errmsg;
+    					}
+    					if (!$error && ($invoice->date < ($now - ($nbdaysbeforeendoftries * 24 * 3600)))                                 // We try until we reach $nbdaysbeforeendoftries
+    						&& ($invoice->date < ($now - (62 * 24 * 3600)) || $invoice->date > ($now - (60 * 24 * 3600)))     // or when we have 60 days
+    						&& ($invoice->date < ($now - (92 * 24 * 3600)) || $invoice->date > ($now - (90 * 24 * 3600)))     // or when we have 90 days
+    						&& empty($nocancelifpaymenterror))
+    					{
+    						$errmsg='Payment try was canceled (invoice date is older than '.$nbdaysbeforeendoftries.' days and not 60 days old and not 90 days old) - You can still take payment from backoffice.';
+    						dol_syslog($errmsg, LOG_DEBUG);
 
-						    $error++;
-						    $errorforinvoice++;
-						    $this->errors[]=$errmsg;
-						}
-						elseif (
-						    ($invoice->date < ($now - ($nbdaysbeforeendoftries * 24 * 3600)))                                 // We try until we reach $nbdaysbeforeendoftries
-						    && ($invoice->date < ($now - (62 * 24 * 3600)) || $invoice->date > ($now - (60 * 24 * 3600)))     // or when we have 60 days
-						    && ($invoice->date < ($now - (92 * 24 * 3600)) || $invoice->date > ($now - (90 * 24 * 3600)))     // or when we have 90 days
-						    && empty($nocancelifpaymenterror))
+    						$error++;
+    						$errorforinvoice++;
+    						$this->errors[]=$errmsg;
+    					}
+    					if (!$error && empty($nocancelifpaymenterror))	// If we are not in a mode that ask to avoid cancelation, we cancel payment.
 						{
-							$errmsg='Payment try was canceled (invoice date is older than '.$nbdaysbeforeendoftries.' days and not 60 days old and not 90 days old) - You can still take payment from backoffice.';
-							dol_syslog($errmsg, LOG_DEBUG);
+							// Test if last AC_PAYMENT_STRIPE_KO event is an old error lower than $nbhoursbetweentries hours.
+							$recentfailedpayment = false;
+							$sqlonevents = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'actioncomm WHERE fk_soc = '.$thirdparty->id." AND code ='AC_PAYMENT_STRIPE_KO' AND datep > '".$this->db->idate($now - ($nbhoursbetweentries * 3600))."'";
+							$resqlonevents = $this->db->query($sqlonevents);
+							if ($resqlonevents)
+							{
+								$obj = $this->db->fetch_object($resqlonevents);
+								if ($obj && $obj->nb > 0) $recentfailedpayment = true;
+							}
 
-							$error++;
-							$errorforinvoice++;
-							$this->errors[]=$errmsg;
+							if ($recentfailedpayment) {
+								$errmsg='Payment try was canceled (recent payment, in last '.$nbhoursbetweentries.' hours, with error AC_PAYMENT_STRIPE_KO for this customer)';
+								dol_syslog($errmsg, LOG_DEBUG);
+
+								$error++;
+								$errorforinvoice++;
+								$this->errors[]=$errmsg;
+							}
 						}
-						else
-						{
+
+						if (!$error) {
 	    					$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
 	    					if ($stripecard)  // Can be card_... (old mode) or pm_... (new mode)
 	    					{
@@ -1147,6 +1153,8 @@ class SellYourSaasUtils
 	    						{
     	    						dol_syslog("* Create charge on card ".$stripecard->id.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
+    	    						$ipaddress = getUserRemoteIP();
+
     	    						$charge = null;		// Force reset of $charge, so, if already set from a previous fetch, it will be empty even if there is an exception at next step
     	    						try {
     		    						$charge = \Stripe\Charge::create(array(
@@ -1154,7 +1162,7 @@ class SellYourSaasUtils
     			    						'currency' => $currency,
     			    						'capture'  => true,							// Charge immediatly
     			    						'description' => $description,
-    			    						'metadata' => array("FULLTAG" => $FULLTAG, 'Recipient' => $mysoc->name, 'dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>(empty($_SERVER['REMOTE_ADDR'])?'':$_SERVER['REMOTE_ADDR'])),
+    		    							'metadata' => array("FULLTAG" => $FULLTAG, 'Recipient' => $mysoc->name, 'dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>$ipaddress),
     		    							'customer' => $customer->id,
     		    							//'customer' => 'bidon_to_force_error',		// To use to force a stripe error
     			    						'source' => $stripecard,
@@ -1184,14 +1192,30 @@ class SellYourSaasUtils
 	    						    $paymentintent = $stripe->getPaymentIntent($amounttopay, $currency, $FULLTAG, $description, $invoice, $customer->id, $stripeacc, $servicestatus, 0, 'automatic', true, $stripecard->id, 1);
 
 	    						    $charge = new stdClass();
-	    						    if ($paymentintent->status == 'succeeded')
+	    						    if ($paymentintent->status === 'succeeded')
 	    						    {
 	    						        $charge->status = 'ok';
 	    						        $charge->id = $paymentintent->id;
 	    						        $charge->customer = $customer->id;
 	    						    }
+	    						    elseif ($paymentintent->status === 'requires_action')
+	    						    {
+	    						    	//paymentintent->status may be => 'requires_action' (no error in such a case)
+	    						    	dol_syslog(var_export($paymentintent, true), LOG_DEBUG);
+
+	    						    	$charge->status = 'failed';
+	    						    	$charge->customer = $customer->id;
+	    						    	$charge->failure_code = $stripe->code;
+	    						    	$charge->failure_message = $stripe->error;
+	    						    	$charge->failure_declinecode = $stripe->declinecode;
+	    						    	$stripefailurecode = $stripe->code;
+	    						    	$stripefailuremessage = 'Action required. Contact the support at '.$conf->global->SELLYOURSAAS_MAIN_EMAIL;
+	    						    	$stripefailuredeclinecode = $stripe->declinecode;
+	    						    }
 	    						    else
 	    						    {
+	    						    	dol_syslog(var_export($paymentintent, true), LOG_DEBUG);
+
 	    						        $charge->status = 'failed';
 	    						        $charge->customer = $customer->id;
                                         $charge->failure_code = $stripe->code;
@@ -1265,7 +1289,9 @@ class SellYourSaasUtils
 	    							$description='Stripe payment OK ('.$charge->id.') from doTakePaymentStripeForThirdparty: '.$FULLTAG;
 
 	    							$db=$this->db;
-	    							$ipaddress = (empty($_SERVER['REMOTE_ADDR'])?'':$_SERVER['REMOTE_ADDR']);
+
+	    							$ipaddress = getUserRemoteIP();
+
 	    							$TRANSACTIONID = $charge->id;
 	    							$currency=$conf->currency;
 	    							$paymentmethod='stripe';
@@ -2451,8 +2477,10 @@ class SellYourSaasUtils
 									//var_dump(dol_print_date($date_start, 'dayhour'));
 									//exit;
 
-									$frequency=1;
-									$frequency_unit='m';
+									//$frequency=1;
+									//$frequency_unit='m';
+									$frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
+									$frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
 									$tmp=dol_getdate($date_start?$date_start:$now);
 									$reyear=$tmp['year'];
 									$remonth=$tmp['mon'];
@@ -3024,7 +3052,7 @@ class SellYourSaasUtils
     		$listoflines = array($object);
     	}
 
-    	dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." email=".$email." password=".$password.(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, 1);
+    	dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." email=".$email." ".(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, 1);
 
     	include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
     	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
@@ -3038,7 +3066,8 @@ class SellYourSaasUtils
     		    $server=$object->array_options['options_hostname_os'];
     		    dol_syslog("Try to ssh2_connect to ".$server);
 
-    		    $connection = @ssh2_connect($server, 22);
+    		    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    		    $connection = @ssh2_connect($server, $server_port);
     			if ($connection)
     			{
     				//print ">>".$object->array_options['options_username_os']." - ".$object->array_options['options_password_os']."<br>\n";exit;
@@ -3069,9 +3098,9 @@ class SellYourSaasUtils
 		    					$fstatlock=@ssh2_sftp_stat($sftp, $fileinstalllock2);
 		    					$datelockfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
-		    					// Check if authorized_keys exists (created during os account creation, into skel dir)
+		    					// Check if authorized_keys_support exists (created during os account creation, into skel dir)
 		    					$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-		    					$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys';
+		    					$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 		    					$fstatlock=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
 		    					$dateauthorizedkeysfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 		    					//var_dump($datelockfile);
@@ -3095,7 +3124,7 @@ class SellYourSaasUtils
 
     						// Update ssl certificate
     						// Dir .ssh must have rwx------ permissions
-    						// File authorized_keys must have rw------- permissions
+    						// File authorized_keys_support must have rw------- permissions
     						$dircreated=0;
     						$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh');
     						if ($result) {
@@ -3106,11 +3135,11 @@ class SellYourSaasUtils
     						}	// Creation fails or already exists
 
     						// Check if authorized_key exists
-    						//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys';
-    						$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys';  // With PHP 5.6.27+
-    						$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys');
+    						//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
+    						$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
+    						$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
 
-    						// Create authorized_keys file
+    						// Create authorized_keys_support file
     						if (empty($fstat['atime']))		// Failed to connect or file does not exists
     						{
     							$stream = fopen($filecert, 'w');
@@ -3126,7 +3155,9 @@ class SellYourSaasUtils
     								fwrite($stream,$publickeystodeploy);
 
     								fclose($stream);
-    								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys');
+    								// File authorized_keys_support must have rw------- permissions
+                                    ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support', 0600);
+    								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
     							}
     						}
     						else
@@ -3210,7 +3241,9 @@ class SellYourSaasUtils
 
     				if (function_exists('ssh2_disconnect'))
     				{
-    				    //ssh2_disconnect($connection);     // Hang on some config
+    				    if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				        //ssh2_disconnect($connection);     // Hang on some config
+    				    }
     				    $connection = null;
     				    unset($connection);
     				}
@@ -3330,21 +3363,22 @@ class SellYourSaasUtils
    					$archivedir = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH;
    				}
 
-    			$generatedunixlogin   =$contract->array_options['options_username_os'];
-    			$generatedunixpassword=$contract->array_options['options_password_os'];
-    			$generateddbname      =$contract->array_options['options_database_db'];
-    			$generateddbport      =($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
-    			$generateddbusername  =$contract->array_options['options_username_db'];
-    			$generateddbpassword  =$contract->array_options['options_password_db'];
-    			$generateddbprefix    =($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
-    			$generatedunixhostname=$contract->array_options['options_hostname_os'];
-    			$generateddbhostname  =$contract->array_options['options_hostname_db'];
-    			$generateduniquekey   =getRandomPassword(true);
+    			$generatedunixlogin    =$contract->array_options['options_username_os'];
+    			$generatedunixpassword =$contract->array_options['options_password_os'];
+    			$generateddbname       =$contract->array_options['options_database_db'];
+    			$generateddbport       =($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
+    			$generateddbusername   =$contract->array_options['options_username_db'];
+    			$generateddbpassword   =$contract->array_options['options_password_db'];
+    			$generateddbprefix     =($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
+    			$generatedunixhostname =$contract->array_options['options_hostname_os'];
+    			$generateddbhostname   =$contract->array_options['options_hostname_db'];
+    			$generateduniquekey    =getRandomPassword(true);
 
-    			$customurl            =$contract->array_options['options_custom_url'];
-    			$customvirtualhostline=$contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
+    			$sshaccesstype         =(empty($contract->array_options['options_sshaccesstype'])?0:$contract->array_options['options_sshaccesstype']);
+    			$customurl             =$contract->array_options['options_custom_url'];
+    			$customvirtualhostline =$contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
     			$SSLON='On';
-    			$CERTIFFORCUSTOMDOMAIN=$customurl;
+    			$CERTIFFORCUSTOMDOMAIN =$customurl;
     			if ($CERTIFFORCUSTOMDOMAIN)
     			{
     			    // Kept for backward compatibility
@@ -3375,14 +3409,14 @@ class SellYourSaasUtils
     			$password0salted = dol_hash($password);
     			$passwordmd5salted = dol_hash($password, 'md5');
     			$passwordsha256salted = dol_hash($password, 'sha256');
-    			dol_syslog("passwordmd5salted=".$passwordmd5salted);
+    			dol_syslog("password0salted=".$password0salted." passwordmd5salted=".$passwordmd5salted." passwordsha256salted=".$passwordsha256salted, LOG_DEBUG);
 
     			$conf->global->MAIN_SECURITY_SALT = '';
     			dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
     			$password0 = dol_hash($password);
     			$passwordmd5 = dol_hash($password, 'md5');
     			$passwordsha256 = dol_hash($password, 'sha256');
-    			dol_syslog("passwordmd5=".$passwordmd5);
+    			dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
 
     			$conf->global->MAIN_SECURITY_SALT = $savsalt;
     			$conf->global->MAIN_SECURITY_HASH_ALGO = $savhashalgo;
@@ -3391,7 +3425,7 @@ class SellYourSaasUtils
     			$substitarray=array(
         			'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,
         			'__INSTANCEDBPREFIX__'=>$generateddbprefix,
-        			'__DOL_DATA_ROOT__'=>DOL_DATA_ROOT,
+    				'__DOL_DATA_ROOT__'=>(empty($conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT) ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT),
         			'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
         			'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
         			'__OSHOSTNAME__'=>$generatedunixhostname,
@@ -3448,6 +3482,13 @@ class SellYourSaasUtils
     			$tmppackage->targetsrcfile1 = make_substitutions($tmppackage->targetsrcfile1, $substitarray);
     			$tmppackage->targetsrcfile2 = make_substitutions($tmppackage->targetsrcfile2, $substitarray);
     			$tmppackage->targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
+
+    			// get direct access value
+    			$directaccess=0;
+    			if ($producttmp->array_options['options_app_or_option'] == 'app')
+    			{
+    			    $directaccess=$producttmp->array_options['options_directaccess'];
+    			}
 
     			dol_syslog("Create conf file ".$tmppackage->srcconffile1);
     			if ($tmppackage->srcconffile1 && $conffile)
@@ -3509,6 +3550,8 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
 				$commandurl.= '&'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+				$commandurl.= '&'.$directaccess;        // Param 38 in .sh
+				$commandurl.= '&'.$sshaccesstype;       // Param 39 in .sh
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 
@@ -3519,7 +3562,7 @@ class SellYourSaasUtils
     			{
     			    $urltoget='http://'.$serverdeployment.':8080/'.$remoteaction.'?'.urlencode($commandurl);
 	    			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-	    			$retarray = getURLContent($urltoget);   // Timeout is defined before
+	    			$retarray = getURLContent($urltoget, 'GET', '', 0, array(), array('http', 'https'), 2);   // Timeout is defined before
 
 	    			if ($retarray['curl_error_no'] != '' || $retarray['http_code'] != 200)
 	    			{
@@ -3536,14 +3579,20 @@ class SellYourSaasUtils
 			    	{
 			    		dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
+			    		$serverdb = $serverdeployment;
+			    		// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+			    		if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+			    		    $serverdb = $generateddbhostname;
+			    		}
+
 			    		//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
 			    		//var_dump($serverdeployment);		// just ip of deployement server
 			    		//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-			    		$dbinstance = @getDoliDBInstance('mysqli', $serverdeployment, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+			    		$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 			    		if (! $dbinstance || ! $dbinstance->connected)
 			    		{
 			    			$error++;
-			    			$this->error = $dbinstance->error;
+			    			$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
 			    			$this->errors = $dbinstance->errors;
 			    		}
 			    		else
@@ -3566,6 +3615,8 @@ class SellYourSaasUtils
 			    					$resql = $dbinstance->query($sqltoexecuteline);
 			    				}
 			    			}
+
+			    			$dbinstance->close();
 			    		}
 			    	}
     			}
@@ -3690,7 +3741,7 @@ class SellYourSaasUtils
     				);
 
 
-					// Now execute the formula
+					// Now execute the formula to set $newqty
     				$currentqty = $tmpobject->qty;
     				$newqty = null;
 
@@ -3704,14 +3755,20 @@ class SellYourSaasUtils
 
     					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation");
 
+    					$serverdb = $serverdeployment;
+    					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+    					if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+    						$serverdb = $generateddbhostname;
+    					}
+
     					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
     					//var_dump($serverdeployment);		// just ip of deployment server
     					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-    					$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+    					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
     					if (! $dbinstance || ! $dbinstance->connected)
     					{
     						$error++;
-    						$this->error = $dbinstance->error.' ('.$generateddbusername.'@'.$generateddbhostname.'/'.$generateddbname.')';
+    						$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
     						$this->errors = $dbinstance->errors;
     					}
     					else
@@ -3738,6 +3795,8 @@ class SellYourSaasUtils
     							$this->error = $dbinstance->lasterror();
     							$this->errors[] = $dbinstance->lasterror();
     						}
+
+    						$dbinstance->close();
     					}
     				}
     				elseif ($tmparray[0] == 'BASH')
@@ -3749,7 +3808,8 @@ class SellYourSaasUtils
     				    {
     				        $server=$object->array_options['options_hostname_os'];
 
-    				        $connection = @ssh2_connect($server, 22);
+    				        $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+    				        $connection = @ssh2_connect($server, $server_port);
     				        if ($connection)
     				        {
     				            dol_syslog("Get resource BASH ".$bashformula);
@@ -3782,7 +3842,9 @@ class SellYourSaasUtils
 
     				            if (function_exists('ssh2_disconnect'))
     				            {
-    				                ssh2_disconnect($connection);     // Hang on some config
+    				                if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+    				                    ssh2_disconnect($connection);     // Hang on some config
+    				                }
     				                $connection = null;
     				                unset($connection);
     				            }
@@ -3800,9 +3862,9 @@ class SellYourSaasUtils
     				            $this->error = 'ssh2_connect function not supported by your PHP';
     				        }
     				    }
-    				}
-    				else
-    				{
+    				} elseif (is_numeric($tmparray[0]) && ((int) $tmparray[0]) > 0) {		// If value is just a number
+    					$newqty = ((int) $tmparray[0]);
+    				} else {
     					$error++;
     					$this->error = 'Bad definition of formula to calculate resource for product '.$producttmp->ref;
     				}
@@ -3942,7 +4004,7 @@ class SellYourSaasUtils
     	        $tmpcontract->fetch($object->fk_contrat);
     	    }
 
-    	    $remoteip = getUserRemoteIP();
+    	    $ipaddress = getUserRemoteIP();
 
     	    // Create a new connection to record event in an other transaction
     	    global $dolibarr_main_db_type, $dolibarr_main_db_host, $dolibarr_main_db_user;
@@ -3961,7 +4023,7 @@ class SellYourSaasUtils
         	    $actioncomm = new ActionComm($independantdb);
         		$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
         		$actioncomm->code        = 'AC_'.strtoupper($remoteaction);
-        		$actioncomm->label       = $prefixlabel.'Remote action '.$remoteaction.(preg_match('/PROV/', $tmpcontract->ref) ? '' : ' on '.$tmpcontract->ref).' by '.($remoteip?$remoteip:'localhost');
+        		$actioncomm->label       = $prefixlabel.'Remote action '.$remoteaction.(preg_match('/PROV/', $tmpcontract->ref) ? '' : ' on '.$tmpcontract->ref).' by '.($ipaddress?$ipaddress:'localhost');
         		$actioncomm->datep       = $now;
         		$actioncomm->datef       = $now;
         		$actioncomm->percentage  = -1;            // Not applicable
@@ -4016,7 +4078,7 @@ class SellYourSaasUtils
     	}
 
 
-    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." password=".$password." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
+    	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
 
     	if ($error) return -1;
     	else return 1;

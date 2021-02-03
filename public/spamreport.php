@@ -23,8 +23,9 @@
  *		\brief      Page to report SPAM
  */
 
-define("NOLOGIN",1);		// This means this output page does not require to be logged.
-define("NOCSRFCHECK",1);	// We accept to go on this page from external web site.
+if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
+if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK', '1');
+if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 // For MultiCompany module.
 // Do not use GETPOST here, function is not defined and get of entity must be done before including main.inc.php
@@ -55,18 +56,16 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 
 $tmpfile = '/var/log/sellyoursaas_spamreport.log';
 $date = strftime("%Y-%m-%d %H:%M:%S" ,time());
+$body = file_get_contents('php://input');
 
 file_put_contents($tmpfile, "\n***** Spam report received ".$date."*****\n", FILE_APPEND);
 file_put_contents($tmpfile, var_export($_SERVER, true), FILE_APPEND);
-echo "Spam report received at ".$date."<br>\n";
-
-$body = file_get_contents('php://input');
 file_put_contents($tmpfile, $body, FILE_APPEND);
-
-echo "Content of alert message received:<br>\n";
-echo $body;
-
 file_put_contents($tmpfile, "\n", FILE_APPEND);
+
+echo "Spam report received at ".$date."<br>\n";
+echo "Content of alert message received:<br>\n";
+echo dol_escape_htmltag($body);
 echo "<br>\n";
 
 
@@ -75,14 +74,14 @@ echo "<br>\n";
 file_put_contents($tmpfile, "Now we send an email to supervisor ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n", FILE_APPEND);
 
 $headers = 'From: <'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.">\r\n";
-$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from SendGrid', 'Spam was reported by SendGrid:'."\r\n".($body ? $body : 'Body empty'), $headers);
+$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from external SMTP service', 'Spam was reported by external SMTP service:'."\r\n".($body ? $body : 'Body empty'), $headers);
 if (!$success) {
 	$errorMessage = error_get_last()['message'];
-	print $errorMessage;
+	print dol_escape_htmltag($errorMessage);
 }
 else
 {
-    echo "Email sent to ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."<br>\n";
+    echo "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
 }
 
 // Send to DataDog (metric + event)

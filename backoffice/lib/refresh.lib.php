@@ -18,7 +18,7 @@ include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
  * @param 	Contrat                  	$object	    			Customer (can modify caller)
  * @param	array						$errors	    			Array of errors
  * @param	int							$printoutput			Print output information
- * @param	int							$recreateauthorizekey	1=Recreate authorized key if not found
+ * @param	int							$recreateauthorizekey	1=Recreate authorized key if not found, 2=Recreate authorized key event if found
  * @return	int													1
  */
 function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0, $recreateauthorizekey=0)
@@ -37,9 +37,11 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 	// SFTP refresh
 	if (function_exists("ssh2_connect"))
 	{
-		if ($printoutput) print "ssh2_connect ".$server." ".$username_web." ".$password_web."\n";
+	    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 
-		$connection = ssh2_connect($server, 22);
+	    if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_web." ".$password_web."\n";
+
+	    $connection = ssh2_connect($server, $server_port);
 		if ($connection)
 		{
 			if ($printoutput) print $instance." ".$username_web." ".$password_web."\n";
@@ -64,29 +66,31 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 
 				// Update ssl certificate
 				// Dir .ssh must have rwx------ permissions
-				// File authorized_keys must have rw------- permissions
+				// File authorized_keys_support must have rw------- permissions
 
-				// Check if authorized_key exists
-				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys';
-				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys';    // With PHP 5.6.27+
-				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys');
-				// Create authorized_keys file
-				if (empty($fstat['atime']))
+				// Check if authorized_keys_support exists
+				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
+				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
+				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support');
+				// Create authorized_keys_support file
+				if (empty($fstat['atime']) || $recreateauthorizekey == 2)
 				{
 					if ($recreateauthorizekey)
 					{
 						@ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh');
 
-						if ($printoutput) print 'Write file '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys'."\n";
+						$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
+
+						// We overwrite authorized_keys_support
+						if ($printoutput) print 'Write file '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support.'."\n";
 
 						$stream = @fopen($filecert, 'w');
 						//var_dump($stream);exit;
 						if ($stream)
 						{
-							$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 							fwrite($stream, $publickeystodeploy);
 							fclose($stream);
-							$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys');
+							$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support');
 						}
 						else
 						{
@@ -95,12 +99,12 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 					}
 					else
 					{
-						if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys not found\n";
+						if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys_support not found.\n";
 					}
 				}
 				else
 				{
-					if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys already exists\n";
+					if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys_support already exists.\n";
 				}
 				$object->fileauthorizedkey=(empty($fstat['mtime'])?'':$fstat['mtime']);
 
@@ -155,6 +159,10 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	$password_web = $object->password_web;
 	if (empty($password_web)) $password_web = $object->array_options['options_password_os'];
 
+	$hostname_db = $object->hostname_db;
+	if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];
+	$port_db = $object->port_db;
+	if (empty($port_db)) $port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
 	$username_db = $object->username_db;
 	if (empty($username_db)) $username_db = $object->array_options['options_username_db'];
 	$password_db = $object->password_db;
@@ -162,9 +170,9 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	$database_db = $object->database_db;
 	if (empty($database_db)) $database_db = $object->array_options['options_database_db'];
 
-	$server=$instance;
+	$server = (! empty($hostname_db) ? $hostname_db : $instance);
 
-	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, 3306);
+	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
 	$ret=1;
 
@@ -195,7 +203,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 
 				// If this is a line for a metric
 				if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
-					&& $producttmp->array_options['options_resource_label'] == 'User')
+				    && ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref)))
 				{
 					$dbprefix = ($object->array_options['options_prefix_db']?$object->array_options['options_prefix_db']:'llx_');
 
@@ -268,7 +276,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					if ($resql)
 					{
 						$obj = $newdb->fetch_object($resql);
-						$object->nbofusers	= $obj->nb;
+						$object->nbofusers += $obj->nb;
 					}
 					else {
 						$error++;
@@ -304,7 +312,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 		}
 		else
 		{
-			$errors[]='Failed to connect '.$conf->db->type.' '.$instance.'.on.dolicloud.com '.$username_db.' '.$password_db.' '.$database_db.' 3306';
+			$errors[]='Failed to connect '.$conf->db->type.' '.$instance.'.on.dolicloud.com '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
 			$ret=-1;
 		}
 
@@ -337,7 +345,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	}
 	else
 	{
-		$errors[]='Failed to connect '.$conf->db->type.' '.$server.' '.$username_db.' '.$password_db.' '.$database_db.' 3306';
+	    $errors[]='Failed to connect '.$conf->db->type.' '.$server.' '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
 		$ret=-1;
 	}
 
@@ -560,9 +568,9 @@ function sellyoursaas_calculate_stats($db, $datelim)
 					$totalinstances++;
 					$totalusers+=$nbofuser;
 
-					// Return true if instance $object is paying instance (template invoice exists)
-					$ispaid = sellyoursaasIsPaidInstance($object);										// This also load $object->linkedObjects['facturerec']
-					if (! $ispaid)		// This is a test only customer or expired or suspended
+					// Return true if instance $object is paying instance (invoice or template invoice exists)
+					$ispaid = sellyoursaasIsPaidInstance($object, 0, 1);										// This also load $object->linkedObjects['facturerec']
+					if (! $ispaid)		// This is a test only customer or expired or suspended (no invoice or template invoice at all)
 					{
 						if ($tmpdata['expirationdate'] < $now) {
 							$totalinstancesexpiredfree++;
@@ -593,7 +601,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 						$atleastonenotsuspended = 0;
 						if (is_array($object->linkedObjects['facturerec']))		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
 						{
-							foreach($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice)
+							foreach($object->linkedObjects['facturerec'] as $idelementelement => $templateinvoice)
 							{
 								if (! $templateinvoice->suspended)
 								{

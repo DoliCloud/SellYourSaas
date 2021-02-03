@@ -1,0 +1,9 @@
+*_log
+*.log
+*.log.old
+*log.*.gz
+*log.*.gz.old
+_sessions/*
+_log/*
+_tmp/*
+*/temp/*

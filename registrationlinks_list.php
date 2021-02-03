@@ -139,7 +139,7 @@ if (is_array($extrafields->attributes[$object->table_element]['label']) && count
 	foreach($extrafields->attributes[$object->table_element]['label'] as $key => $val)
 	{
 		if (! empty($extrafields->attributes[$object->table_element]['list'][$key]))
-			$arrayfields["ef.".$key]=array('label'=>$extrafields->attributes[$object->table_element]['label'][$key], 'checked'=>(($extrafields->attributes[$object->table_element]['list'][$key]<0)?0:1), 'position'=>$extrafields->attributes[$object->table_element]['pos'][$key], 'enabled'=>(abs($extrafields->attributes[$object->table_element]['list'][$key])!=3 && $extrafields->attributes[$object->table_element]['perms'][$key]));
+			$arrayfields["ef.".$key]=array('label'=>$extrafields->attributes[$object->table_element]['label'][$key], 'checked'=>(($extrafields->attributes[$object->table_element]['list'][$key]<0)?0:1), 'position'=>$extrafields->attributes[$object->table_element]['pos'][$key], 'enabled'=>(abs((int) $extrafields->attributes[$object->table_element]['list'][$key])!=3 && $extrafields->attributes[$object->table_element]['perms'][$key]));
 	}
 }
 $object->fields = dol_sort_array($object->fields, 'position');
@@ -203,7 +203,7 @@ $title = $langs->trans('ListOfRegistrationLinks');
 
 if (empty($conf->global->SELLYOURSAAS_DEFAULT_PRODUCT_CATEG))
 {
-	print 'Error, setup of module SellYourSaas not complete';
+	print 'Error, setup of module SellYourSaas not complete (the category of product to sell with SellYourSaas has not been defined)';
 	llxFooter();
 	exit;
 }
@@ -367,6 +367,8 @@ $newcardbutton.= '</a>';
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'title_companies', 0, $newcardbutton, '', $limit);
 
+print '<span class="opacitymedium">'.$langs->trans("RegistrationURLDesc").'</span><br><br>';
+
 if ($sall)
 {
 	foreach($fieldstosearchall as $key => $val) $fieldstosearchall[$key]=$langs->trans($val);
@@ -507,7 +509,7 @@ while ($i < min($num, $limit))
 	// Link
 	print '<td class="nowrap">';
 	$helponurl=$langs->trans('ShowMoreParametersForRegisterUrls');
-	print '<a class="classfortooltip" href="'.getRootUrlForAccount($object).'/register.php?origin=backofficelink&plan='.$obj->ref.'&partner=&partnerkey=md5aliaspartner" target="_register" title="'.dol_escape_htmltag($helponurl).'">';
+	print '<a class="classfortooltip" href="'.getRootUrlForAccount($object).'/register.php?origin=backofficelink&plan='.$obj->ref.(empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM) ? '' : '&partner=&partnerkey=md5aliaspartner').'" target="_register" title="'.dol_escape_htmltag($helponurl).'">';
 	print img_picto('', 'object_globe');
 	print ' URL';
 	print '</a>';

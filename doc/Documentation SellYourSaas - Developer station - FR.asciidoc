@@ -128,6 +128,9 @@ esac
 exit 0
 ---------------
 
+Try to connect to webhog on:  http://localhost:8025
+
+
 === Installation de postfix
 
 Installer postfix par apt.
@@ -157,8 +160,8 @@ X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
 [source,bash]
 ---------------
 sudo add-apt-repository ppa:yktooo/ppa
-sudo apt-get update
-sudo apt-get install indicator-sound-switcher
+sudo apt update
+sudo apt install indicator-sound-switcher
 ---------------
 
 

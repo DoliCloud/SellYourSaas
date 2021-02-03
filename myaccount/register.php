@@ -28,6 +28,7 @@
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 // Add specific definition to allow a dedicated session management
 include ('./mainmyaccount.inc.php');
@@ -91,6 +92,10 @@ if (empty($productid) && empty($productref))
 	    // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 	    $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
+	    $suffix='_'.strtoupper(str_replace('.', '_', $domainname));
+	    $constname="SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
+	    $defaultproduct=(! empty($conf->global->$constname) ? $conf->global->$constname : $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT);
+
 		// Take first plan found
 		$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pa.restrict_domains';
 		$sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
@@ -98,8 +103,15 @@ if (empty($productid) && empty($productref))
 		$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 		$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 		$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
-		// restict_domains can be empty (it's ok), can be mydomain.com or can be with.mydomain.com
-		$sqlproducts.= " AND (pa.restrict_domains IS NULL OR pa.restrict_domains = '".$db->escape($domainname)."' OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."')";
+		$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
+		$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
+		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
+		$sqlproducts.= ")";
+		if (! empty($defaultproduct)) $sqlproducts.= " AND p.rowid = ".((int) $defaultproduct);
 		$sqlproducts.= " ORDER BY p.datec";
 		//print $_SERVER["SERVER_NAME"].' - '.$sqlproducts;
 		$resqlproducts = $db->query($sqlproducts);
@@ -185,6 +197,8 @@ if ($socid > 0)
 	$mythirdparty->fetch($socid);
 }
 
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks(array('sellyoursaas-register'));
 
 
 /*
@@ -208,7 +222,11 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
-if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
+if ($favicon) {
+    $href = 'img/'.$favicon;
+    if (preg_match('/^http/i', $favicon)) $href = $favicon;
+    $head.='<link rel="icon" href="'.$href.'">'."\n";
+}
 $head.='<!-- Bootstrap core CSS -->
 <!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
 <link href="dist/css/bootstrap.css" rel="stylesheet">';
@@ -258,6 +276,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
         }
 
         $linklogo = '';
+        $homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
         if ($partnerthirdparty->id > 0)     // Show logo of partner
         {
         	require_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
@@ -271,6 +290,12 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
         	if ($ecmfile->id > 0)
         	{
         		$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=societe&hashp='.$ecmfile->share;
+        	}
+        	$homepage = '';
+        	if (! empty($partnerthirdparty->url))
+        	{
+        	    $url = preg_replace('#^https?://#', '', rtrim($partnerthirdparty->url,'/'));
+        	    $homepage = 'https://'.$url;
         	}
         }
         if (empty($linklogo))               // Show main logo of Cloud service
@@ -325,20 +350,20 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 		    <div class="container">
 		      <div class="registerheader" style="display:flex; justify-content:space-between;">
 				  <div class="valignmiddle" style="padding-right: 25px;">
-		          <img class="logoheader"  src="<?php echo $linklogo; ?>" id="logo" /><br>
+		          <a href="<?php echo $homepage ?>"><img class="logoheader"  src="<?php echo $linklogo; ?>" id="logo" /></a><br>
 		          </div>
 				  <?php if (empty($mythirdparty->id)) {
 				    $langs->load("website");
 				      ?>
 		          <div class="paddingtop20" style="float: right;">
-		              <div class="padding: 4px 10px 5px 10px;">
+		              <div class="btn-sm">
 		              <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
 		              <?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
 		              <a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
 		              </div>
-		              <?php if (empty($partner) && empty($partnerkey)) { ?>
-		              <div class="padding: 4px 10px 5px 10px;">
-		              <span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="https://<?php echo $sellyoursaasdomain ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
+		              <?php if (! empty($homepage)) { ?>
+		              <div class="btn-sm home-page-url">
+		              <span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="<?php echo $homepage ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
 		              </div>
 		              <?php } ?>
 		          </div>
@@ -368,8 +393,8 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 		<div class="signup2 centpercent">
 
 			<?php
-			if (! empty($tmpproduct->array_options['options_register_text']))
-			{
+			if (! empty($tmpproduct->array_options['options_register_text'])) {
+				print '<!-- show custom registration text of service -->';
 			    print '<div class="register_text">'.$langs->trans($tmpproduct->array_options['options_register_text']).'</div>';
 			}
 			?>
@@ -389,6 +414,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	          <input type="hidden" name="fromsocid" value="<?php echo dol_escape_htmltag($fromsocid); ?>" />
 	          <input type="hidden" name="origin" value="<?php echo dol_escape_htmltag($origin); ?>" />
 	          <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
+	          <!-- thirdpartyidinsession = <?php echo $_SESSION['dol_loginsellyoursaas']; ?> -->
 
 	          <section id="enterUserAccountDetails">
 
@@ -477,8 +503,8 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 				<label class="control-label" for="address_country"><?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 			<?php
-			$countryselected=strtoupper(dolGetCountryCodeFromIp($_SERVER["REMOTE_ADDR"]));
-			print '<!-- Autodetected IP/Country: '.$_SERVER["REMOTE_ADDR"].'/'.$countryselected.' -->'."\n";
+			$countryselected=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
+			print '<!-- Autodetected IP/Country: '.dol_escape_htmltag(getUserRemoteIP()).'/'.$countryselected.' -->'."\n";
 			if (empty($countryselected)) $countryselected='US';
 			if (GETPOST('address_country','alpha')) $countryselected=GETPOST('address_country','alpha');
 			print $form->select_country($countryselected, 'address_country', 'optionsValue="name"'.$disabled, 0, 'minwidth300', 'code2', 1, 1);
@@ -552,9 +578,16 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	                	}
 
 	                	// Defined a preselected domain
-	                	$randomselect = '';
-	                	if (empty($tldid) && ! GETPOSTISSET('forcesubdomain') && ! GETPOSTISSET('tldid')) {
-	                		$randomselect = $domainstosuggest[rand(0, 2)];
+	                	$randomselect = ''; $randomindex = 0;
+	                	if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
+	                		$maxforrandom = (count($domainstosuggest) - 1);
+	                		$randomindex = mt_rand(0, $maxforrandom);
+	                		$randomselect = $domainstosuggest[$randomindex];
+	                	}
+	                	// Force selection with no way to change value if SELLYOURSAAS_FORCE_RANDOM_SELECTION is set
+	                	if (!empty($conf->global->SELLYOURSAAS_FORCE_RANDOM_SELECTION) && !empty($randomselect)) {
+	                		$domainstosuggest = array();
+	                		$domainstosuggest[] = $randomselect;
 	                	}
 	                	foreach($domainstosuggest as $val) {
 	                		print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
@@ -589,6 +622,17 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
           	}
 			?>
 
+
+
+			<!-- Selection of domain to create instance -->
+			<?php if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) { ?>
+			<br>
+	        <section id="optinmessagesid">
+				<input type="checkbox" id="optinmessages" name="optinmessages" class="valignmiddle inline" style="margin-top: 0" value="1">
+				<label for="optinmessages" class="valignmiddle small inline"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>
+			</section>
+			<?php } ?>
+
 			<br>
 
        </div>
@@ -614,13 +658,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	          	if ($productref != 'none')
 	          	{
 	          	?>
-	            	<input type="submit"<?php echo $disabled; ?> name="submit" style="margin: 10px;" value="<?php echo $langs->trans("SignMeUp") ?>" class="btn btn-primary" id="submit" />
+	            	<input type="submit"<?php echo $disabled; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("SignMeUp") ?>" class="btn btn-primary" id="newinstance" />
 	            <?php
 	          	}
 	          	else
 	          	{
 	          	?>
-	            	<input type="submit"<?php echo $disabled; ?> name="submit" style="margin: 10px;" value="<?php echo $langs->trans("CreateMyAccount") ?>" class="btn btn-primary" id="submit" />
+	            	<input type="submit"<?php echo $disabled; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("CreateMyAccount") ?>" class="btn btn-primary" id="newinstance" />
 	          	<?php
 	          	}
 	          	?>
@@ -641,6 +685,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
      </form> <!-- end form-content -->
 
 	</div>
+
+	<?php
+	// Execute hook getRegisterPageFooter
+	$parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct, 'tmpproduct' => $tmpproduct);
+    $reshook = $hookmanager->executeHooks('getRegisterPageFooter', $parameters); // Note that $action and $object may have been modified by some hooks.
+    print $hookmanager->resPrint;
+    ?>
 
   </div>
 </div>

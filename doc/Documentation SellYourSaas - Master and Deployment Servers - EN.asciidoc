@@ -44,7 +44,7 @@ Following the deployment of v1 and at the request of users to perpetuate their i
 * Management of a reseller network.
 * Available in OpenSource.
 
-Funded by the Open Source companies https://www.nltechno.com [NLTechno] and https://www.teclib.com [TecLib], SellYourSaas v2 has achieved these objectives and is now in production for several companies offering Saas services (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], https://www.doliondemand.fr[DoliOnDemand],...). Here is a summary of its capabilities:
+Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and https://www.teclib.com [TecLib], SellYourSaas v2 has achieved these objectives and is now in production for several companies offering Saas services (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], https://www.doliondemand.fr[DoliOnDemand],...). Here is a summary of its capabilities:
 
 * Deployment of any WAMP application. Management of multiple solutions / different applications at the same time.
 * Free distribution of proceedings without request for confidential information or bank cards.
@@ -85,10 +85,11 @@ You need to acquire this domain name from a registrar.
 
 The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be * Deployment servers * (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
 
-=== Choice of machine and OS
+=== Choice of machine and OS and create it
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04*) for the *Master server*.
-* Obtain one or n servers with SSH access that can pass root (We will use Ubuntu LTS minimum 16.04 or 18.04) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Master server*.
+
+* Obtain one or n servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
 _Example with Amazon Standard Medium: _
 
@@ -99,46 +100,53 @@ _Example with OVH Public Cloud: _
 For the master server: VPS or B2-15 or more
 For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
 
-
+* Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
 
 
 [[adding_disk]]
-=== Adding the data disk (home of user instances and home of backups)
+=== Adding the harddisk of data (home of user instances and home of backups)
 
-We will add, on the *Deployment server*, an independent disk for user instances and backups. It can be a disc for the 2 or 2 different discs.
+We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
 
 On *Deployment server* :
 
 With OVH Public Cloud:
 
-* Create the data disk. For the deployment server, take 250MB per instance.
-* Associate the disk with the server (each additional disk is added in / dev / vdb, / dev / vdc, / dev / vdd, ...).
+* Create the data disk. On a deployment server, you can imagine to reserve 250MB for each customer instance so choose a size in consideration.
+
+* Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
 Note, the disk becomes visible with *fdisk -l* and *lsblk*
+
 * If it is a disk never partitioned, add the partition on the disk (Linux type) and format it by doing:
 
 [source, bash]
 ---------------
 fdisk -l
-fdisk / dev / vdx
+fdisk /dev/vdx
 option n then p (then choose the partition number, first and last sector) then w
 
 fdisk -l
 
-fsck -N / dev / vdxY
-mkfs.ext4 / dev / vdxY
+fsck -N /dev/vdxY
+mkfs.ext4 /dev/vdxY
 ---------------
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
 
-* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command *blkid*
+* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
+
+[source, bash]
+---------------
+blkid
+---------------
 
 * Declare the assembly for an automatic assembly at each reboot by adding a line in */etc/fstab*
 
 [source, bash]
 ---------------
-UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 / mnt / diskX ext4 defaults 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 or
-UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 / mnt / diskX ext4 [noatime,] nofail 0 0 (does not block the server from starting)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (does not block the server from starting)
 ---------------
 
 * Mount disk
@@ -146,12 +154,16 @@ UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 / mnt / diskX ext4 [noatime,] nofail
 [source, bash]
 ---------------
 mkdir /mnt/diskhome
-mkdir /mnt/diskbackup
 mount /dev/vdxY /mnt/diskhome
+
+And if a disk was created for backup:
+mkdir /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
 ---------------
+
+Note: A reboot may be required if disk or mount is not visible.
 
 * Optimize the filesystem by removing the update of the "atime" read access
 
@@ -159,7 +171,7 @@ To see options for optimizing filesystems:
 
 [source, bash]
 ---------------
-tune2fs -l / dev / vdxY | grep features
+tune2fs -l /dev/vdxY | grep features
 ---------------
 return
 
@@ -170,32 +182,33 @@ To add -noatime to the filesystem in the */etc/fstab* file:
 
 [source, bash]
 ---------------
-UUID = 94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
 ---------------
 
 To take the change into account:
 
 [source, bash]
 ---------------
-mount -oremount / dev / diskX /
+mount -oremount /dev/diskX/
 ---------------
 
 To check:
 
 [source, bash]
 ---------------
-cat / proc / mounts | grep diskX
+cat /proc/mounts | grep diskX
 ---------------
 
-Rem: If you need to recover data from another disk, use:
+Rem: If you need to recover data files from another disk, use:
 
 [source, bash]
 ---------------
-rsync --info = progress2 -to source servers: / mnt / diskSource / mnt / diskTarget
+rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
-rsync --info = progress2 --exclude 'dbn *' -au -e 'ssh'. loginuser@myserverdest.mydomain.com: / var / lib / mysql
-chown -R mysql.mysql / var / lib / mysql
+rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
+chown -R mysql.mysql /var/lib/mysql
+After launching mysql, you can test all databases with
 mysqlcheck --all-databases
 ---------------
 
@@ -209,9 +222,8 @@ Create the user account *admin*. It will be used to install and administer the s
 
 [source, bash]
 ---------------
-useradd admin -g admin
-mkdir /home/admin/logs
-chown root.adm /home/admin/logs
+groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -225,30 +237,47 @@ adduser myunixlogin
 ---------------
 
 
-==== Ssh configuration
+==== ssh setup
 
-Create a file */etc/ssh/sshd_config.d/sellyoursaas* to change login permissions with the following content:
+Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
+
+[source,conf]
+---------------
+chmod go-rw /etc/ssh/sshd_config
+---------------
+
+Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
 
 [source, conf]
 ---------------
-#Privilege Separation is turned on for security
+# Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
-PermitRootLogin no
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+# MaxSessions 10
+MaxSessions 25
+
+# Disallow login to root
+PermitRootLogin no
+# Disallow empty passwords
+PermitEmptyPasswords no
+# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
+ChallengeResponseAuthentication no
+ 
 # Define list of allowed method to authenticate
-ChallengeResponseAuthentication yes
 PasswordAuthentication yes
 PubkeyAuthentication yes
 
-PermitEmptyPasswords no
-
-AllowUsers myunixlogin admin osu *
 DenyUsers guest
+
+AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
+
+AllowUsers admin osu*
+AllowUsers myunixlogin
 ---------------
 
-Please note: replace myunixlogin with the correct value before taking changes into account with:
+Please note: replace *myunixlogin* with the correct value before taking changes into account with:
 
 [source, conf]
 ---------------
@@ -263,13 +292,21 @@ Add the following line in the */etc/sudoers* file to reposition the HOME accordi
 Defaults set_home
 ---------------
 
-Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root* and the permissions *r-r-----* and the content
+Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root*.*root* and the permissions *r-r-----* and the content
 
 [source, conf]
 ---------------
-myunixlogin ALL = (ALL) NOPASSWD: ALL
+myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
+
+Test that you can connect using *myunixlogin* and make a sudo with
+
+[source,bash]
+---------------
+ssh -v myunixlogin@x.y.z.a
+sudo -s
+---------------
 
 
 Add your public key to your unix account.
@@ -280,9 +317,15 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Define or redefine the password for *root*, *admin*, and *myunixlogin* with a secure password.
+Define or redefine the password for *root*, *admin* with a secure password.
 
-Launch ssh-keygen on each of these 3 accounts
+[source,bash]
+---------------
+passwd root
+passwd admin
+---------------
+
+Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
 
 
 ==== Default shell
@@ -315,12 +358,12 @@ Edit the contents of */etc/skel* on the deployment servers in order to fill in t
 [source, bash]
 ---------------
 sudo mkdir /etc/skel/.ssh
-sudo touch /etc/skel/.ssh/authorized_keys
+sudo touch /etc/skel/.ssh/authorized_keys_support
 sudo chmod -R go-rwx /etc/skel/.ssh
-sudo vi /etc/skel/.ssh/authorized_keys
+sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
-Thus any new linux account created (those of customer instances) will be accessible by the administrator (s).
+Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
     
 
@@ -330,7 +373,7 @@ Add at the end of */etc/bash.bashrc*:
 
 [source, bash]
 ---------------
-alias psld = 'ps -fax -eo user: 12, pid, ppid, pcpu, pmem, vsz: 12, size: 12, tty, start_time: 6, utime, time, cmd'
+alias psld='ps -fax -eo user: 12, pid, ppid, pcpu, pmem, vsz: 12, size: 12, tty, start_time: 6, utime, time, cmd'
 ---------------
 
 
@@ -351,8 +394,8 @@ Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc
 
 [source, conf]
 ---------------
-LimitUIDRange 1,500,000
-LimitGIDRange 1,500,000
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 
@@ -366,7 +409,7 @@ Go to the management interface of OVH servers, to modify their short name. This 
 
 [source, bash]
 ---------------
-Server name
+nameofserver
 ---------------
 
 
@@ -374,38 +417,37 @@ Connect and modify the file */etc/hosts* with the entry of the new server
 
 [source, bash]
 ---------------
-ipduserveurprincipale nomdserveur.mysaasdomainname.com
+main.ip.of.server nameofserver.mysaasdomainname.com
 ---------------
 
 
-=== Added support for IP v6 (optional)
+=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
 
-==== With ifupdown (apt install ifupdown)
+==== With ifupdown (Ubuntu 16.04)
 
 - To add a v6 IP dynamically for testing purposes at first:
 
 [source, bash]
 ---------------
-ip addr add 2002: 41d0: 1234: 1000 :: 1234/128 dev eth0
-ip -6 route add 2002: 41d0: 1234: 1000 :: 1 dev eth0
-ip -6 route add default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
+ip addr add 2002:41d0:1234:1000::1234/128 dev eth0
+ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
 - For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
-Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
+Example for an IPv6 2002:41d0:1234:1000::1234 with as gateway 2002:41d0:1234:1000::1
 
 [source, conf]
 ---------------
-
 # To declare a persistent v6 IP (the mask is 128 at OVH in ipv6)
 iface eth0 inet6 static
-        address 2002: 41d0: 1234: 1000 :: 1234
+        address 2002:41d0:1234:1000::1234
         netmask 128
-        post-up / sbin / ip -6 route add 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        post-up / sbin / ip -6 route add default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        pre-down / sbin / ip -6 route del default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        pre-down / sbin / ip -6 route del 2002: 41d0: 1234: 1000 :: 1 dev eth0
+        post-up /sbin/ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+        post-up /sbin/ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
 Rem: *eth0* can be something else, for example *ens3*.
@@ -422,7 +464,7 @@ To take this into account, try this, otherwise, reboot.
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
  
-Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
+Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
 
 [source, conf]
 ---------------
@@ -433,8 +475,8 @@ network:
 			match:
 				name: eth0
 			addresses:
-				- "2002:41d0:1234:1000::1234/64"
-			gateway6: "2002:41d0:1234:1000::1"
+				- "1234:41d0:1234:1000::1234/64"
+			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
  
@@ -521,12 +563,10 @@ Create directories required to store data and backups:
 
 [source, bash]
 ---------------
-mkdir /home/jail;
+mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail/home
 
-mkdir /mnt/diskhome/home
-ln -fs /mnt/diskhome/home /home/jail/home
-
-mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
+mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup; ln -fs /mnt/diskhome/backup /mnt/diskbackup/
+mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
@@ -542,7 +582,7 @@ NFS sharing will allow the *Deployment* servers to recover the application image
 ==== On the Master server
 
 Install the NFS server and share on */home/admin/wwwroot/dolibarr_documents/sellyoursaas*
-    
+
 [source, bash]
 ---------------
 sudo apt install nfs-kernel-server
@@ -566,6 +606,9 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
+Note that you should have n lines per deployment server in this file.
+
+
 [source, bash]
 ---------------
 exportfs -v -a (to validate new entries to add)
@@ -577,6 +620,7 @@ systemctl status nfs-kernel-server
 exportfs
 ---------------
 
+
 ==== On the Deployment Servers
 
 Remember to open the firewall access between the NFS client (* Deployment server *) and the NFS server (* Master server *).
@@ -585,7 +629,7 @@ Install the NFS client and install it manually. Editing is performed by default 
 
 [source, bash]
 ---------------
-sudo apt-get install nfs-common
+sudo apt install nfs-common
 sudo mount -t nfs i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 sudo umount /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 ---------------
@@ -598,26 +642,17 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 
-=== Creation of the ssh key of the admin account
-
-==== On the master and deployment server
-
-Generate a public and private ssh key for the *admin* account.
-
-[source, bash]
----------------
-ssh-keygen
----------------
+=== Deploy the public key of master on admin account
 
 ==== On deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh *admin* account to /home/admin/.ssh/id_rsa_sellyoursaas ... (This key is the one common for maintenance to access user accounts). Put the right rights.
+On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access user accounts). Put the right permissios.
 
 [source, bash]
 ---------------
-chmod u + rw /home/admin/.ssh/id_rsa_sellyoursaas*
+chmod u +rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod go-rw /home/admin/.ssh/id_rsa_sellyoursaas*
-chmod a + r /home/admin/.ssh/id_rsa_sellyoursaas.pub
+chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
 
 
@@ -642,12 +677,13 @@ Host github.com
 
 [source, bash]
 ---------------
-sudo apt-get update
-sudo apt-get install ntp git zip memcached rrdtool ncdu
-sudo apt-get install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php- rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2
-sudo apt-get install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit 
-sudo apt-get install bind9
-sudo apt-get install spamc spamassassin clamav clamav-daemon
+sudo apt update
+sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
+sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php- rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit 
+sudo apt install bind9
+sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
 
@@ -692,12 +728,12 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* On Ubuntu 18.04 and higher, check that the *PrivateTmp* parameter is *false* in the Apache launch configuration. This will make it possible to have a 
-directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
+* On Ubuntu 18.04 and higher, check that the *PrivateTmp* parameter is *false* in the *apache2.service* Apache launch configuration. This will make it possible to have a directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
 
 [source, bash]
 ---------------
 vi /etc/systemd/system/multi-user.target.wants/apache2.service
+systemctl daemon-reload
 systemctl reload apache2
 ---------------
 
@@ -886,7 +922,7 @@ TODO Graphic with flux and ports
 
 [source,bash]
 ---------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/bin/repair
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/sbin/repair
 ---------------
 
 To consult, no longer launch at startup, launch at startup, stop, launch:
@@ -943,6 +979,40 @@ systemctl status remote_server_launcher
 ---------------
 
 Note: The agent is launched on port 8080
+
+
+Pour utiliser systemd créer un fichier /etc/systemd/system/remote-server-launcher.service :
+
+[source,bash]
+---------------
+# /etc/systemd/system/remote-server-launcher.service
+[Unit]
+ Description=Remote Server Launcher
+ RequiresMountsFor=/home/admin/wwwroot/dolibarr_documents/sellyoursaas
+
+[Service]
+ Type=forking
+ ExecStart=/etc/init.d/remote_server_launcher start
+ TimeoutSec=0
+ StandardOutput=tty
+ RemainAfterExit=yes
+ Restart=on-failure
+
+[Install]
+ WantedBy=multi-user.target
+---------------
+
+La directive "RequiresMountsFor" permet d'attendre la disponibilité du répertoire où se trouve le script "remote_server_launcher.sh"
+
+Activation du service :
+
+[source,bash]
+---------------
+systemctl enable remote-server-launcher.service
+systemctl start remote-server-launcher.service
+systemctl status remote-server-launcher.service
+systemctl stop remote-server-launcher.service
+---------------
 
 
 === Installation of fail2ban ===
@@ -1321,14 +1391,32 @@ It seems we must also restart apache to have this effective inside apache.
 ########## put your local config below ####################
 !/var/log/mysql
 !/var/log/letsencrypt
+!/var/log/datadog
+
+!/etc/apache2/sellyoursaas-available
+!/etc/apache2/sellyoursaas-online
+!/etc/bind/archives
+!/etc/bind/
+!/etc/group
+!/etc/group-
+!/etc/gshadow
+!/etc/gshadow-
+!/etc/passwd
+!/etc/passwd-
+!/etc/shadow
+!/etc/shadow-
+!/etc/subgid
+!/etc/subgid-
+!/etc/subuid
+!/etc/subuid-
 
 /home MyRule
 /home/admin/logs Logs
+/var/log/datadog Logs
 !/home/admin/backup
 !/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
 !/home/admin/wwwroot/dolibarr/.git
-!/home/admin/wwwroot/dolibarr_nltechno/.git
 !/home/admin/wwwroot/dolibarr_sellyoursaas/.git
 
 !/home/admin/.bash_history
@@ -1344,11 +1432,12 @@ It seems we must also restart apache to have this effective inside apache.
 exclude_suffix := cache
 ---------------
 
+
 Test that execution by crontab works correcly by running under root:
 
 [source,bash]
 ---------------
-/etc/cron.dail/afick_cron
+/etc/cron.daily/afick_cron
 ---------------
 
 
@@ -1402,7 +1491,8 @@ Compiler le fichier par:
 postmap /etc/postfix/generic
 ---------------
 
-Editer le fichier /etc/mailname pour mettre le nom long du serveur *myshortservername.mysaasdomain.com*:
+Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
+
 [source,bash]
 ---------------
 vi /etc/mailname
@@ -1488,7 +1578,7 @@ En cas de besoin d'utiliser postfix depuis un accès externe (et donc authentifi
 
 [source,bash]
 ---------------
-sudo apt-get install sasl2-bin
+sudo apt install sasl2-bin
 vi /etc/default/saslauthd  pour mettre START=yes
 ---------------
 
@@ -1597,8 +1687,8 @@ read_buffer_size=1M
 join_buffer_size=2M
 max_heap_table_size=32M
 max_allowed_packet=32M
-# Mysql: max_execution_time = 300000 (milliseconds) or Mariadb: max_statement_time = 300 (seconds)
-#max_execution_time = 300000
+# Mysql: max_execution_time = 120000 (milliseconds) or Mariadb: max_statement_time = 120 (seconds)
+#max_execution_time = 120000
 
 innodb_buffer_pool_size=1G
 innodb_buffer_pool_instances=8
@@ -2132,6 +2222,156 @@ systemctl daemon-reload
 ---------------
 
 
+=== Jailkit configuration (optional)
+
+Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
+
+!! Important !!
+Jailkit requires changing the access to /mnt/diskhome/home directory as it will not work with a symbolic link
+
+* Remove the symbolic link /home/jail/home that points to /mnt/diskhome/home
+
+[source,bash]
+---------------
+rm -f /home/jail/home
+---------------
+
+* Create the home directory which will be used for mounting /mnt/diskhome/home
+
+[source,bash]
+---------------
+mkdir /home/jail/home
+---------------
+
+* Create the directory that will contain the chroot/jail of users
+
+[source,bash]
+---------------
+mkdir /mnt/diskhome/chroot
+mkdir /home/jail/chroot
+---------------
+
+* Add mounts from directories to /etc/fstab
+
+[source,bash]
+---------------
+# /home/jail/home
+/mnt/diskhome/home /home/jail/home bind defaults,bind 0
+# /home/jail/chroot
+/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
+---------------
+
+* Mount directories
+
+[source,bash]
+---------------
+mount /home/jail/home
+mount /home/jail/chroot
+---------------
+
+* Installing the Jailkit package
+
+[source,bash]
+---------------
+sudo apt install jailkit
+---------------
+
+* Add this to the end of the config file /etc/jailkit/jk_init.ini
+
+[source,bash]
+---------------
+[groups]
+comment = Groups management
+executables = /usr/bin/groups
+
+[php]
+comment = The PHP Interpreter and Libraries
+executables = /usr/bin/php, /usr/bin/php7.4, /usr/bin/php7.3, /usr/bin/php7.2, /usr/bin/php5.6
+directories = /usr/lib/php, /usr/share/php, /usr/share/php, /etc/php, /usr/share/php-geshi, /usr/share/zoneinfo
+includesections = env
+
+[env]
+comment = environment variables
+executables = /usr/bin/env
+
+[mysqlclient]
+comment = mysql client
+executables = /usr/bin/mysql, /usr/bin/mysqldump
+paths = /usr/lib/x86_64-linux-gnu/libmysqlclient.so.21
+regularfiles = /etc/mysql/my.cf, /etc/mysql/conf.d/, /etc/mysql/mariadb.conf.d/
+---------------
+
+* Add this to the end of the config file /etc/jailkit/jk_chrootsh.ini
+
+[source,bash]
+---------------
+[DEFAULT]
+env = TERM, PATH
+---------------
+
+* Create the directory which will contain the chroot/jail model which will be used to create the templates
+
+[source,bash]
+---------------
+mkdir /home/jail/chroot/template
+---------------
+
+* Initializing the chroot/jail with the commands you want to make available to users
+
+[source,bash]
+---------------
+jk_init -c /etc/jailkit/jk_init.ini -j /home/jail/chroot/template extendedshell limitedshell groups sftp rsync editors git php mysqlclient
+mkdir /home/jail/chroot/template/home
+mkdir /home/jail/chroot/template/tmp
+chmod 1777 /home/jail/chroot/template/tmp
+---------------
+
+In this example the commonjail.tgz template will be used to create the chroot/jail common /home/jail/chroot/commonjail (if it does not exist)
+
+and the privatejail.tgz template will be used to create private chroot/jail (eg. /home/jail/chroot/osuxxxxx)
+
+* Create your tgz which will be used to install the private chroot/jail and reinstall the common chroot/jail if necessary
+
+[source,bash]
+---------------
+cd /home/jail/chroot
+tar czf commonjail.tgz template
+tar czf privatejail.tgz template
+---------------
+
+* Move your templates to the /sellyoursaas/scripts/templates directory accessible by your instances server
+
+[source,bash]
+---------------
+mv commonjail.tgz privatejail.tgz /home/admin/wwwroot/dolibarr_documents/sellyoursaas/scripts/templates/
+---------------
+
+* Modify the /etc/sellyoursaas.conf file of your instances server
+
+[source,bash]
+---------------
+# Options for Jailkit
+chrootdir=/home/jail/chroot
+privatejailtemplatename=privatejail
+commonjailtemplatename=commonjail
+---------------
+
+
+Add this constant in your backoffice to activate Jailkit
+* SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
+
+
+A new "SSH access type" option will be available in your service (Application):
+
+image::config_jailkit_service.png[SSH access type]
+
+
+and in contracts (instances):
+
+image::config_jailkit_contrat.png[SSH access type]
+
+
+
 === Allow generation of PNG thumbs from PDFs
 
 Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick
@@ -2171,7 +2411,7 @@ Create a file */etc/bind/withX.mysaasdomainname.com.hosts* for the DNS *withX.my
 $ttl 1d
 $ORIGIN with1.mysaasdomainname.com.
 @               IN     SOA     ns1withXmysaasdomainname.com. admin.mysaasdomainname.com. ((
-                140921009        ; serial number
+                140921009        ; serial
                 600              ; refresh = 10 minutes
                 300              ; update retry = 5 minutes
                 604800           ; expiry = 1 week
@@ -2190,25 +2430,27 @@ $ORIGIN withX.mysaasdomainname.com.
 ; here will be added entry like this one
 ; client1  A   ip.of.server.deployment
 
-
 ---------------
-
 
 
 Ajouter une entrée dans */etc/bind/named.conf.local* pour que ce nouveau fichier soit pris en compte
 
 [source,bash]
 ---------------
-
 // mysaasdomainname.com
-
 zone "with.mysaasdomainname.com" {
         type master;
         file "/etc/bind/with.mysaasdomainname.com.hosts";
         };
-
 ---------------
 
+
+Créer un répertoire */etc/bind/archives*
+
+[source,bash]
+---------------
+mkdir /etc/bind/archives
+---------------
 
 
 Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
@@ -2275,13 +2517,13 @@ mail.log = /var/log/phpmail.log
 ---------------
 
 
-=== Configuration de logrotate
+=== Setup of logrotate
 
-* Ajouter une ligne si non déjà présente dans le fichier */etc/logrotate.conf*
+* Add a line if not already present into file */etc/logrotate.conf*
 
 [source,bash]
 ---------------
-# use the syslog group by default, since this is the owning group of /var/log/syslog.
+# use the syslog group by default, since this is the owning group of /var/log.
 su root syslog
 ---------------
 
@@ -2311,7 +2553,7 @@ su root syslog
 [source,conf]
 ---------------
 /var/log/phpsendmail.log /var/log/phpmail.log {
-        su syslog adm        
+        su root root        
         weekly
         rotate 4
         compress
@@ -2333,7 +2575,7 @@ su root syslog
 }
 
 /home/admin/wwwroot/dolibarr_documents/*.log {
-        su root root
+        su admin www-data
         daily
         rotate 7
         compress
@@ -2353,15 +2595,33 @@ logrotate -f logrotate_sellyoursaas_log
 ---------------
 
 
-=== Configuration de journalctl (sur Ubuntu 18.04+)
+=== Setup of journalctl (on Ubuntu 18.04+)
 
-* Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
+* Edit the file */etc/systemd/journald.conf* to define the max size for systemd journals
 
 [source,conf]
 ---------------
 ...
-SystemMaxUse=100M
+SystemMaxUse=250M
+SystemMaxFileSize=50M
 ...
+---------------
+
+Take into account the change with
+
+[source,bash]
+---------------
+systemctl stop systemd-journald
+systemctl start systemd-journald
+---------------
+
+To force clear of journal:
+
+[source,bash]
+---------------
+journalctl --flush --rotate
+journalctl --vacuum-size=250M
+journalctl --vacuum-time=1d
 ---------------
 
 
@@ -2385,23 +2645,27 @@ sudo systemctl stop apport.service
 sudo systemctl status apport.service
 ---------------
 
-Note: Les rapports sont dans */var/crash*
+Note: Reports are into */var/crash*
 
 
 === Installer certbot (pour le SSL des sites hors instances utilisateurs)
 
 [source,bash]
 ---------------
-apt-get install software-properties-common python-software-properties
+apt install software-properties-common python-software-properties
 add-apt-repository ppa:certbot/certbot
-apt-get update
-apt-get install python-certbot-apache
+apt update
+apt install python-certbot-apache
 ---------------
 
 [[creation_certificat_ssl]]
 === Create a wildcard SSL certificate for user instances
 
-Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
+Into the following instructions, we will use X with value '', 2, 3, ... (numero of pool of instance = numero of the deployment server).
+
+==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
+
+===== From a SSL provider 
 
 * Créer le fichier key *withX.mysaasdomainname.com.key* et csr *withX.mysaasdomainname.com.csr* ainsi:
 
@@ -2432,19 +2696,40 @@ Choisir:
 	Email				Ne rien mettre !
 	Challenge password		Ne rien mettre !
 
-* Soumettre le fichier.
+* Submit the *.csr* file to the SSL certificate provider.
 
-* Récupérer les certificats SSL (fichier .crt de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
+===== From LetsEncrypt
+
+* Run certbot-auto
+
+[source,bash]
+---------------
+/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.destailleur.fr"
+---------------
+
+Follow instructions to add DNS entries and validate generation.
+
+To read generated .pem files, run
+
+[source,bash]
+---------------
+openssl x509 -in fullchain.pem -text
+---------------
+
+
+==== Install certificates files
+
+* Get the SSL certificate files (file *.crt* of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
 * Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
 ---------------
 cd /etc/apache2
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.crt
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.key with.sellyoursaas.com-intermediate.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
-* Edit the default apache file */etc/init.d/apache2/000-default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
+* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
 
 ---------------
 SSLCertificateFile /etc/apache2/witX.sellyoursaas.com.crt
@@ -2496,12 +2781,14 @@ You must have inside the cron of user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php `hostname`secondpartofsecuritykey firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 # cron master and deployment root
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
+
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key you set into the setup of module *Scheduled jobs* on the Dolibarr master.
 
 ==== On deployment servers
 
@@ -2537,17 +2824,25 @@ cd / && run-parts --report /etc/cron.daily
 
 == Installation of Dolibarr
 
-Sur tous les serveurs (Master et Déploiement):
+On all servers (Master and Deploiement):
 
-* Sous le compte *admin*, récupérer les sources de *Dolibarr* (v11 ou +) à placer dans */home/admin/wwwroot/dolibarr*
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
 
-Sur le serveur master:
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+---------------
 
-* Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*)
+On *Master server*:
 
-* Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
+* Install Dolibarr so that it responds to an Apache virtual host, for example: https://admin.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).
+Warning: Choose as the name of the document directory during the installation wizard */home/admin/wwwroot/dolibarr_documents* rather than
+*/home/admin/wwwroot/dolibarr/documents*
 
-* Activez le module "Cron/Travaux programmés"  et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
+* If you configure the sending of emails from the Dolibarr backoffice via an SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
+
+* Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
 
 
 === Installation of Geoip2
@@ -2561,7 +2856,28 @@ Sur tous les serveurs (Master et Déploiement):
 
 * Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
 
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+---------------
+
 * Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot/dolibarr/htdocs/custom
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas sellyoursaas
+---------------
+
+* Créer un lien symoblique dans *source* dans myaccounts.
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
+ln -fs /home/admin/wwwroot/dolibarr/htdocs source
+---------------
+
 
 Se connecter à l'interface utilisateur du master Dolibarr (https://admin.mysaasdomainname.com):
 
@@ -2634,8 +2950,13 @@ dnsserver=1
 ipserverdeployment=ipduserverdeployment
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
+# Set port of the master database (default is 3306)
+databaseport=3306
+# Set database name of the master server
 database=databaseduservermaster
 # Set credential for the master and deployment database
 databaseuser=sellyoursaas
@@ -2648,13 +2969,29 @@ backupdir=/mnt/diskbackup/backup
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+# Set remote server launcher ip (default is 0.0.0.0)
+remoteserverlistenip=0.0.0.0
+# Set remote server launcher port (default is 8080)
+remoteserverlistenport=8080
+# Options for use a different path of dataroot in deployment server
+#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
+#newdoldataroot=/new/path/of/documents
+# Options to change the directory of vhostfile templates
+#templatesdir=/path/of/vhostfile/templates
+# Options to change the SSL certificates names in Apache virtualhost
+#websslcertificatecrt=with.sellyoursaas.com.crt
+#websslcertificatekey=with.sellyoursaas.com.key
+#websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+# Options for Jailkit
+#chrootdir=/home/jail/chroot
+#privatejailtemplatename=privatejail
+#commonjailtemplatename=commonjail
 ---------------
 
 Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 
 Rebasculer sur l'instance Master Dolibarr (https://admin.mysaasdomainname.com) et aller sur la configuration du module SellYourSaas:
 
-TODO Ajouter desc des variables de config du module...
 
 * Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
 
@@ -2676,6 +3013,9 @@ Voir le chapitre "Configuration des services" pour un description des champs.
 Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
 
 Remarque: Les URL pour réaliser les déploiements des packages de type *Applications* seront visibles dans le menu *SellYourSaas - URL de déploiement*
+
+
+* Go to the configuration of the *Scheduled jobs* module and retrieve the instruction to add in the cron of the user *admin*. Check if not add this instruction so that the Sell-Your-Saas batches can run.
 
 
 <<<<
@@ -2735,7 +3075,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
 ---------------
 
-Editer le fichier pour ajouter "min_collection_interval: 300" sous "postfix_user: postfix" et sous "queues: - deffered"
+Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deffered*
 
 
 * Copy the datadog config file to supervize *memcached*.
@@ -2781,6 +3121,18 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]
+      
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
 ---------------
 
 
@@ -2896,13 +3248,15 @@ resize2fs /dev/vdX9
 
 
 [Clonage d une instance serveur pour production bis ou pour développement]
-=== Clonage d une instance serveur pour production bis ou pour développement
+=== Clone an server instance for a another production server or for development
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
 
 - Créer un snapshot du *Deployment server* à cloner.
 
 - Créer un nouveau serveur OVH depuis le snapshot en spécifiant le nom du snapshot source et en copiant dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
+
+- Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
 
 - Une fois le serveur prêt: Se connecter pour désactiver les crons en doublons avec le serveur cloné (possibilité de désactiver le process cron complètement) par
 
@@ -2939,9 +3293,12 @@ touch /mnt/diskhome/DATA_MYDEPLOYMENTSERVERX
 vi /etc/exports
 ---------------
 
-Pour ajouter une ligne du type:
+to add a line that looks like:
 
-	/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
+[source,bash]
+---------------
+/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
+---------------
 
 [source,bash]
 ---------------
@@ -2950,7 +3307,7 @@ exportfs
 systemctl restart nfs-kernel-server
 ---------------
 
-- Ajouter, dans le fichier */etc/fstab* du nouveau serveur de déploiement, l'entrée pour avoir le montage NFS au démarrage.
+- Add, into file */etc/fstab* of the new deployment server an entry to have the NFS mounted after a restart.
 
 [source,bash]
 ---------------
@@ -2963,10 +3320,10 @@ For exemple, on the *Master server*:
 
 [source,bash]
 ---------------
-${IPTABLES} -t filter -A INPUT -p tcp -s ip.server.deploymeent --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A INPUT -p udp -s ip.server.deploymeent --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A OUTPUT -p tcp -d ip.server.deploymeent --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A OUTPUT -p udp -d ip.server.deploymeent --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A INPUT -p tcp -s ip.server.deployment --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A INPUT -p udp -s ip.server.deployment --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -p tcp -d ip.server.deployment --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -p udp -d ip.server.deployment --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
 
 And on the *Deployment servers*
@@ -2977,13 +3334,15 @@ If we have a IP_SERVER and IP_SERVER2 get like this:
 ---------------
 IP_SERVER=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n 1`
 IP_SERVER_V6=`ifconfig | grep -i global | sed -En 's/127.0.0.1//;s/.*inet6 (addr:)?\s?([^\s]+)/\2/p' | cut -d' ' -f1 | cut -d'/' -f1 `
-IP_SERVER2=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | sed '2 ! d'
+IP_SERVER2=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | sed '2 ! d'`
 ---------------
 
 You must add
 
 [source,bash]
 ---------------
+IP_SELLYOURSAAS_ADMIN=ip.server.master
+
 ${IPTABLES} -t filter -A OUTPUT -s $IP_SERVER -d $IP_SELLYOURSAAS_ADMIN -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -s $IP_SELLYOURSAAS_ADMIN -d $IP_SERVER -j ACCEPT
 if [ "x$IP_SERVER2" != "x" ]
@@ -3108,13 +3467,14 @@ apt remove php-fpm php7-fpm
 ---------------
 
 
-
+[[check_database_used]]
 === Follow space used by database
 
 La requête suivante permet d'avoir une vision de l'espace réél (sans le gachis) en base de données.
 
 [source,sql]
 ---------------
+show variables like 'innodb_stats_on_metadata';
 SET GLOBAL innodb_stats_on_metadata=0;
 SELECT table_schema "DB Name", ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB",
 SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables 
@@ -3126,6 +3486,7 @@ And per table
 
 [source,sql]
 ---------------
+show variables like 'innodb_stats_on_metadata';
 SET GLOBAL innodb_stats_on_metadata=0;
 SELECT table_schema "DB Name", table_name, ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB",
 SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables 
@@ -3197,7 +3558,7 @@ Voir la documentation *afick.pl* pour plus d'options.
 
 [source,bash]
 ---------------
-apt-get install python3-openstackclient python3-novaclient -y
+apt install python3-openstackclient python3-novaclient -y
 ---------------
 
 - Récupérer le fichier OpenStack RC File v3
@@ -3313,7 +3674,7 @@ Find the line in the [mysqld] block that begins with datadir=, which is separate
 
 [source,bash]
 ---------------
-/etc/my.cnf
+vi /etc/my.cnf
 [mysqld]
 datadir=/mnt/volume-nyc1-01/mysql
 socket=/mnt/volume-nyc1-01/mysql/mysql.sock
@@ -3323,7 +3684,7 @@ After updating the existing lines, we’ll need to add configuration for the mys
 
 [source,bash]
 ---------------
-/etc/my.cnf
+vi /etc/my.cnf
 [client]
 port=3306
 socket=/mnt/volume-nyc1-01/mysql/mysql.sock
@@ -3376,8 +3737,8 @@ aa-enforce usr.sbin.mysqld
 
 
 
-[[Lancement de mysql sans permissions]]
-=== Lancement spéciaux de mysql ou mariadb
+[[special_start_mysql_mariadb]]
+=== Special start of mysql or mariadb
 
 * Sans permissions :
 
@@ -3399,7 +3760,7 @@ innodb_force_recovery=1
 A partir de 3 ou +, risque de perte de données.
 
 
-NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouverts par ordre de dates sur le disque.
+NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouverts, soit par ordre de dates sur le disque, soit par ordre alphabétique du répertoire dbn... (en faire plusieurs de suite pour déterminer l'ordre).
 
 
 
@@ -3571,10 +3932,17 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SO
 --REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SOCIETE_COUNTRY', 1, '__APPCOUNTRYIDCODELABEL__', 'chaine', 0);
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAIN_MAIL_EMAIL_FROM';
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAILING_EMAIL_FROM';
-UPDATE llx_const set value = '9.0.5' where name = 'MAIN_VERSION_LAST_UPGRADE';
-UPDATE llx_const set value = 'ip.server.deployment1, ip.servr.deployment2' where name = 'MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS';
+UPDATE llx_const set value = '10.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
+REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'ip.server.deployment1, ip.servr.deployment23', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_USING_PHPMAIL', 0, '1', 'chaine', 1);
+--REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, '1', 'password_hash', 1);
+--REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_SALT', 0, '1', '123456', 1);
 ---------------
+
+Change the value 10.0.0 with version of the image you will build to deploy.
+
+Enable also request to set MAIN_SECURITY_HASH_ALGO and MAIN_SECURITY_SALT to the same values than the one set into setup of SellYourSaas.
+Also, if you use the MAIN_SECURITY_HASH_ALGO to 'password_hash', you must use the key __APPPASSWORD0__ for password encrypted instead of __APPPASSWORD0SALTED__ (because salt is included inside the encrypted value of password).
 
 
 === Setup of Services
@@ -3685,7 +4053,7 @@ Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inut
 
 Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
-- Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
+- Mise à jour du fichier ssh */etc/skel/authorized_keys_support* avec les clés publiques passées en paramètres.
 
 
 === Some business rules of Sell-Your-Saas
@@ -3762,7 +4130,7 @@ image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 === Hidden options
 
-You can force different values for some setup parameters when the customer has registered itself from a page with *mydomain.com* as main domain.
+You can force different values for some setup parameters to overwrite the default value when the customer has registered itself from a page with *mydomain.com* as main domain.
 
 * SELLYOURSAAS_NAME_FORDOMAIN-myseconddomain.com = My Service name bis 
 * SELLYOURSAAS_ACCOUNT_URL-myseconddomain.com = https://myaccount.myseconddomain.com
@@ -3778,6 +4146,18 @@ To define account to use getipintel API for VPN probability.
 To enable native Datadog reporting (datadog-agent must just be installed)
 * SELLYOURSAAS_DATADOG_ENABLED = 1
 
+If you use an external db server (same value of "databasehost" and "databaseport" in sellyoursaas.conf)
+* SELLYOURSAAS_FORCE_DATABASE_HOST = ip or host name of your external mysql server
+* SELLYOURSAAS_FORCE_DATABASE_PORT = port of your external mysql server
+
+If you use an ssh port other than 22
+* SELLYOURSAAS_SSH_SERVER_PORT = port of your ssh server
+
+If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (same value of "newdoldataroot" in sellyoursaas.conf)
+* SELLYOURSAAS_FORCE_DOL_DATA_ROOT = /path/of/dolibarr/documents/in/deployment/server
+
+To activate Jailkit, a chroot security system (see Jailkit configuration)
+* SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 
 === TroubleShooting
@@ -3799,9 +4179,14 @@ Error when sending email in */var/log/mail.log*:
 
 	Mar  2 22:41:59 novafirstcloud6 postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 
-=> Check you have a file */etc/resolv.conf* and that it point to 127.0.0.1 (if not, create it and restart postfix)
+=> Check you have a file */etc/resolv.conf* that is link to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
 
+nameserver 127.0.0.1
+or 
+nameserver 127.0.0.56
 
+If not, create it and restart postfix.
+     
 ==== php sessions files in /var/lib/php/sessions are not purged
 
 php session purge can be done by 
@@ -3819,3 +4204,30 @@ We found into log file /var/log/fail2ban.log
 	2020-09-19 00:57:16,902 fail2ban.actions        [1182]: ERROR   Failed to execute ban jail 'postfix-sasl' action 'iptables-multiport' info 'ActionInfo
 	
 Edit the file /etc/fail2ban/jail/conf to replace *imap3* (it does not exists) into *imap* for rule postfix-sasl
+
+
+==== Extracting a zip file extract files into filename with path with \ including into name
+
+The problem is into the zip file (may be generated by the bugged Powershell). To solve this, try to unzip from command line with 
+
+	unzip  file.zip
+
+If it fails, you can fix path with this command
+
+	for file in *\\*; do target="${file//\\//}"; mkdir -p "${target%/*}"; mv -v "$file" "$target"; done
+	
+
+==== Error mysqldump: Error 3024: Query execution was interrupted, maximum statement execution time exceeded when dumping table `....` at row: ...
+
+The value for *max_execution_time* is too low or there is a table that has an abnormal number of records.
+- Check parameter max_execution_time into */etc/mysql/mysql.conf.d/mysqld.cnf* or similar files.
+- Try to run the mysqldump after increasing the max_execution_time dynamically from mysql with:
+    SHOW VARIABLES LIKE 'MAX_EXECUTION_TIME'
+    SET GLOBAL MAX_EXECUTION_TIME=120000;
+- See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
+
+
+==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
+
+- Check the temp directory is writable by the web server user.
+	

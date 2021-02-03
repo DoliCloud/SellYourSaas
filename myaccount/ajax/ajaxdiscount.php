@@ -27,6 +27,7 @@ if (!defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');
 if (!defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX', '1');
 if (!defined('NOREQUIRESOC'))   define('NOREQUIRESOC', '1');
 if (!defined('NOCSRFCHECK'))    define('NOCSRFCHECK', '1');
+if (!defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 // Add specific definition to allow a dedicated session management
 require ('../mainmyaccount.inc.php');

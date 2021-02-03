@@ -27,7 +27,8 @@
  * remote access to database must be granted for option 'testdatabase' or 'confirmdatabase'.
  */
 
-if (! defined('NOREQUIREDB'))              define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -41,7 +42,6 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 
 // Global variables
 $version='1.0';
-$error=0;
 $RSYNCDELETE=0;
 
 $instance=isset($argv[1])?$argv[1]:'';
@@ -56,6 +56,7 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to 
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
+$databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
@@ -78,6 +79,10 @@ if ($fp) {
 		if ($tmpline[0] == 'databasehost')
 		{
 			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport')
+		{
+		    $databaseport = $tmpline[1];
 		}
 		if ($tmpline[0] == 'database')
 		{
@@ -129,6 +134,9 @@ if (! $res) {
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
+$return_varother = 0;
+$return_var = 0;
+$return_varmysql = 0;
 
 
 
@@ -151,10 +159,10 @@ if (empty($instanceserver))
     exit(-1);
 }
 
-$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error)
 {
-    dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+    dol_print_error($dbmaster,"host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
     exit;
 }
 if ($dbmaster)
@@ -224,6 +232,8 @@ if ($result <= 0)
 $object->instance        = $object->ref_customer;
 $object->username_web    = $object->array_options['options_username_os'];
 $object->password_web    = $object->array_options['options_password_os'];
+$object->hostname_db     = $object->array_options['options_hostname_db'];
+$object->port_db         = $object->array_options['options_port_db'];
 $object->username_db     = $object->array_options['options_username_db'];
 $object->password_db     = $object->array_options['options_password_db'];
 $object->database_db     = $object->array_options['options_database_db'];
@@ -278,7 +288,8 @@ if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
 			if (! $res)
 			{
 				print 'Failed to create dir '.$dirtocreate."\n";
-				exit(-6);
+				$mode = 'disabled';
+				$return_varother = 1;
 			}
 		}
 	}
@@ -302,6 +313,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	//$param[]="-vv";
 	$param[]="-v";
 	$param[]="--noatime";
+	//$param[]="--exclude-from --exclude-from=$scriptdir/backup_backups.exclude";
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
 	$param[]="--exclude .gitignore";
@@ -311,12 +323,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*.log'";
 	$param[]="--exclude '*.pdf_preview*.png'";
 	$param[]="--exclude '(PROV*)'";
-	//$param[]="--exclude '*/build/'";
 	//$param[]="--exclude '*/doc/images/'";	    // To keep files into htdocs/core/module/xxx/doc/ dir
 	//$param[]="--exclude '*/doc/install/'";	// To keep files into htdocs/core/module/xxx/doc/ dir
 	//$param[]="--exclude '*/doc/user/'";		// To keep files into htdocs/core/module/xxx/doc/ dir
-	//$param[]="--exclude '*/dev/'";
-	//$param[]="--exclude '*/test/'";
 	$param[]="--exclude '*/thumbs/'";
 	$param[]="--exclude '*/temp/'";
 	// Excludes for Dolibarr
@@ -328,12 +337,19 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/freefont-*'";
 	// Excludes for GLPI
 	$param[]="--exclude '*/_cache/*'";
+	$param[]="--exclude '*/_cron/*'";
 	$param[]="--exclude '*/_dumps/*'";
+	$param[]="--exclude '*/_graph/*'";
+	$param[]="--exclude '*/_lock/*'";
 	$param[]="--exclude '*/_log/*'";
+	$param[]="--exclude '*/_rss/*'";
 	$param[]="--exclude '*/_sessions/*'";
+	$param[]="--exclude '*/_uploads/*'";
 	$param[]="--exclude '*/_tmp/*'";
+	$param[]="--exclude '*/_plugins/fusioninventory/xml/*'";
 	// Excludes for other
 	$param[]="--exclude '*/_source/*'";
+	$param[]="--exclude '*/__MACOSX/*'";
 
 	//$param[]="--backup --suffix=.old";
 	if ($RSYNCDELETE)
@@ -349,7 +365,6 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[] = $dirroot.'/'.$login;
 	$fullcommand=$command." ".join(" ",$param);
 	$output=array();
-	$return_var=0;
 	$datebeforersync = strftime("%Y%m%d-%H%M%S");
 	print $datebeforersync.' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
@@ -382,10 +397,12 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 // Backup database
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
+    include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
     $serverdb = $server;
-    if (filter_var($object->array_options['options_hostname_db'], FILTER_VALIDATE_IP) !== false) {
+    if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
         print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
-        $serverdb = $object->array_options['options_hostname_db'];
+        $serverdb = $object->hostname_db;
     }
 
 	$command="mysqldump";
@@ -393,6 +410,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]=$object->database_db;
 	$param[]="-h";
 	$param[]=$serverdb;
+	$param[]="-P";
+	$param[]=(! empty($object->port_db) ? $object->port_db : "3306");
 	$param[]="-u";
 	$param[]=$object->username_db;
 	$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$object->password_db).'"';
@@ -401,16 +420,23 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--single-transaction";
 	$param[]="-K";
 	$param[]="--tables";
+	$param[]="--no-tablespaces";
 	$param[]="-c";
 	$param[]="-e";
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 
 	$fullcommand=$command." ".join(" ",$param);
-	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip > /dev/null';
-	else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
+	if (command_exists("zstd")) {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > /dev/null';
+	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst';
+	    // Delete file with same name and gz extension (to clean rest of old behaviour)
+	    dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
+	} else {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
+	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
+	}
 	$output=array();
-	$return_varmysql=0;
 	$return_outputmysql=0;
 	$datebeforemysqldump = strftime("%Y%m%d-%H%M%S");
 	print $datebeforemysqldump.' '.$fullcommand."\n";
@@ -420,17 +446,20 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
 	print $outputerr;
 
-	$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
+	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
+	//$return_outputmysql = strpos($outputerr, ' Error ');
+	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
 	if ($return_outputmysql > 0) {
 		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
 	} else {
 		$return_outputmysql = 0;
+		// Delete temporary file once backup is done when file is empty
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
 	}
 
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
 
-	// Delete file with same name and bzip2 extension
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+	// Delete file with same name and bzip2 extension (to clean rest of old behaviour)
 	dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 
 	// Output result
@@ -459,7 +488,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 $now=dol_now();
 
 // Update database
-if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
+if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 {
 	print "RESULT into backup process of rsync: ".$return_var."\n";
 	print "RESULT into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
@@ -469,7 +498,8 @@ if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 		print 'Update date of full backup (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
 
 		// Update database
-		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup
+		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
+		$object->array_options['options_latestbackup_date_ok'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'OK';
 		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
 		$object->update($user, 1);
@@ -501,13 +531,14 @@ if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 }
 else
 {
+	if (! empty($return_varother)) print "ERROR into backup process init: ".$return_varother."\n";
 	if (! empty($return_var))      print "ERROR into backup process of rsync: ".$return_var."\n";
 	if (! empty($return_varmysql) || ! empty($return_outputmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
 
-	if ($mode == 'confirm')
+	if ($mode == 'confirm' || $mode == 'disabled')
 	{
 		// Update database
-		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup
+		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'KO';
 		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
 		$object->update($user, 1);

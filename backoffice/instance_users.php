@@ -157,10 +157,14 @@ if (empty($reshook))
 	    	$conf->global->MAIN_SECURITY_HASH_ALGO = $savMAIN_SECURITY_HASH_ALGO;
 	    	$conf->global->MAIN_SECURITY_SALT = $savMAIN_SECURITY_SALT;
 	    	$private_note = $newlangs->trans("NoteForSupportUser");
+	    	$emailsupport = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 	    	$signature = '--<br>Support team';
 
-	    	$sql="INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, signature)";
-	    	$sql.=" VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', 1, '".$conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT."', '".$newdb->escape($password_crypted_for_remote)."', 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($signature)."')";
+	    	$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature)";
+	    	$sql .= " VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."', 1,";
+	    	$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT)."'").",";
+	    	$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
+	    	$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."')";
 	        $resql=$newdb->query($sql);
 	        if (! $resql)
 	        {
@@ -341,6 +345,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 		else
 		{
 			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(),'','warnings');
+			$error++;
 		}
 	}
 	//	else print 'Error, failed to connect';
@@ -350,7 +355,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	if (is_object($object->db2))
 	{
 		$savdb=$object->db;
-		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = stratus5 database
+		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
 	}
 
 	$object->fetch_thirdparty();
@@ -443,7 +448,7 @@ $hostname_os = $object->array_options['options_hostname_os'];
 
 $dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
-if (is_object($dbcustomerinstance) && $dbcustomerinstance->connected)
+if (!$error && is_object($dbcustomerinstance) && $dbcustomerinstance->connected)
 {
 	// Get user/pass of last admin user
 	$sql="SELECT login, pass, pass_crypted FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
@@ -480,42 +485,48 @@ if ($action == 'resetpassword') {
 	print $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&remoteid=' . GETPOST('remoteid','int'), $langs->trans('ResetPassword'), $langs->trans('ConfirmResetPassword'), 'confirm_resetpassword', $formquestion, 0, 1);
 }
 
-print '<table class="border" width="100%">';
+if (!$error)
+{
+    print '<table class="border" width="100%">';
 
-print_user_table($dbcustomerinstance, $object);
+    print_user_table($dbcustomerinstance, $object);
 
-print "</table><br>";
+    print "</table><br>";
+}
 
 
 // Application instance url
-if (empty($lastpassadmin))
+if (!$error)
 {
-    if (! empty($object->array_options['options_deployment_init_adminpass']))
+    if (empty($lastpassadmin))
     {
-        $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
-        $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-        $links.='Link to application (initial install pass) : ';
+        if (! empty($object->array_options['options_deployment_init_adminpass']))
+        {
+            $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
+            $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+            $links.='Link to application (initial install pass) : ';
+        }
+        else
+        {
+            $url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
+            $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+            $links.='Link to application : ';
+        }
     }
     else
     {
-        $url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
+        $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
         $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-        $links.='Link to application : ';
+        $links.='Link to application (last logged admin) : ';
     }
-}
-else
-{
-    $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
-    $link='<a href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-    $links.='Link to application (last logged admin) : ';
-}
-print $links.$link;
+    print $links.$link;
 
-print '<br>';
+    print '<br>';
+}
 
 
 // Barre d'actions
-if (! $user->societe_id)
+if (!$error && ! $user->societe_id)
 {
     print '<div class="tabsAction">';
 

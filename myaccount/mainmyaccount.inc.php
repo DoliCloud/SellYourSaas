@@ -159,7 +159,11 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 		$favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 		if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
-		if ($favicon) print '<link rel="shortcut icon" href="img/'.$favicon.'">'."\n";
+		if ($favicon) {
+		    $href = 'img/'.$favicon;
+		    if (preg_match('/^http/i', $favicon)) $href = $favicon;
+		    print '<link rel="shortcut icon" href="'.$href.'">'."\n";
+		}
 
 		// Displays title
 		$appli=constant('DOL_APPLICATION_TITLE');
@@ -271,8 +275,8 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 				print '<script type="text/javascript" src="'.$pathckeditor.$jsckeditor.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
 
-			// Browser notifications
-			if (! defined('DISABLE_BROWSER_NOTIF'))
+			// Browser notifications (if NOREQUIREMENU is on, it is mostly a page for popup, so we do not enable notif too. We hide also for public pages).
+			if (!defined('NOBROWSERNOTIF') && !defined('NOREQUIREMENU') && !defined('NOLOGIN'))
 			{
 				$enablebrowsernotif=false;
 				if (! empty($conf->agenda->enabled) && ! empty($conf->global->AGENDA_REMINDER_BROWSER)) $enablebrowsernotif=true;
@@ -490,12 +494,12 @@ if (! function_exists('dol_getprefix'))
 {
 	function dol_getprefix($mode='')
 	{
-	    global $conf;
-
-	    // If prefix is for email
+		// If prefix is for email (we need to have $conf alreayd loaded for this case)
 		if ($mode == 'email')
 		{
-		    if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID))	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
+			global $conf;
+
+			if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID))	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
 		    {
 		        if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
 		        elseif (isset($_SERVER["SERVER_NAME"])) return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
@@ -508,8 +512,14 @@ if (! function_exists('dol_getprefix'))
 		    return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
 		}
 
+		// If prefix is for session (no need to have $conf loaded)
+		global $dolibarr_main_instance_unique_id, $dolibarr_main_cookie_cryptkey;	// This is loaded by filefunc.inc.php
+		$tmp_instance_unique_id = empty($dolibarr_main_instance_unique_id) ? (empty($dolibarr_main_cookie_cryptkey) ? '' : $dolibarr_main_cookie_cryptkey) : $dolibarr_main_instance_unique_id; // Unique id of instance
+
 		// The recommended value (may be not defined for old versions)
-		if (! empty($conf->file->instance_unique_id)) return 'sellyoursaas'.$conf->file->instance_unique_id;
+		if (!empty($tmp_instance_unique_id)) {
+			return 'sellyoursaas'.$tmp_instance_unique_id;
+		}
 
 		// For backward compatibility
 		if (isset($_SERVER["SERVER_NAME"]) && isset($_SERVER["DOCUMENT_ROOT"]))
@@ -637,6 +647,8 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	    $constlogosmall.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 	}
 
+	$homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
+
 	if (empty($urllogo) && ! empty($conf->global->$constlogosmall))
 	{
 	    if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall))
@@ -721,6 +733,8 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	// Include login page template
 	include $template_dir.'loginmyaccount.tpl.php';
 
+	// Global html output events ($mesgs, $errors, $warnings)
+	dol_htmloutput_events(0);
 
 	$_SESSION["dol_loginmesg"] = '';
 }

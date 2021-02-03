@@ -7,9 +7,19 @@
 
 echo "***** $0 *****"
 
-export webSSLCertificateCRT=with.sellyoursaas.com.crt
-export webSSLCertificateKEY=with.sellyoursaas.com.key
-export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
+# possibility to change the ssl certificates name
+export webSSLCertificateCRT=`grep 'websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateCRT" == "x" ]]; then
+	export webSSLCertificateCRT=with.sellyoursaas.com.crt
+fi
+export webSSLCertificateKEY=`grep 'websslcertificatekey=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateKEY" == "x" ]]; then
+	export webSSLCertificateKEY=with.sellyoursaas.com.key
+fi
+export webSSLCertificateIntermediate=`grep 'websslcertificateintermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
+	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
+fi
 
 if [ "x$2" == "x" ]; then
    echo "Usage:   $0  urlwhenoffline  test|offline|online"
@@ -22,11 +32,19 @@ if [ "x$2" != "xtest" -a "x$2" != "xoffline" -a "x$2" != "xonline" ]; then
    exit 1
 fi
 
-realdir=$(dirname $(dirname $(realpath ${0})))
+export scriptdir=$(dirname $(realpath ${0}))
+
+# possibility to change the directory of vhostfile templates
+templatesdir=`grep 'templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$templatesdir" != "x" ]]; then
+	export vhostfileoffline="$templatesdir/vhostHttps-sellyoursaas-offline.template"
+else
+	export vhostfileoffline="$scriptdir/templates/vhostHttps-sellyoursaas-offline.template"
+fi
 
 if [ "x$2" != "xonline" ]; then
 	echo "Loop on each enabled virtual host of customer instances, create a new one and switch it"
-	echo "Path for template is $realdir"
+	echo "Path for template is $scriptdir"
 	mkdir /etc/apache2/sellyoursaas-offline 2>/dev/null
 
 	for file in `ls /etc/apache2/sellyoursaas-online/*`
@@ -41,7 +59,7 @@ if [ "x$2" != "xonline" ]; then
 				export domain=$(cat /etc/apache2/sellyoursaas-online/$domain.custom.conf | grep ServerName | sed -s 's/^ *//' | cut --delimiter=' '  -f2)
 	        
 				echo Create file /etc/apache2/sellyoursaas-offline/$fileshort for domain $domain
-				cat $realdir/scripts/templates/vhostHttps-sellyoursaas-offline.template | \
+				cat $vhostfileoffline | \
 					sed 's!__webAppDomain__!'${domain}'!g' | \
 					sed 's!__webMyAccount__!'$1'!g' | \
 			        sed 's!__webSSLCertificateCRT__!'$webSSLCertificateCRT'!g' | \
@@ -54,7 +72,7 @@ if [ "x$2" != "xonline" ]; then
 		        rm -f /etc/apache2/sellyoursaas-offline/$domain.conf 2>/dev/null
 				
 				echo Create file /etc/apache2/sellyoursaas-offline/$fileshort for domain $domain
-				cat $realdir/scripts/templates/vhostHttps-sellyoursaas-offline.template | \
+				cat $vhostfileoffline | \
 					sed 's!__webAppDomain__!'${domain}'!g' | \
 					sed 's!__webMyAccount__!'$1'!g' | \
 		            sed 's!__webSSLCertificateCRT__!'$webSSLCertificateCRT'!g' | \

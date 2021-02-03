@@ -24,9 +24,9 @@ echo "# realname -------> $(realpath ${0})"
 echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
+
 export PID=${$}
-export scriptdir=$(dirname $(realpath ${0}))
-export targetdir="/home/jail/home"				
+export scriptdir=$(dirname $(realpath ${0}))				
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirtest=`grep '^archivedirtest=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirpaid=`grep '^archivedirpaid=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -38,10 +38,20 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+# possibility to change the directory of instances are stored
+export targetdir=`grep 'targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$targetdir" == "x" ]]; then
+	export targetdir="/home/jail/home"
+fi
+
 export IPSERVERDEPLOYMENT=`grep '^ipserverdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export databasehost=`grep '^databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export database=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export databaseuser=`grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databaseport=`grep '^databaseport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databaseport" == "x" ]]; then
+	databaseport="3306"
+fi
 
 if [ "x$IPSERVERDEPLOYMENT" == "x" ]; then
    echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
@@ -63,10 +73,41 @@ if [ "x$databaseuser" == "x" ]; then
 	echo "Usage: ${0} [test|confirm]"
 	exit 1
 fi
+echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
+databasepass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databasepass" == "x" ]]; then
+	echo Failed to get password for mysql user sellyoursaas 
+	exit 1
+fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
-	echo "Usage: ${0} [test|confirm]"
+	echo "Usage: ${0} [test|confirm] (tempdirs)"
+	exit 1
+fi
+
+echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
+export databasehostdeployment=`grep 'databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databasehostdeployment" == "x" ]]; then
+	databasehostdeployment="localhost"
+fi 
+export databaseportdeployment=`grep 'databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databaseportdeployment" == "x" ]]; then
+	databaseportdeployment="3306"
+fi
+echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
+export databaseuserdeployment=`grep 'databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databaseuserdeployment" == "x" ]]; then
+	databaseuserdeployment=$databaseuser
+fi
+databasepassdeployment=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$databasepassdeployment" == "x" ]]; then
+	databasepassdeployment=$databasepass
+fi 
+
+dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dnsserver" == "x" ]]; then
+	echo Failed to get dns server parameters 
 	exit 1
 fi
 
@@ -78,13 +119,7 @@ echo "testorconfirm = $testorconfirm"
 
 
 MYSQL=`which mysql`
-MYSQLDUMP=`which mysqldump`
-echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
-passsellyoursaas=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$passsellyoursaas" == "x" ]]; then
-	echo Failed to get password for mysql user sellyoursaas 
-	exit 1
-fi 
+MYSQLDUMP=`which mysqldump` 
 
 if [[ ! -d $archivedirtest ]]; then
 	echo Failed to find archive directory $archivedirtest
@@ -130,7 +165,7 @@ fi
 
 
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
-for fic in `ls /etc/apache2/sellyoursaas-available/*.*.*.*.conf /etc/apache2/sellyoursaas-available/*.*.*.*.custom.conf /etc/apache2/sellyoursaas-available/*.home.lan 2>/dev/null`
+for fic in `ls /etc/apache2/sellyoursaas-available/*.*.*.*.conf /etc/apache2/sellyoursaas-available/*.home.lan 2>/dev/null`
 do
 	basfic=`basename $fic` 
 	if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
@@ -152,8 +187,8 @@ Q1="use $database; "
 Q2="SELECT c.ref_customer, ce.username_os, ce.database_db, ce.deployment_status FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE ce.fk_object = c.rowid AND ce.deployment_status IS NOT NULL";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e '$SQL' | grep -v 'ref_customer'"
-$MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-dbinsellyoursaas
+echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL' | grep -v 'ref_customer'"
+$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-dbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make first SQL request to get instances. Exit 1."
 	exit 1
@@ -168,22 +203,22 @@ Q1="use $database; "
 Q2="SELECT c.ref_customer, ce.username_os, ce.database_db, ce.deployment_status, ce.deployment_host FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE ce.fk_object = c.rowid AND ce.deployment_status IN ('processing','done')";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e '$SQL' | grep -v 'ref_customer'"
-$MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-activedbinsellyoursaas
+echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL' | grep -v 'ref_customer'"
+$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-activedbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make second SQL request to get instances. Exit 1."
 	exit 1
 fi
 
 
-echo "***** Get list of databases available in mysql local and save it into /tmp/instancefound-dbinmysqldic"
+echo "***** Get list of databases available in mysql local and save it into /tmp/instancefound-dbinmysqldic (seems not used)"
 
 Q1="use mysql; "
 Q2="SHOW DATABASES; ";
 SQL="${Q1}${Q2}"
 
-echo "$MYSQL -usellyoursaas -pxxxxxx -h localhost -e '$SQL' | grep 'dbn' "
-$MYSQL -usellyoursaas -p$passsellyoursaas -h localhost -e "$mysql" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e '$SQL' | grep 'dbn' "
+$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
 	exit 1
@@ -252,14 +287,14 @@ Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce W
 Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";
 SQL="${Q1}${Q2}${Q3}"
 
-echo "$MYSQL -usellyoursaas -phidden -h $databasehost -e $SQL"
-$MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
+echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e $SQL"
+$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
 if [ -s /tmp/osutoclean-oldundeployed ]; then
 	for osusername in `cat /tmp/osutoclean-oldundeployed`
 	do
 		tmpvar1=`echo $osusername | awk -F ":" ' { print $1 } '`
-		if [ -d /home/jail/home/$osusername ]; then
-			nbdbn=`ls /home/jail/home/$osusername/ | grep ^dbn | wc -w`
+		if [ -d $targetdir/$osusername ]; then
+			nbdbn=`ls $targetdir/$osusername/ | grep ^dbn | wc -w`
 			if [[ "x$nbdbn" == "x0" ]]; then
 				echo "User $tmpvar1 is an ^osu user in /tmp/osutoclean-oldundeployed but has still a home dir with no more dbn... into, so we will remove it"
 				echo $tmpvar1 >> /tmp/osutoclean
@@ -285,7 +320,6 @@ if [ -s /tmp/osutoclean ]; then
 		export dbname=""
 		export instancename=`grep $osusername /tmp/instancefound-dbinsellyoursaas | cut -f 1`
 		export dbname=`grep $osusername /tmp/instancefound-dbinsellyoursaas | cut -f 3`
-		export databasehostdeployment="localhost"
 		
 		echo For osusername=$osusername, dbname is $dbname, instancename is $instancename, databasehostdeployment is $databasehostdeployment
 		
@@ -294,13 +328,18 @@ if [ -s /tmp/osutoclean ]; then
 			if [[ "x$dbname" != "xNULL" ]]; then	
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
-				echo "$MYSQLDUMP -usellyoursaas -pxxxxxx -h $databasehostdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
-				$MYSQLDUMP -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+				if [[ -x /usr/bin/zstd ]]; then
+					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
+					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
+				else
+					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
+					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+				fi
 
 				echo "Now drop the database"
-				echo "echo 'DROP DATABASE $dbname;' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname"
+				echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname"
 				if [[ $testorconfirm == "confirm" ]]; then
-					echo "DROP DATABASE $dbname;" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehostdeployment $dbname
+					echo "DROP DATABASE $dbname;" | $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname
 				fi	
 			fi
 		fi
@@ -352,58 +391,60 @@ if [ -s /tmp/osutoclean ]; then
 		if [ "x$instancenameshort" != "x" ]; then
 			if [ "x$instancenameshort" != "xNULL" ]; then
 
-				if [ -f /etc/bind/${ZONE} ]; then
-					echo "   ** Remove DNS entry for $instancenameshort from /etc/bind/${ZONE}"
-					cat /etc/bind/${ZONE} | grep "^$instancenameshort " > /dev/null 2>&1
-					notfound=$?
-					echo notfound=$notfound
-					
-					if [[ $notfound == 0 ]]; then
-			
-						echo "cat /etc/bind/${ZONE} | grep -v '^$instancenameshort ' > /tmp/${ZONE}.$PID"
-						cat /etc/bind/${ZONE} | grep -v "^$instancenameshort " > /tmp/${ZONE}.$PID
-					
-						# we're looking line containing this comment
-						export DATE=`date +%y%m%d%H`
-						export NEEDLE="serial number"
-					    curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
-					    # replace if current date is shorter (possibly using different format)
-					    echo "Current bind counter is $curr"
-					    if [ ${#curr} -lt ${#DATE} ]; then
-					      serial="${DATE}00"
-					    else
-					      prefix=${curr::-2}
-					      if [ "$DATE" -eq "$prefix" ]; then 	# same day
-					        num=${curr: -2} # last two digits from serial number
-					        num=$((10#$num + 1)) # force decimal representation, increment
-					        serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
-					      else
-					        serial="${DATE}00" # just update date
-					      fi
-					    fi
-					    echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
-					    /bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
-					    
-					    echo Test temporary file /tmp/${ZONE}.$PID
-						named-checkzone ${ZONENOHOST} /tmp/${ZONE}.$PID
-						if [[ "$?x" != "0x" ]]; then
-							echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid 
-							exit 1
-						fi 
+				if [[ "$dnsserver" == "1" ]]; then
+					if [ -f /etc/bind/${ZONE} ]; then
+						echo "   ** Remove DNS entry for $instancenameshort from /etc/bind/${ZONE}"
+						cat /etc/bind/${ZONE} | grep "^$instancenameshort " > /dev/null 2>&1
+						notfound=$?
+						echo notfound=$notfound
 						
-						echo "   ** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-						cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+						if [[ $notfound == 0 ]]; then
+				
+							echo "cat /etc/bind/${ZONE} | grep -v '^$instancenameshort ' > /tmp/${ZONE}.$PID"
+							cat /etc/bind/${ZONE} | grep -v "^$instancenameshort " > /tmp/${ZONE}.$PID
 						
-						echo "   ** Move new host file"
-						echo mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-						if [[ $testorconfirm == "confirm" ]]; then
-							mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
-						fi
-						
-						echo "   ** Reload dns with rndc reload ${ZONENOHOST}"
-						if [[ $testorconfirm == "confirm" ]]; then
-							rndc reload ${ZONENOHOST}
-							#/etc/init.d/bind9 reload
+							# we're looking line containing this comment
+							export DATE=`date +%y%m%d%H`
+							export NEEDLE="serial number"
+						    curr=$(/bin/grep -e "${NEEDLE}$" /tmp/${ZONE}.$PID | /bin/sed -n "s/^\s*\([0-9]*\)\s*;\s*${NEEDLE}\s*/\1/p")
+						    # replace if current date is shorter (possibly using different format)
+						    echo "Current bind counter is $curr"
+						    if [ ${#curr} -lt ${#DATE} ]; then
+						      serial="${DATE}00"
+						    else
+						      prefix=${curr::-2}
+						      if [ "$DATE" -eq "$prefix" ]; then 	# same day
+						        num=${curr: -2} # last two digits from serial number
+						        num=$((10#$num + 1)) # force decimal representation, increment
+						        serial="${DATE}$(printf '%02d' $num )" # format for 2 digits
+						      else
+						        serial="${DATE}00" # just update date
+						      fi
+						    fi
+						    echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
+						    /bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
+						    
+						    echo Test temporary file /tmp/${ZONE}.$PID
+							named-checkzone ${ZONENOHOST} /tmp/${ZONE}.$PID
+							if [[ "$?x" != "0x" ]]; then
+								echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid 
+								exit 1
+							fi 
+							
+							echo "   ** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+							cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+							
+							echo "   ** Move new host file"
+							echo mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+							if [[ $testorconfirm == "confirm" ]]; then
+								mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+							fi
+							
+							echo "   ** Reload dns with rndc reload ${ZONENOHOST}"
+							if [[ $testorconfirm == "confirm" ]]; then
+								rndc reload ${ZONENOHOST}
+								#/etc/init.d/bind9 reload
+							fi
 						fi
 					fi
 				fi
@@ -482,10 +523,12 @@ echo "***** Now clean also old dir in $archivedirtest - 15 days after being arch
 cd $archivedirtest
 find $archivedirtest -maxdepth 1 -type d -mtime +15 -exec rm -fr {} \;
 
-# Now clean also old files in $archivedirbind
-echo "***** Now clean also old files in $archivedirbind - 15 days after being archived"
-cd $archivedirbind
-find $archivedirbind -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+if [[ "$dnsserver" == "1" ]]; then
+	# Now clean also old files in $archivedirbind
+	echo "***** Now clean also old files in $archivedirbind - 15 days after being archived"
+	cd $archivedirbind
+	find $archivedirbind -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+fi
 
 # Now clean also old files in $archivedircron
 echo "***** Now clean also old files in $archivedircron - 15 days after being archived"
@@ -497,6 +540,16 @@ echo "***** Now clean miscellaneous files"
 rm /var/log/repair.lock > /dev/null 2>&1
 
 
+# Clean archives 
+if [ "x$2" == "xtempdirs" ]; then
+	echo "Clean archives dir from not expected files (should not be required anymore). Archives are no more tree of files but an archive since 1st of july 2019".
+	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
+	find "$archivedirpaid" -type d -path '*/osu*/temp' -exec rm -fr {} \;
+	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
+	find "$archivedirtest" -type d -path '*/osu*/temp' -exec rm -fr {} \;
+fi
+
+
 echo
 echo TODO Manually...
 
@@ -504,12 +557,12 @@ echo TODO Manually...
 echo "***** We should also clean mysql record for permission on old databases and old users"
 SQL="use mysql; delete from db where Db NOT IN (SELECT schema_name FROM information_schema.schemata) and Db like 'dbn%';"
 echo You can execute
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e \"$SQL\""
-#$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e "$SQL"
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+#$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 SQL="use mysql; delete from user where User NOT IN (SELECT User from db) and User like 'dbu%';"
 echo You can execute
-echo "$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e \"$SQL\""
-#$MYSQL -usellyoursaas -pxxxxxx -h $databasehost -e "$SQL"
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+#$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 
 if [[ $testorconfirm == "test" ]]; then
 	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so they we can force to undeployed them correctly again"
@@ -519,12 +572,14 @@ if [[ $testorconfirm == "test" ]]; then
 		echo -n " '"$fic"'," >> /tmp/idlistofdb
 	done
 	export idlistofdb=`cat /tmp/idlistofdb | sed -e 's/,$//' `
-	echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
-	echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
-	echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database"
-	echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$passsellyoursaas -h $databasehost $database
-	echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
-	echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
+	if [[ "x$idlistofdb" != "x" ]]; then
+		echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx $database"
+		echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass $database
+		echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -pxxxxxx -h $databasehost $database"
+		echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
+		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
+		echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
+	fi
 fi
 
 # Clean backup dir of payed instances that are now archived
@@ -555,5 +610,6 @@ if [ -s /tmp/deletedirs.sh ]; then
 	echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
 	echo You can execute commands into file /tmp/deletedirs.sh
 fi
+
 
 exit 0

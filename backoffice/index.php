@@ -463,7 +463,8 @@ if ($resql)
 		if ($oldx && $oldx != $obj->x)
 		{
 			// break
-			$absice[0]=preg_replace('/^20/','',$oldx);
+			preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
+			$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 			$benefit=price2num($absice[1] * (1 - $part) - $serverprice - $absice[2], 'MT');
 			$absice[3]=$benefit;
 			ksort($absice);
@@ -481,7 +482,8 @@ if ($resql)
 
 	if ($oldx)
 	{
-		$absice[0]=preg_replace('/^20/','',$oldx);
+	    preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
+	    $absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 		$benefit=price2num($absice[1] * (1 - $part) - $serverprice - $absice[2], 'MT');
 		$absice[3]=$benefit;
 		ksort($absice);
@@ -512,7 +514,8 @@ if ($resql)
 		if ($oldx && $oldx != $obj->x)
 		{
 			// break
-			$absice[0]=preg_replace('/^20/','',$oldx);
+		    preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
+		    $absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 			ksort($absice);
 			$data2[]=$absice;
 			$absice=array();
@@ -530,7 +533,8 @@ if ($resql)
 
 	if ($oldx)
 	{
-		$absice[0]=preg_replace('/^20/','',$oldx);
+	    preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
+	    $absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 		ksort($absice);
 		$data2[]=$absice;
 	}
@@ -642,8 +646,9 @@ if ($action != 'edit')
 else
 {
 	print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="update">';
-	$doleditor=new DolEditor('NLTECHNO_NOTE',$conf->global->NLTECHNO_NOTE,'',480,'Full');
+	$doleditor=new DolEditor('NLTECHNO_NOTE', $conf->global->NLTECHNO_NOTE, '', 480, 'dolibarr_mailings');
 	print $doleditor->Create(1);
 	print '<br>';
 	print '<input class="button" type="submit" name="'.$langs->trans("Save").'">';

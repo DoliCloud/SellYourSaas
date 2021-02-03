@@ -26,7 +26,8 @@
  *      			update statistics
  */
 
-if (! defined('NOREQUIREDB'))              define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -73,6 +74,7 @@ include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
+$databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
@@ -87,6 +89,10 @@ if ($fp) {
         if ($tmpline[0] == 'databasehost')
         {
             $databasehost = $tmpline[1];
+        }
+        if ($tmpline[0] == 'databaseport')
+        {
+            $databaseport = $tmpline[1];
         }
         if ($tmpline[0] == 'database')
         {
@@ -118,10 +124,10 @@ else
  * Main
  */
 
-$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error)
 {
-    dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+    dol_print_error($dbmaster,"host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
     exit;
 }
 if ($dbmaster)
@@ -261,9 +267,9 @@ if ($resql)
 				}
 
 				$ispaid = sellyoursaasIsPaidInstance($object);
-				if (! $ispaid) $payment_status='TRIAL';
-				else
-				{
+				if (! $ispaid) {
+					$payment_status='TRIAL';
+				} else {
 					$ispaymentko = sellyoursaasIsPaymentKo($object);
 					if ($ispaymentko) $payment_status='FAILURE';
 				}

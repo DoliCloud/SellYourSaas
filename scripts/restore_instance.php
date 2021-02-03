@@ -27,7 +27,8 @@
  * remote access to database must be granted for option 'testdatabase' or 'confirmdatabase'.
  */
 
-if (! defined('NOREQUIREDB'))              define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -69,6 +70,7 @@ dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
+$databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
@@ -82,6 +84,10 @@ if ($fp) {
         if ($tmpline[0] == 'databasehost')
         {
             $databasehost = $tmpline[1];
+        }
+        if ($tmpline[0] == 'databaseport')
+        {
+            $databaseport = $tmpline[1];
         }
         if ($tmpline[0] == 'database')
         {
@@ -113,10 +119,10 @@ if (0 == posix_getuid()) {
     exit(-1);
 }
 
-$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, 3306);
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error)
 {
-    dol_print_error($dbmaster,"host=".$databasehost.", port=3306, user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+    dol_print_error($dbmaster,"host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
     exit;
 }
 if ($dbmaster)
@@ -316,11 +322,19 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 // Restore database
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
 {
+    $serverdb = $server;
+    if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
+        print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
+        $serverdb = $object->hostname_db;
+    }
+
 	$command="mysql";
 	$param=array();
 	$param[]=$object->database_db;
 	$param[]="-h";
-	$param[]=$server;
+	$param[]=$serverdb;
+	$param[]="-P";
+	$param[]=(! empty($object->port_db) ? $object->port_db : "3306");
 	$param[]="-u";
 	$param[]=$object->username_db;
 	$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$object->password_db).'"';
@@ -330,7 +344,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	{
 		$src_database_db = basename($dirroot);
 	    $dateselected=sprintf("%02s", $dayofmysqldump);
-	    $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.gz";
+	    if (command_exists("zstd")) {
+	        $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.zst";
+	    } else {
+	        $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.gz";
+	    }
 	}
 	else
 	{
@@ -342,8 +360,14 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 	// Launch load
 	$fullcommand=$command." ".join(" ",$param);
-	if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d > /dev/null';
-	else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d | '.$fullcommand;
+	if (command_exists("zstd")) {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q > /dev/null';
+	    else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q  | '.$fullcommand;
+	} else {
+	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d > /dev/null';
+	    else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d | '.$fullcommand;
+	}
+
 	$output=array();
 	$return_varmysql=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";

@@ -89,41 +89,40 @@ class ActionsSellyoursaas
 	    	if ($user->admin && ! empty($object->array_options['options_dolicloud']))
 	    	{
 	    		$url = '';
-		    	if ($object->array_options['options_dolicloud'] == 'yesv2')
-		    	{
-		    	    $urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-		    	    if (! empty($object->array_options['options_domain_registration_page'])
-		    	        && $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-		    	    {
-		    	        $constforaltname = $object->array_options['options_domain_registration_page'];
-		    	        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-		    	        if (! empty($conf->global->$newnamekey))
-		    	        {
-		    	            $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
-		    	        }
-		    	    }
+	    		if ($object->array_options['options_dolicloud'] == 'yesv2')
+	    		{
+	    		    $urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+	    		    $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+	    		    if (! empty($object->array_options['options_domain_registration_page'])
+	    		        && $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+	    		    {
+	    		        $constforaltname = $object->array_options['options_domain_registration_page'];
+	    		        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
+	    		        if (! empty($conf->global->$newnamekey))
+	    		        {
+	    		            $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+	    		            if (! empty($conf->global->$newurlkey))
+	    		            {
+	    		                $urlmyaccount = $conf->global->$newurlkey;
+	    		            }
+	    		            else
+	    		            {
+	    		                $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
+	    		            }
 
-		    		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$object->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
-		    		$url=$urlmyaccount.'?mode=logout_dashboard&action=login&actionlogin=login&username='.$object->email.'&password=&login_hash='.$dol_login_hash;
-		    	}
+	    		            $sellyoursaasname = $conf->global->$newnamekey;
+	    		        }
+	    		    }
 
-		    	if ($url)
-		    	{
-		    	    $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-		    	    if (! empty($object->array_options['options_domain_registration_page'])
-		    	        && $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-		    	    {
-		    	        $constforaltname = $object->array_options['options_domain_registration_page'];
-		    	        $newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-		    	        if (! empty($conf->global->$newnamekey))
-		    	        {
-		    	            $sellyoursaasname = $conf->global->$newnamekey;
-		    	        }
-		    	    }
+	    		    $dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$object->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash to login is sha256 and is valid one day
+	    		    $url=$urlmyaccount.'?mode=logout_dashboard&action=login&actionlogin=login&username='.$object->email.'&password=&login_hash='.$dol_login_hash;
+	    		}
 
-		    	    $this->resprints = (empty($parameters['notiret'])?' -':'').'<!-- Added by getNomUrl hook of SellYourSaas -->';
-			    	$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
-		    	}
+	    		if ($url)
+	    		{
+	    		    $this->resprints = (empty($parameters['notiret'])?' -':'').'<!-- Added by getNomUrl hook of SellYourSaas -->';
+	    		    $this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
+	    		}
 	    	}
     	}
 
@@ -167,7 +166,14 @@ class ActionsSellyoursaas
             }
             if ($isanurlofasellyoursaasinstance)
             {
-                $this->results['objref'] = $parameters['objref'].' <a href="https://'.$parameters['objref'].'" target="_blank">'.img_picto('https://'.$parameters['objref'], 'object_globe').'</a>';
+                $objref = $parameters['objref'];
+                $url = 'https://'.$parameters['objref'];
+                if (! empty($object->array_options['options_custom_url'])) {
+                    $objref = $object->array_options['options_custom_url'];
+                    $url = 'https://'.$object->array_options['options_custom_url'];
+                }
+
+                $this->results['objref'] = $objref.' <a href="'.$url.'" target="_blank">'.img_picto($url, 'object_globe').'</a>';
 
                 if ($parameters['currentcontext'] == 'contractcard')
                 {
@@ -510,7 +516,9 @@ class ActionsSellyoursaas
 					$db->rollback();
 				}
 
-				$urlto=preg_replace('/action=[a-z]+/', '', $_SERVER['REQUEST_URI']);
+				$urlto=preg_replace('/action=[a-z_]+/', '', $_SERVER['REQUEST_URI']);
+				$urlto=preg_replace('/&confirm=yes/', '', $urlto);
+				$urlto=preg_replace('/&token=/', '&tokendisabled=', $urlto);
 				if ($urlto)
 				{
 					dol_syslog("Redirect to page urlto=".$urlto." to avoid to do action twice if we do back");
@@ -915,6 +923,10 @@ class ActionsSellyoursaas
     	{
         	// Read version
         	$server = $contract->ref_customer;
+        	$hostname_db = $object->hostname_db;
+        	if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];
+        	$port_db = $object->port_db;
+        	if (empty($port_db)) $port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
         	$username_db = $contract->username_db;
         	if (empty($username_db)) $username_db = $contract->array_options['options_username_db'];
         	$password_db = $object->password_db;
@@ -922,7 +934,9 @@ class ActionsSellyoursaas
         	$database_db = $object->database_db;
         	if (empty($database_db)) $database_db = $contract->array_options['options_database_db'];
 
-        	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, 3306);
+        	$server = (! empty($hostname_db) ? $hostname_db : $instance);
+
+        	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
         	if ($newdb->connected)
         	{
@@ -1022,8 +1036,7 @@ class ActionsSellyoursaas
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo')))
     	{
-    		if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) // Field "Mode paid or free" not hidden
-    		{
+    		if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) { // Field "Mode paid or free" not hidden
     			global $contractmpforloop;
 	    		if (! is_object($contractmpforloop))
 	    		{
@@ -1031,15 +1044,14 @@ class ActionsSellyoursaas
 	    		}
 	    		$contractmpforloop->id = $parameters['obj']->rowid ? $parameters['obj']->rowid : $parameters['obj']->id;
 	    		$contractmpforloop->socid = $parameters['obj']->socid;
-	    		print '<td class="center">';
 
-	    		if (! preg_match('/\.on\./', $parameters['obj']->ref_customer))
-	    		{
-	    			if ($parameters['obj']->options_deployment_status != 'undeployed')
-	    			{
+	    		print '<td class="center">';
+	    		if (!empty($parameters['obj']->options_deployment_status) && $parameters['obj']->options_deployment_status != 'undeployed') {
+	    			if (! preg_match('/\.on\./', $parameters['obj']->ref_customer)) {
 		    			dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
+
 		    			$ret = '<div class="bold">';
-		    			$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);
+		    			$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);	// This call fetchObjectLinked
 		    			if ($ispaid) $ret .= '<span class="badge badge-status4" style="font-size: 1em;">'.$langs->trans("PayedMode").'</span>';
 		    			else $ret .= '<span class="badge" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
 		    			$ret .= '</div>';
@@ -1047,23 +1059,17 @@ class ActionsSellyoursaas
 		    			print $ret;
 	    			}
 	    		}
-
 	    		print '</td>';
     		}
-    		if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED))    // Field "Payment mode recorded" not hidden
-    		{
-    			global $companytmpforloop;
-    			if (! is_object($companytmpforloop))
-    			{
-    				$companytmpforloop = new Societe($db);
-    			}
-    			$companytmpforloop->id = $parameters['obj']->socid;
-
-    			$atleastonepaymentmode = sellyoursaasThirdpartyHasPaymentMode($companytmpforloop->id);
-
+    		if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {    // Field "Payment mode recorded" not hidden
     			print '<td class="center">';
-    			dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
-    			if ($atleastonepaymentmode) print $langs->trans("Yes");
+    			if (!empty($parameters['obj']->options_deployment_status)) {
+    				dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
+
+    				$atleastonepaymentmode = sellyoursaasThirdpartyHasPaymentMode($parameters['obj']->socid);
+
+    				if ($atleastonepaymentmode) print $langs->trans("Yes");
+    			}
     			print '</td>';
     		}
     	}
@@ -1097,6 +1103,12 @@ class ActionsSellyoursaas
     {
     	global $conf,$langs;
     	global $hookmanager;
+
+    	if (! empty($conf->global->SELLYOURSAAS_AFTERPDFCREATION_HOOK_DISABLED))
+    	{
+    	    dol_syslog("Trigger afterPDFCreation was called but constant 'SELLYOURSAAS_AFTERPDFCREATION_HOOK_DISABLED' is defined.", LOG_WARNING);
+    	    return 0;
+    	}
 
     	if (! is_object($parameters['object']))
     	{

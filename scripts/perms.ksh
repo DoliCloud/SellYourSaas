@@ -6,6 +6,11 @@ if [ "$(id -u)" != "0" ]; then
 	exit 1
 fi
 
+# possibility to change the directory of instances are stored
+export targetdir=`grep 'targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$targetdir" == "x" ]]; then
+	export targetdir="/home/jail/home"
+fi
 
 echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -31,6 +36,9 @@ do
 	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/$fic
 	chmod -R ug+w /home/admin/wwwroot/dolibarr_documents/$fic
 done
+if [ -d /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf ]; then
+	chown www-data.www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
+fi
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_documents/sellyoursaas
@@ -55,10 +63,10 @@ chown www-data.admin /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 
 echo "Nettoyage fichier logs error"
-for fic in `ls -art /home/jail/home/osu*/dbn*/*_error.log`; do > $fic; done
+for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done
 echo "Nettoyage fichier logs"
-for fic in `ls -art /home/jail/home/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
-for fic in `ls -art /home/jail/home/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
+for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
  
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 

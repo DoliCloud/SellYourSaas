@@ -65,7 +65,7 @@ function getPreviousInstanceInChain($object)
     if (empty($object->array_options['options_cookieregister_previous_instance'])) return null;
 
     $contract = new Contrat($db);
-    $result = $contract->fetch(0, '', $object->array_options['options_cookieregister_previous_instance']);
+    $result = $contract->fetch(0, '', $object->array_options['options_cookieregister_previous_instance']);		// $object->array_options['options_cookieregister_previous_instance'] is ref_customer of previous instance
     if ($result > 0) return $contract;
     else return null;
 }
@@ -80,28 +80,30 @@ function getListOfInstancesInChain($object)
     global $conf, $langs, $user, $db;
 
     $arrayofinstances = array();
-    $arrayofinstances[] = $object;
+    $arrayofinstances[$object->id] = $object;
 
     // Get next contracts
     $nextcontract = getNextInstanceInChain($object);
-    if ($nextcontract) $arrayofinstances[] = $nextcontract;
+    if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
     $i = 0;
     while ($nextcontract && $i < 1000)
     {
         $i++;
+        if (array_key_exists($nextcontract->id, $arrayofinstances)) continue;
         $nextcontract = getNextInstanceInChain($nextcontract);
-        if ($nextcontract) $arrayofinstances[] = $nextcontract;
+        if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
     }
 
     // Get previous contracts
     $previouscontract = getPreviousInstanceInChain($object);
-    if ($previouscontract) $arrayofinstances[] = $previouscontract;
+    if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
     $i = 0;
     while ($previouscontract && $i < 1000)
     {
         $i++;
+        if (array_key_exists($previouscontract->id, $arrayofinstances)) continue;
         $previouscontract = getPreviousInstanceInChain($previouscontract);
-        if ($previouscontract) $arrayofinstances[] = $previouscontract;
+        if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
     }
 
     $arrayofinstances = dol_sort_array($arrayofinstances, 'date_creation', 'asc');
@@ -175,8 +177,23 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	elseif (is_object($object->thirdparty)) $thirdparty = $object->thirdparty;
 	if ($user->admin && is_object($thirdparty) && (! empty($thirdparty->array_options['options_dolicloud'])))
 	{
+	    $urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+	    if (! empty($thirdparty->array_options['options_domain_registration_page'])
+	        && $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+	    {
+	        $constforaltname = $thirdparty->array_options['options_domain_registration_page'];
+	        $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+	        if (! empty($conf->global->$newurlkey))
+	        {
+	            $urlmyaccount = $conf->global->$newurlkey;
+	        }
+	        else
+	        {
+	            $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+	        }
+	    }
 		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
-		$url=$conf->global->SELLYOURSAAS_ACCOUNT_URL.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
+		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
 	}
 	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.$url.'</a>';
 	$links.='Link to customer dashboard : ';
@@ -409,4 +426,26 @@ function dolicloud_prepare_head($object,$prefix='')
 	*/
 
 	return $head;
+}
+
+/**
+ * Check if Windows system
+ *
+ * @return boolean  true or false
+ */
+function is_windows()
+{
+    return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+}
+
+/**
+ * Check if shell command exists and executable
+ *
+ * @param   string  $command    Name of shell command (eg zstd)
+ * @return  boolean             true or false
+ */
+function command_exists($command)
+{
+    $test = is_windows() ? "where" : "which";
+    return is_executable(trim(shell_exec("$test $command")));
 }

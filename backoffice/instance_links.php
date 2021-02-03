@@ -121,6 +121,10 @@ if (empty($reshook))
 	    $tmpcontract->fetch($idtoclose);
 
 	    $server = $tmpcontract->ref_customer;
+	    $hostname_db = $tmpcontract->hostname_db;
+	    if (empty($hostname_db)) $hostname_db = $tmpcontract->array_options['options_hostname_db'];
+	    $port_db = $tmpcontract->port_db;
+	    if (empty($port_db)) $port_db = (! empty($tmpcontract->array_options['options_port_db']) ? $tmpcontract->array_options['options_port_db'] : 3306);
 	    $username_db = $tmpcontract->username_db;
 	    if (empty($username_db)) $username_db = $tmpcontract->array_options['options_username_db'];
 	    $password_db = $object->password_db;
@@ -128,12 +132,36 @@ if (empty($reshook))
 	    $database_db = $object->database_db;
 	    if (empty($database_db)) $database_db = $tmpcontract->array_options['options_database_db'];
 
-	    $newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, 3306);
+	    $server = (! empty($hostname_db) ? $hostname_db : $server);
+
+	    $newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
 	    if ($newdb)
 	    {
+	        $urlmyaccount = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
+
+	        $tmpthirdparty = new Societe($db);
+	        $ret = $tmpthirdparty->fetch($tmpcontract->fk_soc);
+	        if ($ret > 0)
+	        {
+	            if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
+	                && $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
+	            {
+	                $constforaltname = $tmpthirdparty->array_options['options_domain_registration_page'];
+	                $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+	                if (! empty($conf->global->$newurlkey))
+	                {
+	                    $urlmyaccount = $conf->global->$newurlkey;
+	                }
+	                else
+	                {
+	                    $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+	                }
+	            }
+	        }
+
 	        include_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-	        $stringtosave = '<script type="text/javascript" src="'.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/public/localdata.js"></script>';
+	        $stringtosave = '<script type="text/javascript" src="'.$urlmyaccount.'/public/localdata.js"></script>';
 	        if ($action == 'removespamtracker') $stringtosave = '';
 	        dolibarr_set_const($newdb, 'MAIN_HOME', $stringtosave);
     	    //$tmpcontract->array_options['spammer'] = 1;
@@ -242,7 +270,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	$object->password_web = $password_web;
 	$object->hostname_web = $hostname_os;
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db?$port_db:3306);
+	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, ($port_db?$port_db:3306));
 
 	$stringofversion = '';
 	$stringoflistofmodules = '';
@@ -330,7 +358,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 	if (is_object($object->db2))
 	{
 		$savdb=$object->db;
-		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = stratus5 database
+		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
 	}
 
 
@@ -450,7 +478,7 @@ if ($object->nbofusers == 0)    // If value not already loaded
 
             // If this is a line for a metric
             if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
-                && $producttmp->array_options['options_resource_label'] == 'User')
+                && ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref)))
             {
                 $generatedunixlogin=$contract->array_options['options_username_os'];
                 $generatedunixpassword=$contract->array_options['options_password_os'];
@@ -522,7 +550,7 @@ if ($object->nbofusers == 0)    // If value not already loaded
                             $objsql = $dbinstance->fetch_object($resql);
                             if ($objsql)
                             {
-                                $object->nbofusers = $objsql->nb;
+                                $object->nbofusers += $objsql->nb;
                             }
                             else
                             {
@@ -617,21 +645,21 @@ print '<br>';
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 
-if (! empty($object->array_options['options_cookieregister_previous_instance']))
-{
+//if (! empty($object->array_options['options_cookieregister_previous_instance']))
+//{
     // Get all instances in chain
     $arraylistofinstances = getListOfInstancesInChain($object);
 
     print '<br>';
-    print_barre_liste($langs->trans("ChainOfRegistrations"));
+    print_barre_liste($langs->trans("ChainOfRegistrations"),'','','','','','','',0);
 
     print '<div class="div-table-responsive-no-min">';
     print '<table class="noborder" width="100%">';
 
     print '<tr>';
-    print '<td>'.$langs->trans("#").'</td>';
     print '<td>'.$langs->trans("Instance").'</td>';
     print '<td>'.$langs->trans("RefCustomer").'</td>';
+    print '<td>'.$langs->trans("RegistrationCounter").'</td>';
     print '<td>'.$langs->trans("IP").'</td>';
     print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
     print '<td>'.$langs->trans("Date").'</td>';
@@ -647,9 +675,9 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
 
         // Nb of users
         print '<tr>';
-        print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
         print '<td>'.$instance->getNomUrl(1).'</td>';
         print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
+        print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
         print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
         print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
         print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
@@ -658,10 +686,12 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
         if ($user->rights->sellyoursaas->write)
         {
             print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
-            print ' &nbsp; ';
-            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
-            print ' &nbsp; ';
-            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+            if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
+	            print ' &nbsp; ';
+	            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
+	            print ' &nbsp; ';
+	            print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+            }
         }
         print '</td>';
         print '</tr>';
@@ -682,7 +712,7 @@ if (! empty($object->array_options['options_cookieregister_previous_instance']))
 
     print '</table>';
     print '</div>';
-}
+//}
 
 
 llxFooter();

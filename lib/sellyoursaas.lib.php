@@ -104,18 +104,22 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
  * Return if instance is a paid instance or not
  * Check if there is an invoice or template invoice (it was a paying customer) or just a template invoice (it is a current paying customer)
  *
- * @param 	Contrat $contract		Object contract
- * @param	int		$mode			0=Test invoice or template invoice of contract, 1=Test only templates invoices
- * @return	int						>0 if this is a paid contract
+ * @param 	Contrat $contract			Object contract
+ * @param	int		$mode				0=Test invoice or template invoice of contract, 1=Test only templates invoices
+ * @param	int		$loadalsoobjects	Load also array this->linkedObjects (Use 0 to increase performances)
+ * @return	int							>0 if this is a paid contract
  */
-function sellyoursaasIsPaidInstance($contract, $mode=0)
+function sellyoursaasIsPaidInstance($contract, $mode=0, $loadalsoobjects=0)
 {
-	$contract->fetchObjectLinked();
+	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', $loadalsoobjects);
+
+	/*var_dump($contract->linkedObjectsIds);
+	var_dump($contract->linkedObjects);*/
 
 	$foundtemplate=0;
-	if (is_array($contract->linkedObjects['facturerec']))
+	if (is_array($contract->linkedObjectsIds['facturerec']))
 	{
-		foreach($contract->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice)
+		foreach($contract->linkedObjectsIds['facturerec'] as $idelementelement => $templateinvoiceid)
 		{
 			$foundtemplate++;
 			break;
@@ -127,9 +131,9 @@ function sellyoursaasIsPaidInstance($contract, $mode=0)
 	if ($mode == 0)
 	{
 		$foundinvoice=0;
-		if (is_array($contract->linkedObjects['facture']))
+		if (is_array($contract->linkedObjectsIds['facture']))
 		{
-			foreach($contract->linkedObjects['facture'] as $idinvoice => $invoice)
+			foreach($contract->linkedObjectsIds['facture'] as $idelementelement => $invoiceid)
 			{
 				$foundinvoice++;
 				break;
@@ -272,8 +276,14 @@ function sellyoursaasGetExpirationDate($contract)
 			}
 			if ($prodforline->array_options['options_app_or_option'] == 'system')
 			{
-				if (preg_match('/user/i', $prodforline->label)) $nbofusers = $line->qty;
-				if (preg_match('/\sgb\s/i', $prodforline->label)) $nbofgbs = $line->qty;
+			    if ($prodforline->array_options['options_resource_label'] == 'User'
+			    || preg_match('/user/i', $prodforline->ref)) {
+			        $nbofusers += $line->qty;
+			    }
+			    if ($prodforline->array_options['options_resource_label'] == 'Gb'
+			    || preg_match('/\sgb\s/i', $prodforline->ref)) {
+			        $nbofgbs = $line->qty;
+			    }
 			}
 		}
 	}
@@ -325,6 +335,8 @@ function getRootUrlForAccount($object)
     // If $object is a product, we take package
     if (get_class($newobject) == 'Product')
     {
+        dol_include_once('/sellyoursaas/class/packages.class.php');
+
         $newobject->fetch_optionals();
 
         $tmppackage = new Packages($db);

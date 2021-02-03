@@ -30,7 +30,8 @@ if ($action == 'addauthorizedkey')
 
 	$server=$hostname_os;
 
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		if (! @ssh2_auth_password($connection, $username_web, $password_web))
@@ -44,7 +45,7 @@ if ($action == 'addauthorizedkey')
 
 			// Update ssl certificate
 			// Dir .ssh must have rwx------ permissions
-			// File authorized_keys must have rw------- permissions
+			// File authorized_keys_support must have rw------- permissions
 			$dircreated=0;
 			$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh');
 			if ($result) {
@@ -55,11 +56,11 @@ if ($action == 'addauthorizedkey')
 			}	// Creation fails or already exists
 
 			// Check if authorized_key exists
-			//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys';
-			$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys';  // With PHP 5.6.27+
-			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys');
+			//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';
+			$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
+			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support');
 
-			// Create authorized_keys file
+			// Create authorized_keys_support file
 			if (empty($fstat['atime']))		// Failed to connect or file does not exists
 			{
 				$stream = fopen($filecert, 'w');
@@ -73,7 +74,9 @@ if ($action == 'addauthorizedkey')
 					$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 					fwrite($stream, $publickeystodeploy);
 					fclose($stream);
-					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys');
+					// File authorized_keys_support must have rw------- permissions
+					ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support', 0600);
+					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support');
 					setEventMessage($langs->transnoentitiesnoconv("FileCreated"),'mesgs');
 				}
 			}
@@ -112,7 +115,8 @@ if ($action == 'addinstalllock')
 
 	$server=$hostname_os;
 
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $instance." ".$username_web." ".$password_web."<br>\n";
@@ -172,7 +176,8 @@ if ($action == 'delauthorizedkey')
 	$hostname_os = $object->array_options['options_hostname_os'];
 
 	$server=$hostname_os;
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $instance." ".$username_web." ".$password_web."<br>\n";
@@ -184,8 +189,8 @@ if ($action == 'delauthorizedkey')
 		{
 			$sftp = ssh2_sftp($connection);
 
-			// Check if install.lock exists
-			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys';
+			// Check if authorized_keys_support exists
+			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"),'mesgs');
@@ -222,8 +227,8 @@ if ($action == 'delinstalllock')
 	$hostname_os = $object->array_options['options_hostname_os'];
 
 	$server=$hostname_os;
-
-	$connection = ssh2_connect($server, 22);
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
 	if ($connection)
 	{
 		//print $object->instance." ".$username_web." ".$password_web."<br>\n";

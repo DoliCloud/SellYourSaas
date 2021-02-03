@@ -12,9 +12,11 @@ if [ "x$1" == "x" ]; then
    exit 1
 fi
 
+export currentpath=$(dirname "$0")
+
 echo "Update git dirs found into $1 and generate the tgz image."
 
-for dir in `ls -d $1/* | grep -v tgz`
+for dir in `ls -d $1/* | grep -v "tgz\|zstd"`
 do
 	# If a subdir is given, discard if not subdir
 	if [ "x$2" != "x" ]; then
@@ -33,6 +35,7 @@ do
 	    	git pull
 	    	if [ $? -ne 0 ]; then
 	    		# If git pull fail, we force a git reset before and try again.
+	    		echo Execut a git reset --hard HEAD
 	        	git reset --hard HEAD
 	        	# Do not use git pull --depth=1 here, this will make merge errors.
 	        	git pull
@@ -60,8 +63,13 @@ do
 	    fi
 	
 		# Create a deployment tar file
-		echo "Compress the repository into an archive $dir.tar.gz"
-		tar cz --exclude-vcs -f $dir/../$gitdir.tgz .
+		#if [[ -x /usr/bin/zstd ]]; then
+		#	echo "Compress the repository into an archive $gitdir.tar.zst"
+		#	tar c --zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
+		#else
+			echo "Compress the repository into an archive $gitdir.tgz"
+			tar cz --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
+		#fi
 	
 	    cd -
 	fi
