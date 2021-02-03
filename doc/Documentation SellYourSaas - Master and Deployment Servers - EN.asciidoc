@@ -673,17 +673,63 @@ Host github.com
 
 === Installation of packages
 
-* Installation of the following Ubuntu packages
+There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one
 
-[source, bash]
+* Installation of the 18.04- Ubuntu packages
+
+[source,bash]
 ---------------
 sudo apt update
 sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php- rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit 
+sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install soffice libreoffice-common libreoffice-writer
+---------------
+
+* Installation of the 20.04+ Ubuntu packages
+
+[source,bash]
+---------------
+sudo apt update
+sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
+sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php7.4-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install bind9
+sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install soffice libreoffice-common libreoffice-writer
+---------------
+
+==== Now, we need to install *php-mcrypt*
+
+[source,bash]
+---------------
+sudo apt install -y build-essential
+sudo pecl install mcrypt
+---------------
+
+When you see :
+
+[source,bash]
+---------------
+libmcrypt prefix? [autodetect] :
+---------------
+
+Press *Enter*
+
+Write the following line in /etc/php/7.4/cli/php.ini and /etc/php/7.4/apache2/php.ini
+
+[source,bash]
+---------------
+extension=mcrypt.so
+---------------
+
+Then *reboot* the *Apache* server
+
+[source,bash]
+---------------
+sudo systemctl restart apache2
 ---------------
 
 
