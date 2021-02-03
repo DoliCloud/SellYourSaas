@@ -708,7 +708,7 @@ Quand vous voyez :
 libmcrypt prefix? [autodetect] :
 ---------------
 
-Appuyez sur *entrer*
+Appuyez sur *Entrer*
 
 Écrire la ligne suivante dans /etc/php/7.4/cli/php.ini et /etc/php/7.4/apache2/php.ini
 
