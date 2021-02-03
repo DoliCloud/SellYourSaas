@@ -721,14 +721,17 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* Sur Ubuntu 18.04 et plus, vérifiez que le paramètre *PrivateTmp* est à *false* dans le fichier *apache2.service* de configuration de lancement Apache. Ceci permettra d'avoir un répertoire */tmp* non unique et isolé à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam.
+* Sur Ubuntu 18.04 et +, vérifiez que le paramètre *PrivateTmp* est à *false* dans le fichier *apache2.service* de configuration de lancement Apache. Ceci permettra d'avoir un répertoire */tmp* non unique et isolé à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam. Cela permet aussi aux applications web de lancer un antivirus dans un processus séparé sur les fichiers téléversés qui sont stocké dans ce répertoire temporaire.
 
 [source,bash]
 ---------------
 vi /etc/systemd/system/multi-user.target.wants/apache2.service
 systemctl daemon-reload
-systemctl reload apache2
+/usr/sbin/apachectl stop
+/usr/sbin/apachectl start
 ---------------
+
+Note: Le reload d'apache ne semble pas suffisant.
 
 * Ajout de la directive pour prendre en compte le répertoire pour les *virtual hosts* des instances utilisateurs dans la config */etc/apache2/apache2.conf*
 
