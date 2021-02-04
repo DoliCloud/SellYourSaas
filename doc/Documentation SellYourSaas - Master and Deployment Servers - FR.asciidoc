@@ -686,7 +686,7 @@ sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 sudo apt update
 sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php7.4-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
