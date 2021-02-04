@@ -12,6 +12,9 @@ if [ "x$1" == "x" ]; then
    exit 1
 fi
 
+# Function to convert version string to integer for compare version
+function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+
 export currentpath=$(dirname "$0")
 
 echo "Update git dirs found into $1 and generate the tgz image."
@@ -63,13 +66,13 @@ do
 	    fi
 	
 		# Create a deployment tar file
-		if [[ $(lsb_release -rs) == "20.04" && -x /usr/bin/zstd ]]; then
+		if [[ $(version $(lsb_release -rs)) -ge $(version "20.04") && -x /usr/bin/zstd ]]; then
 			echo "Compress the repository into an archive $gitdir.tar.zst"
 			tar c --zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
 		else
 			echo "Compress the repository into an archive $gitdir.tgz"
 			tar cz --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
-		#fi
+		fi
 	
 	    cd -
 	fi
