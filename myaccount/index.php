@@ -2265,7 +2265,7 @@ elseif ($action == 'undeploy' || $action == 'undeployconfirmed')
 			{
 				$object = $contract;
 
-				dol_syslog("--- Start undeploy of '.$contract->ref.' after a confirmation from email for ".$contract->ref_customer, LOG_DEBUG, 0);
+				dol_syslog("--- Start undeploy of ".$contract->ref." after a confirmation from email for ".$contract->ref_customer, LOG_DEBUG, 0);
 
 				// SAME CODE THAN INTO ACTION_SELLYOURSAAS.CLASS.PHP
 

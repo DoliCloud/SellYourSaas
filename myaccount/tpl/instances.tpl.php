@@ -419,12 +419,9 @@ else
 
                                         // Label
                                         $labelprod = $tmpproduct->label;
-                                        if (preg_match('/instance/i', $tmpproduct->ref) || preg_match('/instance/i', $tmpproduct->label))
-                                        {
+                                        if (preg_match('/instance/i', $tmpproduct->ref) || preg_match('/instance/i', $tmpproduct->label)) {
                                             $labelprod = $langs->trans("Application");
-                                        }
-                                        elseif ($tmpproduct->array_options['options_resource_label'] == 'User')
-                                        {
+                                        } elseif ($tmpproduct->array_options['options_resource_label'] == 'User' && preg_match('/User/i', $tmpproduct->label)) {
                                             $labelprod = $langs->trans("Users");
                                         }
 
@@ -462,8 +459,11 @@ else
                                         {
                                             print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
                                             //if ($line->qty > 1 && $labelprodsing) print ' / '.$labelprodsing;
-                                            if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
-                                            elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
+                                            if ($tmpproduct->array_options['options_resource_label']) {
+                                            	print ' / '.$langs->trans($tmpproduct->array_options['options_resource_label']);	// Label of units
+                                            } elseif (preg_match('/users/i', $tmpproduct->ref)) {
+                                            	print ' / '.$langs->trans("User");	// backward compatibility
+                                            }
                                             // TODO
                                             print $tmpduration;
                                             print '</span>';

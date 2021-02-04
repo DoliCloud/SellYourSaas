@@ -85,10 +85,11 @@ You need to acquire this domain name from a registrar.
 
 The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be * Deployment servers * (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
 
-=== Choice of machine and OS
+=== Choice of machine and OS and create it
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04*) for the *Master server*.
-* Obtain one or n servers with SSH access that can pass root (We will use Ubuntu LTS minimum 16.04 or 18.04) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Master server*.
+
+* Obtain one or n servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
 _Example with Amazon Standard Medium: _
 
@@ -99,21 +100,23 @@ _Example with OVH Public Cloud: _
 For the master server: VPS or B2-15 or more
 For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
 
-
+* Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
 
 
 [[adding_disk]]
 === Adding the harddisk of data (home of user instances and home of backups)
 
-We will add, on the *Deployment server*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
+We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
 
 On *Deployment server* :
 
 With OVH Public Cloud:
 
-* Create the data disk. For the deployment server, take 250MB per instance.
-* Associate the disk with the server (each additional disk is added in / dev / vdb, / dev / vdc, / dev / vdd, ...).
+* Create the data disk. On a deployment server, you can imagine to reserve 250MB for each customer instance so choose a size in consideration.
+
+* Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
 Note, the disk becomes visible with *fdisk -l* and *lsblk*
+
 * If it is a disk never partitioned, add the partition on the disk (Linux type) and format it by doing:
 
 [source, bash]
@@ -130,7 +133,12 @@ mkfs.ext4 /dev/vdxY
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
 
-* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command *blkid*
+* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
+
+[source, bash]
+---------------
+blkid
+---------------
 
 * Declare the assembly for an automatic assembly at each reboot by adding a line in */etc/fstab*
 
@@ -138,7 +146,7 @@ Whether the disk has just been formatted or whether it is an added disk already 
 ---------------
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 or
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (does not block the server from starting)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (does not block the server from starting)
 ---------------
 
 * Mount disk
@@ -146,12 +154,16 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (
 [source, bash]
 ---------------
 mkdir /mnt/diskhome
-mkdir /mnt/diskbackup
 mount /dev/vdxY /mnt/diskhome
+
+And if a disk was created for backup:
+mkdir /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
 ---------------
+
+Note: A reboot may be required if disk or mount is not visible.
 
 * Optimize the filesystem by removing the update of the "atime" read access
 
@@ -210,12 +222,8 @@ Create the user account *admin*. It will be used to install and administer the s
 
 [source, bash]
 ---------------
-groupadd admin
-useradd -m -g admin admin
-usermod -a -G adm admin
-mkdir /home/admin/logs
-chown root.adm /home/admin/logs
-chmod 770 /home/admin/logs
+groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -231,35 +239,45 @@ adduser myunixlogin
 
 ==== ssh setup
 
-Fix permission on */etc/ssh/sshd_config so only root has read and write access:
+Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 
 [source,conf]
 ---------------
 chmod go-rw /etc/ssh/sshd_config
 ---------------
 
-Create a file */etc/ssh/sshd_config.d/sellyoursaas* to change login permissions with the following content:
+Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
 
 [source, conf]
 ---------------
-#Privilege Separation is turned on for security
+# Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
-PermitRootLogin no
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+# MaxSessions 10
+MaxSessions 25
+
+# Disallow login to root
+PermitRootLogin no
+# Disallow empty passwords
+PermitEmptyPasswords no
+# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
+ChallengeResponseAuthentication no
+ 
 # Define list of allowed method to authenticate
-ChallengeResponseAuthentication yes
 PasswordAuthentication yes
 PubkeyAuthentication yes
 
-PermitEmptyPasswords no
-
-AllowUsers myunixlogin admin osu *
 DenyUsers guest
+
+AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
+
+AllowUsers admin osu*
+AllowUsers myunixlogin
 ---------------
 
-Please note: replace myunixlogin with the correct value before taking changes into account with:
+Please note: replace *myunixlogin* with the correct value before taking changes into account with:
 
 [source, conf]
 ---------------
@@ -274,13 +292,21 @@ Add the following line in the */etc/sudoers* file to reposition the HOME accordi
 Defaults set_home
 ---------------
 
-Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root* and the permissions *r-r-----* and the content
+Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root*.*root* and the permissions *r-r-----* and the content
 
 [source, conf]
 ---------------
-myunixlogin ALL = (ALL) NOPASSWD: ALL
+myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
+
+Test that you can connect using *myunixlogin* and make a sudo with
+
+[source,bash]
+---------------
+ssh -v myunixlogin@x.y.z.a
+sudo -s
+---------------
 
 
 Add your public key to your unix account.
@@ -291,9 +317,15 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Define or redefine the password for *root*, *admin*, and *myunixlogin* with a secure password.
+Define or redefine the password for *root*, *admin* with a secure password.
 
-Launch ssh-keygen on each of these 3 accounts
+[source,bash]
+---------------
+passwd root
+passwd admin
+---------------
+
+Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
 
 
 ==== Default shell
@@ -326,12 +358,12 @@ Edit the contents of */etc/skel* on the deployment servers in order to fill in t
 [source, bash]
 ---------------
 sudo mkdir /etc/skel/.ssh
-sudo touch /etc/skel/.ssh/authorized_keys
+sudo touch /etc/skel/.ssh/authorized_keys_support
 sudo chmod -R go-rwx /etc/skel/.ssh
-sudo vi /etc/skel/.ssh/authorized_keys
+sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
-Thus any new linux account created (those of customer instances) will be accessible by the administrator (s).
+Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
     
 
@@ -341,7 +373,7 @@ Add at the end of */etc/bash.bashrc*:
 
 [source, bash]
 ---------------
-alias psld = 'ps -fax -eo user: 12, pid, ppid, pcpu, pmem, vsz: 12, size: 12, tty, start_time: 6, utime, time, cmd'
+alias psld='ps -fax -eo user: 12, pid, ppid, pcpu, pmem, vsz: 12, size: 12, tty, start_time: 6, utime, time, cmd'
 ---------------
 
 
@@ -362,8 +394,8 @@ Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc
 
 [source, conf]
 ---------------
-LimitUIDRange 1,500,000
-LimitGIDRange 1,500,000
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 
@@ -377,7 +409,7 @@ Go to the management interface of OVH servers, to modify their short name. This 
 
 [source, bash]
 ---------------
-Server name
+nameofserver
 ---------------
 
 
@@ -385,38 +417,37 @@ Connect and modify the file */etc/hosts* with the entry of the new server
 
 [source, bash]
 ---------------
-ipduserveurprincipale nomdserveur.mysaasdomainname.com
+main.ip.of.server nameofserver.mysaasdomainname.com
 ---------------
 
 
-=== Added support for IP v6 (optional)
+=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
 
-==== With ifupdown (apt install ifupdown)
+==== With ifupdown (Ubuntu 16.04)
 
 - To add a v6 IP dynamically for testing purposes at first:
 
 [source, bash]
 ---------------
-ip addr add 2002: 41d0: 1234: 1000 :: 1234/128 dev eth0
-ip -6 route add 2002: 41d0: 1234: 1000 :: 1 dev eth0
-ip -6 route add default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
+ip addr add 2002:41d0:1234:1000::1234/128 dev eth0
+ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
 - For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
-Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
+Example for an IPv6 2002:41d0:1234:1000::1234 with as gateway 2002:41d0:1234:1000::1
 
 [source, conf]
 ---------------
-
 # To declare a persistent v6 IP (the mask is 128 at OVH in ipv6)
 iface eth0 inet6 static
-        address 2002: 41d0: 1234: 1000 :: 1234
+        address 2002:41d0:1234:1000::1234
         netmask 128
-        post-up / sbin / ip -6 route add 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        post-up / sbin / ip -6 route add default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        pre-down / sbin / ip -6 route del default via 2002: 41d0: 1234: 1000 :: 1 dev eth0
-        pre-down / sbin / ip -6 route del 2002: 41d0: 1234: 1000 :: 1 dev eth0
+        post-up /sbin/ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+        post-up /sbin/ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
 Rem: *eth0* can be something else, for example *ens3*.
@@ -433,7 +464,7 @@ To take this into account, try this, otherwise, reboot.
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
  
-Example for an IPv6 2002: 41d0: 1234: 1000 :: 1234 with as gateway 2002: 41d0: 1234: 1000 :: 1
+Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
 
 [source, conf]
 ---------------
@@ -444,8 +475,8 @@ network:
 			match:
 				name: eth0
 			addresses:
-				- "2002:41d0:1234:1000::1234/64"
-			gateway6: "2002:41d0:1234:1000::1"
+				- "1234:41d0:1234:1000::1234/64"
+			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
  
@@ -532,12 +563,10 @@ Create directories required to store data and backups:
 
 [source, bash]
 ---------------
-mkdir /home/jail;
+mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail/home
 
-mkdir /mnt/diskhome/home
-ln -fs /mnt/diskhome/home /home/jail/home
-
-mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
+mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup; ln -fs /mnt/diskhome/backup /mnt/diskbackup/
+mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
@@ -577,6 +606,9 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
+Note that you should have n lines per deployment server in this file.
+
+
 [source, bash]
 ---------------
 exportfs -v -a (to validate new entries to add)
@@ -587,6 +619,7 @@ systemctl restart nfs-kernel-server
 systemctl status nfs-kernel-server
 exportfs
 ---------------
+
 
 ==== On the Deployment Servers
 
@@ -609,26 +642,17 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 
-=== Creation of the ssh key of the admin account
-
-==== On the master and deployment server
-
-Generate a public and private ssh key for the *admin* account.
-
-[source, bash]
----------------
-ssh-keygen
----------------
+=== Deploy the public key of master on admin account
 
 ==== On deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh *admin* account to /home/admin/.ssh/id_rsa_sellyoursaas ... (This key is the one common for maintenance to access user accounts). Put the right rights.
+On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access user accounts). Put the right permissios.
 
 [source, bash]
 ---------------
-chmod u + rw /home/admin/.ssh/id_rsa_sellyoursaas*
+chmod u +rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod go-rw /home/admin/.ssh/id_rsa_sellyoursaas*
-chmod a + r /home/admin/.ssh/id_rsa_sellyoursaas.pub
+chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
 
 
@@ -659,6 +683,7 @@ sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit 
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
 
@@ -703,13 +728,17 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* On Ubuntu 18.04 and higher, check that the *PrivateTmp* parameter is *false* in the *apache2.service* Apache launch configuration. This will make it possible to have a directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
+* On Ubuntu 18.04 and +, check that the *PrivateTmp* parameter is *false* in the *apache2.service* Apache launch configuration. This will make it possible to have a directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam. It also allows to send antivirus into a separate process on uploaded files that are stored into this temporary directory.
 
 [source, bash]
 ---------------
 vi /etc/systemd/system/multi-user.target.wants/apache2.service
-systemctl reload apache2
+systemctl daemon-reload
+/usr/sbin/apachectl stop
+/usr/sbin/apachectl start
 ---------------
+
+Note: Reload of apache seems not enough.
 
 * Addition of the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
 
@@ -796,7 +825,7 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 You can create another virtual host for the HTTPS on port 443
 
 
-* Create a virtual host for the client area * myaccount.mysaasdomainname.com *
+* Create a virtual host for the client area *myaccount.mysaasdomainname.com*
 
 [source, bash]
 ---------------
@@ -855,7 +884,7 @@ You can create another virtual host for the HTTPS on port 443
 
 On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
 
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restatr after a crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
 
 [source, bash]
 ---------------
@@ -864,7 +893,7 @@ TimeoutStartSec = 3600s
 TimeoutStopSec = 3600s
 ---------------
 
-Rem: Instead of putting *3600s*, it is possible to put *infinity*
+Rem: Instead of putting *3600s*, it is possible to put *infinity* (but 3600 is preferred)
 
 Then reload the new configuration:
 
@@ -4027,7 +4056,7 @@ Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inut
 
 Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
-- Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
+- Mise à jour du fichier ssh */etc/skel/authorized_keys_support* avec les clés publiques passées en paramètres.
 
 
 === Some business rules of Sell-Your-Saas
@@ -4200,4 +4229,8 @@ The value for *max_execution_time* is too low or there is a table that has an ab
     SET GLOBAL MAX_EXECUTION_TIME=120000;
 - See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
 
+
+==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
+
+- Check the temp directory is writable by the web server user.
 	

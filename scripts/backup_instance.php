@@ -42,7 +42,6 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 
 // Global variables
 $version='1.0';
-$error=0;
 $RSYNCDELETE=0;
 
 $instance=isset($argv[1])?$argv[1]:'';
@@ -135,6 +134,9 @@ if (! $res) {
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
+$return_varother = 0;
+$return_var = 0;
+$return_varmysql = 0;
 
 
 
@@ -286,7 +288,8 @@ if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
 			if (! $res)
 			{
 				print 'Failed to create dir '.$dirtocreate."\n";
-				exit(-6);
+				$mode = 'disabled';
+				$return_varother = 1;
 			}
 		}
 	}
@@ -362,7 +365,6 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[] = $dirroot.'/'.$login;
 	$fullcommand=$command." ".join(" ",$param);
 	$output=array();
-	$return_var=0;
 	$datebeforersync = strftime("%Y%m%d-%H%M%S");
 	print $datebeforersync.' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
@@ -435,7 +437,6 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
 	}
 	$output=array();
-	$return_varmysql=0;
 	$return_outputmysql=0;
 	$datebeforemysqldump = strftime("%Y%m%d-%H%M%S");
 	print $datebeforemysqldump.' '.$fullcommand."\n";
@@ -487,7 +488,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 $now=dol_now();
 
 // Update database
-if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
+if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 {
 	print "RESULT into backup process of rsync: ".$return_var."\n";
 	print "RESULT into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
@@ -530,10 +531,11 @@ if (empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
 }
 else
 {
+	if (! empty($return_varother)) print "ERROR into backup process init: ".$return_varother."\n";
 	if (! empty($return_var))      print "ERROR into backup process of rsync: ".$return_var."\n";
 	if (! empty($return_varmysql) || ! empty($return_outputmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
 
-	if ($mode == 'confirm')
+	if ($mode == 'confirm' || $mode == 'disabled')
 	{
 		// Update database
 		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try

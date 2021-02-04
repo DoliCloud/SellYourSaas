@@ -85,10 +85,11 @@ Il vous faut acquerrir ce nom de domaine auprès d'un registrar.
 
 La première étape est de mettre à disposition un (ou plusieurs) serveur. Si on part sur plusieurs serveurs, l'un sera serveur *Master* (pilotage et facturation) et les autres seront *Serveurs de déploiement* (les instances des clients). Le serveur *Master* pouvant aussi être *Serveur de déploiement*, il est possible de démarrer avec un seul serveur.
 
-=== Choix de la machine et de l'OS
+=== Choix de la machine et de l'OS et création
 
-* Obtenir un serveur avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal *16.04* ou *18.04*) pour le *Serveur Master*.
-* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04) pour le ou les *Serveurs de Déploiement*. Remarque: Ce point peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master (non recommandé en production).
+* Obtenir un serveur avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal *16.04* ou *18.04* or *20.04*) pour le *Serveur Master*.
+
+* Obtenir un ou n serveurs avec un accès SSH pouvant passer root (On utilisera Ubuntu LTS minimal 16.04 ou 18.04 or 20.04) pour le ou les *Serveurs de Déploiement*. Remarque: Ce point peut être ignorée si vous décidez que le serveur de Déploiement sera le même serveur que le serveur Master (non recommandé en production).
 
 _Exemple avec Amazon Standard Medium:_
 
@@ -99,7 +100,7 @@ _Exemple avec OVH Public Cloud:_
 Pour le serveur master: VPS ou B2-15 ou +
 Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit server 2 core minimum - Mémoire 8 Go minimum - Coût en 2020: 22 euros / mois). Doublez les caractéristiques si vous visez 1 000 instances client par serveur.
 
-
+* Ajouter les entrées DNS entry du ou des serveurs (Entrée A pour IP4 et AAAA pour IP6)
 
 
 [[ajout_de_disque]]
@@ -138,7 +139,7 @@ Que le disque viennent d'etre formaté ou qu'il s'aggisse d'un disque ajouté d�
 ---------------
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 ou
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (ne bloque pas le démarrage du serveur)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (ne bloque pas le démarrage du serveur)
 ---------------
 
 * Monter les disques
@@ -146,8 +147,10 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 [noatime,]nofail 0 0 (
 [source,bash]
 ---------------
 mkdir /mnt/diskhome
-mkdir /mnt/diskbackup
 mount /dev/vdxY /mnt/diskhome
+
+And if a disk was created for backup:
+mkdir /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -238,25 +241,35 @@ Corriger les permissions du fichier */etc/ssh/sshd_config* pour etre en lecture/
 chmod go-rw /etc/ssh/sshd_config
 ---------------
 
-Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas* pour changer les autorisations de login avec le contenu suivant:
+Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas.conf* pour changer les autorisations de login avec le contenu suivant:
 
 [source,conf]
 ---------------
-#Privilege Separation is turned on for security
+# Privilege Separation is turned on for security
 UsePrivilegeSeparation yes
-PermitRootLogin no
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+# MaxSessions 10
+MaxSessions 25
+
+# Disallow login to root
+PermitRootLogin no
+# Disallow empty passwords
+PermitEmptyPasswords no
+# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
+ChallengeResponseAuthentication no
+ 
 # Define list of allowed method to authenticate
-ChallengeResponseAuthentication yes
 PasswordAuthentication yes
 PubkeyAuthentication yes
 
-PermitEmptyPasswords no
-
-AllowUsers myunixlogin admin osu*
 DenyUsers guest
+
+AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
+
+AllowUsers admin osu*
+AllowUsers myunixlogin
 ---------------
 
 Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre en compte les modifications par:
@@ -265,7 +278,6 @@ Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre 
 ---------------
 /etc/init.d/ssh reload
 ---------------
-
 
 Ajouter la ligne suivante dans le fichier */etc/sudoers* pour repositionner le HOME selon le user apres un sudo -s:
 
@@ -282,6 +294,14 @@ myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
 
+Tester qu'il est possible de se connecter avec *myunixlogin* par
+
+[source,bash]
+---------------
+ssh -v myunixlogin@x.y.z.a
+sudo -s
+---------------
+
 
 Ajouter votre clé publique à votre compte unix.
 
@@ -291,9 +311,15 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Définir ou redéfinir le mot de passe de *root*, *admin*, et de *myunixlogin* avec un mot de passe sure.
+Définir ou redéfinir le mot de passe de *root*, *admin* avec un mot de passe sure.
 
-Lancer ssh-keygen sur chacun de ces 3 comptes
+[source,bash]
+---------------
+passwd root
+passwd admin
+---------------
+
+Lancer *ssh-keygen* sur les 3 comptes *root*, *admin* et *myunixlogin*
 
 
 ==== Shell par défaut
@@ -319,16 +345,16 @@ rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgr
 
 === Modification de /etc/skel
 
-Editer sur les serveurs de déploiement le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys* avec 
+Editer sur les serveurs de déploiement le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys_support* avec 
 * la clé publique ssh du ou des utilisateurs *myunixlogin*
 * la clé publique ssh de l'utilisateur *admin* du serveur master
 
 [source,bash]
 ---------------
 sudo mkdir /etc/skel/.ssh
-sudo touch /etc/skel/.ssh/authorized_keys
+sudo touch /etc/skel/.ssh/authorized_keys_support
 sudo chmod -R go-rwx /etc/skel/.ssh
-sudo vi /etc/skel/.ssh/authorized_keys
+sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
 Ainsi tout nouveau compte linux créé (ceux des instances des clients) sera accessible par le ou les administrateurs.
@@ -385,13 +411,13 @@ Se connecter et modifier le fichier */etc/hosts* avec l'entrée du nouveau serve
 
 [source,bash]
 ---------------
-ipduserveurprincipale   nomduserveur.mysaasdomainname.com
+ip.principale.du.serveur   nomduserveur.mysaasdomainname.com
 ---------------
 
 
-=== Ajout du support de l'IP v6 (optionnel)
+=== Ajout du support de l'IP v6 (optionnel, si ipv6 désiré et pas encore paramétré)
 
-==== Avec ifupdown (apt install ifupdown)
+==== Avec ifupdown (Ubuntu 16.04)
 
 - Pour ajouter une IP v6 de manière dynamique à des fins de test dans un premier temps: 
 
@@ -408,7 +434,6 @@ Exemple pour une IPv6 2002:41d0:1234:1000::1234 avec comme gateway 2002:41d0:123
 
 [source,conf]
 ---------------
-
 # Pour declarer une IP v6 persistente (le masque est 128 chez OVH en ipv6) 
 iface eth0 inet6 static
         address 2002:41d0:1234:1000::1234
@@ -433,7 +458,7 @@ Pour prendre en compte, essayer ceci, sinon, reboot.
 Ajouter un fichier de conf */etc/netplan/51-ipv6-ovh.yaml*.
 Remarque: OVH fourni un /128 pour l'ipv6 mais netplan veut du /64
  
-Exemple pour une IPv6 2002:41d0:1234:1000::1234 avec comme gateway 2002:41d0:1234:1000::1
+Exemple pour une IPv6 1234:41d0:1234:1000::1234 avec comme gateway 1234:41d0:1234:1000::1
 
 [source,conf]
 ---------------
@@ -444,8 +469,8 @@ network:
 			match:
 				name: eth0
 			addresses:
-				- "2002:41d0:1234:1000::1234/64"
-			gateway6: "2002:41d0:1234:1000::1"
+				- "1234:41d0:1234:1000::1234/64"
+			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
  
@@ -532,12 +557,10 @@ Create directories required to store data and backups:
 
 [source,bash]
 ---------------
-mkdir /home/jail;
+mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail/home
 
-mkdir /mnt/diskhome/home; 
-ln -fs /mnt/diskhome/home /home/jail/home
-
-mkdir /mnt/diskbackup/backup; mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
+mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup; ln -fs /mnt/diskhome/backup /mnt/diskbackup/
+mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
@@ -577,6 +600,8 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
+Notez qu'il y aura dans ce fichier autant de lignes que de serveurs de déploiements.
+
 [source,bash]
 ---------------
 exportfs -v -a			(to validate new entries to add)
@@ -609,20 +634,11 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 
-=== Creation de la clé ssh du compte admin
-
-==== Sur le serveur master et de déploiement
-
-Générer une clé publique et privée ssh pour le compte *admin*.
-
-[source,bash]
----------------
-ssh-keygen
----------------
+=== Déploiement de la clé publique ssh du compte admin
 
 ==== Sur les serveurs de déploiement
 
-Sur les serveurs de déploiement, copier la clé publique et privé du compte ssh *admin* du master en /home/admin/.ssh/id_rsa_sellyoursaas... (Cette clé est celle commune pour la maintenance pour accéder aux comptes utilisateurs). Mettre les bons droits.
+Sur les serveurs de déploiement, copier la clé publique et privé du compte ssh *admin* du master en */home/admin/.ssh/id_rsa_sellyoursaas...* (Ce couple de fichier est celui commun pour la maintenance pour accéder aux comptes utilisateurs). Mettre les bons droits.
 
 [source,bash]
 ---------------
@@ -659,6 +675,7 @@ sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
 
@@ -704,13 +721,17 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* Sur Ubuntu 18.04 et plus, vérifiez que le paramètre *PrivateTmp* est à *false* dans le fichier *apache2.service* de configuration de lancement Apache. Ceci permettra d'avoir un répertoire */tmp* non unique et isolé à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam.
+* Sur Ubuntu 18.04 et +, vérifiez que le paramètre *PrivateTmp* est à *false* dans le fichier *apache2.service* de configuration de lancement Apache. Ceci permettra d'avoir un répertoire */tmp* non unique et isolé à chaque instance rendant possible les opérations de debug et d'analyse sur les problèmes d'envoi demails et de contrôle de Spam. Cela permet aussi aux applications web de lancer un antivirus dans un processus séparé sur les fichiers téléversés qui sont stocké dans ce répertoire temporaire.
 
 [source,bash]
 ---------------
 vi /etc/systemd/system/multi-user.target.wants/apache2.service
-systemctl reload apache2
+systemctl daemon-reload
+/usr/sbin/apachectl stop
+/usr/sbin/apachectl start
 ---------------
+
+Note: Le reload d'apache ne semble pas suffisant.
 
 * Ajout de la directive pour prendre en compte le répertoire pour les *virtual hosts* des instances utilisateurs dans la config */etc/apache2/apache2.conf*
 
@@ -856,7 +877,7 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
 
 Sur Ubuntu 18.04+ et avec MariaDb migré depuis un MySql:
 
-Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long en cas de plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
+Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long suite à un plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
 
 [source,bash]
 ---------------
@@ -865,7 +886,7 @@ TimeoutStartSec=3600s
 TimeoutStopSec=3600s
 ---------------
 
-Rem: Au lieu de mettre *3600s*, il est possible de mettre *infinity*
+Rem: Au lieu de mettre *3600s*, il est possible de mettre *infinity* (mais 3600 est préferrable)
 
 Puis recharger la nouvelle configuration:
 
@@ -4016,7 +4037,7 @@ Les étapes réalisées par l'agent et la remote action "backup" sont:
 Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inutile et inutilisé pour le déploiement d'autres logiciels.
 Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys":
 
-- Mise à jour du fichier ssh authorized_keys avec les clés publiques passées en paramètres.
+- Mise à jour du fichier ssh */etc/skel/authorized_keys_support* avec les clés publiques passées en paramètres.
 
 
 === Quelques règles de fonctionnement métier de SellYourSaas
@@ -4188,4 +4209,9 @@ The value for *max_execution_time* is too low or there is a table that has an ab
     SHOW VARIABLES LIKE 'MAX_EXECUTION_TIME'
     SET GLOBAL MAX_EXECUTION_TIME=120000;
 - See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
+
+
+==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
+
+- Check the temp directory is writable by the web server user.
 
