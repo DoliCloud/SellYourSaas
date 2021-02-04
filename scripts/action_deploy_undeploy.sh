@@ -342,7 +342,7 @@ if [[ "$mode" == "deployall" ]]; then
 					else
 						if [[ ! -d "$chrootdir/$commonjailtemplatename" ]]; then
 							echo "Common jail directory $chrootdir/$commonjailtemplatename not exists, try to create it"
-							if [[ -f "$templatesdir/$commonjailtemplatename.tar.zst" ]]; then
+							if [[ $(lsb_release -rs) == "20.04" && -f "$templatesdir/$commonjailtemplatename.tar.zst" ]]; then
 									echo "tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/"
 									tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/
 							else
@@ -382,7 +382,7 @@ if [[ "$mode" == "deployall" ]]; then
 					# Private users jail
 					if [[ "$sshaccesstype" == "2" ]]; then
 						if [[ ! -d "$chrootdir/$osusername" ]]; then
-							if [[ "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tar.zst" ]]; then
+							if [[ $(lsb_release -rs) == "20.04" && "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tar.zst" ]]; then
 								echo "tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/"
 								tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/
 								echo "mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername"
@@ -688,7 +688,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
-			if [ -f $dirwithsources1.tar.zst ]; then
+			if [ $(lsb_release -rs) == "20.04" && -f $dirwithsources1.tar.zst ]; then
 				echo "tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 				tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
@@ -706,7 +706,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
-			if [ -f $dirwithsources2.tar.zst ]; then
+			if [ $(lsb_release -rs) == "20.04" && -f $dirwithsources2.tar.zst ]; then
 				echo "tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 				tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
@@ -724,7 +724,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
-			if [ -f $dirwithsources3.tar.zst ]; then
+			if [ $(lsb_release -rs) == "20.04" && -f $dirwithsources3.tar.zst ]; then
 				echo "tar --zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 				tar --zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
@@ -790,7 +790,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd ]]; then
+					if [[ $(lsb_release -rs) == "20.04" && -x /usr/bin/zstd ]]; then
 						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 					else
@@ -807,13 +807,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
-						if [[ -x /usr/bin/zstd ]]; then
+						if [[ $(lsb_release -rs) == "20.04" && -x /usr/bin/zstd ]]; then
 							echo "Archive of test instances are disabled. We discard the tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
 						else
 							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 						fi
 					else
-						if [[ -x /usr/bin/zstd ]]; then
+						if [[ $(lsb_release -rs) == "20.04" && -x /usr/bin/zstd ]]; then
 							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						else
