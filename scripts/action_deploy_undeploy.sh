@@ -19,7 +19,7 @@ function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4
 # Function to check if greater or equal Ubuntu 20.04 or Debian 10
 function checklinuxversion {
 	# Check if Ubuntu greater or equal 20.04
-	if [[ "$(lsb_release -is)" == "Ubuntu" && $(version $(lsb_release -rs)) -ge $(version "21.04") ]]; then
+	if [[ "$(lsb_release -is)" == "Ubuntu" && $(version $(lsb_release -rs)) -ge $(version "20.04") ]]; then
 		echo "1"
 	#Check if Debian greater or equal 10
 	elif [[ "$(lsb_release -is)" == "Debian" && $(version $(lsb_release -rs)) -ge $(version "10") ]]; then
