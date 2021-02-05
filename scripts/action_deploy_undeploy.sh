@@ -16,6 +16,19 @@
 # Function to convert version string to integer for compare version
 function version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
 
+# Function to check if greater or equal Ubuntu 20.04 or Debian 10
+function checklinuxversion {
+	# Check if Ubuntu greater or equal 20.04
+	if [[ "$(lsb_release -is)" == "Ubuntu" && $(version $(lsb_release -rs)) -ge $(version "21.04") ]]; then
+		echo "1"
+	#Check if Debian greater or equal 10
+	elif [[ "$(lsb_release -is)" == "Debian" && $(version $(lsb_release -rs)) -ge $(version "10") ]]; then
+		echo "1"
+	else
+		echo "0"
+	fi
+}
+
 export now=`date +%Y%m%d%H%M%S`
 
 echo
@@ -344,7 +357,7 @@ if [[ "$mode" == "deployall" ]]; then
 					else
 						if [[ ! -d "$chrootdir/$commonjailtemplatename" ]]; then
 							echo "Common jail directory $chrootdir/$commonjailtemplatename not exists, try to create it"
-							if [[ $(version $(lsb_release -rs)) -ge $(version "20.04") && -f "$templatesdir/$commonjailtemplatename.tar.zst" ]]; then
+							if [[ "$(checklinuxversion)" == "1" && -f "$templatesdir/$commonjailtemplatename.tar.zst" ]]; then
 									echo "tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/"
 									tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/
 							else
@@ -384,7 +397,7 @@ if [[ "$mode" == "deployall" ]]; then
 					# Private users jail
 					if [[ "$sshaccesstype" == "2" ]]; then
 						if [[ ! -d "$chrootdir/$osusername" ]]; then
-							if [[ $(version $(lsb_release -rs)) -ge $(version "20.04") && "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tar.zst" ]]; then
+							if [[ "$(checklinuxversion)" == "1" && "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tar.zst" ]]; then
 								echo "tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/"
 								tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/
 								echo "mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername"
@@ -690,7 +703,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
-			if [ $(version $(lsb_release -rs)) -ge $(version "20.04") && -f $dirwithsources1.tar.zst ]; then
+			if [[ "$(checklinuxversion)" == "1" && -f $dirwithsources1.tar.zst ]]; then
 				echo "tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 				tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
@@ -708,7 +721,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
-			if [ $(version $(lsb_release -rs)) -ge $(version "20.04") && -f $dirwithsources2.tar.zst ]; then
+			if [[ "$(checklinuxversion)" == "1" && -f $dirwithsources2.tar.zst ]]; then
 				echo "tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 				tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
@@ -726,7 +739,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
-			if [ $(version $(lsb_release -rs)) -ge $(version "20.04") && -f $dirwithsources3.tar.zst ]; then
+			if [[ "$(checklinuxversion)" == "1" && -f $dirwithsources3.tar.zst ]]; then
 				echo "tar --zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 				tar --zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
@@ -792,7 +805,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ $(version $(lsb_release -rs)) -ge $(version "20.04") && -x /usr/bin/zstd ]]; then
+					if [[ "$(checklinuxversion)" == "1" && -x /usr/bin/zstd ]]; then
 						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 					else
@@ -809,13 +822,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
-						if [[ $(version $(lsb_release -rs)) -ge $(version "20.04") && -x /usr/bin/zstd ]]; then
+						if [[ "$(checklinuxversion)" == "1" && -x /usr/bin/zstd ]]; then
 							echo "Archive of test instances are disabled. We discard the tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
 						else
 							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 						fi
 					else
-						if [[ $(version $(lsb_release -rs)) -ge $(version "20.04") && -x /usr/bin/zstd ]]; then
+						if [[ "$(checklinuxversion)" == "1" && -x /usr/bin/zstd ]]; then
 							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						else
