@@ -980,7 +980,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				# It is better to link to a bad certificate than linking to non existing file
 				if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
 					echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to /etc/apache2/$webSSLCertificateCRT"
-					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/webCustomSSLCertificateCRT
+					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
 				fi
 			fi
 			if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then

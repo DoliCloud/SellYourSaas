@@ -604,7 +604,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('lastname',                                 "LastName",  'varchar',106,  '64', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('auto'=>null));
 		$resultx=$extrafields->addExtraField('password',                        "DashboardPassword", 'password',190, '128', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('oldpassword',                  "OldDashboardPassword",  'varchar',191, '128', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('oldpassword',                  "OldDashboardPassword",  'varchar',191, '128', 'thirdparty', 0, 0, '',     '', 0, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('pass_temp',                    "HashForPasswordReset",  'varchar',192, '128', 'thirdparty', 0, 0, '',     '', 1, '',  0, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('optinmessages',          "OptinForCommercialMessages",  'boolean',193,   '',  'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('manualcollection',                 "ManualCollection",  'boolean',194,   '',  'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
