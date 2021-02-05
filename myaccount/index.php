@@ -452,7 +452,7 @@ elseif ($action == 'send')
 	$arr_file = array();
 	$arr_mime = array();
 	$arr_name = array();
-	$upload_dir = $conf->sellyoursaas->dir_temp."/".$tmpdir.'.tmp';
+	$upload_dir = $conf->sellyoursaas->dir_temp."/support__".$mythirdpartyaccount->id.'.tmp';
 	$listofpaths = dol_dir_list($upload_dir, 'all', 0, '', '', 'name', SORT_ASC, 0);
 	if (count($listofpaths)) {
 		foreach ($listofpaths as $key => $val) {

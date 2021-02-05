@@ -30,15 +30,12 @@ if (empty($conf) || ! is_object($conf))
     if(empty($_POST['token'])){
         $token = newToken();
     }
-
-    $tokenarray = explode('$',$token);
-    $tmpdir = str_replace('/','',$tokenarray[3]);
-    $upload_dir = $conf->sellyoursaas->dir_temp."/".$tmpdir.'.tmp';
+    $upload_dir = $conf->sellyoursaas->dir_temp."/support__".$mythirdpartyaccount->id.'.tmp';
 
     if (!empty($_POST['addfile'])) {
         // Set tmp user directory
         require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-        dol_add_file_process($upload_dir, 0, 0);
+        dol_add_file_process($upload_dir, 1, 0);
 
         $action = "presend";
     }
