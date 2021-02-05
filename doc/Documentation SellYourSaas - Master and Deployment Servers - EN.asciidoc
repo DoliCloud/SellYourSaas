@@ -871,7 +871,7 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 You can create another virtual host for the HTTPS on port 443
 
 
-* Create a virtual host for the client area * myaccount.mysaasdomainname.com *
+* Create a virtual host for the client area *myaccount.mysaasdomainname.com*
 
 [source, bash]
 ---------------
@@ -930,7 +930,7 @@ You can create another virtual host for the HTTPS on port 443
 
 On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
 
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restatr after a crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
 
 [source, bash]
 ---------------
@@ -939,7 +939,7 @@ TimeoutStartSec = 3600s
 TimeoutStopSec = 3600s
 ---------------
 
-Rem: Instead of putting *3600s*, it is possible to put *infinity*
+Rem: Instead of putting *3600s*, it is possible to put *infinity* (but 3600 is preferred)
 
 Then reload the new configuration:
 

@@ -922,7 +922,7 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
 
 Sur Ubuntu 18.04+ et avec MariaDb migré depuis un MySql:
 
-Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long en cas de plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
+Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long suite à un plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
 
 [source,bash]
 ---------------
@@ -931,7 +931,7 @@ TimeoutStartSec=3600s
 TimeoutStopSec=3600s
 ---------------
 
-Rem: Au lieu de mettre *3600s*, il est possible de mettre *infinity*
+Rem: Au lieu de mettre *3600s*, il est possible de mettre *infinity* (mais 3600 est préferrable)
 
 Puis recharger la nouvelle configuration:
 
