@@ -1373,7 +1373,7 @@ clamscan /tmp/testvirus
 clamdscan /tmp/testvirus --fdpass
 ---------------
 
-Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
+Supprimer le profil apparmor pour *usr.sbin.clamd*. Il doit être appelé par un processeur web (sinon, erreur sur "getattr").
 
 [source,bash]
 ---------------
@@ -1383,8 +1383,8 @@ service apparmor reload
 service apparmor status
 ---------------
 
-You should see into the status a line saying that Profile *usr/sbin/clamd* is disabled.
-It seems we must also restart apache to have this effective inside apache.
+Vous devez voir dans le statut une ligne disant que le profil *usr/sbin/clamd* est désactivée.
+Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans apache.
 
 
 === Installation de Afick
