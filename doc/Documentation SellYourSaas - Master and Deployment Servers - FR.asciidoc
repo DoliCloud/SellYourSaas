@@ -665,7 +665,9 @@ Host github.com
 
 === Installation des packages
 
-* Installation des packages Ubuntu suivant
+Il y a deux cas de figure selon votre version d'Ubuntu. Suivre la consigne *18.04-* OU la *20.04+*
+
+* Installation des packages Ubuntu 18.04-
 
 [source,bash]
 ---------------
@@ -678,6 +680,49 @@ sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
+* Installation des packages Ubuntu 20.04+
+
+[source,bash]
+---------------
+sudo apt update
+sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
+sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install bind9
+sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install soffice libreoffice-common libreoffice-writer
+---------------
+
+==== Il faut à présent installer *php-mcrypt*
+
+[source,bash]
+---------------
+sudo apt install -y build-essential
+sudo pecl install mcrypt
+---------------
+
+Quand vous voyez :
+
+[source,bash]
+---------------
+libmcrypt prefix? [autodetect] :
+---------------
+
+Appuyez sur *Entrer*
+
+Écrire la ligne suivante dans /etc/php/7.4/cli/php.ini et /etc/php/7.4/apache2/php.ini
+
+[source,bash]
+---------------
+extension=mcrypt.so
+---------------
+
+Puis *redémarrer* le serveur *Apache*
+
+[source,bash]
+---------------
+sudo systemctl restart apache2
+---------------
 
 === Désactivation de la mise a jour automatique
 

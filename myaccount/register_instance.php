@@ -376,6 +376,91 @@ else                    // When we deploy from the register.php page
 	        }
 	    }
 	}
+	if (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED) && ! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY))
+	{
+	    $allowed = false;
+	    $disposable = false;
+	    $allowedemail = (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED) ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
+	    $bannedemail = (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED) ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED, true) : array());
+	    $parts = explode("@", $email);
+	    $domaintocheck = $parts[1];
+
+	    // Check cache of domain already check and allowed
+	    if (! empty($allowedemail)) {
+	        foreach ($allowedemail as $alloweddomainname) {
+	            if ($alloweddomainname == $domaintocheck) {
+	                $allowed = true;
+	                break;
+	            }
+	        }
+	    }
+
+	    // If not found in allowed database
+	    if ($allowed === false)
+	    {
+	        // Check cache of domain already check and banned
+	        if (! empty($bannedemail)) {
+	            foreach ($bannedemail as $banneddomainname) {
+	                if ($banneddomainname == $domaintocheck) {
+	                    $disposable = true;
+	                    break;
+	                }
+	            }
+	        }
+
+	        // Check in API Block Disposable E-mail database
+	        if ($disposable === false)
+	        {
+	            $emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+	            $apikey = $conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY;
+
+	            // Check if API account and credit are ok
+	            $request = "https://status.block-disposable-email.com/status/?apikey=".$apikey;
+	            $result = file_get_contents($request);
+	            $resultData = json_decode($result, true);
+
+	            if ($resultData["request_status"] == "ok" && $resultData["apikeystatus"] == "active" && $resultData["credits"] > "0")
+	            {
+	                $request = 'https://api.block-disposable-email.com/easyapi/json/'.$apikey.'/'.$domaintocheck;
+	                $result = file_get_contents($request);
+	                $resultData = json_decode($result, true);
+
+	                if ($resultData["request_status"] == "success")
+	                {
+	                    require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+
+	                    // domain is allowed
+	                    if ($resultData["domain_status"] == "ok") {
+	                        array_push($allowedemail, $domaintocheck);
+	                        dolibarr_set_const($db,'SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED',json_encode($allowedemail),'chaine',0,'',$conf->entity);
+	                    } else if ($resultData["domain_status"] == "block") {
+	                        array_push($bannedemail, $domaintocheck);
+	                        dolibarr_set_const($db,'SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED',json_encode($bannedemail),'chaine',0,'',$conf->entity);
+	                        setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
+	                        header("Location: ".$newurl);
+	                        exit(-1);
+	                    } else {
+	                        setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
+	                        header("Location: ".$newurl);
+	                        exit(-1);
+	                    }
+	                } else {
+	                    setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
+	                    header("Location: ".$newurl);
+	                    exit(-1);
+	                }
+	            } else {
+	                setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
+	                header("Location: ".$newurl);
+	                exit(-1);
+	            }
+	        } else {
+	            setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
+	            header("Location: ".$newurl);
+	            exit(-1);
+	        }
+	    }
+	}
 	if (empty($password) || empty($password2))
 	{
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
