@@ -288,7 +288,7 @@ if (empty($login) || empty($dirdb))
 	exit(-5);
 }
 
-print 'Restore into instance '.$instance.' from '.$dirroot." to ".$targetdir."\n";
+print 'Restore from '.$dirroot." to ".$targetdir.' into instance '.$instance."\n";
 print 'Target SFTP password '.$object->password_web."\n";
 print 'Target Database password '.$object->password_db."\n";
 
