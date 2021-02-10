@@ -140,7 +140,7 @@ else
 		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "sudo chown -R admin.admin ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 
-		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PAautoscanTH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
 		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
@@ -479,7 +479,7 @@ if ($restorestringfromarchive) {
 
 // Migrate to another instance container
 if ($restorestringfrombackupshort) {
-	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
+	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database"></span> -> <span class="fa fa-database"></span> Migration of instance into another instance<br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
 	print $backupstringtoshow."\n";
