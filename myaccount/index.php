@@ -449,9 +449,22 @@ elseif ($action == 'send')
 			$content .= "<br>\n";;
 		}
 	}
+	$arr_file = array();
+	$arr_mime = array();
+	$arr_name = array();
+	$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
+	$listofpaths = dol_dir_list($upload_dir, 'all', 0, '', '', 'name', SORT_ASC, 0);
+	if (count($listofpaths)) {
+		foreach ($listofpaths as $key => $val) {
+			$arr_file[] = $listofpaths[$key]['fullname'];
+			$arr_mime[] = dol_mimetype($listofpaths[$key]['name']);
+			$arr_name[] = $listofpaths[$key]['name'];
+		}
+	}
+
 	$trackid = 'sellyoursaas'.$contractid;
 
-	$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, array(), array(), array(), '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
+	$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, $arr_file, $arr_mime, $arr_name, '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
 	$result = $cmailfile->sendfile();
 
 	if ($result) setEventMessages($langs->trans("TicketSent"), null, 'warnings');
