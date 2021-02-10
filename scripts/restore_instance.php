@@ -179,6 +179,8 @@ else
  *	Main
  */
 
+print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
+
 if (0 == posix_getuid()) {
     echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
     exit(-1);
