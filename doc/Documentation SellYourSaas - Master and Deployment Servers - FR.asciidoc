@@ -1373,7 +1373,7 @@ clamscan /tmp/testvirus
 clamdscan /tmp/testvirus --fdpass
 ---------------
 
-Supprimer le profil apparmor pour *usr.sbin.clamd*. Il doit être appelé par un processeur web (sinon, erreur sur "getattr").
+Supprimer le profil apparmor pour *usr.sbin.clamd*. Ceci est requis pour être appelé par un process web (sinon, erreur sur "getattr").
 
 [source,bash]
 ---------------
