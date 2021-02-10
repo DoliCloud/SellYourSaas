@@ -53,6 +53,65 @@ $mode=isset($argv[4])?$argv[4]:'';
 @set_time_limit(0);							// No timeout for this script
 define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
+// Read /etc/sellyoursaas.conf file
+$databasehost='localhost';
+$databaseport='3306';
+$database='';
+$databaseuser='sellyoursaas';
+$databasepass='';
+$dolibarrdir='';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach($array as $val)
+	{
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'ipserverdeployment')
+		{
+			$ipserverdeployment = $tmpline[1];
+		}
+		if ($tmpline[0] == 'instanceserver')
+		{
+			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasehost')
+		{
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport')
+		{
+			$databaseport = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database')
+		{
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseuser')
+		{
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass')
+		{
+			$databasepass = $tmpline[1];
+		}
+		if ($tmpline[0] == 'dolibarrdir')
+		{
+			$dolibarrdir = $tmpline[1];
+		}
+	}
+}
+else
+{
+	print "Failed to open /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
@@ -64,8 +123,14 @@ if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.in
 if (! $res && file_exists("../master.inc.php")) $res=@include("../master.inc.php");
 if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.inc.php");
 if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
-if (! $res) die("Include of master fails");
-
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include($dolibarrdir."/htdocs/master.inc.php");
+if (! $res) {
+	print ("Include of master fails");
+	exit(-1);
+}
+include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
 // Read /etc/sellyoursaas.conf file
@@ -134,9 +199,9 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode))
 {
     print "This script must be ran as 'admin' user.\n";
-    print "Usage:   $script_file backup_dir  instance  mysqldump_dbn...sql.gz|dayofmysqldump  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
+    print "Usage:   $script_file backup_dir  instance  autoscan|mysqldump_dbn...sql.zst|dayofmysqldump  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
 	print "Example: $script_file ".$conf->global->DOLICLOUD_BACKUP_PATH."/osu123456/dbn789012  myinstance  31  testrsync\n";
-	print "Note:    ssh keys must be authorized to have testrsync and confirmrsync working\n";
+	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -221,13 +286,33 @@ if (empty($login) || empty($dirdb))
 	exit(-5);
 }
 
-print 'Restore on instance '.$instance.' from '.$dirroot." to ".$targetdir."\n";
+print 'Restore into instance '.$instance.' from '.$dirroot." to ".$targetdir."\n";
 print 'Target SFTP password '.$object->password_web."\n";
 print 'Target Database password '.$object->password_db."\n";
 
 if (! in_array($mode, array('testrsync', 'testdatabase', 'test', 'confirmrsync', 'confirmdatabase', 'confirm'))) {
 	print "Error: Bad value for last parameter (action must be testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm).\n";
 	exit(-6);
+}
+
+if ($dayofmysqldump == 'autoscan') {
+	print 'Scan directory '.$dirroot.'/.. for database dumps.'."\n";
+	$arrayoffiles = dol_dir_list($dirroot.'/..', 'files', 0, '\.gz|\.zst');
+	if (count($arrayoffiles)) {
+		$i = 1;
+		foreach($arrayoffiles as $filevar) {
+			print $i." - ".$filevar['relativename']."\n";
+			$i++;
+		}
+		do {
+			print "Enter choice : ";
+			$input = rtrim(fgets(STDIN));
+		} while ($input <= 0 || $input > count($arrayoffiles));
+		$dayofmysqldump = $arrayoffiles[($input - 1)]['relativename'];
+	} else {
+		print 'No dump file found into '.$dirroot.'/..'."\n";
+		exit(-7);
+	}
 }
 
 // Backup files
