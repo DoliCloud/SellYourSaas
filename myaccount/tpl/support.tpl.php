@@ -27,10 +27,10 @@ if (empty($conf) || ! is_object($conf))
 <?php
     require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 
-    if(empty($_POST['token'])){
+    if (empty($_POST['token'])) {
         $token = newToken();
     }
-    $upload_dir = $conf->sellyoursaas->dir_temp."/support__".$mythirdpartyaccount->id.'.tmp';
+    $upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
 
     if (!empty($_POST['addfile'])) {
         // Set tmp user directory
