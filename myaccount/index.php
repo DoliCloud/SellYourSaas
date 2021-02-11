@@ -2926,7 +2926,7 @@ if ($mythirdpartyaccount->isareseller)
 	print '
 		<!-- Info reseller -->
 		<div class="note note-info">
-		<h4 class="block">'.$langs->trans("YouAreAReseller").'.</h4>
+		<h4 class="block"><span class="fa fa-briefcase"></span> '.$langs->trans("YouAreAReseller").'.</h4>
 		';
 	print $langs->trans("YourURLToCreateNewInstance").' : ';
 
@@ -2948,7 +2948,7 @@ if ($mythirdpartyaccount->isareseller)
 	});
 		</script>';
 
-	print '<a id="spanmorereselleroptions" href="#" style="color: #666">'.$langs->trans("OtherOptionsAndParameters").' <span class="fa fa-angle-down"></span></a><br>';
+	print '<a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
 	print '<div id="divmorereselleroptions" style="display: hidden">';
 	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span>';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1)

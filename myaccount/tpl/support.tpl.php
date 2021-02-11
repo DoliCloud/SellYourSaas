@@ -112,10 +112,10 @@ if (empty($conf) || ! is_object($conf))
                         print '<input type="hidden" name="mode" value="support">';
                         print '<input type="hidden" name="action" value="presend">';
 
-                        print $langs->trans("SelectYourSupportChannel").'<br>';
+                        print '<span class="opacitymedium">'.$langs->trans("SelectYourSupportChannel").'</span><br>';
 
-                        print '<select id="supportchannel" name="supportchannel" class="maxwidth500 minwidth500" style="width: auto">';
-                        print '<option value=""></option>';
+                        print '<select id="supportchannel" name="supportchannel" class="maxwidth500 minwidth600" style="width: auto">';
+                        print '<option value="">&nbsp;</option>';
                         if (count($listofcontractid) == 0)
                         {
                             // Should not happen
@@ -226,8 +226,9 @@ if (empty($conf) || ! is_object($conf))
                         print '<option value="high_premium" disabled="disabled">'.$langs->trans("PremiumSupport").' ('.$langs->trans("Priority").': '.$langs->trans("High").') - '.$langs->trans("NoPremiumPlan").'</option>';
                     }
                     print '</select>';
+					print ajax_combobox("supportchannel");
 
-                    print '&nbsp; <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle">';
+                    print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
 
                     print '</form>';
 
