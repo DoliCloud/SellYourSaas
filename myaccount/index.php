@@ -394,8 +394,10 @@ elseif ($action == 'changeplan')
 }
 
 // Send support ticket
-elseif ($action == 'send')
+elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile'))
 {
+	$error = 0;
+
 	$emailfrom = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
@@ -407,69 +409,91 @@ elseif ($action == 'send')
 
 	$emailto = GETPOST('to','alpha');
 	$replyto = GETPOST('from','alpha');
-	$topic = GETPOST('subject','none');
-	$content = GETPOST('content','none');
+	$topic = GETPOST('subject','restricthtml');
+	$content = GETPOST('content','restricthtml');
 
-	$channel = GETPOST('supportchannel','alpha');
-	$contractid = GETPOST('contractid','int');
-	if ($contractid > 0)
-	{
-		$tmpcontract = $listofcontractid[$contractid];
-		$topic = '[Ticket - '.$tmpcontract->ref_customer.'] '.$topic;
-		$content .= "<br><br>\n";
-		$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
-		$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
-		//$content .= 'Ref contract: <a href="xxx/contrat/card.php?id='.$tmpcontract->ref.">".$tmpcontract->ref."</a><br>\n"; 	// No link to backoffice as the mail is used with answer to.
-		$content .= 'Ref contract: '.$tmpcontract->ref."<br>\n";
-		$tmpcontract->fetch_thirdparty();
-		if (is_object($tmpcontract->thirdparty))
+	if (empty($replyto)) {
+		$error++;
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("MailFrom")), null, 'errors');
+	}
+	if (empty($topic)) {
+		$error++;
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("MailTopic")), null, 'errors');
+	}
+	if (empty($content)) {
+		$error++;
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Description")), null, 'errors');
+	}
+
+	if (!$error) {
+		$channel = GETPOST('supportchannel','alpha');
+		$contractid = GETPOST('contractid','int');
+		if ($contractid > 0)
 		{
-			$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
-			$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
-			$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
-		}
-		// Add the support type
-		foreach($tmpcontract->lines as $key => $val)
-		{
-			if ($val->fk_product > 0)
+			$tmpcontract = $listofcontractid[$contractid];
+			$topic = '[Ticket - '.$tmpcontract->ref_customer.'] '.$topic;
+			$content .= "<br><br>\n";
+			$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
+			$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
+			//$content .= 'Ref contract: <a href="xxx/contrat/card.php?id='.$tmpcontract->ref.">".$tmpcontract->ref."</a><br>\n"; 	// No link to backoffice as the mail is used with answer to.
+			$content .= 'Ref contract: '.$tmpcontract->ref."<br>\n";
+			$tmpcontract->fetch_thirdparty();
+			if (is_object($tmpcontract->thirdparty))
 			{
-				$product = new Product($db);
-				$product->fetch($val->fk_product);
-				$content .= '- '.$langs->trans("Service").' '.$product->ref.' - '.$langs->trans("Qty")." ".$val->qty;
-				$content.=' ('.$product->array_options['options_app_or_option'].')';
-				if ($product->array_options['options_app_or_option'] == 'app')
+				$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
+				$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
+				$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
+			}
+			// Add the support type
+			foreach($tmpcontract->lines as $key => $val)
+			{
+				if ($val->fk_product > 0)
 				{
-					$content .= ' - Support type = '.$product->array_options['options_typesupport'];
+					$product = new Product($db);
+					$product->fetch($val->fk_product);
+					$content .= '- '.$langs->trans("Service").' '.$product->ref.' - '.$langs->trans("Qty")." ".$val->qty;
+					$content.=' ('.$product->array_options['options_app_or_option'].')';
+					if ($product->array_options['options_app_or_option'] == 'app')
+					{
+						$content .= ' - Support type = '.$product->array_options['options_typesupport'];
+					}
 				}
+				else
+				{
+					$content .= '- Service '.$val->label;
+				}
+				$content .= "<br>\n";;
 			}
-			else
-			{
-				$content .= '- Service '.$val->label;
+		}
+		$arr_file = array();
+		$arr_mime = array();
+		$arr_name = array();
+		$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
+		$listofpaths = dol_dir_list($upload_dir, 'all', 0, '', '', 'name', SORT_ASC, 0);
+		if (count($listofpaths)) {
+			foreach ($listofpaths as $key => $val) {
+				$arr_file[] = $listofpaths[$key]['fullname'];
+				$arr_mime[] = dol_mimetype($listofpaths[$key]['name']);
+				$arr_name[] = $listofpaths[$key]['name'];
 			}
-			$content .= "<br>\n";;
 		}
-	}
-	$arr_file = array();
-	$arr_mime = array();
-	$arr_name = array();
-	$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
-	$listofpaths = dol_dir_list($upload_dir, 'all', 0, '', '', 'name', SORT_ASC, 0);
-	if (count($listofpaths)) {
-		foreach ($listofpaths as $key => $val) {
-			$arr_file[] = $listofpaths[$key]['fullname'];
-			$arr_mime[] = dol_mimetype($listofpaths[$key]['name']);
-			$arr_name[] = $listofpaths[$key]['name'];
+
+		$trackid = 'sellyoursaas'.$contractid;
+
+		$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, $arr_file, $arr_mime, $arr_name, '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
+		$result = $cmailfile->sendfile();
+
+		if ($result) {
+			setEventMessages($langs->trans("TicketSent"), null, 'warnings');
+			$action = '';
 		}
+		else {
+			setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
+			$action = 'presend';
+		}
+	} else {
+		$action = 'presend';
 	}
-
-	$trackid = 'sellyoursaas'.$contractid;
-
-	$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, $arr_file, $arr_mime, $arr_name, '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
-	$result = $cmailfile->sendfile();
-
-	if ($result) setEventMessages($langs->trans("TicketSent"), null, 'warnings');
-	else setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
-	$action = '';
 }
 
 // Send reseller request
