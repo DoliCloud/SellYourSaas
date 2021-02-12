@@ -100,11 +100,11 @@ if ($ispaid)
     	$restorestringpretoshow .= "sudo chown -R admin.admin ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
     	$restorestringpretoshow .= "su - admin"."\n";
 
-    	$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31)';
-    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31) '.$object->ref_customer;
+    	$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
-    	$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename';
-    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+    	$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
     } else {
     	//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
     	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
@@ -119,11 +119,11 @@ if ($ispaid)
 
     	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
-    	$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31)';
-    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' (dumpfilename|31) '.$object->ref_customer;
+    	$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
-    	$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename';
-    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+    	$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
     }
 }
 else
@@ -140,8 +140,11 @@ else
 		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "sudo chown -R admin.admin ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 
-		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename ';
-		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+
+		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
+		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 	} else {
 		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
@@ -157,8 +160,8 @@ else
 
 		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
-		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename ';
-		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' dumpfilename '.$object->ref_customer;
+		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
+		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 	}
 }
 
@@ -375,7 +378,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 
 	// Backup dir
 	print '<tr class="oddeven">';
-	print '<td class="titlefield">'.$langs->trans("DeploymentHost").'</td>';
+	print '<td class="titlefieldcreate">'.$langs->trans("DeploymentHost").'</td>';
 	print '<td>'.$object->array_options['options_deployment_host'].'</td>';
 	print '</tr>';
 
@@ -435,44 +438,35 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=backupinstance">'.$langs->trans('BackupNow').'</a>';
 		}
 
-		print "</div><br>";
+		print "</div>";
 	}
 }
 
 
-// Backup link
-$backupstringtoshow=$backupstring.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]';
-print 'Backup command line string<br>';
+// Backup command line
+$backupstringtoshow=$backupstring.' confirm';
+$backupstringtoshow2=$backupstring.' confirm';
+print '<span class="fa fa-database"></span> -> Backup command line string<br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
 print ajax_autoselect('backupstring');
 
 print '<br>';
 
-// Restore link from backup
+// Restore command line from backup
 if ($restorestringfrombackup) {
-	$restorestringtoshow=$restorestringfrombackup.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
-	print 'Restore command line string from Backup<br>';
+	$restorestringtoshow=$restorestringfrombackup.' (test|confirm)';
+	print '-> <span class="fa fa-database"></span> Restore command line string from Backup<br>';
 	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
 	print ajax_autoselect('restorestring');
 
 	print '<br>';
 }
 
-// Restore link from backup into another instance
-if ($restorestringfrombackupshort) {
-	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
-	print 'Restore command line string from Backup into another instance<br>';
-	print '<input type="text" name="restorestringtoanother" id="restorestringtoanother" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
-	print ajax_autoselect('restorestringtoanother');
-
-	print '<br>';
-}
-
-// Restore link from archive
+// Restore commands from archive
 if ($restorestringfromarchive) {
-	$restorestringtoshow=$restorestringfromarchive.' (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm)';
-	print 'Restore command line string from Archive<br>';
-	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_7.'">';
+	$restorestringtoshow=$restorestringfromarchive.' (test|confirm)';
+	print '-> <span class="fa fa-database"></span> Restore command line string from Archive<br>';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_9.'">';
 	print $restorestringpretoshow."\n";
 	print $restorestringtoshow."\n";
 	print $restorestringposttoshow;
@@ -480,7 +474,22 @@ if ($restorestringfromarchive) {
 	//print ajax_autoselect('restorestringfromarchive');
 
 	print '<br>';
+	print '<br>';
 }
+
+// Migrate to another instance container
+if ($restorestringfrombackupshort) {
+	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
+	print '<span class="fa fa-database"></span> -> <span class="fa fa-database"></span> Migration of instance into another instance<br>';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
+	print $backupstringtoshow."\n";
+	print $restorestringtoshow."\n";
+	print '</textarea>';
+
+	print '<br>';
+}
+
+
 
 if (! empty($mesg)) {
 	print '<br>';

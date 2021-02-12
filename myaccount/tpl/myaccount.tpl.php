@@ -77,7 +77,7 @@ print '
 
 	                <div class="form-group">
 	                  <label>'.$langs->trans("AddressLine").'</label>
-	                  <input type="text" class="form-control" placeholder="'.$langs->trans("HouseNumberAndStreet").'" value="'.$mythirdpartyaccount->address.'" name="address">
+	                  <textarea class="form-control" placeholder="'.$langs->trans("HouseNumberAndStreet").'" name="address">'.$mythirdpartyaccount->address.'</textarea>
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Town").'</label>

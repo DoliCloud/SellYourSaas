@@ -557,11 +557,11 @@ echo TODO Manually...
 echo "***** We should also clean mysql record for permission on old databases and old users"
 SQL="use mysql; delete from db where Db NOT IN (SELECT schema_name FROM information_schema.schemata) and Db like 'dbn%';"
 echo You can execute
-echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -e \"$SQL\" -pxxxxxx"
 #$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 SQL="use mysql; delete from user where User NOT IN (SELECT User from db) and User like 'dbu%';"
 echo You can execute
-echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -e \"$SQL\" -pxxxxxx"
 #$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 
 if [[ $testorconfirm == "test" ]]; then

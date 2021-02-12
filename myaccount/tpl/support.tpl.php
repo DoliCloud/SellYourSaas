@@ -25,6 +25,24 @@ if (empty($conf) || ! is_object($conf))
 ?>
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
+    require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+
+    $upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
+
+    if (!empty($_POST['addfile'])) {
+        // Set tmp user directory
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+        dol_add_file_process($upload_dir, 1, 0);
+
+        $action = "presend";
+    }
+
+    if (!empty($_POST["removedfile"])) {
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+		dol_remove_file_process($_POST['removedfile'], 0, 0); // We really delete file linked to mailing
+
+		$action = "presend";
+    }
 
     // Print warning to read FAQ before
     print '<!-- Message to read FAQ and get status -->'."\n";
@@ -94,10 +112,10 @@ if (empty($conf) || ! is_object($conf))
                         print '<input type="hidden" name="mode" value="support">';
                         print '<input type="hidden" name="action" value="presend">';
 
-                        print $langs->trans("SelectYourSupportChannel").'<br>';
+                        print '<span class="opacitymedium">'.$langs->trans("SelectYourSupportChannel").'</span><br>';
 
-                        print '<select id="supportchannel" name="supportchannel" class="maxwidth500 minwidth500" style="width: auto">';
-                        print '<option value=""></option>';
+                        print '<select id="supportchannel" name="supportchannel" class="maxwidth500 minwidth600" style="width: auto">';
+                        print '<option value="">&nbsp;</option>';
                         if (count($listofcontractid) == 0)
                         {
                             // Should not happen
@@ -208,21 +226,66 @@ if (empty($conf) || ! is_object($conf))
                         print '<option value="high_premium" disabled="disabled">'.$langs->trans("PremiumSupport").' ('.$langs->trans("Priority").': '.$langs->trans("High").') - '.$langs->trans("NoPremiumPlan").'</option>';
                     }
                     print '</select>';
+					print ajax_combobox("supportchannel");
 
-                    print '&nbsp;
-                						<input type="submit" name="submit" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle">
-                						';
+                    print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
 
                     print '</form>';
 
                     if ($action == 'presend' && GETPOST('supportchannel','alpha'))
                     {
                         print '<br><br>';
-                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+
+                        $trackid = '';
+			            dol_init_file_process($upload_dir, $trackid);
+
+			            if (GETPOST('choosechannel')) {
+			            	$counttodelete = 0;
+			            	dol_delete_dir_recursive($upload_dir, $counttodelete);
+			            }
+
+                        // List of files
+                        $listofpaths = dol_dir_list($upload_dir, 'files', 0, '', '', 'name', SORT_ASC, 0);
+
+                        $out .= '<input type="hidden" class="removedfilehidden" name="removedfile" value="">'."\n";
+                        $out .= '<script type="text/javascript" language="javascript">';
+                        $out .= 'jQuery(document).ready(function () {';
+                        $out .= '    jQuery(".removedfile").click(function() {';
+                        $out .= '        jQuery(".removedfilehidden").val(jQuery(this).val());';
+                        $out .= '    });';
+                        $out .= '})';
+                        $out .= '</script>'."\n";
+                        if (count($listofpaths)) {
+                            foreach ($listofpaths as $key => $val) {
+                                $out .= '<div id="attachfile_'.$key.'" class="margintop">';
+                                $out .= img_mime($listofpaths[$key]['name']).' '.$listofpaths[$key]['name'];
+                                $out .= ' <input type="image" style="border: 0px;" src="'.img_picto($langs->trans("Search"), 'delete.png', '', '', 1).'" value="'.($key + 1).'" class="removedfile" id="removedfile_'.$key.'" name="removedfile_'.$key.'" />';
+                                $out .= '</div>';
+                            }
+                        } else {
+                        	$out .= '<br>';
+                            //$out .= $langs->trans("NoAttachedFiles").'<br>';
+                        }
+
+                        /*
+                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
                         print '<input type="hidden" name="token" value="'.newToken().'">';
+                        print '<input type="hidden" name="action" value="addfile">';
+                        print $hiddeninputs;
+                        print $out;
+                        print '<input type="file" class="flat" id="addedfile" name="addedfile" value="'.$langs->trans("Upload").'" />';
+                        print ' ';
+                        print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
+                        print '</form>';
+                        */
+
+                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+                        print '<input type="hidden" name="token" value="'.newToken().'">';
+                        print '<input type="hidden" name="action" value="send">';
+
+                        // Add link to add file
                         print '<input type="hidden" name="mode" value="support">';
                         print '<input type="hidden" name="contractid" value="'.$id.'">';
-                        print '<input type="hidden" name="action" value="send">';
                         print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel','alpha').'">';
 
                         $sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
@@ -248,13 +311,24 @@ if (empty($conf) || ! is_object($conf))
                         $subject = (GETPOST('subject','none')?GETPOST('subject','none'):'');
 
                         print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
-                        print $langs->trans("MailFrom").' : <input type="text" required name="from" value="'.(GETPOST('from','none')?GETPOST('from','none'):$mythirdpartyaccount->email).'"><br><br>';
-                        print $langs->trans("MailTopic").' : <input type="text" required class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
-                        print '<textarea rows="6" required placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content','none').'</textarea><br><br>';
 
-                        print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle">';
+                        print $langs->trans("MailFrom").' : <input type="text" name="from" value="'.(GETPOST('from','none')?GETPOST('from','none'):$mythirdpartyaccount->email).'"><br><br>';
+                        print $langs->trans("MailTopic").' : <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
+
+                        print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
                         print ' ';
-                        print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
+                        print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
+
+                        print $out;
+                        print '<br>';
+
+                        // Description
+                        print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content','none').'</textarea><br><br>';
+
+                        // Button to send ticket/email
+                        print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly">';
+                        print ' ';
+                        print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle marginleftonly">';
                         print '</center>';
 
                         print '</form>';
