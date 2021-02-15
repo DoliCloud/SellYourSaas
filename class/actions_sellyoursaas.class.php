@@ -221,7 +221,7 @@ class ActionsSellyoursaas
 	    			$alt = $langs->trans("SellYourSaasSubDomains").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
 	    			$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
 
-	    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deploy" title="'.dol_escape_htmltag($alt).'">' . $langs->trans('Redeploy') . '</a>';
+	    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deploy&token='.urlencode(newToken()).'" title="'.dol_escape_htmltag($alt).'">' . $langs->trans('Redeploy') . '</a>';
 	    		}
 	    		else
 	    		{
@@ -230,11 +230,11 @@ class ActionsSellyoursaas
 
 	    		if (in_array($object->array_options['options_deployment_status'], array('done')))
 	    		{
-	    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refresh">' . $langs->trans('RefreshRemoteData') . '</a>';
+	    			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refresh&token='.urlencode(newToken()).'">' . $langs->trans('RefreshRemoteData') . '</a>';
 
 	    			if (empty($object->array_options['options_fileauthorizekey']))
 	    			{
-	    				print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreateauthorizedkeys">' . $langs->trans('RecreateAuthorizedKey') . '</a>';
+	    				print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreateauthorizedkeys&token='.urlencode(newToken()).'">' . $langs->trans('RecreateAuthorizedKey') . '</a>';
 	    			}
 
 	    			/*if (empty($object->array_options['options_filelock']))
@@ -254,22 +254,22 @@ class ActionsSellyoursaas
 	    		if (in_array($object->array_options['options_deployment_status'], array('done')))
 	    		{
 	    			if (empty($object->array_options['options_suspendmaintenance_message'])) {
-	    				print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance">' . $langs->trans('Maintenance') . '</a>';
+	    				print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance&token='.urlencode(newToken()).'">' . $langs->trans('Maintenance') . '</a>';
 	    			} else {
-	    				print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unsuspend">' . $langs->trans('StopMaintenance') . '</a>';
+	    				print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unsuspend&token='.urlencode(newToken()).'">' . $langs->trans('StopMaintenance') . '</a>';
 	    			}
 	    		}
 
 	    		if (in_array($object->array_options['options_deployment_status'], array('done')))
 	    		{
-	    			print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=undeploy">' . $langs->trans('Undeploy') . '</a>';
+	    			print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=undeploy&token='.urlencode(newToken()).'">' . $langs->trans('Undeploy') . '</a>';
 	    		}
 	    		else
 	    		{
 	    			print '<a class="butActionRefused" href="#" title="'.$langs->trans("ContractMustHaveStatusDone").'">' . $langs->trans('Undeploy') . '</a>';
 	    		}
 
-	    		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=changecustomer" title="'.$langs->trans("ChangeCustomer").'">' . $langs->trans('ChangeCustomer') . '</a>';
+	    		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=changecustomer&token='.urlencode(newToken()).'" title="'.$langs->trans("ChangeCustomer").'">' . $langs->trans('ChangeCustomer') . '</a>';
 	    	}
     	}
 
