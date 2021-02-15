@@ -263,7 +263,7 @@ else
         print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
         if ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
         elseif ($statuslabel == 'done') print $langs->trans("Alive");
-        elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning();
+        elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
         elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");
         else print $statuslabel;
         print '</span></span><br>';
