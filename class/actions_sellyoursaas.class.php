@@ -168,12 +168,15 @@ class ActionsSellyoursaas
             {
                 $objref = $parameters['objref'];
                 $url = 'https://'.$parameters['objref'];
-                if (! empty($object->array_options['options_custom_url'])) {
-                    $objref = $object->array_options['options_custom_url'];
-                    $url = 'https://'.$object->array_options['options_custom_url'];
-                }
 
                 $this->results['objref'] = $objref.' <a href="'.$url.'" target="_blank">'.img_picto($url, 'object_globe').'</a>';
+
+                // Add also link to custom url
+                if (! empty($object->array_options['options_custom_url'])) {
+                	$objref = $object->array_options['options_custom_url'];
+                	$url = 'https://'.$object->array_options['options_custom_url'];
+                	$this->results['objref'] .= ' <a href="'.$url.'" target="_blank" class="opacitymedium">'.img_picto($url, 'object_globe').'</a>';
+                }
 
                 if ($parameters['currentcontext'] == 'contractcard')
                 {
