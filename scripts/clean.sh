@@ -600,14 +600,14 @@ do
 	done
 	if [[ "x$noyoungfile" == "x1" ]]; then
 		if [ -d "$archivedirpaid/$osusername" ]; then
-			echo "# $fic - $noyoungfile - dir $archivedirpaid/$osusername exists" >> /tmp/deletedirs.sh
+			echo "# $fic - $noyoungfile - archive dir $archivedirpaid/$osusername exists, we can remove backup" >> /tmp/deletedirs.sh
 			echo "rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 		else
 			echo "# $fic - $noyoungfile" >> /tmp/deletedirs.sh
-			echo "# ALERT Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!!" >> /tmp/deletedirs.sh
+			echo "# ALERT Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with: move $backupdir/$osusername $archivedirpaid/$osusername" >> /tmp/deletedirs.sh
 		fi
 	else
-        echo "# $fic - $noyoungfile - dir $dirtoscan exists and was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
+        echo "# $fic - $noyoungfile - archive dir $dirtoscan exists but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
         echo "#rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 	fi
 done
