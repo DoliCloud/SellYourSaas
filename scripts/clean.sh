@@ -539,6 +539,11 @@ find $archivedircron -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
 echo "***** Now clean miscellaneous files"
 rm /var/log/repair.lock > /dev/null 2>&1
 
+# Now clean old journalctl files
+echo "***** Now clean journal files older than 60 days"
+echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;"
+find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;
+
 
 # Clean archives 
 if [ "x$2" == "xtempdirs" ]; then

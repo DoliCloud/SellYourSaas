@@ -2634,15 +2634,18 @@ logrotate -f logrotate_sellyoursaas_log
 ---------------
 
 
-=== Configuration de journalctl (sur Ubuntu 18.04+)
+=== Configuration de journalctl
+
+Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
 * Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
 
 [source,conf]
 ---------------
 ...
-SystemMaxUse=250M
-SystemMaxFileSize=50M
+SystemMaxUse=1G
+# Define max size of each file (there is 1 file per user). Default is 1/8 of SystemMaxUse.
+SystemMaxFileSize=5M
 ...
 ---------------
 
@@ -2652,6 +2655,25 @@ Prendre en compte la modification
 ---------------
 systemctl stop systemd-journald
 systemctl start systemd-journald
+---------------
+
+Pour forcer le vidage d'un journal:
+
+[source,bash]
+---------------
+journalctl --flush --rotate
+journalctl --vacuum-size=1G
+journalctl --vacuum-time=1d
+---------------
+
+Pour lire les journaux:
+
+[source,bash]
+---------------
+journalctl --disk-usage
+journalctl --header
+
+journalctl -r --file user-XXX.journal
 ---------------
 
 
