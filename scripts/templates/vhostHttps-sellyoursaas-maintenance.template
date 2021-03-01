@@ -24,8 +24,6 @@
 
         ErrorLog /var/log/apache2/apache_sellyoursaas_maintenance_error.log
         #TransferLog /var/log/apache2/__webAppLogName___access_log
-
-        ServerSignature On
         
         # Compress returned resources of type php pages, text file export, css and javascript
         AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript
