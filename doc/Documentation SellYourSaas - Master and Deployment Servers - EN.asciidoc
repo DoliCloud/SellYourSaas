@@ -620,8 +620,6 @@ archivetestinstances=1
 
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
 # Set directory where backup are stored
 backupdir=/mnt/diskbackup/backup
 # Set directory where archives of tests instances are stored
@@ -634,7 +632,10 @@ remoteserverlistenip=0.0.0.0
 # Set remote server launcher port (default is 8080)
 remoteserverlistenport=8080
 
-# Advanced Options for use a different path of dataroot in deployment server
+# Advanced Options to use a different paths in deployment server
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+# Option to use different path for dataroot
 #olddoldataroot=/home/admin/wwwroot/dolibarr_documents
 #newdoldataroot=/new/path/of/documents
 # Options to change the directory of vhostfile templates
@@ -649,8 +650,9 @@ remoteserverlistenport=8080
 #commonjailtemplatename=commonjail
 ---------------
 
-Mettre *masterserver* à 1, *dnsserver* et *instanceserver* à 0 sur le Master
-Mettre *masterserver* à 0, *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
+Put *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master
+Put *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on deployment servers.
+Do not forget to set a value for *databasepass*.
 
 
 === Installing the nfs share
