@@ -279,7 +279,7 @@ if (empty($conf) || ! is_object($conf))
                         print '</form>';
                         */
 
-                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+                        print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
                         print '<input type="hidden" name="token" value="'.newToken().'">';
                         print '<input type="hidden" name="action" value="send">';
 
@@ -335,7 +335,11 @@ if (empty($conf) || ! is_object($conf))
                         print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content','none').'</textarea><br><br>';
 
                         // Button to send ticket/email
-                        print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly">';
+                        print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly"';
+                        if($conf->use_javascript_ajax){
+                            print ' onClick="if (document.forms.mailform.addedfile.value != \'\') { alert(\''.dol_escape_js($langs->trans("FileWasNotUploaded")).'\'); return false; } else { return true; }"';
+                        }
+                        print '>';
                         print ' ';
                         print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle marginleftonly">';
                         print '</center>';
