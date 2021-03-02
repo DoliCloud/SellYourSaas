@@ -574,6 +574,83 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
 
+=== Creation of sellyoursaas.conf with credentials
+
+* Create a file */etc/sellyoursaas.conf* on the server (on the server *Master* and the *Deployment servers*)
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas.conf
+chown root.admin /etc/sellyoursaas.conf
+chmod g-wx /etc/sellyoursaas.conf
+chmod o-rwx /etc/sellyoursaas.conf
+---------------
+
+With the following content:
+
+[source,conf]
+---------------
+# domain du service
+domain=mysaasdomainname.com
+subdomain=withX.mysaasdomainname.com
+# ips autorisés à commander le déploiement
+allowed_hosts=127.0.0.1,ipduservermaster
+# Set to 1 if this server is the master server
+masterserver=1
+# Set to 1 if this server host instances for the pool (deployment server)
+instanceserver=1
+# Set to 1 if this server hosts a dns for the pool (deployment server)
+dnsserver=1
+# Set to its own IP if it is a deployment server
+ipserverdeployment=ipduserverdeployment
+# Set this to directory where dolibarr repository is installed
+dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+
+# Set location of the master database
+databasehost=ipduserveurmaster ou localhost si serveur master
+# Set port of the master database (default is 3306)
+databaseport=3306
+# Set database name of the master server
+database=databaseduservermaster
+# Set credential for the master and deployment database
+databaseuser=sellyoursaas
+databasepass=...
+# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
+archivetestinstances=1
+
+# Set directory where backup are stored
+backupdir=/mnt/diskbackup/backup
+# Set directory where archives of tests instances are stored
+archivedirtest=/mnt/diskbackup/archives-test
+# Set directory where archives of paid instances are stored
+archivedirpaid=/mnt/diskbackup/archives-paid
+
+# Set remote server launcher ip (default is 0.0.0.0)
+remoteserverlistenip=0.0.0.0
+# Set remote server launcher port (default is 8080)
+remoteserverlistenport=8080
+
+# Advanced Options for use a different path of dataroot in deployment server
+#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
+#newdoldataroot=/new/path/of/documents
+# Options to change the directory of vhostfile templates
+#templatesdir=/path/of/vhostfile/templates
+# Options to change the SSL certificates names in Apache virtualhost
+#websslcertificatecrt=with.sellyoursaas.com.crt
+#websslcertificatekey=with.sellyoursaas.com.key
+#websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+# Options for Jailkit
+#chrootdir=/home/jail/chroot
+#privatejailtemplatename=privatejail
+#commonjailtemplatename=commonjail
+---------------
+
+Mettre *masterserver* à 1, *dnsserver* et *instanceserver* à 0 sur le Master
+Mettre *masterserver* à 0, *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
+
+
 === Installing the nfs share
 
 NFS sharing will allow the *Deployment* servers to recover the application images to be installed which are centralized on the
@@ -701,7 +778,7 @@ sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
-==== Now, we need to install *php-mcrypt*
+Now, we need to install *php-mcrypt* for Ubuntu 20.04+ (optional)
 
 [source,bash]
 ---------------
@@ -1812,8 +1889,11 @@ On the *Master* server and each *Deployment server*, donner l'accès localement 
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'localhost' IDENTIFIED BY '...';
+
 GRANT CREATE USER, GRANT OPTION, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'sellyoursaas'@'localhost';
+
 GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT, UPDATE, ALTER, INDEX, REFERENCES, SHOW VIEW ON *.* TO 'sellyoursaas'@'localhost';
+
 FLUSH PRIVILEGES;
 ---------------
 
@@ -1822,7 +1902,9 @@ Give permission, on the *Master server*, to the account of each deployment serve
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf of the deployment server)
+
 GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON dolibarr.* TO 'sellyoursaas'@'ip.server.deployment';
+
 FLUSH PRIVILEGES;
 ---------------
 
@@ -2981,74 +3063,6 @@ Se connecter à l'interface utilisateur du master Dolibarr (https://admin.mysaas
 ** Module Utilisateurs et Groupes
 *** Créer/modifier ses propres informations utilisateur
 
-* Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
-
-[source,bash]
----------------
-vi /etc/sellyoursaas.conf
-chown root.admin /etc/sellyoursaas.conf
-chmod g-wx /etc/sellyoursaas.conf
-chmod o-rwx /etc/sellyoursaas.conf
----------------
-
-With the following content:
-
-[source,conf]
----------------
-# domain du service
-domain=mysaasdomainname.com
-subdomain=withX.mysaasdomainname.com
-# ips autorisés à commander le déploiement
-allowed_hosts=127.0.0.1,ipduservermaster
-# Set to 1 if this server is the master server
-masterserver=1
-# Set to 1 if this server host instances for the pool (deployment server)
-instanceserver=1
-# Set to 1 if this server hosts a dns for the pool (deployment server)
-dnsserver=1
-# Set to its own IP if it is a deployment server
-ipserverdeployment=ipduserverdeployment
-# Set this to directory where dolibarr repository is installed
-dolibarrdir=/home/admin/wwwroot/dolibarr
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
-# Set location of the master database
-databasehost=ipduserveurmaster ou localhost si serveur master
-# Set port of the master database (default is 3306)
-databaseport=3306
-# Set database name of the master server
-database=databaseduservermaster
-# Set credential for the master and deployment database
-databaseuser=sellyoursaas
-databasepass=...
-# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
-archivetestinstances=1
-# Set directory where backup are stored
-backupdir=/mnt/diskbackup/backup
-# Set directory where archives of tests instances are stored
-archivedirtest=/mnt/diskbackup/archives-test
-# Set directory where archives of paid instances are stored
-archivedirpaid=/mnt/diskbackup/archives-paid
-# Set remote server launcher ip (default is 0.0.0.0)
-remoteserverlistenip=0.0.0.0
-# Set remote server launcher port (default is 8080)
-remoteserverlistenport=8080
-# Options for use a different path of dataroot in deployment server
-#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
-#newdoldataroot=/new/path/of/documents
-# Options to change the directory of vhostfile templates
-#templatesdir=/path/of/vhostfile/templates
-# Options to change the SSL certificates names in Apache virtualhost
-#websslcertificatecrt=with.sellyoursaas.com.crt
-#websslcertificatekey=with.sellyoursaas.com.key
-#websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
-# Options for Jailkit
-#chrootdir=/home/jail/chroot
-#privatejailtemplatename=privatejail
-#commonjailtemplatename=commonjail
----------------
-
-Mettre *dnsserver* et *instanceserver* à 0 sur le Master, mettre *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 
 Rebasculer sur l'instance Master Dolibarr (https://admin.mysaasdomainname.com) et aller sur la configuration du module SellYourSaas:
 
