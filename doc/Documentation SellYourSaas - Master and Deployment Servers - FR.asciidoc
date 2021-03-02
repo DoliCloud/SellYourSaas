@@ -589,6 +589,7 @@ domain=mysaasdomainname.com
 subdomain=withX.mysaasdomainname.com
 # ips autorisés à commander le déploiement
 allowed_hosts=127.0.0.1,ipduservermaster
+
 # Set to 1 if this server is the master server
 masterserver=1
 # Set to 1 if this server host instances for the pool (deployment server)
@@ -597,10 +598,6 @@ instanceserver=1
 dnsserver=1
 # Set to its own IP if it is a deployment server
 ipserverdeployment=ipduserverdeployment
-# Set this to directory where dolibarr repository is installed
-dolibarrdir=/home/admin/wwwroot/dolibarr
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
 
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
@@ -615,6 +612,10 @@ databasepass=...
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
 
+# Set this to directory where dolibarr repository is installed
+dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
 # Set directory where backup are stored
 backupdir=/mnt/diskbackup/backup
 # Set directory where archives of tests instances are stored
