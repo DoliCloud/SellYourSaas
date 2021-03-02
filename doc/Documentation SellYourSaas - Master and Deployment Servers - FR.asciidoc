@@ -1917,7 +1917,7 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-Donner les droits d'accès sur le serveur *Master* et les *Serveurs de déploiement* pour administration à distance de toute base client:
+Donner les droits d'accès sur le serveur de base de données pour permettre l'administration à distance de toute base client:
 
 [source,sql]
 ---------------
@@ -1932,7 +1932,7 @@ Si vous utilisez un agent de supervision comme *DataDog* pour superviser la base
 
 [source,sql]
 ---------------
-CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...';
+CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...passwordfordatadog...';
 GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 FLUSH PRIVILEGES;

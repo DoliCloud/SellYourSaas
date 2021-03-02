@@ -1925,11 +1925,11 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-Give access rights to the *Master server* and *Deployment servers* for remote administration on all databases from a desktop:
+Give access rights on the database server to allow remote administration on all databases from your desktop:
 
 [source,sql]
 ---------------
-CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
+CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordfordatadog...';
 GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
