@@ -608,9 +608,10 @@ databasehost=ipduserveurmaster ou localhost si serveur master
 databaseport=3306
 # Set database name of the master server
 database=databaseduservermaster
-# Set credential for the master and deployment database
+# Set a credential for an access to the master database (each server can have a different account to access the master database)
 databaseuser=sellyoursaas
 databasepass=...
+
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
 
