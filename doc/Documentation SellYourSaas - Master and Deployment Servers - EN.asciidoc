@@ -885,7 +885,7 @@ ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
 
 
 
-On the Master server:
+On the *Master server*:
 
 * Create a virtual host *admin.mysaasdomainname.com* on the Dolibarr *Master* for the administration of SellyourSaas
 
@@ -3066,10 +3066,6 @@ Se connecter à l'interface utilisateur du master Dolibarr (https://admin.mysaas
 *** Consulter les contacts
 ** Module Utilisateurs et Groupes
 *** Créer/modifier ses propres informations utilisateur
-
-
-Rebasculer sur l'instance Master Dolibarr (https://admin.mysaasdomainname.com) et aller sur la configuration du module SellYourSaas:
-
 
 * Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
 
