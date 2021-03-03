@@ -364,7 +364,7 @@ if (empty($conf) || ! is_object($conf))
     				<div class="page-head">
     				<!-- BEGIN PAGE TITLE -->
     				<div class="page-title">
-    				<h1>'.$langs->trans("Tickets").' </h1>
+					<h1>'.$langs->trans("OldTickets").' <small>'.$langs->trans("OldTicketsDesc").'</small></h1>
     				</div>
     				<!-- END PAGE TITLE -->
 
