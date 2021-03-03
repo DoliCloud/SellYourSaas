@@ -2518,7 +2518,9 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration du serveur DNS sur les serveurs Master
+=== Setup of DNS server for Master server
+
+==== On registar side
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -2526,7 +2528,9 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
     *myaccount.mysaasdomainname.com*     Domain de l'outil d'administration pointant sur l'ip du serveur Master
 
 
-=== Setup of DNS server on deployment servers
+=== Setup of DNS server for deployment servers
+
+==== On registar side
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -2538,6 +2542,8 @@ You can also add record *GLUE record* on your register side for (optional)
 
     *ns1with1.mysaasdomainname.com*
     *ns2with1.mysaasdomainname.com*
+
+==== On deployment servers
 
 Create a file */etc/bind/withX.mysaasdomainname.com.hosts* for the DNS *withX.mysaasdomainname.com* on the *Deployment server* (replace X):
 
@@ -2590,7 +2596,7 @@ mkdir /etc/bind/archives
 
 Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
 
-Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local.
+Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local:
 
 [source,bash]
 ---------------
@@ -2610,7 +2616,7 @@ Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/
 
 ==== Définition taille upload et durée sessions
 
-Modifier le fichier *php.ini* (celui de *apache* et celui de *cli*) pour permettre l'upload de plus gros fichiers.
+Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
@@ -2794,14 +2800,19 @@ sudo systemctl status apport.service
 Note: Reports are into */var/crash*
 
 
-=== Installer certbot (pour le SSL des sites hors instances utilisateurs)
+=== Install certbot (for SSL certificates)
 
 [source,bash]
 ---------------
-apt install software-properties-common python-software-properties
-add-apt-repository ppa:certbot/certbot
-apt update
-apt install python-certbot-apache
+apt remove cerbot
+sudo snap install --classic certbot
+
+# Old method was:
+#cd /root
+#apt install software-properties-common python-software-properties
+#add-apt-repository ppa:certbot/certbot
+#apt update
+#apt install python-certbot-apache
 ---------------
 
 [[creation_certificat_ssl]]
@@ -2846,11 +2857,14 @@ Choisir:
 
 ===== From LetsEncrypt
 
+apt install certbot
+
+
 * Run certbot-auto
 
 [source,bash]
 ---------------
-/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
+certbot certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
 ---------------
 
 Follow instructions to add DNS entries and validate generation.

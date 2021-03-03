@@ -2509,7 +2509,9 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration du serveur DNS sur les serveurs Master
+=== Configuration du serveur DNS pour le serveur Master
+
+==== Chez le registar
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -2518,6 +2520,8 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
 
 
 === Configuration du serveur DNS sur les serveurs de Déploiement
+
+==== Chez le registar
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -2529,6 +2533,8 @@ Ajouter les enregistrements *GLUE record* auprès du registar pour (optionnel)
 
     *ns1with1.mysaasdomainname.com*
     *ns2with1.mysaasdomainname.com*
+
+==== Sur le serveur de déploiement
 
 Créer un fichier */etc/bind/withX.mysaasdomainname.com.hosts* pour le DNS *withX.mysaasdomainname.com* sur le *Serveur de Déploiement* (remplacer X par la valeur adéquate):
 
@@ -2580,7 +2586,7 @@ mkdir /etc/bind/archives
 
 Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
 
-Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local.
+Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local:
 
 [source,bash]
 ---------------
@@ -2786,14 +2792,19 @@ sudo systemctl status apport.service
 Note: Les rapports sont dans */var/crash*
 
 
-=== Installer certbot (pour le SSL des sites hors instances utilisateurs)
+=== Installer certbot (pour les certificats SSL)
 
 [source,bash]
 ---------------
-apt install software-properties-common python-software-properties
-add-apt-repository ppa:certbot/certbot
-apt update
-apt install python-certbot-apache
+apt remove cerbot
+sudo snap install --classic certbot
+
+# Old method was:
+#cd /root
+#apt install software-properties-common python-software-properties
+#add-apt-repository ppa:certbot/certbot
+#apt update
+#apt install certbot
 ---------------
 
 [[creation_certificat_ssl]]
@@ -2838,11 +2849,13 @@ Choisir:
 
 ===== Via LetsEncrypt
 
+apt install certbot
+
 * Run certbot-auto
 
 [source,bash]
 ---------------
-/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
+certbot certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
 ---------------
 
 Follow instructions to add DNS entries and validate generation.
