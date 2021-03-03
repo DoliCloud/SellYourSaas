@@ -2545,12 +2545,14 @@ You can also add record *GLUE record* on your register side for (optional)
 
 ==== On deployment servers
 
+We have to create the DNS files that will be used to store the DNS record of each customer. Those files will be completed after each new deployment.
+
 Create a file */etc/bind/withX.mysaasdomainname.com.hosts* for the DNS *withX.mysaasdomainname.com* on the *Deployment server* (replace X):
 
 [source,bash]
 ---------------
 $ttl 1d
-$ORIGIN with1.mysaasdomainname.com.
+$ORIGIN withX.mysaasdomainname.com.
 @               IN     SOA     ns1withXmysaasdomainname.com. admin.mysaasdomainname.com. ((
                 140921009        ; serial
                 600              ; refresh = 10 minutes

@@ -2536,12 +2536,15 @@ Ajouter les enregistrements *GLUE record* auprès du registar pour (optionnel)
 
 ==== Sur le serveur de déploiement
 
+Nous allons créer les fichiers DNS pour permettre la résolution des noms DNS de tous les clients. Ces fichiers seront complétés à chaque nouveau
+déploiement.
+
 Créer un fichier */etc/bind/withX.mysaasdomainname.com.hosts* pour le DNS *withX.mysaasdomainname.com* sur le *Serveur de Déploiement* (remplacer X par la valeur adéquate):
 
 [source,bash]
 ---------------
 $ttl 1d
-$ORIGIN with1.mysaasdomainname.com.
+$ORIGIN withX.mysaasdomainname.com.
 @               IN     SOA     ns1withX.mysaasdomainname.com. supervision.mysaasdomainname.com. (
                 140921009        ; serial
                 600              ; refresh = 10 minutes
