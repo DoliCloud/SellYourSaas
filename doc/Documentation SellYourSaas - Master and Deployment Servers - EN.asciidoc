@@ -2546,7 +2546,8 @@ You can also add record *GLUE record* on your register side for (optional)
 
 ==== On deployment servers
 
-We have to create the DNS files that will be used to store the DNS record of each customer. Those files will be completed after each new deployment.
+We have to create the DNS files that will be used to store the DNS record of each customer *.withX.mysaasdomainname.com.
+Those files will be completed after each new deployment.
 
 Create a file */etc/bind/withX.mysaasdomainname.com.hosts* for the DNS *withX.mysaasdomainname.com* on the *Deployment server* (replace X):
 
@@ -2569,10 +2570,12 @@ $ORIGIN withX.mysaasdomainname.com.
 
 $ORIGIN withX.mysaasdomainname.com.
 
-; other sub-domain records
+_acme-challenge IN	  TXT      "a-value-that-will-be-filled-later-for-lets-encrypt"
+
 ; other sub-domain records
 ; here will be added entry like this one
 ; client1  A   ip.of.server.deployment
+test	A	ip.of.server.deployment
 
 ---------------
 
@@ -2608,6 +2611,15 @@ sudo systemctl stop systemd-resolved
 cat "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
 ---------------
+
+Do a test of DNS resolution using the local DNS server with
+
+[source,bash]
+---------------
+host -a test.withX.mysaasdomainname.com 127.0.0.1
+---------------
+
+Cela doit renvoyer l'ip du serveur de déploiement.
 
 
 === Setup of PHP
