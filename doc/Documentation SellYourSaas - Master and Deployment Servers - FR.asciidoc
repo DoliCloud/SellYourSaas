@@ -2500,7 +2500,8 @@ image::config_jailkit_contrat.png[SSH access type]
 
 === Autoriser la génération de vignettes aperçus PNG depuis les PDF
 
-Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick
+Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick. Ceci permettra à ImageMagick et donc les librairies PHP de 
+pouvoir fabriquer une image png d'aperçu depuis un fichier PDF.
 
     vi /etc/ImageMagick-6/policy.xml
 
