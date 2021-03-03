@@ -2820,15 +2820,15 @@ Pour générer le fichier .key:
 [source,bash]
 ---------------
 cd /etc/apache2
-openssl genrsa 2048 > with.mysaasdomainname.com.key
-chmod go-r with.mysaasdomainname.com.key
+openssl genrsa 2048 > withX.mysaasdomainname.com.key
+chmod go-r withX.mysaasdomainname.com.key
 ---------------
 
 Pour générer le fichier .csr:
 
 [source,bash]
 ---------------
-openssl req -nodes -newkey rsa:2048 -sha256 -keyout with.mysaasdomainname.com.key -out with.mysaasdomainname.com.csr
+openssl req -nodes -newkey rsa:2048 -sha256 -keyout withX.mysaasdomainname.com.key -out withX.mysaasdomainname.com.csr
 ---------------
 
 Choisir:
@@ -2850,7 +2850,7 @@ Choisir:
 
 [source,bash]
 ---------------
-/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.destailleur.fr"
+/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
 ---------------
 
 Follow instructions to add DNS entries and validate generation.

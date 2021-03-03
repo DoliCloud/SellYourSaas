@@ -2842,7 +2842,7 @@ Choisir:
 
 [source,bash]
 ---------------
-/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.destailleur.fr"
+/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
 ---------------
 
 Follow instructions to add DNS entries and validate generation.
