@@ -1045,7 +1045,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
-			echo Error when running service apache2 reload 
+			echo Error when running service apache2 reload to deploy instance $instancename.$domainname
 			echo "Failed to deployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 			exit 2
 		fi
@@ -1081,7 +1081,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
 			service apache2 reload
 			if [[ "x$?" != "x0" ]]; then
-				echo Error when running service apache2 reload 
+				echo Error when running service apache2 reload to undeploy instance $instancename.$domainname
 				echo "Failed to undeploy or undeployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
 				exit 2
 			fi
