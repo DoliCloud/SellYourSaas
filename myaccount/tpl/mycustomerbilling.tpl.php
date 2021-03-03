@@ -166,7 +166,7 @@ print '
                     $urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
                     //print '<br><a href="'.$urltouse.'" target="_download">'.$langs->trans("Download").'</a>';
 
-                    $totalpaidht+=$obj->total_ht;
+                    $totalpaidht += $obj->total_ht;
 
                     print '
 			              </td>
@@ -396,7 +396,7 @@ print '
         if ($resql)
         {
             $obj = $db->fetch_object($resql);
-            $totalamountcommission=$obj->total;
+            $totalamountcommission = $obj->total;
         }
 
         print '<tr class="liste_titre"><td colspan="6">'.$langs->trans("Total").'</td>';
