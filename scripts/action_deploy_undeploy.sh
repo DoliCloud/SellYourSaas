@@ -168,6 +168,8 @@ if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
 
+export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 # possibility to change the path of sellyoursass directory
 olddoldataroot=`grep 'olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 newdoldataroot=`grep 'newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -790,7 +792,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd ]]; then
+					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
 						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 					else
@@ -813,7 +815,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 						fi
 					else
-						if [[ -x /usr/bin/zstd ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
 							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						else
