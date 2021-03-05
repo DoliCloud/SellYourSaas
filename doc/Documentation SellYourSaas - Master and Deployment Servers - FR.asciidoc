@@ -626,6 +626,9 @@ remoteserverlistenip=0.0.0.0
 # Set remote server launcher port (default is 8080)
 remoteserverlistenport=8080
 
+remotebackupserver=ip.of.remote.backup.ssh.server
+remotebackupdir=/mnt/diskbackup
+
 # Advanced Options to use different paths in deployment server
 # Set directory where instances are stored (default is /home/jail/home)
 #targetdir=/home/jail/home
@@ -1628,6 +1631,10 @@ Compiler le fichier par:
 [source,bash]
 ---------------
 postmap /etc/postfix/generic
+postmap /etc/aliases
+echo >> /etc/postfix/access; postmap /etc/postfix/access
+echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
+echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
 Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomain.com*:
@@ -1922,7 +1929,7 @@ Donner les droits d'accès, sur le *Master*, au compte de chaque serveur de dép
 ---------------
 CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
 
-GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON dolibarr.* TO 'sellyoursaas'@'ip.server.deployment';
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
 
 FLUSH PRIVILEGES;
 ---------------
@@ -2708,6 +2715,15 @@ sendmail_path = /usr/local/bin/phpsendmail.php
 mail.log = /var/log/phpmail.log
 ---------------
 
+Créer les fichier *phpmail.log* et *phpsendmail.log*:
+
+[source,bash]
+---------------
+echo >> /var/log/phpmail.log
+echo >> /var/log/phpsendmail.log
+chown syslog.adm phpmail.log phpsendmail.log
+chmod a+rw phpmail.log phpsendmail.log
+---------------
 
 === Configuration de logrotate
 
@@ -3063,7 +3079,16 @@ Attention: Choisissez comme nom de répertoire document lors de l'assistant d'in
 
 === Installation de Geoip2
 
-* Installer la base de données de MaxMind. Activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
+* Installer la base de données de MaxMind:
+
+mkdir */home/admin/tools/maxmind/*
+
+Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
+
+chmod -R o-w maxmind
+
+
+Sur le Dolibarr master, activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
 
 
 == Installation du plugin SellYourSaas
@@ -3094,6 +3119,7 @@ cd /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
 ln -fs /home/admin/wwwroot/dolibarr/htdocs source
 ---------------
 
+Sur le *Master*:
 
 Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainname.com):
 
@@ -3270,13 +3296,14 @@ DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https:/
 ---------------
 
 
-* Copier le fichier de config datadog pour superviser *mysql/mariadb*. Le fichier sera éditer pour renseigner le mot de passe du compte de base datadog un peu plus loin... 
+* Copier le fichier de config datadog pour superviser *mysql/mariadb*.
 
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
 ---------------
 
+Edit the file to enter the datadog password for mariadb.
 
 * Copier le fichier de config datadog pour superviser *apache*.
 
@@ -3301,6 +3328,25 @@ Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+---------------
+
+Edit file to be
+
+[source,bash]
+---------------
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+instances:
+  - url: localhost  # url used to connect to the memcached instance
 ---------------
 
 
