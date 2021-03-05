@@ -351,7 +351,7 @@ rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgr
 
 === Modification of /etc/skel
 
-Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys* with
+Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys_support* with
 * the ssh public key of the user (s) *myunixlogin*
 * the ssh public key of the user *admin* of the master server
 
@@ -373,7 +373,7 @@ Add at the end of */etc/bash.bashrc*:
 
 [source, bash]
 ---------------
-alias psld='ps -fax -eo user: 12, pid, ppid, pcpu, pmem, vsz: 12, size: 12, tty, start_time: 6, utime, time, cmd'
+alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,cmd'
 ---------------
 
 
@@ -779,7 +779,7 @@ sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
-sudo apt install soffice libreoffice-common libreoffice-writer
+sudo apt install libreoffice-common libreoffice-writer
 ---------------
 
 Now, we need to install *php-mcrypt* for Ubuntu 20.04+ (optional)
@@ -1011,7 +1011,7 @@ You can create another virtual host for the HTTPS on port 443
 
 On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
 
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restatr after a crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
 
 [source, bash]
 ---------------
@@ -1396,6 +1396,19 @@ bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 10
 
+[web-dol-registerinstance]
+
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
+; disable this rule by setting enable to false on deployment servers
+;enabled = true
+;port    = http,https
+;filter  = apache-dolibarr-rulesregisterinstance
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
+;action  = %(action_mw)s
+;bantime  = 4320000   ; 50 days
+;findtime = 86400     ; 1 day
+;maxretry = 10
+
 ---------------
 
 Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d*
@@ -1483,6 +1496,12 @@ It seems we must also restart apache to have this effective inside apache.
 * Install afick.pl tool from the debian package found on afick web site.
 
 * Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+
+[source,bash]
+---------------
+exclude_suffix := log LOG
+exclude_suffix := tmp old bak
+---------------
 
 * Complete setup */etc/afick.conf* for section *macros* with:
 
@@ -1610,7 +1629,6 @@ et l'email à utiliser qui est officiellement valide.
 [source,bash]
 ---------------
 root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-root@myshortservername.locadomain			noreply@mysaasdomain.com
 admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
 
@@ -2585,9 +2603,9 @@ Ajouter une entrée dans */etc/bind/named.conf.local* pour que ce nouveau fichie
 [source,bash]
 ---------------
 // mysaasdomainname.com
-zone "with.mysaasdomainname.com" {
+zone "withX.mysaasdomainname.com" {
         type master;
-        file "/etc/bind/with.mysaasdomainname.com.hosts";
+        file "/etc/bind/withX.mysaasdomainname.com.hosts";
         };
 ---------------
 
@@ -2599,9 +2617,14 @@ Créer un répertoire */etc/bind/archives*
 mkdir /etc/bind/archives
 ---------------
 
+Vérifier que la résolution DNS se fait bien par défaut sur 127.0.0.1 en faisant par exempl:
 
-Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com
+---------------
 
+Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
 Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local:
 
 [source,bash]
@@ -2612,6 +2635,7 @@ cat "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
 ---------------
 
+
 Do a test of DNS resolution using the local DNS server with
 
 [source,bash]
@@ -2620,6 +2644,14 @@ host -a test.withX.mysaasdomainname.com 127.0.0.1
 ---------------
 
 Cela doit renvoyer l'ip du serveur de déploiement.
+
+Essayez ensuite en passant par un DNS exterieur comme celui de Google:
+
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com 8.8.8.8
+---------------
+
 
 
 === Setup of PHP
@@ -2872,10 +2904,7 @@ Choisir:
 
 ===== From LetsEncrypt
 
-apt install certbot
-
-
-* Run certbot-auto
+* Run cerbot or certbot-auto
 
 [source,bash]
 ---------------
@@ -2904,13 +2933,13 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
-* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
+* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
 
 ---------------
-SSLCertificateFile /etc/apache2/witX.sellyoursaas.com.crt
-SSLCertificateKeyFile /etc/apache2/withX.sellyoursaas.com.key
-SSLCertificateChainFile /etc/apache2/withX.sellyoursaas.com-intermediate.crt
-SSLCACertificateFile /etc/apache2/withX.sellyoursaas.com-intermediate.crt
+SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
+SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
+SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
 ---------------
 
 So if a user is using an old URL with a delete virtual host, he will reach the default page */var/www/html/index.html*. 

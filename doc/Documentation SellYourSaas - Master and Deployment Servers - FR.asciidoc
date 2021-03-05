@@ -1388,6 +1388,19 @@ bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 10
 
+[web-dol-registerinstance]
+
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
+; disable this rule by setting enable to false on deployment servers
+;enabled = true
+;port    = http,https
+;filter  = apache-dolibarr-rulesregisterinstance
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
+;action  = %(action_mw)s
+;bantime  = 4320000   ; 50 days
+;findtime = 86400     ; 1 day
+;maxretry = 10
+
 ---------------
 
 Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/filter.d* dans le répertoire du même nom */etc/fail2ban/filter.d*
@@ -1473,6 +1486,12 @@ Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans a
 * Installer afick.pl tool from the debian package found on afick web site.
 
 * Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+
+[source,bash]
+---------------
+exclude_suffix := log LOG
+exclude_suffix := tmp old bak
+---------------
 
 * Complete setup */etc/afick.conf* for section *macros* with:
 
@@ -1601,7 +1620,6 @@ et l'email à utiliser qui est officiellement valide.
 [source,bash]
 ---------------
 root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-root@myshortservername.locadomain			noreply@mysaasdomain.com
 admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
 
@@ -1831,15 +1849,20 @@ Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
 Afin de ne pas permettre le brut force cracking, si ce n'est pas déjà le cas, mettre le user *root* de base de donnée en authentification
 depuis le compte root système uniquement (utilisation de *auth_socket* ou *unix_socket*):
 
-For Mysql: Le plugin est *auth_socket* et il faut l'installer manuellement. Plus d'info sur: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
+For Mysql:
+
+Le plugin est *auth_socket* et il faut l'installer manuellement. Plus d'info sur: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
 
 [source,sql]
 ---------------
-INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
+INSTALL PLUGIN auth_socket SONAME 'unix_socket.so';
 SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
 ---------------
 
-For MariaDb: Le plugin est *unix_socket* and is set by default on Ubuntu OS.
+For MariaDb: 
+
+Le plugin est *unix_socket* and is set by default on Ubuntu OS.
+
 
 
 Pour basculer en mode authentification par mot de passe / par compte unix socket:
@@ -2591,8 +2614,22 @@ mkdir /etc/bind/archives
 ---------------
 
 
-Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
+Vérifier que la résolution DNS se fait bien par défaut sur 127.0.0.1 en faisant:
 
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com
+---------------
+
+Essayez ensuite en passant par un DNS exterieur comme celui de Google:
+
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com 8.8.8.8
+---------------
+
+
+Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
 Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local:
 
 [source,bash]
@@ -2603,7 +2640,8 @@ cat "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
 ---------------
 
-Faire un test de résolution qui utilise le serveur DNS local par:
+
+Do a test of DNS resolution using the local DNS server with
 
 [source,bash]
 ---------------
@@ -2611,6 +2649,13 @@ host -a test.withX.mysaasdomainname.com 127.0.0.1
 ---------------
 
 Cela doit renvoyer l'ip du serveur de déploiement.
+
+Essayez ensuite en passant par un DNS exterieur comme celui de Google:
+
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com 8.8.8.8
+---------------
 
 
 === Configuration de PHP
@@ -2865,9 +2910,7 @@ Choisir:
 
 ===== Via LetsEncrypt
 
-apt install certbot
-
-* Run certbot-auto
+* Run certbot or cerbot-auto
 
 [source,bash]
 ---------------
@@ -2896,7 +2939,7 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
-* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
+* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
 
 ---------------
 SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
