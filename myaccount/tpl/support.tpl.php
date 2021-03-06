@@ -283,9 +283,18 @@ if (empty($conf) || ! is_object($conf))
                         print '<input type="hidden" name="token" value="'.newToken().'">';
                         print '<input type="hidden" name="action" value="send">';
 
+                        $tmpcontractid = $id;	// The last contract id found
+                        if (GETPOST('supportchannel','alpha')) {
+                        	$tmparray = explode('_', GETPOST('supportchannel','alpha'));
+                        	if (!empty($tmparray[1]) && $tmparray[1] > 0) {
+                        		$tmpcontractid = $tmparray[1];
+                        		// TODO Check that $tmpcontractid is into list of own contract ids.
+                        	}
+                        }
+
                         // Add link to add file
                         print '<input type="hidden" name="mode" value="support">';
-                        print '<input type="hidden" name="contractid" value="'.$id.'">';
+                        print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
                         print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel','alpha').'">';
 
                         $sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
@@ -355,7 +364,7 @@ if (empty($conf) || ! is_object($conf))
     				<div class="page-head">
     				<!-- BEGIN PAGE TITLE -->
     				<div class="page-title">
-    				<h1>'.$langs->trans("Tickets").' </h1>
+					<h1>'.$langs->trans("OldTickets").' <small>'.$langs->trans("OldTicketsDesc").'</small></h1>
     				</div>
     				<!-- END PAGE TITLE -->
 

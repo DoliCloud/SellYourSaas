@@ -379,7 +379,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 				print '-> Backup process fails for '.$instance."\n";
 			}
 
-			sleep(1);
+			sleep(2);
 
 			$i++;
 		}

@@ -492,6 +492,7 @@ dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontracti
 
 
 if (empty($remoteip)) {
+	dol_syslog("InstanceCreationBlockedForSecurityPurpose empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
 	$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 	setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
 	header("Location: ".$newurl);
@@ -1099,6 +1100,7 @@ else
 		if ($abusetest) {
 			$db->rollback();
 			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+			dol_syslog("InstanceCreationBlockedForSecurityPurpose ip ".$remoteip." is refused with value abusetest=".$abusetest, LOG_DEBUG);
 			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip), null, 'errors');
 			//http_response_code(403);
 			header("Location: ".$newurl);
