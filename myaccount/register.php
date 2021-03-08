@@ -722,7 +722,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
     jQuery(document).ready(function() {
 
         /* Autofill the domain */
-        jQuery("[name=orgName]").change(function() {
+        jQuery("[name=orgName]").on("change", function() {
             console.log("Update sldAndSubdomain");
     	    $("[name=sldAndSubdomain]").val( applyDomainConstraints( $(this).val() ) );
         });
