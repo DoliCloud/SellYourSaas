@@ -930,7 +930,7 @@ else
         }
     	jQuery(document).ready(function() {
             /* Apply constraints in sldAndSubdomain field */
-            jQuery("#sldAndSubdomain").on("change", function() {
+            jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {
                 console.log("Update sldAndSubdomain field");
         	    $(this).val( applyDomainConstraints( $(this).val() ) );
             });

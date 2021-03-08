@@ -722,13 +722,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
     jQuery(document).ready(function() {
 
         /* Autofill the domain */
-        jQuery("[name=orgName]").on("change", function() {
+        jQuery("#formregister").on("change keyup", "#orgName", function() {
             console.log("Update sldAndSubdomain");
-    	    $("[name=sldAndSubdomain]").val( applyDomainConstraints( $(this).val() ) );
+    	    $("#sldAndSubdomain").val( applyDomainConstraints( $(this).val() ) );
         });
 
         /* Apply constraints if sldAndSubdomain field is change */
-        jQuery("#sldAndSubdomain").change(function() {
+        jQuery("#formregister").on("change keyup", "#sldAndSubdomain", function() {
             console.log("Update sldAndSubdomain field");
     	    $(this).val( applyDomainConstraints( $(this).val() ) );
         });
