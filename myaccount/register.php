@@ -69,7 +69,7 @@ $langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors
 $partner=GETPOST('partner','int');
 $partnerkey=GETPOST('partnerkey','alpha');
 $plan=GETPOST('plan','alpha');
-$sldAndSubdomain=GETPOST('sldAndSubdomain','alpha');
+$sldAndSubdomain=strtolower(GETPOST('sldAndSubdomain','alpha'));
 $tldid=GETPOST('tldid','alpha');
 $origin = GETPOST('origin','aZ09');
 
@@ -187,7 +187,7 @@ if ($reusecontractid)
 	$contract->fetch($reusecontractid);
 	$socid = $contract->fk_soc;
 	$tmparray=explode('.', $contract->ref_customer, 2);
-	$sldAndSubdomain=$tmparray[0];
+	$sldAndSubdomain=strtolower($tmparray[0]);
 	$tldid='.'.$tmparray[1];
 }
 
@@ -532,7 +532,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 	              <label trans="1"><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
 	              <div class="linked-flds">
 	                <span class="opacitymedium">https://</span>
-	                <input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" />
+	                <input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" />
 	                <select<?php echo $disabled; ?> name="tldid" id="tldid" >
 	                	<?php
 	                	// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
@@ -724,8 +724,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
         /* Autofill the domain */
         jQuery("[name=orgName]").change(function() {
             console.log("Update sldAndSubdomain");
-        	dn = applyDomainConstraints( $(this).val() );
     	    $("[name=sldAndSubdomain]").val( applyDomainConstraints( $(this).val() ) );
+        });
+
+        /* Apply constraints if sldAndSubdomain field is change */
+        jQuery("#sldAndSubdomain").change(function() {
+            console.log("Update sldAndSubdomain field");
+    	    $(this).val( applyDomainConstraints( $(this).val() ) );
         });
 
         /* Sow hourglass */

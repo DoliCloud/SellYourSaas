@@ -177,6 +177,8 @@ $domainname = preg_replace('/^\./', '', $tldid);
 // Sanitize $sldAndSubdomain. Remove start and end -
 $sldAndSubdomain = preg_replace('/^\-+/', '', $sldAndSubdomain);
 $sldAndSubdomain = preg_replace('/\-+$/', '', $sldAndSubdomain);
+// Avoid uppercase letters
+$sldAndSubdomain = strtolower($sldAndSubdomain);
 
 $tmpproduct = new Product($db);
 $tmppackage = new Packages($db);
