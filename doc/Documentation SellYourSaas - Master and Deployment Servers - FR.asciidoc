@@ -568,6 +568,90 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
 
+=== Creation of sellyoursaas.conf with credentials
+
+* Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas.conf
+chown root.admin /etc/sellyoursaas.conf
+chmod g-wx /etc/sellyoursaas.conf
+chmod o-rwx /etc/sellyoursaas.conf
+---------------
+
+avec le contenu suivant
+
+[source,conf]
+---------------
+# domain du service
+domain=mysaasdomainname.com
+subdomain=withX.mysaasdomainname.com
+# ips autorisés à commander le déploiement
+allowed_hosts=127.0.0.1,ipduservermaster
+
+# Set to 1 if this server is the master server
+masterserver=1
+# Set to 1 if this server host instances for the pool (deployment server)
+instanceserver=1
+# Set to 1 if this server hosts a dns for the pool (deployment server)
+dnsserver=1
+# Set to its own IP if it is a deployment server
+ipserverdeployment=ipduserverdeployment
+
+# Set location of the master database
+databasehost=ipduserveurmaster ou localhost si serveur master
+# Set port of the master database (default is 3306)
+databaseport=3306
+# Set database name of the master server
+database=databaseduservermaster
+# Set a credential for an access to the master database (each server can have a different account to access the master database)
+databaseuser=sellyoursaas
+databasepass=...
+
+# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
+archivetestinstances=1
+
+# Set this to directory where dolibarr repository is installed
+dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where backup are stored
+backupdir=/mnt/diskbackup/backup
+# Set directory where archives of tests instances are stored
+archivedirtest=/mnt/diskbackup/archives-test
+# Set directory where archives of paid instances are stored
+archivedirpaid=/mnt/diskbackup/archives-paid
+
+# Set remote server launcher ip (default is 0.0.0.0)
+remoteserverlistenip=0.0.0.0
+# Set remote server launcher port (default is 8080)
+remoteserverlistenport=8080
+
+remotebackupserver=ip.of.remote.backup.ssh.server
+remotebackupdir=/mnt/diskbackup
+
+# Advanced Options to use different paths in deployment server
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+# Option to use different path for dataroot
+#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
+#newdoldataroot=/new/path/of/documents
+# Options to change the directory of vhostfile templates
+#templatesdir=/path/of/vhostfile/templates
+# Options to change the SSL certificates names in Apache virtualhost
+#websslcertificatecrt=with.sellyoursaas.com.crt
+#websslcertificatekey=with.sellyoursaas.com.key
+#websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+# Options for Jailkit
+#chrootdir=/home/jail/chroot
+#privatejailtemplatename=privatejail
+#commonjailtemplatename=commonjail
+---------------
+
+Mettre *masterserver* à 1, *dnsserver* et *instanceserver* à 0 sur le Master
+Mettre *masterserver* à 0, *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
+Ne pas oublier de définir une valeur pour *databasepass*.
+
+
 === Installation du partage nfs
 
 Le partage NFS permettra aux serveurs de *Déploiement* de récupérer les images d'application à installer qui sont centralisées sur le 
@@ -693,7 +777,7 @@ sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
-==== Il faut à présent installer *php-mcrypt*
+Il faut aussi à présent installer *php-mcrypt* pour Ubuntu 20.04+
 
 [source,bash]
 ---------------
@@ -796,7 +880,7 @@ ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
 
 
 
-Sur le serveur Master:
+Sur le *Serveur Master*:
 
 * Créer un virtual host *admin.mysaasdomainname.com* sur le Dolibarr *Master* pour l'administration de SellyourSaas
 
@@ -1307,6 +1391,19 @@ bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 10
 
+[web-dol-registerinstance]
+
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
+; disable this rule by setting enable to false on deployment servers
+;enabled = true
+;port    = http,https
+;filter  = apache-dolibarr-rulesregisterinstance
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
+;action  = %(action_mw)s
+;bantime  = 4320000   ; 50 days
+;findtime = 86400     ; 1 day
+;maxretry = 10
+
 ---------------
 
 Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/filter.d* dans le répertoire du même nom */etc/fail2ban/filter.d*
@@ -1373,7 +1470,7 @@ clamscan /tmp/testvirus
 clamdscan /tmp/testvirus --fdpass
 ---------------
 
-Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
+Supprimer le profil apparmor pour *usr.sbin.clamd*. Ceci est requis pour être appelé par un process web (sinon, erreur sur "getattr").
 
 [source,bash]
 ---------------
@@ -1383,8 +1480,8 @@ service apparmor reload
 service apparmor status
 ---------------
 
-You should see into the status a line saying that Profile *usr/sbin/clamd* is disabled.
-It seems we must also restart apache to have this effective inside apache.
+Vous devez voir dans le statut une ligne disant que le profil *usr/sbin/clamd* est désactivée.
+Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans apache.
 
 
 === Installation de Afick
@@ -1392,6 +1489,12 @@ It seems we must also restart apache to have this effective inside apache.
 * Installer afick.pl tool from the debian package found on afick web site.
 
 * Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+
+[source,bash]
+---------------
+exclude_suffix := log LOG
+exclude_suffix := tmp old bak
+---------------
 
 * Complete setup */etc/afick.conf* for section *macros* with:
 
@@ -1520,7 +1623,6 @@ et l'email à utiliser qui est officiellement valide.
 [source,bash]
 ---------------
 root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-root@myshortservername.locadomain			noreply@mysaasdomain.com
 admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
 
@@ -1529,6 +1631,10 @@ Compiler le fichier par:
 [source,bash]
 ---------------
 postmap /etc/postfix/generic
+postmap /etc/aliases
+echo >> /etc/postfix/access; postmap /etc/postfix/access
+echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
+echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
 Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomain.com*:
@@ -1750,15 +1856,20 @@ Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
 Afin de ne pas permettre le brut force cracking, si ce n'est pas déjà le cas, mettre le user *root* de base de donnée en authentification
 depuis le compte root système uniquement (utilisation de *auth_socket* ou *unix_socket*):
 
-For Mysql: Le plugin est *auth_socket* et il faut l'installer manuellement. Plus d'info sur: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
+For Mysql:
+
+Le plugin est *auth_socket* et il faut l'installer manuellement. Plus d'info sur: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
 
 [source,sql]
 ---------------
-INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
+INSTALL PLUGIN auth_socket SONAME 'unix_socket.so';
 SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
 ---------------
 
-For MariaDb: Le plugin est *unix_socket* and is set by default on Ubuntu OS.
+For MariaDb: 
+
+Le plugin est *unix_socket* and is set by default on Ubuntu OS.
+
 
 
 Pour basculer en mode authentification par mot de passe / par compte unix socket:
@@ -1804,8 +1915,11 @@ Sur le serveur *Master* et sur chaque *Serveur de déploiement*, donner l'accès
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'localhost' IDENTIFIED BY '...';
+
 GRANT CREATE USER, GRANT OPTION, RELOAD, LOCK TABLES, REPLICATION CLIENT ON *.* TO 'sellyoursaas'@'localhost';
+
 GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT, UPDATE, ALTER, INDEX, REFERENCES, SHOW VIEW ON *.* TO 'sellyoursaas'@'localhost';
+
 FLUSH PRIVILEGES;
 ---------------
 
@@ -1814,7 +1928,9 @@ Donner les droits d'accès, sur le *Master*, au compte de chaque serveur de dép
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
-GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON dolibarr.* TO 'sellyoursaas'@'ip.server.deployment';
+
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
+
 FLUSH PRIVILEGES;
 ---------------
 
@@ -1831,7 +1947,7 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-Donner les droits d'accès sur le serveur *Master* et les *Serveurs de déploiement* pour administration à distance de toute base client:
+Donner les droits d'accès sur le serveur de base de données pour permettre l'administration à distance de toute base client:
 
 [source,sql]
 ---------------
@@ -1846,7 +1962,7 @@ Si vous utilisez un agent de supervision comme *DataDog* pour superviser la base
 
 [source,sql]
 ---------------
-CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...';
+CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...passwordfordatadog...';
 GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 FLUSH PRIVILEGES;
@@ -2414,7 +2530,8 @@ image::config_jailkit_contrat.png[SSH access type]
 
 === Autoriser la génération de vignettes aperçus PNG depuis les PDF
 
-Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick
+Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick. Ceci permettra à ImageMagick et donc les librairies PHP de 
+pouvoir fabriquer une image png d'aperçu depuis un fichier PDF.
 
     vi /etc/ImageMagick-6/policy.xml
 
@@ -2423,7 +2540,9 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration du serveur DNS sur les serveurs Master
+=== Configuration du serveur DNS pour le serveur Master
+
+==== Chez le registar
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -2432,6 +2551,8 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
 
 
 === Configuration du serveur DNS sur les serveurs de Déploiement
+
+==== Chez le registar
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
@@ -2444,14 +2565,19 @@ Ajouter les enregistrements *GLUE record* auprès du registar pour (optionnel)
     *ns1with1.mysaasdomainname.com*
     *ns2with1.mysaasdomainname.com*
 
+==== Sur le serveur de déploiement
+
+Nous allons créer les fichiers DNS pour permettre la résolution des noms DNS de tous les clients *.withX.mysaasdomainname.com.
+Ces fichiers seront complétés à chaque nouveau déploiement.
+
 Créer un fichier */etc/bind/withX.mysaasdomainname.com.hosts* pour le DNS *withX.mysaasdomainname.com* sur le *Serveur de Déploiement* (remplacer X par la valeur adéquate):
 
 [source,bash]
 ---------------
 $ttl 1d
-$ORIGIN with1.mysaasdomainname.com.
+$ORIGIN withX.mysaasdomainname.com.
 @               IN     SOA     ns1withX.mysaasdomainname.com. supervision.mysaasdomainname.com. (
-                140921009        ; serial
+                2101011200       ; serial
                 600              ; refresh = 10 minutes
                 300              ; update retry = 5 minutes
                 604800           ; expiry = 1 week
@@ -2465,9 +2591,12 @@ $ORIGIN with1.mysaasdomainname.com.
 
 $ORIGIN withX.mysaasdomainname.com.
 
+_acme-challenge IN	  TXT      "a-value-that-will-be-filled-later-for-lets-encrypt"
+
 ; other sub-domain records
 ; here will be added entry like this one
 ; client1  A   ip.of.server.deployment
+test	A	ip.of.server.deployment
 
 ---------------
 
@@ -2492,9 +2621,23 @@ mkdir /etc/bind/archives
 ---------------
 
 
-Vérifier que le fichier */etc/resolv.conf* utilise bien 127.0.0.1 comme resolver. Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
+Vérifier que la résolution DNS se fait bien par défaut sur 127.0.0.1 en faisant:
 
-Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local.
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com
+---------------
+
+Essayez ensuite en passant par un DNS exterieur comme celui de Google:
+
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com 8.8.8.8
+---------------
+
+
+Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
+Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local:
 
 [source,bash]
 ---------------
@@ -2502,6 +2645,23 @@ sudo systemctl disable systemd-resolved.service
 sudo systemctl stop systemd-resolved
 cat "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
+---------------
+
+
+Do a test of DNS resolution using the local DNS server with
+
+[source,bash]
+---------------
+host -a test.withX.mysaasdomainname.com 127.0.0.1
+---------------
+
+Cela doit renvoyer l'ip du serveur de déploiement.
+
+Essayez ensuite en passant par un DNS exterieur comme celui de Google:
+
+[source,bash]
+---------------
+nslookup test.withX.mysaasdomainname.com 8.8.8.8
 ---------------
 
 
@@ -2555,6 +2715,15 @@ sendmail_path = /usr/local/bin/phpsendmail.php
 mail.log = /var/log/phpmail.log
 ---------------
 
+Créer les fichier *phpmail.log* et *phpsendmail.log*:
+
+[source,bash]
+---------------
+echo >> /var/log/phpmail.log
+echo >> /var/log/phpsendmail.log
+chown syslog.adm phpmail.log phpsendmail.log
+chmod a+rw phpmail.log phpsendmail.log
+---------------
 
 === Configuration de logrotate
 
@@ -2634,15 +2803,18 @@ logrotate -f logrotate_sellyoursaas_log
 ---------------
 
 
-=== Configuration de journalctl (sur Ubuntu 18.04+)
+=== Configuration de journalctl
+
+Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
 * Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
 
 [source,conf]
 ---------------
 ...
-SystemMaxUse=250M
-SystemMaxFileSize=50M
+SystemMaxUse=1G
+# Define max size of each file (there is 1 file per user). Default is 1/8 of SystemMaxUse.
+SystemMaxFileSize=5M
 ...
 ---------------
 
@@ -2652,6 +2824,25 @@ Prendre en compte la modification
 ---------------
 systemctl stop systemd-journald
 systemctl start systemd-journald
+---------------
+
+Pour forcer le vidage d'un journal:
+
+[source,bash]
+---------------
+journalctl --flush --rotate
+journalctl --vacuum-size=1G
+journalctl --vacuum-time=1d
+---------------
+
+Pour lire les journaux:
+
+[source,bash]
+---------------
+journalctl --disk-usage
+journalctl --header
+
+journalctl -r --file user-XXX.journal
 ---------------
 
 
@@ -2678,14 +2869,19 @@ sudo systemctl status apport.service
 Note: Les rapports sont dans */var/crash*
 
 
-=== Installer certbot (pour le SSL des sites hors instances utilisateurs)
+=== Installer certbot (pour les certificats SSL)
 
 [source,bash]
 ---------------
-apt install software-properties-common python-software-properties
-add-apt-repository ppa:certbot/certbot
-apt update
-apt install python-certbot-apache
+apt remove cerbot
+sudo snap install --classic certbot
+
+# Old method was:
+#cd /root
+#apt install software-properties-common python-software-properties
+#add-apt-repository ppa:certbot/certbot
+#apt update
+#apt install certbot
 ---------------
 
 [[creation_certificat_ssl]]
@@ -2730,11 +2926,11 @@ Choisir:
 
 ===== Via LetsEncrypt
 
-* Run certbot-auto
+* Run certbot or cerbot-auto
 
 [source,bash]
 ---------------
-/root/certbot-auto certonly --manual --preferred-challenges=dns -d "*.destailleur.fr"
+certbot certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
 ---------------
 
 Follow instructions to add DNS entries and validate generation.
@@ -2759,7 +2955,7 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
-* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
+* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
 
 ---------------
 SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
@@ -2806,6 +3002,8 @@ Avoir dans le cron du user *root*
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
+Note: certbot-auto may be certbot
+
 Mettre dans le cron du user *admin*:
 
 [source,bash]
@@ -2813,9 +3011,11 @@ Mettre dans le cron du user *admin*:
 # m h  dom mon dow   command
 # cron master admin
 */10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
-7 7 * * * /home/admin/wwwroot/dolibarr/htocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
+7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 # cron master and deployment root
+#7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
+# cron master and deployment admin
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
@@ -2829,8 +3029,8 @@ Avoir dans le cron du user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment root
-40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 30 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
@@ -2840,6 +3040,7 @@ Mettre dans le cron du user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment admin
+#7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
@@ -2865,10 +3066,11 @@ cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr
 ---------------
 
+Sur le *Serveur Master*:
+
 * Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*)
 Attention: Choisissez comme nom de répertoire document lors de l'assistant d'installation */home/admin/wwwroot/dolibarr_documents* plutôt que
 */home/admin/wwwroot/dolibarr/documents*
-
 
 * Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
 
@@ -2877,7 +3079,16 @@ Attention: Choisissez comme nom de répertoire document lors de l'assistant d'in
 
 === Installation de Geoip2
 
-* Installer la base de données de MaxMind. Activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
+* Installer la base de données de MaxMind:
+
+mkdir */home/admin/tools/maxmind/*
+
+Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
+
+chmod -R o-w maxmind
+
+
+Sur le Dolibarr master, activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
 
 
 == Installation du plugin SellYourSaas
@@ -2908,6 +3119,7 @@ cd /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
 ln -fs /home/admin/wwwroot/dolibarr/htdocs source
 ---------------
 
+Sur le *Master*:
 
 Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainname.com):
 
@@ -3084,13 +3296,14 @@ DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https:/
 ---------------
 
 
-* Copier le fichier de config datadog pour superviser *mysql/mariadb*. Le fichier sera éditer pour renseigner le mot de passe du compte de base datadog un peu plus loin... 
+* Copier le fichier de config datadog pour superviser *mysql/mariadb*.
 
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
 ---------------
 
+Edit the file to enter the datadog password for mariadb.
 
 * Copier le fichier de config datadog pour superviser *apache*.
 
@@ -3115,6 +3328,25 @@ Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+---------------
+
+Edit file to be
+
+[source,bash]
+---------------
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+instances:
+  - url: localhost  # url used to connect to the memcached instance
 ---------------
 
 

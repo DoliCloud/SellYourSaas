@@ -168,9 +168,11 @@ if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
 
+export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 # possibility to change the path of sellyoursass directory
-olddoldataroot=`grep 'olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-newdoldataroot=`grep 'newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+newdoldataroot=`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 	fileforconfig1=${fileforconfig1/$olddoldataroot/$newdoldataroot}
 	dirwithdumpfile=${dirwithdumpfile/$olddoldataroot/$newdoldataroot}
@@ -790,7 +792,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd ]]; then
+					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
 						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 					else
@@ -807,13 +809,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
-						if [[ -x /usr/bin/zstd ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
 							echo "Archive of test instances are disabled. We discard the tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
 						else
 							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 						fi
 					else
-						if [[ -x /usr/bin/zstd ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
 							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						else
@@ -1043,7 +1045,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
-			echo Error when running service apache2 reload 
+			echo Error when running service apache2 reload to deploy instance $instancename.$domainname
 			echo "Failed to deployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 			exit 2
 		fi
@@ -1079,7 +1081,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
 			service apache2 reload
 			if [[ "x$?" != "x0" ]]; then
-				echo Error when running service apache2 reload 
+				echo Error when running service apache2 reload to undeploy instance $instancename.$domainname
 				echo "Failed to undeploy or undeployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
 				exit 2
 			fi

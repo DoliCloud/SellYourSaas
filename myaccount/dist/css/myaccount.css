@@ -266,10 +266,11 @@ div.tab-content {
 }
 .hideobject { display: none; }
 
+.minwidth50  { min-width: 50px; }
 .minwidth300 { min-width: 300px; }
 .minwidth400 { min-width: 400px; }
 .minwidth500 { min-width: 500px; }
-.minwidth50  { min-width: 50px; }
+.minwidth600 { min-width: 600px; }
 
 .width25  { width: 25px; }
 .width50  { width: 50px; }
@@ -317,6 +318,7 @@ div.tab-content {
     .minwidth300 { min-width: 280px !important; }
     .minwidth400 { min-width: 280px !important; }
     .minwidth500 { min-width: 280px !important; }
+    .minwidth600 { min-width: 280px !important; }
 	.maxwidth25  { max-width: 25px; }
 	.maxwidth50  { max-width: 50px; }
 	.maxwidth75  { max-width: 75px; }

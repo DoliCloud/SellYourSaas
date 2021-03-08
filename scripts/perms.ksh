@@ -59,8 +59,10 @@ chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas
 chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
-chown www-data.admin /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
-chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
+	chown www-data.admin /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+	chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+fi
 
 echo "Nettoyage fichier logs error"
 for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done

@@ -521,7 +521,12 @@ done;
 # Now clean also old dir in archives-test
 echo "***** Now clean also old dir in $archivedirtest - 15 days after being archived"
 cd $archivedirtest
-find $archivedirtest -maxdepth 1 -type d -mtime +15 -exec rm -fr {} \;
+find $archivedirtest -maxdepth 1 -name 'osu*' -type d -mtime +15 -exec rm -fr {} \;
+
+# Now clean also old dir in archives-paid
+echo "***** Now clean also old dir in $archivedirpaid - 90 days after being archived"
+cd $archivedirpaid
+find $archivedirpaid -maxdepth 1 -name 'osu*' -type d -mtime +90 -exec rm -fr {} \;
 
 if [[ "$dnsserver" == "1" ]]; then
 	# Now clean also old files in $archivedirbind
@@ -538,6 +543,11 @@ find $archivedircron -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
 # Now clean miscellaneous files
 echo "***** Now clean miscellaneous files"
 rm /var/log/repair.lock > /dev/null 2>&1
+
+# Now clean old journalctl files
+echo "***** Now clean journal files older than 60 days"
+echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;"
+find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;
 
 
 # Clean archives 
@@ -557,11 +567,11 @@ echo TODO Manually...
 echo "***** We should also clean mysql record for permission on old databases and old users"
 SQL="use mysql; delete from db where Db NOT IN (SELECT schema_name FROM information_schema.schemata) and Db like 'dbn%';"
 echo You can execute
-echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -e \"$SQL\" -pxxxxxx"
 #$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 SQL="use mysql; delete from user where User NOT IN (SELECT User from db) and User like 'dbu%';"
 echo You can execute
-echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx -e \"$SQL\""
+echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -e \"$SQL\" -pxxxxxx"
 #$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 
 if [[ $testorconfirm == "test" ]]; then
@@ -595,14 +605,15 @@ do
 	done
 	if [[ "x$noyoungfile" == "x1" ]]; then
 		if [ -d "$archivedirpaid/$osusername" ]; then
-			echo "# $fic - $noyoungfile - dir $archivedirpaid/$osusername exists" >> /tmp/deletedirs.sh
+			echo "# $fic - $noyoungfile - archive dir $archivedirpaid/$osusername exists, we can remove backup" >> /tmp/deletedirs.sh
 			echo "rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 		else
 			echo "# $fic - $noyoungfile" >> /tmp/deletedirs.sh
-			echo "# ALERT Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!!" >> /tmp/deletedirs.sh
+			echo "# ALERT Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with:" >> /tmp/deletedirs.sh
+			echo "# mv $backupdir/$osusername $archivedirpaid/$osusername; chown -R root.root $archivedirpaid/$osusername" >> /tmp/deletedirs.sh
 		fi
 	else
-        echo "# $fic - $noyoungfile - dir $dirtoscan exists and was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
+        echo "# $fic - $noyoungfile - backup dir $dirtoscan exists with a very old last_mysqldump* file but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
         echo "#rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 	fi
 done
