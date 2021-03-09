@@ -710,7 +710,7 @@ if (empty($conf) || ! is_object($conf))
         {
             domain = domain.replace(/ /g,"");
             domain = domain.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            // not  "a" - "z", "A" - "Z", "0" - "9" and "_"
+            // not  "a-z", "A-Z", "0-9" and "_"
             domain = domain.replace(/\W/g,"");
             domain = domain.replace(/\_/g,"");
             domain = domain.replace(/^[^a-z0-9]+/ig,"");
