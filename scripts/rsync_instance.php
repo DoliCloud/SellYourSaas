@@ -136,6 +136,10 @@ if (empty($dirroot) || empty($instance) || empty($mode))
 	exit(-1);
 }
 
+if (0 == posix_getuid()) {
+	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
+	exit(-1);
+}
 
 // Forge complete name of instance
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance))
