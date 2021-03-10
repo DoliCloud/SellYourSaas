@@ -3066,15 +3066,35 @@ cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr
 ---------------
 
+
 Sur le *Serveur Master*:
 
 * Installer Dolibarr pour qu'il réponde à un virtual host Apache, par exemple: https://admin.mysaasdomainname.com (pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*)
-Attention: Choisissez comme nom de répertoire document lors de l'assistant d'installation */home/admin/wwwroot/dolibarr_documents* plutôt que
+Attention: Choisissez lors de l'assistant d'installation, comme nom de répertoire document */home/admin/wwwroot/dolibarr_documents* plutôt que
 */home/admin/wwwroot/dolibarr/documents*
 
 * Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google ou SendGrid, penser à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du service de relai SMTP. 
 
-* Activez le module "Cron/Travaux programmés"  et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
+* Activez le module "Cron/Travaux programmés" et définissez la clé de sécurité du cron à la même valeur que ce qui a été mis en paramètre de l'appel de *cron_run_jobs.php*
+
+
+Sur les *Serveurs de déploiement*:
+
+* Créer un fichier */home/admin/wwwroot/dolibarr/htdocs/conf/conf.php*:
+
+[source,ini]
+---------------
+sudo vi /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+---------------
+
+pour ajouter le contenu suivant:
+
+[source,ini]
+---------------
+<?php
+$dolibarr_main_document_root='/home/admin/wwwroot/dolibarr/htdocs';
+$dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
+---------------
 
 
 === Installation de Geoip2
@@ -3088,7 +3108,7 @@ Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
 chmod -R o-w maxmind
 
 
-Sur le Dolibarr master, activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
+Sur le *Serveur maitre* Dolibarr, activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
 
 
 == Installation du plugin SellYourSaas
@@ -3103,7 +3123,7 @@ cd /home/admin/wwwroot
 git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
-* Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+* Créer un lien symbolique appelé *sellyoursaas* dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
 [source,bash]
 ---------------
@@ -3111,7 +3131,7 @@ cd /home/admin/wwwroot/dolibarr/htdocs/custom
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas sellyoursaas
 ---------------
 
-* Créer un lien symoblique dans *source* dans myaccounts.
+* Créer un lien symoblique appelé *source* dans *myaccounts* vers */home/admin/wwwroot/dolibarr/htdocs* :
 
 [source,bash]
 ---------------

@@ -2605,7 +2605,7 @@ test	A	ip.of.server.deployment
 ---------------
 
 
-Ajouter une entrée dans */etc/bind/named.conf.local* pour que ce nouveau fichier soit pris en compte
+Add an entry into */etc/bind/named.conf.local* so the new file will be taken into account
 
 [source,bash]
 ---------------
@@ -2617,7 +2617,7 @@ zone "withX.mysaasdomainname.com" {
 ---------------
 
 
-Créer un répertoire */etc/bind/archives*
+Create a directory */etc/bind/archives*
 
 [source,bash]
 ---------------
@@ -3065,7 +3065,7 @@ git clone https://github.com/Dolibarr/dolibarr dolibarr
 On *Master server*:
 
 * Install Dolibarr so that it responds to an Apache virtual host, for example: https://admin.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).
-Warning: Choose as the name of the document directory during the installation wizard */home/admin/wwwroot/dolibarr_documents* rather than
+Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than
 */home/admin/wwwroot/dolibarr/documents*
 
 * If you configure the sending of emails from the Dolibarr backoffice via an SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
@@ -3073,24 +3073,44 @@ Warning: Choose as the name of the document directory during the installation wi
 * Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
 
 
+On *Deployment servers*:
+
+* Create a file */home/admin/wwwroot/dolibarr/htdocs/conf/conf.php*:
+
+[source,ini]
+---------------
+sudo vi /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+---------------
+
+to add the following content:
+
+[source,ini]
+---------------
+<?php
+$dolibarr_main_document_root='/home/admin/wwwroot/dolibarr/htdocs';
+$dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
+---------------
+
+
+
 === Installation of Geoip2
 
-* Installer la base de données de MaxMind.
+* Install the free database file of Maxmind.
 
 mkdir */home/admin/tools/maxmind/*
 
-Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
+Copy the file GeoLite2-Country.mmdb you can get from website maxmind.com
 
 chmod -R o-w maxmind
 
-Sur le Dolibarr master, activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
+On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr to use this database file.
 
 
 == Installation of plugin SellYourSaas
 
-Sur tous les serveurs (Master et Déploiement):
+On all servers (*Master and Deployment*):
 
-* Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
 
 [source,bash]
 ---------------
@@ -3098,7 +3118,7 @@ cd /home/admin/wwwroot
 git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
-* Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+* Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
 [source,bash]
 ---------------
@@ -3106,7 +3126,7 @@ cd /home/admin/wwwroot/dolibarr/htdocs/custom
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas sellyoursaas
 ---------------
 
-* Créer un lien symoblique dans *source* dans myaccounts.
+* Create a symbolic link called *source* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs* :
 
 [source,bash]
 ---------------
