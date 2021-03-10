@@ -292,7 +292,7 @@ Add the following line in the */etc/sudoers* file to reposition the HOME accordi
 Defaults set_home
 ---------------
 
-Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root*.*root* and the permissions *r-r-----* and the content
+Create a file */etc/sudoers.d/myunixlogin* with the owner *root*.*root* and the permissions *r-r-----* and the content
 
 [source, conf]
 ---------------
@@ -764,7 +764,7 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
+sudo apt install ntp git gzip zip zstd memcached ncdu
 sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9

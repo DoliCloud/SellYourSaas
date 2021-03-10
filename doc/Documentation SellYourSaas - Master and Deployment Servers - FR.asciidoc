@@ -286,7 +286,7 @@ Ajouter la ligne suivante dans le fichier */etc/sudoers* pour repositionner le H
 Defaults        set_home
 ---------------
 
-Créer un fichier *myunixlogin* à mettre dans le répertoire */etc/sudoers.d* avec le owner *root* et les permissions *r--r-----* et le contenu
+Créer un fichier */etc/sudoers.d/myunixlogin* avec le owner *root* et les permissions *r--r-----* et le contenu
 
 [source,conf]
 ---------------
@@ -341,23 +341,6 @@ Afin de ne pas donner d'information aux utilisateurs qui feront du SSH, sur les 
 rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
-
-
-=== Modification de /etc/skel
-
-Editer sur les serveurs de déploiement le contenu de */etc/skel* afin de rempir le *.ssh/authorized_keys_support* avec 
-* la clé publique ssh du ou des utilisateurs *myunixlogin*
-* la clé publique ssh de l'utilisateur *admin* du serveur master
-
-[source,bash]
----------------
-sudo mkdir /etc/skel/.ssh
-sudo touch /etc/skel/.ssh/authorized_keys_support
-sudo chmod -R go-rwx /etc/skel/.ssh
-sudo vi /etc/skel/.ssh/authorized_keys_support
----------------
-
-Ainsi tout nouveau compte linux créé (ceux des instances des clients) sera accessible par le ou les administrateurs.
 
     
 
@@ -756,7 +739,7 @@ Il y a deux cas de figure selon votre version d'Ubuntu. Suivre la consigne *18.0
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
+sudo apt install ntp git gzip zip zstd memcached ncdu
 sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9

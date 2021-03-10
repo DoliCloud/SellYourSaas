@@ -1,0 +1,1304 @@
+= Sell-Your-Saas installation and operation document
+This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...) - Laurent Destailleur - www.sellyoursaas.org
+:source-highlighter: rouge
+:companyname: Teclib
+:corpname: Teclib
+:orgname: Teclib
+:creator: Laurent Destailleur
+:title: Document installation and operation of SellYourSaas
+:subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
+:keywords: sellyoursaas, saas, dolibarr, wamp, glpi
+:imagesdir: ./img
+:city: Bordeaux
+:toc: manual
+:toclevels: 3
+:toc-title: Table of contents
+:toc-placement: preamble
+:revnumber: v1.0
+:revdate: 2019-01-30
+:revremark: First version
+:revnumber: v1.1
+:revdate: 2020-02-12
+:revremark: Many improvements
+
+<<<<
+
+== Introduction ==
+
+This document present how to install a remote server for Backups in a SellYourSaas environement.
+
+
+<<<<
+
+=== Choice of machine and OS and create it
+
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*)
+
+* Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
+
+
+[[adding_disk]]
+=== Adding the harddisk of data (home of user instances and home of backups)
+
+We will add on the *RemoteBackupServer*, an independent disk for user instances and backups.
+
+With OVH Public Cloud or ScaleWay:
+
+* Create the disk of data from backoffice. You can imagine to reserve 250MB for each customer instance so choose a size in consideration.
+
+* Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
+Note, the disk becomes visible with *fdisk -l* and *lsblk*
+
+* If it is a disk never partitioned, add the partition on the disk (Linux type) and format it by doing:
+
+[source, bash]
+---------------
+fdisk -l
+fdisk /dev/vdx
+option n then p (then choose the partition number, first and last sector) then w
+
+fdisk -l
+
+fsck -N /dev/vdxY
+mkfs.ext4 /dev/vdxY
+---------------
+
+Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
+
+* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
+
+[source, bash]
+---------------
+blkid
+---------------
+
+* Declare the assembly for an automatic assembly at each reboot by adding a line in */etc/fstab*
+
+[source, bash]
+---------------
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (does not block the server from starting)
+---------------
+
+* Mount disk
+
+[source, bash]
+---------------
+mkdir /mnt/diskbackup
+mount /dev/vdxZ /mnt/diskbackup
+
+blkid
+---------------
+
+Note: A reboot may be required if disk or mount is not visible.
+
+* Optimize the filesystem by removing the update of the "atime" read access
+
+To see options for optimizing filesystems:
+
+[source, bash]
+---------------
+tune2fs -l /dev/vdxY | grep features
+---------------
+return
+
+Filesystem features: has_journal ext_attr resize_inode dir_index filetype needs_recovery extent flex_bg sparse_super large_file huge_file uninit_bg dir_nlink extra_isize
+
+
+To add -noatime to the filesystem in the */etc/fstab* file:
+
+[source, bash]
+---------------
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
+---------------
+
+To take the change into account:
+
+[source, bash]
+---------------
+mount -oremount /dev/diskX/
+---------------
+
+To check:
+
+[source, bash]
+---------------
+cat /proc/mounts | grep diskX
+---------------
+cat /proc/
+Rem: If you need to recover data files from another disk, use:
+
+[source, bash]
+---------------
+rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
+---------------
+
+
+
+
+=== SSH and sudo
+
+=== Unix admin account
+
+Create the user account *admin*. It will be used to install and administer the system when root is not required.
+
+[source, bash]
+---------------
+groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs
+---------------
+
+Check that the id of this user *admin* is greater than or equal to 1000.
+ 
+
+Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
+
+[source, bash]
+---------------
+adduser myunixlogin
+---------------
+
+
+==== ssh setup
+
+Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
+
+[source,conf]
+---------------
+chmod go-rw /etc/ssh/sshd_config
+---------------
+
+Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
+
+[source, conf]
+---------------
+# Privilege Separation is turned on for security
+UsePrivilegeSeparation yes
+# Permissions on files must be correct to allow login
+StrictModes yes
+
+# MaxSessions 10
+MaxSessions 25
+
+# Disallow login to root
+PermitRootLogin no
+# Disallow empty passwords
+PermitEmptyPasswords no
+# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
+ChallengeResponseAuthentication no
+ 
+# Define list of allowed method to authenticate
+PasswordAuthentication yes
+PubkeyAuthentication yes
+
+DenyUsers guest
+
+AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
+
+AllowUsers admin osu*
+AllowUsers myunixlogin
+---------------
+
+Please note: replace *myunixlogin* with the correct value before taking changes into account with:
+
+[source, conf]
+---------------
+/etc/init.d/ssh reload
+---------------
+
+
+Add the following line in the */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
+
+[source, conf]
+---------------
+Defaults set_home
+---------------
+
+Create a file */etc/sudoers.d/myunixlogin* with the owner *root*.*root* and the permissions *r-r-----* and the content
+
+[source, conf]
+---------------
+myunixlogin ALL=(ALL) NOPASSWD:ALL
+---------------
+
+
+Test that you can connect using *myunixlogin* and make a sudo with
+
+[source,bash]
+---------------
+ssh -v myunixlogin@x.y.z.a
+sudo -s
+---------------
+
+
+Add your public key to your unix account.
+
+[source, bash]
+---------------
+ssh-copy-id myunixlogin@x.y.z.a
+---------------
+
+Warning: Sometime ssh-copy-id copy the dss key instead of rsa key and ssh fails with dss.
+
+
+Define or redefine the password for *root*, *admin* with a secure password.
+
+[source,bash]
+---------------
+passwd root
+passwd admin
+---------------
+
+Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
+
+
+==== Default shell
+
+Modify the default shell to use bash (instead of dh sh or dash)
+
+[source, bash]
+---------------
+ln -fs /bin/bash /usr/bin/sh
+---------------
+
+
+=== Deletion of information files at login
+
+In order not to give information to users doing SSH, on the deployment servers:
+
+[source, bash]
+---------------
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/ 50-landscape-sysinfo
+rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
+---------------
+
+
+=== Add alias
+
+Add at the end of */etc/bash.bashrc*:
+
+[source, bash]
+---------------
+alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,cmd'
+---------------
+
+
+=== Hostname and IP configuration
+
+Add an entry from the new server to the DNS provided by the domain provider.
+
+Go to the OVH IP management interface, to add the reverse on the server IP.
+
+Go to the management interface of OVH servers, to modify their short name. This will modify the */etc/hostname* file automatically (if not manually modify) with the short name. The file will then have as sole content:
+
+[source, bash]
+---------------
+nameofserver
+---------------
+
+
+Connect and modify the file */etc/hosts* with the entry of the new server
+
+[source, bash]
+---------------
+main.ip.of.server nameofserver.mysaasdomainname.com
+---------------
+
+
+=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
+
+==== With ifupdown (Ubuntu 16.04)
+
+- To add a v6 IP dynamically for testing purposes at first:
+
+[source, bash]
+---------------
+ip addr add 2002:41d0:1234:1000::1234/128 dev eth0
+ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+---------------
+
+- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
+
+Example for an IPv6 2002:41d0:1234:1000::1234 with as gateway 2002:41d0:1234:1000::1
+
+[source, conf]
+---------------
+# To declare a persistent v6 IP (the mask is 128 at OVH in ipv6)
+iface eth0 inet6 static
+        address 2002:41d0:1234:1000::1234
+        netmask 128
+        post-up /sbin/ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+        post-up /sbin/ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del 2002:41d0:1234:1000::1 dev eth0
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
+To take this into account, try this, otherwise, reboot.
+
+[source, bash]
+---------------
+/etc/init.d/networking restart
+---------------
+
+==== With netplan (Ubuntu 18.04 +)
+
+Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
+Note: OVH provides a /128 for ipv6 but netplan wants /64
+ 
+Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
+
+[source, conf]
+---------------
+network:
+	version: 2
+	ethernets:
+		eth0:
+			match:
+				name: eth0
+			addresses:
+				- "1234:41d0:1234:1000::1234/64"
+			gateway6: "1234:41d0:1234:1000::1"
+---------------
+Note: Use 4 spaces for tabulation.
+ 
+[source, bash]
+---------------
+netplan try
+netplan apply
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
+
+=== Add virtual IP (optional)
+
+- Add the virtual IP via the OVH manager.
+
+- Add and remove the virtual network interface on the server dynamically (for test).
+
+Addition:
+
+[source, bash]
+---------------
+ifconfig eth0: 0 a.b.c.d
+---------------
+
+Deletion:
+
+[source, bash]
+---------------
+ifconfig eth0: 0 down
+---------------
+
+- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
+
+Example for 2 virtual IPs:
+
+[source, conf]
+---------------
+auto eth0: 0
+iface eth0: 0 inet static
+            address a.b.c.d
+            netmask 255.255.255.255
+            broadcast a.b.c.d
+
+# To declare a persistent virtual IP
+auto eth0: 1
+iface eth0: 1 inet static
+            address e.f.g.h
+            netmask 255.255.255.255
+            broadcast e.f.g.h
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
+To take this into account, try this, otherwise, reboot.
+
+[source, bash]
+---------------
+/etc/init.d/networking restart
+---------------
+
+- Associate the virtual IP with the server from the OVH manager.
+
+
+=== Creation of working directories
+
+Only */mnt/diskbackup* is required, so no creation of directory has to be done.
+
+  
+<<<<
+
+== Installation of system and application components
+
+=== Installation of packages
+
+There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one
+
+* Installation of the 18.04- Ubuntu packages
+
+[source,bash]
+---------------
+sudo apt update
+sudo apt install ntp git gzip zip zstd ncdu
+sudo apt rkhunter chkrootkit
+sudo apt install spamc spamassassin clamav clamav-daemon
+---------------
+
+
+=== Disabling automatic update
+
+Uninstall the package *unattended-upgrades* if it was installed.
+
+[source, bash]
+---------------
+apt remove unattended-upgrades
+---------------
+
+
+=== Installation of the firewall ===
+
+* Create a firewall launch file (for example in */home/admin/tools/firewall*). Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
+
+[source, bash]
+---------------
+ln -fs /home/admin/tools/firewall /etc/init.d/firewallsellyoursaas
+systemctl daemon-reload
+systemctl enable firewallsellyoursaas
+systemctl is-enabled firewallsellyoursaas
+systemctl status firewallsellyoursaas
+---------------
+
+TODO Graphic with flux and ports
+
+
+
+=== Installation of fail2ban ===
+
+* Installation of fail2ban and activation of the following fail2ban rules:
+  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
+  
+* As well as the specific rules for sellyoursaas:
+  
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
+
+
+To do this, first create a */etc/fail2ban/jail.local* file with this content:
+
+NOTE: The rules available may vary depending on the version of the OS installed.
+
+NOTE: Remember to also modify "mybusinessips" by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
+
+
+[source, bash]
+---------------
+# Fail2Ban configuration file.
+#
+# This file was composed for Debian systems from the original one
+# provided now under /usr/share/doc/fail2ban/examples/jail.conf
+# for additional examples.
+#
+# Comments: use '#' for comment lines and ';' for inline comments
+#
+# To avoid merges during upgrades DO NOT MODIFY THIS FILE
+# and rather provide your changes in /etc/fail2ban/jail.local
+#
+
+# The DEFAULT allows a global definition of the options. They can be overridden
+# in each jail afterwards.
+
+[DEFAULT]
+# "ignoreip" can be an IP address, a CIDR mask or a DNS host. Fail2ban will not
+# ban a host which matches an address in this list. Several addresses can be
+# defined using space separator.
+ignoreip = 127.0.0.1/8 mybusinessips
+
+# "bantime" is the number of seconds that a host is banned.
+bantime  = 3600
+
+# A host is banned if it has generated "maxretry" during the last "findtime"
+# seconds.
+findtime = 600
+maxretry = 3
+
+# "backend" specifies the backend used to get files modification.
+# Available options are "pyinotify", "gamin", "polling" and "auto".
+# This option can be overridden in each jail as well.
+#
+# pyinotify: requires pyinotify (a file alteration monitor) to be installed.
+#            If pyinotify is not installed, Fail2ban will use auto.
+# gamin:     requires Gamin (a file alteration monitor) to be installed.
+#            If Gamin is not installed, Fail2ban will use auto.
+# polling:   uses a polling algorithm which does not require external libraries.
+# auto:      will try to use the following backends, in order:
+#            pyinotify, gamin, polling.
+backend = auto
+
+# "usedns" specifies if jails should trust hostnames in logs,
+#   warn when reverse DNS lookups are performed, or ignore all hostnames in logs
+#
+# yes:   if a hostname is encountered, a reverse DNS lookup will be performed.
+# warn:  if a hostname is encountered, a reverse DNS lookup will be performed,
+#        but it will be logged as a warning.
+# no:    if a hostname is encountered, will not be used for banning,
+#        but it will be logged as info.
+usedns = warn
+
+#
+# Destination email address used solely for the interpolations in
+# jail.{conf,local} configuration files.
+destemail = supervision@mydomain.com
+
+#
+# Name of the sender for mta actions
+sendername = Fail2Ban
+
+
+#
+# ACTIONS
+#
+
+# Default banning action (e.g. iptables, iptables-new,
+# iptables-multiport, shorewall, etc) It is used to define
+# action_* variables. Can be overridden globally or per
+# section within jail.local file
+banaction = iptables-multiport
+
+# email action. Since 0.8.1 upstream fail2ban uses sendmail
+# MTA for the mailing. Change mta configuration parameter to mail
+# if you want to revert to conventional 'mail'.
+mta = sendmail
+
+
+[apache-shellshock]
+
+enabled = true
+
+
+[php-url-fopen]
+
+enabled = true
+
+
+[pam-generic]
+
+enabled = true
+
+
+[postfix-sasl]
+
+# Overwrite param port since it is wrong into file jail.conf because it contains 'imap3' instead of 'imap' that does not exists
+port    = smtp,465,submission,imap,imaps,pop3,pop3s
+enabled = true
+
+
+[sshd]
+
+enabled = true
+
+
+[webmin-auth]
+
+enabled = true
+
+
+[xinetd-fail]
+
+enabled = true
+
+
+[apache-badbots]
+# Ban hosts which agent identifies spammer robots crawling the web
+# for email addresses. The mail outputs are buffered.
+port     = http,https
+logpath  = %(apache_access_log)s
+bantime  = 172800
+maxretry = 1
+enabled  = true
+
+
+[apache-noscript]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 6
+enabled  = true
+
+
+[apache-overflows]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[apache-nohome]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[apache-botsearch]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[mysqld-auth]
+
+port     = 3306
+logpath  = /var/log/mysql/error.log
+#backend  = %(mysql_backend)s
+enabled = true
+bantime  = 7200      ; 2 hours
+findtime = 3600      ; 1 hour
+maxretry = 5
+
+
+[email-dol-perhour]
+
+; rule against intensive email ko - too high number of recipient (see file etc/fail2ban/filter.d/apache-dolibarr-rulesko)
+; A log for this rule wil be reported if nb of recipients is higher than $MAXOK defined into phpsendmail.php file
+; Note: For Dolibarr app, you can set MAIL_MAX_NB_OF_RECIPIENTS_IN_SAME_EMAIL to match same value.
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-rulesko
+logpath = /var/log/phpsendmail.log
+action = %(action_mw)s
+bantime  = 7200      ; 2 hours
+findtime = 3600      ; 1 hour
+maxretry = 5
+
+[email-dol-blacklist]
+
+; rule against email ko - blacklist ip, email or content (see file etc/fail2ban/filter.d/apache-dolibarr-ruleskoblacklist)
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-ruleskoblacklist
+logpath = /var/log/phpsendmail.log
+action = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 1
+
+[email-dol-perday]
+
+; rule against out of limit emails (max 500 emails per day) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesall)
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-rulesall
+logpath = /var/log/phpsendmail.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 86400     ; 1 day
+maxretry = 500
+
+[email-dol-perhouradmin]
+
+; rule against out of limit emails (max 10 from admin) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesadmin)
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-rulesadmin
+logpath = /var/log/phpsendmail.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 60        ; 1 minute
+maxretry = 10
+
+[web-dol-passforgotten]
+
+; rule against call to passwordforgottenpage (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
+; disable this rule by setting enable to false on deployment only servers
+enabled = true
+port    = http,https
+filter  = apache-dolibarr-rulespassforgotten
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 10
+
+[web-dol-registerinstance]
+
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
+; disable this rule by setting enable to false on deployment servers
+;enabled = true
+;port    = http,https
+;filter  = apache-dolibarr-rulesregisterinstance
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
+;action  = %(action_mw)s
+;bantime  = 4320000   ; 50 days
+;findtime = 86400     ; 1 day
+;maxretry = 10
+
+---------------
+
+Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d*
+
+
+=== Test spamassassin ===
+
+The process *spamd* must be running. Start it manually if it is not the case the first time.
+
+To test that spamassassin client is working, create a file */tmp/testspam* with content
+
+    Subject: Test spam mail (GTUBE)
+    Message-ID: <GTUBE1.1010101@example.net>
+    Date: Wed, 23 Jul 2003 23:30:00 +0200
+    From: Sender <sender@example.net>
+    To: Recipient <recipient@example.net>
+    Precedence: junk
+    MIME-Version: 1.0
+    Content-Type: text/plain; charset=us-ascii
+    Content-Transfer-Encoding: 7bit
+
+    This is the GTUBE, the
+	    Generic
+	    Test for
+	    Unsolicited
+	    Bulk
+	    Email
+
+    If your spam filter supports it, the GTUBE provides a test by which you
+    can verify that the filter is installed correctly and is detecting incoming
+    spam. You can send yourself a test mail containing the following string of
+    characters (in upper case and with no white spaces and line breaks):
+
+    XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
+
+    You should send this test mail from an account outside of your network.
+
+Then test with:
+
+[source,bash]
+---------------
+spamc < /tmp/testspam
+spamc -c < /tmp/testspam
+echo $?
+---------------
+
+
+=== Installation of ClamAV
+
+The process *freshclam* and *clamd* must be running. Start them manually the first time.
+
+To test clamav tool, create a file */tmp/testvirus* with content
+
+[source,bash]
+---------------
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+---------------
+
+And to test *clamav* command line and daemon:
+
+[source,bash]
+---------------
+clamscan /tmp/testvirus
+clamdscan /tmp/testvirus --fdpass
+---------------
+
+Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
+
+[source,bash]
+---------------
+cd /etc/apparmor.d/disable
+ln -fs /etc/apparmor.d/usr.sbin.clamd
+service apparmor reload
+service apparmor status
+service apache2 stop
+service apache2 start
+---------------
+
+You should see into the status a line saying that Profile *usr/sbin/clamd* is disabled.
+It seems we must also restart apache to have this effective inside apache.
+
+
+=== Installation of Afick
+
+* Install afick.pl tool from the debian package found on afick web site.
+
+* Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+
+[source,bash]
+---------------
+exclude_suffix := log LOG
+exclude_suffix := tmp old bak
+---------------
+
+* Complete setup */etc/afick.conf* for section *macros* with:
+
+[source,bash]
+---------------
+# used by cron job (afick_cron)
+# define the mail adress to send cron job result
+@@define MAILTO supervision@mysaasdomainname.com
+# truncate the result sended by mail to the number of lines (avoid too long mails)
+@@define LINES 1000
+# REPORT = 1 to enable mail reports, =0 to disable report
+@@define REPORT 1
+# VERBOSE = 1 to have one mail by run, =0 to have a mail only if changes are detected
+@@define VERBOSE 1
+# define the nice value : from 0 to 19 (priority of the job)
+@@define NICE 18
+# = 1 to allow cron job, = 0 to suppress cron job
+@@define BATCH 1
+# if set to 0, keep all archives, else define the number of days to keep
+# with the syntaxe nS , n for a number, S for the scale
+# (d for day, w for week, m for month, y for year)
+# ex : for 5 months : 5m
+@@define ARCHIVE_RETENTION 6m
+---------------
+
+* Complete setup */etc/afick.conf* by adding at end:
+
+[source,bash]
+---------------
+############################################
+# to allow easier upgrade, my advice is too separate
+# the default configuration file (above) from your
+# local configuration (below).
+# default configuration will be upgraded
+# local configuration will be kept
+########## put your local config below ####################
+!/var/log/mysql
+!/var/log/letsencrypt
+!/var/log/datadog
+
+!/etc/apache2/sellyoursaas-available
+!/etc/apache2/sellyoursaas-online
+!/etc/bind/archives
+!/etc/bind/
+!/etc/group
+!/etc/group-
+!/etc/gshadow
+!/etc/gshadow-
+!/etc/passwd
+!/etc/passwd-
+!/etc/shadow
+!/etc/shadow-
+!/etc/subgid
+!/etc/subgid-
+!/etc/subuid
+!/etc/subuid-
+
+/home MyRule
+/home/admin/logs Logs
+/var/log/datadog Logs
+!/home/admin/backup
+!/home/jail/home
+!/home/admin/wwwroot/dolibarr_documents
+!/home/admin/wwwroot/dolibarr/.git
+!/home/admin/wwwroot/dolibarr_sellyoursaas/.git
+
+!/home/admin/.bash_history
+!/home/admin/.viminfo
+!/home/admin/.mysql_history
+!/home/myunixlogin/.bash_history
+!/home/myunixlogin/.viminfo
+!/home/myunixlogin/.mysql_history
+!/root/.bash_history
+!/root/.viminfo
+!/root/.mysql_history
+
+exclude_suffix := cache
+---------------
+
+
+Test that execution by crontab works correcly by running under root:
+
+[source,bash]
+---------------
+/etc/cron.daily/afick_cron
+---------------
+
+
+=== Setup of /etc/security/limits.conf (optionnel)
+
+* Editer le fichier */etc/security/limits.conf* par exemple pour augmenter le nombre de fichiers max ouvert par processus
+
+[source,conf]
+---------------
+mysql           soft     nofile           4096
+mysql           hard     nofile           32768
+---------------
+
+Pour voir les limites:
+
+[source,bash]
+---------------
+ulimit -a
+---------------
+
+
+=== Setup of logrotate
+
+* Add a line if not already present into file */etc/logrotate.conf*
+
+[source,bash]
+---------------
+# use the syslog group by default, since this is the owning group of /var/log.
+su root syslog
+---------------
+
+
+=== Setup of journalctl
+
+Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
+
+* Edit the file */etc/systemd/journald.conf* to define the max size for systemd journals
+
+[source,conf]
+---------------
+...
+SystemMaxUse=1G
+# Define max size of each file (there is 1 file per user). Default is 1/8 of SystemMaxUse.
+SystemMaxFileSize=5M
+...
+---------------
+
+Take into account the change with
+
+[source,bash]
+---------------
+systemctl stop systemd-journald
+systemctl start systemd-journald
+---------------
+
+To force clear of journal:
+
+[source,bash]
+---------------
+journalctl --flush --rotate
+journalctl --vacuum-size=1G
+journalctl --vacuum-time=1d
+---------------
+
+To read journal:
+
+[source,bash]
+---------------
+journalctl --disk-usage
+journalctl --header
+---------------
+
+
+=== Désactivation ou activation de apport (optionnel, "on" recommandé)
+
+Pour activer:
+
+[source,bash]
+---------------
+sudo systemctl enable apport.service
+sudo systemctl start apport.service
+sudo systemctl status apport.service
+---------------
+
+Pour désactiver:
+
+[source,bash]
+---------------
+sudo systemctl disable apport.service
+sudo systemctl stop apport.service
+sudo systemctl status apport.service
+---------------
+
+Note: Reports are into */var/crash*
+
+
+<<<<
+
+== Installation d'outils externes
+
+=== Installation de webmin (optionnel pour supervision)
+
+* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
+
+* Si la fonction sauvegarde de toutes les bases de Webmin est active, modifier les fichiers */usr/share/webmin/mysql/backup.pl*  et  */usr/share/webmin/mysql/backup_db.cgi*
+
+[source,perl]
+---------------
+foreach $db (@dbs) {
+---------------
+
+in
+
+[source,perl]
+---------------
+foreach $db (@dbs) {
+    # @CHANGE LDR
+    if ($db =~ /^dbn/) { next; }
+---------------
+
+=== Installation of DataDog (optionnel pour supervision)
+
+* Create an account on DataDog.
+
+* Install the agent on serveur with:
+
+[source,bash]
+---------------
+DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+---------------
+
+* Copy the datadog config file to supervize *mysql/mariadb*. 
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
+---------------
+
+Edit the file to enter the datadog password for mariadb. 
+
+* Copy the datadog config file to supervize *apache*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.d/apache.d/conf.yaml
+---------------
+
+
+* Copy the datadog config file to supervize *postfix*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+---------------
+
+Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deffered*
+
+
+* Copy the datadog config file to supervize *memcached*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+---------------
+
+Edit file to be
+
+[source,bash]
+---------------
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+instances:
+  - url: localhost  # url used to connect to the memcached instance
+---------------
+
+
+
+* Copy the datadog config file to supervize *process*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
+---------------
+
+Editer le pour suivre les 3 process suivants:
+
+[source,bash]
+---------------
+instances:
+  - name: process_apache2
+    search_string: ['apache2']
+    exact_match: False
+    thresholds:
+      critical: [5, 5000]
+
+  - name: agent_sellyoursaas
+    search_string: ['remote_server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: apache_watchdog_daemon1
+    search_string: ['apache_watchdog_daemon1']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+      
+  - name: apache_watchdog_daemon2
+    search_string: ['apache_watchdog_daemon2']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+      
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
+---------------
+
+
+Relancer datadog
+
+[source,bash]
+---------------
+sudo service datadog-agent stop
+sudo service datadog-agent start
+---------------
+
+
+<<<<
+
+== Exploitation - Supervision
+
+=== Backup / Restauration
+
+==== Backup system
+
+La sauvegarde du serveur+bases peut se faire par un snapshot d'image de la VM.
+Il est aussi possible de ne faire un snapshot que des disques complémentaires.
+
+Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+
+==== Restauration system
+
+Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure ou égale en terme de capacité de stockage.
+
+Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+
+
+==== Backup files and database
+
+===== Local backup
+
+- Une sauvegarde locale de la configuration du serveur et des instances payantes est assurée par le cron
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* de *root* (voir <<installation_des_taches_cron>>) vers le disque */home/admin/backup/conf* et */home/admin/backup/mysql*
+
+- Une sauvegarde locale des instances utilisateurs payantes est assurée par le cron 
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* de *admin* (voir <<installation_des_taches_cron>>) vers le disque */mnt/diskbackup/backup/osu*
+
+
+===== Remote backup
+
+- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
+
+
+- For a remote backup as AWS:
+
+[source,bash]
+---------------
+pip install awscli --upgrade --user
+
+    TODO...
+---------------
+
+
+=== Increase size of disk
+
+* Faire le snapshot du disque à redimensionner pour sauvegarde. Créer un nouveau disque depuis ce snapshot et le rattacher à un autre serveur (voir chapitre <<ajout_de_disque>>) pour s'assurer qu'il est lisible et ainsi avoir les fichiers de la sauvegarde sous la main.
+
+* Unmount the filesystem:
+
+[source,bash]
+---------------
+umount /mnt/disk/
+---------------
+
+Rem: Pour voir les fichiers ouverts sur un disque si le démontage échoue:
+
+[source,bash]
+---------------
+lsof | grep "/mnt/disk"
+---------------
+
+* Détacher le disque du serveur. S'assurer que son nom ne contient pas d'espaces ou caractères spéciaux. Changer la taille du disque depuis le manager du Public Cloud et le réattacher au serveur.
+
+* Agrandir la partition en lançant: 
+
+[source,bash]
+---------------
+fdisk -l
+parted /dev/vdX    (X=a, b, !!! SANS le chiffre, on veut le disque complet)
+print all
+resizepart 
+Y
+999GB    (Ne pas saisir la valeur proposé par défaut mais la valeur max du disque qui a été affiché par le "print all")
+q
+---------------
+
+* Remonter le disque pour prise en compte et augmenter le formatage du filesystem sans effacement.
+
+[source,bash]
+---------------
+mount /mnt/disk/
+resize2fs /dev/vdX9
+---------------
+
+
+=== Upgrade OS
+
+Pour mettre à jour Ubuntu 16.04 vers 18.04 sur un serveur SellYourSaas:
+
+[source,sql]
+---------------
+apt dist-upgrade
+---------------
+
+
+=== Follow files modified
+
+Pour détecter la liste des fichiers modifiés depuis la dernière mise à jour afick:
+
+[source,bash]
+---------------
+afick.pl -k
+---------------
+
+Voir le résumé des historiques de chaque changements:
+
+[source,bash]
+---------------
+vi /var/lib/afick/history
+---------------
+
+Voir le détail des changements d'un jour:
+
+[source,bash]
+---------------
+vi /var/lib/afick/archive/afick.YYYMMDD*
+---------------
+
+Voir la documentation *afick.pl* pour plus d'options.
+
+
+
+=== Passage en mode rescue d'un serveur
+
+Aller sur l'interface du service Cloud pour passer en mode rescue. Le serveur sera rebooté et un lien pour se logué sera fourni.
+
+Trouver les disques attachées et montez le disque système.
+
+[source,bash]
+---------------
+lsblk
+mount /dev/sdXY /mnt
+---------------
+
+Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
