@@ -84,6 +84,7 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (do
 [source, bash]
 ---------------
 mkdir /mnt/diskbackup
+chown admin.admin diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -427,6 +428,7 @@ To take this into account, try this, otherwise, reboot.
 === Creation of working directories
 
 Only */mnt/diskbackup* is required, so no creation of directory has to be done.
+
 
   
 <<<<
@@ -1180,34 +1182,6 @@ Voir chapitre <<Clonage d une instance serveur pour production bis ou pour déve
 Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure ou égale en terme de capacité de stockage.
 
 Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
-
-
-==== Backup files and database
-
-===== Local backup
-
-- Une sauvegarde locale de la configuration du serveur et des instances payantes est assurée par le cron
-
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* de *root* (voir <<installation_des_taches_cron>>) vers le disque */home/admin/backup/conf* et */home/admin/backup/mysql*
-
-- Une sauvegarde locale des instances utilisateurs payantes est assurée par le cron 
-
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* de *admin* (voir <<installation_des_taches_cron>>) vers le disque */mnt/diskbackup/backup/osu*
-
-
-===== Remote backup
-
-- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
-
-
-- For a remote backup as AWS:
-
-[source,bash]
----------------
-pip install awscli --upgrade --user
-
-    TODO...
----------------
 
 
 === Increase size of disk

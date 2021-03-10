@@ -158,6 +158,7 @@ mount /dev/vdxY /mnt/diskhome
 
 And if a disk was created for backup:
 mkdir /mnt/diskbackup
+chown admin.admin diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid

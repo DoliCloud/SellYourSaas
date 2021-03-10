@@ -592,7 +592,7 @@ if [[ $testorconfirm == "test" ]]; then
 	fi
 fi
 
-# Clean backup dir of payed instances that are now archived
+# Clean backup dir of instances that are now archived
 > /tmp/deletedirs.sh
 for fic in `find $backupdir/*/last_mysqldump* -name "last_mysqldump*" -mtime +90`
 do
