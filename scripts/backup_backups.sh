@@ -90,6 +90,11 @@ if [ "x$SERVDESTI" == "x" ]; then
 	echo "Usage: ${0} (test|confirm) [osux]"
 fi
 
+if [ "x$DOMAIN" == "x" ]; then
+	echo "Value for domain seems to not be set into /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} (test|confirm) [osux]"
+fi
+
 
 export testorconfirm=$1
 

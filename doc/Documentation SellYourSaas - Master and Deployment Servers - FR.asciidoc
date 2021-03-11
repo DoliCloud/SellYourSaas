@@ -3326,6 +3326,13 @@ cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf
 
 Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deffered*
 
+Ajouter la ligne suivante dans le fichier */etc/sudoers*
+
+[source,bash]
+---------------
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find
+---------------
+
 
 * Copier le fichier de config datadog pour superviser *memcached*.
 
