@@ -84,7 +84,6 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (do
 [source, bash]
 ---------------
 mkdir /mnt/diskbackup
-chown admin.admin diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -144,8 +143,9 @@ Create the user account *admin*. It will be used to install and administer the s
 
 [source, bash]
 ---------------
-groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
-mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs
+groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
+chown admin.admin /mnt/diskbackup
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -195,7 +195,7 @@ DenyUsers guest
 
 AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 
-AllowUsers admin osu*
+AllowUsers admin
 AllowUsers myunixlogin
 ---------------
 
@@ -268,7 +268,8 @@ In order not to give information to users doing SSH, on the deployment servers:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/ 50-landscape-sysinfo
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
@@ -445,8 +446,9 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 ---------------
 sudo apt update
 sudo apt install ntp git gzip zip zstd ncdu
-sudo apt rkhunter chkrootkit
+sudo apt install rkhunter chkrootkit
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 ---------------
 
 
@@ -575,25 +577,9 @@ banaction = iptables-multiport
 mta = sendmail
 
 
-[apache-shellshock]
-
-enabled = true
-
-
-[php-url-fopen]
-
-enabled = true
-
 
 [pam-generic]
 
-enabled = true
-
-
-[postfix-sasl]
-
-# Overwrite param port since it is wrong into file jail.conf because it contains 'imap3' instead of 'imap' that does not exists
-port    = smtp,465,submission,imap,imaps,pop3,pop3s
 enabled = true
 
 
@@ -602,145 +588,10 @@ enabled = true
 enabled = true
 
 
-[webmin-auth]
-
-enabled = true
-
 
 [xinetd-fail]
 
 enabled = true
-
-
-[apache-badbots]
-# Ban hosts which agent identifies spammer robots crawling the web
-# for email addresses. The mail outputs are buffered.
-port     = http,https
-logpath  = %(apache_access_log)s
-bantime  = 172800
-maxretry = 1
-enabled  = true
-
-
-[apache-noscript]
-
-port     = http,https
-logpath  = %(apache_error_log)s
-maxretry = 6
-enabled  = true
-
-
-[apache-overflows]
-
-port     = http,https
-logpath  = %(apache_error_log)s
-maxretry = 2
-enabled  = true
-
-
-[apache-nohome]
-
-port     = http,https
-logpath  = %(apache_error_log)s
-maxretry = 2
-enabled  = true
-
-
-[apache-botsearch]
-
-port     = http,https
-logpath  = %(apache_error_log)s
-maxretry = 2
-enabled  = true
-
-
-[mysqld-auth]
-
-port     = 3306
-logpath  = /var/log/mysql/error.log
-#backend  = %(mysql_backend)s
-enabled = true
-bantime  = 7200      ; 2 hours
-findtime = 3600      ; 1 hour
-maxretry = 5
-
-
-[email-dol-perhour]
-
-; rule against intensive email ko - too high number of recipient (see file etc/fail2ban/filter.d/apache-dolibarr-rulesko)
-; A log for this rule wil be reported if nb of recipients is higher than $MAXOK defined into phpsendmail.php file
-; Note: For Dolibarr app, you can set MAIL_MAX_NB_OF_RECIPIENTS_IN_SAME_EMAIL to match same value.
-enabled = true
-port    = http,https
-filter  = apache-dolibarr-rulesko
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 7200      ; 2 hours
-findtime = 3600      ; 1 hour
-maxretry = 5
-
-[email-dol-blacklist]
-
-; rule against email ko - blacklist ip, email or content (see file etc/fail2ban/filter.d/apache-dolibarr-ruleskoblacklist)
-enabled = true
-port    = http,https
-filter  = apache-dolibarr-ruleskoblacklist
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 1
-
-[email-dol-perday]
-
-; rule against out of limit emails (max 500 emails per day) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesall)
-enabled = true
-port    = http,https
-filter  = apache-dolibarr-rulesall
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 86400     ; 1 day
-maxretry = 500
-
-[email-dol-perhouradmin]
-
-; rule against out of limit emails (max 10 from admin) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesadmin)
-enabled = true
-port    = http,https
-filter  = apache-dolibarr-rulesadmin
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 60        ; 1 minute
-maxretry = 10
-
-[web-dol-passforgotten]
-
-; rule against call to passwordforgottenpage (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
-; disable this rule by setting enable to false on deployment only servers
-enabled = true
-port    = http,https
-filter  = apache-dolibarr-rulespassforgotten
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
-[web-dol-registerinstance]
-
-; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
-; disable this rule by setting enable to false on deployment servers
-;enabled = true
-;port    = http,https
-;filter  = apache-dolibarr-rulesregisterinstance
-;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
-;action  = %(action_mw)s
-;bantime  = 4320000   ; 50 days
-;findtime = 86400     ; 1 day
-;maxretry = 10
-
 ---------------
 
 Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d*
@@ -807,119 +658,14 @@ clamscan /tmp/testvirus
 clamdscan /tmp/testvirus --fdpass
 ---------------
 
-Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
-
 [source,bash]
 ---------------
-cd /etc/apparmor.d/disable
-ln -fs /etc/apparmor.d/usr.sbin.clamd
 service apparmor reload
 service apparmor status
-service apache2 stop
-service apache2 start
 ---------------
 
 You should see into the status a line saying that Profile *usr/sbin/clamd* is disabled.
 It seems we must also restart apache to have this effective inside apache.
-
-
-=== Installation of Afick
-
-* Install afick.pl tool from the debian package found on afick web site.
-
-* Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
-
-[source,bash]
----------------
-exclude_suffix := log LOG
-exclude_suffix := tmp old bak
----------------
-
-* Complete setup */etc/afick.conf* for section *macros* with:
-
-[source,bash]
----------------
-# used by cron job (afick_cron)
-# define the mail adress to send cron job result
-@@define MAILTO supervision@mysaasdomainname.com
-# truncate the result sended by mail to the number of lines (avoid too long mails)
-@@define LINES 1000
-# REPORT = 1 to enable mail reports, =0 to disable report
-@@define REPORT 1
-# VERBOSE = 1 to have one mail by run, =0 to have a mail only if changes are detected
-@@define VERBOSE 1
-# define the nice value : from 0 to 19 (priority of the job)
-@@define NICE 18
-# = 1 to allow cron job, = 0 to suppress cron job
-@@define BATCH 1
-# if set to 0, keep all archives, else define the number of days to keep
-# with the syntaxe nS , n for a number, S for the scale
-# (d for day, w for week, m for month, y for year)
-# ex : for 5 months : 5m
-@@define ARCHIVE_RETENTION 6m
----------------
-
-* Complete setup */etc/afick.conf* by adding at end:
-
-[source,bash]
----------------
-############################################
-# to allow easier upgrade, my advice is too separate
-# the default configuration file (above) from your
-# local configuration (below).
-# default configuration will be upgraded
-# local configuration will be kept
-########## put your local config below ####################
-!/var/log/mysql
-!/var/log/letsencrypt
-!/var/log/datadog
-
-!/etc/apache2/sellyoursaas-available
-!/etc/apache2/sellyoursaas-online
-!/etc/bind/archives
-!/etc/bind/
-!/etc/group
-!/etc/group-
-!/etc/gshadow
-!/etc/gshadow-
-!/etc/passwd
-!/etc/passwd-
-!/etc/shadow
-!/etc/shadow-
-!/etc/subgid
-!/etc/subgid-
-!/etc/subuid
-!/etc/subuid-
-
-/home MyRule
-/home/admin/logs Logs
-/var/log/datadog Logs
-!/home/admin/backup
-!/home/jail/home
-!/home/admin/wwwroot/dolibarr_documents
-!/home/admin/wwwroot/dolibarr/.git
-!/home/admin/wwwroot/dolibarr_sellyoursaas/.git
-
-!/home/admin/.bash_history
-!/home/admin/.viminfo
-!/home/admin/.mysql_history
-!/home/myunixlogin/.bash_history
-!/home/myunixlogin/.viminfo
-!/home/myunixlogin/.mysql_history
-!/root/.bash_history
-!/root/.viminfo
-!/root/.mysql_history
-
-exclude_suffix := cache
----------------
-
-
-Test that execution by crontab works correcly by running under root:
-
-[source,bash]
----------------
-/etc/cron.daily/afick_cron
----------------
 
 
 === Setup of /etc/security/limits.conf (optionnel)

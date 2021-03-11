@@ -151,7 +151,6 @@ mount /dev/vdxY /mnt/diskhome
 
 And if a disk was created for backup:
 mkdir /mnt/diskbackup
-chown admin.admin diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -214,12 +213,9 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 
 [source,bash]
 ---------------
-groupadd admin
-useradd -m -g admin admin
-usermod -a -G adm admin
-mkdir /home/admin/logs
-chown root.adm /home/admin/logs
-chmod 770 /home/admin/logs
+groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
+chown admin.admin diskbackup
 ---------------
 
 Vérifiez que le id de ce user *admin* est bien supérieur ou égale à 1000.
@@ -339,7 +335,8 @@ Afin de ne pas donner d'information aux utilisateurs qui feront du SSH, sur les 
 
 [source,bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
@@ -745,6 +742,7 @@ sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
@@ -758,6 +756,7 @@ sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 

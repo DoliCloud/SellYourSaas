@@ -158,7 +158,6 @@ mount /dev/vdxY /mnt/diskhome
 
 And if a disk was created for backup:
 mkdir /mnt/diskbackup
-chown admin.admin diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -224,7 +223,8 @@ Create the user account *admin*. It will be used to install and administer the s
 [source, bash]
 ---------------
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
-mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
+chown admin.admin diskbackup
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -345,7 +345,8 @@ In order not to give information to users doing SSH, on the deployment servers:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/ 50-landscape-sysinfo
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/ 50-landscape-sysinfo
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
@@ -770,6 +771,7 @@ sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 sudo apt install soffice libreoffice-common libreoffice-writer
 ---------------
 
@@ -783,6 +785,7 @@ sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 sudo apt install libreoffice-common libreoffice-writer
 ---------------
 
