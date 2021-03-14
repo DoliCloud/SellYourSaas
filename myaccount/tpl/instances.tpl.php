@@ -233,7 +233,7 @@ else
 
                 if ($result == -2) {
                 	// We overwrite status suspended and done with unreachable (a status only for screen output)
-                	$statuslabel == 'unreachable';
+                	$statuslabel = 'unreachable';
                 	$color = 'grey';
                 } else {
                 	setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
