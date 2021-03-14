@@ -3066,7 +3066,7 @@ class SellYourSaasUtils
     		if (function_exists("ssh2_connect"))
     		{
     			// Set timeout for ssh2_connect
-    			$TIMEOUTSSH = 3; 	// in seconds
+    			$TIMEOUTSSH = 5; 	// in seconds
     			$originalConnectionTimeout = ini_get('default_socket_timeout');
     			ini_set('default_socket_timeout', $TIMEOUTSSH);
 
