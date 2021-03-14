@@ -15,6 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// $initialaction can be set
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf))
 {
@@ -64,10 +66,10 @@ if ($resqlproducts)
         $obj = $db->fetch_object($resqlproducts);
         if ($obj)
         {
-            $tmpprod->fetch($obj->rowid);
+            $tmpprod->fetch($obj->rowid, '', '', '', 1, 1, 1);
             $tmpprod->sousprods = array();
             $tmpprod->get_sousproduits_arbo();
-            $tmparray = $tmpprod->get_arbo_each_prod();
+            $tmparray = $tmpprod->get_arbo_each_prod(1, 1);
 
             $label = $obj->label;
 
@@ -229,6 +231,10 @@ else
             {
                 $error++;
                 setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
+
+                // We overwrite status suspended and done with unreachable (a status only for screen output)
+                $statuslabel == 'unreachable';
+                $color = 'grey';
             }
             /*else
              {

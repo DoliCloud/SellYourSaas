@@ -3030,7 +3030,7 @@ class SellYourSaasUtils
      *													$forceaddevent is set by caller but is overwrote to on when we detect qty has changed.
      * @param	string					$comment		Comment
      * @param   int                     $timeout        Time out in seconds
-     * @return	int										<0 if KO, >0 if OK
+     * @return	int										<0 if KO (-1 = generic error, -2 = failed to connect), >0 if OK
      */
     function sellyoursaasRemoteAction($remoteaction, $object, $appusername='admin', $email='', $password='', $forceaddevent='0', $comment='', $timeout = 90)
     {
@@ -3071,7 +3071,7 @@ class SellYourSaasUtils
     			ini_set('default_socket_timeout', $TIMEOUTSSH);
 
     		    $server=$object->array_options['options_hostname_os'];
-    		    dol_syslog("Try to ssh2_connect to ".$server." with timeout of ".$TIMEOUTSSH);
+    		    dol_syslog("Try to ssh2_connect to ".$server." with timeout of ".$TIMEOUTSSH." instead of ".$originalConnectionTimeout);
 
     		    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
     		    $connection = @ssh2_connect($server, $server_port);
@@ -4106,8 +4106,15 @@ class SellYourSaasUtils
 
     	dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." error=".$error." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
 
-    	if ($error) return -1;
-    	else return 1;
+    	if ($error) {
+    		if ($errorforsshconnect && $errorfordb) {
+    			return -2;
+    		} else {
+    			return -1;
+    		}
+    	} else {
+    		return 1;
+    	}
     }
 
 

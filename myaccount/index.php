@@ -1745,7 +1745,6 @@ elseif ($action == 'createpaymentmode')		// Create credit card stripe
     				// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
     				$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
 
-
     				dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id.", so we create it then create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
     				// Now create invoice draft
@@ -2236,7 +2235,7 @@ elseif ($action == 'undeploy' || $action == 'undeployconfirmed')
 			{
 				$sellyoursaasutils = new SellYourSaasUtils($db);
 				$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspend', $contract, 'admin', '', '', 0, $comment);
-				if ($result < 0)
+				if ($result <= 0)
 				{
 					$error++;
 					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
@@ -2339,7 +2338,7 @@ elseif ($action == 'undeploy' || $action == 'undeployconfirmed')
 				{
 					$sellyoursaasutils = new SellYourSaasUtils($db);
 					$result = $sellyoursaasutils->sellyoursaasRemoteAction('undeploy', $contract, 'admin', '', '', 0, $comment, 300);
-					if ($result < 0)
+					if ($result <= 0)
 					{
 						$error++;
 						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
