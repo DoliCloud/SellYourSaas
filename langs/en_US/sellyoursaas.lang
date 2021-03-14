@@ -265,6 +265,7 @@ UndeploymentDate=Undeployment date (UTC)
 DeploymentInProgress=Deployment in progress
 Alive=Active
 Undeployed=Undeployed
+Unreachable=Unreachable
 Suspended=Suspended
 SuspendWillBeDoneSoon=The suspension will soon be effective
 CompanyAliasIsRequiredWhenWeSetResellerTag=Thirdparty alias is mandatory when you set the Reseller tag

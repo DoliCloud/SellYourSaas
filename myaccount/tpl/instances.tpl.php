@@ -230,11 +230,14 @@ else
             if ($result <= 0)
             {
                 $error++;
-                setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
 
-                // We overwrite status suspended and done with unreachable (a status only for screen output)
-                $statuslabel == 'unreachable';
-                $color = 'grey';
+                if ($result == -2) {
+                	// We overwrite status suspended and done with unreachable (a status only for screen output)
+                	$statuslabel == 'unreachable';
+                	$color = 'grey';
+                } else {
+                	setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
+                }
             }
             /*else
              {
@@ -271,6 +274,7 @@ else
         elseif ($statuslabel == 'done') print $langs->trans("Alive");
         elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
         elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");
+        elseif ($statuslabel == 'unreachable') print $langs->trans("Unreachable");
         else print $statuslabel;
         print '</span></span><br>';
 
