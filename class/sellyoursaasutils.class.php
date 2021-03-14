@@ -3039,6 +3039,8 @@ class SellYourSaasUtils
     	$langs->load("agenda");
 
     	$error = 0;
+    	$errorforsshconnect = 0;
+    	$errorfordb = 0;
         $retarray = array();
 
     	$now = dol_now();
@@ -3058,18 +3060,25 @@ class SellYourSaasUtils
     	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
 		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract, check install.lock file
-    	if (in_array($remoteaction, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat')
+		if (in_array($remoteaction, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat')
     	{
     		// SFTP refresh
     		if (function_exists("ssh2_connect"))
     		{
+    			// Set timeout for ssh2_connect
+    			$TIMEOUTSSH = 3; 	// in seconds
+    			$originalConnectionTimeout = ini_get('default_socket_timeout');
+    			ini_set('default_socket_timeout', $TIMEOUTSSH);
+
     		    $server=$object->array_options['options_hostname_os'];
-    		    dol_syslog("Try to ssh2_connect to ".$server);
+    		    dol_syslog("Try to ssh2_connect to ".$server." with timeout of ".$TIMEOUTSSH);
 
     		    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
     		    $connection = @ssh2_connect($server, $server_port);
-    			if ($connection)
-    			{
+
+    		    ini_set('default_socket_timeout', $originalConnectionTimeout);
+
+    			if ($connection) {
     				//print ">>".$object->array_options['options_username_os']." - ".$object->array_options['options_password_os']."<br>\n";exit;
     				if (! @ssh2_auth_password($connection, $object->array_options['options_username_os'], $object->array_options['options_password_os']))
     				{
@@ -3084,7 +3093,7 @@ class SellYourSaasUtils
 	    					$sftp = ssh2_sftp($connection);
 	    					if (! $sftp)
 	    					{
-	    						dol_syslog("Could not execute ssh2_sftp",LOG_ERR);
+	    						dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
 	    						$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
 	    						$error++;
 	    					}
@@ -3254,8 +3263,10 @@ class SellYourSaasUtils
     				}
     			}
     			else {
-    				$this->errors[]='Failed to connect to ssh2 to '.$server;
+   					dol_syslog('Failed to connect with ssh2_connect to '.$server, LOG_ERR);
+    				$this->errors[]='Failed to connect with ssh2_connect to '.$server;
     				$error++;
+    				$errorforsshconnect++;
     			}
     		}
     		else {
@@ -3761,15 +3772,30 @@ class SellYourSaasUtils
     						$serverdb = $generateddbhostname;
     					}
 
-    					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
-    					//var_dump($serverdeployment);		// just ip of deployment server
-    					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-    					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+    					if (! $errorforsshconnect) {
+    						//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
+	    					//var_dump($serverdeployment);		// just ip of deployment server
+	    					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+	    					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+
+	    					if (! $dbinstance || ! $dbinstance->connected)
+	    					{
+	    						$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
+	    						$this->errors = $dbinstance->errors;
+	    					}
+    					} else {
+    						dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we failed to connect with ssh", LOG_WARNING);
+
+    						$dbinstance = null;
+
+    						$this->error = 'Did not try to execute SQL formula due to previous SSH2 connect error';
+    						$this->errors[] = $this->error;
+    					}
+
     					if (! $dbinstance || ! $dbinstance->connected)
     					{
     						$error++;
-    						$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
-    						$this->errors = $dbinstance->errors;
+    						$errorfordb++;
     					}
     					else
     					{
