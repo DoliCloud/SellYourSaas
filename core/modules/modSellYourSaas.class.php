@@ -253,6 +253,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->menu[$r]=array(	'fk_menu'=>0,
 								'type'=>'top',
 								'titre'=>'__[SELLYOURSAAS_NAME]__',
+								'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth"'),
 								'mainmenu'=>'sellyoursaas',
 								'url'=>'/sellyoursaas/backoffice/index.php',
 								'langs'=>'',
@@ -268,6 +269,7 @@ class modSellYourSaas extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=sellyoursaas',        // Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
 			'type'=>'left',         // This is a Left menu entry
 			'titre'=>'Summary',
+			'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_summary',
 			'url'=>'/sellyoursaas/backoffice/index.php',
@@ -284,6 +286,7 @@ class modSellYourSaas extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=sellyoursaas',
 			'type'=>'left',
 			'titre'=>'Packages',
+			'prefix' => img_picto('', 'label', 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_packages',
 			'url'=>'/sellyoursaas/packages_list.php',
@@ -326,11 +329,12 @@ class modSellYourSaas extends DolibarrModules
 		$r++;
 
 
-		// Products
+		// Products - Services
 		$this->menu[$r]=array(
 		'fk_menu'=>'fk_mainmenu=sellyoursaas',
 		'type'=>'left',
 		'titre'=>'Services',
+		'prefix' => img_picto('', 'service', 'class="paddingright pictofixedwidth"'),
 		'mainmenu'=>'sellyoursaas',
 		'leftmenu'=>'mysaas_products',
 		'url'=>'/product/list.php?type=1&search_category_product_list[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
@@ -363,7 +367,8 @@ class modSellYourSaas extends DolibarrModules
 		    'fk_menu'=>'fk_mainmenu=sellyoursaas',
 		    'type'=>'left',
 		    'titre'=>'ProspectsOrCustomers',
-		    'mainmenu'=>'sellyoursaas',
+			'prefix' => img_picto('', 'company', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
 		    'leftmenu'=>'mysaas_customers',
 			'url'=>'/societe/list.php?search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&sortfield=s.tms&sortorder=desc',
 			'langs'=>'',
@@ -373,7 +378,8 @@ class modSellYourSaas extends DolibarrModules
 		    'target'=>'',
 		    'user'=>0);
 		$r++;
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_customers',
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_customers',
 			'type'=>'left',
 			'titre'=>'NewCustomer',
 			'mainmenu'=>'sellyoursaas',
@@ -423,7 +429,8 @@ class modSellYourSaas extends DolibarrModules
 		    'fk_menu'=>'fk_mainmenu=sellyoursaas',
 		    'type'=>'left',
 		    'titre'=>'Instances',
-		    'mainmenu'=>'sellyoursaas',
+			'prefix' => img_picto('', 'contract', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
 		    'leftmenu'=>'mysaas_instances',
 		    'url'=>'/contrat/list.php?leftmenu=contracts&contextpage=sellyoursaasinstances&search_product_category=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__&sortfield=c.tms&sortorder=desc',
 		    'langs'=>'sellyoursaas@sellyoursaas',
@@ -453,7 +460,8 @@ class modSellYourSaas extends DolibarrModules
 		    'fk_menu'=>'fk_mainmenu=sellyoursaas',
 		    'type'=>'left',
 		    'titre'=>'CancellationForms',
-		    'mainmenu'=>'sellyoursaas',
+			'prefix' => img_picto('', 'generic', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
 		    'leftmenu'=>'mysaas_cancellation_list',
 		    'url'=>'/sellyoursaas/cancellation_list.php?leftmenu=contracts&contextpage=cancellationlist',
 		    'langs'=>'sellyoursaas@sellyoursaas',
@@ -485,6 +493,7 @@ class modSellYourSaas extends DolibarrModules
 		'fk_menu'=>'fk_mainmenu=sellyoursaas',
 		'type'=>'left',
 		'titre'=>'RegistrationPages',
+		'prefix' => img_picto('', 'generic', 'class="paddingright pictofixedwidth"'),
 		'mainmenu'=>'sellyoursaas',
 		'leftmenu'=>'website',
 		'url'=>'/sellyoursaas/registrationlinks_list.php',
@@ -521,6 +530,7 @@ class modSellYourSaas extends DolibarrModules
 		'fk_menu'=>'fk_mainmenu=sellyoursaas',
 		'type'=>'left',
 		'titre'=>'Resellers',
+		'prefix' => img_picto('', 'company', 'class="paddingright pictofixedwidth"'),
 		'mainmenu'=>'sellyoursaas',
 		'leftmenu'=>'mysaas_resellerlist',
 		'url'=>'/societe/list.php?search_categ_sup=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
