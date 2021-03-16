@@ -2045,9 +2045,9 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 
 === Configuration de AppArmor
 
-Copy */bin/bash* or */bin/dash* into */bin/secureBash*
+Copy */bin/bash* or */bin/dash* into */bin/secureBash*  (Ce fichier shell sera positionné comme le shell pour les nouveaux utilisateur par le processus de déploiment)
 
-Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
+Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 
 [source,bash]
 ---------------

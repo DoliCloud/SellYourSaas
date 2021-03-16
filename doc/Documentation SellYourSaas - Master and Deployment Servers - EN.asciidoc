@@ -2069,9 +2069,9 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 
 === Setup of AppArmor
 
-Copy */bin/bash* or */bin/dash* into */bin/secureBash*
+Copy */bin/bash* or */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
-Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
+Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 
 [source,bash]
 ---------------
@@ -3959,7 +3959,7 @@ aa-enforce usr.sbin.mysqld
 [[special_start_mysql_mariadb]]
 === Special start of mysql or mariadb
 
-* Sans permissions :
+* Without permission (to bypass root password for example):
 
 [source,bash]
 ---------------
