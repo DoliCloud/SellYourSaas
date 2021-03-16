@@ -150,14 +150,15 @@ echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
 
 if [ "x$ret1" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
+	echo "Failed to make copy backup to remote backup server $SERVDESTI - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
 	exit $ret1
-else
-	if [ "x$ret2" != "x0" ]; then
+elif [ "x$ret2" != "x0" ]; then
 		echo "Send email to $EMAILTO to warn about backup error"
-		echo "Failed to make copy backup on remote backup - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup on remote failed for "`hostname` $EMAILTO
+		echo "Failed to make copy backup to remote backup server $SERVDESTI - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
 		exit $ret2
-	fi 
+else
+	echo "Send email to $EMAILTO to inform about backup success"
+	echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 fi
 
 
