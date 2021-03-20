@@ -3,11 +3,11 @@
 # Script to update sources found into a directory
 #
 # To include into cron
-# /pathto/git_update_sources.sh documentdir/sellyoursaas/git > /pathto/git_update_sources.log 2>&
+# /pathto/git_update_sources.sh documentdir/sellyoursaas/git all > /pathto/git_update_sources.log 2>&
 #---------------------------------------------------------
 
 if [ "x$1" == "x" ]; then
-   echo "Usage:   $0  dir_document_of_git_repositories [subdir]"
+   echo "Usage:   $0  dir_document_of_git_repositories [subdir|all]"
    echo "Example: $0  /pathtodocuments/documents/sellyoursaas/git"
    exit 1
 fi
@@ -19,7 +19,7 @@ echo "Update git dirs found into $1 and generate the tgz image."
 for dir in `ls -d $1/* | grep -v "tgz\|zstd"`
 do
 	# If a subdir is given, discard if not subdir
-	if [ "x$2" != "x" ]; then
+	if [ "x$2" != "x" -a "x$2" != "xall" ]; then
 		if [ "x$1/$2" != "x$dir" ]; then
 			continue;
 		fi
@@ -56,6 +56,7 @@ do
 		rm -fr files/_cache/*
 		# We remove subdir of build. We need files.
 		find build/* -type d -exec rm -fr {} \;
+		find . -type f -name index.html -exec rm -f {} \;
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php"
