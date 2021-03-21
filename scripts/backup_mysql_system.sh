@@ -62,7 +62,7 @@ if [[ ! -d $targetdir2 ]]; then
 	exit 1
 fi
 
-if [[ -x /usr/bin/zstd && "$usecompressformatforarchive" == "zstd" ]]; then
+if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	echo "Do a tar of config files"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst
