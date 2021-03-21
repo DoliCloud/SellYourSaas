@@ -791,7 +791,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd && "$usecompressformatforarchive" == "zstd" ]]; then
+					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 					else
@@ -808,13 +808,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
-						if [[ -x /usr/bin/zstd && "$usecompressformatforarchive" == "zstd" ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 							echo "Archive of test instances are disabled. We discard the tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
 						else
 							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 						fi
 					else
-						if [[ -x /usr/bin/zstd && "$usecompressformatforarchive" == "zstd" ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						else
@@ -1216,7 +1216,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
-	if [[ -x /usr/bin/zstd && "$usecompressformatforarchive" == "zstd" ]]; then
+	if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$now.sql.zst"
 		$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$now.sql.zst
 	else
