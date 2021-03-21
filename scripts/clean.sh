@@ -330,7 +330,7 @@ if [ -s /tmp/osutoclean ]; then
 			if [[ "x$dbname" != "xNULL" ]]; then	
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
-				if [[ -x /usr/bin/zstd && "$usecompressformatforarchive" == "zstd" ]]; then
+				if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
 					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
 				else
