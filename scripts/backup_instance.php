@@ -432,7 +432,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--default-character-set=utf8";
 
 	$fullcommand=$command." ".join(" ",$param);
-	if (command_exists("zstd") && $usecompressformatforarchive == "zstd") {
+	if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
 	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > /dev/null';
 	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst';
 	    // Delete file with same name and gz extension (to clean rest of old behaviour)
