@@ -4353,7 +4353,7 @@ Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys"
 
 == Annexes
 
-=== Quelques URL type pour les objectifs Google Analytics ou Statistiques DataDog
+=== Quelques URL standards pour les objectifs Google Analytics ou Statistiques DataDog
 
 Pour activer les statistiques Google Analytics, mettre le tag dans la configuration du module sellyoursaas.
 
@@ -4399,7 +4399,7 @@ Exemple de supervision de sellyoursaas avec DataDog:
 image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 
-=== Options cachées
+=== Options cachées du module SellYourSaas
 
 You can force different values for some setup parameters to overwrite the default value when the customer has registered itself from a page with *mydomain.com* as main domain.
 

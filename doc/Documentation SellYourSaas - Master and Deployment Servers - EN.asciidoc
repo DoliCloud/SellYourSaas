@@ -3467,13 +3467,21 @@ resize2fs /dev/vdX9
 
 
 [Clonage d une instance serveur pour production bis ou pour développement]
-=== Clone an server instance for a another production server or for development
+=== Clone or duplicate a server instance into another server
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
 
 - Créer un snapshot du *Deployment server* à cloner.
 
-- Créer un nouveau serveur OVH depuis le snapshot en spécifiant le nom du snapshot source et en copiant dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
+- Créer un nouveau serveur depuis le snapshot:
+
+*Avec OVH*:
+
+Spécifier le nom du snapshot source et copier dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
+
+*Avec ScaleWay*:
+
+TODO
 
 - Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
 
@@ -4301,7 +4309,7 @@ Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 == Annexes
 
-=== Quelques URL type pour les objectifs Google Analytics ou Statistiques DataDog
+=== Some common URLs fot Google Analytics objectives or DataDog Statistics
 
 To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
 
@@ -4347,7 +4355,7 @@ Example of supervision of sellyoursaas using DataDog:
 image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 
-=== Hidden options
+=== Hidden options of SellYourSaas module
 
 You can force different values for some setup parameters to overwrite the default value when the customer has registered itself from a page with *mydomain.com* as main domain.
 
@@ -4377,6 +4385,20 @@ If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment 
 
 To activate Jailkit, a chroot security system (see Jailkit configuration)
 * SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
+
+
+=== Command ScaleWay
+
+scw instance image list
+scw instance server list
+
+Create a new server:
+
+scw instance server create type=DEV1-S zone=fr-par-1|nl-ams-1 image=ubuntu_focal name=remotebackupXscw \
+    root-volume=l:10G [additional-volumes.0=l:10G] \
+    tags.0=build_method=from-qcow2 \
+    tags.1=disk_img_url=http://51.15.201.97/focal-server-cloudimg-amd64-disk-kvm.img \
+
 
 
 === TroubleShooting
