@@ -65,7 +65,7 @@ do
 	    fi
 	
 		# Create a deployment tar file
-		if [[ -x /usr/bin/zstd && "$usecompressformatforarchive" == "zstd" ]]; then
+		if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 			echo "Compress the repository into an archive $gitdir.tar.zst"
 			tar c --zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
 		else
