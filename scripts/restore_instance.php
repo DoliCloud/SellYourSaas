@@ -60,6 +60,7 @@ $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
+$usecompressformatforarchive='gzip';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -98,6 +99,10 @@ if ($fp) {
 		if ($tmpline[0] == 'dolibarrdir')
 		{
 			$dolibarrdir = $tmpline[1];
+		}
+		if ($tmpline[0] == 'usecompressformatforarchive')
+		{
+		    $usecompressformatforarchive = $tmpline[1];
 		}
 	}
 }
@@ -431,7 +436,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	{
 		$src_database_db = basename($dirroot);
 	    $dateselected=sprintf("%02s", $dayofmysqldump);
-	    if (command_exists("zstd")) {
+	    if (command_exists("zstd") && "x$usecompressformatforarchive" == 'xzstd') {
 	        $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.zst";
 	    } else {
 	        $dumpfiletoload='mysqldump_'.$src_database_db.'_'.$dateselected.".sql.gz";
@@ -447,7 +452,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 	// Launch load
 	$fullcommand=$command." ".join(" ",$param);
-	if (command_exists("zstd")) {
+	if (command_exists("zstd") && "x$usecompressformatforarchive" == 'xzstd') {
 	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q > /dev/null';
 	    else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q  | '.$fullcommand;
 	} else {

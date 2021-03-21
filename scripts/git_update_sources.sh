@@ -12,6 +12,8 @@ if [ "x$1" == "x" ]; then
    exit 1
 fi
 
+export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 export currentpath=$(dirname "$0")
 
 echo "Update git dirs found into $1 and generate the tgz image."
@@ -64,13 +66,13 @@ do
 	    fi
 	
 		# Create a deployment tar file
-		#if [[ -x /usr/bin/zstd ]]; then
-		#	echo "Compress the repository into an archive $gitdir.tar.zst"
-		#	tar c --zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
-		#else
+		if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+			echo "Compress the repository into an archive $gitdir.tar.zst"
+			tar c --zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
+		else
 			echo "Compress the repository into an archive $gitdir.tgz"
 			tar cz --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
-		#fi
+		fi
 	
 	    cd -
 	fi
