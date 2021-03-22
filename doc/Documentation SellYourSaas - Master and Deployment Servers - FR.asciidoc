@@ -4034,7 +4034,13 @@ innodb_force_recovery=1
 A partir de 3 ou +, risque de perte de données.
 
 
-NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouverts par ordre de dates sur le disque.
+NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un 
+
+[source,bash]
+---------------
+lsof -p PID_de_mysql 
+---------------
+pour voir les fichiers et bases traitées en relog. Ils sont ouverts par ordre de dates sur le disque.
 
 
 
