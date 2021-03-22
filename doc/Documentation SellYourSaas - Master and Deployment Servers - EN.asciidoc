@@ -597,6 +597,10 @@ domain=mysaasdomainname.com
 subdomain=withX.mysaasdomainname.com
 # ips autorisés à commander le déploiement
 allowed_hosts=127.0.0.1,ipduservermaster
+# email from
+emailfrom=robot@mysaasdomainname.com
+# email supervision
+emailsupervision=supervision@mysaasdomainname.com
 
 # Set to 1 if this server is the master server
 masterserver=1
