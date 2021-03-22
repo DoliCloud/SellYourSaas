@@ -47,8 +47,15 @@ export USER=`grep '^remotebackupuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export DIRDESTI1="$remotebackupdir/home_"`hostname`;
 export DIRDESTI2="$remotebackupdir/backup_"`hostname`;
 
-export EMAILFROM=support@$DOMAIN
-export EMAILTO=supervision@$DOMAIN
+export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [ "x$EMAILFROM" == "x" ]; then
+	export EMAILFROM=support@$DOMAIN
+fi
+if [ "x$EMAILTO" == "x" ]; then
+	export EMAILTO=supervision@$DOMAIN
+fi
+
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
 export OPTIONS="-v -4 --stats -rlt --noatime --chmod=u=rwX --backup --suffix=.old";
