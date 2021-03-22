@@ -13,7 +13,6 @@
 # undeployall remove user and instance
 # undeploy    remove only instance (must be easy to restore) - rest can be done later with clean.sh
 
-
 export now=`date +%Y%m%d%H%M%S`
 
 echo
@@ -690,7 +689,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
-			if [ -f $dirwithsources1.tar.zst ]; then
+			if [[ -f $dirwithsources1.tar.zst ]]; then
 				echo "tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 				tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
@@ -708,7 +707,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
-			if [ -f $dirwithsources2.tar.zst ]; then
+			if [[ -f $dirwithsources2.tar.zst ]]; then
 				echo "tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 				tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
@@ -726,7 +725,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
-			if [ -f $dirwithsources3.tar.zst ]; then
+			if [[ -f $dirwithsources3.tar.zst ]]; then
 				echo "tar --zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 				tar --zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
@@ -792,7 +791,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
+					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 					else
@@ -809,13 +808,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					chmod -R o-rwx $archivedir/$osusername/$dbname
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
-						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 							echo "Archive of test instances are disabled. We discard the tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
 						else
 							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 						fi
 					else
-						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "zstd" ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						else
@@ -1217,7 +1216,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
-	if [[ -x /usr/bin/zstd ]]; then
+	if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		echo "$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$now.sql.zst"
 		$MYSQLDUMP -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$now.sql.zst
 	else
