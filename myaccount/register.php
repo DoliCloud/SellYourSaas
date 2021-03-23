@@ -702,13 +702,13 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 <script type="text/javascript" language="javascript">
     function applyDomainConstraints( domain )
     {
-        domain = domain.replace(/ /g,"");
+        domain = domain.replace(/ /g, "");
         domain = domain.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        // not  "a-z", "A-Z", "0-9" and "_"
-        domain = domain.replace(/\W/g,"");
-        domain = domain.replace(/\_/g,"");
-        domain = domain.replace(/^[^a-z0-9]+/ig,"");
-        domain = domain.replace(/[^a-z0-9]+$/ig,"");
+        // allow  "a-z", "A-Z", "0-9" and "-"
+        domain = domain.replace(/[^\w\-]/g, "");
+        domain = domain.replace(/\_/g, "");
+        domain = domain.replace(/^[^a-z0-9\-]+/ig, "");		// We accept the - at start during input to avoid to have it to be removed automatically during typing
+        domain = domain.replace(/[^a-z0-9\-]+$/ig, "");		// We accept the - at end during input to avoid to have it to be removed automatically during typing
         domain = domain.toLowerCase();
         if (!isNaN(domain)) {
           return ""
@@ -723,7 +723,7 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 
         /* Autofill the domain */
         jQuery("#formregister").on("change keyup", "#orgName", function() {
-            console.log("Update sldAndSubdomain");
+            console.log("Update sldAndSubdomain in register.php");
     	    $("#sldAndSubdomain").val( applyDomainConstraints( $(this).val() ) );
         });
 
