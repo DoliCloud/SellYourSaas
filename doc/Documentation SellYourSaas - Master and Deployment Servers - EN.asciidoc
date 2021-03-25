@@ -2687,6 +2687,7 @@ Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow 
 upload_max_filesize = 20M
 
 post_max_size = 25M
+max_input_vars = 4000
 
 session.gc_maxlifetime = 3600
 ---------------
