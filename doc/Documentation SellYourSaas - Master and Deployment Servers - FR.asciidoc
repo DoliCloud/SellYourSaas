@@ -3113,16 +3113,14 @@ git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 
 [source,bash]
 ---------------
-cd /home/admin/wwwroot/dolibarr/htdocs/custom
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas sellyoursaas
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
 ---------------
 
 * Créer un lien symoblique appelé *source* dans *myaccounts* vers */home/admin/wwwroot/dolibarr/htdocs* :
 
 [source,bash]
 ---------------
-cd /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
-ln -fs /home/admin/wwwroot/dolibarr/htdocs source
+ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
 ---------------
 
 Sur le *Master*:
