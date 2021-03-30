@@ -253,7 +253,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->menu[$r]=array(	'fk_menu'=>0,
 								'type'=>'top',
 								'titre'=>'__[SELLYOURSAAS_NAME]__',
-								'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth"'),
+								'prefix' => img_picto('', 'object_'.$this->picto, 'class="paddingright2imp pictofixedwidth"'),
 								'mainmenu'=>'sellyoursaas',
 								'url'=>'/sellyoursaas/backoffice/index.php',
 								'langs'=>'',
