@@ -2732,7 +2732,7 @@ class SellYourSaasUtils
     }
 
     /**
-     * Action executed by scheduler
+     * Action executed by scheduler to undeploy test or paid instances (Max number of undeployment per call = $conf->global->MAX_UNDEPLOY_PER_CALL)
      * CAN BE A CRON TASK
      *
    	 * @param	string	$mode		'test' or 'paid'
@@ -2744,7 +2744,7 @@ class SellYourSaasUtils
 
     	$langs->load("agenda");
 
-    	$MAXPERCALL = 5;       // Undeploy can be long (1mn). So we limit to 5 per call
+    	$MAXPERCALL = (empty($conf->global->SELLYOURSAAS_MAX_UNDEPLOY_PER_CALL) ? 5 : $conf->global->SELLYOURSAAS_MAX_UNDEPLOY_PER_CALL);       // Undeploy can be long (1mn). So we limit to 5 per call
 
     	if ($mode != 'test' && $mode != 'paid')
     	{
