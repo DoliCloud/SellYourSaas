@@ -2732,7 +2732,7 @@ class SellYourSaasUtils
     }
 
     /**
-     * Action executed by scheduler to undeploy test or paid instances (Max number of undeployment per call = $conf->global->MAX_UNDEPLOY_PER_CALL)
+     * Action executed by scheduler to undeploy test or paid instances (Max number of undeployment per call = $conf->global->SELLYOURSAAS_MAX_UNDEPLOY_PER_CALL)
      * CAN BE A CRON TASK
      *
    	 * @param	string	$mode		'test' or 'paid'
