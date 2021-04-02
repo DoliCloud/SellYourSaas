@@ -1227,12 +1227,12 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	if [[ "x$?" == "x0" ]]; then
 		echo "Now drop the database and user"
 		echo "echo \"DROP DATABASE $dbname;\" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname"
-		echo "echo \"DROP USER '$dbusername'@'%';\" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname"
-		echo "echo \"DROP USER '$dbusername'@'localhost';\" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname"
+		echo "echo \"DROP USER '$dbusername'@'%';\" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX"
+		echo "echo \"DROP USER '$dbusername'@'localhost';\" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX"
 		if [[ $testorconfirm == "confirm" ]]; then
 			echo "DROP DATABASE $dbname;" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname
-			echo "DROP USER '$dbusername'@'%';" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname
-			echo "DROP USER '$dbusername'@'localhost';" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname
+			echo "DROP USER '$dbusername'@'%';" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass
+			echo "DROP USER '$dbusername'@'localhost';" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass
 		fi
 	else
 		echo "ERROR in dumping database, so we don't try to drop it"	
