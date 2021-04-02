@@ -67,11 +67,15 @@ do
 	
 		# Create a deployment tar file
 		if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-			echo "Compress the repository into an archive $gitdir.tar.zst"
+			echo "Compress the repository into an archive $gitdir.tar.zst"$dir/../$gitdir.tar.zst
 			tar c -I zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
+			# Delete archive in other format
+			rm $dir/../$gitdir.tgz
 		else
 			echo "Compress the repository into an archive $gitdir.tgz"
 			tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
+			# Delete archive in other format
+			rm $dir/../$gitdir.tar.zst
 		fi
 	
 	    cd -
