@@ -344,8 +344,8 @@ if [[ "$mode" == "deployall" ]]; then
 						if [[ ! -d "$chrootdir/$commonjailtemplatename" ]]; then
 							echo "Common jail directory $chrootdir/$commonjailtemplatename not exists, try to create it"
 							if [[ -f "$templatesdir/$commonjailtemplatename.tar.zst" ]]; then
-									echo "tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/"
-									tar --zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/
+									echo "tar -I zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/"
+									tar -I zstd -xf $templatesdir/$commonjailtemplatename.tar.zst --directory $chrootdir/
 							else
 								if [[ -f "$templatesdir/$commonjailtemplatename.tgz" ]]; then
 									echo "tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/"
@@ -384,8 +384,8 @@ if [[ "$mode" == "deployall" ]]; then
 					if [[ "$sshaccesstype" == "2" ]]; then
 						if [[ ! -d "$chrootdir/$osusername" ]]; then
 							if [[ "x$privatejailtemplatename" != "x" && -f "$templatesdir/$privatejailtemplatename.tar.zst" ]]; then
-								echo "tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/"
-								tar --zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/
+								echo "tar -I zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/"
+								tar -I zstd -xf $templatesdir/$privatejailtemplatename.tar.zst --directory $chrootdir/
 								echo "mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername"
 								mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername
 							else
@@ -690,8 +690,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
 			if [[ -f $dirwithsources1.tar.zst ]]; then
-				echo "tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
-				tar --zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
+				echo "tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+				tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
 				if [ -f $dirwithsources1.tgz ]; then
 					echo "tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
@@ -708,8 +708,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
 			if [[ -f $dirwithsources2.tar.zst ]]; then
-				echo "tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
-				tar --zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
+				echo "tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+				tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
 				if [ -f $dirwithsources2.tgz ]; then
 					echo "tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
@@ -726,8 +726,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
 			if [[ -f $dirwithsources3.tar.zst ]]; then
-				echo "tar --zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
-				tar --zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
+				echo "tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+				tar -I zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
 				if [ -f $dirwithsources3.tgz ]; then
 					echo "tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
@@ -792,8 +792,8 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
 					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-						echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-						tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+						echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+						tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 					else
 						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
@@ -809,14 +809,14 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-							echo "Archive of test instances are disabled. We discard the tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
+							echo "Archive of test instances are disabled. We discard the tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
 						else
 							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
 						fi
 					else
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-							echo tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-							tar c --zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+							echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+							tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
 						else
 							echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
