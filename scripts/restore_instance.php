@@ -308,7 +308,7 @@ if ($dayofmysqldump == 'autoscan') {
 	if (count($arrayoffiles)) {
 		$i = 1;
 		foreach($arrayoffiles as $filevar) {
-			print $i." - ".$filevar['relativename']."\n";
+			print $i." - ".$filevar['relativename']." - ".$filevar['date']."\n";
 			$i++;
 		}
 		do {
