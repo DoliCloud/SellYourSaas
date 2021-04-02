@@ -1226,7 +1226,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	if [[ "x$?" == "x0" ]]; then
 		echo "Now drop the database and user"
-		echo "echo \"DROP DATABASE $dbname; DROP USER '$dbusername'@'%'; DROP USER '$dbusername'@'localhost';\"" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname"
+		echo "echo \"DROP DATABASE $dbname; DROP USER '$dbusername'@'%'; DROP USER '$dbusername'@'localhost';\" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname"
 		if [[ $testorconfirm == "confirm" ]]; then
 			echo "DROP DATABASE $dbname; DROP USER '$dbusername'@'%'; DROP USER '$dbusername'@'localhost';" | $MYSQL -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname
 		fi
