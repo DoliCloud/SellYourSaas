@@ -3761,14 +3761,14 @@ Voir la documentation *afick.pl* pour plus d'options.
 
 [source,bash]
 ---------------
-apt install python3-openstackclient python3-novaclient -y
+apt install python3-openstackclient python3-novaclient python3-glanceclient -y
 ---------------
 
-- Récupérer le fichier OpenStack RC File v3
+- Créer un compta API OpenStack Horizon et récupérer le fichier RC OpenStack v3. Lancer le.
 
 [source,bash]
 ---------------
-source fichiersource.sh
+source openrc.sh
 ---------------
 
 - Les commandes openstack sont alors disponibles.
@@ -3778,28 +3778,34 @@ Pour récupérer une image d'instance:
 [source,bash]
 ---------------
 nova list
-nova image-create aaa115b3-83df-4375-b2ee-19339041dcfa nom_du_snap_serveur1
-glance image-list   ou   openstack image list
-glance image-download --file mon_fichier_snap_serveur1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
+nova image-create aaa115b3-83df-4375-b2ee-19339041dcfa image-myfile-server1
+glance image-list
+   ou   openstack image list
+glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a   
+   ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
 
 Pour pousser une image d'instance sur un projet:
 
 [source,bash]
 ---------------
-source fichiertarget.sh
+source openrctarget.sh
 export OS_REGION_NAME=SBG1
 glance image-create --name nom_image_snaphot_new_server --disk-format qcow2 --container-format bare --file mon_fichier_snap_serveur1.qcow2
 ---------------
 
-Pour récupérer une image de volume, il faut la backup sous forme d'image d'instance:
+Pour récupérer une image de volume, il faut d'abord la créer depuis le volume détaché (Pas de possibilité de faire depuis un snapshot):
 
 [source,bash]
 ---------------
 openstack volume list
 ...Then detach the volume from its server...
 openstack image create --disk-format qcow2 --container-format bare --volume 673b0ad9-1fca-485c-ae2b-8ee271b71dc7 nom_image_snaphot_new_volume
-openstack volume list
+
+...wait until the copy is finished...
+
+openstack image list
+
 openstack image save --file nom_image_snaphot_new_volume.qcow2 8625f87e-8248-4e62-a0ce-a89c7bd1a9be
 ---------------
 
