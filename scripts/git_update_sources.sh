@@ -56,8 +56,9 @@ do
 		rm -fr htdocs/includes/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* htdocs/includes/tecnickcom/tcpdf/fonts/freefont-* htdocs/includes/tecnickcom/tcpdf/fonts/ae_fonts_*
 		#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
 		rm -fr files/_cache/*
-		# We remove subdir of build. We need files.
+		# We remove subdir of build. We need files into build root only.
 		find build/* -type d -exec rm -fr {} \;
+		echo "Clean some files to save disk spaces"
 		find . -type f -name index.html -exec rm -f {} \;
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
