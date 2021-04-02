@@ -511,6 +511,7 @@ class modSellYourSaas extends DolibarrModules
 		'fk_menu'=>'fk_mainmenu=sellyoursaas',
 		'type'=>'left',
 		'titre'=>'CustomerPortal',
+		'prefix' => img_picto('', 'globe', 'class="paddingright pictofixedwidth"'),
 		'mainmenu'=>'sellyoursaas',
 		'leftmenu'=>'website',
 		'url'=>'__[SELLYOURSAAS_ACCOUNT_URL]__',

@@ -123,6 +123,11 @@ $head[$h][1] = $langs->trans("CustomReports");
 $head[$h][2] = 'customreports';
 $h++;
 
+$head[$h][0] = 'notes.php';
+$head[$h][1] = $langs->trans("Notes");
+$head[$h][2] = 'notes';
+$h++;
+
 
 //$head = commande_prepare_head(null);
 dol_fiche_head($head, 'home', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');
@@ -625,35 +630,6 @@ print '</div>';
 print '<div class="inline-block nohover">';
 print $px2->show();
 print '</div></center></div>';
-
-
-print '<br><hr><br>';
-
-print_fiche_titre($langs->trans("Notes"));
-
-print '<br>';
-
-if ($action != 'edit')
-{
-	print dol_htmlcleanlastbr($conf->global->NLTECHNO_NOTE);
-
-	print '<div class="tabsAction">';
-
-	print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=edit">'.$langs->trans("Edit").'</a></div>';
-
-	print '</div>';
-}
-else
-{
-	print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-	print '<input type="hidden" name="token" value="'.newToken().'">';
-	print '<input type="hidden" name="action" value="update">';
-	$doleditor=new DolEditor('NLTECHNO_NOTE', $conf->global->NLTECHNO_NOTE, '', 480, 'dolibarr_mailings');
-	print $doleditor->Create(1);
-	print '<br>';
-	print '<input class="button" type="submit" name="'.$langs->trans("Save").'">';
-	print '</form>';
-}
 
 
 dol_fiche_end();

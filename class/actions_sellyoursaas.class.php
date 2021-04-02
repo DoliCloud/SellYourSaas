@@ -1258,7 +1258,13 @@ class ActionsSellyoursaas
             $head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily'])?'':'&tabfamily='.$parameters['tabfamily']);
             $head[$h][1] = $langs->trans("CustomReports");
             $head[$h][2] = 'customreports';
+            $h++;
         //}
+
+            $head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
+            $head[$h][1] = $langs->trans("Notes");
+            $head[$h][2] = 'notes';
+            $h++;
 
         $this->results['head'] = $head;
 
