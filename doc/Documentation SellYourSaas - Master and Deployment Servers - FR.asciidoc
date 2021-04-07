@@ -1133,7 +1133,7 @@ systemctl stop remote-server-launcher.service
   
 * Ainsi que les règles spécifiques à sellyoursaas:
   
-  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
 
 Pour cela, créer d'abord un fichier */etc/fail2ban/jail.local* avec ce contenu:
@@ -1313,26 +1313,13 @@ findtime = 3600      ; 1 hour
 maxretry = 5
 
 
-[email-dol-perhour]
-
-; rule against intensive email ko - too high number of recipient (see file etc/fail2ban/filter.d/apache-dolibarr-rulesko)
-; A log for this rule wil be reported if nb of recipients is higher than $MAXOK defined into phpsendmail.php file
-; Note: For Dolibarr app, you can set MAIL_MAX_NB_OF_RECIPIENTS_IN_SAME_EMAIL to match same value.
-enabled = true
-port    = http,https
-filter  = apache-dolibarr-rulesko
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 7200      ; 2 hours
-findtime = 3600      ; 1 hour
-maxretry = 5
 
 [email-dol-blacklist]
 
-; rule against email ko - blacklist ip, email or content (see file etc/fail2ban/filter.d/apache-dolibarr-ruleskoblacklist)
+; rule against email ko - blacklist ip, email or content
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-ruleskoblacklist
+filter  = email-dolibarr-ruleskoblacklist
 logpath = /var/log/phpsendmail.log
 action = %(action_mw)s
 bantime  = 4320000   ; 50 days
@@ -1341,22 +1328,34 @@ maxretry = 1
 
 [email-dol-perday]
 
-; rule against out of limit emails (max 500 emails per day) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesall)
+; rule against out of limit emails (max 500 emails per day)
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-rulesall
+filter  = email-dolibarr-rulesall
 logpath = /var/log/phpsendmail.log
 action  = %(action_mw)s
 bantime  = 86400     ; 1 day
 findtime = 86400     ; 1 day
 maxretry = 500
 
-[email-dol-perhouradmin]
+[email-dol-perhour]
 
-; rule against out of limit emails (max 10 from admin) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesadmin)
+; rule against intensive email ko - too high number of recipient
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-rulesadmin
+filter  = email-dolibarr-rulesko
+logpath = /var/log/phpsendmail.log
+action = %(action_mw)s
+bantime  = 7200      ; 2 hour
+findtime = 3600      ; 1 hour
+maxretry = 5
+
+[email-dol-perhouradmin]
+
+; rule against out of limit emails (max 10 from admin)
+enabled = true
+port    = http,https
+filter  = email-dolibarr-rulesadmin
 logpath = /var/log/phpsendmail.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
@@ -1365,24 +1364,35 @@ maxretry = 10
 
 [web-dol-passforgotten]
 
-; rule against call to passwordforgottenpage (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
-; disable this rule by setting enable to false on deployment only servers
+; rule against call of passwordforgottenpage
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-rulespassforgotten
+filter  = web-dolibarr-rulespassforgotten
 logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 10
 
+[web-dol-bruteforce]
+
+; rule against bruteforce hacking (login + api)
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulesbruteforce
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 3600      ; 1 hour
+maxretry = 10
+
 [web-dol-registerinstance]
 
-; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
 ; disable this rule by setting enable to false on deployment servers
 ;enabled = true
 ;port    = http,https
-;filter  = apache-dolibarr-rulesregisterinstance
+;filter  = web-dolibarr-rulesregisterinstance
 ;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
 ;action  = %(action_mw)s
 ;bantime  = 4320000   ; 50 days
