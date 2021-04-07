@@ -1173,7 +1173,7 @@ To do this, first create a */etc/fail2ban/jail.local* file with this content:
 
 NOTE: The rules available may vary depending on the version of the OS installed.
 
-NOTE: Remember to also modify "mybusinessips" by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
+NOTE: Remember to also modify *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
 
 
 [source, bash]
@@ -1434,7 +1434,21 @@ maxretry = 10
 
 ---------------
 
-Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d*
+Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating a link:
+
+[source, bash]
+---------------
+cd /etc/fail2ban/filter.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+---------------
+
+Relaunch fail2ban and check errors into */var/log/fail2ban.log*
 
 
 === Test spamassassin ===

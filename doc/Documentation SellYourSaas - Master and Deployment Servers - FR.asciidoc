@@ -1140,7 +1140,7 @@ Pour cela, créer d'abord un fichier */etc/fail2ban/jail.local* avec ce contenu:
 
 NOTE: Les règles disponibles peuvent varier selon la version de l'OS installé.
 
-NOTE: Penser à modifier aussi "mybusinessips" par votre ou vos ips séparés par des espaces ainsi que le paramètre *destemail* par l'email de supervision de votre société.
+NOTE: Penser à modifier aussi *mybusinessips* par votre ou vos ips séparés par des espaces ainsi que le paramètre *destemail* par l'email de supervision de votre société.
 
 
 [source,bash]
@@ -1401,7 +1401,11 @@ maxretry = 10
 
 ---------------
 
-Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/filter.d* dans le répertoire du même nom */etc/fail2ban/filter.d*
+Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/filter.d* dans le répertoire du même nom */etc/fail2ban/filter.d* en créant un lien:
+
+
+
+Relancer fail2ban et vérifier les erreurs dans */var/log/fail2ban.log*
 
 
 === Test spamassassin ===
