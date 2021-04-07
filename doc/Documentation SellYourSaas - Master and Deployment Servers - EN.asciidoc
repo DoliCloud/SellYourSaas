@@ -367,7 +367,7 @@ sudo vi /etc/skel/.ssh/authorized_keys_support
 
 Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
-    
+
 
 === Add alias
 
@@ -1426,7 +1426,7 @@ maxretry = 10
 ;enabled = true
 ;port    = http,https
 ;filter  = web-dolibarr-rulesregisterinstance
-;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
 ;action  = %(action_mw)s
 ;bantime  = 4320000   ; 50 days
 ;findtime = 86400     ; 1 day
@@ -4485,6 +4485,13 @@ We found into log file /var/log/fail2ban.log
 	2020-09-19 00:57:16,902 fail2ban.actions        [1182]: ERROR   Failed to execute ban jail 'postfix-sasl' action 'iptables-multiport' info 'ActionInfo
 	
 Edit the file /etc/fail2ban/jail/conf to replace *imap3* (it does not exists) into *imap* for rule postfix-sasl
+
+
+==== Error when starting fail2ban
+
+You can get more information by running 
+
+sudo fail2ban-client -vvv -x start
 
 
 ==== Extracting a zip file extract files into filename with path with \ including into name
