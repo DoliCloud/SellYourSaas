@@ -372,6 +372,7 @@ print '
 
         if ($nbtotalofrecords > $limit2)
         {
+        	// Show navigation previous - next
             print '<tr><td colspan="6" class="center">';
             if ($page2 > 0) print '<a href="'.$_SERVER["PHP_SEFL"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2-1).'">'.$langs->trans("Previous").'</a>';
             if ($page2 > 0 && (($page2 + 1) * $limit2) <= $nbtotalofrecords) print ' &nbsp; ... &nbsp; ';
@@ -382,23 +383,25 @@ print '
             print '</tr>';
         }
 
-        // Get total of commissions
+        // Get total of commissions earned
         $totalamountcommission='ERROR';
 
         $sql ='SELECT SUM(fe.commission * f.total_ht / 100) as total';
         $sql.= ' FROM '.MAIN_DB_PREFIX.'facture as f LEFT JOIN '.MAIN_DB_PREFIX.'facture_extrafields as fe ON fe.fk_object = f.rowid';
         //$sql.=' WHERE fe.reseller IN ('.join(',', $listofcustomeridreseller).')';
-        $sql.=' WHERE fe.reseller = '.$mythirdpartyaccount->id;
+        $sql.=' WHERE fe.reseller = '.((int) $mythirdpartyaccount->id);
         $sql.=' AND fk_statut <> '.Facture::STATUS_DRAFT;
         $sql.=' AND paye = 1';
 
         $resql = $db->query($sql);
-        if ($resql)
-        {
+        if ($resql) {
             $obj = $db->fetch_object($resql);
             $totalamountcommission = $obj->total;
+        } else {
+        	dol_print_error($db);
         }
 
+        print '<!-- Total of commissions earned -->';
         print '<tr class="liste_titre"><td colspan="6">'.$langs->trans("Total").'</td>';
         print '<td align="right"><strong>'.price($commoldystem + $totalamountcommission).'</strong></td>';
         print '</tr>';
