@@ -3503,15 +3503,20 @@ Les étapes suivantes résumes les opérations à réaliser pour cloner un serve
 
 - Créer un nouveau serveur depuis le snapshot:
 
-*Avec OVH*:
+*With OVH*:
 
-Spécifier le nom du snapshot source et copier dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
+Choose the snapshot or image to use and copy into area *post installation script* the content of file */scripts/post_inst_script.sh*.
 
-*Avec ScaleWay*:
+Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
+Il est possible qu'il faille aussi modifier les fichiers network pour obtenir l'ip v4 en dhcp. Pour cela:
+Se connecter à la console. Faire *ip link show* pour connaitre l'adresse MAC. Vérifier le fichier */etc/netplan/50-cloud-init.yaml* afin d'avoir la bonne MAC address.
+Corriger et redémmarer si nécessaire. Corriger ensuite aussi pour l'ipv6.
+
+
+*With ScaleWay*:
 
 TODO
 
-- Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
 
 - Une fois le serveur prêt: Se connecter pour désactiver les crons en doublons avec le serveur cloné (possibilité de désactiver le process cron complètement) par
 

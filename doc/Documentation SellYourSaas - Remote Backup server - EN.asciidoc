@@ -83,7 +83,7 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (do
 
 [source, bash]
 ---------------
-mkdir /mnt/diskbackup
+mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -129,7 +129,7 @@ Rem: If you need to recover data files from another disk, use:
 
 [source, bash]
 ---------------
-rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
+rsync --info=progress2 -au serveursource:/mnt/diskSource/* /mnt/diskTarget
 ---------------
 
 
