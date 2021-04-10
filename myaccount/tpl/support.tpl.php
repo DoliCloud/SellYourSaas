@@ -107,7 +107,8 @@ if (empty($conf) || ! is_object($conf))
 				      <div class="portlet-title">
 				        <div class="caption">';
 
-                        print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+        				print '<!-- form to select channel -->'."\n";
+        				print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
                         print '<input type="hidden" name="token" value="'.newToken().'">';
                         print '<input type="hidden" name="mode" value="support">';
                         print '<input type="hidden" name="action" value="presend">';
@@ -232,6 +233,7 @@ if (empty($conf) || ! is_object($conf))
 
                     print '</form>';
 
+
                     if ($action == 'presend' && GETPOST('supportchannel','alpha'))
                     {
                         print '<br><br>';
@@ -279,6 +281,7 @@ if (empty($conf) || ! is_object($conf))
                         print '</form>';
                         */
 
+                        print '<!-- form to send a ticket -->'."\n";
                         print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
                         print '<input type="hidden" name="token" value="'.newToken().'">';
                         print '<input type="hidden" name="action" value="send">';

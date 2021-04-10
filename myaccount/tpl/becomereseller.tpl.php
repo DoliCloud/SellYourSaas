@@ -79,7 +79,7 @@ if (empty($conf) || ! is_object($conf))
 
 				      <div class="portlet-title">
 				        <div class="caption">';
-
+		print '<!-- form to send a request to be reseller -->'."\n";
         print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
         print '<input type="hidden" name="token" value="'.newToken().'">';
         print '<input type="hidden" name="mode" value="becomereseller">';
@@ -94,15 +94,17 @@ if (empty($conf) || ! is_object($conf))
         }
 
         if (preg_match('/high/', GETPOST('supportchannel','alpha'))) $sellyoursaasemail = preg_replace('/@/', '+premium@', $sellyoursaasemail);
-        $subject = (GETPOST('subject','none')?GETPOST('subject','none'):(preg_match('/fr/i', $langs->defaultlang)?$langs->trans("BecomeReseller"):$langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
+        $subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):(preg_match('/fr/i', $langs->defaultlang)?$langs->trans("BecomeReseller"):$langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
 
         $commissiondefault = (empty($conf->global->SELLYOURSAAS_DEFAULT_COMMISSION) ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
 
         print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
+
         print $langs->trans("MailFrom").' : <input type="text" required name="from" value="'.(GETPOST('from','none')?GETPOST('from','none'):$mythirdpartyaccount->email).'"><br><br>';
+
         print $langs->trans("MailTopic").' : <input type="text" required class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
-        $texttouse = GETPOST('content','none');
+        $texttouse = GETPOST('content', 'none');
         // Text is in french or english (no other language for resellers)
         if (! $texttouse)
         {
