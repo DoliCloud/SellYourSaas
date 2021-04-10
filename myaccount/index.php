@@ -421,6 +421,10 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile'))
 		$error++;
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("MailTopic")), null, 'errors');
 	}
+	if (GETPOSTISSET('groupticket') && ! GETPOST('groupticket')) {
+		$error++;
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("GroupOfTicket")), null, 'errors');
+	}
 	if (empty($content)) {
 		$error++;
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Description")), null, 'errors');

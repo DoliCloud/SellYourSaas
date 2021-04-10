@@ -115,7 +115,7 @@ if (empty($conf) || ! is_object($conf))
 
                         print '<span class="opacitymedium">'.$langs->trans("SelectYourSupportChannel").'</span><br>';
 
-                        print '<select id="supportchannel" name="supportchannel" class="maxwidth500 minwidth600" style="width: auto">';
+                        print '<select id="supportchannel" name="supportchannel" class="minwidth600">';
                         print '<option value="">&nbsp;</option>';
                         if (count($listofcontractid) == 0)
                         {
@@ -182,7 +182,7 @@ if (empty($conf) || ! is_object($conf))
                                     if (! $ispaid)
                                     {
                                         $priority = 'low';
-                                        $prioritylabel = $langs->trans("Trial").'-'.$langs->trans("Low");
+                                        $prioritylabel = $langs->trans("Trial").' = <span class="prioritylow">'.$langs->trans("Low").'</span>';
                                     }
                                     else
                                     {
@@ -191,25 +191,26 @@ if (empty($conf) || ! is_object($conf))
                                             if ($tmpproduct->array_options['options_typesupport'] == 'premium')
                                             {
                                                 $priority = 'high';
-                                                $prioritylabel = $langs->trans("High");
+                                                $prioritylabel = '<span class="priorityhigh">'.$langs->trans("High").'</span>';
                                                 $atleastonehigh++;
                                             }
                                             else
                                             {
                                                 $priority = 'medium';
-                                                $prioritylabel = $langs->trans("Medium");
+                                                $prioritylabel = '<span class="prioritymedium">'.$langs->trans("Medium").'</span>';
                                             }
                                         }
                                     }
                                     $optionid = $priority.'_'.$id;
-                                    print '<option value="'.$optionid.'"'.(GETPOST('supportchannel','alpha') == $optionid ? ' selected="selected"':'').'">';
-                                    //print $langs->trans("Instance").' '.$contract->ref_customer.' - ';
-                                    print $tmpproduct->label.' - '.$contract->ref_customer.' ';
-                                    //print $tmpproduct->array_options['options_typesupport'];
-                                    //print $tmpproduct->array_options['options_typesupport'];
-                                    print ' ('.$langs->trans("Priority").': ';
-                                    print $prioritylabel;
-                                    print ')';
+                                    $labeltoshow .= $langs->trans("Instance").' <strong>'.$contract->ref_customer.'</strong> ';
+                                    //$labeltoshow = $tmpproduct->label.' - '.$contract->ref_customer.' ';
+                                    //$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
+                                    //$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
+                                    $labeltoshow .= ' <span class="opacitymedium">('.$langs->trans("Priority").': ';
+                                    $labeltoshow .= $prioritylabel;
+                                    $labeltoshow .= ')</span>';
+                                    print '<option value="'.$optionid.'"'.(GETPOST('supportchannel','alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
+                                    print dol_escape_htmltag($labeltoshow);
                                     print '</option>';
                                     //print ajax_combobox('supportchannel');
 
@@ -218,13 +219,15 @@ if (empty($conf) || ! is_object($conf))
                             }
                         }
 
+                    // Add link other or miscellaneous
                     if (! $atleastonefound) $labelother = $langs->trans("Miscellaneous");
                     else $labelother = $langs->trans("Other");
+                    $labelother .= ' <span class="opacitymedium">('.$langs->trans("Priority").': <span class="prioritylow">'.$langs->trans("Low").'</span>)</span>';
 
-                    print '<option value="low_other"'.(GETPOST('supportchannel','alpha') == 'low_other' ? ' selected="selected"':'').'>'.$labelother.' ('.$langs->trans("Priority").': '.$langs->trans("Low").')</option>';
-                    if (empty($atleastonehigh))
-                    {
-                        print '<option value="high_premium" disabled="disabled">'.$langs->trans("PremiumSupport").' ('.$langs->trans("Priority").': '.$langs->trans("High").') - '.$langs->trans("NoPremiumPlan").'</option>';
+                    print '<option value="low_other"'.(GETPOST('supportchannel','alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
+                    if (empty($atleastonehigh)) {
+                    	$labeltoshow = $langs->trans("PremiumSupport").' ('.$langs->trans("Priority").': <span class="priorityhigh">'.$langs->trans("High").'</span>) / '.$langs->trans("NoPremiumPlan");
+                    	print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
                     }
                     print '</select>';
 					print ajax_combobox("supportchannel");
@@ -324,12 +327,13 @@ if (empty($conf) || ! is_object($conf))
 
                         print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
 
-                        print $langs->trans("MailFrom").' : <input type="text" name="from" value="'.(GETPOST('from','none')?GETPOST('from','none'):$mythirdpartyaccount->email).'"><br><br>';
-                        print $langs->trans("MailTopic").' : <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
+                        print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" name="from" value="'.(GETPOST('from','none')?GETPOST('from','none'):$mythirdpartyaccount->email).'"><br><br>';
+                        print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
                         //Combobox for Group of ticket
-                        $stringtoprint = $langs->trans("GroupOfTicket").' : <br>';
-                        $stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth600" style="width: auto">';
+                        $stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
+                        $stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth200">';
+                        $stringtoprint .= '<option value="">&nbsp;</option>';
 
                         $sql = "SELECT ctc.code, ctc.label";
                         $sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
@@ -348,7 +352,7 @@ if (empty($conf) || ! is_object($conf))
                                 {
                                     $groupvalue = $obj->code;
                                     $grouplabel = $obj->label;
-                                    $stringtoprint .= '<option value="'.dol_escape_htmltag($groupvalue).'">'.dol_escape_htmltag($grouplabel).'</option>';
+                                    $stringtoprint .= '<option value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
                                 }
                                 $i++;
                             }
@@ -359,7 +363,7 @@ if (empty($conf) || ! is_object($conf))
                         $stringtoprint .= '<br><br>';
                         if ($num_rows > 1) {
                             print $stringtoprint;
-                        }else if ($num_rows == 1){
+                        } else if ($num_rows == 1){
                             print '<input type="hidden" name="groupticket" id="groupticket" value="'.dol_escape_htmltag($groupvalue).'">';
                         }
 
