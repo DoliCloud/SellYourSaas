@@ -324,6 +324,42 @@ if (empty($conf) || ! is_object($conf))
                         print $langs->trans("MailFrom").' : <input type="text" name="from" value="'.(GETPOST('from','none')?GETPOST('from','none'):$mythirdpartyaccount->email).'"><br><br>';
                         print $langs->trans("MailTopic").' : <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
+                        //Combobox for Group of ticket
+                        $stringtoprint = $langs->trans("GroupOfTicket").' : <br>';
+                        $stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth600" style="width: auto">';
+
+                        $sql = "SELECT ctc.code, ctc.label";
+                        $sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
+                        $sql .= " WHERE ctc.public = 1";
+                        $sql .= " AND ctc.active = 1";
+                        $sql .= $db->order('ctc.pos','ASC');
+                        $resql = $db->query($sql);
+                        if ($resql)
+                        {
+                            $num_rows = $db->num_rows($resql);
+                            $i = 0;
+                            while ($i < $num_rows)
+                            {
+                                $obj = $db->fetch_object($resql);
+                                if ($obj)
+                                {
+                                    $groupvalue = $obj->code;
+                                    $grouplabel = $obj->label;
+                                    $stringtoprint .= '<option value="'.dol_escape_htmltag($groupvalue).'">'.dol_escape_htmltag($grouplabel).'</option>';
+                                }
+                                $i++;
+                            }
+                        }
+
+                        $stringtoprint .= '</select>';
+                        $stringtoprint .= ajax_combobox("groupticket");
+                        $stringtoprint .= '<br><br>';
+                        if ($num_rows > 1) {
+                            print $stringtoprint;
+                        }else if ($num_rows == 1){
+                            print '<input type="hidden" name="groupticket" id="groupticket" value="'.dol_escape_htmltag($groupvalue).'">';
+                        }
+
                         print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
                         print ' ';
                         print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
@@ -405,7 +441,7 @@ if (empty($conf) || ! is_object($conf))
     print '
 	    </div>
 		</div>
-	';
+    ';
 
 ?>
 <!-- END PHP TEMPLATE support.tpl.php -->

@@ -411,6 +411,7 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile'))
 	$replyto = GETPOST('from','alpha');
 	$topic = GETPOST('subject','restricthtml');
 	$content = GETPOST('content','restricthtml');
+	$groupticket=GETPOST('groupticket','aZ09');
 
 	if (empty($replyto)) {
 		$error++;
@@ -434,6 +435,9 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile'))
 			$topic = '[Ticket - '.$tmpcontract->ref_customer.'] '.$topic;
 			$content .= "<br><br>\n";
 			$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
+			if ($groupticket) {
+				$content .= 'Group: '.dol_escape_htmltag($groupticket)."<br>\n";
+			}
 			$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
 			//$content .= 'Ref contract: <a href="xxx/contrat/card.php?id='.$tmpcontract->ref.">".$tmpcontract->ref."</a><br>\n"; 	// No link to backoffice as the mail is used with answer to.
 			$content .= 'Ref contract: '.$tmpcontract->ref."<br>\n";
