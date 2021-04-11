@@ -308,7 +308,7 @@ if ($dayofmysqldump == 'autoscan') {
 	if (count($arrayoffiles)) {
 		$i = 1;
 		foreach($arrayoffiles as $filevar) {
-			print $i." - ".$filevar['relativename']." - ".dol_print_date($filevar['date'], 'dayhour')." (".dol_print_size($filevar['size'], 1).")\n";
+			print $i." - ".$filevar['relativename']." - ".dol_print_date($filevar['date'], 'dayhour')." (".dol_print_size($filevar['size'], 1, 1).")\n";
 			$i++;
 		}
 		do {
