@@ -332,7 +332,7 @@ if (empty($conf) || ! is_object($conf))
 
                         //Combobox for Group of ticket
                         $stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
-                        $stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth200">';
+                        $stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth400">';
                         $stringtoprint .= '<option value="">&nbsp;</option>';
 
                         $sql = "SELECT ctc.code, ctc.label";

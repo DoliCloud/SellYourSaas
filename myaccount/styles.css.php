@@ -139,7 +139,7 @@ border: 1px solid #e5e5e5;*zoom: 1;
 
 .supportemailfield {
     display: inline-block;
-    min-width: 100px;
+    min-width: 150px;
 }
 
 .prioritylow { color: #811; }
