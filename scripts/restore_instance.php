@@ -463,7 +463,10 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$output=array();
 	$return_varmysql=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
-	exec($fullcommand, $output, $return_varmysql);
+	if ($mode == 'confirm' || $mode == 'confirmdatabase')
+	{
+		exec($fullcommand, $output, $return_varmysql);
+	}
 	print strftime("%Y%m%d-%H%M%S").' mysqldump done (return='.$return_varmysql.')'."\n";
 
 	// Output result
