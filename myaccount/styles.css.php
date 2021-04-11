@@ -88,6 +88,10 @@ display: inline-block;padding: 4px 6px;
 line-height: 20px;color: #555555;
 }
 
+.pictofixedwidth {
+    width: 22px;
+}
+
 input,textarea,.uneditable-input { width: 256px;}
 textarea {height: auto;}
 textarea,input[type='text'],input[type='password'],input[type='datetime'],input[type='datetime-local'],input[type='date'],input[type='month'],input[type='time'],input[type='week'],input[type='number'],input[type='email'],input[type='url'],input[type='search'],input[type='tel'],input[type='color'],.uneditable-input
