@@ -304,11 +304,11 @@ if (! in_array($mode, array('testrsync', 'testdatabase', 'test', 'confirmrsync',
 
 if ($dayofmysqldump == 'autoscan') {
 	print 'Scan directory '.$dirroot.'/.. for database dumps.'."\n";
-	$arrayoffiles = dol_dir_list($dirroot.'/..', 'files', 0, '\.gz|\.zst');
+	$arrayoffiles = dol_dir_list($dirroot.'/..', 'files', 0, '\.gz|\.bz2|\.zst', null, 'name', SORT_ASC, 1);
 	if (count($arrayoffiles)) {
 		$i = 1;
 		foreach($arrayoffiles as $filevar) {
-			print $i." - ".$filevar['relativename']." - ".$filevar['date']."\n";
+			print $i." - ".$filevar['relativename']." - ".dol_print_date($filevar['date'], 'dayhour')." (".dol_print_size($filevar['size'], 1).")\n";
 			$i++;
 		}
 		do {
