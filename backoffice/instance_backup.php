@@ -446,7 +446,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 // Backup command line
 $backupstringtoshow=$backupstring.' confirm';
 $backupstringtoshow2=$backupstring.' confirm';
-print '<span class="fa fa-database"></span> -> Backup command line string<br>';
+print '<span class="fa fa-database"></span> -> Backup command line string <span class="opacitymedium">(to run on the server where to store the backup)</span><br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
 print ajax_autoselect('backupstring');
 
@@ -455,7 +455,7 @@ print '<br>';
 // Restore command line from backup
 if ($restorestringfrombackup) {
 	$restorestringtoshow=$restorestringfrombackup.' (test|confirm)';
-	print '-> <span class="fa fa-database"></span> Restore command line string from Backup<br>';
+	print '-> <span class="fa fa-database"></span> Restore command line string from Backup <span class="opacitymedium">(to run from the server hosting the backup)</span><br>';
 	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
 	print ajax_autoselect('restorestring');
 
@@ -465,7 +465,7 @@ if ($restorestringfrombackup) {
 // Restore commands from archive
 if ($restorestringfromarchive) {
 	$restorestringtoshow=$restorestringfromarchive.' (test|confirm)';
-	print '-> <span class="fa fa-database"></span> Restore command line string from Archive<br>';
+	print '-> <span class="fa fa-database"></span> Restore command line string from Archive <span class="opacitymedium">(to run from the server hosting the archives)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_9.'">';
 	print $restorestringpretoshow."\n";
 	print $restorestringtoshow."\n";
@@ -480,7 +480,7 @@ if ($restorestringfromarchive) {
 // Migrate to another instance container
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
-	print '<span class="fa fa-database"></span> -> <span class="fa fa-database"></span> Migration of instance into another instance<br>';
+	print '<span class="fa fa-database"></span> -> <span class="fa fa-database"></span> Migration of instance into another instance <span class="opacitymedium">(can be run on any server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
 	print $backupstringtoshow."\n";
 	print $restorestringtoshow."\n";
