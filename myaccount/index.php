@@ -2938,7 +2938,7 @@ if ($mythirdpartyaccount->isareseller)
 		<div class="note note-info">
 		<h4 class="block"><span class="fa fa-briefcase"></span> '.$langs->trans("YouAreAReseller").'.</h4>
 		';
-	print $langs->trans("YourURLToCreateNewInstance").':<br>';
+	print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
