@@ -482,13 +482,8 @@ TODO Graphic with flux and ports
 === Installation of fail2ban ===
 
 * Installation of fail2ban and activation of the following fail2ban rules:
-  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
-  *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
+  *pam-generic*, *xinetd-fail*
   
-* As well as the specific rules for sellyoursaas:
-  
-  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
-
 
 To do this, first create a */etc/fail2ban/jail.local* file with this content:
 
