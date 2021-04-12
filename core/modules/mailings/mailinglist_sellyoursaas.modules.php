@@ -188,7 +188,8 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$productid = GETPOST('productid', 'int');
 
 		$sql = " SELECT s.rowid as id, email, nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label,";
-		$sql .=" se.stripeaccount, se.domain_registration_page";
+		$sql .= " se.stripeaccount, se.domain_registration_page,";
+		$sql .= " coe.deployment_host";
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
