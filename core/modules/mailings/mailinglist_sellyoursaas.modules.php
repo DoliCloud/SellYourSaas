@@ -249,7 +249,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 						'lastname' => $obj->lastname,
 						'id' => $obj->id,
 						'firstname' => $obj->firstname,
-						'other' => 'lang='.$obj->default_lang.';country_code='.$obj->country_code.';domain_registration='.$obj->domain_registration_page.';host_instance='.$obj->stripeaccount,
+						'other' => 'lang='.$obj->default_lang.';country_code='.$obj->country_code.';domain_registration='.$obj->domain_registration_page.';host_instance='.$obj->deployment_host,
 						'source_url' => $this->url($obj->id),
 						'source_id' => $obj->id,
 						'source_type' => 'thirdparty'
