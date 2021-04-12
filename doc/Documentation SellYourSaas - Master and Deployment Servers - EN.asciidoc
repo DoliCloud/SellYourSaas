@@ -224,7 +224,7 @@ Create the user account *admin*. It will be used to install and administer the s
 ---------------
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
-chown admin.admin diskbackup
+mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -252,7 +252,7 @@ Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permiss
 [source, conf]
 ---------------
 # Privilege Separation is turned on for security
-UsePrivilegeSeparation yes
+#UsePrivilegeSeparation yes
 # Permissions on files must be correct to allow login
 StrictModes yes
 
@@ -293,15 +293,23 @@ Add the following line in the */etc/sudoers* file to reposition the HOME accordi
 Defaults set_home
 ---------------
 
-Create a file */etc/sudoers.d/myunixlogin* with the owner *root*.*root* and the permissions *r-r-----* and the content
+Create a file */etc/sudoers.d/myunixlogin* with the content
 
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
+And set the *root*.*root* and the permissions *r-r-----*
 
-Test that you can connect using *myunixlogin* and make a sudo with
+[source, conf]
+---------------
+chmod a-w /etc/sudoers.d/myunixlogin
+chmod a-r /etc/sudoers.d/myunixlogin
+---------------
+
+
+Test that you can connect using *myunixlogin* and you can make a sudo with
 
 [source,bash]
 ---------------

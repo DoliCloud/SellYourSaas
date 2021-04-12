@@ -30,47 +30,19 @@ Avec OVH Public Cloud:
 * Installation de Ubuntu LTS.
 
 
-[ajout_de_disque]
-=== Ajout de disque ===
-
-Avec OVH Public Cloud:
-
-* Créer le serveur
-* Ajouter les disques (chaque disque suplémentaire est ajouté en /dev/vdb, /dev/vdc, /dev/vdd, ...). 
-Remarque, le disque devient visible avec fdisk -l.
-* Ajouter la partition sur les disques (type Linux) et la formater si c'est un disque jamais partitionné
-
-[source,bash]
----------------
-fdisk /dev/vdx
-option n puis p (choisir alors le numéro de partition) puis w
-
-fsck -N /dev/vdxY
-mkfs.ext4 /dev/vdxY
----------------
-
-Récuper la valeur du UUID qui s'affiche.
-
-* Monter les disques
-
-[source,bash]
----------------
-mkdir /mnt/disk  ou  /mnt/diskX
-mount /dev/vdxY /mnt/disk  ou  mount /dev/vdxY /mnt/diskX
-
-lsblk
----------------
-
-* Désactiver le montage des anciens disques externes et ajouter le montage en automatique du nouveau par *vi /etc/fstab*
-
-[source,bash]
----------------
-UUID=4ca52db5-4e90-491b-bda7-9013daf57ef1 /mnt/disk ext4 nofail 0 0
----------------
-
-
-
 === Configuration système
+
+Create the user account *admin*. It will be used to install and administer the system when root is not required.
+
+[source, bash]
+---------------
+groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
+mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+---------------
+
+Check that the id of this user *admin* is greater than or equal to 1000.
+
 
 Créer le compte utilisateur *mylogin*.
 
@@ -79,33 +51,187 @@ Créer le compte utilisateur *mylogin*.
 adduser mylogin
 ---------------
 
-Ajouter la clé publique.
+==== ssh setup
+
+Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
+
+[source,conf]
+---------------
+chmod go-rw /etc/ssh/sshd_config
+---------------
+
+Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
+
+[source, conf]
+---------------
+# Privilege Separation is turned on for security
+#UsePrivilegeSeparation yes
+# Permissions on files must be correct to allow login
+StrictModes yes
+
+# MaxSessions 10
+MaxSessions 25
+
+# Disallow login to root
+PermitRootLogin no
+# Disallow empty passwords
+PermitEmptyPasswords no
+# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
+ChallengeResponseAuthentication no
+ 
+# Define list of allowed method to authenticate
+PasswordAuthentication yes
+PubkeyAuthentication yes
+
+DenyUsers guest
+
+AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
+
+AllowUsers admin osu*
+AllowUsers myunixlogin
+---------------
+
+Please note: replace *myunixlogin* with the correct value before taking changes into account with:
+
+[source, conf]
+---------------
+/etc/init.d/ssh reload
+---------------
+
+
+Add the following line in the */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
+
+[source, conf]
+---------------
+Defaults set_home
+---------------
+
+Create a file */etc/sudoers.d/myunixlogin* with the content
+
+[source, conf]
+---------------
+myunixlogin ALL=(ALL) NOPASSWD:ALL
+---------------
+
+And set the *root*.*root* and the permissions *r-r-----*
+
+[source, conf]
+---------------
+chmod a-w /etc/sudoers.d/myunixlogin
+chmod a-r /etc/sudoers.d/myunixlogin
+---------------
+
+
+Test that you can connect using *myunixlogin* and you can make a sudo with
 
 [source,bash]
 ---------------
-ssh-copy-id mylogin@x.y.z.a
+ssh -v myunixlogin@x.y.z.a
+sudo -s
 ---------------
 
 
-Initialiser le mot de passe de *root* et de *mylogin*.
+Add your public key to your unix account.
 
-Modifier */etc/ssh/sshd_config* pour changer les autorisations de login:
+[source, bash]
+---------------
+ssh-copy-id myunixlogin@x.y.z.a
+---------------
 
-	PermitRootLogin no
-	ChallengeResponseAuthentication yes
 
-Ajouter la ligne suivante dans le fichier /etc/sudoers pour repositionne le HOME selon le user apres un sudo -s
+Define or redefine the password for *root*, *admin* with a secure password.
 
-	Defaults        set_home
+[source,bash]
+---------------
+passwd root
+passwd admin
+---------------
 
-Créer un fichier *mylogin* à mettre dans le répertoire */etc/sudoers.d* avec les permission *r--r-----* et le contenu
+Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
 
-	mylogin ALL=(ALL) NOPASSWD:ALL
+
+==== Default shell
+
+Modify the default shell to use bash (instead of dh sh or dash)
+
+[source, bash]
+---------------
+ln -fs /bin/bash /usr/bin/sh
+---------------
+
 
 
 === Modification du nom du serveur
 
 Mettre le nom du serveur dans le fichier */etc/hostname*
+
+
+=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
+
+==== With ifupdown (Ubuntu 16.04)
+
+- To add a v6 IP dynamically for testing purposes at first:
+
+[source, bash]
+---------------
+ip addr add 2002:41d0:1234:1000::1234/128 dev eth0
+ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+---------------
+
+- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
+
+Example for an IPv6 2002:41d0:1234:1000::1234 with as gateway 2002:41d0:1234:1000::1
+
+[source, conf]
+---------------
+# To declare a persistent v6 IP (the mask is 128 at OVH in ipv6)
+iface eth0 inet6 static
+        address 2002:41d0:1234:1000::1234
+        netmask 128
+        post-up /sbin/ip -6 route add 2002:41d0:1234:1000::1 dev eth0
+        post-up /sbin/ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del default via 2002:41d0:1234:1000::1 dev eth0
+        pre-down /sbin/ip -6 route del 2002:41d0:1234:1000::1 dev eth0
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
+To take this into account, try this, otherwise, reboot.
+
+[source, bash]
+---------------
+/etc/init.d/networking restart
+---------------
+
+==== With netplan (Ubuntu 18.04 +)
+
+Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
+Note: OVH provides a /128 for ipv6 but netplan wants /64
+ 
+Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
+
+[source, conf]
+---------------
+network:
+	version: 2
+	ethernets:
+		eth0:
+			match:
+				name: eth0
+			addresses:
+				- "1234:41d0:1234:1000::1234/64"
+			gateway6: "1234:41d0:1234:1000::1"
+---------------
+Note: Use 4 spaces for tabulation.
+ 
+[source, bash]
+---------------
+netplan try
+netplan apply
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
 
 
 === Ajout d'un swap
@@ -118,15 +244,9 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 == Installation des outils externe
 
-=== Copie outils dans /home/admin/tools
-
-* Copier les outils dans /home/admin/tools
-
-
-=== Installation de webmin
+=== Installation de webmin (optionnel pour supervision)
 
 * Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
 
 
 == Installation des composants systèmes et applicatifs
@@ -174,6 +294,244 @@ ln -fs /home/admin/tools/firewall /etc/init.d/firewall
 === Installation de fail2ban
 
 * Installation et activation de fail2ban avec les configs dans */etc/fail2ban*
+
+
+* Installation of fail2ban and activation of the following fail2ban rules:
+  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
+  
+* As well as the specific rules for sellyoursaas:
+  
+  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
+
+
+To do this, first create a */etc/fail2ban/jail.local* file with this content:
+
+NOTE: The rules available may vary depending on the version of the OS installed.
+
+NOTE: Remember to also modify *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
+
+
+[source, bash]
+---------------
+# Fail2Ban configuration file.
+#
+# This file was composed for Debian systems from the original one
+# provided now under /usr/share/doc/fail2ban/examples/jail.conf
+# for additional examples.
+#
+# Comments: use '#' for comment lines and ';' for inline comments
+#
+# To avoid merges during upgrades DO NOT MODIFY THIS FILE
+# and rather provide your changes in /etc/fail2ban/jail.local
+#
+
+# The DEFAULT allows a global definition of the options. They can be overridden
+# in each jail afterwards.
+
+[DEFAULT]
+# "ignoreip" can be an IP address, a CIDR mask or a DNS host. Fail2ban will not
+# ban a host which matches an address in this list. Several addresses can be
+# defined using space separator.
+ignoreip = 127.0.0.1/8 mybusinessips
+
+# "bantime" is the number of seconds that a host is banned.
+bantime  = 3600
+
+# A host is banned if it has generated "maxretry" during the last "findtime"
+# seconds.
+findtime = 600
+maxretry = 3
+
+# "backend" specifies the backend used to get files modification.
+# Available options are "pyinotify", "gamin", "polling" and "auto".
+# This option can be overridden in each jail as well.
+#
+# pyinotify: requires pyinotify (a file alteration monitor) to be installed.
+#            If pyinotify is not installed, Fail2ban will use auto.
+# gamin:     requires Gamin (a file alteration monitor) to be installed.
+#            If Gamin is not installed, Fail2ban will use auto.
+# polling:   uses a polling algorithm which does not require external libraries.
+# auto:      will try to use the following backends, in order:
+#            pyinotify, gamin, polling.
+backend = auto
+
+# "usedns" specifies if jails should trust hostnames in logs,
+#   warn when reverse DNS lookups are performed, or ignore all hostnames in logs
+#
+# yes:   if a hostname is encountered, a reverse DNS lookup will be performed.
+# warn:  if a hostname is encountered, a reverse DNS lookup will be performed,
+#        but it will be logged as a warning.
+# no:    if a hostname is encountered, will not be used for banning,
+#        but it will be logged as info.
+usedns = warn
+
+#
+# Destination email address used solely for the interpolations in
+# jail.{conf,local} configuration files.
+destemail = supervision@mydomain.com
+
+#
+# Name of the sender for mta actions
+sendername = Fail2Ban
+
+
+#
+# ACTIONS
+#
+
+# Default banning action (e.g. iptables, iptables-new,
+# iptables-multiport, shorewall, etc) It is used to define
+# action_* variables. Can be overridden globally or per
+# section within jail.local file
+banaction = iptables-multiport
+
+# email action. Since 0.8.1 upstream fail2ban uses sendmail
+# MTA for the mailing. Change mta configuration parameter to mail
+# if you want to revert to conventional 'mail'.
+mta = sendmail
+
+
+[apache-shellshock]
+
+enabled = true
+
+
+[php-url-fopen]
+
+enabled = true
+
+
+[pam-generic]
+
+enabled = true
+
+
+[postfix-sasl]
+
+# Overwrite param port since it is wrong into file jail.conf because it contains 'imap3' instead of 'imap' that does not exists
+port    = smtp,465,submission,imap,imaps,pop3,pop3s
+enabled = true
+
+
+[sshd]
+
+enabled = true
+
+
+[webmin-auth]
+
+enabled = true
+
+
+[xinetd-fail]
+
+enabled = true
+
+
+[apache-badbots]
+# Ban hosts which agent identifies spammer robots crawling the web
+# for email addresses. The mail outputs are buffered.
+port     = http,https
+logpath  = %(apache_access_log)s
+bantime  = 172800
+maxretry = 1
+enabled  = true
+
+
+[apache-noscript]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 6
+enabled  = true
+
+
+[apache-overflows]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[apache-nohome]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[apache-botsearch]
+
+port     = http,https
+logpath  = %(apache_error_log)s
+maxretry = 2
+enabled  = true
+
+
+[mysqld-auth]
+
+port     = 3306
+logpath  = /var/log/mysql/error.log
+#backend  = %(mysql_backend)s
+enabled = true
+bantime  = 7200      ; 2 hours
+findtime = 3600      ; 1 hour
+maxretry = 5
+
+
+[web-dol-passforgotten]
+
+; rule against call of passwordforgottenpage
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulespassforgotten
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 10
+
+[web-dol-bruteforce]
+
+; rule against bruteforce hacking (login + api)
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulesbruteforce
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 3600      ; 1 hour
+maxretry = 10
+
+[web-dol-registerinstance]
+
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
+; disable this rule by setting enable to false on deployment servers
+;enabled = true
+;port    = http,https
+;filter  = web-dolibarr-rulesregisterinstance
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
+;action  = %(action_mw)s
+;bantime  = 4320000   ; 50 days
+;findtime = 86400     ; 1 day
+;maxretry = 10
+
+---------------
+
+Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating a link:
+
+[source, bash]
+---------------
+cd /etc/fail2ban/filter.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+---------------
+
+Relaunch fail2ban and check errors into */var/log/fail2ban.log*
 
 
 === Installation de afick

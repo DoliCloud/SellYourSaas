@@ -215,7 +215,7 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 ---------------
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
-chown admin.admin diskbackup
+mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
 ---------------
 
 Vérifiez que le id de ce user *admin* est bien supérieur ou égale à 1000.
@@ -243,7 +243,7 @@ Créer un fichier */etc/ssh/sshd_config.d/sellyoursaas.conf* pour changer les au
 [source,conf]
 ---------------
 # Privilege Separation is turned on for security
-UsePrivilegeSeparation yes
+#UsePrivilegeSeparation yes
 # Permissions on files must be correct to allow login
 StrictModes yes
 
@@ -283,11 +283,19 @@ Ajouter la ligne suivante dans le fichier */etc/sudoers* pour repositionner le H
 Defaults        set_home
 ---------------
 
-Créer un fichier */etc/sudoers.d/myunixlogin* avec le owner *root* et les permissions *r--r-----* et le contenu
+Créer un fichier */etc/sudoers.d/myunixlogin*
 
 [source,conf]
 ---------------
 myunixlogin ALL=(ALL) NOPASSWD:ALL
+---------------
+
+Et positionner le owner *root.root* et les permissions *r--r-----*
+
+[source, conf]
+---------------
+chmod a-w /etc/sudoers.d/myunixlogin
+chmod a-r /etc/sudoers.d/myunixlogin
 ---------------
 
 
