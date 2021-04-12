@@ -187,20 +187,20 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		$productid = GETPOST('productid', 'int');
 
-		$sql = " SELECT s.rowid as id, email, nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label";
-		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
-		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
-		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
+		$sql = " SELECT s.rowid as id, email, nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label,";
+		$sql .=" se.stripeaccount, se.domain_registration_page";
+		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
 		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
 		    (! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
-			($productid > 0))
-		{
-			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
-			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
+			($productid > 0)) {
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
 		}
-		$sql.= ", ".MAIN_DB_PREFIX."categorie_societe as cs";
-		$sql.= " WHERE email IS NOT NULL AND email <> ''";
-		$sql.= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
+		$sql .= ", ".MAIN_DB_PREFIX."categorie_societe as cs";
+		$sql .= " WHERE email IS NOT NULL AND email <> ''";
+		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
 		/*if (! empty($_POST['options_dolicloud']) && $_POST['options_dolicloud'] != 'none')
 		{
 			$sql.= " AND se.dolicloud = '".$this->db->escape($_POST['options_dolicloud'])."'";
@@ -208,8 +208,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		if (GETPOST('lang_id') && GETPOST('lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id', 'array')), 3);
 		if (GETPOST('not_lang_id') && GETPOST('not_lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id', 'array')), -3);
 		if (GETPOST('country_id') && GETPOST('country_id') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
-		if (GETPOST('filter') && GETPOST('filter') != 'none')
-		{
+		if (GETPOST('filter') && GETPOST('filter') != 'none') {
 			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('filter'))."'";
 		}
 		if (GETPOST('filterip') && GETPOST('filterip') != 'none') {
@@ -250,7 +249,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 						'lastname' => $obj->lastname,
 						'id' => $obj->id,
 						'firstname' => $obj->firstname,
-						'other' => 'lang='.$obj->default_lang.';country_code='.$obj->country_code,
+						'other' => 'lang='.$obj->default_lang.';country_code='.$obj->country_code.';domain_registration='.$obj->domain_registration_page.';host_instance='.$obj->stripeaccount,
 						'source_url' => $this->url($obj->id),
 						'source_id' => $obj->id,
 						'source_type' => 'thirdparty'
