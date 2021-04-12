@@ -552,3 +552,4 @@ SecurityOfRegistrations=Security of registration
 IHaveAVATID=I have a Tax/VAT ID
 NoResourceToCountUsersFound=This instance contains no products that need to count resource users
 GroupOfTicket=Category
+DoNotUseDefaultStripeAccount=Do not use default stripe account

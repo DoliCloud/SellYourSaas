@@ -78,11 +78,12 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
         $s.=$langs->trans("Language").': ';
         $formother=new FormAdmin($db);
-        $s.=$formother->select_language(GETPOST('lang_id', 'alpha'), 'lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+
+        $s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
         $s.=$langs->trans("NotLanguage").': ';
         $formother=new FormAdmin($db);
-        $s.=$formother->select_language(GETPOST('not_lang_id', 'alpha'), 'not_lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+        $s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
         $s.='<br> ';
 
@@ -91,7 +92,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
         $s.='<option value="none">&nbsp;</option>';
         foreach($arraystatus as $key => $status)
         {
-        	$s.='<option value="'.$key.'">'.$status.'</option>';
+        	$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
         }
         $s.='</select>';
 
@@ -117,7 +118,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
         $s.='<option value="none">&nbsp;</option>';
         foreach($listofipwithinstances as $val)
         {
-        	$s.='<option value="'.$val.'">'.$val.'</option>';
+        	$s.='<option value="'.$val.'"'.(GETPOST('filterip', 'alpha') == $val ? ' selected':'').'>'.$val.'</option>';
         }
         $s.='</select>';
 
@@ -140,6 +141,11 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
         $s.=$langs->trans("Product").': ';
         $s.=$form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
+
+        $s .= '<br>';
+
+        $s.=$langs->trans("DoNotUseDefaultStripeAccount").': ';
+        $s.='<input type="checkbox" value="1" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
 
         return $s;
     }
@@ -199,27 +205,30 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		{
 			$sql.= " AND se.dolicloud = '".$this->db->escape($_POST['options_dolicloud'])."'";
 		}*/
-		if (! empty($_POST['lang_id']) && $_POST['lang_id'] != 'none') $sql.= natural_search('default_lang', join(',', $_POST['lang_id']), 3);
-		if (! empty($_POST['not_lang_id']) && $_POST['not_lang_id'] != 'none') $sql.= natural_search('default_lang', join(',', $_POST['not_lang_id']), -3);
-		if (! empty($_POST['country_id']) && $_POST['country_id'] != 'none') $sql.= " AND fk_pays IN ('".$this->db->escape($_POST['country_id'])."')";
-		if (! empty($_POST['filter']) && $_POST['filter'] != 'none')
+		if (GETPOST('lang_id') && GETPOST('lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id', 'array')), 3);
+		if (GETPOST('not_lang_id') && GETPOST('not_lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id', 'array')), -3);
+		if (GETPOST('country_id') && GETPOST('country_id') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
+		if (GETPOST('filter') && GETPOST('filter') != 'none')
 		{
-			$sql.= " AND coe.deployment_status = '".$this->db->escape($_POST['filter'])."'";
+			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('filter'))."'";
 		}
-		if (! empty($_POST['filterip']) && $_POST['filterip'] != 'none')
-		{
-		    $sql.= " AND coe.deployment_host = '".$this->db->escape($_POST['filterip'])."'";
+		if (GETPOST('filterip') && GETPOST('filterip') != 'none') {
+		    $sql.= " AND coe.deployment_host = '".$this->db->escape(GETPOST('filterip'))."'";
 		}
-		if (! empty($_POST['client']) && $_POST['client'] != '-1')
-		{
-		    $sql.= ' AND s.client IN ('.$this->db->sanitize($this->db->escape($_POST['client'])).')';
+		if (GETPOST('client') && GETPOST('client') != '-1') {
+		    $sql.= ' AND s.client IN ('.$this->db->sanitize(GETPOST('client', 'intcomma')).')';
 		}
 
 		if ($productid > 0) {
 			$sql .= ' AND co.rowid IN (SELECT fk_contrat FROM '.MAIN_DB_PREFIX.'contratdet as cd WHERE fk_product IN ('.$this->db->sanitize($this->db->escape($productid)).'))';
 		}
 
+		if (GETPOST('donotusedefaultstripeaccount')) {
+			$sql.= " AND se.stripeaccount IS NOT NULL AND se.stripeaccount <> ''";
+		}
+
 		$sql.= " ORDER BY email";
+		print $sql;
 
 		// Stocke destinataires dans cibles
 		$result=$this->db->query($sql);
