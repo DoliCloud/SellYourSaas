@@ -2709,7 +2709,7 @@ nslookup test.withX.mysaasdomainname.com 8.8.8.8
 
 ==== Securisation du répertoire des sessions PHP
 
-Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php*
+Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
 
 
 ==== Définition taille upload et durée sessions

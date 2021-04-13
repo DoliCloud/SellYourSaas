@@ -654,7 +654,7 @@ adduser postfix sasl
 ---------------
 
 
-Modfifier le fichier master.cf pour ajouter un n afin de désactiver le chroot de smtpd
+Modfifier le fichier */etc/postfix/master.cf* pour ajouter un n afin de désactiver le chroot de smtpd
 
 [source,bash]
 ---------------
@@ -753,7 +753,7 @@ non_smtpd_milters = inet:localhost:12345
 
 === Configuration de mysql/mariadb
 
-Edit the config file */etc/mysql/my.cnf* ou */etc/mysql/mysql.conf/mysqld.cnf* to change
+Edit the config file */etc/mysql/mysql.conf.d/mysqld.cnf* or */etc/mysql/my.cnf* to change
 
 [source,bash]
 ---------------
@@ -772,7 +772,7 @@ Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
 
 === Securisation rep session PHP
 
-Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php*
+Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php/sessions*
 
 
 === Ajout du wrapper PHP pour mail
