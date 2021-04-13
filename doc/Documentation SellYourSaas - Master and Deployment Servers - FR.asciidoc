@@ -748,7 +748,8 @@ Il y a deux cas de figure selon votre version d'Ubuntu. Suivre la consigne *18.0
 ---------------
 sudo apt update
 sudo apt install ntp git gzip zip zstd memcached ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install mariadb-server mariadb-client
+sudo apt install php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
@@ -1021,11 +1022,11 @@ systemctl reload nom_du_service.service
 
 === Installation du firewall ===
 
-* Créer un fichier de lancement du firewall (par exemple dans */home/admin/tools/firewall*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas. Assurez vous de son lancement au démarrage du serveur par:
+* Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas. Assurez vous de son lancement au démarrage du serveur par:
 
 [source,bash]
 ---------------
-ln -fs /home/admin/tools/firewall /etc/init.d/firewallsellyoursaas
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
 systemctl daemon-reload
 systemctl enable firewallsellyoursaas
 systemctl is-enabled firewallsellyoursaas

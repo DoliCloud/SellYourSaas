@@ -781,7 +781,8 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 ---------------
 sudo apt update
 sudo apt install ntp git gzip zip zstd memcached ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install mariadb-server mariadb-client
+sudo apt install php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
@@ -1054,11 +1055,11 @@ systemctl reload service_name.service
 
 === Installation of the firewall ===
 
-* Create a firewall launch file (for example in */home/admin/tools/firewall*). Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
+* Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
 
 [source, bash]
 ---------------
-ln -fs /home/admin/tools/firewall /etc/init.d/firewallsellyoursaas
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
 systemctl daemon-reload
 systemctl enable firewallsellyoursaas
 systemctl is-enabled firewallsellyoursaas
@@ -1636,7 +1637,7 @@ Test that execution by crontab works correcly by running under root:
 ---------------
 
 
-=== Configuration de cpulimit (optionnel)
+=== Setup of cpulimit (optional)
 
 * Launch cpulimit at startup to execute:
 
@@ -1649,9 +1650,9 @@ See script *cpulimit_daemon* to put into */etc/init.d*.
 
 
 
-=== Setup of /etc/security/limits.conf (optionnel)
+=== Setup of /etc/security/limits.conf (optional)
 
-* Editer le fichier */etc/security/limits.conf* par exemple pour augmenter le nombre de fichiers max ouvert par processus
+* Edit the file */etc/security/limits.conf* for example to increase the max number of files open by a process
 
 [source,conf]
 ---------------

@@ -264,10 +264,14 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 [source,bash]
 ---------------
 sudo apt install ntp git gzip zip zstd memcached ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip
+sudo apt install mariadb-server mariadb-client 
+sudo apt install php php-cli apache2 php-pear apache2-bin php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip
 sudo apt install cpulimit apparmor
+sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 sudo apt install libapache2-mod-php
 sudo apt install php-fpm libapache2-mod-fcgid
+sudo apt install postfix
 ---------------
 
 === Activation des modules apache
@@ -289,22 +293,44 @@ a2enconf php7.2-fpm|php7.4-fpm
 ---------------
 
 
-=== Installation de watchdog
+=== Installation of unix watchdog (optional) ===
 
-* Installation et activation de watchdog avec les configs dans */etc/watchdog*
-
-
-=== Installation du firewall
-
-* Installation et activation du firewall dans */home/admin/tools/firewall* en créant un lien par
+* Installation and activation of watchdog Linux with configs in */etc/watchdog*
 
 [source,bash]
 ---------------
-ln -fs /home/admin/tools/firewall /etc/init.d/firewall
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/sbin/repair
+---------------
+
+To consult, no longer launch at startup, launch at startup, stop, launch:
+
+[source, bash]
+---------------
+systemctl status watchdog
+systemctl disable watchdog
+systemctl enable watchdog
+systemctl stop watchdog
+systemctl start watchdog
+---------------
+
+When load become very high or when memory is very low, the watchdog will launch the repair script that will track status of server into files */var/log/repair...log* and then reboot the server. Note: This should never happen.
+
+
+=== Installation of firewall
+
+* Installation et activation du firewall dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh* en créant un lien par
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
+systemctl daemon-reload
+systemctl enable firewallsellyoursaas
+systemctl is-enabled firewallsellyoursaas
+systemctl status firewallsellyoursaas
 ---------------
 
 
-=== Installation de fail2ban
+=== Installation of fail2ban
 
 * Installation et activation de fail2ban avec les configs dans */etc/fail2ban*
 
@@ -567,20 +593,7 @@ exclude_suffix := cache
 ---------------
 
 
-=== Installation de mlocate
-
-* Installer mlocate tool from debian package
-* Complete setup */etc/updatedb.conf* by adding dir */mnt/backup* into exclude list:
-
-[source,bash]
----------------
-...
-PRUNEPATHS="/tmp /var/spool /media /home/.ecryptfs /var/lib/schroot /mnt/diskbackup"
-...
----------------
-
-
-=== Configuration de cpulimit (optionnel) 
+=== Setup of cpulimit (optional) 
 
 * Lancement de cpulimit au démarrage pour exécuter:
 
@@ -589,7 +602,7 @@ Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 cpulimit launched with script  cpulimit --exe=apache2 --limit=20
 
 
-=== Installation de saslauthd (optionnel) ===
+=== Installation of saslauthd (optional) ===
 
 Pour permettre authentification extern SMTP.
 
@@ -609,7 +622,7 @@ To test SPF + DKIM + spam analysis of an email,  send an email to email suggeste
 
 Setup of domains to protect are into */etc/opendkim/*
 
-Note: SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @myserver.mysellyoursaasmydomain.com
+Note: SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @mysubdomain.mysellyoursaasmydomain.com
 
 
 === Configuration du nom de domain
@@ -631,7 +644,7 @@ Attention, certains hébergeurs DNS comme OVH n'accepte que des clés de 1024 et
  _dmarc.mysaasdomainname.com	 "v=DMARC1; p=none; rua=mailto:supervision@mysaasdomainname.com; ruf=mailto:supervision@mysaasdomainname.com; fo=1;"
 
 
-=== Configuration de postfix
+=== Setup of postfix
 
 Vérifier que le user postfix se trouve dans le groupe sasl. Si non, l'ajouter.
 
@@ -648,7 +661,7 @@ Modfifier le fichier master.cf pour ajouter un n afin de désactiver le chroot d
 smtp      inet  n       -       n       -       -       smtpd
 ---------------
 
-Ajouter un fichier smtpd.conf dans /etc/postfix/sasl
+Ajouter un */etc/postfix/sasl/smtpd.conf* avec le contenu:
 
 [source,bash]
 ---------------
@@ -658,7 +671,7 @@ mech_list: plain login
 ---------------
 
 
-Compléter le fichier main.cf avec:
+Compléter le fichier */etc/postfix/main.cf* avec:
 
 [source,bash]
 ---------------
@@ -740,7 +753,7 @@ non_smtpd_milters = inet:localhost:12345
 
 === Configuration de mysql/mariadb
 
-Mise en place du fichier de config *my.cnf* dans */etc/mysql* pour changer
+Edit the config file */etc/mysql/my.cnf* ou */etc/mysql/mysql.conf/mysqld.cnf* to change
 
 [source,bash]
 ---------------
