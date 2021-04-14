@@ -740,35 +740,36 @@ Host github.com
 
 === Installation des packages
 
-Il y a deux cas de figure selon votre version d'Ubuntu. Suivre la consigne *18.04-* OU la *20.04+*
-
-* Installation des packages Ubuntu 18.04-
+* Installation des packages Ubuntu *18.04-*
 
 [source,bash]
 ---------------
 sudo apt update
 sudo apt install ntp git gzip zip zstd memcached ncdu
 sudo apt install mariadb-server mariadb-client
-sudo apt install php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
 sudo apt install soffice libreoffice-common libreoffice-writer
+sudo apt install mailutils postfix
 ---------------
 
-* Installation des packages Ubuntu 20.04+
+* Installation des packages Ubuntu *20.04+*
 
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install ntp git gzip zip zstd memcached ncdu
+sudo apt install mariadb-server mariadb-client
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
-sudo apt install soffice libreoffice-common libreoffice-writer
+sudo apt install libreoffice-common libreoffice-writer
+sudo apt install mailutils postfix
 ---------------
 
 Il faut aussi à présent installer *php-mcrypt* pour Ubuntu 20.04+
@@ -1507,6 +1508,12 @@ Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans a
 
 * Installer afick.pl tool from the debian package found on afick web site.
 
+[source,bash]
+---------------
+wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
+dpkg -i afick.deb
+---------------
+
 * Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
 
 [source,bash]
@@ -1601,6 +1608,7 @@ Test que l'exécution par la crontab fonctionne correctent en lançant sous root
 /etc/cron.daily/afick_cron
 ---------------
 
+Ignore if you have error when sending emails, sending emails is setup later.
 
 
 === Configuration de cpulimit (optionnel)
@@ -1674,7 +1682,6 @@ myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-mydestination = $myhostname, apollon.localdomain, localhost.localdomain, localhost
 # mynetworks contains only localhost. Allowed external host are allowed with firewall on port 25 + because we use sasl authentication
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
@@ -2818,6 +2825,7 @@ su root syslog
 
 [source,bash]
 ---------------
+cd /etc/logrotate.d
 logrotate -f logrotate_admin_log
 logrotate -f logrotate_sellyoursaas_log
 ---------------
@@ -2895,6 +2903,7 @@ Note: Les rapports sont dans */var/crash*
 ---------------
 apt remove cerbot
 sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
 # Old method was:
 #cd /root
@@ -4420,6 +4429,13 @@ To activate Jailkit, a chroot security system (see Jailkit configuration)
 
 
 === TroubleShooting
+
+==== Ping hangs in input, not in output
+
+If you are using a server hosted on OpenStack, a security group may exists that block network in some direction/protocols.
+Check that your security group match the following setup
+
+image::Example_setup_security_group_horizon.png[Example of setup of security group on horizon]
 
 ==== ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 

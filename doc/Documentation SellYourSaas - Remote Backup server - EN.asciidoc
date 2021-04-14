@@ -912,3 +912,13 @@ mount /dev/sdXY /mnt
 ---------------
 
 Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
+
+
+<<<<<<<
+
+== Annexes
+
+=== TroubleShooting
+
+See the chapter available into the *Documentation SellYourSaas - Master and Deployment servers*
+

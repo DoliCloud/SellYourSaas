@@ -259,20 +259,39 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 === Installation des packages
 
-* Installation des packages Ubuntu suivant
+* Installation des packages Ubuntu *18.04-*
 
 [source,bash]
 ---------------
+sudo apt update
 sudo apt install ntp git gzip zip zstd memcached ncdu
-sudo apt install mariadb-server mariadb-client 
-sudo apt install php php-cli apache2 php-pear apache2-bin php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip
-sudo apt install cpulimit apparmor
+sudo apt install mariadb-server mariadb-client
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install libapache2-mod-php
+sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
-sudo apt install libapache2-mod-php
-sudo apt install php-fpm libapache2-mod-fcgid
-sudo apt install postfix
+sudo apt install soffice libreoffice-common libreoffice-writer
+sudo apt install mailutils postfix
 ---------------
+
+* Installation des packages Ubuntu *20.04+*
+
+[source,bash]
+---------------
+sudo apt update
+sudo apt install ntp git gzip zip zstd memcached ncdu
+sudo apt install mariadb-server mariadb-client 
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install bind9
+sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
+sudo apt install libreoffice-common libreoffice-writer
+sudo apt install mailutils postfix
+---------------
+
 
 === Activation des modules apache
 
@@ -573,24 +592,111 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 Relaunch fail2ban and check errors into */var/log/fail2ban.log*
 
 
-=== Installation de afick
+=== Installation of Afick
 
-* Installer afick.pl tool from debian package
-* Complete setup */etc/afick.conf* by adding:
+* Install afick.pl tool from the debian package found on afick web site.
 
 [source,bash]
 ---------------
+wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
+dpkg -i afick.deb
+---------------
+
+* Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+
+[source,bash]
+---------------
+exclude_suffix := log LOG
+exclude_suffix := tmp old bak
+---------------
+
+* Complete setup */etc/afick.conf* for section *macros* with:
+
+[source,bash]
+---------------
+# used by cron job (afick_cron)
+# define the mail adress to send cron job result
+@@define MAILTO supervision@mysaasdomainname.com
+# truncate the result sended by mail to the number of lines (avoid too long mails)
+@@define LINES 1000
+# REPORT = 1 to enable mail reports, =0 to disable report
+@@define REPORT 1
+# VERBOSE = 1 to have one mail by run, =0 to have a mail only if changes are detected
+@@define VERBOSE 1
+# define the nice value : from 0 to 19 (priority of the job)
+@@define NICE 18
+# = 1 to allow cron job, = 0 to suppress cron job
+@@define BATCH 1
+# if set to 0, keep all archives, else define the number of days to keep
+# with the syntaxe nS , n for a number, S for the scale
+# (d for day, w for week, m for month, y for year)
+# ex : for 5 months : 5m
+@@define ARCHIVE_RETENTION 6m
+---------------
+
+* Complete setup */etc/afick.conf* by adding at end:
+
+[source,bash]
+---------------
+############################################
+# to allow easier upgrade, my advice is too separate
+# the default configuration file (above) from your
+# local configuration (below).
+# default configuration will be upgraded
+# local configuration will be kept
+########## put your local config below ####################
+!/var/log/mysql
+!/var/log/letsencrypt
+!/var/log/datadog
+
+!/etc/apache2/sellyoursaas-available
+!/etc/apache2/sellyoursaas-online
+!/etc/bind/archives
+!/etc/bind/
+!/etc/group
+!/etc/group-
+!/etc/gshadow
+!/etc/gshadow-
+!/etc/passwd
+!/etc/passwd-
+!/etc/shadow
+!/etc/shadow-
+!/etc/subgid
+!/etc/subgid-
+!/etc/subuid
+!/etc/subuid-
+
 /home MyRule
 /home/admin/logs Logs
-/home/mysaas/logs Logs
-/home/mylogin/logs Logs
+/var/log/datadog Logs
+!/home/admin/backup
+!/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
-!/home/admin/wwwroot/htdocs/cache
-!/home/mysaas/mysaasdomainname.com/htdocs/cache
-!/home/mylogin/wwwroot/perso/tmp
+!/home/admin/wwwroot/dolibarr/.git
+!/home/admin/wwwroot/dolibarr_sellyoursaas/.git
+
+!/home/admin/.bash_history
+!/home/admin/.viminfo
+!/home/admin/.mysql_history
+!/home/myunixlogin/.bash_history
+!/home/myunixlogin/.viminfo
+!/home/myunixlogin/.mysql_history
+!/root/.bash_history
+!/root/.viminfo
+!/root/.mysql_history
 
 exclude_suffix := cache
 ---------------
+
+
+Test que l'exécution par la crontab fonctionne correctent en lançant sous root:
+
+[source,bash]
+---------------
+/etc/cron.daily/afick_cron
+---------------
+
+Ignore if you have error when sending emails, sending emails is setup later.
 
 
 === Setup of cpulimit (optional) 
@@ -644,34 +750,36 @@ Attention, certains hébergeurs DNS comme OVH n'accepte que des clés de 1024 et
  _dmarc.mysaasdomainname.com	 "v=DMARC1; p=none; rua=mailto:supervision@mysaasdomainname.com; ruf=mailto:supervision@mysaasdomainname.com; fo=1;"
 
 
-=== Setup of postfix
+=== Setup of Postfix
 
-Vérifier que le user postfix se trouve dans le groupe sasl. Si non, l'ajouter.
-
-[source,bash]
----------------
-adduser postfix sasl
----------------
-
-
-Modfifier le fichier */etc/postfix/master.cf* pour ajouter un n afin de désactiver le chroot de smtpd
+Create a file */etc/postfix/generic* to add binding between email used to send email by the system that has a "from" empty and the email to use that is authorized to send emails officially (postfix will do the replacement).
 
 [source,bash]
 ---------------
-smtp      inet  n       -       n       -       -       smtpd
+root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
+admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
 
-Ajouter un */etc/postfix/sasl/smtpd.conf* avec le contenu:
+Compile the file with:
 
 [source,bash]
 ---------------
-saslauthd_path: /var/run/saslauthd/mux
-pwcheck_method: saslauthd
-mech_list: plain login
+postmap /etc/postfix/generic
+postmap /etc/aliases
+echo >> /etc/postfix/access; postmap /etc/postfix/access
+echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
+echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
+---------------
+
+Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
+
+[source,bash]
+---------------
+vi /etc/mailname
 ---------------
 
 
-Compléter le fichier */etc/postfix/main.cf* avec:
+Complete the file */etc/postfix/main.cf* with:
 
 [source,bash]
 ---------------
@@ -680,20 +788,22 @@ myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-mydestination = $myhostname, apollon.localdomain, localhost.localdomain, localhost
 # mynetworks contains only localhost. Allowed external host are allowed with firewall on port 25 + because we use sasl authentication
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
 recipient_delimiter = +
-inet_interfaces = all
-inet_protocols = all
+inet_interfaces = ip.public.du.serveur
+inet_protocols = ipv4
+smtp_generic_maps = hash:/etc/postfix/generic
 
+# Activer ces lignes pour utiliser SendGrid comme serveur envoi pour les envois d'emails depuis les instances utilisateurs
 #smtp_sasl_auth_enable = yes
 #smtp_sasl_password_maps = static:apikey:abc1234567890abc12345678901234567890
 #smtp_sasl_security_options = noanonymous
 #smtp_tls_security_level = encrypt
 #header_size_limit = 4096000
 #relayhost = [smtp.sendgrid.net]:2525
+# Ou mettre relayhost à vide pour utiliser le serveur local commant agent d'envoi des emails.
 relayhost =
 
 smtpd_recipient_limit = 100
@@ -703,11 +813,11 @@ smtpd_client_connection_count_limit = 20
 #deliver_lock_delay = 10s
 message_size_limit = 20480000
 
-header_checks = regexp:/etc/postfix/header_checks
+#header_checks = regexp:/etc/postfix/header_checks
 
 # Liste des emails virtuelles
 #----------------------------
-virtual_alias_maps = hash:/etc/postfix/virtual
+#virtual_alias_maps = hash:/etc/postfix/virtual
 
 # Liste des clients bloques
 #-----------------------------
@@ -716,7 +826,7 @@ smtpd_client_restrictions = permit_sasl_authenticated, permit_mynetworks, check_
 # Liste des emetteurs bloques
 #----------------------------
 # Here we declare we want mail from specific email, mail not rejected by rbl, otherwise refused
-#smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_rbl_client cbl.abuseat.org, reject_rbl_client bl.spamcop.net, reject_unknown_sender_domain
+#smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access,  check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_rbl_client cbl.abuseat.org, reject_rbl_client bl.spamcop.net, reject_unknown_sender_domain
 smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_unknown_sender_domain
 
 # Liste des recepteurs bloques
@@ -724,11 +834,80 @@ smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_
 # Here we declare we want mail to my domain, to specific email with SA filtering, otherwise refuse.
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
 
-#debug_peer_list = mysaasdomainname.com
-compatibility_level = 2
+#debug_peer_list = mysaasdomainname.com, mysaasdomainname.com
+#compatibility_level = 2
+---------------
 
 
-# FOR SASL AUTH
+!!! IMPORTANT
+
+Pensez à modifier dans */etc/postfix/main.cf*, les entrées :
+ 
+[source,bash]
+---------------
+inet_interfaces = ip_publique_associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
+inet_protocols = ipv4
+---------------
+
+
+=== Configuration de Postfix pour authentification externe SMTP sécurisée (optionnel)
+
+En cas de besoin d'utiliser postfix depuis un accès externe (et donc authentifié)
+
+[source,bash]
+---------------
+sudo apt install sasl2-bin
+vi /etc/default/saslauthd  pour mettre START=yes
+---------------
+
+Vérifier que le user postfix se trouve dans le groupe *sasl*. Si non, l'ajouter par:
+
+[source,bash]
+---------------
+adduser postfix sasl
+---------------
+
+Modifier le fichier */etc/postfix/master.cf* pour ajouter un 'n' afin de désactiver le chroot de smtpd
+
+[source,bash]
+---------------
+smtp      inet  n       -       n       -       -       smtpd
+---------------
+
+Ajouter un fichier *smtpd.conf* dans */etc/postfix/sasl*
+
+[source,bash]
+---------------
+saslauthd_path: /var/run/saslauthd/mux
+pwcheck_method: saslauthd
+mech_list: plain login
+---------------
+
+Pour du SMTPS, créer un certificat:
+ 
+[source,bash]
+---------------
+cd /etc/postfix
+openssl req -nodes -new -x509 -keyout dsfc.key -out dsfc.crt
+---------------
+
+Compléter le fichier */etc/postfix/main.cf* avec:
+
+[source,bash]
+---------------
+# TLS parameters (only if you want TLS as SMTP server)
+smtpd_tls_cert_file=/etc/postfix/dfsc.crt
+smtpd_tls_key_file=/etc/postfix/dfsc.key
+#smtpd_tls_ask_ccert = yes
+#smtpd_tls_req_ccert = yes
+smtpd_use_tls=yes
+smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
+#smtpd_tls_auth_only = yes
+#smtpd_tls_ccert_verifydepth = 1
+smtpd_tls_loglevel = 1
+smtpd_tls_security_level = may
+
 #smtpd_sasl_type = dovecot
 #smtpd_sasl_path = private/auth-client
 #smtpd_sasl_local_domain =
@@ -737,16 +916,6 @@ smtpd_sasl_auth_enable = yes
 # Need auth
 smtpd_sasl_security_options = noanonymous
 broken_sasl_auth_clients = yes
-smtpd_tls_loglevel = 1
-smtpd_tls_security_level = may
-
-
-# FOR DKIM
-milter_default_action = accept
-milter_protocol = 6
-smtpd_milters = inet:localhost:12345
-non_smtpd_milters = inet:localhost:12345
-
 ---------------
 
 
@@ -775,90 +944,315 @@ Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
 Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php/sessions*
 
 
-=== Ajout du wrapper PHP pour mail
+=== Create a virtual host for the web portal
 
-Modifier le fichier php.ini de apache avec:
+
+vi */etc/apache2/sites-available/mysellyoursaasdomain.com.conf*
+
 
 [source,bash]
 ---------------
-; Automatically add files before PHP document.
-; http://php.net/auto-prepend-file
-auto_prepend_file = /usr/local/bin/phpsendmailprepend.php
+##########################
+# Web site
+##########################
+<VirtualHost *:80>
+        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
+        #php_admin_value mail.force_extra_parameters "-f postmaster@nltechno.com"
+        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster1@nltechno.com"
+        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/home/admin/awstats/:/usr/share/GeoIP:/home/jail/home:/home/admin/backup/dump:/home/admin/tools/
 
-; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
-; http://php.net/sendmail-path
-sendmail_path = /usr/local/bin/phpsendmail.php
+        ServerName      mysellyoursaasdomain.com
+        ServerAlias     www.mysellyoursaasdomain.com
+        DocumentRoot /home/admin/wwwroot/dolibarr_documents/website/mysellyoursaasdomain.com/
+        ErrorLog     /home/admin/logs/mysellyoursaasdomain_error_log
+        CustomLog    /home/admin/logs/mysellyoursaasdomain_access_log combined
 
-; The path to a log file that will log all mail() calls. Log entries include
-; the full path of the script, line number, To address and headers.
-mail.log = /var/log/phpmail.log
+        UseCanonicalName Off
+
+        # Not sure this can help
+        TimeOut 20
+
+        KeepAlive On
+        KeepAliveTimeout 5
+        MaxKeepAliveRequests 20
+
+        <Directory /home/admin/wwwroot>
+        AllowOverride FileInfo Limit
+        Options +FollowSymLinks
+        Order allow,deny
+        Deny from env=bad_bots
+        Allow from all
+        Require all granted
+        </Directory>
+
+RewriteEngine on
+RewriteCond %{SERVER_NAME} =mysellyoursaasdomain.com
+RewriteRule ^ https://www.%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+
+</VirtualHost>
 ---------------
 
-ln -fs /home/admin/tools/phpsendmailprepend.php /usr/local/bin/
-ln -fs /home/admin/tools/phpsendmail.php /usr/local/bin/
-
-
-
-=== Créer un virtual host pour les Portails Web
-
-Note: Penser à ajouter la ligne suivant pour gérer le http2
+Note: Penser à ajouter la ligne suivante pour gérer le http2
 
 [source,bash]
 ---------------
 Protocols h2 h2c http/1.1
 ---------------
 
-
-=== Installation de certificat ssl apache par letsencrypt
-
-On utilisera la methode "webroot" qui a l'avantage de pouvoir fonctionner aussi à travers un cache comme CloudFlare.
-
-Pour forcer le renewal d'un domaine en particulier:
+Activer le virtual host par
 
 [source,bash]
 ---------------
-/root/certbot-auto certonly -d www.dolimed.com
+a2ensite  mysellyoursaasdomain.com
 ---------------
 
-Pour renouveller automatiquement les certificats créés:
+
+=== Configuration de logrotate
+
+* Ajouter une ligne si non déjà présente dans le fichier */etc/logrotate.conf*
 
 [source,bash]
 ---------------
-/root/certbot-auto renew
+# use the syslog group by default, since this is the owning group of /var/log.
+su root syslog
 ---------------
 
 
+* Créer un fichier */etc/logrotate.d/logrotate_admin_log*
+
+[source,conf]
+---------------
+/home/*/logs/*log {
+        su root root
+        notifempty
+        daily
+        rotate 7
+        compress
+        sharedscripts
+        postrotate
+                if [ -f "`. /etc/apache2/envvars ; echo ${APACHE_PID_FILE:-/var/run/apache2.pid}`" ]; then
+                        /etc/init.d/apache2 reload > /dev/null
+                fi
+        endscript
+}
+---------------
 
 
-== Clonage d'un instance serveur
+* Créer un fichier */etc/logrotate.d/logrotate_sellyoursaas_log*
 
-- Créer un snapshot du serveur + Disque
+[source,conf]
+---------------
+/var/log/backup_backups.log {
+        su root root
+        weekly
+        rotate 4
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 600 root root
+}
 
-- Créer un nouveau serveur OVH depuis le snapshot.
+/home/admin/wwwroot/dolibarr_documents/*.log {
+        su admin www-data
+        daily
+        rotate 7
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 660 admin www-data
+}
+---------------
 
-- Ajouter une entrée du nouveau serveur dans le DNS.
+* Pour tester la rotation immédiatement:
 
-- Aller dans l'interface de gestion des IP OVH, pour ajouter le reverse sur l'IP.
+[source,bash]
+---------------
+cd /etc/logrotate.d
+logrotate -f logrotate_admin_log
+logrotate -f logrotate_sellyoursaas_log
+---------------
 
-- Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement.
 
-- Se connecter et modifier le fichier */etc/hosts* avec le nom du nouveau serveur et nouvelle ip du serveur.
+=== Configuration de journalctl
 
-- Modifier le fichier */etc/init.d/firewall* pour prendre en compte le nouveau nom et ip du serveur.
+Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
-- Vérifier le fichier */etc/network/interfaces*.
+* Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
 
-- Formater le nouveau disque dur. Pour cela, voir la chapitre <<ajout_de_disque>>.
+[source,conf]
+---------------
+...
+SystemMaxUse=1G
+# Define max size of each file (there is 1 file per user). Default is 1/8 of SystemMaxUse.
+SystemMaxFileSize=5M
+...
+---------------
 
-- Ajouter un fichier à la racine du disque pour identifier le volume.
+Prendre en compte la modification
 
-- Se connecter à webmin pour désactiver les actions de supervision en doublons avec celle du serveur cloné.
+[source,bash]
+---------------
+systemctl stop systemd-journald
+systemctl start systemd-journald
+---------------
 
-- Supprimer les crons en doublons avec le serveur cloné.
+Pour forcer le vidage d'un journal:
 
-- Modifier le fichiers /etc/postfix/main.cf et /etc/postfix/mydestination
+[source,bash]
+---------------
+journalctl --flush --rotate
+journalctl --vacuum-size=1G
+journalctl --vacuum-time=1d
+---------------
 
-- Modifier les fichiers de serveur virtuels Apache
+Pour lire les journaux:
+
+[source,bash]
+---------------
+journalctl --disk-usage
+journalctl --header
+
+journalctl -r --file user-XXX.journal
+---------------
+
+
+=== Désactivation ou activation de apport (optionnel, "on" recommandé)
+
+Pour activer:
+
+[source,bash]
+---------------
+sudo systemctl enable apport.service
+sudo systemctl start apport.service
+sudo systemctl status apport.service
+---------------
+
+Pour désactiver:
+
+[source,bash]
+---------------
+sudo systemctl disable apport.service
+sudo systemctl stop apport.service
+sudo systemctl status apport.service
+---------------
+
+Note: Les rapports sont dans */var/crash*
+
+
+=== Installer certbot (pour les certificats SSL)
+
+[source,bash]
+---------------
+apt remove cerbot
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+# Old method was:
+#cd /root
+#apt install software-properties-common python-software-properties
+#add-apt-repository ppa:certbot/certbot
+#apt update
+#apt install certbot
+---------------
+
+[[creation_certificat_ssl]]
+=== Création d'un certificat SSL wildcard pour les instances utilisateurs
+
+Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
+
+==== Obtenir un certiticat SSL wildcard pour *.withX.mysaasdomainname.com
+
+===== Via un fournisseur SSL
+
+* Créer le fichier key *withX.mysaasdomainname.com.key* et csr *withX.mysaasdomainname.com.csr* ainsi:
+
+Pour générer le fichier .key:   
+    
+[source,bash]
+---------------
+cd /etc/apache2
+openssl genrsa 2048 > withX.mysaasdomainname.com.key
+chmod go-r withX.mysaasdomainname.com.key
+---------------
+
+Pour générer le fichier .csr:
+
+[source,bash]
+---------------
+openssl req -nodes -newkey rsa:2048 -sha256 -keyout withX.mysaasdomainname.com.key -out withX.mysaasdomainname.com.csr
+---------------
+
+Choisir:
+
+	CN	*.withX.mysaasdomainname.com
+	OU	IT
+	O	The company name
+	L	Paris
+	S	IDF
+	C	FR
+	Email				Ne rien mettre !
+	Challenge password		Ne rien mettre !
+
+* Soumettre le fichier *.csr* auprès du fournisseur de certificats.
+
+===== Via LetsEncrypt
+
+* Run certbot or cerbot-auto
+
+[source,bash]
+---------------
+certbot certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
+---------------
+
+Follow instructions to add DNS entries and validate generation.
+
+To read generated .pem files, run
+
+[source,bash]
+---------------
+openssl x509 -in fullchain.pem -text
+---------------
+
+
+==== Installer les fichiers certificats
+
+* Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
+
+* Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
+
+---------------
+cd /etc/apache2
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
+---------------
+
+* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
+
+---------------
+SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
+SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
+SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+---------------
+
+Ainsi, si un utilisateur utilise une vieille URL sans virtual host, il arrivera sur la page par défaut */var/www/html/index.html*. 
+
+* Editer la page */var/www/html/index.html* avec le contenu comme celui la:
+
+---------------
+<html>
+<body>
+<center>
+<br>
+<strong>Server (name_of_server_x)<br></strong>Sorry, there is currently no service available to this URL. May be this domain name was used in the past to host a customer instance that was definitely undeployed.<br>
+You may try later or create a new instance from scratch from page <a href="https://www.mysaasdomainname.com">https://www.mysaasdomainname.com</a>.
+<br>
+</center>
+</body>
+</html>
+---------------
 
 
 
@@ -911,6 +1305,12 @@ Une fois une restauration faite, si elle a été faite sur un autre serveur, il 
 * For Mediawiki sites, if VM has a new url, go into database to set correct url into file LocalSettings.php
 
 
+<<<<<<<
 
+== Annexes
+
+== TroubleShooting
+
+See the chapter available into the *Documentation SellYourSaas - Master and Deployment servers*
 
 

@@ -782,12 +782,13 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 sudo apt update
 sudo apt install ntp git gzip zip zstd memcached ncdu
 sudo apt install mariadb-server mariadb-client
-sudo apt install php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
 sudo apt install soffice libreoffice-common libreoffice-writer
+sudo apt install mailutils postfix
 ---------------
 
 * Installation of the 20.04+ Ubuntu packages
@@ -795,13 +796,15 @@ sudo apt install soffice libreoffice-common libreoffice-writer
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install ntp git gzip zip zstd memcached ncdu
+sudo apt install mariadb-server mariadb-client
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
 sudo apt install libreoffice-common libreoffice-writer
+sudo apt install mailutils
 ---------------
 
 Now, we need to install *php-mcrypt* for Ubuntu 20.04+ (optional)
@@ -1542,6 +1545,12 @@ It seems we must also restart apache to have this effective inside apache.
 
 * Install afick.pl tool from the debian package found on afick web site.
 
+[source,bash]
+---------------
+wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
+dpkg -i afick.deb
+---------------
+
 * Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
 
 [source,bash]
@@ -1636,6 +1645,8 @@ Test that execution by crontab works correcly by running under root:
 /etc/cron.daily/afick_cron
 ---------------
 
+Ignore if you have error when sending emails, sending emails is setup later.
+
 
 === Setup of cpulimit (optional)
 
@@ -1668,10 +1679,9 @@ ulimit -a
 ---------------
 
 
-=== Configuration de Postfix
+=== Setup of Postfix
 
-Créer un fichier */etc/postfix/generic* pour ajouter la correspondance entre l'email utilisé par les envois de mails système qui ont un from vide
-et l'email à utiliser qui est officiellement valide.
+Create a file */etc/postfix/generic* to add binding between email used to send email by the system that has a "from" empty and the email to use that is authorized to send emails officially (postfix will do the replacement).
 
 [source,bash]
 ---------------
@@ -1679,7 +1689,7 @@ root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
 admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
 
-Compiler le fichier par:
+Compile the file with:
 
 [source,bash]
 ---------------
@@ -1699,7 +1709,7 @@ vi /etc/mailname
 
 
 
-Compléter le fichier */etc/postfix/main.cf* avec:
+Complete the file */etc/postfix/main.cf* with:
 
 [source,bash]
 ---------------
@@ -1708,7 +1718,6 @@ myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-mydestination = $myhostname, apollon.localdomain, localhost.localdomain, localhost
 # mynetworks contains only localhost. Allowed external host are allowed with firewall on port 25 + because we use sasl authentication
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
@@ -2840,6 +2849,7 @@ su root syslog
 
 [source,bash]
 ---------------
+cd /etc/logrotate.d
 logrotate -f logrotate_admin_log
 logrotate -f logrotate_sellyoursaas_log
 ---------------
@@ -2915,6 +2925,7 @@ Note: Reports are into */var/crash*
 ---------------
 apt remove cerbot
 sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
 # Old method was:
 #cd /root
@@ -4457,6 +4468,13 @@ scw instance server create type=DEV1-S zone=fr-par-1|nl-ams-1 image=ubuntu_focal
 
 
 === TroubleShooting
+
+==== Ping hangs in input, not in output
+
+If you are using a server hosted on OpenStack, a security group may exists that block network in some direction/protocols.
+Check that your security group match the following setup
+
+image::Example_setup_security_group_horizon.png[Example of setup of security group on horizon]
 
 
 ==== ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
