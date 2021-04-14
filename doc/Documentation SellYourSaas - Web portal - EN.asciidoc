@@ -3,15 +3,15 @@
 :companyname: Teclib
 :corpname: Teclib
 :orgname: Teclib
-:title: Document installation et exploitation du serveur Web et mail
+:title: Document installation and operaiont for a Web portal
 // Date du document :
 :docdate: 30/01/2019
 // Ville associée au document
 :city: Bordeaux
 :toc: manual
 :toc-placement: preamble
-Ce document décrit les spécifications techniques pour la mise en oeuvre du serveur Web et Mails du service SellYourSaas (service de mise en SaaS automatisé par Dolibarr).
-
+This document describes the technical and functional implementation of a server to host a web portal for SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
+:keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
 
 
 == Installation de la machine et OS
