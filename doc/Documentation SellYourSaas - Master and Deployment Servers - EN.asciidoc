@@ -1909,7 +1909,7 @@ innodb_log_buffer_size=32M
 log_warnings = 2
 ---------------
 
-This may also be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
+Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
 ==== Secure the root account
@@ -2002,30 +2002,32 @@ update mysql.user SET authentication_string = PASSWORD('...') where user  = 'sel
 FLUSH PRIVILEGES;
 ---------------
 
+==== Create a user to login for remote administration (optional)
 
 Give access rights on the database server to allow remote administration on all databases from your desktop:
 
 [source,sql]
 ---------------
-CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordfordatadog...';
+CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
 GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
 
+==== Create a user for supervision (optional)
 
 If you use a supervision agent like *DataDog* to superize the database, create an accunt to access localy to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
 
 [source,sql]
 ---------------
-CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...';
+CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...passwordfordatadog...';
 GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 FLUSH PRIVILEGES;
 ---------------
 
 
-==== Setup mariadb cluster in mode master-slave (optionnel, abandonned)
+==== Setup mariadb cluster in mode master-slave (optional, abandonned)
 
 On the server, activate the mode MASTER by adding the directives:
 
@@ -2597,6 +2599,7 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
+
 === Setup of DNS server for Master server
 
 ==== On registar side
@@ -2605,6 +2608,7 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
 
     *admin.mysaasdomainname.com*         Domain de l'outil d'administration pointant sur l'ip du serveur Master
     *myaccount.mysaasdomainname.com*     Domain de l'outil d'administration pointant sur l'ip du serveur Master
+
 
 
 === Setup of DNS server for deployment servers
@@ -2736,7 +2740,7 @@ session.gc_maxlifetime = 3600
 ---------------
 
 
-==== Ajout du wrapper PHP pour la fonction PHP mail
+==== Add a wrapper PHP for the mail() function
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 
@@ -2896,7 +2900,7 @@ journalctl --header
 ---------------
 
 
-=== Désactivation ou activation de apport (optionnel, "on" recommandé)
+=== Disable or enable apport (optional, "on" recommended)
 
 Pour activer:
 
@@ -3259,9 +3263,9 @@ Remarque: Les URL pour réaliser les déploiements des packages de type *Applica
 
 <<<<
 
-== Installation d'outils externes
+== Installation of external tools
 
-=== Installation de webmin (optionnel pour supervision)
+=== Installation de webmin (optional for supervision)
 
 * Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
 
@@ -3361,7 +3365,7 @@ instances:
 cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
 ---------------
 
-Editer le pour suivre les 3 process suivants:
+Editer le pour suivre les process suivants:
 
 [source,bash]
 ---------------
@@ -3372,6 +3376,18 @@ instances:
     thresholds:
       critical: [5, 5000]
 
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
+      
   - name: agent_sellyoursaas
     search_string: ['remote_server']
     exact_match: False
@@ -3389,18 +3405,6 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]
-      
-  - name: fail2ban
-    search_string: ['fail2ban-server']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]
-
-  - name: cron
-    search_string: ['/usr/sbin/cron']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]      
 ---------------
 
 

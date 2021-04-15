@@ -920,7 +920,9 @@ broken_sasl_auth_clients = yes
 
 
 
-=== Configuration de mysql/mariadb
+=== Setup of Mysql or Mariadb
+
+==== Setup
 
 Edit the config file */etc/mysql/mysql.conf.d/mysqld.cnf* or */etc/mysql/my.cnf* to change
 
@@ -931,7 +933,84 @@ max_connections      = 500
 max_user_connections = 30
 ---------------
 
-Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
+Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
+
+
+==== Secure the root account
+
+In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
+from the system root account only (using *auth_socket* or *unix_socket*):
+
+For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
+
+[source,sql]
+---------------
+INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
+SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
+---------------
+
+For MariaDb: The plugin is *unix_socket* and is set by default on Ubuntu OS.
+
+
+To switch in mode authentification by password / by unix socket account :
+
+For Mysql:
+
+[source,sql]
+---------------
+# Identification by password
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
+# Identification by unix socket
+ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
+---------------
+
+For MariaDb:
+
+[source,sql]
+---------------
+# Identification by password
+update mysql.user set plugin='' where user='root' and host='localhost';
+# Identification by unix socket
+update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
+---------------
+
+
+Note: The show specific parameters that are not the default values, you can launch:
+
+[source,bash]
+---------------
+mysqld --print-defaults
+---------------
+
+
+Note: To delete active plugins, empty the mysql * plugins * table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
+
+
+
+[[creer_un_compte_db_sellyoursaas]]
+==== Create a user to login for remote administration (optional)
+
+Give access rights on the database server to allow remote administration on all databases from your desktop:
+
+[source,sql]
+---------------
+CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
+GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
+GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
+FLUSH PRIVILEGES;
+---------------
+
+==== Create a user for supervision (optional)
+
+If you use a supervision agent like *DataDog* to superize the database, create an accunt to access localy to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
+
+[source,sql]
+---------------
+CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...passwordfordatadog...';
+GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
+GRANT PROCESS ON *.* TO 'datadog'@'localhost';
+FLUSH PRIVILEGES;
+---------------
 
 
 === Configuration de apparmor
@@ -1118,7 +1197,7 @@ journalctl -r --file user-XXX.journal
 ---------------
 
 
-=== Désactivation ou activation de apport (optionnel, "on" recommandé)
+=== Disable or enable apport (optional, "on" recommended)
 
 Pour activer:
 
@@ -1254,6 +1333,128 @@ You may try later or create a new instance from scratch from page <a href="https
 </html>
 ---------------
 
+
+<<<<
+
+== Installation of external tools
+
+=== Installation de webmin (optional for supervision)
+
+* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
+
+
+=== Installation of DataDog (optional for supervision)
+
+* Create an account on DataDog.
+
+* Install the agent on serveur with:
+
+[source,bash]
+---------------
+DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+---------------
+
+* Copy the datadog config file to supervize *mysql/mariadb*. 
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
+---------------
+
+Edit the file to enter the datadog password for mariadb. 
+
+* Copy the datadog config file to supervize *apache*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.d/apache.d/conf.yaml
+---------------
+
+
+* Copy the datadog config file to supervize *postfix*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+---------------
+
+Edit the file to add *min_collection_interval: 300* under *postfix_user: postfix* and under *queues: - deffered*
+
+Add the following line into the file */etc/sudoers*
+
+[source,bash]
+---------------
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find
+---------------
+
+
+* Copy the datadog config file to supervize *memcached*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/mcache.d/conf.yaml.example /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+---------------
+
+Edit file to be
+
+[source,bash]
+---------------
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+instances:
+  - url: localhost  # url used to connect to the memcached instance
+---------------
+
+
+
+* Copy the datadog config file to supervize *process*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
+---------------
+
+Editer le pour suivre les process suivants:
+
+[source,bash]
+---------------
+instances:
+  - name: process_apache2
+    search_string: ['apache2']
+    exact_match: False
+    thresholds:
+      critical: [5, 5000]
+
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
+---------------
+
+
+Relancer datadog
+
+[source,bash]
+---------------
+sudo service datadog-agent stop
+sudo service datadog-agent start
+---------------
 
 
 == Installation composants Backups/Synchro

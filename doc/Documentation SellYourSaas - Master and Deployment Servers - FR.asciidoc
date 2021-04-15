@@ -1874,7 +1874,7 @@ innodb_log_buffer_size=32M
 log_warnings = 2
 ---------------
 
-Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
+Remarque: Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
 
 
 ==== Securisation du compte root
@@ -1972,17 +1972,19 @@ update mysql.user SET authentication_string = PASSWORD('...') where user  = 'sel
 FLUSH PRIVILEGES;
 ---------------
 
+==== Créer un utilisateur pour l'administration à distance de la base (optionnel)
 
 Donner les droits d'accès sur le serveur de base de données pour permettre l'administration à distance de toute base client:
 
 [source,sql]
 ---------------
-CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
+CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
 GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
 
+==== Créer un utilisateur pour la supervision (optional)
 
 Si vous utilisez un agent de supervision comme *DataDog* pour superviser la base de donnée, créer un compte pouvant accéder localement à la base (le mot de passe est celui dans */etc/datadog-agent/conf.d/mysql.d/conf.yaml*:
 
@@ -3339,7 +3341,7 @@ instances:
 cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
 ---------------
 
-Editer le pour suivre les 3 process suivants:
+Editer le pour suivre les process suivants:
 
 [source,bash]
 ---------------
@@ -3350,6 +3352,18 @@ instances:
     thresholds:
       critical: [5, 5000]
 
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
+      
   - name: agent_sellyoursaas
     search_string: ['remote_server']
     exact_match: False
@@ -3367,18 +3381,6 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]
-      
-  - name: fail2ban
-    search_string: ['fail2ban-server']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]
-
-  - name: cron
-    search_string: ['/usr/sbin/cron']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]      
 ---------------
 
 
