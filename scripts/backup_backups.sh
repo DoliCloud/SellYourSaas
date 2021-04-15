@@ -174,6 +174,8 @@ do
 		echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTICURSOR succeed - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 	fi
 
+echo
+
 done
 
 
