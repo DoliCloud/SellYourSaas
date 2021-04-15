@@ -109,64 +109,76 @@ export testorconfirm=$1
 echo "testorconfirm = $testorconfirm"
 
 export errstring=""
-
-echo `date +%Y%m%d%H%M%S`" Do rsync - first part..."
-export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-export command="rsync -x --delete --delete-excluded --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTI:$DIRDESTI1";
-echo "$command";
-
-$command 2>&1
-export ret1=$?
-
+export ret=0
+export ret1=0
 export ret2=0
-if [ "x$ret1" == "x0" ]; then
-	echo
-	echo `date +%Y%m%d%H%M%S`" Do rsync - second part..."
 
-	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-			echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
-			nbofdir=`ls -d $backupdir/osu$i* | wc -l`
-			if [ "x$nbofdir" != "x0" ]; then
-				# Test if we force backup on a given dir
-				if [ "x$2" != "x" ]; then
-					if [ "x$2" != "xosu$i" ]; then
-						break
+# Loop on each target server
+for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
+do
+	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
+	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
+	export command="rsync -x --delete --delete-excluded --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
+	echo "$command";
+	
+	$command 2>&1
+	export ret1=$?
+	
+	export ret2=0
+	if [ "x$ret1" == "x0" ]; then
+		echo
+		echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories to $SERVDESTICURSOR..."
+	
+		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
+				echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
+				nbofdir=`ls -d $backupdir/osu$i* | wc -l`
+				if [ "x$nbofdir" != "x0" ]; then
+					# Test if we force backup on a given dir
+					if [ "x$2" != "x" ]; then
+						if [ "x$2" != "xosu$i" ]; then
+							break
+						fi
 					fi
-				fi
-				
-				export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-		        export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTI:$DIRDESTI2";
-	        	echo "$command";
-	        	
-		        $command 2>&1
-		        if [ "x$?" != "x0" ]; then
-		        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i"
-		        	export ret2=$(($ret2 + 1));
-		        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
-		        fi
-		    else
-		    	echo No directory found starting with name $backupdir/osu$i
-		    fi
-			echo
-	done
-else
-	export errstring="ERROR Failed to make $command"
-fi
-
-echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
-
-if [ "x$ret1" != "x0" ]; then
-	echo "Send email to $EMAILTO to warn about backup error"
-	echo "Failed to make copy backup to remote backup server $SERVDESTI - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-	exit $ret1
-elif [ "x$ret2" != "x0" ]; then
+					
+					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
+			        export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+		        	echo "$command";
+		        	
+			        $command 2>&1
+			        if [ "x$?" != "x0" ]; then
+			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i"
+			        	export ret2=$(($ret2 + 1));
+			        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
+			        fi
+			    else
+			    	echo No directory found starting with name $backupdir/osu$i
+			    fi
+				echo
+		done
+	else
+		export errstring="ERROR Failed to make $command"
+	fi
+	
+	echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
+	
+	if [ "x$ret1" != "x0" ]; then
 		echo "Send email to $EMAILTO to warn about backup error"
-		echo "Failed to make copy backup to remote backup server $SERVDESTI - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-		exit $ret2
-else
-	echo "Send email to $EMAILTO to inform about backup success"
-	echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
-fi
+		echo "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
+		ret=$ret1
+	elif [ "x$ret2" != "x0" ]; then
+		echo "Send email to $EMAILTO to warn about backup error"
+		echo "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
+		ret=$ret2
+	else
+		echo "Send email to $EMAILTO to inform about backup success"
+		echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTICURSOR succeed - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+	fi
 
+done
+
+
+if [ "x$ret" != "x0" ]; then
+	exit $ret
+fi
 
 exit 0
