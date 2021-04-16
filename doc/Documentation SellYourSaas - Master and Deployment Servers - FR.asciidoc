@@ -207,7 +207,7 @@ mysqlcheck --all-databases
 
 === SSH et sudo
 
-=== Compte unix admin
+==== Compte unix admin
 
 Créer le compte utilisateur *admin*. Il sera utilisé pour installer et administrer le systeme lorsque root n'est pas nécessaire.
 
@@ -229,7 +229,7 @@ adduser myunixlogin
 ---------------
 
 
-==== Configuration ssh
+==== Configuration SSH
 
 Corriger les permissions du fichier */etc/ssh/sshd_config* pour etre en lecture/écriture pour root uniquement.
 

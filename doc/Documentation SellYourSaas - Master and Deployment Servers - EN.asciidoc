@@ -216,7 +216,7 @@ mysqlcheck --all-databases
 
 === SSH and sudo
 
-=== Unix admin account
+==== Unix admin account
 
 Create the user account *admin*. It will be used to install and administer the system when root is not required.
 
@@ -225,6 +225,7 @@ Create the user account *admin*. It will be used to install and administer the s
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -238,7 +239,7 @@ adduser myunixlogin
 ---------------
 
 
-==== ssh setup
+==== SSH setup
 
 Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 
@@ -3074,7 +3075,7 @@ You must have inside the cron of user *admin*:
 
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key you set into the setup of module *Scheduled jobs* on the Dolibarr master.
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. You will also set it into module *Scheduled jobs* on the Dolibarr master later.
 
 ==== On deployment servers
 

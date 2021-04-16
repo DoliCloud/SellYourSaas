@@ -14,9 +14,9 @@ This document describes the technical and functional implementation of a server 
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
 
 
-== Installation de la machine et OS
+== Installation of the machine and OS
 
-=== Choix machine ===
+=== Choice of the machine and OS and create it ===
 
 Avec Amazon Standard Medium:
 Server *m1.medium* hosted in EU @ $0.18 per hour plus $10 for storage and bandwidth puis passage à *m1.large* @ $0.18 per hour
@@ -25,12 +25,9 @@ Avec OVH Public Cloud:
 1 core.
 
 
-=== OS Ubuntu server ===
+=== SSH and sudo
 
-* Installation de Ubuntu LTS.
-
-
-=== Configuration système
+==== Unix admin account
 
 Create the user account *admin*. It will be used to install and administer the system when root is not required.
 
@@ -39,19 +36,21 @@ Create the user account *admin*. It will be used to install and administer the s
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
+ 
 
+Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
 
-Créer le compte utilisateur *mylogin*.
-
-[source,bash]
+[source, bash]
 ---------------
-adduser mylogin
+adduser myunixlogin
 ---------------
 
-==== ssh setup
+
+==== SSH setup
 
 Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 
@@ -1332,6 +1331,69 @@ You may try later or create a new instance from scratch from page <a href="https
 </body>
 </html>
 ---------------
+
+
+[[installation_des_taches_cron]]
+=== Installation of Cron tasks
+
+You must have inside the cron of user *root*
+
+[source,bash]
+---------------
+# m h  dom mon dow   command
+# cron master root
+47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
+10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
+# cron master and deployment root
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
+00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
+#40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
+---------------
+
+Note: certbot-auto may be certbot
+
+You must have inside the cron of user *admin*:
+
+[source,bash]
+---------------
+# m h  dom mon dow   command
+# cron master admin
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+# cron master and deployment root
+#7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
+---------------
+
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. You will also set it into the setup of module *Scheduled jobs* on the Dolibarr later.
+
+==== Check that launching of cron is ok
+
+Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. Par exemple par:
+
+[source,bash]
+---------------
+cd / && run-parts --report /etc/cron.daily
+---------------
+
+
+
+== Installation of Dolibarr
+
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+---------------
+
+* Install an Apache virtual host, for example: https://adminweb.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).
+Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than
+*/home/admin/wwwroot/dolibarr/documents*
+
+* If you will add feature to send email from web portal using a SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
+
+* Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
+
 
 
 <<<<
