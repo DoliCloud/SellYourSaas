@@ -1384,6 +1384,7 @@ cd / && run-parts --report /etc/cron.daily
 ---------------
 cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr
+chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
 * Install an Apache virtual host, for example: https://adminweb.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).
@@ -1393,6 +1394,32 @@ Warning: Choose, during the installation wizard, the name of the document direct
 * If you will add feature to send email from web portal using a SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
 
 * Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
+
+
+
+== Installation of plugin SellYourSaas
+
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+---------------
+
+* Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
+---------------
+
+* Create a symbolic link called *source* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
+---------------
 
 
 

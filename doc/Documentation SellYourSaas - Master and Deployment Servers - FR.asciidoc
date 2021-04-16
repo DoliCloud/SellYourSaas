@@ -890,7 +890,6 @@ Sur le *Serveur Master*:
         #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
         #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster@mysaasdomainname.com"
         php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/jail/home:/home/admin/backup/dump:/home/admin/tools/
-        php_admin_value memory_limit 64M
 
         ServerName      admin.mysaasdomainname.com
         DocumentRoot /home/admin/wwwroot/dolibarr/htdocs/
@@ -2710,6 +2709,8 @@ upload_max_filesize = 20M
 
 post_max_size = 25M
 max_input_vars = 4000
+
+memory_limit = 256M
 
 session.gc_maxlifetime = 3600
 ---------------
