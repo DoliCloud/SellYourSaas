@@ -724,7 +724,9 @@ exportfs
 
 ==== On the Deployment Servers
 
-Remember to open the firewall access between the NFS client (* Deployment server *) and the NFS server (* Master server *).
+Remember to open the firewall access between the NFS client (*Deployment server*) and the NFS server (*Master server*).
+
+TODO ...
 
 Install the NFS client and install it manually. Editing is performed by default in NFSv4.
 
@@ -1060,6 +1062,11 @@ systemctl reload service_name.service
 
 * Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
 
+TODO Graphic with flux and ports
+
+
+==== With iptables ====
+
 [source, bash]
 ---------------
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
@@ -1069,7 +1076,49 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-TODO Graphic with flux and ports
+==== With ufw
+
+TODO
+
+sudo ufw default deny incoming
+sudo ufw default deny outgoing
+
+sudo ufw allow icmp
+
+sudo ufw allow out 22/tcp
+sudo ufw allow out 80/tcp
+sudo ufw allow out 8080/tcp
+sudo ufw allow out 443/tcp
+sudo ufw allow out 3306/tcp
+sudo ufw allow out 25/tcp
+sudo ufw allow out 2525/tcp
+sudo ufw allow out 465/tcp
+sudo ufw allow out 587/tcp
+sudo ufw allow out 110/tcp
+# LDAP LDAPS
+sudo ufw allow out 389/tcp
+sudo ufw allow out 636/tcp
+# IMAP
+sudo ufw allow out 143/tcp
+sudo ufw allow out 993/tcp
+# DCC
+sudo ufw allow out 6227/tcp
+sudo ufw allow out 6227/udp
+# Rdate
+sudo ufw allow out 37/tcp
+sudo ufw allow out 123/udp
+# Whois
+sudo ufw allow out 43/tcp
+
+sudo ufw allow in 22/tcp
+sudo ufw allow in 80/tcp
+sudo ufw allow in 8080/tcp
+sudo ufw allow in 443/tcp
+
+sudo ufw reload
+
+
+
 
 
 === Installation of unix watchdog (optional) ===
@@ -3604,6 +3653,8 @@ ip.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin
 
 - Allow access between the new server *Deployment server* and the *Master server* at firewall level.
 
+==== If using iptables ====
+
 For exemple, on the *Master server*:
 
 [source,bash]
@@ -3639,6 +3690,10 @@ then
         ${IPTABLES} -t filter -A INPUT -s $IP_SELLYOURSAAS_ADMIN -d $IP_SERVER2 -j ACCEPT
 fi
 ---------------
+
+==== If using ifw ====
+
+TODO
 
 
 - Modifier le fichiers de configuration de Postfix suivant  (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement):

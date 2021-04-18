@@ -148,9 +148,6 @@ ${IPTABLES} -t filter -A OUTPUT -o ens3 -s $IP_SERVER -p tcp --dport 636 -m stat
 # IMAP, IMAPS
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -s $IP_SERVER -p tcp --dport 143 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -s $IP_SERVER -p tcp --dport 993 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-# FTP, FTPS
-#${IPTABLES} -t filter -A OUTPUT -o ens3 -s $IP_SERVER -p tcp --dport 21 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-#${IPTABLES} -t filter -A OUTPUT -o ens3 -s $IP_SERVER -p tcp --dport 990 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 # Whois
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -s $IP_SERVER -p tcp --dport 43 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 # DCC
@@ -191,31 +188,17 @@ ${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p udp --sport 123 -m state
 
 # Ouverture a l'exterieur vers interieur (avec redirection sur serveur internet)
 #-------------------------------------------------------------------------------
-# FTP commandes, SSH, SMTP, HTTP, POP3, IMAP, POPS, IMAPS, Webmin, HTTPS, Usermin, MySQL
+# SSH, SMTP, HTTP, POP3, IMAP, POPS, IMAPS, Webmin, HTTPS, Usermin, MySQL
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 22 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 80 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 443 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 3306 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 
-# FTP donnees mode Actif
-#${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 20 -m state --state ESTABLISHED,RELATED -j ACCEPT
-# FTP donnees mode PASV (Serveur FTP donnees a ecoute sur port ephemerals)
-#${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --sport 1024:65535 --dport 32768:61000 -m state --state NEW,ESTABLISHED -j ACCEPT
-# Ouverture a la console Bacula
-#${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 9101 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-
-# FTP commandes, SSH, SMTP, HTTP, POP3, IMAP, POPS, IMAPS, Webmin, HTTPS, Usermin, MySQL
+# SSH, SMTP, HTTP, POP3, IMAP, POPS, IMAPS, Webmin, HTTPS, Usermin, MySQL
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 22 -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 80 -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 443 -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 3306 -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# FTP donnees mode Actif
-#${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 20 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-# FTP donnees mode PASV (Serveur FTP donnees a ecoute sur port ephemerals)
-#${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 32768:61000 --dport 1024:65535 -m state --state ESTABLISHED,RELATED -j ACCEPT
-# Ouverture a la console Bacula
-#${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 9101 -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 
 # Ouvertures vers autres serveurs
