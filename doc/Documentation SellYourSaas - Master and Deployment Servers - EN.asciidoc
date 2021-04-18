@@ -1083,8 +1083,6 @@ TODO
 sudo ufw default deny incoming
 sudo ufw default deny outgoing
 
-sudo ufw allow icmp
-
 sudo ufw allow out 22/tcp
 sudo ufw allow out 80/tcp
 sudo ufw allow out 8080/tcp

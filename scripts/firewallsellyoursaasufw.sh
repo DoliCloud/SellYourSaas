@@ -3,8 +3,7 @@
 sudo ufw default deny incoming
 sudo ufw default deny outgoing
 
-sudo ufw allow icmp
-
+# From local to external target - Out
 sudo ufw allow out 22/tcp
 sudo ufw allow out 80/tcp
 sudo ufw allow out 8080/tcp
@@ -30,6 +29,7 @@ sudo ufw allow out 123/udp
 # Whois
 sudo ufw allow out 43/tcp
 
+# From external source to local - In
 sudo ufw allow in 22/tcp
 sudo ufw allow in 80/tcp
 sudo ufw allow in 8080/tcp
