@@ -188,13 +188,13 @@ ${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p udp --sport 123 -m state
 
 # Ouverture a l'exterieur vers interieur (avec redirection sur serveur internet)
 #-------------------------------------------------------------------------------
-# SSH, SMTP, HTTP, POP3, IMAP, POPS, IMAPS, Webmin, HTTPS, Usermin, MySQL
+# SSH, HTTP, HTTPS, MySQL
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 22 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 80 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 443 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -i ens3 -p tcp --dport 3306 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 
-# SSH, SMTP, HTTP, POP3, IMAP, POPS, IMAPS, Webmin, HTTPS, Usermin, MySQL
+# SSH, HTTP, HTTPS, MySQL
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 22 -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 80 -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -o ens3 -p tcp --sport 443 -m state --state ESTABLISHED,RELATED -j ACCEPT
