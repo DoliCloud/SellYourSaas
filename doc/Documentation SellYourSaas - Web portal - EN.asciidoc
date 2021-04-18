@@ -923,19 +923,30 @@ broken_sasl_auth_clients = yes
 
 ==== Setup
 
-Edit the config file */etc/mysql/mysql.conf.d/mysqld.cnf* or */etc/mysql/my.cnf* to change
+Edit config file 
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
+or
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
+to change:
 
 [source,bash]
 ---------------
 bind-address = 0.0.0.0
-max_connections      = 500
-max_user_connections = 30
 ---------------
 
 Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
-==== Secure the root account
+==== Set mysql root password
+
+[source,bash]
+---------------
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
+FLUSH PRIVILEGES;
+---------------
+
+
+==== Secure the root account (optional)
 
 In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
 from the system root account only (using *auth_socket* or *unix_socket*):
@@ -962,6 +973,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
 # Identification by unix socket
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
+You must stop/start database server to validate this change.
 
 For MariaDb:
 
@@ -972,6 +984,7 @@ update mysql.user set plugin='' where user='root' and host='localhost';
 # Identification by unix socket
 update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
+You must stop/start database server to validate this change.
 
 
 Note: The show specific parameters that are not the default values, you can launch:
@@ -1342,7 +1355,7 @@ You must have inside the cron of user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master root
-47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
+#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1

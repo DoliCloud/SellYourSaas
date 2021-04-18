@@ -1834,10 +1834,11 @@ Prendre en compte le changement en lançant:
 systemctl daemon-reload
 ---------------
 
-Edition du fichier de config *mysqld.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
-ou *50-server.cnf* dans */etc/mysql/mariadb.conf.d* (si mariadb) pour changer :
-
-Remplacer le 
+Edition du fichier de config 
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (si mysql) 
+ou
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (si mariadb)
+pour changer :
 
 [source,bash]
 ---------------
@@ -1876,7 +1877,16 @@ log_warnings = 2
 Remarque: Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0".
 
 
-==== Securisation du compte root
+==== Définir le mot de passe mysql root
+
+[source,bash]
+---------------
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
+FLUSH PRIVILEGES;
+---------------
+
+
+==== Securisation du compte root (optionnel)
 
 Afin de ne pas permettre le brut force cracking, si ce n'est pas déjà le cas, mettre le user *root* de base de donnée en authentification
 depuis le compte root système uniquement (utilisation de *auth_socket* ou *unix_socket*):
@@ -3026,7 +3036,7 @@ Avoir dans le cron du user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master root
-47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
+#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
@@ -4040,7 +4050,7 @@ pour voir les fichiers et bases traitées en relog. Ils sont ouverts par ordre d
 
 === Désactivation de toutes les instances utilisateurs
 
-Utiliser le script *make_instance_offline* qui désactivera tous les accès en remplaçant chaque virtual host par un virtual host réalisant une redirection sur une page d'attente.
+Utiliser le script *make_instance_offline.sh* qui désactivera tous les accès en remplaçant chaque virtual host par un virtual host réalisant une redirection sur une page d'attente.
 
 Le même script peut etre utilisé pour l'opération inverse.
 

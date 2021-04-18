@@ -1918,8 +1918,11 @@ Take the change into account with command:
 systemctl daemon-reload
 ---------------
 
-Edition du fichier de config *mysqld.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
-ou *50-server.cnf* dans */etc/mysql/mariadb.conf.d* (si mariadb) pour changer :
+Edit config file 
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
+or
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
+to change:
 
 
 [source,bash]
@@ -1959,7 +1962,16 @@ log_warnings = 2
 Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
-==== Secure the root account
+==== Set mysql root password
+
+[source,bash]
+---------------
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
+FLUSH PRIVILEGES;
+---------------
+
+
+==== Secure the root account (optional)
 
 In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
 from the system root account only (using *auth_socket* or *unix_socket*):
@@ -1986,6 +1998,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
 # Identification by unix socket
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
+You must stop/start database server to validate this change.
 
 For MariaDb:
 
@@ -1996,6 +2009,7 @@ update mysql.user set plugin='' where user='root' and host='localhost';
 # Identification by unix socket
 update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
+You must stop/start database server to validate this change.
 
 
 Note: The show specific parameters that are not the default values, you can launch:
@@ -2011,7 +2025,7 @@ Note: To delete active plugins, empty the mysql * plugins * table. See "Starting
 
 
 [[creer_un_compte_db_sellyoursaas]]
-==== Create a user sellyoursaas to administer database of user instances
+==== Create a user sellyoursaas to control databases of user instances
 
 On the *Master* server and each *Deployment server*, donner l'accès localement au compte *sellyoursaas*:
 
@@ -3097,7 +3111,7 @@ You must have inside the cron of user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master root
-47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
+#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
@@ -4119,7 +4133,7 @@ pour voir les fichiers et base traitées en relog. Ils sont ouverts, soit par or
 
 === Désactivation de toutes les instances utilisateurs
 
-Utiliser le script *make_instance_offline* qui désactivera tous les accès en remplaçant chaque virtual host par un virtual host réalisant une redirection sur une page d'attente.
+Utiliser le script *make_instance_offline.sh* qui désactivera tous les accès en remplaçant chaque virtual host par un virtual host réalisant une redirection sur une page d'attente.
 
 Le même script peut etre utilisé pour l'opération inverse.
 
