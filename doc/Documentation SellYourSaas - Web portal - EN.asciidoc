@@ -1098,7 +1098,32 @@ a2ensite  mysellyoursaasdomain.com
 ---------------
 
 
-=== Configuration de logrotate
+=== Setup of PHP
+
+==== Secure the directory of sessions PHP
+
+Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
+
+
+==== Define size of upload and session duration
+
+Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
+
+[source,bash]
+---------------
+upload_max_filesize = 20M
+
+post_max_size = 25M
+max_input_vars = 4000
+
+memory_limit = 256M
+
+session.gc_maxlifetime = 3600
+---------------
+
+
+
+=== Setup of logrotate
 
 * Ajouter une ligne si non déjà présente dans le fichier */etc/logrotate.conf*
 

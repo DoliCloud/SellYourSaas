@@ -2781,12 +2781,12 @@ nslookup test.withX.mysaasdomainname.com 8.8.8.8
 
 === Setup of PHP
 
-==== Securisation du répertoire des sessions PHP
+==== Secure the directory of PHP sessions
 
 Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
 
 
-==== Définition taille upload et durée sessions
+==== Define size of upload and session duration
 
 Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
 
