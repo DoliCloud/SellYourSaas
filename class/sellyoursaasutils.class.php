@@ -3749,7 +3749,7 @@ class SellYourSaasUtils
         				'__ALLOWOVERRIDE__'=>'',
         				'__VIRTUALHOSTHEAD__'=>$customvirtualhostline,
         				'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT,
-						'__CONTRACTREF__'=>$contract->ref,
+        				'__CONTRACTREF__'=>$contract->ref,
     				);
 
 
