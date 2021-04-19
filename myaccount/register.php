@@ -507,7 +507,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			print '<!-- Autodetected IP/Country: '.dol_escape_htmltag(getUserRemoteIP()).'/'.$countryselected.' -->'."\n";
 			if (empty($countryselected)) $countryselected='US';
 			if (GETPOST('address_country','alpha')) $countryselected=GETPOST('address_country','alpha');
-			print $form->select_country($countryselected, 'address_country', 'optionsValue="name"'.$disabled, 0, 'minwidth300', 'code2', 1, 1);
+			print $form->select_country($countryselected, 'address_country', 'optionsValue="name"'.$disabled, 0, ($conf->dol_optimize_smallscreen ? 'minwidth200' : 'minwidth300'), 'code2', 1, 1);
 			?>
 				</div>
 			</div>
@@ -740,7 +740,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
                 jQuery(document.body).css({ 'cursor': 'wait' });
                 jQuery("div#waitMask").show();
                 jQuery("#waitMask").css("opacity"); // must read it first
-                jQuery("#waitMask").css("opacity", "0.5");
+                jQuery("#waitMask").css("opacity", "0.6");
 
                 return true;	/* Use return false to show the hourglass without submitting the page (for debug) */
         });

@@ -95,9 +95,10 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
 	height: unset;	
 }
 .portlet {
-    border: 1px solid #aaa;
+    border: 1px solid #ddd;
     padding: 20px;
 	margin-bottom: 30px;
+	box-shadow: 0px 1px 5px #ddd;
 }
 
 @media only screen and (max-width: 400px) {	/* reduction 3 */
@@ -906,7 +907,9 @@ help-inline {font-size: 13px;color: #737373;display: inline-block;
 padding: 5px;}.form-inline input {margin-bottom: 0px !important;}.
 control-label {margin-top: 1px;}.control-label .required {color: 
 #e02222;font-size: 12px;padding-left: 2px;}.form {padding: 0 !
-important;}.form .form-body {padding: 10px;}.portlet.light .form .
+important;}.form .form-body {padding: 10px;}
+
+.portlet.light .form .
 form-body {padding-left: 0;padding-right: 0;}.form .form-actions {
 padding: 20px 10px;margin: 0;background-color: #f5f5f5;border-top: 
 1px solid #e5e5e5;*zoom: 1;}.portlet.light .form .form-actions {
@@ -1308,10 +1311,14 @@ popover .popover-content,.popover.name .popover-content {color:
 #F3565D;}.popovers.yellow + .popover {background: yellow;}.popovers.
 yellow + .popover .popover-title {background: yellow;}.popovers.
 yellow + .popover .popover-content {background: yellow;}.
-page-portlet-fullscreen {overflow: hidden;}.portlet {margin-top: 0px;
+page-portlet-fullscreen {overflow: hidden;}
+
+.portlet {margin-top: 0px;
 margin-bottom: 25px;padding: 0px;-webkit-border-radius: 4px;
 -moz-border-radius: 4px;-ms-border-radius: 4px;-o-border-radius: 4px;
-border-radius: 4px;}.portlet.portlet-fullscreen {z-index: 10060;
+border-radius: 4px;}
+
+.portlet.portlet-fullscreen {z-index: 10060;
 margin: 0;position: fixed;top: 0;left: 0;bottom: 0;right: 0;width: 
 100%;height: 100%;background: #fff;}.portlet.portlet-fullscreen > .
 portlet-body {overflow-y: auto;overflow-x: hidden;padding: 0 10px;}.

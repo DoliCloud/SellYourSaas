@@ -949,14 +949,17 @@ else
     			jQuery("#formaddanotherinstance").toggle();
     		});
 
-            /*jQuery("#formaddanotherinstance").submit(function() {
-                console.log("We clicked on submit")
+
+            jQuery("#formaddanotherinstance").submit(function() {
+                console.log("We clicked on submit on instance.tpl.php")
+
                 jQuery(document.body).css({ \'cursor\': \'wait\' });
                 jQuery("div#waitMask").show();
                 jQuery("#waitMask").css("opacity"); // must read it first
-                jQuery("#waitMask").css("opacity", "0.5");
-                return true;
-            });*/
+                jQuery("#waitMask").css("opacity", "0.7");
+
+				return true;	/* Use return false to show the hourglass without submitting the page (for debug) */
+            });
     	});
     		</script>';
 

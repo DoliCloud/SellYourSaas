@@ -78,7 +78,7 @@ if (empty($conf) || ! is_object($conf))
 
     if (count($listofcontractidreseller) == 0)
     {
-        print '<span class="opacitymedium">'.$langs->trans("NoneF").'</span>';
+        //print '<span class="opacitymedium">'.$langs->trans("NoneF").'</span>';
     }
     else
     {

@@ -86,8 +86,7 @@ if (empty($conf) || ! is_object($conf))
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">
-		            	'.$langs->trans("SeeDetailsAndOptions").'
+						<i class="fa fa-server opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'
 		                </a>
 					</div></div>';
 
@@ -133,8 +132,7 @@ if (empty($conf) || ! is_object($conf))
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">
-		            	'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'
+						<i class="fa fa-server opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'
 		                </a>
 					</div></div>';
 
@@ -185,8 +183,7 @@ if (empty($conf) || ! is_object($conf))
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">
-	            	'.$langs->trans("SeeOrEditProfile").'
+					<i class="fa fa-user opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">'.$langs->trans("SeeOrEditProfile").'
 	                </a>
 				</div>
 				</div>
@@ -270,8 +267,7 @@ if (empty($conf) || ! is_object($conf))
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">
-	            	'.$langs->trans("SeeDetailsOfPayments").'
+					<i class="fa fa-usd opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfPayments").'
 	                </a>
 				</div>
 				</div>
@@ -322,8 +318,7 @@ if (empty($conf) || ! is_object($conf))
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">
-	            	'.$langs->trans("SeeDetailsOfTickets").'
+					<i class="fa fa-hands-helping opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'
 	                </a>
 				</div></div>
 
