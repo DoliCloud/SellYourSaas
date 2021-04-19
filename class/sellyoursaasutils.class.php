@@ -3748,7 +3748,8 @@ class SellYourSaasUtils
         				'__APPDOMAIN__'=>$sldAndSubdomain.'.'.$domainname,
         				'__ALLOWOVERRIDE__'=>'',
         				'__VIRTUALHOSTHEAD__'=>$customvirtualhostline,
-        				'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
+        				'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT,
+        				'__CONTRACTREF__'=>$contract->ref,
     				);
 
 
@@ -3757,7 +3758,7 @@ class SellYourSaasUtils
     				$newqty = null;
 
     				$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
-    				if ($tmparray[0] == 'SQL')
+    				if ($tmparray[0] === 'SQL')
     				{
     					$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
@@ -3825,7 +3826,7 @@ class SellYourSaasUtils
     						$dbinstance->close();
     					}
     				}
-    				elseif ($tmparray[0] == 'BASH')
+    				elseif ($tmparray[0] === 'BASH')
     				{
     				    $bashformula = make_substitutions($tmparray[1], $substitarray);
 
@@ -3888,7 +3889,17 @@ class SellYourSaasUtils
     				            $this->error = 'ssh2_connect function not supported by your PHP';
     				        }
     				    }
-    				} elseif (is_numeric($tmparray[0]) && ((int) $tmparray[0]) > 0) {		// If value is just a number
+    				} elseif ($tmparray[0] === 'PHPMETHOD') {
+					// keyword : PHPMETHOD then function name to call, then args (use ':' as sep.)
+					// ex: PHPMETHOD:caprelCountDoliSCANUsers;__CONTRACTREF__;__INSTANCEDBPREFIX__;
+					$arguments = make_substitutions($tmparray[1], $substitarray);
+					$argsArray = explode(';', $arguments);
+					$customFunctionToCall = array_shift($argsArray);
+
+					if (is_callable($customFunctionToCall)) {
+						$newqty = call_user_func_array($customFunctionToCall, $argsArray);
+					}
+				} elseif (is_numeric($tmparray[0]) && ((int) $tmparray[0]) > 0) {		// If value is just a number
     					$newqty = ((int) $tmparray[0]);
     				} else {
     					$error++;
