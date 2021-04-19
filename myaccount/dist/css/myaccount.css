@@ -344,7 +344,9 @@ div.tab-content {
 .boxresource .uppercase {
     text-transform: unset !important;
 }
-body {color: #333333;font-family: "Open Sans", sans-serif;padding:0px !important;margin: 0px !important;direction: ltr;}
+
+body { color: #333333; font-family: "Open Sans", sans-serif; padding:0px !important; margin: 0px !important; direction: ltr; }
+
 @-webkit-viewport {width: device-width;}@-moz-viewport {width: 
 device-width;}@-ms-viewport {width: device-width;}@-o-viewport {width
 : device-width;}@viewport {width: device-width;}@-ms-viewport {width:

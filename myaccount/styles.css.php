@@ -290,19 +290,19 @@ margin-top: 20px;
 }
 
 div#waitMask {
-text-align: center;
-z-index: 999;
-position: absolute;
-top: 0;
-right: 0;
-height: 100%;
-width: 100%;
-cursor: wait;
-padding-top: 250px;
-background-color: #000;
-opacity: 0;
-transition-duration: 0.5s;
--webkit-transition-duration: 0.5s;
+	text-align: center;
+	z-index: 999;
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 100%;
+	width: 100%;
+	cursor: wait;
+	padding-top: 250px;
+	background-color: #000;
+	opacity: 0;
+	transition-duration: 0.5s;
+	-webkit-transition-duration: 0.5s;
 }
 
 

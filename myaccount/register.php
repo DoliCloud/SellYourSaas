@@ -735,12 +735,14 @@ if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0,
 
         /* Sow hourglass */
         $('#formregister').submit(function() {
-                console.log("We clicked on submit")
+                console.log("We clicked on submit on register page")
+
                 jQuery(document.body).css({ 'cursor': 'wait' });
                 jQuery("div#waitMask").show();
                 jQuery("#waitMask").css("opacity"); // must read it first
                 jQuery("#waitMask").css("opacity", "0.5");
-                return true;
+
+                return true;	/* Use return false to show the hourglass without submitting the page (for debug) */
         });
 	});
 </script>
