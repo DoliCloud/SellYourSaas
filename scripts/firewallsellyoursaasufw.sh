@@ -65,7 +65,7 @@ ufw disable
     $0 start
     ;;
   status)
-    ${IPTABLES} -L | grep anywhere 1>/dev/null 2>&1
+    ${IPTABLES} -L | grep anywhere | grep ESTABLISHED 1>/dev/null 2>&1
     if [ "$?" == 0 ];
     then
         echo "Firewall is running : OK"
