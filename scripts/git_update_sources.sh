@@ -61,7 +61,7 @@ do
 		# We remove subdir of build. We need files into build root only.
 		find build/* -type d -exec rm -fr {} \;
 		echo "Clean some files to save disk spaces"
-		find . -type f -name index.html -exec rm -f {} \;
+		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -exec rm -f {} \;
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php"
