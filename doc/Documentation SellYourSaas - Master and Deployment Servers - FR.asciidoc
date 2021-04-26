@@ -2011,7 +2011,6 @@ Donner les droits d'accès sur le serveur de base de données pour permettre l'a
 [source,sql]
 ---------------
 CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
@@ -2123,6 +2122,11 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 === Configuration de AppArmor
 
 Copy */bin/bash* or */bin/dash* into */bin/secureBash*  (Ce fichier shell sera positionné comme le shell pour les nouveaux utilisateur par le processus de déploiment)
+
+[source,bash]
+---------------
+cp /bin/bash /bin/secureBash
+---------------
 
 Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 
@@ -2600,7 +2604,7 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Configuration du serveur DNS pour le serveur Master
+=== Configuration du serveur DNS pour les domaines servis par le serveur Master
 
 ==== Chez le registar
 
@@ -2731,6 +2735,10 @@ nslookup test.withX.mysaasdomainname.com 8.8.8.8
 
 Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
 
+[source,bash]
+---------------
+TODO
+---------------
 
 ==== Définition taille upload et durée sessions
 
@@ -2750,6 +2758,8 @@ session.gc_maxlifetime = 3600
 
 
 ==== Ajout du wrapper PHP pour la fonction PHP mail
+
+Sur les *Serveurs de déploiement*:
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 

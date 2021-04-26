@@ -35,6 +35,7 @@ ufw allow out 123/udp
 ufw allow out 43/tcp
 # DNS
 ufw allow out 53/tcp
+ufw allow out 53/udp
 
 # From external source to local - In
 ufw allow in 22/tcp
@@ -43,6 +44,7 @@ ufw allow in 8080/tcp
 ufw allow in 443/tcp
 # DNS
 ufw allow in 53/tcp
+ufw allow in 53/udp
 
 ufw default deny incoming
 ufw default deny outgoing

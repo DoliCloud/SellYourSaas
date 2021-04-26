@@ -2048,7 +2048,6 @@ Give access rights on the database server to allow remote administration on all 
 [source,sql]
 ---------------
 CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
@@ -2160,6 +2159,11 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 === Setup of AppArmor
 
 Copy */bin/bash* or */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
+
+[source,bash]
+---------------
+cp /bin/bash /bin/secureBash
+---------------
 
 Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 
@@ -2350,7 +2354,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /usr/share/pyshared/zope.interface-3.6.1-nspkg.pth r,
   /usr/share/vim/vim72/debian.vim r,
   /usr/share/vim/vim72/filetype.vim r,
-  /usr/share/vim/vim72/lang/en_GB/LC_MESSAGES/vim.mo r,
+  /usr/share/vim/vim72/lang/en_GB/LC_Mvi /etc/ImageMagick-6/policy.xmlESSAGES/vim.mo r,
   /usr/share/vim/vim72/plugin/ r,
   /usr/share/vim/vim72/plugin/getscriptPlugin.vim r,
   /usr/share/vim/vim72/plugin/gzip.vim r,
@@ -2639,7 +2643,7 @@ Mettre en commentaire
 
 
 
-=== Setup of DNS server for Master server
+=== Setup of DNS server for domains served by Master server
 
 ==== On registar side
 
@@ -2763,6 +2767,10 @@ nslookup test.withX.mysaasdomainname.com 8.8.8.8
 
 Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
 
+[source,bash]
+---------------
+TODO
+---------------
 
 ==== Define size of upload and session duration
 
@@ -2782,6 +2790,8 @@ session.gc_maxlifetime = 3600
 
 
 ==== Add a wrapper PHP for the mail() function
+
+On *Deployment servers*:
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 
