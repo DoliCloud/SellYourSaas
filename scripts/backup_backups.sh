@@ -62,7 +62,8 @@ fi
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
 export OPTIONS="-v -4 --stats -rlt --chmod=u=rwX --backup --suffix=.old";
 if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
-	export OPTIONS="$OPTIONS --open-noatime" 
+	# Version must be 20.10+ on both side !
+	#export OPTIONS="$OPTIONS --open-noatime" 
 else 
 	export OPTIONS="$OPTIONS --noatime"
 fi
