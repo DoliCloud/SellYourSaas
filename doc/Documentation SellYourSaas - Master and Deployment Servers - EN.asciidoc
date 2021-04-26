@@ -106,9 +106,18 @@ For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server
 [[adding_disk]]
 === Adding the harddisk of data (home of user instances and home of backups)
 
-We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
+On *Master server*:
+
+We will just use the same disk for local backup. So we just do:
+
+[source, bash]
+---------------
+mkdir /mnt/diskhome
+---------------
 
 On *Deployment server* :
+
+We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
 
 With OVH Public Cloud:
 
@@ -603,9 +612,12 @@ With the following content:
 ---------------
 # domain du service
 domain=mysaasdomainname.com
+
+# If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
-# ips autorisés à commander le déploiement
-allowed_hosts=127.0.0.1,ipduservermaster
+# If deployment server: IPs allowed to request a deployment
+allowed_hosts=127.0.0.1,ipofmasterserver
+
 # email from
 emailfrom=robot@mysaasdomainname.com
 # email supervision
@@ -617,7 +629,7 @@ masterserver=1
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
-# Set to its own IP if it is a deployment server
+# Set to its own IP if it is a deployment server. Keep empty for master only server.
 ipserverdeployment=ipduserverdeployment
 
 # Set location of the master database
@@ -672,7 +684,7 @@ remotebackupdir=/mnt/diskbackup
 
 Put *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master
 Put *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on deployment servers.
-Do not forget to set a value for *databasepass*.
+Do not forget to set a value for *databasepass*. We will reuse this value later.
 
 
 === Installing the nfs share
