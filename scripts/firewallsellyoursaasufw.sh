@@ -6,8 +6,7 @@ IPTABLES=iptables
 case $1 in
   start)
 
-ufw default deny incoming
-ufw default deny outgoing
+ufw enable
 
 # From local to external target - Out
 ufw allow out 22/tcp
@@ -44,6 +43,9 @@ ufw allow in 8080/tcp
 ufw allow in 443/tcp
 # DNS
 ufw allow in 53/tcp
+
+ufw default deny incoming
+ufw default deny outgoing
 
 ufw reload
 

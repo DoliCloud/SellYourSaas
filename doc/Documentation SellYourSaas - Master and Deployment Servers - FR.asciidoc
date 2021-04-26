@@ -1033,9 +1033,15 @@ systemctl reload nom_du_service.service
 
 === Installation du firewall ===
 
-* Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas. Assurez vous de son lancement au démarrage du serveur par:
+TODO Graphic avec les flux et les ports.
 
-[source,bash]
+
+* Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
+
+
+==== With iptables ====
+
+[source, bash]
 ---------------
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
 systemctl daemon-reload
@@ -1044,7 +1050,13 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-TODO Graphic avec les flux et les ports.
+==== With ufw
+
+[source, bash]
+---------------
+/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaasufw.sh start
+---------------
+
 
 
 === Installation de watchdog unix (optionnel) ===
