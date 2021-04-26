@@ -1,42 +1,77 @@
 #!/bin/bash
 
-sudo ufw default deny incoming
-sudo ufw default deny outgoing
+IPTABLES=iptables
+
+
+case $1 in
+  start)
+
+ufw default deny incoming
+ufw default deny outgoing
 
 # From local to external target - Out
-sudo ufw allow out 22/tcp
-sudo ufw allow out 80/tcp
-sudo ufw allow out 8080/tcp
-sudo ufw allow out 443/tcp
-sudo ufw allow out 3306/tcp
-sudo ufw allow out 25/tcp
-sudo ufw allow out 2525/tcp
-sudo ufw allow out 465/tcp
-sudo ufw allow out 587/tcp
-sudo ufw allow out 110/tcp
+ufw allow out 22/tcp
+ufw allow out 80/tcp
+ufw allow out 8080/tcp
+ufw allow out 443/tcp
+ufw allow out 3306/tcp
+ufw allow out 25/tcp
+ufw allow out 2525/tcp
+ufw allow out 465/tcp
+ufw allow out 587/tcp
+ufw allow out 110/tcp
 # LDAP LDAPS
-sudo ufw allow out 389/tcp
-sudo ufw allow out 636/tcp
+ufw allow out 389/tcp
+ufw allow out 636/tcp
 # IMAP
-sudo ufw allow out 143/tcp
-sudo ufw allow out 993/tcp
+ufw allow out 143/tcp
+ufw allow out 993/tcp
 # DCC
-sudo ufw allow out 6227/tcp
-sudo ufw allow out 6227/udp
+ufw allow out 6227/tcp
+ufw allow out 6227/udp
 # Rdate
-sudo ufw allow out 37/tcp
-sudo ufw allow out 123/udp
+ufw allow out 37/tcp
+ufw allow out 123/udp
 # Whois
-sudo ufw allow out 43/tcp
+ufw allow out 43/tcp
 # DNS
-sudo ufw allow out 53/tcp
+ufw allow out 53/tcp
 
 # From external source to local - In
-sudo ufw allow in 22/tcp
-sudo ufw allow in 80/tcp
-sudo ufw allow in 8080/tcp
-sudo ufw allow in 443/tcp
+ufw allow in 22/tcp
+ufw allow in 80/tcp
+ufw allow in 8080/tcp
+ufw allow in 443/tcp
 # DNS
-sudo ufw allow in 53/tcp
+ufw allow in 53/tcp
 
-sudo ufw reload
+ufw reload
+
+$0 status
+	;;
+
+  stop)
+    
+    echo "Stopping firewall rules"
+
+ufw disable 	
+
+    exit 0
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  status)
+    ${IPTABLES} -L | grep anywhere 1>/dev/null 2>&1
+    if [ "$?" == 0 ];
+    then
+        echo "Firewall is running : OK"
+    else
+        echo "Firewall is NOT running."
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+esac
