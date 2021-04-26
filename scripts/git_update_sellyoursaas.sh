@@ -6,6 +6,8 @@
 # /pathto/git_update_sellyoursaas.sh /home/admin/wwwroot > /pathto/git_update_sellyoursaas.log 2>&
 #---------------------------------------------------------
 
+source /etc/lsb-release
+
 if [ "x$1" == "x" ]; then
    echo "Usage:   $0  dir_of_git_repositories_of_app"
    echo "Example: $0  /home/admin/wwwroot"

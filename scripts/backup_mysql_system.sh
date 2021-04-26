@@ -6,6 +6,8 @@
 
 #set -e
 
+source /etc/lsb-release
+
 export now=`date +%Y%m%d%H%M%S`
 
 echo

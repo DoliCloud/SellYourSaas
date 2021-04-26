@@ -6,6 +6,8 @@
 # /pathto/git_update_sources.sh documentdir/sellyoursaas/git all > /pathto/git_update_sources.log 2>&
 #---------------------------------------------------------
 
+source /etc/lsb-release
+
 if [ "x$1" == "x" ]; then
    echo "Usage:   $0  dir_document_of_git_repositories [subdir|all]"
    echo "Example: $0  /pathtodocuments/documents/sellyoursaas/git"
