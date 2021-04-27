@@ -60,12 +60,8 @@ $error=0; $errors=array();
 
 $object = new Contrat($db);
 
-// Security check
-$result = restrictedArea($user, 'sellyoursaas', 0, '','');
-
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('contractcard','globalcard'));
-
 
 if ($id > 0 || $ref)
 {
@@ -75,6 +71,9 @@ if ($id > 0 || $ref)
 }
 
 $now = dol_now();
+
+// Security check
+$result = restrictedArea($user, 'sellyoursaas', 0, '','');
 
 
 /*

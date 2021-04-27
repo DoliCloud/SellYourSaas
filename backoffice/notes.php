@@ -64,11 +64,9 @@ $limit = GETPOST('limit','int')?GETPOST('limit','int'):$conf->liste_limit;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
-// Protection if external user
-if ($user->societe_id > 0)
-{
-	//accessforbidden();
-}
+// Security check
+$result = restrictedArea($user, 'sellyoursaas', 0, '','');
+
 
 
 

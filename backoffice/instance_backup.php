@@ -65,10 +65,6 @@ if ($action != 'create')
 	$object = new Contrat($db);
 }
 
-
-// Security check
-$result = restrictedArea($user, 'sellyoursaas', 0, '','');
-
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('contractcard','globalcard'));
 
@@ -175,6 +171,9 @@ if (!empty($ExecTimeLimit))
 	@set_time_limit($ExecTimeLimit); // Need more than 240 on Windows 7/64
 	error_reporting($err);
 }
+
+// Security check
+$result = restrictedArea($user, 'sellyoursaas', 0, '','');
 
 
 /*

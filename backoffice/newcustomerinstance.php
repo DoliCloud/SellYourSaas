@@ -82,6 +82,9 @@ $object=new Societe($db);
 if (GETPOST('loadthirdparty')) $action='create2';
 if (GETPOST('add')) $action='add';
 
+// Security check
+$result = restrictedArea($user, 'sellyoursaas', 0, '','');
+
 
 /*
  *	Actions

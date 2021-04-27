@@ -60,9 +60,6 @@ if ($action != 'create')
 	$object = new Contrat($db);
 }
 
-// Security check
-$result = restrictedArea($user, 'sellyoursaas', 0, '','');
-
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array array
 include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
 $hookmanager=new HookManager($db);
@@ -93,6 +90,9 @@ $password_web = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
 if (empty($prefix_db)) $prefix_db = 'llx_';
+
+// Security check
+$result = restrictedArea($user, 'sellyoursaas', 0, '','');
 
 
 /*
