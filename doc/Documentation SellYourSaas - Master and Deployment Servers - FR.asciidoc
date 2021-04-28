@@ -1516,13 +1516,15 @@ Supprimer le profil apparmor pour *usr.sbin.clamd*. Ceci est requis pour être a
 
 [source,bash]
 ---------------
-cd /etc/apparmor.d/disable
-ln -fs /etc/apparmor.d/usr.sbin.clamd
+aa-disable usr.sbin.clamd
+ls -alrt /etc/apparmor.d/disable
 service apparmor reload
 service apparmor status
+service apache2 stop
+service apache2 start
 ---------------
 
-Vous devez voir dans le statut une ligne disant que le profil *usr/sbin/clamd* est désactivée.
+Vous devez voir dans le statut apparmor une ligne disant que le profil *usr/sbin/clamd* est désactivée.
 Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans apache.
 
 
@@ -2423,7 +2425,7 @@ aa-status
 
 [source,bash]
 ---------------
-aa-enforce usr.sbin.mysqld
+aa-enforce bin.secureBash
 ---------------
 
 
@@ -2432,9 +2434,14 @@ aa-enforce usr.sbin.mysqld
 [source,bash]
 ---------------
 apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
+or 
+aa-disable usr.sbin.mysqld
 ---------------
 
-Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour mettre *RemainAfterExit=no*
+Tous les profils désactivés sont visible dans */etc/apparmor.d/disable*
+
+
+* Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour mettre *RemainAfterExit=no*
 
 [source,bash]
 ---------------
@@ -4537,6 +4544,19 @@ Edit the file /etc/fail2ban/jail/conf to replace *imap3* (it does not exists) in
 You can get more information by running 
 
 sudo fail2ban-client -vvv -x start
+
+
+==== Problem when starting mariadb / mariadb stop after a timetout
+
+Launching mariadb launch the database but the command never return to the command line prompt and the database is automatically stopped after few minutes.
+
+Check the /var/log/kern.log, you may have apparmor error on /usr/sbin/mysqld.
+
+If yes, disable the apparmor rule: 
+
+aa-disable usr.sbin.mysqld
+
+Then reboot server.
 
 
 ==== Extracting a zip file extract files into filename with path with \ including into name
