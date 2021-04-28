@@ -6,7 +6,7 @@ global $conf;
 $serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
 
 
-include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
+include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 
 
 /**
@@ -21,7 +21,7 @@ include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
  * @param	int							$recreateauthorizekey	1=Recreate authorized key if not found, 2=Recreate authorized key event if found
  * @return	int													1
  */
-function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0, $recreateauthorizekey=0)
+function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 0, $recreateauthorizekey = 0)
 {
 	$instance = $object->instance;
 	if (empty($instance)) $instance = $object->ref_customer;
@@ -35,32 +35,26 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 	$server=$instance;
 
 	// SFTP refresh
-	if (function_exists("ssh2_connect"))
-	{
-	    $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	if (function_exists("ssh2_connect")) {
+		$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 
-	    if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_web." ".$password_web."\n";
+		if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_web." ".$password_web."\n";
 
-	    $connection = ssh2_connect($server, $server_port);
-		if ($connection)
-		{
+		$connection = ssh2_connect($server, $server_port);
+		if ($connection) {
 			if ($printoutput) print $instance." ".$username_web." ".$password_web."\n";
 
-			if (! @ssh2_auth_password($connection, $username_web, $password_web))
-			{
+			if (! @ssh2_auth_password($connection, $username_web, $password_web)) {
 				dol_syslog("Could not authenticate in dolicloud_files_refresh with username ".$username_web." . and password ".preg_replace('/./', '*', $password_web), LOG_ERR);
-			}
-			else
-			{
+			} else {
 				$sftp = ssh2_sftp($connection);
-				if (! $sftp)
-				{
-					dol_syslog("Could not execute ssh2_sftp",LOG_ERR);
+				if (! $sftp) {
+					dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
 					$errors[]='Failed to connect to ssh2 to '.$server;
 					return 1;
 				}
 
-				$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$database_db);
+				$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
 				//$file="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/'.$dir.'/htdocs/conf/conf.php';
 				//$file="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/'.$dir.'/htdocs/conf/conf.php';    // With PHP 5.6.27+
 
@@ -73,10 +67,8 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
 				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support');
 				// Create authorized_keys_support file
-				if (empty($fstat['atime']) || $recreateauthorizekey == 2)
-				{
-					if ($recreateauthorizekey)
-					{
+				if (empty($fstat['atime']) || $recreateauthorizekey == 2) {
+					if ($recreateauthorizekey) {
 						@ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh');
 
 						$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
@@ -86,24 +78,17 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 
 						$stream = @fopen($filecert, 'w');
 						//var_dump($stream);exit;
-						if ($stream)
-						{
+						if ($stream) {
 							fwrite($stream, $publickeystodeploy);
 							fclose($stream);
 							$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support');
-						}
-						else
-						{
+						} else {
 							$errors[]='Failed to open for write '.$filecert."\n";
 						}
-					}
-					else
-					{
+					} else {
 						if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys_support not found.\n";
 					}
-				}
-				else
-				{
+				} else {
 					if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys_support already exists.\n";
 				}
 				$object->fileauthorizedkey=(empty($fstat['mtime'])?'':$fstat['mtime']);
@@ -123,12 +108,10 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput=0,
 					$object->date_endfreeperiod=($object->date_registration?dol_time_plus_duree($object->date_registration,15,'d'):'');
 				}*/
 			}
-		}
-		else {
+		} else {
 			$errors[]='Failed to connect to ssh2 to '.$server;
 		}
-	}
-	else {
+	} else {
 		$errors[]='ssh2_connect not supported by this PHP';
 	}
 
@@ -186,25 +169,21 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	unset($object->version);
 	unset($object->nbofusers);
 
-	if (is_object($newdb))
-	{
+	if (is_object($newdb)) {
 		$error=0;
 		$done=0;
 
-		if ($newdb->connected && $newdb->database_selected)
-		{
+		if ($newdb->connected && $newdb->database_selected) {
 			$sqltocountusers = '';
 			// Now search the real SQL request to count users
-			foreach($object->lines as $contractline)
-			{
+			foreach ($object->lines as $contractline) {
 				if (empty($contractline->fk_product)) continue;
 				$producttmp = new Product($db);
 				$producttmp->fetch($contractline->fk_product);
 
 				// If this is a line for a metric
 				if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
-				    && ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref)))
-				{
+					&& ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref))) {
 					$dbprefix = ($object->array_options['options_prefix_db']?$object->array_options['options_prefix_db']:'llx_');
 
 					$sqltocountusers = $producttmp->array_options['options_resource_formula'];
@@ -221,64 +200,51 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM llx_user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY datelastlogin DESC LIMIT 1";
 
 			// Get user/pass of last admin user
-			if (! $error)
-			{
+			if (! $error) {
 				$resql=$newdb->query($sqltogetlastloginadmin);
-				if ($resql)
-				{
+				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
 					$object->lastlogin_admin = $obj->login;
 					$object->lastpass_admin = $obj->pass;
 					$lastloginadmin = $object->lastlogin_admin;
 					$lastpassadmin = $object->lastpass_admin;
-				}
-				else $error++;
+				} else $error++;
 			}
 
 			// Get list of modules
-			if (! $error)
-			{
+			if (! $error) {
 				$modulesenabled=array(); $lastinstall=''; $lastupgrade='';
 				$resql=$newdb->query($sqltogetmodules);
-				if ($resql)
-				{
+				if ($resql) {
 					$num=$newdb->num_rows($resql);
 					$i=0;
-					while ($i < $num)
-					{
+					while ($i < $num) {
 						$obj = $newdb->fetch_object($resql);
-						if (preg_match('/MAIN_MODULE_/',$obj->name))
-						{
-							$name=preg_replace('/^[^_]+_[^_]+_/','',$obj->name);
-							if (! preg_match('/_/',$name)) $modulesenabled[$name]=$name;
+						if (preg_match('/MAIN_MODULE_/', $obj->name)) {
+							$name=preg_replace('/^[^_]+_[^_]+_/', '', $obj->name);
+							if (! preg_match('/_/', $name)) $modulesenabled[$name]=$name;
 						}
-						if (preg_match('/MAIN_VERSION_LAST_UPGRADE/',$obj->name))
-						{
+						if (preg_match('/MAIN_VERSION_LAST_UPGRADE/', $obj->name)) {
 							$lastupgrade=$obj->value;
 						}
-						if (preg_match('/MAIN_VERSION_LAST_INSTALL/',$obj->name))
-						{
+						if (preg_match('/MAIN_VERSION_LAST_INSTALL/', $obj->name)) {
 							$lastinstall=$obj->value;
 						}
 						$i++;
 					}
-					$object->modulesenabled=join(',',$modulesenabled);
+					$object->modulesenabled=join(',', $modulesenabled);
 					$object->version=($lastupgrade?$lastupgrade:$lastinstall);
-				}
-				else $error++;
+				} else $error++;
 			}
 
 			// Get nb of users (special case for hard coded field into some GUI tabs)
-			if (! $error)
-			{
+			if (! $error) {
 				if ($sqltocountusers) {
 					$resql=$newdb->query($sqltocountusers);
-					if ($resql)
-					{
+					if ($resql) {
 						$obj = $newdb->fetch_object($resql);
 						$object->nbofusers += $obj->nb;
-					}
-					else {
+					} else {
 						$error++;
 						setEventMessages($newdb->lasterror(), null, 'errors');
 					}
@@ -290,36 +256,29 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 			$deltatzserver=(getServerTimeZoneInt()-0)*3600;	// Diff between TZ of NLTechno and DoliCloud
 
 			// Get last login of users
-			if (! $error)
-			{
+			if (! $error) {
 				$resql=$newdb->query($sqltogetlastloginuser);
-				if ($resql)
-				{
+				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
 
 					$object->lastlogin  = $obj->login;
 					$object->lastpass   = $obj->pass;
 					$object->date_lastlogin = ($obj->datelastlogin ? ($newdb->jdate($obj->datelastlogin)+$deltatzserver) : '');
-				}
-				else
-				{
+				} else {
 					$error++;
 					$errors[]='Failed to connect to database '.$instance.'.on.dolicloud.com'.' '.$username_db;
 				}
 			}
 
 			$done++;
-		}
-		else
-		{
+		} else {
 			$errors[]='Failed to connect '.$conf->db->type.' '.$instance.'.on.dolicloud.com '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
 			$ret=-1;
 		}
 
 		$newdb->close();
 
-		if (! $error && $done)
-		{
+		if (! $error && $done) {
 			$now=dol_now();
 			$object->date_lastcheck=$now;
 			$object->lastcheck=$now;	// For backward compatibility
@@ -329,23 +288,18 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 			//$object->array_options['options_latestresupdate_date']=$now;
 
 			$result = $object->update($user);	// persist
-			if (method_exists($object,'update_old')) $result = $object->update_old($user);	// persist
+			if (method_exists($object, 'update_old')) $result = $object->update_old($user);	// persist
 
-			if ($result < 0)
-			{
+			if ($result < 0) {
 				dol_syslog("Failed to persist data on object into database", LOG_ERR);
 				if ($object->error) $errors[]=$object->error;
-				$errors=array_merge($errors,$object->errors);
-			}
-			else
-			{
+				$errors=array_merge($errors, $object->errors);
+			} else {
 				//var_dump($object);
 			}
 		}
-	}
-	else
-	{
-	    $errors[]='Failed to connect '.$conf->db->type.' '.$server.' '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
+	} else {
+		$errors[]='Failed to connect '.$conf->db->type.' '.$server.' '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
 		$ret=-1;
 	}
 
@@ -449,57 +403,47 @@ function dolicloud_calculate_stats($db, $datelim)
 
 	dol_syslog($script_file." dolicloud_calculate_stats sql=".$sql, LOG_DEBUG);
 	$resql=$db->query($sql);
-	if ($resql)
-	{
-	    $num = $db->num_rows($resql);
-	    $i = 0;
-	    if ($num)
-	    {
-	        while ($i < $num)
-	        {
-	            $obj = $db->fetch_object($resql);
-	            if ($obj)
-	            {
-    				//print "($obj->price_instance * ($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)) + (max(0,($obj->nbofusers - ($obj->min_threshold ? $obj->min_threshold : 0))) * $obj->price_user)";
-                    // Voir aussi dolicloud_list.php
-                    $price=($obj->price_instance * ($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)) + (max(0,($obj->nbofusers - ($obj->min_threshold ? $obj->min_threshold : 0))) * $obj->price_user);
-                    if ($obj->interval_unit == 'Year') $price = $price / 12;
+	if ($resql) {
+		$num = $db->num_rows($resql);
+		$i = 0;
+		if ($num) {
+			while ($i < $num) {
+				$obj = $db->fetch_object($resql);
+				if ($obj) {
+					//print "($obj->price_instance * ($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)) + (max(0,($obj->nbofusers - ($obj->min_threshold ? $obj->min_threshold : 0))) * $obj->price_user)";
+					// Voir aussi dolicloud_list.php
+					$price=($obj->price_instance * ($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)) + (max(0, ($obj->nbofusers - ($obj->min_threshold ? $obj->min_threshold : 0))) * $obj->price_user);
+					if ($obj->interval_unit == 'Year') $price = $price / 12;
 
 					$totalinstances++;
 					$totalusers+=$obj->nbofusers;
 
 					$activepaying=1;
-					if (in_array($obj->status,array('SUSPENDED'))) $activepaying=0;
-					if (in_array($obj->status,array('CLOSED','CLOSE_QUEUED','CLOSURE_REQUESTED')) || in_array($obj->instance_status,array('UNDEPLOYED'))) $activepaying=0;
-					if (in_array($obj->payment_status,array('TRIAL','TRIALING','TRIAL_EXPIRED','FAILURE','PAST_DUE'))) $activepaying=0;
+					if (in_array($obj->status, array('SUSPENDED'))) $activepaying=0;
+					if (in_array($obj->status, array('CLOSED','CLOSE_QUEUED','CLOSURE_REQUESTED')) || in_array($obj->instance_status, array('UNDEPLOYED'))) $activepaying=0;
+					if (in_array($obj->payment_status, array('TRIAL','TRIALING','TRIAL_EXPIRED','FAILURE','PAST_DUE'))) $activepaying=0;
 
-	                if (! $activepaying)
-	                {
-	                	$listofcustomers[$obj->customer_id]++;
+					if (! $activepaying) {
+						$listofcustomers[$obj->customer_id]++;
 						//print "cpt=".$totalinstances." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price." -> 0<br>\n";
-	                }
-	                else
-	                {
-	              		$listofcustomerspaying[$obj->customer_id]++;
+					} else {
+						$listofcustomerspaying[$obj->customer_id]++;
 
-	                	$totalinstancespaying++;
-	                	$total+=$price;
+						$totalinstancespaying++;
+						$total+=$price;
 
-	                	//print "cpt=".$totalinstancespaying." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price."<br>\n";
-	                	if (! empty($obj->partner))
-	                	{
-	                		$totalcommissions+=price2num($price * 0.2);
-	                	}
-	                }
-	            }
-	            $i++;
-	        }
-	    }
-	}
-	else
-	{
-	    $error++;
-	    dol_print_error($db);
+						//print "cpt=".$totalinstancespaying." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price."<br>\n";
+						if (! empty($obj->partner)) {
+							$totalcommissions+=price2num($price * 0.2);
+						}
+					}
+				}
+				$i++;
+			}
+		}
+	} else {
+		$error++;
+		dol_print_error($db);
 	}
 
 	return array('total'=>(double) $total, 'totalcommissions'=>(double) $totalcommissions,
@@ -540,12 +484,10 @@ function sellyoursaas_calculate_stats($db, $datelim)
 
 	dol_syslog("sellyoursaas_calculate_stats sql=".$sql, LOG_DEBUG, 1);
 	$resql=$db->query($sql);
-	if ($resql)
-	{
+	if ($resql) {
 		$num = $db->num_rows($resql);
 		$i = 0;
-		if ($num)
-		{
+		if ($num) {
 			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 			dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
@@ -553,11 +495,9 @@ function sellyoursaas_calculate_stats($db, $datelim)
 			$object = new Contrat($db);
 			//$cacheofthirdparties = array();
 
-			while ($i < $num)
-			{
+			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
-				if ($obj)
-				{
+				if ($obj) {
 					unset($object->linkedObjects);
 
 					// Get resource for instance
@@ -570,28 +510,24 @@ function sellyoursaas_calculate_stats($db, $datelim)
 
 					// Return true if instance $object is paying instance (invoice or template invoice exists)
 					$ispaid = sellyoursaasIsPaidInstance($object, 0, 1);										// This also load $object->linkedObjects['facturerec']
-					if (! $ispaid)		// This is a test only customer or expired or suspended (no invoice or template invoice at all)
-					{
+					if (! $ispaid) {		// This is a test only customer or expired or suspended (no invoice or template invoice at all)
 						if ($tmpdata['expirationdate'] < $now) {
 							$totalinstancesexpiredfree++;
 						}
 
-						if ($tmpdata['status'] == 5)
-						{
+						if ($tmpdata['status'] == 5) {
 							$totalinstancessuspendedfree++;
 						}
 
 						$listofcustomers[$obj->customer_id]++;
 						//print "cpt=".$totalinstances." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price." -> 0<br>\n";
-					}
-					else				// This is a paying customer (with at least one invoice or recurring invoice)
+					} else // This is a paying customer (with at least one invoice or recurring invoice)
 					{
 						if ($tmpdata['expirationdate'] < $now) {
 							$totalinstancesexpiredpaying++;
 						}
 
-						if ($tmpdata['status'] == 5)
-						{
+						if ($tmpdata['status'] == 5) {
 							$totalinstancessuspendedpaying++;
 						}
 
@@ -599,22 +535,14 @@ function sellyoursaas_calculate_stats($db, $datelim)
 						$price = 0;
 
 						$atleastonenotsuspended = 0;
-						if (is_array($object->linkedObjects['facturerec']))		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
-						{
-							foreach($object->linkedObjects['facturerec'] as $idelementelement => $templateinvoice)
-							{
-								if (! $templateinvoice->suspended)
-								{
-									if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency >= 1)
-									{
+						if (is_array($object->linkedObjects['facturerec'])) {		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
+							foreach ($object->linkedObjects['facturerec'] as $idelementelement => $templateinvoice) {
+								if (! $templateinvoice->suspended) {
+									if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency >= 1) {
 										$price += $templateinvoice->total_ht / $templateinvoice->frequency;
-									}
-									elseif ($templateinvoice->unit_frequency == 'y' && $templateinvoice->frequency >= 1)
-									{
+									} elseif ($templateinvoice->unit_frequency == 'y' && $templateinvoice->frequency >= 1) {
 										$price += ($templateinvoice->total_ht / (12 * $templateinvoice->frequency));
-									}
-									else
-									{
+									} else {
 										$price += $templateinvoice->total_ht;
 									}
 
@@ -623,8 +551,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 							}
 						}
 
-						if (! $atleastonenotsuspended)	// Really a paying customer if template invoice not suspended
-						{
+						if (! $atleastonenotsuspended) {	// Really a paying customer if template invoice not suspended
 							$listofcustomerspayingwithoutrecinvoice[$obj->customer_id]++;
 							$listofinstancespayingwithoutrecinvoice[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
 							$totalinstancespayingwithoutrecinvoice++;
@@ -642,8 +569,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 							$totalinstancespaying++;
 
 							//print "cpt=".$totalinstancespaying." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price."<br>\n";
-							if ($atleastonenotsuspended && ! empty($obj->parent))
-							{
+							if ($atleastonenotsuspended && ! empty($obj->parent)) {
 								$thirdpartyparent = new Societe($db);		// TODO Extend the select with left join on parent + extrafield to get this data
 								$thirdpartyparent->fetch($obj->parent);
 								$totalcommissions+=price2num($price * $thirdpartyparent->array_options['options_commission'] / 100);
@@ -654,9 +580,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 				$i++;
 			}
 		}
-	}
-	else
-	{
+	} else {
 		$error++;
 		dol_print_error($db);
 	}

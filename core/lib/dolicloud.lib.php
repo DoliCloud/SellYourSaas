@@ -29,27 +29,23 @@
  */
 function getNextInstanceInChain($object)
 {
-    global $db;
+	global $db;
 
-    $contract = null;
+	$contract = null;
 
-    $sql="SELECT fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE cookieregister_previous_instance = '".$db->escape($object->ref_customer)."'";
+	$sql="SELECT fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE cookieregister_previous_instance = '".$db->escape($object->ref_customer)."'";
 
-    $resql = $db->query($sql);
-    if ($resql)
-    {
-        $obj = $db->fetch_object($resql);
-        if ($obj && $obj->fk_object > 0)
-        {
-            $contract = new Contrat($db);
-            $contract->fetch($obj->fk_object);
-        }
-    }
-    else
-    {
-        dol_print_error($db);
-    }
-    return $contract;
+	$resql = $db->query($sql);
+	if ($resql) {
+		$obj = $db->fetch_object($resql);
+		if ($obj && $obj->fk_object > 0) {
+			$contract = new Contrat($db);
+			$contract->fetch($obj->fk_object);
+		}
+	} else {
+		dol_print_error($db);
+	}
+	return $contract;
 }
 
 /**
@@ -60,14 +56,14 @@ function getNextInstanceInChain($object)
  */
 function getPreviousInstanceInChain($object)
 {
-    global $db;
+	global $db;
 
-    if (empty($object->array_options['options_cookieregister_previous_instance'])) return null;
+	if (empty($object->array_options['options_cookieregister_previous_instance'])) return null;
 
-    $contract = new Contrat($db);
-    $result = $contract->fetch(0, '', $object->array_options['options_cookieregister_previous_instance']);		// $object->array_options['options_cookieregister_previous_instance'] is ref_customer of previous instance
-    if ($result > 0) return $contract;
-    else return null;
+	$contract = new Contrat($db);
+	$result = $contract->fetch(0, '', $object->array_options['options_cookieregister_previous_instance']);		// $object->array_options['options_cookieregister_previous_instance'] is ref_customer of previous instance
+	if ($result > 0) return $contract;
+	else return null;
 }
 
 /**
@@ -77,37 +73,35 @@ function getPreviousInstanceInChain($object)
  */
 function getListOfInstancesInChain($object)
 {
-    global $conf, $langs, $user, $db;
+	global $conf, $langs, $user, $db;
 
-    $arrayofinstances = array();
-    $arrayofinstances[$object->id] = $object;
+	$arrayofinstances = array();
+	$arrayofinstances[$object->id] = $object;
 
-    // Get next contracts
-    $nextcontract = getNextInstanceInChain($object);
-    if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
-    $i = 0;
-    while ($nextcontract && $i < 1000)
-    {
-        $i++;
-        if (array_key_exists($nextcontract->id, $arrayofinstances)) continue;
-        $nextcontract = getNextInstanceInChain($nextcontract);
-        if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
-    }
+	// Get next contracts
+	$nextcontract = getNextInstanceInChain($object);
+	if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
+	$i = 0;
+	while ($nextcontract && $i < 1000) {
+		$i++;
+		if (array_key_exists($nextcontract->id, $arrayofinstances)) continue;
+		$nextcontract = getNextInstanceInChain($nextcontract);
+		if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
+	}
 
-    // Get previous contracts
-    $previouscontract = getPreviousInstanceInChain($object);
-    if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
-    $i = 0;
-    while ($previouscontract && $i < 1000)
-    {
-        $i++;
-        if (array_key_exists($previouscontract->id, $arrayofinstances)) continue;
-        $previouscontract = getPreviousInstanceInChain($previouscontract);
-        if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
-    }
+	// Get previous contracts
+	$previouscontract = getPreviousInstanceInChain($object);
+	if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
+	$i = 0;
+	while ($previouscontract && $i < 1000) {
+		$i++;
+		if (array_key_exists($previouscontract->id, $arrayofinstances)) continue;
+		$previouscontract = getPreviousInstanceInChain($previouscontract);
+		if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
+	}
 
-    $arrayofinstances = dol_sort_array($arrayofinstances, 'date_creation', 'asc');
-    return $arrayofinstances;
+	$arrayofinstances = dol_sort_array($arrayofinstances, 'date_creation', 'asc');
+	return $arrayofinstances;
 }
 
 
@@ -120,52 +114,45 @@ function getListOfInstancesInChain($object)
  */
 function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 {
-    global $db, $conf, $langs, $user;
+	global $db, $conf, $langs, $user;
 
-    // Define links
-    $links='';
+	// Define links
+	$links='';
 
-    // Get the main application/service of contract
-    include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
-    dol_include_once('sellyoursaas/class/packages.class.php');
-    dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
+	// Get the main application/service of contract
+	include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+	dol_include_once('sellyoursaas/class/packages.class.php');
+	dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
 
-    $dataofcontract = sellyoursaasGetExpirationDate($object);
-    $tmpproduct = new Product($db);
-    $tmppackage = new Packages($db);
+	$dataofcontract = sellyoursaasGetExpirationDate($object);
+	$tmpproduct = new Product($db);
+	$tmppackage = new Packages($db);
 
-    if ($dataofcontract['appproductid'] > 0)
-    {
-        $tmpproduct->fetch($dataofcontract['appproductid']);
-        $tmppackage->fetch($tmpproduct->array_options['options_package']);
-    }
+	if ($dataofcontract['appproductid'] > 0) {
+		$tmpproduct->fetch($dataofcontract['appproductid']);
+		$tmppackage->fetch($tmpproduct->array_options['options_package']);
+	}
 
-    //if (empty($conf->global->DOLICLOUD_EXT_HOME)) $links='Error: DOLICLOUD_EXT_HOME not defined<br>';
-    $domainforapp=$object->hostname_os;
-    if (preg_match('/^[0-9\.]$/',$domainforapp)) $domainforapp=$object->ref_customer;	// If this is an ip, we use the ref_customer.
+	//if (empty($conf->global->DOLICLOUD_EXT_HOME)) $links='Error: DOLICLOUD_EXT_HOME not defined<br>';
+	$domainforapp=$object->hostname_os;
+	if (preg_match('/^[0-9\.]$/', $domainforapp)) $domainforapp=$object->ref_customer;	// If this is an ip, we use the ref_customer.
 
 	// Application instance url
-    if (empty($lastpassadmin))
-    {
-        if (! empty($object->array_options['options_deployment_init_adminpass']))
-        {
-            $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
-        	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-        	$links.='Link to application (initial install pass) : ';
-        }
-        else
-        {
-            $url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
-            $link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-            $links.='Link to application : ';
-        }
-    }
-    else
-    {
-        $url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
+	if (empty($lastpassadmin)) {
+		if (! empty($object->array_options['options_deployment_init_adminpass'])) {
+			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
+			$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+			$links.='Link to application (initial install pass) : ';
+		} else {
+			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
+			$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
+			$links.='Link to application : ';
+		}
+	} else {
+		$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
 		$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
 		$links.='Link to application (last logged admin) : ';
-    }
+	}
 	$links.=$link.'<br>';
 
 	$links.='<br>';
@@ -175,24 +162,19 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$thirdparty = null;
 	if (get_class($object) == 'Societe') $thirdparty = $object;
 	elseif (is_object($object->thirdparty)) $thirdparty = $object->thirdparty;
-	if ($user->admin && is_object($thirdparty) && (! empty($thirdparty->array_options['options_dolicloud'])))
-	{
-	    $urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-	    if (! empty($thirdparty->array_options['options_domain_registration_page'])
-	        && $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-	    {
-	        $constforaltname = $thirdparty->array_options['options_domain_registration_page'];
-	        $newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
-	        if (! empty($conf->global->$newurlkey))
-	        {
-	            $urlmyaccount = $conf->global->$newurlkey;
-	        }
-	        else
-	        {
-	            $urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
-	        }
-	    }
-		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(),'dayrfc'), 5);	// hash is valid one hour
+	if ($user->admin && is_object($thirdparty) && (! empty($thirdparty->array_options['options_dolicloud']))) {
+		$urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+		if (! empty($thirdparty->array_options['options_domain_registration_page'])
+			&& $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			$constforaltname = $thirdparty->array_options['options_domain_registration_page'];
+			$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
+			if (! empty($conf->global->$newurlkey)) {
+				$urlmyaccount = $conf->global->$newurlkey;
+			} else {
+				$urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+			}
+		}
+		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
 		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
 	}
 	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.$url.'</a>';
@@ -212,11 +194,10 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// ArchiveDir
 	$ispaid = sellyoursaasIsPaidInstance($object);
 	$archivestring = $conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->username_os;
-	$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
-	if ($ispaid)
-	{
+	$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
+	if ($ispaid) {
 		$archivestring = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->username_os;
-		$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+		$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	}
 	$links .= ' &nbsp; ';
 	$links .= 'Archive dir: ';
@@ -235,21 +216,21 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>'."\n";
 
 	// SSH
-    $sshconnectstring='ssh '.$object->username_os.'@'.$object->hostname_os;
-    $links.='<span class="fa fa-terminal"></span> SSH connect string: ';
-    $links.='<input type="text" name="sshconnectstring" id="sshconnectstring" value="'.$sshconnectstring.'" class="maxwidth250">';
-    if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshconnectstring');
-    $links.=' &nbsp; '.$langs->trans("or").' SU: ';
-    $sustring='su '.$object->username_os;
-    $links.='<input type="text" name="sustring" id="sustring" value="'.$sustring.'" class="maxwidth200">';
-    if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sustring');
-    $links.='<br>';
-    //$links.='<br>';
+	$sshconnectstring='ssh '.$object->username_os.'@'.$object->hostname_os;
+	$links.='<span class="fa fa-terminal"></span> SSH connect string: ';
+	$links.='<input type="text" name="sshconnectstring" id="sshconnectstring" value="'.$sshconnectstring.'" class="maxwidth250">';
+	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshconnectstring');
+	$links.=' &nbsp; '.$langs->trans("or").' SU: ';
+	$sustring='su '.$object->username_os;
+	$links.='<input type="text" name="sustring" id="sustring" value="'.$sustring.'" class="maxwidth200">';
+	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sustring');
+	$links.='<br>';
+	//$links.='<br>';
 
 	// SFTP
 	//$sftpconnectstring=$object->username_os.':'.$object->password_web.'@'.$object->hostname_os.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
-    $sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
-    $links.='<span class="fa fa-terminal"></span> SFTP connect string: ';
+	$sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
+	$links.='<span class="fa fa-terminal"></span> SFTP connect string: ';
 	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.$sftpconnectstring.'"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sftpconnectstring');
 	//$links.='<br>';
@@ -282,7 +263,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$purgestring=DOL_DATA_ROOT.'/../dev/initdata/purge-data.php test (all|option) (all|YYYY-MM-DD) mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port?$object->database_port:3306);
 
 	// Mysql Backup
-	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(),'dayhourlog').'.sql';
+	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql backup database:<br>';
 	$links.='<input type="text" id="mysqlbackupcommand" name="mysqlbackupcommand" value="'.$mysqlbackupcommand.'" class="marginleftonly quatrevingtpercent"><br>';
@@ -290,7 +271,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Mysql Restore
-	$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db).'/documents/admin/backup/filetorestore';
+	$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/filetorestore';
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql restore database:<br>';
 	$links.='<input type="text" id="mysqlrestorecommand" name="mysqlrestorecommand" value="'.$mysqlresotrecommand.'" class="marginleftonly quatrevingtpercent"><br>';
@@ -310,7 +291,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$sftprestorestring='rsync -n -v -a --exclude \'*.cache\' dolibarr_documents/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/documents';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite document dir';
-    $links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
+	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
 	$links.='<input type="text" id="sftprestorestring" name="sftprestorestring" value="'.$sftprestorestring.'" class="marginleftonly quatrevingtpercent"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("sftprestorestring", 0);
 	$links.='<br>';
@@ -363,21 +344,18 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
  * @param	string	$val	Val
  * @return	string			Value
  */
-function getvalfromkey($db,$param,$val)
+function getvalfromkey($db, $param, $val)
 {
 	$sql ="select ".$param." as val from dolicloud_saasplex.app_instance, dolicloud_saasplex.customer, dolicloud_saasplex.address, dolicloud_saasplex.country_region";
 	$sql.=" where dolicloud_saasplex.address.country_id=dolicloud_saasplex.country_region.id AND";
 	$sql.=" dolicloud_saasplex.customer.address_id=dolicloud_saasplex.address.id AND dolicloud_saasplex.app_instance.customer_id = dolicloud_saasplex.customer.id AND dolicloud_saasplex.customer.org_name = '".$db->escape($val)."'";
 	//print $sql;
 	$resql=$db->query($sql);
-	if ($resql)
-	{
+	if ($resql) {
 		$obj=$db->fetch_object($resql);
 		$ret=$obj->val;
-	}
-	else
-	{
-		dol_print_error($db,'Failed to get key sql='.$sql);
+	} else {
+		dol_print_error($db, 'Failed to get key sql='.$sql);
 	}
 	return $ret;
 }
@@ -390,36 +368,36 @@ function getvalfromkey($db,$param,$val)
  * @param   string  $prefix     Prefix
  * @return  array				Array of tabs to shoc
  */
-function dolicloud_prepare_head($object,$prefix='')
+function dolicloud_prepare_head($object, $prefix = '')
 {
 	global $langs, $conf;
 
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/instance_links'.$prefix.'.php',1).'?id='.$object->id;
+	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/instance_links'.$prefix.'.php', 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans("UsefulLinks");
 	$head[$h][2] = 'upgrade';
 	$h++;
 
-	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/instance_users'.$prefix.'.php',1).'?id='.$object->id;
+	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/instance_users'.$prefix.'.php', 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans("Users");
 	$head[$h][2] = 'users';
 	$h++;
 
-	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/instance_backup'.$prefix.'.php',1).'?id='.$object->id;
+	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/instance_backup'.$prefix.'.php', 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans("Backup");
 	$head[$h][2] = 'backup';
 	$h++;
 
 	// Show more tabs from modules
-    // Entries must be declared in modules descriptor with line
-    // $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
-    // $this->tabs = array('entity:-tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to remove a tab
-    complete_head_from_modules($conf,$langs,$object,$head,$h,'contact');
+	// Entries must be declared in modules descriptor with line
+	// $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
+	// $this->tabs = array('entity:-tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to remove a tab
+	complete_head_from_modules($conf, $langs, $object, $head, $h, 'contact');
 
-    /*
-    $head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/dolicloud_info.php',1).'?id='.$object->id;
+	/*
+	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/dolicloud_info.php',1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans("Info");
 	$head[$h][2] = 'info';
 	$h++;
@@ -435,7 +413,7 @@ function dolicloud_prepare_head($object,$prefix='')
  */
 function is_windows()
 {
-    return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+	return strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 }
 
 /**
@@ -446,6 +424,6 @@ function is_windows()
  */
 function command_exists($command)
 {
-    $test = is_windows() ? "where" : "which";
-    return is_executable(trim(shell_exec("$test $command")));
+	$test = is_windows() ? "where" : "which";
+	return is_executable(trim(shell_exec("$test $command")));
 }

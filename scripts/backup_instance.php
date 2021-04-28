@@ -27,7 +27,7 @@
  * remote access to database must be granted for option 'testdatabase' or 'confirmdatabase'.
  */
 
-if (!defined('NOREQUIREDB')) define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
 if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
@@ -52,7 +52,7 @@ if (isset($argv[4]) && $argv[4] == 'delete') {
 }
 
 @set_time_limit(0);							// No timeout for this script
-define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
@@ -66,49 +66,37 @@ $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
-	foreach($array as $val)
-	{
+	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
-		if ($tmpline[0] == 'ipserverdeployment')
-		{
+		if ($tmpline[0] == 'ipserverdeployment') {
 			$ipserverdeployment = $tmpline[1];
 		}
-		if ($tmpline[0] == 'instanceserver')
-		{
+		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = $tmpline[1];
 		}
-		if ($tmpline[0] == 'databasehost')
-		{
+		if ($tmpline[0] == 'databasehost') {
 			$databasehost = $tmpline[1];
 		}
-		if ($tmpline[0] == 'databaseport')
-		{
-		    $databaseport = $tmpline[1];
+		if ($tmpline[0] == 'databaseport') {
+			$databaseport = $tmpline[1];
 		}
-		if ($tmpline[0] == 'database')
-		{
+		if ($tmpline[0] == 'database') {
 			$database = $tmpline[1];
 		}
-		if ($tmpline[0] == 'databaseuser')
-		{
+		if ($tmpline[0] == 'databaseuser') {
 			$databaseuser = $tmpline[1];
 		}
-		if ($tmpline[0] == 'databasepass')
-		{
+		if ($tmpline[0] == 'databasepass') {
 			$databasepass = $tmpline[1];
 		}
-		if ($tmpline[0] == 'dolibarrdir')
-		{
+		if ($tmpline[0] == 'dolibarrdir') {
 			$dolibarrdir = $tmpline[1];
 		}
-		if ($tmpline[0] == 'usecompressformatforarchive')
-		{
-		    $usecompressformatforarchive = $tmpline[1];
+		if ($tmpline[0] == 'usecompressformatforarchive') {
+			$usecompressformatforarchive = $tmpline[1];
 		}
 	}
-}
-else
-{
+} else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit(-1);
 }
@@ -122,16 +110,16 @@ if (empty($dolibarrdir)) {
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/master.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include("../master.inc.php");
-if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.inc.php");
-if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
-if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
-if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include(__DIR__."/../../../master.inc.php");
-if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include($dolibarrdir."/htdocs/master.inc.php");
+if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include $dolibarrdir."/htdocs/master.inc.php";
 if (! $res) {
 	print ("Include of master fails");
 	exit(-1);
@@ -150,36 +138,31 @@ $return_varmysql = 0;
  */
 
 if (0 == posix_getuid()) {
-    echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
-    exit(-1);
+	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
+	exit(-1);
 }
-if (empty($ipserverdeployment))
-{
-    echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
-    exit(-1);
+if (empty($ipserverdeployment)) {
+	echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
+	exit(-1);
 }
-if (empty($instanceserver))
-{
-    echo "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
-    exit(-1);
+if (empty($instanceserver)) {
+	echo "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
+	exit(-1);
 }
 
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
-if ($dbmaster->error)
-{
-    dol_print_error($dbmaster,"host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
-    exit;
+if ($dbmaster->error) {
+	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+	exit;
 }
-if ($dbmaster)
-{
-    $conf->setValues($dbmaster);
+if ($dbmaster) {
+	$conf->setValues($dbmaster);
 }
 if (empty($db)) $db=$dbmaster;
 
-if (empty($dirroot) || empty($instance) || empty($mode))
-{
-    print "This script must be ran as 'admin' user.\n";
-    print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]\n";
+if (empty($dirroot) || empty($instance) || empty($mode)) {
+	print "This script must be ran as 'admin' user.\n";
+	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]\n";
 	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
@@ -188,11 +171,10 @@ if (empty($dirroot) || empty($instance) || empty($mode))
 }
 
 // Forge complete name of instance
-if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance))
-{
-    $tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-    $tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
-    $instance=$instance.".".$tmpstring;   // Automatically concat first domain name
+if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
+	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
+	$instance=$instance.".".$tmpstring;   // Automatically concat first domain name
 }
 
 
@@ -205,19 +187,15 @@ $sql.= " AND c.ref_customer = '".$dbmaster->escape($instance)."'";
 $sql.= " AND ce.deployment_status = 'done'";
 
 $resql = $dbmaster->query($sql);
-if (! $resql)
-{
+if (! $resql) {
 	dol_print_error($resql);
 	exit(-2);
 }
 $num_rows = $dbmaster->num_rows($resql);
-if ($num_rows > 1)
-{
+if ($num_rows > 1) {
 	print 'Error: several instance '.$instance.' found.'."\n";
 	exit(-2);
-}
-else
-{
+} else {
 	$obj = $dbmaster->fetch_object($resql);
 	if ($obj) $idofinstancefound = $obj->rowid;
 }
@@ -228,8 +206,7 @@ $result=0;
 if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
 
 
-if ($result <= 0)
-{
+if ($result <= 0) {
 	print "Error: instance ".$instance." not found.\n";
 	exit(-2);
 }
@@ -244,26 +221,23 @@ $object->password_db     = $object->array_options['options_password_db'];
 $object->database_db     = $object->array_options['options_database_db'];
 $object->deployment_host = $object->array_options['options_deployment_host'];
 
-if (empty($object->instance) && empty($object->username_web) && empty($object->password_web) && empty($object->database_db))
-{
+if (empty($object->instance) && empty($object->username_web) && empty($object->password_web) && empty($object->database_db)) {
 	print "Error: properties for instance ".$instance." was not registered into database.\n";
 	exit(-3);
 }
-if (! is_dir($dirroot))
-{
+if (! is_dir($dirroot)) {
 	print "Error: Target directory ".$dirroot." to store backup does not exist.\n";
 	exit(-4);
 }
 
-$dirdb=preg_replace('/_([a-zA-Z0-9]+)/','',$object->database_db);
+$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 $login=$object->username_web;
 $password=$object->password_web;
 
 $sourcedir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
 $server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
 
-if (empty($login) || empty($dirdb))
-{
+if (empty($login) || empty($dirdb)) {
 	print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
 	exit(-5);
 }
@@ -275,8 +249,7 @@ print 'Backup instance '.$instance.' from '.$fromserver.' to '.$dirroot.'/'.$log
 //print 'Database password '.$object->password_db."\n";
 
 //$listofdir=array($dirroot.'/'.$login, $dirroot.'/'.$login.'/documents', $dirroot.'/'.$login.'/system', $dirroot.'/'.$login.'/htdocs', $dirroot.'/'.$login.'/scripts');
-if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
-{
+if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase') {
 	$listofdir=array();
 	$listofdir[]=$dirroot.'/'.$login;
 	/*if ($mode == 'confirm' || $mode == 'confirmdatabase')
@@ -285,13 +258,10 @@ if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
 		$listofdir[]=$dirroot.'/'.$login.'/documents/admin';
 		$listofdir[]=$dirroot.'/'.$login.'/documents/admin/backup';
 	}*/
-	foreach($listofdir as $dirtocreate)
-	{
-		if (! is_dir($dirtocreate))
-		{
+	foreach ($listofdir as $dirtocreate) {
+		if (! is_dir($dirtocreate)) {
 			$res=@mkdir($dirtocreate);
-			if (! $res)
-			{
+			if (! $res) {
 				print 'Failed to create dir '.$dirtocreate."\n";
 				$mode = 'disabled';
 				$return_varother = 1;
@@ -301,11 +271,9 @@ if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
 }
 
 // Backup files
-if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm')
-{
-    $result = dol_mkdir($dirroot.'/'.$login);
-	if ($result < 0)
-	{
+if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm') {
+	$result = dol_mkdir($dirroot.'/'.$login);
+	if ($result < 0) {
 		print "ERROR failed to create target dir ".$dirroot.'/'.$login."\n";
 		exit(1);
 	}
@@ -357,8 +325,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude '*/__MACOSX/*'";
 
 	//$param[]="--backup --suffix=.old";
-	if ($RSYNCDELETE)
-	{
+	if ($RSYNCDELETE) {
 		$param[]=" --delete --delete-excluded";
 	}
 	$param[]="--stats";
@@ -368,7 +335,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	//$param[] = (in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
 	$param[] = $login.'@'.$server.":" . $sourcedir;
 	$param[] = $dirroot.'/'.$login;
-	$fullcommand=$command." ".join(" ",$param);
+	$fullcommand=$command." ".join(" ", $param);
 	$output=array();
 	$datebeforersync = strftime("%Y%m%d-%H%M%S");
 	print $datebeforersync.' '.$fullcommand."\n";
@@ -377,38 +344,32 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	print $dateafterrsync.' rsync done (return='.$return_var.')'."\n";
 
 	// Output result
-	foreach($output as $outputline)
-	{
+	foreach ($output as $outputline) {
 		print $outputline."\n";
 	}
 
 	// Add file tag
-	if ($mode == 'confirm' || $mode == 'confirmrsync')
-	{
-		$handle=fopen($dirroot.'/'.$login.'/last_rsync_'.$instance.'.txt','w');
-		if ($handle)
-		{
+	if ($mode == 'confirm' || $mode == 'confirmrsync') {
+		$handle=fopen($dirroot.'/'.$login.'/last_rsync_'.$instance.'.txt', 'w');
+		if ($handle) {
 			fwrite($handle, 'File created after rsync of '.$instance.". datebeforersync=".$datebeforersync." dateafterrsync=".$dateafterrsync." return_var=".$return_var."\n");
 			fwrite($handle, 'fullcommand = '.$fullcommand."\n");
 			fclose($handle);
-		}
-		else
-		{
+		} else {
 			print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_rsync_'.$instance.'.txt'."\n";
 		}
 	}
 }
 
 // Backup database
-if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm')
-{
-    include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm') {
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
-    $serverdb = $server;
-    if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
-        print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
-        $serverdb = $object->hostname_db;
-    }
+	$serverdb = $server;
+	if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
+		print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
+		$serverdb = $object->hostname_db;
+	}
 
 	$command="mysqldump";
 	$param=array();
@@ -419,7 +380,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]=(! empty($object->port_db) ? $object->port_db : "3306");
 	$param[]="-u";
 	$param[]=$object->username_db;
-	$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$object->password_db).'"';
+	$param[]='-p"'.str_replace(array('"','`'), array('\"','\`'), $object->password_db).'"';
 	$param[]="--compress";
 	$param[]="-l";
 	$param[]="--single-transaction";
@@ -431,19 +392,19 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 
-	$fullcommand=$command." ".join(" ",$param);
+	$fullcommand=$command." ".join(" ", $param);
 	if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
-	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > /dev/null';
-	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst';
-	    // Delete file with same name and other extensions (if other option was enabled in past)
-	    dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
-	    dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
+		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > /dev/null';
+		else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst';
+		// Delete file with same name and other extensions (if other option was enabled in past)
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
 	} else {
-	    if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
-	    else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
-	    // Delete file with same name and other extensions (if other option was enabled in past)
-	    dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
-	    dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst');
+		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
+		else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
+		// Delete file with same name and other extensions (if other option was enabled in past)
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst');
 	}
 	$output=array();
 	$return_outputmysql=0;
@@ -472,23 +433,18 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 
 	// Output result
-	foreach($output as $outputline)
-	{
+	foreach ($output as $outputline) {
 		print $outputline."\n";
 	}
 
 	// Add file tag
-	if ($mode == 'confirm' || $mode == 'confirmdatabase')
-	{
-		$handle=fopen($dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.txt','w');
-		if ($handle)
-		{
-		    fwrite($handle, 'File created after mysqldump of '.$instance.". datebeforemysqldump=".$datebeforemysqldump." dateaftermysqldump=".$dateaftermysqldump." return_varmysql=".$return_varmysql."\n");
-		    fwrite($handle, 'fullcommand = '.preg_replace('/\s\-p"[^"]+"/', ' -phidden', $fullcommand)."\n");
+	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
+		$handle=fopen($dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.txt', 'w');
+		if ($handle) {
+			fwrite($handle, 'File created after mysqldump of '.$instance.". datebeforemysqldump=".$datebeforemysqldump." dateaftermysqldump=".$dateaftermysqldump." return_varmysql=".$return_varmysql."\n");
+			fwrite($handle, 'fullcommand = '.preg_replace('/\s\-p"[^"]+"/', ' -phidden', $fullcommand)."\n");
 			fclose($handle);
-		}
-		else
-		{
+		} else {
 			print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_mysqldump_'.$instance.'.txt'."\n";
 		}
 	}
@@ -497,13 +453,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 $now=dol_now();
 
 // Update database
-if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && empty($return_outputmysql))
-{
+if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && empty($return_outputmysql)) {
 	print "RESULT into backup process of rsync: ".$return_var."\n";
 	print "RESULT into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
 
-	if ($mode == 'confirm')
-	{
+	if ($mode == 'confirm') {
 		print 'Update date of full backup (rsync+dump) for instance '.$object->instance.' to '.$now."\n";
 
 		// Update database
@@ -514,38 +468,30 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
-		{
-		    try {
-		    	print "Send result of backup ok to DataDog\n";
-		        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+			try {
+				print "Send result of backup ok to DataDog\n";
+				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-		        $arrayconfig=array();
-		        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-		        {
-		            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-		        }
+				$arrayconfig=array();
+				if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+					$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+				}
 
-		        $statsd = new DataDog\DogStatsd($arrayconfig);
+				$statsd = new DataDog\DogStatsd($arrayconfig);
 
-		        $arraytags=array('result'=>'ok');
-		        $statsd->increment('sellyoursaas.backup', 1, $arraytags);
-		    }
-		    catch(Exception $e)
-		    {
-
-		    }
+				$arraytags=array('result'=>'ok');
+				$statsd->increment('sellyoursaas.backup', 1, $arraytags);
+			} catch (Exception $e) {
+			}
 		}
 	}
-}
-else
-{
+} else {
 	if (! empty($return_varother)) print "ERROR into backup process init: ".$return_varother."\n";
 	if (! empty($return_var))      print "ERROR into backup process of rsync: ".$return_var."\n";
 	if (! empty($return_varmysql) || ! empty($return_outputmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
 
-	if ($mode == 'confirm' || $mode == 'disabled')
-	{
+	if ($mode == 'confirm' || $mode == 'disabled') {
 		// Update database
 		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'KO';
@@ -553,27 +499,22 @@ else
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
-		{
-		    try {
-		    	print "Send result of backup ko to DataDog\n";
-		    	dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+			try {
+				print "Send result of backup ko to DataDog\n";
+				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-		        $arrayconfig=array();
-		        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-		        {
-		            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-		        }
+				$arrayconfig=array();
+				if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+					$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+				}
 
-		        $statsd = new DataDog\DogStatsd($arrayconfig);
+				$statsd = new DataDog\DogStatsd($arrayconfig);
 
-		        $arraytags=array('result'=>'ko');
-		        $statsd->increment('sellyoursaas.backup', 1, $arraytags);
-		    }
-		    catch(Exception $e)
-		    {
-
-		    }
+				$arraytags=array('result'=>'ko');
+				$statsd->increment('sellyoursaas.backup', 1, $arraytags);
+			} catch (Exception $e) {
+			}
 		}
 	}
 

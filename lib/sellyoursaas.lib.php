@@ -48,22 +48,18 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 
 	// Define environment of payment modes
 	$servicestatusstripe = 0;
-	if (! empty($conf->stripe->enabled))
-	{
+	if (! empty($conf->stripe->enabled)) {
 		$service = 'StripeTest';
 		$servicestatusstripe = 0;
-		if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox','alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST))
-		{
+		if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
 			$service = 'StripeLive';
 			$servicestatusstripe = 1;
 		}
 	}
 	$servicestatuspaypal = 0;
-	if (! empty($conf->paypal->enabled))
-	{
+	if (! empty($conf->paypal->enabled)) {
 		$servicestatuspaypal = 0;
-		if (! empty($conf->global->PAYPAL_LIVE) && ! GETPOST('forcesandbox','alpha') && empty($conf->global->SELLYOURSAAS_FORCE_PAYPAL_TEST))
-		{
+		if (! empty($conf->global->PAYPAL_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_PAYPAL_TEST)) {
 			$servicestatuspaypal = 1;
 		}
 	}
@@ -77,17 +73,13 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	$sql.= " ORDER BY default_rib DESC, tms DESC";
 
 	$resqltmp = $db->query($sql);
-	if ($resqltmp)
-	{
+	if ($resqltmp) {
 		$num_rows = $db->num_rows($resqltmp);
-		if ($num_rows)
-		{
+		if ($num_rows) {
 			$i=0;
-			while ($i < $num_rows)
-			{
+			while ($i < $num_rows) {
 				$objtmp = $db->fetch_object($resqltmp);
-				if ($objtmp)
-				{
+				if ($objtmp) {
 					if ($objtmp->default_rib != 1) continue;	// Keep the default payment mode only
 					$atleastonepaymentmode++;
 					break;
@@ -109,7 +101,7 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
  * @param	int		$loadalsoobjects	Load also array this->linkedObjects (Use 0 to increase performances)
  * @return	int							>0 if this is a paid contract
  */
-function sellyoursaasIsPaidInstance($contract, $mode=0, $loadalsoobjects=0)
+function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 {
 	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', $loadalsoobjects);
 
@@ -117,10 +109,8 @@ function sellyoursaasIsPaidInstance($contract, $mode=0, $loadalsoobjects=0)
 	var_dump($contract->linkedObjects);*/
 
 	$foundtemplate=0;
-	if (is_array($contract->linkedObjectsIds['facturerec']))
-	{
-		foreach($contract->linkedObjectsIds['facturerec'] as $idelementelement => $templateinvoiceid)
-		{
+	if (is_array($contract->linkedObjectsIds['facturerec'])) {
+		foreach ($contract->linkedObjectsIds['facturerec'] as $idelementelement => $templateinvoiceid) {
 			$foundtemplate++;
 			break;
 		}
@@ -128,13 +118,10 @@ function sellyoursaasIsPaidInstance($contract, $mode=0, $loadalsoobjects=0)
 
 	if ($foundtemplate) return 1;
 
-	if ($mode == 0)
-	{
+	if ($mode == 0) {
 		$foundinvoice=0;
-		if (is_array($contract->linkedObjectsIds['facture']))
-		{
-			foreach($contract->linkedObjectsIds['facture'] as $idelementelement => $invoiceid)
-			{
+		if (is_array($contract->linkedObjectsIds['facture'])) {
+			foreach ($contract->linkedObjectsIds['facture'] as $idelementelement => $invoiceid) {
 				$foundinvoice++;
 				break;
 			}
@@ -160,22 +147,18 @@ function sellyoursaasIsPaymentKo($contract)
 	$contract->fetchObjectLinked();
 	$paymenterror=0;
 
-	if (is_array($contract->linkedObjects['facture']))
-	{
-		foreach($contract->linkedObjects['facture'] as $idinvoice => $invoice)
-		{
+	if (is_array($contract->linkedObjects['facture'])) {
+		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
 
 			// The invoice is not paid, we check if there is at least one payment issue
 			$sql=' SELECT id FROM '.MAIN_DB_PREFIX."actioncomm WHERE elementtype = 'invoice' AND fk_element = ".$invoice->id." AND code='INVOICE_PAYMENT_ERROR'";
 			$resql=$db->query($sql);
-			if ($resql)
-			{
+			if ($resql) {
 				$num=$db->num_rows($resql);
 				$db->free($resql);
 				return $num;
-			}
-			else dol_print_error($db);
+			} else dol_print_error($db);
 		}
 	}
 
@@ -195,14 +178,11 @@ function sellyoursaasHasOpenInvoices($contract)
 	$contract->fetchObjectLinked();
 	$atleastoneopeninvoice=0;
 
-	if (is_array($contract->linkedObjects['facture']))
-	{
-		foreach($contract->linkedObjects['facture'] as $idinvoice => $invoice)
-		{
+	if (is_array($contract->linkedObjects['facture'])) {
+		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
 			if ($invoice->statut == Facture::STATUS_ABANDONED) continue;
-			if (empty($invoice->paid))
-			{
+			if (empty($invoice->paid)) {
 				$atleastoneopeninvoice++;
 			}
 		}
@@ -236,54 +216,44 @@ function sellyoursaasGetExpirationDate($contract)
 	if (! isset($cachefortmpprod) || ! is_array($cachefortmpprod)) $cachefortmpprod = array();
 
 	// Loop on each line to get lowest expiration date
-	foreach($contract->lines as $line)
-	{
-		if ($line->date_end)	// Planned end date of service
-		{
+	foreach ($contract->lines as $line) {
+		if ($line->date_end) {	// Planned end date of service
 			if ($expirationdate > 0) $expirationdate = min($expirationdate, $line->date_end);
 			else $expirationdate = $line->date_end;
 		}
 
-		if ($line->fk_product > 0)
-		{
-			if (empty($cachefortmpprod[$line->fk_product]))
-			{
+		if ($line->fk_product > 0) {
+			if (empty($cachefortmpprod[$line->fk_product])) {
 				$tmpprod = new Product($db);
 				$result = $tmpprod->fetch($line->fk_product);
-				if ($result > 0)
-				{
-				    $cachefortmpprod[$line->fk_product] = $tmpprod;
-				}
-				else
-				{
-				    dol_syslog("Error, failed to fetch product with ID ".$line->fk_product, LOG_ERR);
+				if ($result > 0) {
+					$cachefortmpprod[$line->fk_product] = $tmpprod;
+				} else {
+					dol_syslog("Error, failed to fetch product with ID ".$line->fk_product, LOG_ERR);
 				}
 			}
 			$prodforline = $cachefortmpprod[$line->fk_product];
 
-			if ($prodforline->array_options['options_app_or_option'] == 'app')
-			{
+			if ($prodforline->array_options['options_app_or_option'] == 'app') {
 				$duration_value = $prodforline->duration_value;
 				$duration_unit = $prodforline->duration_unit;
 				$appproductid = $prodforline->id;
 
 				$status = $line->statut;
 
-				if (empty($duration_value) || empty($duration_unit))
-				{
-				    dol_syslog("Error, the definition of duration for product ID ".$prodforline->id." is uncomplete.", LOG_ERR);
+				if (empty($duration_value) || empty($duration_unit)) {
+					dol_syslog("Error, the definition of duration for product ID ".$prodforline->id." is uncomplete.", LOG_ERR);
 				}
 			}
-			if ($prodforline->array_options['options_app_or_option'] == 'system')
-			{
-			    if ($prodforline->array_options['options_resource_label'] == 'User'
-			    || preg_match('/user/i', $prodforline->ref)) {
-			        $nbofusers += $line->qty;
-			    }
-			    if ($prodforline->array_options['options_resource_label'] == 'Gb'
-			    || preg_match('/\sgb\s/i', $prodforline->ref)) {
-			        $nbofgbs = $line->qty;
-			    }
+			if ($prodforline->array_options['options_app_or_option'] == 'system') {
+				if ($prodforline->array_options['options_resource_label'] == 'User'
+				|| preg_match('/user/i', $prodforline->ref)) {
+					$nbofusers += $line->qty;
+				}
+				if ($prodforline->array_options['options_resource_label'] == 'Gb'
+				|| preg_match('/\sgb\s/i', $prodforline->ref)) {
+					$nbofgbs = $line->qty;
+				}
 			}
 		}
 	}
@@ -318,49 +288,43 @@ function sellyoursaasIsSuspended($contract)
  */
 function getRootUrlForAccount($object)
 {
-    global $db, $conf;
+	global $db, $conf;
 
-    $tmpret = explode(',', $conf->global->SELLYOURSAAS_ACCOUNT_URL);     // By default
-    $ret = $tmpret[0];
+	$tmpret = explode(',', $conf->global->SELLYOURSAAS_ACCOUNT_URL);     // By default
+	$ret = $tmpret[0];
 
-    $newobject = $object;
+	$newobject = $object;
 
-    // If $object is a contract, we take ref_c
-    if (get_class($newobject) == 'Contrat')
-    {
-        include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-        $ret = 'https://myaccount.'.getDomainFromURL($newobject->ref_customer, 1);
-    }
+	// If $object is a contract, we take ref_c
+	if (get_class($newobject) == 'Contrat') {
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+		$ret = 'https://myaccount.'.getDomainFromURL($newobject->ref_customer, 1);
+	}
 
-    // If $object is a product, we take package
-    if (get_class($newobject) == 'Product')
-    {
-        dol_include_once('/sellyoursaas/class/packages.class.php');
+	// If $object is a product, we take package
+	if (get_class($newobject) == 'Product') {
+		dol_include_once('/sellyoursaas/class/packages.class.php');
 
-        $newobject->fetch_optionals();
+		$newobject->fetch_optionals();
 
-        $tmppackage = new Packages($db);
-        $tmppackage->fetch($newobject->array_options['options_package']);
-        $newobject = $tmppackage;
-    }
+		$tmppackage = new Packages($db);
+		$tmppackage->fetch($newobject->array_options['options_package']);
+		$newobject = $tmppackage;
+	}
 
-    // If $object is a package, we take first restrict and add account.
-    if (get_class($newobject) == 'Packages')
-    {
-        $tmparray = explode(',', $newobject->restrict_domains);
-        if (is_array($tmparray))
-        {
-            foreach($tmparray as $key => $val)
-            {
-                if ($val)
-                {
-                    include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-                    $ret = 'https://myaccount.'.getDomainFromURL($val, 1);
-                    break;
-                }
-            }
-        }
-    }
+	// If $object is a package, we take first restrict and add account.
+	if (get_class($newobject) == 'Packages') {
+		$tmparray = explode(',', $newobject->restrict_domains);
+		if (is_array($tmparray)) {
+			foreach ($tmparray as $key => $val) {
+				if ($val) {
+					include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+					$ret = 'https://myaccount.'.getDomainFromURL($val, 1);
+					break;
+				}
+			}
+		}
+	}
 
-    return $ret;
+	return $ret;
 }

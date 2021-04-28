@@ -83,14 +83,13 @@ $workdir 	= $htdocs."langs/en_US/";
 
 
 $files = scandir($workdir);
-if (empty($files))
-{
+if (empty($files)) {
 	echo "Can't scan workdir = ".$workdir;
 	exit;
 }
 
 $exludefiles = array('.','..','README');
-$files = array_diff($files,$exludefiles);
+$files = array_diff($files, $exludefiles);
 $langstrings_3d = array();
 $langstrings_full = array();
 foreach ($files AS $file) {
@@ -100,10 +99,10 @@ foreach ($files AS $file) {
 		$content = file($workdir.$file);
 		foreach ($content AS $line => $row) {
 			// don't want comment lines
-			if (substr($row,0,1) !== '#') {
+			if (substr($row, 0, 1) !== '#') {
 				// don't want lines without the separator (why should those even be here, anyway...)
-				if (strpos($row,'=')!==false) {
-					$row_array = explode('=',$row);		// $row_array[0] = key
+				if (strpos($row, '=')!==false) {
+					$row_array = explode('=', $row);		// $row_array[0] = key
 					$langstrings_3d[$path_file['basename']][$line+1]=$row_array[0];
 					$langstrings_3dtrans[$path_file['basename']][$line+1]=$row_array[1];
 					$langstrings_full[]=$row_array[0];
@@ -117,11 +116,10 @@ foreach ($files AS $file) {
 foreach ($langstrings_3d AS $filename => $file) {
 	foreach ($file AS $linenum => $value) {
 		$keys = array_keys($langstrings_full, $value);
-		if (count($keys)>1)
-		{
-				foreach ($keys AS $key) {
-					$dups[$value][$filename][$linenum] = trim($langstrings_3dtrans[$filename][$linenum]);
-				}
+		if (count($keys)>1) {
+			foreach ($keys AS $key) {
+				$dups[$value][$filename][$linenum] = trim($langstrings_3dtrans[$filename][$linenum]);
+			}
 		}
 	}
 }
@@ -138,7 +136,7 @@ foreach ($dups as $string => $pages) {
 	echo "<td align=\"center\">$count</td>";
 	echo "<td>$string</td>";
 	echo "<td>";
-	foreach ($pages AS $page => $lines ) {
+	foreach ($pages AS $page => $lines) {
 		echo "$page ";
 		foreach ($lines as $line => $translatedvalue) {
 			//echo "($line - ".(substr($translatedvalue,0,20)).") ";
@@ -155,13 +153,11 @@ echo "</table>";
 // STEP 2 - Search key not used
 
 
-if (! empty($_REQUEST['unused']) && $_REQUEST['unused'] == 'true')
-{
-	foreach ($langstrings_dist AS $value)
-	{
+if (! empty($_REQUEST['unused']) && $_REQUEST['unused'] == 'true') {
+	foreach ($langstrings_dist AS $value) {
 		$search = '\'trans("'.$value.'")\'';
 		$string =  'grep -R -m 1 -F --exclude=includes/* --include=*.php '.$search.' '.$htdocs.'*';
-		exec($string,$output);
+		exec($string, $output);
 		if (empty($output)) {
 			$unused[$value] = true;
 			echo $value.'<br>';

@@ -25,7 +25,7 @@
  *      \brief      Script to upgrade an instant
  */
 
-if (!defined('NOREQUIREDB')) define('NOREQUIREDB','1');					// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
 if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();
@@ -48,25 +48,25 @@ $mode=isset($argv[3])?$argv[3]:'';
 
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
-define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/master.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include("../master.inc.php");
-if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.inc.php");
-if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
+if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
 if (! $res) die("Include of master fails");
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
-include_once(DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php');
+include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 
 
 // Read /etc/sellyoursaas.conf file
@@ -78,36 +78,28 @@ $databasepass='';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
-    $array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
-    foreach($array as $val)
-    {
-        $tmpline=explode("=", $val);
-        if ($tmpline[0] == 'databasehost')
-        {
-            $databasehost = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databaseport')
-        {
-            $databaseport = $tmpline[1];
-        }
-        if ($tmpline[0] == 'database')
-        {
-            $database = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databaseuser')
-        {
-            $databaseuser = $tmpline[1];
-        }
-        if ($tmpline[0] == 'databasepass')
-        {
-            $databasepass = $tmpline[1];
-        }
-    }
-}
-else
-{
-    print "Failed to open /etc/sellyoursaas.conf file\n";
-    exit;
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'databasehost') {
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport') {
+			$databaseport = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database') {
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseuser') {
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass') {
+			$databasepass = $tmpline[1];
+		}
+	}
+} else {
+	print "Failed to open /etc/sellyoursaas.conf file\n";
+	exit;
 }
 
 
@@ -117,19 +109,16 @@ else
  */
 
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
-if ($dbmaster->error)
-{
-    dol_print_error($dbmaster,"host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
-    exit;
+if ($dbmaster->error) {
+	dol_print_error($dbmaster, "host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+	exit;
 }
-if ($dbmaster)
-{
-    $conf->setValues($dbmaster);
+if ($dbmaster) {
+	$conf->setValues($dbmaster);
 }
 if (empty($db)) $db=$dbmaster;
 
-if (empty($dirroot) || empty($instance) || empty($mode))
-{
+if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "Update an instance on remote server with new ref version.\n";
 	print "Usage: $script_file source_root_dir sellyoursaas_instance (test|confirm|confirmunlock|diff|diffadd|diffchange|clean|confirmclean)\n";
 	print "Return code: 0 if success, <>0 if error\n";
@@ -142,11 +131,10 @@ if (0 == posix_getuid()) {
 }
 
 // Forge complete name of instance
-if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance))
-{
-    $tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-    $tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
-    $instance=$instance.".".$tmpstring;   // Automatically concat first domain name
+if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
+	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
+	$instance=$instance.".".$tmpstring;   // Automatically concat first domain name
 }
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
@@ -154,8 +142,7 @@ $object = new Contrat($db);
 $result=$object->fetch('', '', $instance);
 $result=$object->fetch_thirdparty();
 
-if ($result <= 0)
-{
+if ($result <= 0) {
 	print "Error: instance ".$instance." not found or duplicate found. Are you on the correct SellYourSaas master server ?\n";
 	exit(-2);
 }
@@ -168,26 +155,23 @@ $object->password_db = $object->array_options['options_password_db'];
 $object->database_db = $object->array_options['options_database_db'];
 
 
-if (empty($object->instance) || empty($object->username_web) || empty($object->password_web) || empty($object->database_db))
-{
+if (empty($object->instance) || empty($object->username_web) || empty($object->password_web) || empty($object->database_db)) {
 	print "Error: Some properties for instance ".$instance." was not registered into database.\n";
 	exit(-3);
 }
-if (! is_file($dirroot.'/README.md'))
-{
+if (! is_file($dirroot.'/README.md')) {
 	print "Error: Source directory to synchronize must contains a README.md file (not found into ".$dirroot.")\n";
 	exit(-4);
 }
 
-$dirdb=preg_replace('/_([a-zA-Z0-9]+)/','',$object->database_db);
+$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 $login=$object->username_web;
 $password=$object->password_web;
 
 $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
 $server=$object->array_options['options_hostname_os'];
 
-if (empty($login) || empty($dirdb))
-{
+if (empty($login) || empty($dirdb)) {
 	print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
 	exit(-5);
 }
@@ -200,9 +184,9 @@ print 'SFTP password '.$object->password_web."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode,array('confirm','confirmunlock','confirmclean'))) $param[]="-n";
+if (! in_array($mode, array('confirm','confirmunlock','confirmclean'))) $param[]="-n";
 //$param[]="-a";
-if (! in_array($mode,array('diff','diffadd','diffchange'))) $param[]="-rlt";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
 $param[]="-v";
 $param[]="--noatime";
@@ -224,64 +208,55 @@ $param[]="--exclude htdocs/bootstrap/";
 $param[]="--exclude htdocs/agefodd/";
 $param[]="--exclude htdocs/memcached/";
 $param[]="--exclude htdocs/cabinetmed/";
-if (! in_array($mode,array('diff','diffadd','diffchange'))) $param[]="--stats";
-if (in_array($mode,array('clean','confirmclean'))) $param[]="--delete";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
+if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 $param[]=$dirroot.'/';
 $param[]=$login.'@'.$server.":".$targetdir;
 
 //var_dump($param);
-$fullcommand=$command." ".join(" ",$param);
+$fullcommand=$command." ".join(" ", $param);
 $output=array();
 $return_var=0;
 print $fullcommand."\n";
 exec($fullcommand, $output, $return_var);
 
 // Output result
-foreach($output as $outputline)
-{
+foreach ($output as $outputline) {
 	print $outputline."\n";
 }
 
 // Remove install.lock file if mode )) confirmunlock
-if ($mode == 'confirmunlock')
-{
+if ($mode == 'confirmunlock') {
 	// SFTP connect
-	if (! function_exists("ssh2_connect")) { dol_print_error('','ssh2_connect function does not exists'); exit(1); }
+	if (! function_exists("ssh2_connect")) { dol_print_error('', 'ssh2_connect function does not exists'); exit(1); }
 
 	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 	$connection = ssh2_connect($server, $server_port);
-	if ($connection)
-	{
+	if ($connection) {
 		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $object->username_web, $object->password_web))
-		{
+		if (! @ssh2_auth_password($connection, $object->username_web, $object->password_web)) {
 			dol_syslog("Could not authenticate with username ".$username." . and password ".preg_replace('/./', '*', $password), LOG_ERR);
 			exit(-5);
-		}
-		else
-		{
+		} else {
 			$sftp = ssh2_sftp($connection);
 
 			// Check if install.lock exists
-			$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
+			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 			$fileinstalllock=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_web.'/'.$dir.'/documents/install.lock';
 
 			print 'Remove file '.$fileinstalllock."\n";
 
 			ssh2_sftp_unlink($sftp, $fileinstalllock);
 		}
-	}
-	else
-	{
+	} else {
 		print 'Failed to connect to ssh2 to '.$server;
 		exit(-6);
 	}
 }
 
-if ($mode != 'test')
-{
+if ($mode != 'test') {
 	print "Create event into database\n";
 	dol_syslog("Add event into database");
 
@@ -289,18 +264,18 @@ if ($mode != 'test')
 	$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 
 	if ($user->id > 0) {
-    	$actioncomm=new ActionComm($db);
-    	if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
-    	$actioncomm->datep=dol_now('tzserver');
-    	$actioncomm->percentage=100;
-    	$actioncomm->label='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-    	$actioncomm->note_private='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-    	$actioncomm->fk_element=$object->id;
-    	$actioncomm->elementtype='contract';
-    	$actioncomm->type_code='AC_OTH_AUTO';
-    	$actioncomm->userassigned[$user->id]=array('id'=>$user->id);
-    	$actioncomm->userownerid=$user->id;
-    	$actioncomm->create($user);
+		$actioncomm=new ActionComm($db);
+		if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
+		$actioncomm->datep=dol_now('tzserver');
+		$actioncomm->percentage=100;
+		$actioncomm->label='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
+		$actioncomm->note_private='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
+		$actioncomm->fk_element=$object->id;
+		$actioncomm->elementtype='contract';
+		$actioncomm->type_code='AC_OTH_AUTO';
+		$actioncomm->userassigned[$user->id]=array('id'=>$user->id);
+		$actioncomm->userownerid=$user->id;
+		$actioncomm->create($user);
 	}
 }
 

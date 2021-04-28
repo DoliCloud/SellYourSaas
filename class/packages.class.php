@@ -83,8 +83,8 @@ class Packages extends CommonObject
 		'ref' => array('type'=>'varchar(64)', 'label'=>'Ref', 'visible'=>1, 'enabled'=>1, 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Reference of object',),
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'visible'=>-2, 'enabled'=>1, 'position'=>20, 'notnull'=>1, 'index'=>1,),
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'visible'=>1, 'enabled'=>1, 'position'=>30, 'notnull'=>-1, 'searchall'=>1, 'css'=>'minwidth200'),
-	    'note_public'   =>array('type'=>'html',			'label'=>'NotePublic',		 'enabled'=>1, 'visible'=>-2,  'position'=>45),
-	    'note_private'  =>array('type'=>'html',			'label'=>'NotePrivate',		 'enabled'=>1, 'visible'=>-2,  'position'=>46),
+		'note_public'   =>array('type'=>'html',			'label'=>'NotePublic',		 'enabled'=>1, 'visible'=>-2,  'position'=>45),
+		'note_private'  =>array('type'=>'html',			'label'=>'NotePrivate',		 'enabled'=>1, 'visible'=>-2,  'position'=>46),
 		'restrict_domains' => array('type'=>'varchar(255)', 'label'=>'RestrictDomainNames', 'visible'=>-1, 'enabled'=>1, 'position'=>40, 'notnull'=>-1, 'help'=>'KeepEmptyForNoRestrictionOnDomain'),
 		'srcfile1' => array('type'=>'varchar(255)', 'label'=>'Dir with sources 1', 'visible'=>-1, 'enabled'=>1, 'position'=>51, 'notnull'=>-1, 'css'=>'minwidth500'),
 		'srcfile2' => array('type'=>'varchar(255)', 'label'=>'Dir with sources 2', 'visible'=>-1, 'enabled'=>1, 'position'=>52, 'notnull'=>-1, 'css'=>'minwidth500'),
@@ -99,9 +99,9 @@ class Packages extends CommonObject
 		'crontoadd' => array('type'=>'text', 'label'=>'Template of cron file', 'visible'=>3, 'enabled'=>1, 'position'=>60, 'notnull'=>-1, 'help'=>'Content will be used to add a file into /var/spool/cron/crontabs<br><br>Can use substitution vars like<br>__INSTALLMINUTES__<br>__INSTALLHOURS__<br>__INSTANCEDIR__<br>__OSUSERNAME__<br>...'),
 		'cliafter' => array('type'=>'text', 'label'=>'Shell after', 'visible'=>3, 'enabled'=>1, 'position'=>65, 'notnull'=>-1, 'help'=>"Cli shell executed after deployment.<br><br>For example, you can use the following shell sequence to enable a module:<br>rm -fr __INSTANCEDIR__/documents/install.lock;<br>cd __INSTANCEDIR__/htdocs/install/;<br>php __INSTANCEDIR__/htdocs/install/upgrade2.php 0.0.0 0.0.0 MAIN_MODULE_MYMODULE;<br>touch __INSTANCEDIR__/documents/install.lock;<br>chown -R __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents;"),
 		'sqlafter' => array('type'=>'text', 'label'=>'Sql after', 'visible'=>3, 'enabled'=>1, 'position'=>70, 'notnull'=>-1, 'help'=>'Sql executed after deployment.<br><br>Can use substitution vars like<br>__APPPASSWORD0__<br>__APPPASSWORD0SALTED__<br>__APPPASSWORDSHA256__<br>__APPPASSWORDSHA256SALTED__<br>__APPEMAIL__<br>__APPDOMAIN__<br>__OSUSERNAME__<br>...'),
-	    'allowoverride' => array('type'=>'varchar(255)', 'label'=>'Option string for virtual host', 'visible'=>-1, 'enabled'=>1, 'position'=>75, 'notnull'=>-1, 'help'=>'Any string to add into the Apache virtual host file. For example, keep empty to not allow apache override<br>Use "AllowOverride All" to allow override.'),
+		'allowoverride' => array('type'=>'varchar(255)', 'label'=>'Option string for virtual host', 'visible'=>-1, 'enabled'=>1, 'position'=>75, 'notnull'=>-1, 'help'=>'Any string to add into the Apache virtual host file. For example, keep empty to not allow apache override<br>Use "AllowOverride All" to allow override.'),
 		'version_formula' => array('type'=>'text', 'label'=>"VersionFormula",  'visible'=>3, 'enabled'=>1, 'position'=>76, 'help'=>'VersionFormulaExamples', 'lang'=>'sellyoursaas@sellyoursaas'),
-	    //'register_text' =>array('type'=>'varchar(255)',			'label'=>'RegisterText',	 'enabled'=>1, 'visible'=>-1,  'position'=>100, 'help'=>'EnterHereTranslationKeyToUseOnRegisterPage'),
+		//'register_text' =>array('type'=>'varchar(255)',			'label'=>'RegisterText',	 'enabled'=>1, 'visible'=>-1,  'position'=>100, 'help'=>'EnterHereTranslationKeyToUseOnRegisterPage'),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'visible'=>-2, 'enabled'=>1, 'position'=>500, 'notnull'=>1,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'visible'=>-2, 'enabled'=>1, 'position'=>501, 'notnull'=>1,),
 		'fk_user_creat' => array('type'=>'integer', 'label'=>'UserAuthor', 'visible'=>-2, 'enabled'=>1, 'position'=>502, 'notnull'=>1,),
@@ -201,43 +201,43 @@ class Packages extends CommonObject
 	public function createFromClone(User $user, $fromid)
 	{
 		global $hookmanager, $langs;
-	    $error = 0;
+		$error = 0;
 
-	    dol_syslog(__METHOD__, LOG_DEBUG);
+		dol_syslog(__METHOD__, LOG_DEBUG);
 
-	    $object = new self($this->db);
+		$object = new self($this->db);
 
-	    $this->db->begin();
+		$this->db->begin();
 
-	    // Load source object
-	    $object->fetchCommon($fromid);
-	    // Reset some properties
-	    unset($object->id);
-	    unset($object->fk_user_creat);
-	    unset($object->import_key);
+		// Load source object
+		$object->fetchCommon($fromid);
+		// Reset some properties
+		unset($object->id);
+		unset($object->fk_user_creat);
+		unset($object->import_key);
 
-	    // Clear other fields
-	    $object->ref = "copy_of_".$object->ref;
-	    $object->title = $langs->trans("CopyOf")." ".$object->title;
-	    // ...
+		// Clear other fields
+		$object->ref = "copy_of_".$object->ref;
+		$object->title = $langs->trans("CopyOf")." ".$object->title;
+		// ...
 
-	    // Create clone
+		// Create clone
 		$object->context['createfromclone'] = 'createfromclone';
-	    $result = $object->createCommon($user);
-	    if ($result < 0) {
-	        $error++;
-	        $this->error = $object->error;
-	        $this->errors = $object->errors;
-	    }
+		$result = $object->createCommon($user);
+		if ($result < 0) {
+			$error++;
+			$this->error = $object->error;
+			$this->errors = $object->errors;
+		}
 
-	    // End
-	    if (!$error) {
-	        $this->db->commit();
-	        return $object;
-	    } else {
-	        $this->db->rollback();
-	        return -1;
-	    }
+		// End
+		if (!$error) {
+			$this->db->commit();
+			return $object;
+		} else {
+			$this->db->rollback();
+			return -1;
+		}
 	}
 
 	/**
@@ -299,51 +299,47 @@ class Packages extends CommonObject
 	 *
 	 *	@param	int		$withpicto					Include picto in link (0=No picto, 1=Include picto into link, 2=Only picto)
 	 *	@param	string	$option						On what the link point to
-     *  @param	int  	$notooltip					1=Disable tooltip
-     *  @param  string  $morecss            		Add more css on link
-     *  @param  int     $save_lastsearch_value    	-1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
+	 *  @param	int  	$notooltip					1=Disable tooltip
+	 *  @param  string  $morecss            		Add more css on link
+	 *  @param  int     $save_lastsearch_value    	-1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
 	 *	@return	string								String with URL
 	 */
-	function getNomUrl($withpicto=0, $option='', $notooltip=0, $morecss='', $save_lastsearch_value=-1)
+	function getNomUrl($withpicto = 0, $option = '', $notooltip = 0, $morecss = '', $save_lastsearch_value = -1)
 	{
 		global $db, $conf, $langs;
-        global $dolibarr_main_authentication, $dolibarr_main_demo;
-        global $menumanager;
+		global $dolibarr_main_authentication, $dolibarr_main_demo;
+		global $menumanager;
 
-        if (! empty($conf->dol_no_mouse_hover)) $notooltip=1;   // Force disable tooltips
+		if (! empty($conf->dol_no_mouse_hover)) $notooltip=1;   // Force disable tooltips
 
-        $result = '';
-        $companylink = '';
+		$result = '';
+		$companylink = '';
 
-        $label = '<u>' . $langs->trans("Packages") . '</u>';
-        $label.= '<br>';
-        $label.= '<b>' . $langs->trans('Ref') . ':</b> ' . $this->ref;
-        $label.= '<br><b>' . $langs->trans('Label') . ':</b> ' . $this->label;
-        $label.= '<br><b>' . $langs->trans('RestrictDomainNames') . ':</b> ' . $this->restrict_domains;
+		$label = '<u>' . $langs->trans("Packages") . '</u>';
+		$label.= '<br>';
+		$label.= '<b>' . $langs->trans('Ref') . ':</b> ' . $this->ref;
+		$label.= '<br><b>' . $langs->trans('Label') . ':</b> ' . $this->label;
+		$label.= '<br><b>' . $langs->trans('RestrictDomainNames') . ':</b> ' . $this->restrict_domains;
 
-        $url='';
-        if ($option != 'nolink')
-        {
-        	$url = dol_buildpath('/sellyoursaas/packages_card.php',1).'?id='.$this->id;
+		$url='';
+		if ($option != 'nolink') {
+			$url = dol_buildpath('/sellyoursaas/packages_card.php', 1).'?id='.$this->id;
 
-	        // Add param to save lastsearch_values or not
-	        $add_save_lastsearch_values=($save_lastsearch_value == 1 ? 1 : 0);
-	        if ($save_lastsearch_value == -1 && preg_match('/list\.php/',$_SERVER["PHP_SELF"])) $add_save_lastsearch_values=1;
-	        if ($add_save_lastsearch_values) $url.='&save_lastsearch_values=1';
-        }
+			// Add param to save lastsearch_values or not
+			$add_save_lastsearch_values=($save_lastsearch_value == 1 ? 1 : 0);
+			if ($save_lastsearch_value == -1 && preg_match('/list\.php/', $_SERVER["PHP_SELF"])) $add_save_lastsearch_values=1;
+			if ($add_save_lastsearch_values) $url.='&save_lastsearch_values=1';
+		}
 
-        $linkclose='';
-        if (empty($notooltip))
-        {
-            if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER))
-            {
-                $label=$langs->trans("ShowPackages");
-                $linkclose.=' alt="'.dol_escape_htmltag($label, 1).'"';
-            }
-            $linkclose.=' title="'.dol_escape_htmltag($label, 1).'"';
-            $linkclose.=' class="classfortooltip'.($morecss?' '.$morecss:'').'"';
-        }
-        else $linkclose = ($morecss?' class="'.$morecss.'"':'');
+		$linkclose='';
+		if (empty($notooltip)) {
+			if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+				$label=$langs->trans("ShowPackages");
+				$linkclose.=' alt="'.dol_escape_htmltag($label, 1).'"';
+			}
+			$linkclose.=' title="'.dol_escape_htmltag($label, 1).'"';
+			$linkclose.=' class="classfortooltip'.($morecss?' '.$morecss:'').'"';
+		} else $linkclose = ($morecss?' class="'.$morecss.'"':'');
 
 		$linkstart = '<a href="'.$url.'"';
 		$linkstart.=$linkclose.'>';
@@ -363,9 +359,9 @@ class Packages extends CommonObject
 	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
 	 *  @return	string 			       Label of status
 	 */
-	function getLibStatut($mode=0)
+	function getLibStatut($mode = 0)
 	{
-		return $this->LibStatut($this->status,$mode);
+		return $this->LibStatut($this->status, $mode);
 	}
 
 	/**
@@ -375,45 +371,38 @@ class Packages extends CommonObject
 	 *  @param  int		$mode          	0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
 	 *  @return string 			       	Label of status
 	 */
-	static function LibStatut($status,$mode=0)
+	static function LibStatut($status, $mode = 0)
 	{
 		global $langs;
 
-		if ($mode == 0)
-		{
+		if ($mode == 0) {
 			$prefix='';
 			if ($status == 1) return $langs->trans('Enabled');
 			if ($status == 0) return $langs->trans('Disabled');
 		}
-		if ($mode == 1)
-		{
+		if ($mode == 1) {
 			if ($status == 1) return $langs->trans('Enabled');
 			if ($status == 0) return $langs->trans('Disabled');
 		}
-		if ($mode == 2)
-		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4').' '.$langs->trans('Enabled');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5').' '.$langs->trans('Disabled');
+		if ($mode == 2) {
+			if ($status == 1) return img_picto($langs->trans('Enabled'), 'statut4').' '.$langs->trans('Enabled');
+			if ($status == 0) return img_picto($langs->trans('Disabled'), 'statut5').' '.$langs->trans('Disabled');
 		}
-		if ($mode == 3)
-		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5');
+		if ($mode == 3) {
+			if ($status == 1) return img_picto($langs->trans('Enabled'), 'statut4');
+			if ($status == 0) return img_picto($langs->trans('Disabled'), 'statut5');
 		}
-		if ($mode == 4)
-		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4').' '.$langs->trans('Enabled');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5').' '.$langs->trans('Disabled');
+		if ($mode == 4) {
+			if ($status == 1) return img_picto($langs->trans('Enabled'), 'statut4').' '.$langs->trans('Enabled');
+			if ($status == 0) return img_picto($langs->trans('Disabled'), 'statut5').' '.$langs->trans('Disabled');
 		}
-		if ($mode == 5)
-		{
-			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'),'statut5');
+		if ($mode == 5) {
+			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'), 'statut4');
+			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'), 'statut5');
 		}
-		if ($mode == 6)
-		{
-			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'),'statut5');
+		if ($mode == 6) {
+			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'), 'statut4');
+			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'), 'statut5');
 		}
 	}
 
@@ -430,28 +419,23 @@ class Packages extends CommonObject
 		$sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' as t';
 		$sql.= ' WHERE t.rowid = '.((int) $id);
 		$result=$this->db->query($sql);
-		if ($result)
-		{
-			if ($this->db->num_rows($result))
-			{
+		if ($result) {
+			if ($this->db->num_rows($result)) {
 				$obj = $this->db->fetch_object($result);
 				$this->id = $obj->rowid;
-				if ($obj->fk_user_author)
-				{
+				if ($obj->fk_user_author) {
 					$cuser = new User($this->db);
 					$cuser->fetch($obj->fk_user_author);
 					$this->user_creation   = $cuser;
 				}
 
-				if ($obj->fk_user_valid)
-				{
+				if ($obj->fk_user_valid) {
 					$vuser = new User($this->db);
 					$vuser->fetch($obj->fk_user_valid);
 					$this->user_validation = $vuser;
 				}
 
-				if ($obj->fk_user_cloture)
-				{
+				if ($obj->fk_user_cloture) {
 					$cluser = new User($this->db);
 					$cluser->fetch($obj->fk_user_cloture);
 					$this->user_cloture   = $cluser;
@@ -463,10 +447,7 @@ class Packages extends CommonObject
 			}
 
 			$this->db->free($result);
-
-		}
-		else
-		{
+		} else {
 			dol_print_error($this->db);
 		}
 	}

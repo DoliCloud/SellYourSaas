@@ -24,21 +24,21 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
-if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
+if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
 if (! $res) die("Include of main fails");
 
-require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php");
+require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php";
+require_once DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php";
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 
@@ -47,25 +47,25 @@ dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use
 $langs->loadLangs(array("companies","other","sellyoursaas@sellyoursaas"));
 
 // Get parameters
-$id			= GETPOST('id','int');
-$action		= GETPOST('action','alpha');
-$mode		= GETPOST('mode','alpha');
+$id			= GETPOST('id', 'int');
+$action		= GETPOST('action', 'alpha');
+$mode		= GETPOST('mode', 'alpha');
 
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
-$sortfield = GETPOST("sortfield",'alpha');
-$sortorder = GETPOST("sortorder",'alpha');
-$page = GETPOST("page",'int');
+$sortfield = GETPOST("sortfield", 'alpha');
+$sortorder = GETPOST("sortorder", 'alpha');
+$page = GETPOST("page", 'int');
 if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
 $offset = $limit * $page;
 if (! $sortorder) $sortorder='ASC';
 if (! $sortfield) $sortfield='t.date_registration';
-$limit = GETPOST('limit','int')?GETPOST('limit','int'):$conf->liste_limit;
+$limit = GETPOST('limit', 'int')?GETPOST('limit', 'int'):$conf->liste_limit;
 
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
 // Security check
-$result = restrictedArea($user, 'sellyoursaas', 0, '','');
+$result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 
 
@@ -73,25 +73,21 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '','');
  *	Actions
  */
 
-if ($action == 'update')
-{
-	dolibarr_set_const($db,"NLTECHNO_NOTE",GETPOST("NLTECHNO_NOTE", 'none'),'chaine',0,'',$conf->entity);
+if ($action == 'update') {
+	dolibarr_set_const($db, "NLTECHNO_NOTE", GETPOST("NLTECHNO_NOTE", 'none'), 'chaine', 0, '', $conf->entity);
 }
 
-if (GETPOST('saveannounce','alpha'))
-{
-	dolibarr_set_const($db,"SELLYOURSAAS_ANNOUNCE",GETPOST("SELLYOURSAAS_ANNOUNCE", 'none'),'chaine',0,'',$conf->entity);
+if (GETPOST('saveannounce', 'alpha')) {
+	dolibarr_set_const($db, "SELLYOURSAAS_ANNOUNCE", GETPOST("SELLYOURSAAS_ANNOUNCE", 'none'), 'chaine', 0, '', $conf->entity);
 }
 
-if ($action == 'setSELLYOURSAAS_DISABLE_NEW_INSTANCES')
-{
-    if (GETPOST('value')) dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
-    else dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 0, 'chaine', 0, '', $conf->entity);
+if ($action == 'setSELLYOURSAAS_DISABLE_NEW_INSTANCES') {
+	if (GETPOST('value')) dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
+	else dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 0, 'chaine', 0, '', $conf->entity);
 }
-if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON')
-{
-    if (GETPOST('value')) dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 1, 'chaine', 0, '', $conf->entity);
-    else dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 0, 'chaine', 0, '', $conf->entity);
+if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON') {
+	if (GETPOST('value')) dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 1, 'chaine', 0, '', $conf->entity);
+	else dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 0, 'chaine', 0, '', $conf->entity);
 }
 
 
@@ -101,7 +97,7 @@ if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON')
 
 $form=new Form($db);
 
-llxHeader('',$langs->transnoentitiesnoconv('DoliCloudCustomers'),'');
+llxHeader('', $langs->transnoentitiesnoconv('DoliCloudCustomers'), '');
 
 //print_fiche_titre($langs->trans("DoliCloudArea"));
 
@@ -145,7 +141,7 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
 
 $param = '';
 
-print '<form method="post" action="'.dol_buildpath('/sellyoursaas/backoffice/index.php',1).'">';
+print '<form method="post" action="'.dol_buildpath('/sellyoursaas/backoffice/index.php', 1).'">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<table class="noborder nohover" width="100%">';
 print '<tr class="liste_titre">';
@@ -154,38 +150,32 @@ print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 $enabledisablehtml='';
-if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES))
-{
-    // Button off, click to enable
-    $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=0'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
-    $enabledisablehtml.='</a>';
-}
-else
-{
-    // Button on, click to disable
-    $enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=1'.$param.'">';
-    $enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
-    $enabledisablehtml.='</a>';
+if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+	// Button off, click to enable
+	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=0'.$param.'">';
+	$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
+	$enabledisablehtml.='</a>';
+} else {
+	// Button on, click to disable
+	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=1'.$param.'">';
+	$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+	$enabledisablehtml.='</a>';
 }
 print $enabledisablehtml;
 print $langs->trans("EnableNewInstance");
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 $enabledisableannounce='';
-if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON))
-{
-    // Button off, click to enable
-    $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
-    $enabledisableannounce.='</a>';
-}
-else
-{
-    // Button on, click to disable
-    $enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0'.$param.'">';
-    $enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
-    $enabledisableannounce.='</a>';
+if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON)) {
+	// Button off, click to enable
+	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1'.$param.'">';
+	$enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
+	$enabledisableannounce.='</a>';
+} else {
+	// Button on, click to disable
+	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0'.$param.'">';
+	$enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
+	$enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
 print $langs->trans("AnnounceOnCustomerDashboard");
@@ -202,15 +192,12 @@ print "</table></form><br>";
 $listofipwithinstances=array();
 $sql="SELECT DISTINCT deployment_host FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
 $resql=$db->query($sql);
-if ($resql)
-{
-    while($obj = $db->fetch_object($resql))
-    {
-        $listofipwithinstances[]=$obj->deployment_host;
-    }
-    $db->free($resql);
-}
-else dol_print_error($db);
+if ($resql) {
+	while ($obj = $db->fetch_object($resql)) {
+		$listofipwithinstances[]=$obj->deployment_host;
+	}
+	$db->free($resql);
+} else dol_print_error($db);
 
 print "\n";
 print "<!-- section of deployment servers -->\n";
@@ -219,7 +206,7 @@ print '<table class="noborder nohover centpercent">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('DeploymentServers').'</td></tr>';
 print '<tr class="oddeven nohover">';
-print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ',$listofipwithinstances).'</strong></td>';
+print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ', $listofipwithinstances).'</strong></td>';
 print '</tr>';
 print '<tr class="">';
 print '<td>';
@@ -232,7 +219,7 @@ print $form->textwithpicto($langs->trans("Registration"), $helptooltip);
 print '</td><td></td><td></td></tr>';
 $listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
 $listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-foreach($listofips as $key => $val) {
+foreach ($listofips as $key => $val) {
 	$tmparraydomain = explode(':', $listofdomains[$key]);
 	print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
 	if (! empty($tmparraydomain[1])) {
@@ -294,14 +281,12 @@ $serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'0':$conf->global->
 $sql = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'categorie_fournisseur as c';
 $sql.= ' WHERE c.fk_soc = s.rowid AND s.status = 1 AND c.fk_categorie = '.$conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG;
 $resql = $db->query($sql);
-if ($resql)
-{
+if ($resql) {
 	$obj = $db->fetch_object($resql);
 	if ($obj) $totalresellers = $obj->nb;
 }
 
-if ($mode == 'refreshstats')
-{
+if ($mode == 'refreshstats') {
 	$rep=sellyoursaas_calculate_stats($db, '');	// $datelastday is last day of current month
 
 	$total=$rep['total'];
@@ -325,9 +310,7 @@ if ($mode == 'refreshstats')
 	$_SESSION['stats_totalinstancesexpiredpaying']=$totalinstancesexpiredpaying;
 	$_SESSION['stats_totalinstances']=$totalinstances;
 	$_SESSION['stats_totalusers']=$totalusers;
-}
-else
-{
+} else {
 	$total = $_SESSION['stats_total'];
 	$totalcommissions = $_SESSION['stats_totalcommissions'];
 	$totalinstancespaying = $_SESSION['stats_totalinstancespaying'];
@@ -363,12 +346,10 @@ print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 $texthelp = $langs->trans("NbOfInstancesActivePayingDesc");
 $stringlistofinstancespayingwithoutrecinvoice = '';
 $nboflistofinstancespayingwithoutrecinvoice = 0;
-if (is_array($rep['listofinstancespayingwithoutrecinvoice']))
-{
+if (is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
 	$nboflistofinstancespayingwithoutrecinvoice = count($rep['listofinstancespayingwithoutrecinvoice']);
 	$rep['listofinstancespayingwithoutrecinvoice'] = dol_sort_array($rep['listofinstancespayingwithoutrecinvoice'], 'thirdparty_name');
-	foreach($rep['listofinstancespayingwithoutrecinvoice'] as $arrayofcontract)
-	{
+	foreach ($rep['listofinstancespayingwithoutrecinvoice'] as $arrayofcontract) {
 		$stringlistofinstancespayingwithoutrecinvoice .= ($stringlistofinstancespayingwithoutrecinvoice ? ', ' : '').$arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
 	}
 }
@@ -380,11 +361,9 @@ print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstancespayingall.' | '.$totalinstances.'</font>';
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '<!-- List of instances : '."\n";
-if (is_array($rep['listofinstancespaying']))
-{
-    $rep['listofinstancespaying'] = dol_sort_array($rep['listofinstancespaying'], 'thirdparty_name');
-	foreach($rep['listofinstancespaying'] as $arrayofcontract)
-	{
+if (is_array($rep['listofinstancespaying'])) {
+	$rep['listofinstancespaying'] = dol_sort_array($rep['listofinstancespaying'], 'thirdparty_name');
+	foreach ($rep['listofinstancespaying'] as $arrayofcontract) {
 		print $arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
 	}
 }
@@ -395,8 +374,7 @@ print $langs->trans("NbOfSuspendedInstances").' '.$langs->trans("payed").' | '.$
 print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) {
 	print '<font size="+2">'.$totalinstancessuspendedpaying.' | '.$totalinstancessuspendedfree.'</font>';
-}
-else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+} else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 print $langs->trans("NbOfUsers").' ';
@@ -407,13 +385,13 @@ print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("AverageRevenuePerInstance");
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.($totalinstancespaying?price(price2num($total/$totalinstancespaying,'MT'),1):'0').' </font>';
+if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.($totalinstancespaying?price(price2num($total/$totalinstancespaying, 'MT'), 1):'0').' </font>';
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("RevenuePerMonth").' ('.$langs->trans("HT").')';
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.price($total,1).' </font>';
+if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.price($total, 1).' </font>';
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
@@ -429,9 +407,9 @@ print '</td></tr>';
 print '<tr class="liste_total"><td class="wrapimp wordwrap wordbreak">';
 print $langs->trans("BenefitDoliCloud");
 print '<br>(';
-print price($total,1).' - '.($part ? ($part*100).'% - ' : '').price($serverprice).'€ - '.price($totalcommissions).'€ = '.price($total * (1 - $part)).'€ - '.price($serverprice).'€ - '.price($totalcommissions).'€';
+print price($total, 1).' - '.($part ? ($part*100).'% - ' : '').price($serverprice).'€ - '.price($totalcommissions).'€ = '.price($total * (1 - $part)).'€ - '.price($serverprice).'€ - '.price($totalcommissions).'€';
 print ')</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.price($benefit,1).' </font>';
+if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.price($benefit, 1).' </font>';
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '</td></tr>';
 print '</table>';
@@ -448,23 +426,20 @@ $sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
 $sql.=" WHERE service = '".$servicetouse."' AND name IN ('total', 'totalcommissions')";
 $sql.=" ORDER BY x, name";
 $resql=$db->query($sql);
-if ($resql)
-{
+if ($resql) {
 	$num = $db->num_rows($resql);
 	$i=0;
 
 	$oldx='';
 	$absice=array();
-	while ($i < $num)
-	{
+	while ($i < $num) {
 		$obj=$db->fetch_object($resql);
 		if ($obj->x < $startyear."01") { $i++; continue; }
 		if ($obj->x > $endyear."12") { $i++; continue; }
 
-		if ($oldx && $oldx != $obj->x)
-		{
+		if ($oldx && $oldx != $obj->x) {
 			// break
-			preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
+			preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
 			$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 			$benefit=price2num($absice[1] * (1 - $part) - $serverprice - $absice[2], 'MT');
 			$absice[3]=$benefit;
@@ -481,42 +456,37 @@ if ($resql)
 		$i++;
 	}
 
-	if ($oldx)
-	{
-	    preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
-	    $absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
+	if ($oldx) {
+		preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
+		$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 		$benefit=price2num($absice[1] * (1 - $part) - $serverprice - $absice[2], 'MT');
 		$absice[3]=$benefit;
 		ksort($absice);
 		$data1[]=$absice;
 	}
-}
-else dol_print_error($db);
+} else dol_print_error($db);
 
 $data2 = array();
 $sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
 $sql.=" WHERE service = '".$servicetouse."' AND name IN ('totalinstancespaying', 'totalinstancespayingall', 'totalinstances', 'totalusers')";
 $sql.=" ORDER BY x, name";
 $resql=$db->query($sql);
-if ($resql)
-{
+if ($resql) {
 	$num = $db->num_rows($resql);
 	$i=0;
 
 	$oldx='';
 	$absice=array();
-	while ($i < $num)
-	{
+	while ($i < $num) {
 		$obj=$db->fetch_object($resql);
 
 		if ($obj->x < $startyear."01") { $i++; continue; }
 		if ($obj->x > $endyear."12") { $i++; continue; }
 
-		if ($oldx && $oldx != $obj->x)
-		{
+		if ($oldx && $oldx != $obj->x) {
 			// break
-		    preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
-		    $absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
+			preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
+			$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 			ksort($absice);
 			$data2[]=$absice;
 			$absice=array();
@@ -532,24 +502,19 @@ if ($resql)
 		$i++;
 	}
 
-	if ($oldx)
-	{
-	    preg_match('/^([0-9]{4})+([0-9]{2})+$/',$oldx,$regs);
-	    $absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
+	if ($oldx) {
+		preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
+		$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 		ksort($absice);
 		$data2[]=$absice;
 	}
-}
-else dol_print_error($db);
+} else dol_print_error($db);
 
 
-if (empty($conf->dol_optimize_smallscreen))
-{
+if (empty($conf->dol_optimize_smallscreen)) {
 	$WIDTH=600;
 	$HEIGHT=260;
-}
-else
-{
+} else {
 	$WIDTH=DolGraph::getDefaultGraphSizeForStats('width');
 	$HEIGHT=DolGraph::getDefaultGraphSizeForStats('height');
 }
@@ -559,8 +524,7 @@ $fileurlnb = '';
 // Show graph
 $px1 = new DolGraph();
 $mesg = $px1->isGraphKo();
-if (! $mesg)
-{
+if (! $mesg) {
 	$px1->SetData($data1);
 	$data1 = null;
 
@@ -586,8 +550,7 @@ if (! $mesg)
 
 $px2 = new DolGraph();
 $mesg = $px2->isGraphKo();
-if (! $mesg)
-{
+if (! $mesg) {
 	$px2->SetData($data2);
 	$data2 = null;
 

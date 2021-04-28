@@ -9,11 +9,10 @@ error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 
 $langs->load("errors");
 
-if ($action == 'addauthorizedkey')
-{
+if ($action == 'addauthorizedkey') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('','ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists'); exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -32,15 +31,11 @@ if ($action == 'addauthorizedkey')
 
 	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 	$connection = ssh2_connect($server, $server_port);
-	if ($connection)
-	{
-		if (! @ssh2_auth_password($connection, $username_web, $password_web))
-		{
+	if ($connection) {
+		if (! @ssh2_auth_password($connection, $username_web, $password_web)) {
 			dol_syslog("Could not authenticate with username ".$username_web." and password ".preg_replace('/./', '*', $password_web), LOG_WARNING);
 			setEventMessages("Could not authenticate with username ".$username_web." and password ".preg_replace('/./', '*', $password_web), null, 'warnings');
-		}
-		else
-		{
+		} else {
 			$sftp = ssh2_sftp($connection);
 
 			// Update ssl certificate
@@ -61,15 +56,11 @@ if ($action == 'addauthorizedkey')
 			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support');
 
 			// Create authorized_keys_support file
-			if (empty($fstat['atime']))		// Failed to connect or file does not exists
-			{
+			if (empty($fstat['atime'])) {		// Failed to connect or file does not exists
 				$stream = fopen($filecert, 'w');
-				if ($stream === false)
-				{
-					setEventMessage($langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile"),'errors');
-				}
-				else
-				{
+				if ($stream === false) {
+					setEventMessage($langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile"), 'errors');
+				} else {
 					// Add public keys
 					$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 					fwrite($stream, $publickeystodeploy);
@@ -77,28 +68,24 @@ if ($action == 'addauthorizedkey')
 					// File authorized_keys_support must have rw------- permissions
 					ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support', 0600);
 					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support');
-					setEventMessage($langs->transnoentitiesnoconv("FileCreated"),'mesgs');
+					setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
 				}
-			}
-			else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"),'warnings');
+			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 
 			$object->fileauthorizedkey=(empty($fstat['atime'])?'':$fstat['atime']);
 			$object->array_options['options_fileauthorizekey']=(empty($fstat['atime'])?'':$fstat['atime']);
 
-			if (! empty($fstat['atime']))
-			{
+			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
 			}
 		}
-	}
-	else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server),'errors');
+	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
 }
 
-if ($action == 'addinstalllock')
-{
+if ($action == 'addinstalllock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('','ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists'); exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -117,50 +104,41 @@ if ($action == 'addinstalllock')
 
 	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 	$connection = ssh2_connect($server, $server_port);
-	if ($connection)
-	{
+	if ($connection) {
 		//print $instance." ".$username_web." ".$password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $username_web, $password_web))
-		{
+		if (! @ssh2_auth_password($connection, $username_web, $password_web)) {
 			dol_syslog("Could not authenticate with username ".$username_web." . and password ".preg_replace('/./', '*', $password_web), LOG_ERR);
-		}
-		else
-		{
+		} else {
 			$sftp = ssh2_sftp($connection);
 
 			// Check if install.lock exists
-			$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$database_db);
+			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
 			//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/'.$dir.'/documents/install.lock';
 			$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/'.$dir.'/documents/install.lock';
 			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/'.$dir.'/documents/install.lock');
-			if (empty($fstat['atime']))
-			{
+			if (empty($fstat['atime'])) {
 				$stream = fopen($fileinstalllock, 'w');
 				//var_dump($stream);exit;
-				fwrite($stream,"// File to protect from install/upgrade.\n");
+				fwrite($stream, "// File to protect from install/upgrade.\n");
 				fclose($stream);
 				$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/'.$dir.'/documents/install.lock');
-				setEventMessage($langs->transnoentitiesnoconv("FileCreated"),'mesgs');
-			}
-			else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"),'warnings');
+				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
+			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 
 			$object->filelock=(empty($fstat['atime'])?'':$fstat['atime']);
 			$object->array_options['options_filelock']=(empty($fstat['atime'])?'':$fstat['atime']);
 
-			if (! empty($fstat['atime']))
-			{
+			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
 			}
 		}
-	}
-	else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server),'errors');
+	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
 }
 
-if ($action == 'delauthorizedkey')
-{
+if ($action == 'delauthorizedkey') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('','ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists'); exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -178,40 +156,33 @@ if ($action == 'delauthorizedkey')
 	$server=$hostname_os;
 	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 	$connection = ssh2_connect($server, $server_port);
-	if ($connection)
-	{
+	if ($connection) {
 		//print $instance." ".$username_web." ".$password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $username_web, $password_web))
-		{
+		if (! @ssh2_auth_password($connection, $username_web, $password_web)) {
 			dol_syslog("Could not authenticate with username ".$username_web." . and password ".preg_replace('/./', '*', $password_web), LOG_ERR);
-		}
-		else
-		{
+		} else {
 			$sftp = ssh2_sftp($connection);
 
 			// Check if authorized_keys_support exists
 			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
-			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"),'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("DeleteFails"),'warnings');
+			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
+			else setEventMessage($langs->transnoentitiesnoconv("DeleteFails"), 'warnings');
 
 			$object->fileauthorizedkey='';
 			$object->array_options['options_fileauthorizekey']='';
 
-			if ($result)
-			{
+			if ($result) {
 				$result = $object->update($user);
 			}
 		}
-	}
-	else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server),'errors');
+	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
 }
-if ($action == 'delinstalllock')
-{
+if ($action == 'delinstalllock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('','ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists'); exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -229,42 +200,35 @@ if ($action == 'delinstalllock')
 	$server=$hostname_os;
 	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 	$connection = ssh2_connect($server, $server_port);
-	if ($connection)
-	{
+	if ($connection) {
 		//print $object->instance." ".$username_web." ".$password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $username_web, $password_web))
-		{
+		if (! @ssh2_auth_password($connection, $username_web, $password_web)) {
 			dol_syslog("Could not authenticate with username ".$username_web." . and password ".preg_replace('/./', '*', $password_web), LOG_ERR);
-		}
-		else
-		{
+		} else {
 			$sftp = ssh2_sftp($connection);
 
 			// Check if install.lock exists
-			$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$database_db);
+			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
 			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/'.$dir.'/documents/install.lock';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
-			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"),'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("DeleteFails"),'warnings');
+			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
+			else setEventMessage($langs->transnoentitiesnoconv("DeleteFails"), 'warnings');
 
 			$object->filelock='';
 			$object->array_options['options_filelock']='';
 
-			if ($result)
-			{
+			if ($result) {
 				$result = $object->update($user);
 			}
 		}
-	}
-	else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server),'errors');
+	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
 }
 
 
 // We make a refresh of status of install.lock + authorized key, this does not update the qty (this is done in makeRenewal).
-if ($action == 'refresh' || $action == 'setdate')
-{
-    dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
+if ($action == 'refresh' || $action == 'setdate') {
+	dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 	$object->oldcopy=dol_clone($object, 1);
 

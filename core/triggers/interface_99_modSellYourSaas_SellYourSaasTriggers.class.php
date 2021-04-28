@@ -88,347 +88,300 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 	{
 		global $mysoc;
 
-        if (empty($conf->sellyoursaas->enabled)) return 0;     // Module not active, we do nothing
+		if (empty($conf->sellyoursaas->enabled)) return 0;     // Module not active, we do nothing
 
-	    // Put here code you want to execute when a Dolibarr business events occurs.
+		// Put here code you want to execute when a Dolibarr business events occurs.
 		// Data and type of action are stored into $object and $action
 
-        $error = 0;
-        $remoteaction = '';
+		$error = 0;
+		$remoteaction = '';
 
-        switch ($action) {
-        	case 'CATEGORY_LINK':
+		switch ($action) {
+			case 'CATEGORY_LINK':
 				// Test if this is a partner. If yes, send an email
-        		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+				include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 
-        		if ($object->type === Categorie::TYPE_SUPPLIER || Categorie::$MAP_ID_TO_CODE[$object->type] == Categorie::TYPE_SUPPLIER)
-        		{
-        			// We link a supplier categorie to a thirdparty
-        			if ($object->id == $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG)
-        			{
-        				$reseller = $object->context['linkto'];
+				if ($object->type === Categorie::TYPE_SUPPLIER || Categorie::$MAP_ID_TO_CODE[$object->type] == Categorie::TYPE_SUPPLIER) {
+					// We link a supplier categorie to a thirdparty
+					if ($object->id == $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG) {
+						$reseller = $object->context['linkto'];
 
 						// $object->context['linkto'] is Societe object
-        				/*if (empty($reseller->name_alias))	// Used to generate the partnerkey
-        				{
-        					$this->errors[] = $langs->trans("CompanyAliasIsRequiredWhenWeSetResellerTag");
-        					return -1;
-        				}*/
-        				if (empty($reseller->array_options['options_commission']) && $reseller->array_options['options_commission'] != '0')
-        				{
-        					$this->errors[] = $langs->trans("CommissionIsRequiredWhenWeSetResellerTag");
-        					return -1;
-        				}
+						/*if (empty($reseller->name_alias))	// Used to generate the partnerkey
+						{
+							$this->errors[] = $langs->trans("CompanyAliasIsRequiredWhenWeSetResellerTag");
+							return -1;
+						}*/
+						if (empty($reseller->array_options['options_commission']) && $reseller->array_options['options_commission'] != '0') {
+							$this->errors[] = $langs->trans("CommissionIsRequiredWhenWeSetResellerTag");
+							return -1;
+						}
 
-        				// If password not set yet, we set it
-        				if (empty($reseller->array_options['options_password']))
-        				{
-        				    $password = dol_string_nospecial(dol_string_unaccent(strtolower($reseller->name)));
+						// If password not set yet, we set it
+						if (empty($reseller->array_options['options_password'])) {
+							$password = dol_string_nospecial(dol_string_unaccent(strtolower($reseller->name)));
 
-        					$reseller->oldcopy = dol_clone($reseller);
+							$reseller->oldcopy = dol_clone($reseller);
 
-        					$reseller->array_options['options_password']=dol_hash($password);
+							$reseller->array_options['options_password']=dol_hash($password);
 
-        					$reseller->update($reseller->id, $user, 0);
-        				}
+							$reseller->update($reseller->id, $user, 0);
+						}
 
-        				// No email, can be done manually.
-        				/*
-        				// Send deployment email
-        				include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-        				include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-        				$formmail=new FormMail($db);
+						// No email, can be done manually.
+						/*
+						// Send deployment email
+						include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+						include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+						$formmail=new FormMail($db);
 
-        				$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, '(ChannelPartnerCreated)');
+						$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, '(ChannelPartnerCreated)');
 
-        				$substitutionarray=getCommonSubstitutionArray($langs, 0, null, $contract);
-        				complete_substitutions_array($substitutionarray, $langs, $contract);
+						$substitutionarray=getCommonSubstitutionArray($langs, 0, null, $contract);
+						complete_substitutions_array($substitutionarray, $langs, $contract);
 
-        				$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
-        				$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
-        				$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-        				$to = $contract->thirdparty->email;
+						$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
+						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
+						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+						$to = $contract->thirdparty->email;
 
-        				$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
-        				$result = $cmail->sendfile();
-        				if (! $result)
-        				{
-        					$error++;
-        					$this->errors += $cmail->errors;
-        				}
+						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
+						$result = $cmail->sendfile();
+						if (! $result)
+						{
+							$error++;
+							$this->errors += $cmail->errors;
+						}
 						*/
-        			}
-        		}
+					}
+				}
 				break;
-        	case 'LINECONTRACT_ACTIVATE':
-        		if (empty($object->context['deployallwasjustdone']))
-        		{
-        			dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran and context 'deployallwasjustdone' is not 1, so we launch the unsuspend remote actions");
-        			$object->fetch_product();
-        			if ($object->product->array_options['options_app_or_option'] == 'app')
-        			{
-        				$contract = new Contrat($this->db);
-        				$contract->fetch($object->fk_contrat);
-        				if ($contract->array_options['options_deployment_status'] == 'undeployed')
-        				{
-        					setEventMessages("CantActivateContractWhenUndeployed", null, 'errors');
-        				}
-        				else
-        				{
-        					$remoteaction = 'unsuspend';
-        				}
-        			}
-        		}
-        		else
-        		{
-        			dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran but context 'deployallwasjustdone' is 1, so we do not launch the unsuspend remote actions");
-        		}
-        		break;
-        	case 'LINECONTRACT_CLOSE':
-        		$object->fetch_product();
-        		if ($object->product->array_options['options_app_or_option'] == 'app')
-        		{
-        			$remoteaction = 'suspend';
-        		}
-        		break;
-        	case 'CONTRACT_DELETE':
+			case 'LINECONTRACT_ACTIVATE':
+				if (empty($object->context['deployallwasjustdone'])) {
+					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran and context 'deployallwasjustdone' is not 1, so we launch the unsuspend remote actions");
+					$object->fetch_product();
+					if ($object->product->array_options['options_app_or_option'] == 'app') {
+						$contract = new Contrat($this->db);
+						$contract->fetch($object->fk_contrat);
+						if ($contract->array_options['options_deployment_status'] == 'undeployed') {
+							setEventMessages("CantActivateContractWhenUndeployed", null, 'errors');
+						} else {
+							$remoteaction = 'unsuspend';
+						}
+					}
+				} else {
+					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran but context 'deployallwasjustdone' is 1, so we do not launch the unsuspend remote actions");
+				}
+				break;
+			case 'LINECONTRACT_CLOSE':
+				$object->fetch_product();
+				if ($object->product->array_options['options_app_or_option'] == 'app') {
+					$remoteaction = 'suspend';
+				}
+				break;
+			case 'CONTRACT_DELETE':
 				$remoteaction = 'undeployall';
-        		break;
-        	case 'CONTRACT_MODIFY':
-        		/*var_dump($object->oldcopy->array_options['options_date_endfreeperiod']);
-        		var_dump($object->array_options['options_date_endfreeperiod']);
-        		var_dump($object->lines);*/
-
-        		if (isset($object->oldcopy)	// We rename instance name
-        		&& ($object->oldcopy->ref_customer != $object->ref_customer
-        		|| $object->oldcopy->array_options['options_custom_url'] != $object->array_options['options_custom_url']))
-        		{
-        			if (preg_match('/\.with\./', $object->array_options['options_custom_url']))
-        			{
-        				$this->errors[]="Value of URL including .with. is not allowed as custom URL";
-        				return -1;
-        			}
-
-        			$testok = 1;
-
-        			// Test that new name is not already used
-        			$nametotest = $object->ref_customer;
-					// @TODO
-
-        			// Test that custom url is not already used
-	       			$nametotest = $object->array_options['options_custom_url'];
-					// @TODO
-
-	       			if ($testok)
-	       			{
-		       			if ($object->oldcopy->array_options['options_deployment_status'] != 'undeployed')
-		       			{
-		       				dol_syslog("We found a change in ref_customer or into custom url for a not undeployed instance, so we will call the remote action rename");
-		       				$remoteaction='rename';
-		       			}
-
-	        			// Change hostname OS and hostname DB
-	        			if ($object->oldcopy->ref_customer != $object->ref_customer)
-	        			{
-	        				$object->array_options['options_hostname_os'] = $object->ref_customer;
-	        				$object->updateExtraField('hostname_os', null, $user);
-	        				$object->array_options['options_hostname_db'] = $object->ref_customer;
-	        				$object->updateExtraField('hostname_db', null, $user);
-	        			}
-	       			}
-	       			else
-	       			{
-	       				$this->errors[]="Name already used";
-	       				return -1;
-	       			}
-        		}
-
-        		if (isset($object->oldcopy)	// We change end of trial
-        			&& $object->oldcopy->array_options['options_date_endfreeperiod'] != $object->array_options['options_date_endfreeperiod'])
-        		{
-        			dol_syslog("We found a change in date of end of trial, so we check if you can and, if yes, we make the update of contract");
-
-        			if ($object->oldcopy->array_options['options_date_endfreeperiod']
-        			    && ($object->oldcopy->array_options['options_date_endfreeperiod'] < $object->array_options['options_date_endfreeperiod']))
-        			{
-	        			// Check there is no recurring invoice. If yes, we refuse to increase value.
-    	    			$object->fetchObjectLinked();
-        				//var_dump($object->linkedObjects);
-        				if (is_array($object->linkedObjects['facturerec']))
-        				{
-        					if (count($object->linkedObjects['facturerec']) > 0)
-        					{
-	        					$this->errors[]="ATemplateInvoiceExistsNoWayToChangeTrial";
-    	    					return -1;
-        					}
-        				}
-        			}
-
-	        		foreach($object->lines as $line)
-	        		{
-	        			if ($line->date_end < $object->array_options['options_date_endfreeperiod'])
-	        			{
-	        				$line->date_end = $object->array_options['options_date_endfreeperiod'];
-	        				$line->date_fin_validite = $object->array_options['options_date_endfreeperiod'];
-	        				$line->update($user);
-	        				break;	// No need to loop on all, there is also a trigger that update all other when we update one
-	        			}
-	        		}
-        		}
-        		break;
-
-        	case 'BILL_VALIDATE':
-        		$reseller = new Societe($this->db);
-        		$reseller->fetch($object->thirdparty->parent);
-        		if ($reseller->id > 0)
-        		{
-	        		$object->array_options['options_commission']=$reseller->array_options['options_commission'];
-	        		$object->array_options['options_reseller']=$reseller->id;
-	        		$object->insertExtraFields('', $user);
-        		}
 				break;
-        	case 'BILL_CANCEL':
-        	    break;
-        	case 'BILL_PAYED':
-        		$object->fetchObjectLinked(null,'',null,'','OR',0,'sourcetype',0);
+			case 'CONTRACT_MODIFY':
+				/*var_dump($object->oldcopy->array_options['options_date_endfreeperiod']);
+				var_dump($object->array_options['options_date_endfreeperiod']);
+				var_dump($object->lines);*/
 
-        		if ($object->type != Facture::TYPE_CREDIT_NOTE  && ! empty($object->linkedObjectsIds['contrat']))
-        		{
-        			// Get the first contract of the paid invoice
-        			$contractid = reset($object->linkedObjectsIds['contrat']);
-        			dol_syslog("The cancel/paid invoice ".$object->ref." is linked to contract id ".$contractid.", we check if we have to unsuspend it.");
+				if (isset($object->oldcopy)	// We rename instance name
+				&& ($object->oldcopy->ref_customer != $object->ref_customer
+				|| $object->oldcopy->array_options['options_custom_url'] != $object->array_options['options_custom_url'])) {
+					if (preg_match('/\.with\./', $object->array_options['options_custom_url'])) {
+						$this->errors[]="Value of URL including .with. is not allowed as custom URL";
+						return -1;
+					}
 
-        			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-        			$contract = new Contrat($this->db);
-        			$contract->fetch($contractid);
+					$testok = 1;
 
-        			// TODO Check there is no other unpaid invoices for the case of several pending invoices on same contract
-        			// (in such a case, we may decide to no activate the linked contract)
-        			// $contract->fetchObjectLinked();
+					// Test that new name is not already used
+					$nametotest = $object->ref_customer;
+					// @TODO
 
-        			if ($contract->array_options['options_deployment_status'] == 'done')
-        			{
-            			$result = $contract->activateAll($user);		// This will activate line if not already activated and set status of contrat to 1 if not already set
-            			if ($result < 0)
-            			{
-            				$error++;
-            				$this->error = $contract->error;
-            				$this->errors = $contract->errors;
-            			}
-        			}
-        		}
-				else
-				{
+					// Test that custom url is not already used
+					$nametotest = $object->array_options['options_custom_url'];
+					// @TODO
+
+					if ($testok) {
+						if ($object->oldcopy->array_options['options_deployment_status'] != 'undeployed') {
+							dol_syslog("We found a change in ref_customer or into custom url for a not undeployed instance, so we will call the remote action rename");
+							$remoteaction='rename';
+						}
+
+						// Change hostname OS and hostname DB
+						if ($object->oldcopy->ref_customer != $object->ref_customer) {
+							$object->array_options['options_hostname_os'] = $object->ref_customer;
+							$object->updateExtraField('hostname_os', null, $user);
+							$object->array_options['options_hostname_db'] = $object->ref_customer;
+							$object->updateExtraField('hostname_db', null, $user);
+						}
+					} else {
+						$this->errors[]="Name already used";
+						return -1;
+					}
+				}
+
+				if (isset($object->oldcopy)	// We change end of trial
+					&& $object->oldcopy->array_options['options_date_endfreeperiod'] != $object->array_options['options_date_endfreeperiod']) {
+					dol_syslog("We found a change in date of end of trial, so we check if you can and, if yes, we make the update of contract");
+
+					if ($object->oldcopy->array_options['options_date_endfreeperiod']
+						&& ($object->oldcopy->array_options['options_date_endfreeperiod'] < $object->array_options['options_date_endfreeperiod'])) {
+						// Check there is no recurring invoice. If yes, we refuse to increase value.
+						$object->fetchObjectLinked();
+						//var_dump($object->linkedObjects);
+						if (is_array($object->linkedObjects['facturerec'])) {
+							if (count($object->linkedObjects['facturerec']) > 0) {
+								$this->errors[]="ATemplateInvoiceExistsNoWayToChangeTrial";
+								return -1;
+							}
+						}
+					}
+
+					foreach ($object->lines as $line) {
+						if ($line->date_end < $object->array_options['options_date_endfreeperiod']) {
+							$line->date_end = $object->array_options['options_date_endfreeperiod'];
+							$line->date_fin_validite = $object->array_options['options_date_endfreeperiod'];
+							$line->update($user);
+							break;	// No need to loop on all, there is also a trigger that update all other when we update one
+						}
+					}
+				}
+				break;
+
+			case 'BILL_VALIDATE':
+				$reseller = new Societe($this->db);
+				$reseller->fetch($object->thirdparty->parent);
+				if ($reseller->id > 0) {
+					$object->array_options['options_commission']=$reseller->array_options['options_commission'];
+					$object->array_options['options_reseller']=$reseller->id;
+					$object->insertExtraFields('', $user);
+				}
+				break;
+			case 'BILL_CANCEL':
+				break;
+			case 'BILL_PAYED':
+				$object->fetchObjectLinked(null, '', null, '', 'OR', 0, 'sourcetype', 0);
+
+				if ($object->type != Facture::TYPE_CREDIT_NOTE  && ! empty($object->linkedObjectsIds['contrat'])) {
+					// Get the first contract of the paid invoice
+					$contractid = reset($object->linkedObjectsIds['contrat']);
+					dol_syslog("The cancel/paid invoice ".$object->ref." is linked to contract id ".$contractid.", we check if we have to unsuspend it.");
+
+					include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+					$contract = new Contrat($this->db);
+					$contract->fetch($contractid);
+
+					// TODO Check there is no other unpaid invoices for the case of several pending invoices on same contract
+					// (in such a case, we may decide to no activate the linked contract)
+					// $contract->fetchObjectLinked();
+
+					if ($contract->array_options['options_deployment_status'] == 'done') {
+						$result = $contract->activateAll($user);		// This will activate line if not already activated and set status of contrat to 1 if not already set
+						if ($result < 0) {
+							$error++;
+							$this->error = $contract->error;
+							$this->errors = $contract->errors;
+						}
+					}
+				} else {
 					dol_syslog("The cancel/paid invoice ".$object->ref." is a credit note, or has no linked contract to check to unsuspend.");
 				}
-        		break;
+				break;
 
-        	case 'PAYMENT_CUSTOMER_CREATE':
-                // $object is a Payment
+			case 'PAYMENT_CUSTOMER_CREATE':
+				// $object is a Payment
 
-        	    dol_syslog("We trap trigger PAYMENT_CUSTOMER_CREATE for id = ".$object->id);
+				dol_syslog("We trap trigger PAYMENT_CUSTOMER_CREATE for id = ".$object->id);
 
-        	    // Send to DataDog (metric + event)
-        	    if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public)))
-        	    {
-        	        $totalamount = 0;
-        	        foreach ($object->amounts as $key => $amount)
-        	        {
-        	            $totalamount+=$amount;
-        	        }
-        	        $totalamount=price2num($totalamount);
+				// Send to DataDog (metric + event)
+				if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public))) {
+					$totalamount = 0;
+					foreach ($object->amounts as $key => $amount) {
+						$totalamount+=$amount;
+					}
+					$totalamount=price2num($totalamount);
 
-        	        try {
-        	            dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+					try {
+						dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-        	            $arrayconfig=array();
-        	            if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-        	            {
-        	                $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-        	            }
+						$arrayconfig=array();
+						if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+							$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+						}
 
-        	            $statsd = new DataDog\DogStatsd($arrayconfig);
+						$statsd = new DataDog\DogStatsd($arrayconfig);
 
-        	            $arraytags=null;
-        	            $statsd->increment('sellyoursaas.payment', 1, $arraytags, $totalamount);
-        	            $statsd->increment('sellyoursaas.paymentdone', 1, $arraytags);
-        	        }
-        	        catch(Exception $e)
-        	        {
+						$arraytags=null;
+						$statsd->increment('sellyoursaas.payment', 1, $arraytags, $totalamount);
+						$statsd->increment('sellyoursaas.paymentdone', 1, $arraytags);
+					} catch (Exception $e) {
+					}
+				}
+				break;
 
-        	        }
-        	    }
-        	    break;
+			case 'PAYMENT_CUSTOMER_DELETE':
 
-        	case 'PAYMENT_CUSTOMER_DELETE':
+				dol_syslog("We trap trigger PAYMENT_CUSTOMER_DELETE for id = ".$object->id);
 
-        	    dol_syslog("We trap trigger PAYMENT_CUSTOMER_DELETE for id = ".$object->id);
+				// Send to DataDog (metric + event)
+				if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public))) {
+					try {
+						dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-        	    // Send to DataDog (metric + event)
-        	    if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public)))
-        	    {
-        	        try {
-        	            dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+						$arrayconfig=array();
+						if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+							$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+						}
 
-        	            $arrayconfig=array();
-        	            if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-        	            {
-        	                $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-        	            }
+						$statsd = new DataDog\DogStatsd($arrayconfig);
 
-        	            $statsd = new DataDog\DogStatsd($arrayconfig);
+						$totalamount=price2num(-1 * $object->amount);
 
-        	            $totalamount=price2num(-1 * $object->amount);
+						$arraytags=null;
+						$statsd->increment('sellyoursaas.payment', 1, $arraytags, $totalamount);   // total amount is negative
+						//$statsd->increment('sellyoursaas.paymentdone', 1, $arraytags);
+					} catch (Exception $e) {
+					}
+				}
+				break;
 
-        	            $arraytags=null;
-        	            $statsd->increment('sellyoursaas.payment', 1, $arraytags, $totalamount);   // total amount is negative
-        	            //$statsd->increment('sellyoursaas.paymentdone', 1, $arraytags);
-        	        }
-        	        catch(Exception $e)
-        	        {
+			case 'COMPANY_MODIFY':
+				/*var_dump($object->oldcopy->array_options['options_date_endfreeperiod']);
+				 var_dump($object->array_options['options_date_endfreeperiod']);
+				 var_dump($object->lines);*/
 
-        	        }
-        	    }
-        	    break;
+				if (isset($object->oldcopy)	&&
+				(($object->oldcopy->tva_intra != $object->tva_intra)
+				|| ($object->oldcopy->tva_assuj != $object->tva_assuj)
+				|| ($object->oldcopy->country_id != $object->country_id))) {
+					include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+					include_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
-        	case 'COMPANY_MODIFY':
-        		/*var_dump($object->oldcopy->array_options['options_date_endfreeperiod']);
-        		 var_dump($object->array_options['options_date_endfreeperiod']);
-        		 var_dump($object->lines);*/
+					dol_syslog("We change intra VAT information or country id, so we must also change VAT into contract and into template invoices");
 
-        		if (isset($object->oldcopy)	&&
-        		(($object->oldcopy->tva_intra != $object->tva_intra)
-        		|| ($object->oldcopy->tva_assuj != $object->tva_assuj)
-        		|| ($object->oldcopy->country_id != $object->country_id)))
-        		{
-        			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-        			include_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+					$object->country_code = getCountry($object->country_id, 2);
 
-        			dol_syslog("We change intra VAT information or country id, so we must also change VAT into contract and into template invoices");
-
-        			$object->country_code = getCountry($object->country_id, 2);
-
-        			$sql ="SELECT c.rowid FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contrat_extrafields as ce";
-        			$sql.=" WHERE ce.fk_object = c.rowid AND ce.deployment_status IS NOT NULL";
-        			$sql.=" AND c.fk_soc = ".$object->id;
-        			$resql = $this->db->query($sql);
-        			if ($resql)
-        			{
-        				$num = $this->db->num_rows($resql);
-        				$i=0;
-        				while($i < $num)
-        				{
+					$sql ="SELECT c.rowid FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contrat_extrafields as ce";
+					$sql.=" WHERE ce.fk_object = c.rowid AND ce.deployment_status IS NOT NULL";
+					$sql.=" AND c.fk_soc = ".$object->id;
+					$resql = $this->db->query($sql);
+					if ($resql) {
+						$num = $this->db->num_rows($resql);
+						$i=0;
+						while ($i < $num) {
 							$obj = $this->db->fetch_object($resql);
 
 							$contract = new Contrat($this->db);
 							$contract->fetch($obj->rowid);
 
-							foreach($contract->lines as $line)
-							{
+							foreach ($contract->lines as $line) {
 								//$newvatrate = get_default_tva($mysoc, $object, $line->fk_product);
 								$newvatrate = get_default_tva($mysoc, $object, 0);
-								if ($newvatrate != $line->tva_tx)
-								{
+								if ($newvatrate != $line->tva_tx) {
 									$line->tva_tx = $newvatrate;
 									$line->update($user, 1);
 								}
@@ -437,21 +390,16 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 							// Test if there is template invoice linked to contract
 							$contract->fetchObjectLinked();
 
-							if (is_array($contract->linkedObjects['facturerec']) && count($contract->linkedObjects['facturerec']) > 0)
-							{
-								foreach($contract->linkedObjects['facturerec'] as $invoice)
-								{
+							if (is_array($contract->linkedObjects['facturerec']) && count($contract->linkedObjects['facturerec']) > 0) {
+								foreach ($contract->linkedObjects['facturerec'] as $invoice) {
 									$sqlsearchline = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'facturedet_rec WHERE fk_facture = '.$invoice->id;
 									$resqlsearchline = $this->db->query($sqlsearchline);
-									if ($resqlsearchline)
-									{
+									if ($resqlsearchline) {
 										$num_search_line = $this->db->num_rows($resqlsearchline);
 										$j=0;
-										while ($j < $num_search_line)
-										{
+										while ($j < $num_search_line) {
 											$objsearchline = $this->db->fetch_object($resqlsearchline);
-											if ($objsearchline)	// If empty, it means, template invoice has no line corresponding to contract line
-											{
+											if ($objsearchline) {	// If empty, it means, template invoice has no line corresponding to contract line
 												// Update qty
 												$invoicerecline = new FactureLigneRec($this->db);
 												$invoicerecline->fetch($objsearchline->rowid);
@@ -473,91 +421,71 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 										}
 
 										$result = $invoice->update_price();
-									}
-									else
-									{
+									} else {
 										$error++;
 										$this->error = $this->db->lasterror();
 									}
 								}
 							}
 
-        					$i++;
-        				}
-        			}
-        			else dol_print_error($this->db);
-        		}
-                break;
-        }
+							$i++;
+						}
+					} else dol_print_error($this->db);
+				}
+				break;
+		}
 
-    	if ($remoteaction)     // Note that remoteaction is on for line of contract if line has type 'app' only.
-    	{
-    		$okforremoteaction = 1;
-    		$contract = null;
-    		if (get_class($object) == 'Contrat')	// object is contract
-    		{
-    			$contract = $object;
-    		}
-    		else									// object is a line of contract fo type 'app'
-    		{
-    			$contract = new Contrat($this->db);
-    			$contract->fetch($object->fk_contrat);
-    		}
+		if ($remoteaction) {     // Note that remoteaction is on for line of contract if line has type 'app' only.
+			$okforremoteaction = 1;
+			$contract = null;
+			if (get_class($object) == 'Contrat') {	// object is contract
+				$contract = $object;
+			} else // object is a line of contract fo type 'app'
+			{
+				$contract = new Contrat($this->db);
+				$contract->fetch($object->fk_contrat);
+			}
 
-    		// No remote action required or this is not a sellyoursaas instance
-    		if (in_array($remoteaction, array('suspend','unsuspend','undeploy','undeployall')) && empty($contract->array_options['options_deployment_status'])) $okforremoteaction=0;
+			// No remote action required or this is not a sellyoursaas instance
+			if (in_array($remoteaction, array('suspend','unsuspend','undeploy','undeployall')) && empty($contract->array_options['options_deployment_status'])) $okforremoteaction=0;
 
-    		if (! $error && $okforremoteaction && $contract)
-    		{
-    			if ($remoteaction == 'deploy' || $remoteaction == 'unsuspend')		// when remoteaction = 'deploy' or 'unsuspend'
-    			{
-    				// If there is some template invoices linked to contract, we make sure the template invoices are also enabled
-    				$contract->fetchObjectLinked();
-    				//var_dump($contract->linkedObjects);
-    				if (is_array($contract->linkedObjects['facturerec']))
-    				{
-    					foreach ($contract->linkedObjects['facturerec'] as $templateinvoice)
-    					{
-    						if ($templateinvoice->suspended == FactureRec::STATUS_SUSPENDED)
-    						{
-    							$templateinvoice->setValueFrom('suspended', FactureRec::STATUS_NOTSUSPENDED);
-    						}
-    					}
-    				}
-    			}
+			if (! $error && $okforremoteaction && $contract) {
+				if ($remoteaction == 'deploy' || $remoteaction == 'unsuspend') {		// when remoteaction = 'deploy' or 'unsuspend'
+					// If there is some template invoices linked to contract, we make sure the template invoices are also enabled
+					$contract->fetchObjectLinked();
+					//var_dump($contract->linkedObjects);
+					if (is_array($contract->linkedObjects['facturerec'])) {
+						foreach ($contract->linkedObjects['facturerec'] as $templateinvoice) {
+							if ($templateinvoice->suspended == FactureRec::STATUS_SUSPENDED) {
+								$templateinvoice->setValueFrom('suspended', FactureRec::STATUS_NOTSUSPENDED);
+							}
+						}
+					}
+				}
 
-    			if ($remoteaction == 'undeploy')
-    			{
-    				// If there is some template invoices linked to contract, we make sure template invoice are disabled
-    				$contract->fetchObjectLinked();
-    				//var_dump($contract->linkedObjects);
-    				if (is_array($contract->linkedObjects['facturerec']))
-    				{
-    					foreach ($contract->linkedObjects['facturerec'] as $templateinvoice)
-    					{
-    						if ($templateinvoice->suspended == FactureRec::STATUS_NOTSUSPENDED)
-    						{
-    							$templateinvoice->setValueFrom('suspended', FactureRec::STATUS_SUSPENDED);
-    						}
-    					}
-    				}
-    			}
-    		}
-    		if (! $error && $okforremoteaction)
-    		{
-	    		dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
-	    		$sellyoursaasutils = new SellYourSaasUtils($this->db);
-	    		$result = $sellyoursaasutils->sellyoursaasRemoteAction($remoteaction, $object, 'admin', '', '', '0', 'Remote action executed from trigger', 300);	// No events added
-				if ($result <= 0)
-				{
+				if ($remoteaction == 'undeploy') {
+					// If there is some template invoices linked to contract, we make sure template invoice are disabled
+					$contract->fetchObjectLinked();
+					//var_dump($contract->linkedObjects);
+					if (is_array($contract->linkedObjects['facturerec'])) {
+						foreach ($contract->linkedObjects['facturerec'] as $templateinvoice) {
+							if ($templateinvoice->suspended == FactureRec::STATUS_NOTSUSPENDED) {
+								$templateinvoice->setValueFrom('suspended', FactureRec::STATUS_SUSPENDED);
+							}
+						}
+					}
+				}
+			}
+			if (! $error && $okforremoteaction) {
+				dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
+				$sellyoursaasutils = new SellYourSaasUtils($this->db);
+				$result = $sellyoursaasutils->sellyoursaasRemoteAction($remoteaction, $object, 'admin', '', '', '0', 'Remote action executed from trigger', 300);	// No events added
+				if ($result <= 0) {
 					$error++;
 					$this->error=$sellyoursaasutils->error;
 					$this->errors=$sellyoursaasutils->errors;
-				}
-				else
-				{
-					if (! preg_match('/sellyoursaas/', session_name()))	// No popup message after trigger if we are not into the backoffice
-					{
+				} else {
+					if (! preg_match('/sellyoursaas/', session_name())) {	// No popup message after trigger if we are not into the backoffice
 						if ($remoteaction == 'suspend') setEventMessage($langs->trans("InstanceWasSuspended", $contract->ref_customer.' ('.$contract->ref.')'));
 						elseif ($remoteaction == 'unsuspend') setEventMessage($langs->trans("InstanceWasUnsuspended", $contract->ref_customer.' ('.$contract->ref.')'));
 						elseif ($remoteaction == 'deploy') setEventMessage($langs->trans("InstanceWasDeployed", $contract->ref_customer.' ('.$contract->ref.')'));
@@ -567,15 +495,12 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						elseif ($remoteaction == 'rename') setEventMessage($langs->trans("InstanceWasRenamed", $contract->ref_customer.' '.$contract->array_options['options_custom_url'].' ('.$contract->ref.')'));
 					}
 				}
-    		}
-    	}
+			}
+		}
 
-    	if ($error)
-    	{
-    		return -1;
-    	}
-		else
-		{
+		if ($error) {
+			return -1;
+		} else {
 			return 0;
 		}
 	}

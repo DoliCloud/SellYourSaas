@@ -33,125 +33,116 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 
 	/**
-     *	Constructor
-     *
-     * 	@param	DoliDB	$db		Database handler
-     */
+	 *	Constructor
+	 *
+	 * 	@param	DoliDB	$db		Database handler
+	 */
 	function __construct($db)
 	{
 		global $conf;
 
 		$this->db=$db;
-		if (is_array($conf->modules))
-		{
-			$this->enabled=in_array('sellyoursaas',$conf->modules);
+		if (is_array($conf->modules)) {
+			$this->enabled=in_array('sellyoursaas', $conf->modules);
 		}
 	}
 
 
-    /**
-     *   Affiche formulaire de filtre qui apparait dans page de selection des destinataires de mailings
-     *
-     *   @return     string      Retourne zone select
-     */
-    function formFilter()
-    {
-        global $langs;
-        $langs->load("members");
+	/**
+	 *   Affiche formulaire de filtre qui apparait dans page de selection des destinataires de mailings
+	 *
+	 *   @return     string      Retourne zone select
+	 */
+	function formFilter()
+	{
+		global $langs;
+		$langs->load("members");
 
-        $form=new Form($this->db);
-        $formcompany=new FormCompany($this->db);
+		$form=new Form($this->db);
+		$formcompany=new FormCompany($this->db);
 
-        $arraystatus=array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed');
+		$arraystatus=array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed');
 
-        $s='';
-        $s.=$langs->trans("Type").': ';
-        $s.=$formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client');
+		$s='';
+		$s.=$langs->trans("Type").': ';
+		$s.=$formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client');
 
-        $s.=' ';
+		$s.=' ';
 
-        $s.=$langs->trans("Country").': ';
-        $formother=new FormAdmin($db);
-        $s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id');
+		$s.=$langs->trans("Country").': ';
+		$formother=new FormAdmin($db);
+		$s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id');
 
-        $s.='<br> ';
+		$s.='<br> ';
 
-        $s.=$langs->trans("Language").': ';
-        $formother=new FormAdmin($db);
+		$s.=$langs->trans("Language").': ';
+		$formother=new FormAdmin($db);
 
-        $s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+		$s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
-        $s.=$langs->trans("NotLanguage").': ';
-        $formother=new FormAdmin($db);
-        $s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+		$s.=$langs->trans("NotLanguage").': ';
+		$formother=new FormAdmin($db);
+		$s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
-        $s.='<br> ';
+		$s.='<br> ';
 
-        $s.=$langs->trans("DeploymentStatus").': ';
-        $s.='<select name="filter" class="flat">';
-        $s.='<option value="none">&nbsp;</option>';
-        foreach($arraystatus as $key => $status)
-        {
-        	$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
-        }
-        $s.='</select>';
+		$s.=$langs->trans("DeploymentStatus").': ';
+		$s.='<select name="filter" class="flat">';
+		$s.='<option value="none">&nbsp;</option>';
+		foreach ($arraystatus as $key => $status) {
+			$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
+		}
+		$s.='</select>';
 
-        $s.=' ';
+		$s.=' ';
 
-        $listofipwithinstances=array();
-        $sql = "SELECT DISTINCT deployment_host";
-        $sql .= " FROM ".MAIN_DB_PREFIX."contrat_extrafields";
-        $sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
-        $resql=$this->db->query($sql);
-        if ($resql)
-        {
-        	while($obj = $this->db->fetch_object($resql))
-        	{
-        		$listofipwithinstances[]=$obj->deployment_host;
-        	}
-        	$this->db->free($resql);
-        }
-        else dol_print_error($this->db);
+		$listofipwithinstances=array();
+		$sql = "SELECT DISTINCT deployment_host";
+		$sql .= " FROM ".MAIN_DB_PREFIX."contrat_extrafields";
+		$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+		$resql=$this->db->query($sql);
+		if ($resql) {
+			while ($obj = $this->db->fetch_object($resql)) {
+				$listofipwithinstances[]=$obj->deployment_host;
+			}
+			$this->db->free($resql);
+		} else dol_print_error($this->db);
 
-        $s.=$langs->trans("DeploymentHost").': ';
-        $s.='<select name="filterip" class="flat">';
-        $s.='<option value="none">&nbsp;</option>';
-        foreach($listofipwithinstances as $val)
-        {
-        	$s.='<option value="'.$val.'"'.(GETPOST('filterip', 'alpha') == $val ? ' selected':'').'>'.$val.'</option>';
-        }
-        $s.='</select>';
+		$s.=$langs->trans("DeploymentHost").': ';
+		$s.='<select name="filterip" class="flat">';
+		$s.='<option value="none">&nbsp;</option>';
+		foreach ($listofipwithinstances as $val) {
+			$s.='<option value="'.$val.'"'.(GETPOST('filterip', 'alpha') == $val ? ' selected':'').'>'.$val.'</option>';
+		}
+		$s.='</select>';
 
-        $s.='<br> ';
+		$s.='<br> ';
 
-        $listofpackages=array();
-        $sql = "SELECT DISTINCT ref";
-        $sql .= " FROM ".MAIN_DB_PREFIX."packages";
-        //$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
-        $resql=$this->db->query($sql);
-        if ($resql)
-        {
-        	while($obj = $this->db->fetch_object($resql))
-        	{
-        		$listofpackages[]=$obj->ref;
-        	}
-        	$this->db->free($resql);
-        }
-        else dol_print_error($this->db);
+		$listofpackages=array();
+		$sql = "SELECT DISTINCT ref";
+		$sql .= " FROM ".MAIN_DB_PREFIX."packages";
+		//$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+		$resql=$this->db->query($sql);
+		if ($resql) {
+			while ($obj = $this->db->fetch_object($resql)) {
+				$listofpackages[]=$obj->ref;
+			}
+			$this->db->free($resql);
+		} else dol_print_error($this->db);
 
-        $s.=$langs->trans("Product").': ';
-        $s.=$form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
+		$s.=$langs->trans("Product").': ';
+		$s.=$form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 
-        $s .= '<br>';
+		$s .= '<br>';
 
-        $s.=$langs->trans("DoNotUseDefaultStripeAccount").': ';
-        $s.='<input type="checkbox" value="1" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
+		$s.=$langs->trans("DoNotUseDefaultStripeAccount").': ';
+		$s.='<input type="checkbox" value="1" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
 
-        return $s;
-    }
+		return $s;
+	}
 
 
-    /**
+	/**
 	 *  Renvoie url lien vers fiche de la source du destinataire du mailing
 	 *
 	 *  @param		int			$id		ID
@@ -159,7 +150,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 */
 	function url($id)
 	{
-		return '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$id.'">'.img_object('',"company").'</a>';
+		return '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$id.'">'.img_object('', "company").'</a>';
 	}
 
 
@@ -170,7 +161,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *  @param	array	$filtersarray   Requete sql de selection des destinataires
 	 *  @return int           			<0 if error, number of emails added if ok
 	 */
-	function add_to_target($mailing_id, $filtersarray=array())
+	function add_to_target($mailing_id, $filtersarray = array())
 	{
 		global $conf;
 
@@ -178,11 +169,11 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$cibles = array();
 		$j = 0;
 
-		foreach($_POST['lang_id'] as $key => $val) {
-		    if (empty($val)) unset($_POST['lang_id'][$key]);
+		foreach ($_POST['lang_id'] as $key => $val) {
+			if (empty($val)) unset($_POST['lang_id'][$key]);
 		}
-		foreach($_POST['not_lang_id'] as $key => $val) {
-		    if (empty($val)) unset($_POST['not_lang_id'][$key]);
+		foreach ($_POST['not_lang_id'] as $key => $val) {
+			if (empty($val)) unset($_POST['not_lang_id'][$key]);
 		}
 
 		$productid = GETPOST('productid', 'int');
@@ -194,7 +185,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
 		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
-		    (! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
+			(! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
 			($productid > 0)) {
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
@@ -213,10 +204,10 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('filter'))."'";
 		}
 		if (GETPOST('filterip') && GETPOST('filterip') != 'none') {
-		    $sql.= " AND coe.deployment_host = '".$this->db->escape(GETPOST('filterip'))."'";
+			$sql.= " AND coe.deployment_host = '".$this->db->escape(GETPOST('filterip'))."'";
 		}
 		if (GETPOST('client') && GETPOST('client') != '-1') {
-		    $sql.= ' AND s.client IN ('.$this->db->sanitize(GETPOST('client', 'intcomma')).')';
+			$sql.= ' AND s.client IN ('.$this->db->sanitize(GETPOST('client', 'intcomma')).')';
 		}
 
 		if ($productid > 0) {
@@ -232,19 +223,16 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		// Stocke destinataires dans cibles
 		$result=$this->db->query($sql);
-		if ($result)
-		{
+		if ($result) {
 			$num = $this->db->num_rows($result);
 			$i = 0;
 
 			dol_syslog("mailinglist_sellyoursaas.modules.php: mailing $num target found");
 
 			$old = '';
-			while ($i < $num)
-			{
+			while ($i < $num) {
 				$obj = $this->db->fetch_object($result);
-				if ($old <> $obj->email)
-				{
+				if ($old <> $obj->email) {
 					$cibles[$j] = array(
 						'email' => $obj->email,
 						'lastname' => $obj->lastname,
@@ -261,9 +249,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 				$i++;
 			}
-		}
-		else
-		{
+		} else {
 			dol_syslog($this->db->error());
 			$this->error=$this->db->error();
 			return -1;
@@ -310,12 +296,10 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *	@param	string	$option		Options
 	 *	@return	int					Nb of recipients
 	 */
-	function getNbOfRecipients($filter=1,$option='')
+	function getNbOfRecipients($filter = 1, $option = '')
 	{
 		$a=parent::getNbOfRecipients("select count(distinct(email)) as nb from ".MAIN_DB_PREFIX."societe as s where email IS NOT NULL AND email != ''");
 		if ($a < 0) return -1;
 		return $a;
 	}
-
 }
-

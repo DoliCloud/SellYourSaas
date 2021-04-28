@@ -24,26 +24,26 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
-if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
+if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
 if (! $res) die("Include of main fails");
 
-require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
-require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
-require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture-rec.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php");
+require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
+require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
+require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+require_once DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php";
+require_once DOL_DOCUMENT_ROOT."/compta/facture/class/facture-rec.class.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
+require_once DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php";
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
@@ -51,30 +51,30 @@ $langs->loadLangs(array("admin", "companies", "users", "other", "commercial", "b
 
 $mesg=''; $error=0; $errors=array();
 
-$action		= (GETPOST('action','alpha') ? GETPOST('action','alpha') : 'view');
-$confirm	= GETPOST('confirm','alpha');
-$backtopage = GETPOST('backtopage','alpha');
-$id			= GETPOST('id','int');
-$instanceoldid = GETPOST('instanceoldid','alpha');
-$instance   = GETPOST('instance','alpha');
-$ref        = GETPOST('ref','alpha');
-$refold     = GETPOST('refold','alpha');
-$date_registration  = dol_mktime(0, 0, 0, GETPOST("date_registrationmonth",'int'), GETPOST("date_registrationday",'int'), GETPOST("date_registrationyear",'int'), 1);
-$date_endfreeperiod = dol_mktime(0, 0, 0, GETPOST("endfreeperiodmonth",'int'), GETPOST("endfreeperiodday",'int'), GETPOST("endfreeperiodyear",'int'), 1);
+$action		= (GETPOST('action', 'alpha') ? GETPOST('action', 'alpha') : 'view');
+$confirm	= GETPOST('confirm', 'alpha');
+$backtopage = GETPOST('backtopage', 'alpha');
+$id			= GETPOST('id', 'int');
+$instanceoldid = GETPOST('instanceoldid', 'alpha');
+$instance   = GETPOST('instance', 'alpha');
+$ref        = GETPOST('ref', 'alpha');
+$refold     = GETPOST('refold', 'alpha');
+$date_registration  = dol_mktime(0, 0, 0, GETPOST("date_registrationmonth", 'int'), GETPOST("date_registrationday", 'int'), GETPOST("date_registrationyear", 'int'), 1);
+$date_endfreeperiod = dol_mktime(0, 0, 0, GETPOST("endfreeperiodmonth", 'int'), GETPOST("endfreeperiodday", 'int'), GETPOST("endfreeperiodyear", 'int'), 1);
 if (empty($date_endfreeperiod) && ! empty($date_registration)) $date_endfreeperiod=$date_registration+15*24*3600;
 
 $emailtocreate=GETPOST('emailtocreate')?GETPOST('emailtocreate'):'';
-$instancetocreate=GETPOST('instancetocreate','alpha');
+$instancetocreate=GETPOST('instancetocreate', 'alpha');
 
 $error = 0; $errors = array();
 
 
 // Security check
 $user->rights->sellyoursaas->delete = $user->rights->sellyoursaas->write;
-$result = restrictedArea($user, 'sellyoursaas', 0, '','');
+$result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array array
-include_once(DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php');
+include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 $hookmanager=new HookManager($db);
 
 $object=new Societe($db);
@@ -83,7 +83,7 @@ if (GETPOST('loadthirdparty')) $action='create2';
 if (GETPOST('add')) $action='add';
 
 // Security check
-$result = restrictedArea($user, 'sellyoursaas', 0, '','');
+$result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 
 /*
@@ -93,14 +93,12 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '','');
 $parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 
-if (empty($reshook))
-{
-    // Cancel
-    if (GETPOST('cancel','alpha') && ! empty($backtopage))
-    {
-        header("Location: ".$backtopage);
-        exit;
-    }
+if (empty($reshook)) {
+	// Cancel
+	if (GETPOST('cancel', 'alpha') && ! empty($backtopage)) {
+		header("Location: ".$backtopage);
+		exit;
+	}
 }
 
 
@@ -109,7 +107,7 @@ if (empty($reshook))
  */
 
 $help_url='';
-llxHeader('',$langs->trans("SellYourSaasInstance"),$help_url);
+llxHeader('', $langs->trans("SellYourSaasInstance"), $help_url);
 
 $form = new Form($db);
 $formother = new FormOther($db);

@@ -24,44 +24,43 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
-if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
+if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
 if (! $res) die("Include of main fails");
 
-require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
-require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
-require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php");
+require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
+require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
+require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaasutils.class.php");
 
 $langs->loadLangs(array("admin", "companies", "users", "other", "contracts", "commercial", "sellyoursaas@sellyoursaas"));
 
-$action		= (GETPOST('action','alpha') ? GETPOST('action','alpha') : 'view');
-$confirm	= GETPOST('confirm','alpha');
-$backtopage = GETPOST('backtopage','alpha');
-$id			= GETPOST('id','int');
-$instanceoldid = GETPOST('instanceoldid','int');
-$ref        = GETPOST('ref','alpha');
-$refold     = GETPOST('refold','alpha');
+$action		= (GETPOST('action', 'alpha') ? GETPOST('action', 'alpha') : 'view');
+$confirm	= GETPOST('confirm', 'alpha');
+$backtopage = GETPOST('backtopage', 'alpha');
+$id			= GETPOST('id', 'int');
+$instanceoldid = GETPOST('instanceoldid', 'int');
+$ref        = GETPOST('ref', 'alpha');
+$refold     = GETPOST('refold', 'alpha');
 
 $mesg = '';
 
 $error=0; $errors=array();
 
 
-if ($action != 'create')
-{
+if ($action != 'create') {
 	$object = new Contrat($db);
 }
 
@@ -69,8 +68,7 @@ if ($action != 'create')
 $hookmanager->initHooks(array('contractcard','globalcard'));
 
 
-if ($id > 0 || $ref)
-{
+if ($id > 0 || $ref) {
 	$result = $object->fetch($id?$id:$instanceoldid, $ref?$ref:$refold);
 	if ($result < 0) dol_print_error($db, $object->error);
 	$id = $object->id;
@@ -82,50 +80,45 @@ $restorestringfrombackup = '';
 $restorestringfromarchive = '';
 $restorestringpretoshow = '';
 $ispaid = sellyoursaasIsPaidInstance($object);
-if ($ispaid)
-{
-    if ($object->array_options['options_deployment_status'] != 'undeployed')
-    {
-    	//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+if ($ispaid) {
+	if ($object->array_options['options_deployment_status'] != 'undeployed') {
+		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
-    	$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
-    	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "\n";
-    	$restorestringpretoshow .= "sudo chown -R admin.admin ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+		$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
+		$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+		$restorestringpretoshow .= "\n";
+		$restorestringpretoshow .= "sudo chown -R admin.admin ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+		$restorestringpretoshow .= "su - admin"."\n";
 
-    	$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
-    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
-    	$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
-    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
-    } else {
-    	//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	// If there is an old dir used by a previous extract, we remove it
-    	$restorestringpretoshow .= "sudo rm -fr ".$conf->global->DOLICLOUD_INSTANCES_PATH."/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
-    	$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
-    	$restorestringpretoshow .= 'sudo mkdir '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].'; sudo chown '.$object->array_options['options_username_os'].':'.$object->array_options['options_username_os'].' '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	$restorestringpretoshow .= "\n";
-    	$restorestringpretoshow .= "sudo chown -R admin.admin ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-    	$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+	} else {
+		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+		// If there is an old dir used by a previous extract, we remove it
+		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->DOLICLOUD_INSTANCES_PATH."/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+		$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
+		$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
+		$restorestringpretoshow .= 'sudo mkdir '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].'; sudo chown '.$object->array_options['options_username_os'].':'.$object->array_options['options_username_os'].' '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os']."\n";
+		$restorestringpretoshow .= "\n";
+		$restorestringpretoshow .= "sudo chown -R admin.admin ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
+		$restorestringpretoshow .= "su - admin"."\n";
 
-    	$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
+		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
-    	$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
-    	$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
-    	$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
-    	$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
-    }
-}
-else
-{
-	if ($object->array_options['options_deployment_status'] != 'undeployed')
-	{
+		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
+		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+	}
+} else {
+	if ($object->array_options['options_deployment_status'] != 'undeployed') {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
@@ -163,8 +156,7 @@ else
 
 // Increase limit of time. Works only if we are not in safe mode
 $ExecTimeLimit = 1800; // 30mn
-if (!empty($ExecTimeLimit))
-{
+if (!empty($ExecTimeLimit)) {
 	$err = error_reporting();
 	error_reporting(0); // Disable all errors
 	//error_reporting(E_ALL);
@@ -173,7 +165,7 @@ if (!empty($ExecTimeLimit))
 }
 
 // Security check
-$result = restrictedArea($user, 'sellyoursaas', 0, '','');
+$result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 
 /*
@@ -181,21 +173,18 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '','');
  */
 
 $parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
-$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+$reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 
-if (empty($reshook))
-{
+if (empty($reshook)) {
 	// Cancel
-	if (GETPOST('cancel','alpha') && ! empty($backtopage))
-	{
+	if (GETPOST('cancel', 'alpha') && ! empty($backtopage)) {
 		header("Location: ".$backtopage);
 		exit;
 	}
 
 	include 'refresh_action.inc.php';
 
-	if ($action == 'backupinstance')
-	{
+	if ($action == 'backupinstance') {
 		// Launch the remote action backup
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 
@@ -209,8 +198,7 @@ if (empty($reshook))
 		// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines + linked template invoice
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction('backup', $object, 'admin', '', '', '0', $comment);	// This include add of event if qty has changed
 
-		if ($result <= 0)
-		{
+		if ($result <= 0) {
 			$error++;
 			$errorforlocaltransaction++;
 			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
@@ -218,15 +206,12 @@ if (empty($reshook))
 			setEventMessages('BackupOK', null, 'mesgs');
 		}
 
-		if (! $errorforlocaltransaction)
-		{
+		if (! $errorforlocaltransaction) {
 			$db->commit();
 
 			// Reload object to get updated values
 			$result = $object->fetch($object->id);
-		}
-		else
-		{
+		} else {
 			$db->rollback();
 		}
 	}
@@ -240,7 +225,7 @@ if (empty($reshook))
  */
 
 $help_url='';
-llxHeader('',$langs->trans("DoliCloudInstances"),$help_url);
+llxHeader('', $langs->trans("DoliCloudInstances"), $help_url);
 
 $form = new Form($db);
 $form2 = new Form($db2);
@@ -248,8 +233,7 @@ $formcompany = new FormCompany($db);
 
 $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
 
-if ($action != 'create')
-{
+if ($action != 'create') {
 	// Show tabs
 	$head = contract_prepare_head($object);
 
@@ -258,8 +242,7 @@ if ($action != 'create')
 }
 
 
-if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
-{
+if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create') {
 	/*
 	 * Fiche en mode visualisation
 	*/
@@ -278,8 +261,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 
 	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
-	if (is_object($object->db2))
-	{
+	if (is_object($object->db2)) {
 		$savdb=$object->db;
 		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
 	}
@@ -307,25 +289,23 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	// Thirdparty
 	$morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . ($object->thirdparty ? $object->thirdparty->getNomUrl(1) : '');
 	// Project
-	if (! empty($conf->projet->enabled))
-	{
+	if (! empty($conf->projet->enabled)) {
 		$langs->load("projects");
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
-		if (0)
-		{
+		if (0) {
 			if ($action != 'classify')
 				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&amp;id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
-				if ($action == 'classify') {
-					//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
-					$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
-					$morehtmlref.='<input type="hidden" name="action" value="classin">';
-					$morehtmlref.='<input type="hidden" name="token" value="'.newToken().'">';
-					$morehtmlref.=$formproject->select_projects($object->thirdparty->id, $object->fk_project, 'projectid', $maxlength, 0, 1, 0, 1, 0, 0, '', 1);
-					$morehtmlref.='<input type="submit" class="button valignmiddle" value="'.$langs->trans("Modify").'">';
-					$morehtmlref.='</form>';
-				} else {
-					$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->thirdparty->id, $object->fk_project, 'none', 0, 0, 0, 1);
-				}
+			if ($action == 'classify') {
+				//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
+				$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
+				$morehtmlref.='<input type="hidden" name="action" value="classin">';
+				$morehtmlref.='<input type="hidden" name="token" value="'.newToken().'">';
+				$morehtmlref.=$formproject->select_projects($object->thirdparty->id, $object->fk_project, 'projectid', $maxlength, 0, 1, 0, 1, 0, 0, '', 1);
+				$morehtmlref.='<input type="submit" class="button valignmiddle" value="'.$langs->trans("Modify").'">';
+				$morehtmlref.='</form>';
+			} else {
+				$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->thirdparty->id, $object->fk_project, 'none', 0, 0, 0, 1);
+			}
 		} else {
 			if (! empty($object->fk_project)) {
 				$proj = new Project($db);
@@ -347,15 +327,12 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	dol_banner_tab($object, ($instanceoldid?'refold':'ref'), $linkback, 1, ($instanceoldid?'name':'ref'), 'ref', $morehtmlref, '', $nodbprefix, '', '', 1);
 }
 
-if ($id > 0 || $instanceoldid > 0)
-{
-    dol_fiche_end();
+if ($id > 0 || $instanceoldid > 0) {
+	dol_fiche_end();
 }
 
-if ($id > 0 && $action != 'edit' && $action != 'create')
-{
-	if (is_object($object->db2))
-	{
+if ($id > 0 && $action != 'edit' && $action != 'create') {
+	if (is_object($object->db2)) {
 		$object->db=$savdb;
 	}
 
@@ -428,12 +405,10 @@ if ($id > 0 && $action != 'edit' && $action != 'create')
 
 
 	// Barre d'actions
-	if (! $user->societe_id)
-	{
+	if (! $user->societe_id) {
 		print '<div class="tabsAction">';
 
-		if ($user->rights->sellyoursaas->write)
-		{
+		if ($user->rights->sellyoursaas->write) {
 			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=backupinstance">'.$langs->trans('BackupNow').'</a>';
 		}
 
@@ -498,4 +473,3 @@ if (! empty($mesg)) {
 llxFooter();
 
 $db->close();
-
