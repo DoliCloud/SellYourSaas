@@ -3176,13 +3176,13 @@ chown -R admin.admin /home/admin/wwwroot/dolibarr
 
 On *Master server*:
 
-* Install Dolibarr so that it responds to an Apache virtual host, for example: https://admin.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).
-Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than
-*/home/admin/wwwroot/dolibarr/documents*
+* Create an Apache virtual for the Dolibarr Master, for example: https://admin.mysaasdomainname.com, therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*
 
-* If you configure the sending of emails from the Dolibarr backoffice via an SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
+* Call the URL to install Dolibarr. Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than */home/admin/wwwroot/dolibarr/documents*
 
-* Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
+* If you configure the sending of emails from the Dolibarr backoffice via an SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service with the IP of the Master server.
+
+* Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php* in the cron of user *admin*.
 
 
 On *Deployment servers*:
