@@ -1842,13 +1842,17 @@ On *Deployment servers*, use a dedicated setup of the database.
 
 ==== Configuration
 
-Edition du fichier de config */lib/systemd/system/mysql.service* pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par *sudo systemctl show -p DefaultLimitNOFILE*) par défaut de systemd:
+Edition du fichier de config 
+*/lib/systemd/system/mysql.service*   ou  */lib/systemd/system/mariadb.service*
+pour mettre dans la section *[Service]* une valeur au nombre limit de fichier plus importante que la valeur de *4096* (affichable par *sudo systemctl show -p DefaultLimitNOFILE*) par défaut de systemd:
 
 [source,bash]
 ---------------
 LimitNOFILE=50000
 Restart=on-watchdog
 ---------------
+
+Ceci devrait éviter les alertes du type "Could not increase number of max_open_files to more than".
 
 Prendre en compte le changement en lançant:
 
@@ -3177,11 +3181,11 @@ $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
 
 * Installer la base de données de MaxMind:
 
-mkdir */home/admin/tools/maxmind/*
+mkdir /home/admin/tools/maxmind/
 
 Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
 
-chmod -R o-w maxmind
+chmod -R o-w /home/admin/tools/maxmind
 
 
 Sur le *Serveur maitre* Dolibarr, activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.

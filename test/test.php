@@ -3,14 +3,12 @@
 
 $domainemails = array('yhaoo.com','yahoo.com','dolibarr.fr');
 
-foreach ($domainemails as $domainemail)
-{
+foreach ($domainemails as $domainemail) {
 	print "idn_to_ascii(".$domainemail.") = ";
 	print idn_to_ascii($domainemail)."<br>\n";
 	print "checkdnsrr(idn_to_ascii(".$domainemail."), 'MX') = ";
 	print checkdnsrr(idn_to_ascii($domainemail), 'MX')."<br>\n";
-	if (checkdnsrr(idn_to_ascii($domainemail), 'MX'))
-	{
+	if (checkdnsrr(idn_to_ascii($domainemail), 'MX')) {
 		$mxhosts=array();
 		$weight=array();
 		getmxrr(idn_to_ascii($domainemail), $mxhosts, $weight);

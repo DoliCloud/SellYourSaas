@@ -39,8 +39,7 @@ define('DOL_APPLICATION_TITLE', 'MyAccount');
 
 // Functions
 
-if (! function_exists("llxHeader"))
-{
+if (! function_exists("llxHeader")) {
 	/**
 	 *	Show HTML header HTML + BODY + Top menu + left menu + DIV
 	 *
@@ -58,7 +57,7 @@ if (! function_exists("llxHeader"))
 	 * @param   string  $morecssonbody      More CSS on body tag.
 	 * @return	void
 	 */
-	function llxHeader($head='', $title='', $help_url='', $target='', $disablejs=0, $disablehead=0, $arrayofjs='', $arrayofcss='', $morequerystring='', $morecssonbody='')
+	function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '')
 	{
 		global $conf;
 
@@ -68,13 +67,11 @@ if (! function_exists("llxHeader"))
 		print '<body id="mainbody"'.($morecssonbody?' class="'.$morecssonbody.'"':'').'>' . "\n";
 
 		// top menu and left menu area
-		if (empty($conf->dol_hide_topmenu))
-		{
+		if (empty($conf->dol_hide_topmenu)) {
 			//top_menu($head, $title, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $help_url);
 		}
 
-		if (empty($conf->dol_hide_leftmenu))
-		{
+		if (empty($conf->dol_hide_leftmenu)) {
 			//left_menu('', $help_url, '', '', 1, $title, 1);
 		}
 
@@ -91,7 +88,7 @@ if (! function_exists("llxHeader"))
  *  @param	int		$forcenocache	Force disabling of cache for the page
  *  @return	void
  */
-function top_httphead_sellyoursaas($contenttype='text/html', $forcenocache=0)
+function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0)
 {
 	global $conf;
 
@@ -99,16 +96,14 @@ function top_httphead_sellyoursaas($contenttype='text/html', $forcenocache=0)
 	else header("Content-Type: ".$contenttype);
 	header("X-Content-Type-Options: nosniff");
 	header("X-Frame-Options: ALLOWALL");           // So we can include page into an IFRAME
-	if (! empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY))
-	{
+	if (! empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY)) {
 		// For example, to restrict script, object, frames or img to some domains
 		// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; child-src https://youtube.com; img-src: https://static.example.com
 		// For example, to restrict everything to one domain, except object, ...
 		// default-src https://cdn.example.net; object-src 'none'
 		header("Content-Security-Policy: ".$conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY);
 	}
-	if ($forcenocache)
-	{
+	if ($forcenocache) {
 		header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
 	}
 }
@@ -127,7 +122,7 @@ function top_httphead_sellyoursaas($contenttype='text/html', $forcenocache=0)
  * @param   int     $disablenofollow Disable no follow tag
  * @return	void
  */
-function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs='', $arrayofcss='', $disablejmobile=0, $disablenofollow=0)
+function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $disablejmobile = 0, $disablenofollow = 0)
 {
 	global $user, $conf, $langs, $db;
 
@@ -137,21 +132,19 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 
 	if (! empty($conf->global->MAIN_ACTIVATE_HTML4)) {
 		$doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
-	}else {
+	} else {
 		$doctype = '<!doctype html>';
 	}
 	print $doctype."\n";
-	if (! empty($conf->global->MAIN_USE_CACHE_MANIFEST)) print '<html lang="'.substr($langs->defaultlang,0,2).'" manifest="'.DOL_URL_ROOT.'/cache.manifest">'."\n";
-	else
-	{
-		print '<html lang="'.substr($langs->defaultlang,0,2).'">'."\n";
+	if (! empty($conf->global->MAIN_USE_CACHE_MANIFEST)) print '<html lang="'.substr($langs->defaultlang, 0, 2).'" manifest="'.DOL_URL_ROOT.'/cache.manifest">'."\n";
+	else {
+		print '<html lang="'.substr($langs->defaultlang, 0, 2).'">'."\n";
 		print '<!-- You language detected: '.$langs->defaultlang." -->\n";
 	}
 
-	if (empty($disablehead))
-	{
+	if (empty($disablehead)) {
 		print "<head>\n";
-		if (GETPOST('dol_basehref','alpha')) print '<base href="'.dol_escape_htmltag(GETPOST('dol_basehref','alpha')).'">'."\n";
+		if (GETPOST('dol_basehref', 'alpha')) print '<base href="'.dol_escape_htmltag(GETPOST('dol_basehref', 'alpha')).'">'."\n";
 		// Displays meta
 		print '<meta name="robots" content="noindex'.($disablenofollow?'':',nofollow').'">'."\n";      				// Do not index
 		print '<meta name="viewport" content="width=device-width, initial-scale=1.0">'."\n";	// Scale for mobile device
@@ -160,51 +153,48 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 		if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 		if ($favicon) {
-		    $href = 'img/'.$favicon;
-		    if (preg_match('/^http/i', $favicon)) $href = $favicon;
-		    print '<link rel="shortcut icon" href="'.$href.'">'."\n";
+			$href = 'img/'.$favicon;
+			if (preg_match('/^http/i', $favicon)) $href = $favicon;
+			print '<link rel="shortcut icon" href="'.$href.'">'."\n";
 		}
 
 		// Displays title
 		$appli=constant('DOL_APPLICATION_TITLE');
 		if (!empty($conf->global->MAIN_APPLICATION_TITLE)) $appli=$conf->global->MAIN_APPLICATION_TITLE;
 
-		if ($title && ! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/',$conf->global->MAIN_HTML_TITLE)) print '<title>'.dol_htmlentities($title).'</title>';
-		else if ($title) print '<title>'.dol_htmlentities($appli.' - '.$title).'</title>';
+		if ($title && ! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) print '<title>'.dol_htmlentities($title).'</title>';
+		elseif ($title) print '<title>'.dol_htmlentities($appli.' - '.$title).'</title>';
 		else print "<title>".dol_htmlentities($appli)."</title>";
 		print "\n";
 
 		//$ext='';
 		//if (! empty($conf->dol_use_jmobile)) $ext='version='.urlencode(DOL_VERSION);
 		$ext='version='.urlencode(DOL_VERSION);
-		if (GETPOST('version','int')) $ext='version='.GETPOST('version','int');	// usefull to force no cache on css/js
+		if (GETPOST('version', 'int')) $ext='version='.GETPOST('version', 'int');	// usefull to force no cache on css/js
 
-		$themeparam='?lang='.$langs->defaultlang.'&amp;theme='.$conf->theme.(GETPOST('optioncss','aZ09')?'&amp;optioncss='.GETPOST('optioncss','aZ09',1):'').'&amp;userid='.$user->id.'&amp;entity='.$conf->entity;
+		$themeparam='?lang='.$langs->defaultlang.'&amp;theme='.$conf->theme.(GETPOST('optioncss', 'aZ09')?'&amp;optioncss='.GETPOST('optioncss', 'aZ09', 1):'').'&amp;userid='.$user->id.'&amp;entity='.$conf->entity;
 		$themeparam.=($ext?'&amp;'.$ext:'');
 		if (! empty($_SESSION['dol_resetcache'])) $themeparam.='&amp;dol_resetcache='.$_SESSION['dol_resetcache'];
-		if (GETPOST('dol_hide_topmenu','int'))           { $themeparam.='&amp;dol_hide_topmenu='.GETPOST('dol_hide_topmenu','int'); }
-		if (GETPOST('dol_hide_leftmenu','int'))          { $themeparam.='&amp;dol_hide_leftmenu='.GETPOST('dol_hide_leftmenu','int'); }
-		if (GETPOST('dol_optimize_smallscreen','int'))   { $themeparam.='&amp;dol_optimize_smallscreen='.GETPOST('dol_optimize_smallscreen','int'); }
-		if (GETPOST('dol_no_mouse_hover','int'))         { $themeparam.='&amp;dol_no_mouse_hover='.GETPOST('dol_no_mouse_hover','int'); }
-		if (GETPOST('dol_use_jmobile','int'))            { $themeparam.='&amp;dol_use_jmobile='.GETPOST('dol_use_jmobile','int'); $conf->dol_use_jmobile=GETPOST('dol_use_jmobile','int'); }
+		if (GETPOST('dol_hide_topmenu', 'int')) { $themeparam.='&amp;dol_hide_topmenu='.GETPOST('dol_hide_topmenu', 'int'); }
+		if (GETPOST('dol_hide_leftmenu', 'int')) { $themeparam.='&amp;dol_hide_leftmenu='.GETPOST('dol_hide_leftmenu', 'int'); }
+		if (GETPOST('dol_optimize_smallscreen', 'int')) { $themeparam.='&amp;dol_optimize_smallscreen='.GETPOST('dol_optimize_smallscreen', 'int'); }
+		if (GETPOST('dol_no_mouse_hover', 'int')) { $themeparam.='&amp;dol_no_mouse_hover='.GETPOST('dol_no_mouse_hover', 'int'); }
+		if (GETPOST('dol_use_jmobile', 'int')) { $themeparam.='&amp;dol_use_jmobile='.GETPOST('dol_use_jmobile', 'int'); $conf->dol_use_jmobile=GETPOST('dol_use_jmobile', 'int'); }
 
-		if (! defined('DISABLE_JQUERY') && ! $disablejs && $conf->use_javascript_ajax)
-		{
+		if (! defined('DISABLE_JQUERY') && ! $disablejs && $conf->use_javascript_ajax) {
 			print '<!-- Includes CSS for JQuery (Ajax library) -->'."\n";
 			$jquerytheme = 'base';
 			if (!empty($conf->global->MAIN_USE_JQUERY_THEME)) $jquerytheme = $conf->global->MAIN_USE_JQUERY_THEME;
 			if (constant('JS_JQUERY_UI')) print '<link rel="stylesheet" type="text/css" href="'.JS_JQUERY_UI.'css/'.$jquerytheme.'/jquery-ui.min.css'.($ext?'?'.$ext:'').'">'."\n";  // JQuery
 			else print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/css/'.$jquerytheme.'/jquery-ui.css'.($ext?'?'.$ext:'').'">'."\n";    // JQuery
 			if (! defined('DISABLE_JQUERY_JNOTIFY')) print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css'.($ext?'?'.$ext:'').'">'."\n";          // JNotify
-			if (! defined('DISABLE_SELECT2') && (! empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT')))     // jQuery plugin "mutiselect", "multiple-select", "select2"...
-			{
+			if (! defined('DISABLE_SELECT2') && (! empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {     // jQuery plugin "mutiselect", "multiple-select", "select2"...
 				$tmpplugin=empty($conf->global->MAIN_USE_JQUERY_MULTISELECT)?constant('REQUIRE_JQUERY_MULTISELECT'):$conf->global->MAIN_USE_JQUERY_MULTISELECT;
 				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/css/'.$tmpplugin.'.css'.($ext?'?'.$ext:'').'">'."\n";
 			}
 		}
 
-		if (! defined('DISABLE_FONT_AWSOME'))
-		{
+		if (! defined('DISABLE_FONT_AWSOME')) {
 			print '<!-- Includes CSS for font awesome -->'."\n";
 			print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/all.min.css'.($ext?'?'.$ext:'').'">'."\n";
 			print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/v4-shims.min.css'.($ext?'?'.$ext:'').'">'."\n";
@@ -221,20 +211,17 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 
 
 		// CSS forced by page in top_htmlhead call (relative url starting with /)
-		if (is_array($arrayofcss))
-		{
-			foreach($arrayofcss as $cssfile)
-			{
-				print '<!-- Includes CSS added by page -->'."\n".'<link rel="stylesheet" type="text/css" title="default" href="'.dol_buildpath($cssfile,1);
+		if (is_array($arrayofcss)) {
+			foreach ($arrayofcss as $cssfile) {
+				print '<!-- Includes CSS added by page -->'."\n".'<link rel="stylesheet" type="text/css" title="default" href="'.dol_buildpath($cssfile, 1);
 				// We add params only if page is not static, because some web server setup does not return content type text/css if url has parameters and browser cache is not used.
-				if (!preg_match('/\.css$/i',$cssfile)) print $themeparam;
+				if (!preg_match('/\.css$/i', $cssfile)) print $themeparam;
 				print '">'."\n";
 			}
 		}
 
 		// Output standard javascript links
-		if (! defined('DISABLE_JQUERY') && ! $disablejs && ! empty($conf->use_javascript_ajax))
-		{
+		if (! defined('DISABLE_JQUERY') && ! $disablejs && ! empty($conf->use_javascript_ajax)) {
 			// JQuery. Must be before other includes
 			print '<!-- Includes JS for JQuery -->'."\n";
 			if (defined('JS_JQUERY') && constant('JS_JQUERY')) print '<script type="text/javascript" src="'.JS_JQUERY.'jquery.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
@@ -243,32 +230,27 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 			else print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
 			if (! defined('DISABLE_JQUERY_TABLEDND')) print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/tablednd/jquery.tablednd.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
 			// jQuery jnotify
-			if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY) && ! defined('DISABLE_JQUERY_JNOTIFY'))
-			{
+			if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY) && ! defined('DISABLE_JQUERY_JNOTIFY')) {
 				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
-			if (! defined('DISABLE_SELECT2') && (! empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT')))     // jQuery plugin "mutiselect", "multiple-select", "select2", ...
-			{
+			if (! defined('DISABLE_SELECT2') && (! empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {     // jQuery plugin "mutiselect", "multiple-select", "select2", ...
 				$tmpplugin=empty($conf->global->MAIN_USE_JQUERY_MULTISELECT)?constant('REQUIRE_JQUERY_MULTISELECT'):$conf->global->MAIN_USE_JQUERY_MULTISELECT;
 				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/js/'.$tmpplugin.'.full.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
 		}
 
-		if (! $disablejs && ! empty($conf->use_javascript_ajax))
-		{
+		if (! $disablejs && ! empty($conf->use_javascript_ajax)) {
 			// CKEditor
-			if (! empty($conf->fckeditor->enabled) && (empty($conf->global->FCKEDITOR_EDITORNAME) || $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor') && ! defined('DISABLE_CKEDITOR'))
-			{
+			if (! empty($conf->fckeditor->enabled) && (empty($conf->global->FCKEDITOR_EDITORNAME) || $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor') && ! defined('DISABLE_CKEDITOR')) {
 				print '<!-- Includes JS for CKEditor -->'."\n";
 				$pathckeditor = DOL_URL_ROOT . '/includes/ckeditor/ckeditor/';
 				$jsckeditor='ckeditor.js';
-				if (constant('JS_CKEDITOR'))	// To use external ckeditor 4 js lib
-				{
+				if (constant('JS_CKEDITOR')) {	// To use external ckeditor 4 js lib
 					$pathckeditor=constant('JS_CKEDITOR');
 				}
 				print '<script type="text/javascript">';
 				print 'var CKEDITOR_BASEPATH = \''.$pathckeditor.'\';'."\n";
-				print 'var ckeditorConfig = \''.dol_buildpath($themesubdir.'/theme/'.$conf->theme.'/ckeditor/config.js'.($ext?'?'.$ext:''),1).'\';'."\n";		// $themesubdir='' in standard usage
+				print 'var ckeditorConfig = \''.dol_buildpath($themesubdir.'/theme/'.$conf->theme.'/ckeditor/config.js'.($ext?'?'.$ext:''), 1).'\';'."\n";		// $themesubdir='' in standard usage
 				print 'var ckeditorFilebrowserBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print 'var ckeditorFilebrowserImageBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Type=Image&Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print '</script>'."\n";
@@ -276,13 +258,11 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 			}
 
 			// Browser notifications (if NOREQUIREMENU is on, it is mostly a page for popup, so we do not enable notif too. We hide also for public pages).
-			if (!defined('NOBROWSERNOTIF') && !defined('NOREQUIREMENU') && !defined('NOLOGIN'))
-			{
+			if (!defined('NOBROWSERNOTIF') && !defined('NOREQUIREMENU') && !defined('NOLOGIN')) {
 				$enablebrowsernotif=false;
 				if (! empty($conf->agenda->enabled) && ! empty($conf->global->AGENDA_REMINDER_BROWSER)) $enablebrowsernotif=true;
 				if ($conf->browser->layout == 'phone') $enablebrowsernotif=false;
-				if ($enablebrowsernotif)
-				{
+				if ($enablebrowsernotif) {
 					print '<!-- Includes JS of Dolibarr (brwoser layout = '.$conf->browser->layout.')-->'."\n";
 					print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/lib_notification.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
 				}
@@ -293,19 +273,14 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 			print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
 
 			// JS forced by page in top_htmlhead (relative url starting with /)
-			if (is_array($arrayofjs))
-			{
+			if (is_array($arrayofjs)) {
 				print '<!-- Includes JS added by page -->'."\n";
-				foreach($arrayofjs as $jsfile)
-				{
-					if (preg_match('/^http/i',$jsfile))
-					{
+				foreach ($arrayofjs as $jsfile) {
+					if (preg_match('/^http/i', $jsfile)) {
 						print '<script type="text/javascript" src="'.$jsfile.'"></script>'."\n";
-					}
-					else
-					{
-						if (! preg_match('/^\//',$jsfile)) $jsfile='/'.$jsfile;	// For backward compatibility
-						print '<script type="text/javascript" src="'.dol_buildpath($jsfile,1).'"></script>'."\n";
+					} else {
+						if (! preg_match('/^\//', $jsfile)) $jsfile='/'.$jsfile;	// For backward compatibility
+						print '<script type="text/javascript" src="'.dol_buildpath($jsfile, 1).'"></script>'."\n";
 					}
 				}
 			}
@@ -322,8 +297,7 @@ function top_htmlhead_sellyoursaas($head, $title='', $disablejs=0, $disablehead=
 
 
 
-if (! function_exists("llxFooter"))
-{
+if (! function_exists("llxFooter")) {
 	/**
 	 * Show HTML footer
 	 * Close div /DIV class=fiche + /DIV id-right + /DIV id-container + /BODY + /HTML.
@@ -334,7 +308,7 @@ if (! function_exists("llxFooter"))
 	 * @param	int		$disabledoutputofmessages	Clear all messages stored into session without diplaying them
 	 * @return	void
 	 */
-	function llxFooter($comment='',$zone='private', $disabledoutputofmessages=0)
+	function llxFooter($comment = '', $zone = 'private', $disabledoutputofmessages = 0)
 	{
 		global $conf, $langs, $user;
 		global $delayedhtmlcontent;
@@ -343,14 +317,11 @@ if (! function_exists("llxFooter"))
 		dol_htmloutput_events($disabledoutputofmessages);
 
 		// Save $user->lastsearch_values if defined (define on list pages when a form field search_xxx exists)
-		if (is_object($user) && ! empty($user->lastsearch_values_tmp) && is_array($user->lastsearch_values_tmp))
-		{
+		if (is_object($user) && ! empty($user->lastsearch_values_tmp) && is_array($user->lastsearch_values_tmp)) {
 			// Clean data
-			foreach($user->lastsearch_values_tmp as $key => $val)
-			{
+			foreach ($user->lastsearch_values_tmp as $key => $val) {
 				unset($_SESSION['lastsearch_values_tmp_'.$key]);
-				if (count($val))
-				{
+				if (count($val)) {
 					if (empty($val['sortfield'])) unset($val['sortfield']);
 					if (empty($val['sortorder'])) unset($val['sortorder']);
 					dol_syslog('Save lastsearch_values_tmp_'.$key.'='.json_encode($val, 0, 1));
@@ -361,17 +332,14 @@ if (! function_exists("llxFooter"))
 		}
 
 		// Core error message
-		if (! empty($conf->global->MAIN_CORE_ERROR))
-		{
+		if (! empty($conf->global->MAIN_CORE_ERROR)) {
 			// Ajax version
-			if ($conf->use_javascript_ajax)
-			{
+			if ($conf->use_javascript_ajax) {
 				$title = img_warning().' '.$langs->trans('CoreErrorTitle');
 				print ajax_dialog($title, $langs->trans('CoreErrorMessage'));
 			}
 			// html version
-			else
-			{
+			else {
 				$msg = img_warning().' '.$langs->trans('CoreErrorMessage');
 				print '<div class="error">'.$msg.'</div>';
 			}
@@ -391,8 +359,7 @@ if (! function_exists("llxFooter"))
 		printCommonFooter($zone);
 		//var_dump($langs);		// Uncommment to see the property _tab_loaded to see which language file were loaded
 
-		if (! empty($conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER))
-		{
+		if (! empty($conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER)) {
 			print $conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER;
 		}
 
@@ -402,8 +369,7 @@ if (! function_exists("llxFooter"))
 		if (! empty($delayedhtmlcontent)) print $delayedhtmlcontent;
 
 		// Wrapper to manage document_preview
-		if (! empty($conf->use_javascript_ajax) && ($conf->browser->layout != 'phone'))
-		{
+		if (! empty($conf->use_javascript_ajax) && ($conf->browser->layout != 'phone')) {
 			print "\n<!-- JS CODE TO ENABLE document_preview -->\n";
 			print '<script type="text/javascript">
                 jQuery(document).ready(function () {
@@ -417,8 +383,7 @@ if (! function_exists("llxFooter"))
 		}
 
 		// Wrapper to manage dropdown
-		if (! empty($conf->use_javascript_ajax) && ! defined('JS_JQUERY_DISABLE_DROPDOWN'))
-		{
+		if (! empty($conf->use_javascript_ajax) && ! defined('JS_JQUERY_DISABLE_DROPDOWN')) {
 			print "\n<!-- JS CODE TO ENABLE dropdown -->\n";
 			print '<script type="text/javascript">
                 jQuery(document).ready(function () {
@@ -460,18 +425,14 @@ if (! function_exists("llxFooter"))
 		print '<div id="dialogforpopup" style="display: none;"></div>'."\n";
 
 		// Show conversion tracker (the $_SESSION['showconversiontracker'] is set into output page after a payment record by myaccount/index.php)
-		if (! empty($_SESSION['showconversiontracker']))
-		{
+		if (! empty($_SESSION['showconversiontracker'])) {
 			print "\n".'<!-- Conversion tracker $_SESSION[\'showconversiontracker\']='.$_SESSION['showconversiontracker'].' -->'."\n";
-			if ($_SESSION['showconversiontracker'] == 'paymentrecorded')
-			{
-                print $conf->global->SELLYOURSAAS_CONVERSION_FOOTER;
-                $_SESSION['showconversiontracker'] = '';
-                unset($_SESSION['showconversiontracker']);
+			if ($_SESSION['showconversiontracker'] == 'paymentrecorded') {
+				print $conf->global->SELLYOURSAAS_CONVERSION_FOOTER;
+				$_SESSION['showconversiontracker'] = '';
+				unset($_SESSION['showconversiontracker']);
 			}
-		}
-		else
-		{
+		} else {
 			print "\n".'<!-- No conversion tracker on this page -->'."\n";
 		}
 
@@ -490,26 +451,23 @@ if (! function_exists("llxFooter"))
  *  @param  string  $mode       			'' (prefix for session name) or 'email' (prefix for email id)
  *  @return	string      					A calculated prefix
  */
-if (! function_exists('dol_getprefix'))
-{
-	function dol_getprefix($mode='')
+if (! function_exists('dol_getprefix')) {
+	function dol_getprefix($mode = '')
 	{
 		// If prefix is for email (we need to have $conf alreayd loaded for this case)
-		if ($mode == 'email')
-		{
+		if ($mode == 'email') {
 			global $conf;
 
-			if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID))	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
-		    {
-		        if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
-		        elseif (isset($_SERVER["SERVER_NAME"])) return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
-		    }
+			if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID)) {	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
+				if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
+				elseif (isset($_SERVER["SERVER_NAME"])) return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
+			}
 
-		    // The recommended value (may be not defined for old versions)
-		    if (! empty($conf->file->instance_unique_id)) return 'sellyoursaas'.$conf->file->instance_unique_id;
+			// The recommended value (may be not defined for old versions)
+			if (! empty($conf->file->instance_unique_id)) return 'sellyoursaas'.$conf->file->instance_unique_id;
 
-		    // For backward compatibility
-		    return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+			// For backward compatibility
+			return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
 		}
 
 		// If prefix is for session (no need to have $conf loaded)
@@ -522,9 +480,8 @@ if (! function_exists('dol_getprefix'))
 		}
 
 		// For backward compatibility
-		if (isset($_SERVER["SERVER_NAME"]) && isset($_SERVER["DOCUMENT_ROOT"]))
-		{
-		    return 'sellyoursaas'.dol_hash($_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+		if (isset($_SERVER["SERVER_NAME"]) && isset($_SERVER["DOCUMENT_ROOT"])) {
+			return 'sellyoursaas'.dol_hash($_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
 		}
 
 		return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
@@ -540,13 +497,13 @@ if (! function_exists('dol_getprefix'))
  * @param		Societe		$mysoc		Company object
  * @return		void
  */
-function dol_loginfunction($langs,$conf,$mysoc)
+function dol_loginfunction($langs, $conf, $mysoc)
 {
 	global $dolibarr_main_demo, $db;
 	global $hookmanager;
 
 	//$langs=new Translate('', $conf);
-	$langs->setDefaultLang(GETPOST('lang','aZ09')?GETPOST('lang','aZ09'):'auto');
+	$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
 
 	$langs->loadLangs(array("main","other","help","admin","sellyoursaas@sellyoursaas"));
 
@@ -565,17 +522,14 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	if (! empty($conf->global->MAIN_APPLICATION_TITLE)) $title=$conf->global->MAIN_APPLICATION_TITLE;
 	$titletruedolibarrversion=constant('DOL_VERSION');	// $title used by login template after the @ to inform of true Dolibarr version
 	$title=$langs->trans("YourCustomerDashboard");
-	if (GETPOST('reseller','alpha')) $title=$langs->trans("YourCustomerOrResellerDashboard");
+	if (GETPOST('reseller', 'alpha')) $title=$langs->trans("YourCustomerOrResellerDashboard");
 
 	// Note: $conf->css looks like '/theme/eldy/style.css.php'
-	$conf->css = "/theme/".(GETPOST('theme','alpha')?GETPOST('theme','alpha'):$conf->theme)."/style.css.php";
-	$themepath=dol_buildpath($conf->css,1);
-	if (! empty($conf->modules_parts['theme']))		// Using this feature slow down application
-	{
-		foreach($conf->modules_parts['theme'] as $reldir)
-		{
-			if (file_exists(dol_buildpath($reldir.$conf->css, 0)))
-			{
+	$conf->css = "/theme/".(GETPOST('theme', 'alpha')?GETPOST('theme', 'alpha'):$conf->theme)."/style.css.php";
+	$themepath=dol_buildpath($conf->css, 1);
+	if (! empty($conf->modules_parts['theme'])) {		// Using this feature slow down application
+		foreach ($conf->modules_parts['theme'] as $reldir) {
+			if (file_exists(dol_buildpath($reldir.$conf->css, 0))) {
 				$themepath=dol_buildpath($reldir.$conf->css, 1);
 				break;
 			}
@@ -592,24 +546,23 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	$sessiontimeout='DOLSESSTIMEOUT_'.$prefix;
 	if (! empty($conf->global->MAIN_SESSION_TIMEOUT)) setcookie($sessiontimeout, $conf->global->MAIN_SESSION_TIMEOUT, 0, "/", null, false, true);
 
-	if (GETPOST('urlfrom','alpha')) $_SESSION["urlfrom"]=GETPOST('urlfrom','alpha');
+	if (GETPOST('urlfrom', 'alpha')) $_SESSION["urlfrom"]=GETPOST('urlfrom', 'alpha');
 	else unset($_SESSION["urlfrom"]);
 
-	if (! GETPOST("username",'alpha')) $focus_element='username';
+	if (! GETPOST("username", 'alpha')) $focus_element='username';
 	else $focus_element='password';
 
 	$demologin='';
 	$demopassword='';
-	if (! empty($dolibarr_main_demo))
-	{
-		$tab=explode(',',$dolibarr_main_demo);
+	if (! empty($dolibarr_main_demo)) {
+		$tab=explode(',', $dolibarr_main_demo);
 		$demologin=$tab[0];
 		$demopassword=$tab[1];
 	}
 
 	// Execute hook getLoginPageOptions (for table)
-	$parameters=array('entity' => GETPOST('entity','int'));
-	$reshook = $hookmanager->executeHooks('getLoginPageOptions',$parameters);    // Note that $action and $object may have been modified by some hooks.
+	$parameters=array('entity' => GETPOST('entity', 'int'));
+	$reshook = $hookmanager->executeHooks('getLoginPageOptions', $parameters);    // Note that $action and $object may have been modified by some hooks.
 	if (is_array($hookmanager->resArray) && ! empty($hookmanager->resArray)) {
 		$morelogincontent = $hookmanager->resArray; // (deprecated) For compatibility
 	} else {
@@ -617,12 +570,12 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	}
 
 	// Execute hook getLoginPageExtraOptions (eg for js)
-	$parameters=array('entity' => GETPOST('entity','int'));
-	$reshook = $hookmanager->executeHooks('getLoginPageExtraOptions',$parameters);    // Note that $action and $object may have been modified by some hooks.
+	$parameters=array('entity' => GETPOST('entity', 'int'));
+	$reshook = $hookmanager->executeHooks('getLoginPageExtraOptions', $parameters);    // Note that $action and $object may have been modified by some hooks.
 	$moreloginextracontent = $hookmanager->resPrint;
 
 	// Login
-	$login = (! empty($hookmanager->resArray['username']) ? $hookmanager->resArray['username'] : (GETPOST("username","alpha") ? GETPOST("username","alpha") : $demologin));
+	$login = (! empty($hookmanager->resArray['username']) ? $hookmanager->resArray['username'] : (GETPOST("username", "alpha") ? GETPOST("username", "alpha") : $demologin));
 	$password = $demopassword;
 
 	// Show logo (search in order: small company logo, large company logo, theme logo, common logo)
@@ -639,73 +592,56 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 	$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
 
-	if (! empty($conf->global->$constforaltname))
-	{
-	    $sellyoursaasdomain = $domainname;
-	    $sellyoursaasname = $conf->global->$constforaltname;
-	    $constlogo.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
-	    $constlogosmall.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
+	if (! empty($conf->global->$constforaltname)) {
+		$sellyoursaasdomain = $domainname;
+		$sellyoursaasname = $conf->global->$constforaltname;
+		$constlogo.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
+		$constlogosmall.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 	}
 
 	$homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
 
-	if (empty($urllogo) && ! empty($conf->global->$constlogosmall))
-	{
-	    if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall))
-	    {
-	        $urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constlogosmall);
-	    }
-	}
-	elseif (empty($urllogo) && ! empty($conf->global->$constlogo))
-	{
-	    if (is_readable($conf->mycompany->dir_output.'/logos/'.$conf->global->$constlogo))
-	    {
-	        $urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/'.$conf->global->$constlogo);
-            $width=128;
-	    }
-	}
-	elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png'))
-	{
+	if (empty($urllogo) && ! empty($conf->global->$constlogosmall)) {
+		if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall)) {
+			$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constlogosmall);
+		}
+	} elseif (empty($urllogo) && ! empty($conf->global->$constlogo)) {
+		if (is_readable($conf->mycompany->dir_output.'/logos/'.$conf->global->$constlogo)) {
+			$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/'.$conf->global->$constlogo);
+			$width=128;
+		}
+	} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
 		$urllogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
-	}
-	elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png'))
-	{
+	} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png')) {
 		$urllogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
-	}
-	else
-	{
-	    $urllogo=DOL_URL_ROOT.'/theme/login_logo.png';
+	} else {
+		$urllogo=DOL_URL_ROOT.'/theme/login_logo.png';
 	}
 
 	// Security graphical code
 	$captcha=0;
 	$captcha_refresh='';
-	if (function_exists("imagecreatefrompng") && ! empty($conf->global->MAIN_SECURITY_ENABLECAPTCHA))
-	{
+	if (function_exists("imagecreatefrompng") && ! empty($conf->global->MAIN_SECURITY_ENABLECAPTCHA)) {
 		$captcha=1;
-		$captcha_refresh=img_picto($langs->trans("Refresh"),'refresh','id="captcha_refresh_img"');
+		$captcha_refresh=img_picto($langs->trans("Refresh"), 'refresh', 'id="captcha_refresh_img"');
 	}
 
 	// Extra link
 	$forgetpasslink=0;
 	$helpcenterlink=0;
-	if (empty($conf->global->MAIN_SECURITY_DISABLEFORGETPASSLINK) || empty($conf->global->MAIN_HELPCENTER_DISABLELINK))
-	{
-		if (empty($conf->global->MAIN_SECURITY_DISABLEFORGETPASSLINK))
-		{
+	if (empty($conf->global->MAIN_SECURITY_DISABLEFORGETPASSLINK) || empty($conf->global->MAIN_HELPCENTER_DISABLELINK)) {
+		if (empty($conf->global->MAIN_SECURITY_DISABLEFORGETPASSLINK)) {
 			$forgetpasslink=1;
 		}
 
-		if (empty($conf->global->MAIN_HELPCENTER_DISABLELINK))
-		{
+		if (empty($conf->global->MAIN_HELPCENTER_DISABLELINK)) {
 			$helpcenterlink=1;
 		}
 	}
 
 	// Home message
 	$main_home='';
-	if (! empty($conf->global->MAIN_HOME))
-	{
+	if (! empty($conf->global->MAIN_HOME)) {
 		$substitutionarray=getCommonSubstitutionArray($langs);
 		complete_substitutions_array($substitutionarray, $langs);
 		$texttoshow = make_substitutions($conf->global->MAIN_HOME, $substitutionarray, $langs);
@@ -724,11 +660,11 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	if (! empty($conf->global->MAIN_USE_JQUERY_THEME)) $jquerytheme = $conf->global->MAIN_USE_JQUERY_THEME;
 
 	// Set dol_hide_topmenu, dol_hide_leftmenu, dol_optimize_smallscreen, dol_no_mouse_hover
-	$dol_hide_topmenu=GETPOST('dol_hide_topmenu','int');
-	$dol_hide_leftmenu=GETPOST('dol_hide_leftmenu','int');
-	$dol_optimize_smallscreen=GETPOST('dol_optimize_smallscreen','int');
-	$dol_no_mouse_hover=GETPOST('dol_no_mouse_hover','int');
-	$dol_use_jmobile=GETPOST('dol_use_jmobile','int');
+	$dol_hide_topmenu=GETPOST('dol_hide_topmenu', 'int');
+	$dol_hide_leftmenu=GETPOST('dol_hide_leftmenu', 'int');
+	$dol_optimize_smallscreen=GETPOST('dol_optimize_smallscreen', 'int');
+	$dol_no_mouse_hover=GETPOST('dol_no_mouse_hover', 'int');
+	$dol_use_jmobile=GETPOST('dol_use_jmobile', 'int');
 
 	// Include login page template
 	include $template_dir.'loginmyaccount.tpl.php';
@@ -738,4 +674,3 @@ function dol_loginfunction($langs,$conf,$mysoc)
 
 	$_SESSION["dol_loginmesg"] = '';
 }
-
