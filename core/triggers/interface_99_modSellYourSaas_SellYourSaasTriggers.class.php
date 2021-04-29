@@ -187,15 +187,36 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				var_dump($object->array_options['options_date_endfreeperiod']);
 				var_dump($object->lines);*/
 
-				if (isset($object->oldcopy)	// We rename instance name
+				// Do we rename instance name ?
+				if (isset($object->oldcopy)
 				&& ($object->oldcopy->ref_customer != $object->ref_customer
 				|| $object->oldcopy->array_options['options_custom_url'] != $object->array_options['options_custom_url'])) {
+					$testok = 1;
+
 					if (preg_match('/\.with\./', $object->array_options['options_custom_url'])) {
 						$this->errors[]="Value of URL including .with. is not allowed as custom URL";
 						return -1;
 					}
 
-					$testok = 1;
+					// Clean new value
+					$nametotest = $object->ref_customer;
+					// Sanitize $sldAndSubdomain. Remove start and end -
+					$nametotest = preg_replace('/^\-+/', '', $nametotest);
+					$nametotest = preg_replace('/\-+$/', '', $nametotest);
+					// Avoid uppercase letters
+					$nametotest = strtolower($nametotest);
+
+					// Test new name syntax
+					if ($nametotest != $object->ref_customer) {	// Same control than in register_instance but we add . because we test FQDN and not only first part.
+						$this->errors[]="Bad value for the new name of URL (must be lowercase, without spaces, not starting with '-')";
+						return -1;
+					}
+
+					// Test new name syntax 2
+					if (! preg_match('/^[a-zA-Z0-9\-\.]+$/', $object->ref_customer)) {	// Same control than in register_instance but we add . because we test FQDN and not only first part.
+						$this->errors[]="Bad value for the new name of URL (special characters are not allowed)";
+						return -1;
+					}
 
 					// Test that new name is not already used
 					$nametotest = $object->ref_customer;
@@ -224,7 +245,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					}
 				}
 
-				if (isset($object->oldcopy)	// We change end of trial
+				// Do we change end of trial ?
+				if (isset($object->oldcopy)
 					&& $object->oldcopy->array_options['options_date_endfreeperiod'] != $object->array_options['options_date_endfreeperiod']) {
 					dol_syslog("We found a change in date of end of trial, so we check if you can and, if yes, we make the update of contract");
 
