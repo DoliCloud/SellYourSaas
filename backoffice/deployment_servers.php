@@ -67,12 +67,36 @@ $pagenext = $page + 1;
 // Security check
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
-
+$keytodesactivate	= GETPOST('key', 'alpha');
+$value	= GETPOST('value', 'alpha');
 
 /*
  *	Actions
  */
-
+if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
+	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	$tmpdomainkey = explode(':',$listofdomains[$keytodesactivate]);
+	if ($value == 0) {
+		if (!empty($tmpdomainkey[1])) {
+			$tmpdomainkey[2]=$tmpdomainkey[1];
+		}
+		$tmpdomainkey[1] = 'closed';
+		$listofdomains[$keytodesactivate] = implode(':',$tmpdomainkey);
+		$listofdomains = implode(',',$listofdomains);
+		dolibarr_set_const($db,"SELLYOURSAAS_SUB_DOMAIN_NAMES",$listofdomains, 'chaine', 0, '', $conf->entity);
+	}
+	else if ($value == 1) {
+		if (!empty($tmpdomainkey[2])) {
+			$tmpdomainkey[1]=$tmpdomainkey[2];
+			unset($tmpdomainkey[2]);
+		}else{
+			unset($tmpdomainkey[1]);
+		}
+		$listofdomains[$keytodesactivate] = implode(':',$tmpdomainkey);
+		$listofdomains = implode(',',$listofdomains);
+		dolibarr_set_const($db,"SELLYOURSAAS_SUB_DOMAIN_NAMES",$listofdomains, 'chaine', 0, '', $conf->entity);
+	}
+}
 
 /*
  *	View
@@ -154,12 +178,11 @@ print '<table class="noborder">';
 print '<tr class="liste_titre_bidon"><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>';
 $helptooltip = img_warning('', '').' '.$langs->trans("EvenIfDomainIsOpenTo");
 print $form->textwithpicto($langs->trans("Registration"), $helptooltip);
+print '<td class="center">'.$langs->trans("Closed").'|'.$langs->trans("Open").'</td>';
 print '</td><td></td><td></td></tr>';
 $listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
 $listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 foreach ($listofips as $key => $val) {
-	/*$constdomaindisabled = 'conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES_DESACTIVE_'.$key;
-	print $$constdomaindisabled;*/
 	$tmparraydomain = explode(':', $listofdomains[$key]);
 	print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
 	if (! empty($tmparraydomain[1])) {
@@ -172,6 +195,20 @@ foreach ($listofips as $key => $val) {
 		print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("Open");
 	}
 	print '</td>';
+	print '<td class="center">';
+	if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))){
+		// Button off, click to enable
+		$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.$key.'">';
+		$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
+		$enabledisablehtml.='</a>';
+	} else {
+		// Button on, click to disable
+		$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.$key.'">';
+		$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+		$enabledisablehtml.='</a>';
+	}
+	print $enabledisablehtml;
+	print '</td>';
 	print '<td>';
 	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
 	print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
@@ -179,9 +216,6 @@ foreach ($listofips as $key => $val) {
 	print '<td>';
 	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
 	print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
-	print '</td>';
-	print '<td>';
-	//print ajax_constantonoff('SELLYOURSAAS_SUB_DOMAIN_NAMES_DESACTIVE_'.$key, array(), $conf->entity, 0, 0, 1);
 	print '</td>';
 	print '</tr>';
 }
