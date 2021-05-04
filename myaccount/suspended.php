@@ -60,14 +60,17 @@ $contract->fetch(0, '', $instance);
 $contract->fetch_thirdparty();
 
 
-$langs=new Translate('', $conf);
-$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
-
-$langsen=new Translate('', $conf);
-$langsen->setDefaultLang('en_US');
-
+//$langs=new Translate('', $conf);
+//$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
 $langs->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
-$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+
+if ($langs->defaultlang == 'en_US') {
+	$langsen = $langs;
+} else {
+	$langsen=new Translate('', $conf);
+	$langsen->setDefaultLang('en_US');
+	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+}
 
 
 top_htmlhead('', 'Suspension Page');

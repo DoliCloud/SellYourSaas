@@ -56,14 +56,19 @@ dol_include_once('/sellyoursaas/class/packages.class.php');
 
 // Re set variables specific to new environment
 $conf->global->SYSLOG_FILE_ONEPERSESSION=1;
-$langs=new Translate('', $conf);
-$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
 
-$langsen=new Translate('', $conf);
-$langsen->setDefaultLang('en_US');
 
+//$langs=new Translate('', $conf);
+//$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
 $langs->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
-$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+
+if ($langs->defaultlang == 'en_US') {
+	$langsen = $langs;
+} else {
+	$langsen=new Translate('', $conf);
+	$langsen->setDefaultLang('en_US');
+	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+}
 
 
 $partner=GETPOST('partner', 'int');
