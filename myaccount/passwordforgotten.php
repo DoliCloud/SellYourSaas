@@ -54,14 +54,17 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/usergroups.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 if (! empty($conf->ldap->enabled)) require_once DOL_DOCUMENT_ROOT.'/core/class/ldap.class.php';
 
-$langs=new Translate('', $conf);
-$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
-
-$langsen=new Translate('', $conf);
-$langsen->setDefaultLang('en_US');
-
+//$langs=new Translate('', $conf);
+//$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
 $langs->loadLangs(array("main","users","ldap","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other'));
-$langsen->loadLangs(array("main","users","ldap","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other'));
+
+if ($langs->defaultlang == 'en_US') {
+	$langsen = $langs;
+} else {
+	$langsen=new Translate('', $conf);
+	$langsen->setDefaultLang('en_US');
+	$langsen->loadLangs(array("main","users","ldap","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other'));
+}
 
 
 // Security check
