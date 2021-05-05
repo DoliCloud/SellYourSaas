@@ -59,7 +59,7 @@ if ($action == 'addauthorizedkey') {
 			if (empty($fstat['atime'])) {		// Failed to connect or file does not exists
 				$stream = fopen($filecert, 'w');
 				if ($stream === false) {
-					setEventMessage($langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile"), 'errors');
+					setEventMessages($langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile"), null, 'errors');
 				} else {
 					// Add public keys
 					$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
@@ -68,9 +68,9 @@ if ($action == 'addauthorizedkey') {
 					// File authorized_keys_support must have rw------- permissions
 					ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support', 0600);
 					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support');
-					setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
+					setEventMessages($langs->transnoentitiesnoconv("FileCreated"), null, 'mesgs');
 				}
-			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+			} else setEventMessages($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), null, 'warnings');
 
 			$object->fileauthorizedkey=(empty($fstat['atime'])?'':$fstat['atime']);
 			$object->array_options['options_fileauthorizekey']=(empty($fstat['atime'])?'':$fstat['atime']);
@@ -79,7 +79,9 @@ if ($action == 'addauthorizedkey') {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessages($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server.' (port '.$server_port.')'), null, 'errors');
+	}
 }
 
 if ($action == 'addinstalllock') {
