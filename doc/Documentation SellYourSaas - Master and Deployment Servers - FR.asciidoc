@@ -276,6 +276,10 @@ AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 
 AllowUsers admin osu*
 AllowUsers myunixlogin
+
+# Legacy changes - To allow an old client (like old PHP) to connect to
+KexAlgorithms +diffie-hellman-group1-sha1
+Ciphers +aes128-cbc
 ---------------
 
 Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre en compte les modifications par:
@@ -4583,4 +4587,19 @@ The value for *max_execution_time* is too low or there is a table that has an ab
 ==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
 
 - Check the temp directory is writable by the web server user.
+
+
+==== Error when doing PHP ssh2_connect to a server
+
+If you find into */var/log/auth.log* an error like:
+
+... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
+
+The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the sshd_config of the server by adding:
+
+# Legacy changes - To allow an old client to connect to
+KexAlgorithms +diffie-hellman-group1-sha1
+Ciphers +aes128-cbc
+
+Then reload ssh with /etc/init.d/ssh reload
 
