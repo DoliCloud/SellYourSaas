@@ -36,6 +36,8 @@ ufw allow out 43/tcp
 # DNS
 ufw allow out 53/tcp
 ufw allow out 53/udp
+# NFS
+ufw allow out 2049/tcp
 
 # From external source to local - In
 ufw allow in 22/tcp
