@@ -80,7 +80,7 @@ if ($action == 'addauthorizedkey') {
 			}
 		}
 	} else {
-		setEventMessages($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server.' (port '.$server_port.')'), null, 'errors');
+		setEventMessages($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server.' - port '.$server_port), null, 'errors');
 	}
 }
 
