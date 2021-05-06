@@ -2195,6 +2195,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   deny /etc/default/nss r,
   deny /etc/host.conf r,
   deny /etc/hosts r,
+  #deny /etc/passwd r,
   deny /etc/securetty r,
   deny /etc/shadow r,
   deny /etc/sudoers r,
