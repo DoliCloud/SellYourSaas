@@ -6,8 +6,8 @@ update llx_socpeople set fk_user_creat = newid where fk_user_creat = oldid;
 update llx_socpeople set fk_user_modif = newid where fk_user_modif = oldid;
 
 
--- Convert field into utf8_general_ci
-ALTER TABLE llx_contrat_extrafields MODIFY username_db VARCHAR(32) COLLATE utf8_general_ci;
+-- Convert field into utf8_unicode_ci
+ALTER TABLE llx_contrat_extrafields MODIFY username_db VARCHAR(32) COLLATE utf8_unicode_ci;
 
 
 -- To list opened connection
