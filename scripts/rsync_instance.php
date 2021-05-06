@@ -191,7 +191,7 @@ else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delet
 $param[]="-v";
 $param[]="--noatime";
 $param[]="--exclude .buildpath";
-$param[]="--exclude .codeclimate";
+$param[]="--exclude .codeclimate.yml";
 $param[]="--exclude .editorconfig";
 $param[]="--exclude .git";
 $param[]="--exclude .github";
