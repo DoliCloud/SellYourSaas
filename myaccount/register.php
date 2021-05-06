@@ -370,6 +370,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 		  <form action="register_instance.php" method="post" id="formregister">
 			<div class="form-content">
 			  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
+			  <input type="hidden" name="forcesubdomain" value="<?php echo dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')); ?>" />
 			  <input type="hidden" name="service" value="<?php echo dol_escape_htmltag($tmpproduct->id); ?>" />
 			  <input type="hidden" name="productref" value="<?php echo ($productref == 'none' ? 'none' : dol_escape_htmltag($tmpproduct->ref)); ?>" />
 			  <input type="hidden" name="extcss" value="<?php echo dol_escape_htmltag($extcss); ?>" />
@@ -564,7 +565,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							if (! $forcesubdomainfound) {
 								print '<br>Error: Value for forcesubdomain = '.GETPOST('forcesubdomain', 'alpha').' is not in list of available subdomains.';
 							} else {
-								print '<input type="hidden" name="forcesubdomain" value="'.GETPOST('forcesubdomain', 'alpha').'">';
+								print '<input type="hidden" name="forcesubdomain" value="'.dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')).'">';
 							}
 						}
 						?>
