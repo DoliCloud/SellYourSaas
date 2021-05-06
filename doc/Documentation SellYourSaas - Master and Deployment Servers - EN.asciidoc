@@ -2362,7 +2362,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /usr/share/pyshared/zope.interface-3.6.1-nspkg.pth r,
   /usr/share/vim/vim72/debian.vim r,
   /usr/share/vim/vim72/filetype.vim r,
-  /usr/share/vim/vim72/lang/en_GB/LC_Mvi /etc/ImageMagick-6/policy.xmlESSAGES/vim.mo r,
+  /usr/share/vim/vim72/lang/en_GB/LC_MESSAGES/vim.mo r,
   /usr/share/vim/vim72/plugin/ r,
   /usr/share/vim/vim72/plugin/getscriptPlugin.vim r,
   /usr/share/vim/vim72/plugin/gzip.vim r,
@@ -2476,6 +2476,8 @@ apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
 or 
 aa-disable usr.sbin.mysqld
 ---------------
+
+A reboot of server may be required to take into account any change on profile files.
 
 All the disabled profiles are visible into */etc/apparmor.d/disable*
 

@@ -2442,6 +2442,8 @@ or
 aa-disable usr.sbin.mysqld
 ---------------
 
+Un redémarrage du serveur peut etre nécessaire pour prise en compte d'un changement de profils.
+
 Tous les profils désactivés sont visible dans */etc/apparmor.d/disable*
 
 
