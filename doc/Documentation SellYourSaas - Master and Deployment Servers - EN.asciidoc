@@ -3909,6 +3909,25 @@ Voir la documentation *afick.pl* pour plus d'options.
 
 
 
+=== Restore a lost config file of a package
+
+Launch this command to find the package that provide the file:
+
+[source,bash]
+---------------
+dpkg -S '/path/to/file'
+---------------
+
+Then launch a command to restore file:
+
+[source,bash]
+---------------
+sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" <package-name>
+or
+sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" <package-name>
+---------------
+
+
 === Utilisation de OpenStack pour gérer les images de serveurs
 
 - Installer les utilitaires OpenStack
