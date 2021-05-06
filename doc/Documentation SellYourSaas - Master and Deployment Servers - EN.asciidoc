@@ -368,8 +368,7 @@ In order not to give information to users doing SSH, on the deployment servers:
 [source, bash]
 ---------------
 rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
-rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/ 50-landscape-sysinfo
-rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
 
@@ -1053,9 +1052,10 @@ You can create another virtual host for the HTTPS on port 443
 
 === Timeout of server launches
 
-On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
+On Ubuntu 18.04+ when MariaDb has been migrated from a MySql:
 
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. 
+To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
 
 [source, bash]
 ---------------

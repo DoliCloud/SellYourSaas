@@ -357,8 +357,7 @@ Afin de ne pas donner d'information aux utilisateurs qui feront du SSH, sur les 
 [source,bash]
 ---------------
 rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
-rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
-rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
     
@@ -1014,9 +1013,10 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
 
 === Timeout des lancements de serveurs
 
-Sur Ubuntu 18.04+ et avec MariaDb migré depuis un MySql:
+Sur Ubuntu 18.04+ lorsque MariaDb a été migrée depuis un MySql:
 
-Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long suite à un plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
+Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long suite à un plantage. 
+Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
 
 [source,bash]
 ---------------
