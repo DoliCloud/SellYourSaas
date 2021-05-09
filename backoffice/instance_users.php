@@ -236,15 +236,13 @@ if (empty($reshook)) {
 			$conf->global->MAIN_SECURITY_SALT = $savsalt;
 			$conf->global->MAIN_SECURITY_HASH_ALGO = $savalgo;
 
-
 			// TODO Set definition of algorithm to hash password into the package
 			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
 				if (!empty($conf->global->MAIN_SHOW_PASSWORD_INTO_LOG)) {
 					dol_syslog("new password=".$password);
 				}
-				$password_crypted = dol_hash($password, 'md5');
+				$password_crypted = md5($password);
 			}
-
 
 			// TODO Set definition to update password of a userinto the package
 			$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
