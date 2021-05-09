@@ -246,7 +246,7 @@ if (empty($reshook)) {
 			// TODO Set definition to update password of a userinto the package
 			$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted)."' where rowid = ".GETPOST('remoteid', 'int');
 			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
-				$sql="UPDATE ".$prefix_db."glpi_user set password='".$newdb->escape($password_crypted)."' WHERE rowid = ".GETPOST('remoteid', 'int');
+				$sql="UPDATE glpi_user set password='".$newdb->escape($password_crypted)."' WHERE rowid = ".GETPOST('remoteid', 'int');
 			}
 
 
