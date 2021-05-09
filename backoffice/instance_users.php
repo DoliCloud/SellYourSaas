@@ -506,6 +506,7 @@ function print_user_table($newdb, $object)
 	// Nb of users
 	print '<tr class="liste_titre">';
 	print '<td>#</td>';
+	print '<td>'.$langs->trans("ID").'</td>';
 	print '<td>'.$langs->trans("Login").'</td>';
 	print '<td>'.$langs->trans("Lastname").'</td>';
 	print '<td>'.$langs->trans("Firstname").'</td>';
@@ -562,6 +563,9 @@ function print_user_table($newdb, $object)
 				print '<tr class="oddeven">';
 				print '<td>';
 				print ($i+1);
+				print '</td>';
+				print '<td>';
+				print $obj->rowid;
 				print '</td>';
 				print '<td class="nowraponall">';
 				print $obj->login;
