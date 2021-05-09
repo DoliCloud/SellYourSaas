@@ -529,7 +529,7 @@ function print_user_table($newdb, $object)
 		// TODO Set definition of SQL to get list of all users into the package
 		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
 			//SELECT COUNT(DISTINCT gpu.users_id) as nb FROM glpi_profiles_users as gpu LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id WHERE gp.interface = 'central' and gpu.users_id not in (select id from glpi_users where name = 'supportcloud' OR is_deleted = 1);
-			$sql = "SELECT gu.id as rowid, name as login, realname as lastname, firstname, gp.interface as admin, '' as pass, password as pass_crypted, date_creation as datec, date_mod as datem, last_login as datelastlogin, 0, 0, 0, entities_id as entity, is_active as statut,";
+			$sql = "SELECT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
 			$sql .= " glpi_useremails.email as email";
 			$sql .= " FROM glpi_users as gu";
 			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
