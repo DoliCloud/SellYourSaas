@@ -571,7 +571,8 @@ function print_user_table($newdb, $object)
 				print '<td>'.$obj->firstname.'</td>';
 				print '<td>'.$obj->admin.'</td>';
 				print '<td>'.$obj->email.'</td>';
-				print '<td class="tdoverflowmax100">'.($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '').'</td>';
+				$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+				print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
 				print '<td>'.dol_print_date($newdb->jdate($obj->datec), 'dayhour').'</td>';
 				print '<td>'.dol_print_date($newdb->jdate($obj->datem), 'dayhour').'</td>';
 				print '<td>'.dol_print_date($newdb->jdate($obj->datelastlogin), 'dayhour').'</td>';
