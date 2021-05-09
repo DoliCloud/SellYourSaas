@@ -526,10 +526,16 @@ function print_user_table($newdb, $object)
 		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
 		$sql.=" FROM llx_user ORDER BY statut DESC";
 
-		// TODO Set definition of algorithm to hash password into the package
+		// TODO Set definition of SQL to get list of all users into the package
 		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
-			$sql="SELECT id as rowid, name as login, realname as lastname, firstname, 0 as admin, 'emailunknown' as email, '' as pass, password as pass_crypted, date_creation as datec, date_mod as datem, last_login as datelastlogin, 0, 0, 0, entities_id as entity, is_active as statut";
-			$sql.=" FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC";
+			//SELECT COUNT(DISTINCT gpu.users_id) as nb FROM glpi_profiles_users as gpu LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id WHERE gp.interface = 'central' and gpu.users_id not in (select id from glpi_users where name = 'supportcloud' OR is_deleted = 1);
+			$sql = "SELECT gu.id as rowid, name as login, realname as lastname, firstname, 0 as admin, '' as pass, password as pass_crypted, date_creation as datec, date_mod as datem, last_login as datelastlogin, 0, 0, 0, entities_id as entity, is_active as statut,";
+			$sql .= " glpi_useremails.email as email";
+			$sql .= " FROM glpi_users as gu";
+			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
+			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.name = 'supportcloud' OR gu2.is_deleted = 1)";
+			// TODO Limit payant uniquement
+			$sql .= " ORDER BY gu.is_active DESC";
 		}
 
 		$resql=$newdb->query($sql);
