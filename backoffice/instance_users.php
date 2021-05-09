@@ -239,6 +239,9 @@ if (empty($reshook)) {
 
 			// TODO Set definition of algorithm to hash password into the package
 			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+				if (!empty($conf->global->MAIN_SHOW_PASSWORD_INTO_LOG)) {
+					dol_syslog("password=".$password);
+				}
 				$password_crypted = dol_hash($password, 'md5');
 			}
 
