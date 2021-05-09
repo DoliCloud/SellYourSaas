@@ -525,6 +525,7 @@ function print_user_table($newdb, $object)
 		// Get user/pass of all users in database
 		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
 		$sql.=" FROM llx_user ORDER BY statut DESC";
+
 		// TODO Set definition of algorithm to hash password into the package
 		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
 			$sql="SELECT id as rowid, name as login, realname as lastname, firstname, 0 as admin, 'emailunknown' as email, '' as pass, password as pass_crypted, date_creation as datec, date_mod as datem, last_login as datelastlogin, 0, 0, 0, entities_id as entity, is_active as statut";
