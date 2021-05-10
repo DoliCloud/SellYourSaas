@@ -1043,7 +1043,7 @@ TODO Graphic avec les flux et les ports.
 * Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
 
 
-==== With iptables ====
+==== Avec iptables ====
 
 [source, bash]
 ---------------
@@ -1054,7 +1054,18 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-==== With ufw
+==== Avec ufw
+
+Editer le fichier */etc/ufw/before.rules* pour permettre les ping sortant, en ajoutant ceci:
+
+[source, bash]
+---------------
+# allow outbound icmp
+-A ufw-before-output -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+-A ufw-before-output -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
+---------------
+
+Puis lancer le firewall et rendez le actif à chaque lancement par:
 
 [source, bash]
 ---------------

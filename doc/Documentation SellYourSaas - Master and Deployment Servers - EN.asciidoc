@@ -724,6 +724,28 @@ vi /etc/exports
 
 Note that you should have n lines per deployment server in this file.
 
+Set a fixed port for mountd:
+
+[source, bash]
+---------------
+vi /etc/default/nfs-kernel-server
+---------------
+
+and comment out this line: RPCMOUNTDOPTS=--manage-gids, add this instead: 
+
+[source, bash]
+---------------
+RPCMOUNTDOPTS="--port 33333"
+---------------
+
+[source, bash]
+---------------
+service nfs-config restart
+service nfs-kernel-server restart
+rpcinfo -p
+---------------
+
+You should see mountd on port 33333. If not, restart server.
 
 [source, bash]
 ---------------
@@ -1094,6 +1116,17 @@ systemctl status firewallsellyoursaas
 ---------------
 
 ==== With ufw
+
+Edit file */etc/ufw/before.rules* to allow out ping, by adding this:
+
+[source, bash]
+---------------
+# allow outbound icmp
+-A ufw-before-output -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+-A ufw-before-output -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
+---------------
+
+Then launch and enable the firewall
 
 [source, bash]
 ---------------
