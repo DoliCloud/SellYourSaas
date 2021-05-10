@@ -3683,7 +3683,7 @@ systemctl status cron
 touch /mnt/diskhome/DATA_MYDEPLOYMENTSERVERX
 ---------------
 
-- Ajouter une autorisation d'accès NFS au nouveau serveur sur le *Master*
+- Add a new permision for NFS access for the new server on *Master server*
 
 [source,bash]
 ---------------
@@ -3711,11 +3711,11 @@ systemctl restart nfs-kernel-server
 ip.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
-- Allow access between the new server *Deployment server* and the *Master server* at firewall level.
+- Allow access between the new server *Deployment server* and the *Master server* at Firewall level.
 
-==== If using iptables ====
+*If using iptables*
 
-For exemple, on the *Master server*:
+On the *Master server*:
 
 [source,bash]
 ---------------
@@ -3751,10 +3751,12 @@ then
 fi
 ---------------
 
-==== If using ifw ====
+*If using ufw*
 
-TODO
+Nothing to do.
 
+
+==== Other changes to do
 
 - Modifier le fichiers de configuration de Postfix suivant  (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement):
   
