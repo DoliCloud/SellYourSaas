@@ -42,6 +42,7 @@ ufw allow out 53/tcp
 ufw allow out 53/udp
 # NFS
 ufw allow out 2049/tcp
+ufw allow out 2049/udp
 
 # From external source to local - In
 # SSH
@@ -55,6 +56,14 @@ ufw allow in 53/tcp
 ufw allow in 53/udp
 # Mysql/Mariadb
 ufw allow in 3306/tcp
+
+# For master server
+ufw allow in 111/udp
+ufw allow in 111/tcp
+ufw allow in 2049/tcp
+ufw allow in 2049/udp
+
+
 
 ufw default deny incoming
 ufw default deny outgoing
