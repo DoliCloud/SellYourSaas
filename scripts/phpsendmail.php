@@ -25,65 +25,62 @@ $emailfrom = '';
 $pointer = fopen('php://stdin', 'r');
 
 while ($line = fgets($pointer)) {
-    if(preg_match('/^to:\s/i', $line) ) {
+	if (preg_match('/^to:\s/i', $line) ) {
 		$toline .= trim($line)."\n";
-		$linetmp = preg_replace('/^to:\s*/i','',trim($line));
+		$linetmp = preg_replace('/^to:\s*/i', '', trim($line));
 		$tmpto=preg_split("/[\s,]+/", $linetmp);
 		$nbto+=count($tmpto);
-        }
-	if(preg_match('/^cc:\s/i', $line) ) {
-                $ccline .= trim($line)."\n";
-                $linetmp = preg_replace('/^cc:\s*/i','',trim($line));
+	}
+	if (preg_match('/^cc:\s/i', $line) ) {
+				$ccline .= trim($line)."\n";
+				$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
 		$tmpcc=preg_split("/[\s,]+/", $linetmp);
-                $nbcc+=count($tmpcc);
-        }
-	if(preg_match('/^bcc:\s/i', $line) ) {
-                $bccline .= trim($line)."\n";
-                $linetmp = preg_replace('/^bcc:\s*/i','',trim($line));
+				$nbcc+=count($tmpcc);
+	}
+	if (preg_match('/^bcc:\s/i', $line) ) {
+				$bccline .= trim($line)."\n";
+				$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
 		$tmpbcc=preg_split("/[\s,]+/", $linetmp);
-                $nbbcc+=count($tmpbcc);
-        }
-    $reg = array();
-    if(preg_match('/^from:\s.*<(.*)>/i', $line, $reg) ) {
-                $fromline .= trim($line)."\n";
+				$nbbcc+=count($tmpbcc);
+	}
+	$reg = array();
+	if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg) ) {
+				$fromline .= trim($line)."\n";
 		$emailfrom = $reg[1];
-    }
-    elseif(preg_match('/^from:\s+([^\s*])/i', $line, $reg) ) {
-        $fromline .= trim($line)."\n";
-        $emailfrom = trim($reg[1]);
-    }
+	} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg) ) {
+		$fromline .= trim($line)."\n";
+		$emailfrom = trim($reg[1]);
+	}
 
-    if(preg_match('/^references:\s/i', $line) ) {
-                $referenceline .= trim($line)."\n";
-        }
-        $mail .= $line;
+	if (preg_match('/^references:\s/i', $line) ) {
+				$referenceline .= trim($line)."\n";
+	}
+		$mail .= $line;
 }
 
 $tmpfile='/tmp/phpsendmail-'.posix_getuid().'-'.getmypid().'.tmp';
 @unlink($tmpfile);
 file_put_contents($tmpfile, $mail);
-chmod ($tmpfile, 0660);
+chmod($tmpfile, 0660);
 
 //* compose the sendmail command
-#$command = 'echo ' . escapeshellarg($mail) . ' | '.$sendmail_bin.' -t -i ';
+// $command = 'echo ' . escapeshellarg($mail) . ' | '.$sendmail_bin.' -t -i ';
 $command = 'cat '.$tmpfile.' | '.$sendmail_bin.' -t -i ';
 $optionffound=0;
 for ($i = 1; $i < $_SERVER['argc']; $i++) {
 	if (preg_match('/-f/', $_SERVER['argv'][$i])) $optionffound++;
-        $command .= escapeshellarg($_SERVER['argv'][$i]).' ';
+		$command .= escapeshellarg($_SERVER['argv'][$i]).' ';
 }
 
-if (! $optionffound)
-{
-	file_put_contents($logfile, date('Y-m-d H:i:s') . ' option -f not found. Args are '.join(' ',$_SERVER['argv']).'. We get if from the header'."\n", FILE_APPEND);
+if (! $optionffound) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' option -f not found. Args are '.join(' ', $_SERVER['argv']).'. We get if from the header'."\n", FILE_APPEND);
 	$command .= "'-f".$emailfrom."'";
 }
 
 $ip=$_SERVER["REMOTE_ADDR"];
-if (empty($ip))
-{
-        file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
-#        exit(1);
+if (empty($ip)) {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
+	// exit(1);
 }
 
 // Rules
@@ -102,62 +99,49 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(em
 
 
 $blacklistofips = @file_get_contents('/var/lib/sellyoursaas/blacklistip');
-if (! empty($ip) && $blacklistofips)
-{
-    $blacklistofipsarray = explode("\n", $blacklistofips);
-    if (is_array($blacklistofipsarray) && in_array($ip, $blacklistofipsarray))
-    {
-        file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' dolicloud rules ko blacklist - exit 2. Blacklisted ip '.$ip." found into file blacklistip\n", FILE_APPEND);
-        exit(3);
-    }
+if (! empty($ip) && $blacklistofips) {
+	$blacklistofipsarray = explode("\n", $blacklistofips);
+	if (is_array($blacklistofipsarray) && in_array($ip, $blacklistofipsarray)) {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 2. Blacklisted ip '.$ip." found into file blacklistip\n", FILE_APPEND);
+		exit(3);
+	}
 }
 
 $blacklistoffroms = @file_get_contents('/var/lib/sellyoursaas/blacklistfrom');
-if (! empty($emailfrom) && $blacklistoffroms)
-{
-    $blacklistoffromsarray = explode("\n", $blacklistoffroms);
-    if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray))
-    {
-        file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' dolicloud rules ko blacklist - exit 3. Blacklisted from '.$emailfrom." found into file blacklistfrom\n", FILE_APPEND);
-        exit(4);
-    }
+if (! empty($emailfrom) && $blacklistoffroms) {
+	$blacklistoffromsarray = explode("\n", $blacklistoffroms);
+	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 3. Blacklisted from '.$emailfrom." found into file blacklistfrom\n", FILE_APPEND);
+		exit(4);
+	}
 }
 
 $blacklistofcontents = @file_get_contents('/var/lib/sellyoursaas/blacklistcontent');
-if (! empty($mail) && $blacklistofcontents)
-{
-    $blacklistofcontentsarray = explode("\n", $blacklistofcontents);
-    foreach($blacklistofcontentsarray as $blackcontent)
-    {
-        if (trim($blackcontent) && preg_match('/'.preg_quote(trim($blackcontent),'/').'/ims', $mail))
-        {
-            file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' dolicloud rules ko blacklist - exit 4. Blacklisted content has the key '.trim($blackcontent)." found into file blacklistcontent\n", FILE_APPEND);
-            // Save spam mail content and ip
-            file_put_contents('/var/lib/sellyoursaas/blacklistmail', $mail."\n", FILE_APPEND);
-            chmod("/var/lib/sellyoursaas/blacklistmail", 0666);
-            if (! empty($ip))
-            {
-                file_put_contents('/var/lib/sellyoursaas/blacklistip', $ip."\n", FILE_APPEND);
-                chmod("/var/lib/sellyoursaas/blacklistip", 0666);
-            }
-            exit(5);
-        }
-    }
+if (! empty($mail) && $blacklistofcontents) {
+	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);
+	foreach ($blacklistofcontentsarray as $blackcontent) {
+		if (trim($blackcontent) && preg_match('/'.preg_quote(trim($blackcontent), '/').'/ims', $mail)) {
+			file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 4. Blacklisted content has the key '.trim($blackcontent)." found into file blacklistcontent\n", FILE_APPEND);
+			// Save spam mail content and ip
+			file_put_contents('/var/lib/sellyoursaas/blacklistmail', $mail."\n", FILE_APPEND);
+			chmod("/var/lib/sellyoursaas/blacklistmail", 0666);
+			if (! empty($ip)) {
+				file_put_contents('/var/lib/sellyoursaas/blacklistip', $ip."\n", FILE_APPEND);
+				chmod("/var/lib/sellyoursaas/blacklistip", 0666);
+			}
+			exit(5);
+		}
+	}
 }
 
-if (empty($fromline) && empty($emailfrom))
-{
+if (empty($fromline) && empty($emailfrom)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' cant send email - exit 1. From not provided. See tmp file '.$tmpfile."\n", FILE_APPEND);
 	exit(1);
-}
-elseif (($nbto + $nbcc + $nbbcc) > $MAXOK)
-{
-    file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' dolicloud rules ko toomanyrecipient - exit 2. ( >'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' ) ' . (empty($_ENV['PWD'])?'':$_ENV['PWD'])."\n", FILE_APPEND);
-    exit(2);
-}
-else
-{
-    file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' dolicloud rules ok ( <'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' - '.(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"]).' ) ' . (empty($_ENV['PWD'])?'':$_ENV['PWD'])."\n", FILE_APPEND);
+} elseif (($nbto + $nbcc + $nbbcc) > $MAXOK) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko toomanyrecipient - exit 2. ( >'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' ) ' . (empty($_ENV['PWD'])?'':$_ENV['PWD'])."\n", FILE_APPEND);
+	exit(2);
+} else {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ok ( <'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' - '.(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"]).' ) ' . (empty($_ENV['PWD'])?'':$_ENV['PWD'])."\n", FILE_APPEND);
 }
 
 

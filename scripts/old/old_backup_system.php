@@ -43,26 +43,26 @@ $mode=isset($argv[5])?$argv[5]:'';
 
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
-define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/master.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include("../master.inc.php");
-if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.inc.php");
-if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
+if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
 if (! $res) die("Include of master fails");
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
-include_once(DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php');
-include_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
+include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 
 
@@ -70,8 +70,7 @@ include_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
  *	Main
  */
 
-if (empty($login) || empty($password) || empty($mode))
-{
+if (empty($login) || empty($password) || empty($mode)) {
 	print "Usage:   $script_file login pass loginbase passbase (test|confirm|confirmsaasplex|confirmrm)\n";
 	print "Example: $script_file laurent ************ dolicloud ************ confirm\n";
 	print "Return code: 0 if success, <>0 if error\n";
@@ -93,20 +92,16 @@ print 'SFTP connect string : '.$sftpconnectstring."\n";
 
 // SFTP connect
 if (! function_exists("ssh2_connect")) {
-	dol_print_error('','ssh2_connect function does not exists'); exit(1);
+	dol_print_error('', 'ssh2_connect function does not exists'); exit(1);
 }
 
 $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 $connection = ssh2_connect($server, $server_port);
-if ($connection)
-{
-	if (! @ssh2_auth_password($connection, $login, $password))
-	{
+if ($connection) {
+	if (! @ssh2_auth_password($connection, $login, $password)) {
 		dol_syslog("Could not authenticate with username ".$login." . and password ".preg_replace('/./', '*', $password), LOG_ERR);
 		exit(-5);
-	}
-	else
-	{
+	} else {
 		$filesys1='dump_sys1.sql';
 		$filesys2='dump_sys2.sql';
 
@@ -117,8 +112,7 @@ if ($connection)
 		$mysqlpassword='EB7ostKIDJrBZeiF';
 
 		print "Generate dump ".$filesys1.'.bz2'."\n";
-		if ($mode == 'confirm' || $mode == 'confirmsaasplex')
-		{
+		if ($mode == 'confirm' || $mode == 'confirmsaasplex') {
 			$mysqldumpcommand="mysqldump -u $mysqluser -p$mysqlpassword -h 127.0.0.1 --single-transaction -K --tables -c -e --hex-blob --default-character-set=utf8 saasplex";
 			echo $mysqldumpcommand."\n";
 			$stream = ssh2_exec($connection, "$mysqldumpcommand | bzip2 -1 > ".$filesys1.'.bz2');
@@ -141,8 +135,7 @@ if ($connection)
 		$sftp = ssh2_sftp($connection);
 
 		print 'Get file '.$sourcedir.$filesys1.'.bz2 into '.$targetdir.$filesys1.'.bz2'."\n";
-		if ($mode == 'confirm' || $mode == 'confirmsaasplex')
-		{
+		if ($mode == 'confirm' || $mode == 'confirmsaasplex') {
 			ssh2_scp_recv($connection, $sourcedir.$filesys1.'.bz2', $targetdir.$filesys1.'.bz2');
 		}
 		/*print 'Get file '.$sourcedir.$filesys2.'.bz2 into '.$targetdir.$filesys2.'.bz2'."\n";
@@ -154,13 +147,12 @@ if ($connection)
 		if ($mode == 'confirm' || $mode == 'confirmsaasplex') dol_delete_file($targetdir.$filesys1);
 		$fullcommand="bzip2 -c -d ".$targetdir.$filesys1.".bz2 | mysql -u".$loginbase." -p".$passwordbase." -D dolicloud_saasplex";
 		print "Load dump with ".$fullcommand."\n";
-		if ($mode == 'confirm' || $mode == 'confirmsaasplex')
-		{
+		if ($mode == 'confirm' || $mode == 'confirmsaasplex') {
 			$output=array();
 			$return_var=0;
 			print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
 			exec($fullcommand, $output, $return_var);
-			foreach($output as $line) print $line."\n";
+			foreach ($output as $line) print $line."\n";
 		}
 
 		/*if ($mode == 'confirm' || $mode == 'confirmrm') dol_delete_file($targetdir.$filesys2);
@@ -178,9 +170,7 @@ if ($connection)
 		//ssh2_sftp_unlink($sftp, $fileinstalllock);
 		//print $output;
 	}
-}
-else
-{
+} else {
 	print 'Failed to connect to ssh2 to '.$server;
 	exit(-6);
 }

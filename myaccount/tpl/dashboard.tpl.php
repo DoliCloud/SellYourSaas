@@ -16,8 +16,7 @@
  */
 
 // Protection to avoid direct call of template
-if (empty($conf) || ! is_object($conf))
-{
+if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
 	exit;
 }
@@ -26,7 +25,7 @@ if (empty($conf) || ! is_object($conf))
 <!-- BEGIN PHP TEMPLATE dashboard.tpl.php -->
 <?php
 
-    print '
+	print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
 
@@ -68,9 +67,8 @@ if (empty($conf) || ! is_object($conf))
 	            </div> <!-- END ROW -->
 
 				';
-                if ($nbofinstancessuspended)
-                {
-                    print '
+if ($nbofinstancessuspended) {
+	print '
 			            <div class="row">
 			              <div class="col-md-9">
 							'.$langs->trans("NbOfSuspendedInstances").'
@@ -80,23 +78,21 @@ if (empty($conf) || ! is_object($conf))
 			              </div>
 			            </div> <!-- END ROW -->
 					';
-                }
+}
 
-                print '
+				print '
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">
-		            	'.$langs->trans("SeeDetailsAndOptions").'
+						<i class="fa fa-server opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'
 		                </a>
 					</div></div>';
 
-            print '
+			print '
 				</div>';		// end protlet-body
 
-            if ($mythirdpartyaccount->isareseller)
-            {
-                print '
+if ($mythirdpartyaccount->isareseller) {
+	print '
 				<div class="portlet-title">
 				<div class="caption"><br><br>
 				<span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesOfMyCustomers").'</span>
@@ -115,9 +111,8 @@ if (empty($conf) || ! is_object($conf))
 				</div> <!-- END ROW -->
 
 				';
-                if ($nbofinstancessuspendedreseller)
-                {
-                    print '
+	if ($nbofinstancessuspendedreseller) {
+		print '
 					<div class="row">
 					<div class="col-md-9">
 					'.$langs->trans("NbOfSuspendedInstances").'
@@ -127,21 +122,20 @@ if (empty($conf) || ! is_object($conf))
 					</div>
 					</div> <!-- END ROW -->
 					';
-                }
+	}
 
-                print '
+	print '
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">
-		            	'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'
+						<i class="fa fa-server opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'
 		                </a>
 					</div></div>';
 
-                print '</div>';		// end protlet-body
-            }
+	print '</div>';		// end protlet-body
+}
 
-            print '
+			print '
 
 	        </div> <!-- END PORTLET -->
 
@@ -161,32 +155,27 @@ if (empty($conf) || ! is_object($conf))
 				<div class="row">
 				<div class="col-md-12">
 	                ';
-                    if (empty($welcomecid))		// If we just created an instance, we don't show warnings yet.
-                    {
-                        $missing = 0;
-                        if (empty($mythirdpartyaccount->array_options['options_firstname'])) $missing++;
-                        if (empty($mythirdpartyaccount->array_options['options_lastname'])) $missing++;
-                        if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra)) $missing++;
+if (empty($welcomecid)) {		// If we just created an instance, we don't show warnings yet.
+	$missing = 0;
+	if (empty($mythirdpartyaccount->array_options['options_firstname'])) $missing++;
+	if (empty($mythirdpartyaccount->array_options['options_lastname'])) $missing++;
+	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra)) $missing++;
 
-                        if (! $missing)
-                        {
-                            print $langs->trans("ProfileIsComplete");
-                        }
-                        else
-                        {
-                            print $langs->trans("ProfileIsNotComplete", $missing, $_SERVER["PHP_SELF"].'?mode=myaccount');
-                            print ' '.img_warning();
-                        }
-                    }
-                    print '
+	if (! $missing) {
+		print $langs->trans("ProfileIsComplete");
+	} else {
+		print $langs->trans("ProfileIsNotComplete", $missing, $_SERVER["PHP_SELF"].'?mode=myaccount');
+		print ' '.img_warning();
+	}
+}
+					print '
 	            </div>
 				</div>
 
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">
-	            	'.$langs->trans("SeeOrEditProfile").'
+					<i class="fa fa-user opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">'.$langs->trans("SeeOrEditProfile").'
 	                </a>
 				</div>
 				</div>
@@ -201,7 +190,7 @@ if (empty($conf) || ! is_object($conf))
 
 	';
 
-    print '
+	print '
 	    <div class="row">
 
 			<!-- Box of payment balance -->
@@ -214,64 +203,59 @@ if (empty($conf) || ! is_object($conf))
 	            </div>
 	          </div>';
 
-                //var_dump($contract->linkedObjects['facture']);
-                //dol_sort_array($contract->linkedObjects['facture'], 'date');
-                $nbinvoicenotpayed = 0;
-                $amountdue = 0;
-                foreach ($listofcontractid as $id => $contract)
-                {
-                    $contract->fetchObjectLinked();
-                    if (is_array($contract->linkedObjects['facture']))
-                    {
-                        foreach($contract->linkedObjects['facture'] as $idinvoice => $invoice)
-                        {
-                            print '<!--';
-                            print dol_escape_htmltag($invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->statut."-paye=".$invoice->paye)."\n";
-                            print '-->';
-                            if ($invoice->statut == $invoice::STATUS_DRAFT) continue;
-                            if ($invoice->statut == $invoice::STATUS_VALIDATED)
-                            {
-                                $nbinvoicenotpayed++;
-                                $alreadypayed = $invoice->getSommePaiement();
-                                $amount_credit_notes_included = $invoice->getSumCreditNotesUsed();
-                                $amountdue += $invoice->total_ttc - $alreadypayed - $amount_credit_notes_included;
-                            }
-                        }
-                    }
-                }
-                print '
+				//var_dump($contract->linkedObjects['facture']);
+				//dol_sort_array($contract->linkedObjects['facture'], 'date');
+				$nbinvoicenotpayed = 0;
+				$amountdue = 0;
+foreach ($listofcontractid as $id => $contract) {
+	$contract->fetchObjectLinked();
+	if (is_array($contract->linkedObjects['facture'])) {
+		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
+			print '<!--';
+			print dol_escape_htmltag($invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->statut."-paye=".$invoice->paye)."\n";
+			print '-->';
+			if ($invoice->statut == $invoice::STATUS_DRAFT) continue;
+			if ($invoice->statut == $invoice::STATUS_VALIDATED) {
+				$nbinvoicenotpayed++;
+				$alreadypayed = $invoice->getSommePaiement();
+				$amount_credit_notes_included = $invoice->getSumCreditNotesUsed();
+				$amountdue += $invoice->total_ttc - $alreadypayed - $amount_credit_notes_included;
+			}
+		}
+	}
+}
+				print '
 	          <div class="portlet-body">
 
 				<div class="row">
 				<div class="col-md-9">
 	            ';
-                if ($amountdue > 0 && $atleastonepaymentmode) print $form->textwithpicto($langs->trans("UnpaidInvoices"), $langs->trans("PaymentWillBeProcessedSoon"));
-                else print $langs->trans("UnpaidInvoices");
-                print '
+				if ($amountdue > 0 && $atleastonepaymentmode) print $form->textwithpicto($langs->trans("UnpaidInvoices"), $langs->trans("PaymentWillBeProcessedSoon"));
+else print $langs->trans("UnpaidInvoices");
+				print '
                 				</div>
                 				<div class="col-md-3 right"><h2>';
-                if ($nbinvoicenotpayed > 0) print '<font style="color: orange">';
-                print $nbinvoicenotpayed;
-                if ($nbinvoicenotpayed) print '</font>';
-                print '<h2></div>
+				if ($nbinvoicenotpayed > 0) print '<font style="color: orange">';
+				print $nbinvoicenotpayed;
+				if ($nbinvoicenotpayed) print '</font>';
+				print '<h2></div>
                 	            </div>
                 				<div class="row">
                 				<div class="col-md-9">';
-                if ($amountdue > 0 && $atleastonepaymentmode) print $form->textwithpicto($langs->trans("RemainderToPay"), $langs->trans("PaymentWillBeProcessedSoon"));
-                else print $langs->trans("RemainderToPay");
-                print '</div>
+				if ($amountdue > 0 && $atleastonepaymentmode) print $form->textwithpicto($langs->trans("RemainderToPay"), $langs->trans("PaymentWillBeProcessedSoon"));
+else print $langs->trans("RemainderToPay");
+				print '</div>
                 				<div class="col-md-3 right"><h2>';
-                if ($amountdue > 0) print '<font style="color: orange; white-space: nowrap;">';
-                print price($amountdue, 1, $langs, 0, -1, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency);
-                if ($amountdue > 0) print '</font>';
-                print '</h2></div>
+				if ($amountdue > 0) print '<font style="color: orange; white-space: nowrap;">';
+				print price($amountdue, 1, $langs, 0, -1, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency);
+				if ($amountdue > 0) print '</font>';
+				print '</h2></div>
 	            </div>
 
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">
-	            	'.$langs->trans("SeeDetailsOfPayments").'
+					<i class="fa fa-usd opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfPayments").'
 	                </a>
 				</div>
 				</div>
@@ -292,10 +276,10 @@ if (empty($conf) || ! is_object($conf))
 	            </div>
 	          </div>';
 
-            $nboftickets = 0;
-            $nbofopentickets = 0;
+			$nboftickets = 0;
+			$nbofopentickets = 0;
 
-            print '
+			print '
 	          <div class="portlet-body">
 
 	            <div class="row">
@@ -312,18 +296,17 @@ if (empty($conf) || ! is_object($conf))
 					'.$langs->trans("NbOfOpenTickets").'
 	              </div>
 	              <div class="col-md-3 right"><h2>';
-                    if ($nbofopentickets > 0) print '<font style="color: orange;">';
-                    print $nbofopentickets;
-                    if ($nbofopentickets > 0) print '</font>';
-                    print '</h2>
+					if ($nbofopentickets > 0) print '<font style="color: orange;">';
+					print $nbofopentickets;
+					if ($nbofopentickets > 0) print '</font>';
+					print '</h2>
 	              </div>
 	            </div> <!-- END ROW -->
 
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">
-	            	'.$langs->trans("SeeDetailsOfTickets").'
+					<i class="fa fa-hands-helping opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'
 	                </a>
 				</div></div>
 
@@ -335,7 +318,7 @@ if (empty($conf) || ! is_object($conf))
 	    </div> <!-- END ROW -->
 	';
 
-    print '
+	print '
 		</div>
 
 	    </div>

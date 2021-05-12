@@ -16,8 +16,7 @@
  */
 
 // Protection to avoid direct call of template
-if (empty($conf) || ! is_object($conf))
-{
+if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
 	exit;
 }
@@ -64,83 +63,80 @@ $outstandingTotalIncTax = $tmp['total_ttc'];
 
 // If thirdparty is not yet a customer (no payment never done), we show him the amount to pay in its first invoice.
 if ($outstandingTotalIncTax == 0) {
+	// Loop on contracts
+	$amounttopayasfirstinvoice = 0;
+	$amounttopayasfirstinvoicetinstances = array();
+	foreach ($listofcontractid as $contract) {
+		if ($contract->array_options['options_deployment_status'] == 'done') {
+			$sellyoursaasutils = new SellYourSaasUtils($db);
 
-    // Loop on contracts
-    $amounttopayasfirstinvoice = 0;
-    $amounttopayasfirstinvoicetinstances = array();
-    foreach ($listofcontractid as $contract)
-    {
-        if ($contract->array_options['options_deployment_status'] == 'done') {
-            $sellyoursaasutils = new SellYourSaasUtils($db);
+			$comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
+			// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+			$contract->fetch($contract->id);   // Reload to get new values after refresh
 
-            $comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
-            // First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-            $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
-            $contract->fetch($contract->id);   // Reload to get new values after refresh
+			$amounttopayasfirstinvoice += $contract->total_ttc;
+			$amounttopayasfirstinvoicetinstances[$contract->ref_customer] = $contract;
+		}
+	}
 
-            $amounttopayasfirstinvoice += $contract->total_ttc;
-            $amounttopayasfirstinvoicetinstances[$contract->ref_customer] = $contract;
-        }
-    }
+	$defaultdiscountcode = GETPOST('discountcode', 'aZ09');
+	$acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE ? 1 : 0);
 
-    $defaultdiscountcode = GETPOST('discountcode', 'aZ09');
-    $acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE ? 1 : 0);
+	// We are not yet a customer
+	if ($amounttopayasfirstinvoice) {
+		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("AFirstInvoiceOfWillBeDone", price($amounttopayasfirstinvoice, 0, $langs, 1, -1, -1, $conf->currency));
+		if (count($amounttopayasfirstinvoicetinstances) >= 2) {    // If 2 instances
+			print ' (';
+			$i = 0;
+			foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
+				if ($i) print ', ';
+				print '<strong>'.$key.'</strong>: '.price($tmpcontracttopay->total_ttc, 0, $langs, 1, -1, -1, $conf->currency);
+				$i++;
+			}
+			print ')';
+		} else {
+			$parenthesisopen = 0;
+			if (count($amounttopayasfirstinvoicetinstances) == 1) {   // If 1 instance to pay (the most common case)
+				foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
+					$parenthesisopen = 1;
+					print ' ('.$langs->trans("Instance").': <strong>'.$key.'</strong>';
+					// If there is only one contract waiting for payment, we can get the discount code of it, if there is one and if a value is not already provided in POST.
+					if (! GETPOSTISSET('discountcode')) {
+						$defaultdiscountcode = $tmpcontracttopay->array_options['options_discountcode'];
+					}
+				}
+			}
 
-    // We are not yet a customer
-    if ($amounttopayasfirstinvoice) {
-        print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("AFirstInvoiceOfWillBeDone", price($amounttopayasfirstinvoice, 0, $langs, 1, -1, -1, $conf->currency));
-        if (count($amounttopayasfirstinvoicetinstances) >= 2) {    // If 2 instances
-            print ' (';
-            $i = 0;
-            foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
-                if ($i) print ', ';
-                print '<strong>'.$key.'</strong>: '.price($tmpcontracttopay->total_ttc, 0, $langs, 1, -1, -1, $conf->currency);
-                $i++;
-            }
-            print ')';
-        } else {
-            $parenthesisopen = 0;
-            if (count($amounttopayasfirstinvoicetinstances) == 1) {   // If 1 instance to pay (the most common case)
-                foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
-                    $parenthesisopen = 1;
-                    print ' ('.$langs->trans("Instance").': <strong>'.$key.'</strong>';
-                    // If there is only one contract waiting for payment, we can get the discount code of it, if there is one and if a value is not already provided in POST.
-                    if (! GETPOSTISSET('discountcode')) {
-                        $defaultdiscountcode = $tmpcontracttopay->array_options['options_discountcode'];
-                    }
-                }
-            }
+			$urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
+			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				$newnamekey = 'SELLYOURSAAS_PRICES_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				$urlforplanprices = $conf->global->$newnamekey;
+			}
 
-            $urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
-            if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-                && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-            {
-                $newnamekey = 'SELLYOURSAAS_PRICES_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-                $urlforplanprices = $conf->global->$newnamekey;
-            }
+			if ($urlforplanprices) {
+				print ' - ';
+				print $langs->trans("SeeOurPrices", $urlforplanprices);
+			}
 
-            if ($urlforplanprices) {
-                print ' - ';
-                print $langs->trans("SeeOurPrices", $urlforplanprices);
-            }
+			if ($parenthesisopen) {
+				print ')';
+			} else {
+				print '.';
+			}
+		}
+		print '</small></div>';
+		print '<br>';
 
-            if ($parenthesisopen) {
-                print ')';
-            } else {
-                print '.';
-            }
-        }
-        print '</small></div>';
-        print '<br>';
-
-        // Show input text for the discount code
-        if ($acceptdiscountcode) {
-            print '<br>';
-            print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'"><br>';
-            print '<div class="discountcodetext margintoponly" id="discountcodetext" autocomplete="off"></div>';
-            //var_dump($listofcontractid);
-            print '<script type="text/javascript" language="javascript">'."\n";
-            print '
+		// Show input text for the discount code
+		if ($acceptdiscountcode) {
+			print '<br>';
+			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'"><br>';
+			print '<div class="discountcodetext margintoponly" id="discountcodetext" autocomplete="off"></div>';
+			//var_dump($listofcontractid);
+			print '<script type="text/javascript" language="javascript">'."\n";
+			print '
 						jQuery(document).ready(function() {
 	        	    		jQuery("#discountcode").keyup(function() {
 	        	    			console.log("Discount code modified, we update the text section");
@@ -164,14 +160,14 @@ if ($outstandingTotalIncTax == 0) {
 	        	    		});
 	        	    	});';
 
-            print '</script>';
-            print '<hr>';
-        }
-        print '<br>';
-    } else {
-        print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
-        print '<br><br>';
-    }
+			print '</script>';
+			print '<hr>';
+		}
+		print '<br>';
+	} else {
+		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
+		print '<br><br>';
+	}
 }
 
 print '
@@ -201,88 +197,77 @@ print '
 
 $foundcard=0;
 // Check if there is already a payment
-foreach($arrayofcompanypaymentmode as $companypaymentmodetemp)
-{
-    if ($companypaymentmodetemp->type == 'card')
-    {
-        $foundcard++;
-        print '<hr>';
-        print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
-        print $langs->trans("CurrentCreditOrDebitCard").':<br>';
-        print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
-        print '....'.$companypaymentmodetemp->last_four;
-        print ' - ';
-        print sprintf("%02d",$companypaymentmodetemp->exp_date_month).'/'.$companypaymentmodetemp->exp_date_year;
-        // Warning if expiring
-        if ($companypaymentmodetemp->exp_date_year < $nowyear ||
-        ($companypaymentmodetemp->exp_date_year == $nowyear && $companypaymentmodetemp->exp_date_month <= $nowmonth))
-        {
-            print '<br>';
-            print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon", $urltoenterpaymentmode);
-        }
-    }
+foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
+	if ($companypaymentmodetemp->type == 'card') {
+		$foundcard++;
+		print '<hr>';
+		print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
+		print $langs->trans("CurrentCreditOrDebitCard").':<br>';
+		print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
+		print '....'.$companypaymentmodetemp->last_four;
+		print ' - ';
+		print sprintf("%02d", $companypaymentmodetemp->exp_date_month).'/'.$companypaymentmodetemp->exp_date_year;
+		// Warning if expiring
+		if ($companypaymentmodetemp->exp_date_year < $nowyear ||
+		($companypaymentmodetemp->exp_date_year == $nowyear && $companypaymentmodetemp->exp_date_month <= $nowmonth)) {
+			print '<br>';
+			print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon", $urltoenterpaymentmode);
+		}
+	}
 }
-if ($foundcard)
-{
-    print '<hr>';
-    print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
-    print $langs->trans("NewCreditOrDebitCard").':<br>';
+if ($foundcard) {
+	print '<hr>';
+	print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
+	print $langs->trans("NewCreditOrDebitCard").':<br>';
 }
 
 
-if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION))	// Use a SCA ready method
-{
-    $fulltag='CUS='.$mythirdpartyaccount->id;
-    $fulltag=dol_string_unaccent($fulltag);
+if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {	// Use a SCA ready method
+	$fulltag='CUS='.$mythirdpartyaccount->id;
+	$fulltag=dol_string_unaccent($fulltag);
 
-    require_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';
 
-    $service = 'StripeLive';
-    $servicestatus = 1;
+	$service = 'StripeLive';
+	$servicestatus = 1;
 
-    if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha'))
-    {
-        $service = 'StripeTest';
-        $servicestatus = 0;
-    }
-    $stripe = new Stripe($db);
-    $stripeacc = $stripe->getStripeAccount($service);
-    $stripecu = null;
-    $stripecu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatus, 1); // will use $stripearrayofkeysbyenv to know which env to search into
+	if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha')) {
+		$service = 'StripeTest';
+		$servicestatus = 0;
+	}
+	$stripe = new Stripe($db);
+	$stripeacc = $stripe->getStripeAccount($service);
+	$stripecu = null;
+	$stripecu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatus, 1); // will use $stripearrayofkeysbyenv to know which env to search into
 
-    if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION))
-    {
-        $setupintent=$stripe->getSetupIntent('Stripe setupintent '.$fulltag, $mythirdpartyaccount, $stripecu, $stripeacc, $servicestatus);
-        if ($stripe->error) {
-            setEventMessages($stripe->error, null, 'errors');
+	if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {
+		$setupintent=$stripe->getSetupIntent('Stripe setupintent '.$fulltag, $mythirdpartyaccount, $stripecu, $stripeacc, $servicestatus);
+		if ($stripe->error) {
+			setEventMessages($stripe->error, null, 'errors');
 
-            $emailforerror = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
-            if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-                && $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)
-            {
-                $newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-                $emailforerror = $conf->global->$newnamekey;
-            }
+			$emailforerror = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				$emailforerror = $conf->global->$newnamekey;
+			}
 
-            setEventMessages($langs->trans("ErrorContactEMail", $emailforerror, 'StripeCusNotFound'), null, 'errors');
-        }
-    }
+			setEventMessages($langs->trans("ErrorContactEMail", $emailforerror, 'StripeCusNotFound'), null, 'errors');
+		}
+	}
 }
 
 
 print '<div class="row"><div class="col-md-12"><label class="valignmiddle" style="margin-bottom: 20px">'.$langs->trans("NameOnCard").':</label> ';
-print '<input id="cardholder-name" class="minwidth200 valignmiddle" style="margin-bottom: 15px" type="text" name="proprio" value="'.GETPOST('proprio','alpha').'" autocomplete="off" autofocus>';
+print '<input id="cardholder-name" class="minwidth200 valignmiddle" style="margin-bottom: 15px" type="text" name="proprio" value="'.GETPOST('proprio', 'alpha').'" autocomplete="off" autofocus>';
 print '</div></div>';
 
 require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
 // Reforce the $stripearrayofkeys because content may have been changed by the include of config.php
-if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox','alpha') || ! empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST))
-{
-    $stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
-}
-else
-{
-    $stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
+if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha') || ! empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+	$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
+} else {
+	$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
 }
 
 print '	<center><div class="form-row" style="max-width: 320px">
@@ -299,36 +284,32 @@ print '	<center><div class="form-row" style="max-width: 320px">
 
 print '<br>';
 
-if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_object($setupintent))
-{
-    print '<input type="hidden" name="setupintentid" value="'.$setupintent->id.'">'."\n";
-    print '<button class="btn btn-info btn-circle" id="buttontopay" data-secret="'.$setupintent->client_secret.'">'.$langs->trans("Save").'</button>';
-}
-else
-{
-    print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("Save").'</button>';
+if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_object($setupintent)) {
+	print '<input type="hidden" name="setupintentid" value="'.$setupintent->id.'">'."\n";
+	print '<button class="btn btn-info btn-circle" id="buttontopay" data-secret="'.$setupintent->client_secret.'">'.$langs->trans("Save").'</button>';
+} else {
+	print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("Save").'</button>';
 }
 
 print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/working.gif'.'">';
 print ' ';
 print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 
-if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_object($setupintent))
-{
-    // TODO Enable this legal mention for SCA
-    /*$urlfortermofuse = '';
-     if ($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME == 'dolicloud.com')
-     {
-     $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/en-terms-and-conditions.php';
-     if (preg_match('/^fr/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/fr-conditions-utilisations.php';
-     if (preg_match('/^es/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/es-terminos-y-condiciones.php';
-     }
-     if ($urlfortermofuse)
-     {
-     print '<br><br><span class="opacitymedium"><small>';
-     print $langs->trans('By entering my credit card number, I authorise to send instructions to the financial institution that issued my card to take payments from my card account for my subscription, in accordance with the terms of the <a href="'.$urlfortermofuse.'" target="_blank">General Terms of Service (GTS)</a>');
-     print '</small></span><br>';
-     }*/
+if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_object($setupintent)) {
+	// TODO Enable this legal mention for SCA
+	/*$urlfortermofuse = '';
+	 if ($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME == 'dolicloud.com')
+	 {
+	 $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/en-terms-and-conditions.php';
+	 if (preg_match('/^fr/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/fr-conditions-utilisations.php';
+	 if (preg_match('/^es/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/es-terminos-y-condiciones.php';
+	 }
+	 if ($urlfortermofuse)
+	 {
+	 print '<br><br><span class="opacitymedium"><small>';
+	 print $langs->trans('By entering my credit card number, I authorise to send instructions to the financial institution that issued my card to take payments from my card account for my subscription, in accordance with the terms of the <a href="'.$urlfortermofuse.'" target="_blank">General Terms of Service (GTS)</a>');
+	 print '</small></span><br>';
+	 }*/
 }
 
 print '<script src="https://js.stripe.com/v3/"></script>'."\n";
@@ -336,118 +317,114 @@ print '<script src="https://js.stripe.com/v3/"></script>'."\n";
 // Code to ask the credit card. This use the default "API version". No way to force API version when using JS code.
 print '<script type="text/javascript" language="javascript">'."\n";
 
-if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT))
+if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
+	// Not implemented
+} elseif (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {
+	?>
+			// Code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set
+
+			// Create a Stripe client.
+			var stripe = Stripe('<?php echo $stripearrayofkeys['publishable_key']; // Defined into config.php ?>');
+
+			// Create an instance of Elements
+			var elements = stripe.elements();
+
+			// Custom styling can be passed to options when creating an Element.
+			// (Note that this demo uses a wider set of styles than the guide below.)
+			var style = {
+			  base: {
+				color: '#32325d',
+				lineHeight: '24px',
+				fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+				fontSmoothing: 'antialiased',
+				fontSize: '16px',
+				'::placeholder': {
+				  color: '#aab7c4'
+				}
+			  },
+			  invalid: {
+				color: '#fa755a',
+				iconColor: '#fa755a'
+			  }
+			};
+
+			var cardElement = elements.create('card', {style: style});
+
+			// Add an instance of the card Element into the `card-element` <div>
+			cardElement.mount('#card-element');
+
+			// Handle real-time validation errors from the card Element.
+			cardElement.addEventListener('change', function(event) {
+				var displayError = document.getElementById('card-errors');
+				  if (event.error) {
+					  console.log("Show event error (like 'Incorrect card number', ...)");
+					displayError.textContent = event.error.message;
+				  } else {
+					  console.log("Reset error message");
+					displayError.textContent = '';
+				  }
+			});
+
+			// Handle form submission
+			var cardholderName = document.getElementById('cardholder-name');
+			var cardButton = document.getElementById('buttontopay');
+			var clientSecret = cardButton.dataset.secret;
+
+			cardButton.addEventListener('click', function(event) {
+				console.log("We click on buttontopay");
+				event.preventDefault();
+
+				if (cardholderName.value == '')
+				{
+					console.log("Field Card holder is empty");
+					var displayError = document.getElementById('card-errors');
+					displayError.textContent = '<?php print dol_escape_js($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameOnCard"))); ?>';
+				}
+				else
+				{
+				  stripe.handleCardSetup(
+					clientSecret, cardElement, {
+						payment_method_data: {
+							billing_details: {
+								name: cardholderName.value
+								<?php if (GETPOST('email', 'alpha') || ! empty($mythirdpartyaccount->email)) { ?>, email: '<?php echo dol_escape_js(GETPOST('email', 'alpha') ? GETPOST('email', 'alpha') : $mythirdpartyaccount->email); ?>'<?php } ?>
+								<?php if (! empty($mythirdpartyaccount->phone)) { ?>, phone: '<?php echo dol_escape_js($mythirdpartyaccount->phone); ?>'<?php } ?>
+								<?php if (is_object($mythirdpartyaccount)) { ?>, address: {
+									city: '<?php echo dol_escape_js($mythirdpartyaccount->town); ?>',
+									country: '<?php echo dol_escape_js($mythirdpartyaccount->country_code); ?>',
+									line1: '<?php echo dol_escape_js($mythirdpartyaccount->address); ?>',
+									postal_code: '<?php echo dol_escape_js($mythirdpartyaccount->zip); ?>'}<?php } ?>
+							}
+						  }
+					}
+				  ).then(function(result) {
+						console.log(result);
+					  if (result.error) {
+						  console.log("Error on result of handleCardPayment");
+						  jQuery('#buttontopay').show();
+						  jQuery('#hourglasstopay').hide();
+						  // Inform the user if there was an error
+						  var errorElement = document.getElementById('card-errors');
+						  errorElement.textContent = result.error.message;
+					  } else {
+							// The payment has succeeded. Display a success message.
+						  console.log("No error on result of handleCardPayment, so we submit the form");
+						  // Submit the form
+						  jQuery('#buttontopay').hide();
+						  jQuery('#buttontocancel').hide();
+						  jQuery('#hourglasstopay').show();
+						  jQuery('#hourglasstopay').removeClass('hidden');
+						  // Send form (action=createpaymentmode)
+						  jQuery('#payment-form').submit();
+					  }
+				  });
+				}
+			});
+
+		<?php
+} else // Old method (not SCA ready)
 {
-    // Not implemented
-}
-elseif (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION))
-{
-    ?>
-    		// Code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set
-
-    	    // Create a Stripe client.
-    	    var stripe = Stripe('<?php echo $stripearrayofkeys['publishable_key']; // Defined into config.php ?>');
-
-    	    // Create an instance of Elements
-    	    var elements = stripe.elements();
-
-    	    // Custom styling can be passed to options when creating an Element.
-    	    // (Note that this demo uses a wider set of styles than the guide below.)
-    	    var style = {
-    	      base: {
-    	        color: '#32325d',
-    	        lineHeight: '24px',
-    	        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-    	        fontSmoothing: 'antialiased',
-    	        fontSize: '16px',
-    	        '::placeholder': {
-    	          color: '#aab7c4'
-    	        }
-    	      },
-    	      invalid: {
-    	        color: '#fa755a',
-    	        iconColor: '#fa755a'
-    	      }
-    	    };
-
-    		var cardElement = elements.create('card', {style: style});
-
-    		// Add an instance of the card Element into the `card-element` <div>
-    		cardElement.mount('#card-element');
-
-    		// Handle real-time validation errors from the card Element.
-    		cardElement.addEventListener('change', function(event) {
-        		var displayError = document.getElementById('card-errors');
-        	      if (event.error) {
-        	      	console.log("Show event error (like 'Incorrect card number', ...)");
-        	        displayError.textContent = event.error.message;
-        	      } else {
-        	      	console.log("Reset error message");
-        	        displayError.textContent = '';
-        	      }
-    	    });
-
-    		// Handle form submission
-            var cardholderName = document.getElementById('cardholder-name');
-            var cardButton = document.getElementById('buttontopay');
-            var clientSecret = cardButton.dataset.secret;
-
-            cardButton.addEventListener('click', function(event) {
-            	console.log("We click on buttontopay");
-            	event.preventDefault();
-
-            	if (cardholderName.value == '')
-            	{
-    				console.log("Field Card holder is empty");
-    				var displayError = document.getElementById('card-errors');
-    				displayError.textContent = '<?php print dol_escape_js($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameOnCard"))); ?>';
-            	}
-            	else
-            	{
-                  stripe.handleCardSetup(
-                    clientSecret, cardElement, {
-                    	payment_method_data: {
-        			        billing_details: {
-        			        	name: cardholderName.value
-        			        	<?php if (GETPOST('email', 'alpha') || ! empty($mythirdpartyaccount->email)) { ?>, email: '<?php echo dol_escape_js(GETPOST('email', 'alpha') ? GETPOST('email', 'alpha') : $mythirdpartyaccount->email); ?>'<?php } ?>
-        			        	<?php if (! empty($mythirdpartyaccount->phone)) { ?>, phone: '<?php echo dol_escape_js($mythirdpartyaccount->phone); ?>'<?php } ?>
-        			        	<?php if (is_object($mythirdpartyaccount)) { ?>, address: {
-        			        	    city: '<?php echo dol_escape_js($mythirdpartyaccount->town); ?>',
-        			        	    country: '<?php echo dol_escape_js($mythirdpartyaccount->country_code); ?>',
-        			        	    line1: '<?php echo dol_escape_js($mythirdpartyaccount->address); ?>',
-        			        	    postal_code: '<?php echo dol_escape_js($mythirdpartyaccount->zip); ?>'}<?php } ?>
-        			        }
-              			}
-                    }
-                  ).then(function(result) {
-                  	  console.log(result);
-        	          if (result.error) {
-        	    	      console.log("Error on result of handleCardPayment");
-                	      jQuery('#buttontopay').show();
-                	      jQuery('#hourglasstopay').hide();
-        		          // Inform the user if there was an error
-        		          var errorElement = document.getElementById('card-errors');
-        		          errorElement.textContent = result.error.message;
-        		      } else {
-        		      	  // The payment has succeeded. Display a success message.
-        	    	      console.log("No error on result of handleCardPayment, so we submit the form");
-            			  // Submit the form
-            		      jQuery('#buttontopay').hide();
-            		      jQuery('#buttontocancel').hide();
-            		      jQuery('#hourglasstopay').show();
-            		      jQuery('#hourglasstopay').removeClass('hidden');
-            		      // Send form (action=createpaymentmode)
-            		      jQuery('#payment-form').submit();
-        		      }
-                  });
-                }
-            });
-
-    	<?php
-    	}
-    	else		// Old method (not SCA ready)
-    	{
-        	print "
+	print "
             	// Old code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION off and STRIPE_USE_NEW_CHECKOUT off
 
     			// Create a Stripe client.
@@ -495,39 +472,37 @@ elseif (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION))
     			var form = document.getElementById('payment-form');
     			form.addEventListener('submit', function(event) {
     			  event.preventDefault();";
-    				if (empty($conf->global->STRIPE_USE_3DSECURE))	// Ask credit card directly, no 3DS test
-    				{
-    				?>
-    					/* Use token */
-    					stripe.createToken(card).then(function(result) {
-    				        if (result.error) {
-    				          // Inform the user if there was an error
-    				          var errorElement = document.getElementById('card-errors');
-    				          errorElement.textContent = result.error.message;
-    				        } else {
-    				          // Send the token to your server
-    				          stripeTokenHandler(result.token);
-    				        }
-    					});
-    				<?php
-    				}
-    				else											// Ask credit card with 3DS test
-    				{
-    				?>
-    					/* Use 3DS source */
-    					stripe.createSource(card).then(function(result) {
-    					    if (result.error) {
-    					      // Inform the user if there was an error
-    					      var errorElement = document.getElementById('card-errors');
-    					      errorElement.textContent = result.error.message;
-    					    } else {
-    					      // Send the source to your server
-    					      stripeSourceHandler(result.source);
-    					    }
-    					});
-    				<?php
-    				}
-    		print "
+	if (empty($conf->global->STRIPE_USE_3DSECURE)) {	// Ask credit card directly, no 3DS test
+		?>
+						/* Use token */
+						stripe.createToken(card).then(function(result) {
+							if (result.error) {
+							  // Inform the user if there was an error
+							  var errorElement = document.getElementById('card-errors');
+							  errorElement.textContent = result.error.message;
+							} else {
+							  // Send the token to your server
+							  stripeTokenHandler(result.token);
+							}
+						});
+			<?php
+	} else // Ask credit card with 3DS test
+			{
+		?>
+						/* Use 3DS source */
+						stripe.createSource(card).then(function(result) {
+							if (result.error) {
+							  // Inform the user if there was an error
+							  var errorElement = document.getElementById('card-errors');
+							  errorElement.textContent = result.error.message;
+							} else {
+							  // Send the source to your server
+							  stripeSourceHandler(result.source);
+							}
+						});
+			<?php
+	}
+			print "
     			});
 
 
@@ -582,9 +557,9 @@ elseif (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION))
     			}
 
     			";
-    	}
+}
 
-        print '</script>';
+		print '</script>';
 
 
 		print '
@@ -602,71 +577,64 @@ elseif (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION))
 		print '
 		</div>';
 
-    	print '
+		print '
 
 		<div class="linksepa" style="display: none;">';
-		if ($mythirdpartyaccount->isInEEC())
-		{
-			$foundban=0;
+if ($mythirdpartyaccount->isInEEC()) {
+	$foundban=0;
 
-			// Check if there is already a payment
-			foreach($arrayofcompanypaymentmode as $companypaymentmodetemp)
-			{
-				if ($companypaymentmodetemp->type == 'ban')
-				{
-					/*print img_picto('', 'bank', '',  false, 0, 0, '', 'fa-2x');
-					print '<span class="wordbreak" style="word-break: break-word" colspan="2">';
-					print $langs->trans("WithdrawalReceipt");
-					print '</span>';
-					print '<br>';*/
-					print $langs->trans("IBAN").': '.$companypaymentmodetemp->iban_prefix.'<br>';
-					if ($companypaymentmodetemp->rum) print $langs->trans("RUM").': '.$companypaymentmodetemp->rum;
-					$foundban++;
-					print '<br>';
-
-					$companybankaccounttemp = new CompanyBankAccount($db);
-
-					include_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
-					$ecmfile = new EcmFiles($db);
-					$result = $ecmfile->fetch(0, '', '', '', '', $companybankaccounttemp->table_element, $companypaymentmodetemp->id);
-					if ($result > 0)
-					{
-						$companybankaccounttemp->last_main_doc = $ecmfile->filepath.'/'.$ecmfile->filename;
-						print '<br><!-- Link to download main doc -->'."\n";
-						$publicurltodownload = $companybankaccounttemp->getLastMainDocLink($object->element, 0, 1);
-
-						$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-						include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-						$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
-
-						$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-						//print img_mime('sepa.pdf').'  <a href="'.$urltouse.'" target="_download">'.$langs->trans("DownloadTheSEPAMandate").'</a><br>';
-					}
-				}
-			}
-
-			if (! $foundban)
-			{
-				print '<br>';
-				//print $langs->trans("SEPAPaymentModeAvailableForYealyAndCeeSubscriptionOnly");
-				print $langs->trans("SEPAPaymentModeAvailableNotYetAvailable");
-			}
-
-			print '<br><br>';
-			//print '<input type="submit" name="submitpaypal" value="'.$langs->trans("Continue").'" class="btn btn-info btn-circle">';
-			print ' ';
-			//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
-			print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
-		}
-		else
-		{
+	// Check if there is already a payment
+	foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
+		if ($companypaymentmodetemp->type == 'ban') {
+			/*print img_picto('', 'bank', '',  false, 0, 0, '', 'fa-2x');
+			print '<span class="wordbreak" style="word-break: break-word" colspan="2">';
+			print $langs->trans("WithdrawalReceipt");
+			print '</span>';
+			print '<br>';*/
+			print $langs->trans("IBAN").': '.$companypaymentmodetemp->iban_prefix.'<br>';
+			if ($companypaymentmodetemp->rum) print $langs->trans("RUM").': '.$companypaymentmodetemp->rum;
+			$foundban++;
 			print '<br>';
-			print $langs->trans("SEPAPaymentModeAvailableForCeeOnly", $mythirdpartyaccount->country);
-			print '<br><br>';
-			print ' ';
-			//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
-			print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+
+			$companybankaccounttemp = new CompanyBankAccount($db);
+
+			include_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
+			$ecmfile = new EcmFiles($db);
+			$result = $ecmfile->fetch(0, '', '', '', '', $companybankaccounttemp->table_element, $companypaymentmodetemp->id);
+			if ($result > 0) {
+				$companybankaccounttemp->last_main_doc = $ecmfile->filepath.'/'.$ecmfile->filename;
+				print '<br><!-- Link to download main doc -->'."\n";
+				$publicurltodownload = $companybankaccounttemp->getLastMainDocLink($object->element, 0, 1);
+
+				$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+				include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+				$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+
+				$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
+				//print img_mime('sepa.pdf').'  <a href="'.$urltouse.'" target="_download">'.$langs->trans("DownloadTheSEPAMandate").'</a><br>';
+			}
 		}
+	}
+
+	if (! $foundban) {
+		print '<br>';
+		//print $langs->trans("SEPAPaymentModeAvailableForYealyAndCeeSubscriptionOnly");
+		print $langs->trans("SEPAPaymentModeAvailableNotYetAvailable");
+	}
+
+	print '<br><br>';
+	//print '<input type="submit" name="submitpaypal" value="'.$langs->trans("Continue").'" class="btn btn-info btn-circle">';
+	print ' ';
+	//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
+	print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+} else {
+	print '<br>';
+	print $langs->trans("SEPAPaymentModeAvailableForCeeOnly", $mythirdpartyaccount->country);
+	print '<br><br>';
+	print ' ';
+	//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
+	print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+}
 		print '
 		</div>
 

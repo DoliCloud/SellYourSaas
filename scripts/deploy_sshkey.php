@@ -31,8 +31,8 @@ $path=dirname($_SERVER['PHP_SELF']).'/';
 
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
-    echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-    exit;
+	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
+	exit;
 }
 
 // Global variables
@@ -42,20 +42,20 @@ $error=0;
 
 // -------------------- START OF YOUR CODE HERE --------------------
 @set_time_limit(0);							// No timeout for this script
-define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/master.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
 // Try master.inc.php using relative path
-if (! $res && file_exists("./master.inc.php")) $res=@include("./master.inc.php");
-if (! $res && file_exists("../master.inc.php")) $res=@include("../master.inc.php");
-if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.inc.php");
-if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
+if (! $res && file_exists("./master.inc.php")) $res=@include "./master.inc.php";
+if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
 if (! $res) die("Include of master fails");
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
@@ -76,13 +76,13 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-    print "Create or recreate the file authorized_keys_support. Old file is erased if it already exists.\n";
-    print "Script must be ran from the master server.\n";
-    print "Usage: ".$script_file." (test|confirm) [instancefilter]\n";
-    print "\n";
-    print "- test     test deploy of public key\n";
-    print "- confirm  deploy public key\n";
-    exit;
+	print "Create or recreate the file authorized_keys_support. Old file is erased if it already exists.\n";
+	print "Script must be ran from the master server.\n";
+	print "Usage: ".$script_file." (test|confirm) [instancefilter]\n";
+	print "\n";
+	print "- test     test deploy of public key\n";
+	print "- confirm  deploy public key\n";
+	exit;
 }
 print '--- start'."\n";
 //print 'Argument 1='.$argv[1]."\n";
@@ -127,33 +127,25 @@ $dbtousetosearch = $db;
 
 dol_syslog($script_file." sql=".$sql, LOG_DEBUG);
 $resql=$dbtousetosearch->query($sql);
-if ($resql)
-{
+if ($resql) {
 	$num = $dbtousetosearch->num_rows($resql);
 	$i = 0;
-	if ($num)
-	{
-		while ($i < $num)
-		{
+	if ($num) {
+		while ($i < $num) {
 			$obj = $dbtousetosearch->fetch_object($resql);
-			if ($obj)
-			{
+			if ($obj) {
 				$instance = $obj->instance;
 				$payment_status='PAID';
 				$found = true;
 
-			    dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 				$object = new Contrat($db);
 
 				$instance_status = '';
 				$result = $object->fetch($obj->id);
 				if ($result <= 0) $found=false;
-				else
-				{
-					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; }
-					elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; }
-					elseif ($object->array_options['options_deployment_status'] == 'done')       { $instance_status = 'DEPLOYED'; }
-					else { $instance_status = 'UNKNOWN'; }
+				else {
+					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; } elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; } elseif ($object->array_options['options_deployment_status'] == 'done') { $instance_status = 'DEPLOYED'; } else { $instance_status = 'UNKNOWN'; }
 				}
 
 				$ispaid = sellyoursaasIsPaidInstance($object);
@@ -167,42 +159,32 @@ if ($resql)
 				print "Analyze instance ".($i+1)." ".$instance." status=".$instance_status." instance_status=".$instance_status." payment_status=".$payment_status."\n";
 
 				// Count
-				if ($found)
-				{
-					if ($instancefiltercomplete)
-					{
+				if ($found) {
+					if ($instancefiltercomplete) {
 						$instances[$obj->id]=$object;
 						print "Qualify instance ".($i+1)." ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
-					}
-					else {
+					} else {
 						$nbofalltime++;
-						if (! in_array($instance_status,array('PROCESSING')) && ! in_array($instance_status,array('UNDEPLOYED')))		// Nb of active
-						{
+						if (! in_array($instance_status, array('PROCESSING')) && ! in_array($instance_status, array('UNDEPLOYED'))) {		// Nb of active
 							$nbofactive++;
 
-							if (in_array($instance_status,array('SUSPENDED'))) $nbofactivesusp++;
+							if (in_array($instance_status, array('SUSPENDED'))) $nbofactivesusp++;
 							else $nbofactiveok++; // not suspended, not close request
 
 							$instances[$obj->id]=$object;
 							print "Qualify instance ".($i+1)." ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
-						}
-						else
-						{
+						} else {
 							//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
 						}
 					}
-				}
-				else
-				{
+				} else {
 					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
 				}
 			}
 			$i++;
 		}
 	}
-}
-else
-{
+} else {
 	$error++;
 	$nboferrors++;
 	dol_print_error($dbtousetosearch);
@@ -211,20 +193,16 @@ print "Found ".count($instances)." instances including ".$nbofactivesusp." suspe
 
 
 //print "----- Start loop for backup_instance\n";
-if ($action == 'test' || $action == 'confirm')
-{
-	if (empty($conf->global->DOLICLOUD_BACKUP_PATH))
-	{
+if ($action == 'test' || $action == 'confirm') {
+	if (empty($conf->global->DOLICLOUD_BACKUP_PATH)) {
 		print "Error: Setup of module SellYourSaas not complete. Path to backup not defined.\n";
 		exit -1;
 	}
 
 	// Loop on each instance
-	if (! $error)
-	{
+	if (! $error) {
 		$i = 0;
-		foreach($instances as $key => $tmpobject)
-		{
+		foreach ($instances as $key => $tmpobject) {
 			$instance = ($tmpobject->instance ? $tmpobject->instance : $tmpobject->ref_customer);
 
 			$now=dol_now();
@@ -236,28 +214,22 @@ if ($action == 'test' || $action == 'confirm')
 
 			$errors=array();
 
-			if ($action == 'confirm')
-			{
+			if ($action == 'confirm') {
 				$return_val = dolicloud_files_refresh($conf, $db, $tmpobject, $errors, 1, 2);
 
 				echo "Result: ".$return_val."\n";
-				echo "Output: ".join(',',$errors)."\n";
-			}
-			else
-			{
+				echo "Output: ".join(',', $errors)."\n";
+			} else {
 				echo "Test mode, nothing done\n";
 			}
 
 			if (! empty($errors)) $error++;
 
 			//
-			if (! $error)
-			{
+			if (! $error) {
 				$nbofok++;
 				print 'Process success for '.$instance."\n";
-			}
-			else
-			{
+			} else {
 				$nboferrors++;
 				$instanceserror[]=$instance;
 				print 'Process fails for '.$instance."\n";
@@ -272,14 +244,11 @@ if ($action == 'test' || $action == 'confirm')
 // Result
 print "Nb of instances process ok: ".$nbofok."\n";
 print "Nb of instances process ko: ".$nboferrors;
-print (count($instanceserror)?", error for deploy public key on ".join(',',$instanceserror):"");
+print (count($instanceserror)?", error for deploy public key on ".join(',', $instanceserror):"");
 print "\n";
-if (! $nboferrors)
-{
+if (! $nboferrors) {
 	print '--- end ok - '.strftime("%Y%m%d-%H%M%S")."\n";
-}
-else
-{
+} else {
 	print '--- end error code='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
 }
 

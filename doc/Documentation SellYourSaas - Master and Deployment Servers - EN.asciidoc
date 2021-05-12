@@ -106,9 +106,18 @@ For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server
 [[adding_disk]]
 === Adding the harddisk of data (home of user instances and home of backups)
 
-We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
+On *Master server*:
+
+We will just use the same disk for local backup. So we just do:
+
+[source, bash]
+---------------
+mkdir /mnt/diskhome
+---------------
 
 On *Deployment server* :
+
+We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
 
 With OVH Public Cloud:
 
@@ -216,14 +225,16 @@ mysqlcheck --all-databases
 
 === SSH and sudo
 
-=== Unix admin account
+==== Unix admin account
 
 Create the user account *admin*. It will be used to install and administer the system when root is not required.
 
 [source, bash]
 ---------------
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
-mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs
+mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
+mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -237,7 +248,7 @@ adduser myunixlogin
 ---------------
 
 
-==== ssh setup
+==== SSH setup
 
 Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 
@@ -251,7 +262,7 @@ Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permiss
 [source, conf]
 ---------------
 # Privilege Separation is turned on for security
-UsePrivilegeSeparation yes
+#UsePrivilegeSeparation yes
 # Permissions on files must be correct to allow login
 StrictModes yes
 
@@ -275,6 +286,10 @@ AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 
 AllowUsers admin osu*
 AllowUsers myunixlogin
+
+# Legacy changes - To allow an old client (like old PHP) to connect to
+KexAlgorithms +diffie-hellman-group1-sha1
+Ciphers +aes128-cbc
 ---------------
 
 Please note: replace *myunixlogin* with the correct value before taking changes into account with:
@@ -292,15 +307,23 @@ Add the following line in the */etc/sudoers* file to reposition the HOME accordi
 Defaults set_home
 ---------------
 
-Create a file *myunixlogin* to put in the directory */etc/sudoers.d* with the owner *root*.*root* and the permissions *r-r-----* and the content
+Create a file */etc/sudoers.d/myunixlogin* with the content
 
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
+And set the *root*.*root* and the permissions *r-r-----*
 
-Test that you can connect using *myunixlogin* and make a sudo with
+[source, conf]
+---------------
+chmod a-w /etc/sudoers.d/myunixlogin
+chmod a-r /etc/sudoers.d/myunixlogin
+---------------
+
+
+Test that you can connect using *myunixlogin* and you can make a sudo with
 
 [source,bash]
 ---------------
@@ -344,8 +367,8 @@ In order not to give information to users doing SSH, on the deployment servers:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/ 50-landscape-sysinfo
-rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
 
@@ -365,7 +388,7 @@ sudo vi /etc/skel/.ssh/authorized_keys_support
 
 Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
-    
+
 
 === Add alias
 
@@ -592,9 +615,16 @@ With the following content:
 ---------------
 # domain du service
 domain=mysaasdomainname.com
+
+# If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
-# ips autorisés à commander le déploiement
-allowed_hosts=127.0.0.1,ipduservermaster
+# If deployment server: IPs allowed to request a deployment
+allowed_hosts=127.0.0.1,ipofmasterserver
+
+# email from
+emailfrom=robot@mysaasdomainname.com
+# email supervision
+emailsupervision=supervision@mysaasdomainname.com
 
 # Set to 1 if this server is the master server
 masterserver=1
@@ -602,7 +632,7 @@ masterserver=1
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
-# Set to its own IP if it is a deployment server
+# Set to its own IP if it is a deployment server. Keep empty for master only server.
 ipserverdeployment=ipduserverdeployment
 
 # Set location of the master database
@@ -626,6 +656,8 @@ backupdir=/mnt/diskbackup/backup
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+usecompressformatforarchive=gzip
 
 # Set remote server launcher ip (default is 0.0.0.0)
 remoteserverlistenip=0.0.0.0
@@ -655,7 +687,7 @@ remotebackupdir=/mnt/diskbackup
 
 Put *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master
 Put *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on deployment servers.
-Do not forget to set a value for *databasepass*.
+Do not forget to set a value for *databasepass*. We will reuse this value later.
 
 
 === Installing the nfs share
@@ -692,6 +724,28 @@ vi /etc/exports
 
 Note that you should have n lines per deployment server in this file.
 
+Set a fixed port for mountd:
+
+[source, bash]
+---------------
+vi /etc/default/nfs-kernel-server
+---------------
+
+and comment out this line: RPCMOUNTDOPTS=--manage-gids, add this instead: 
+
+[source, bash]
+---------------
+RPCMOUNTDOPTS="--port 33333"
+---------------
+
+[source, bash]
+---------------
+service nfs-config restart
+service nfs-kernel-server restart
+rpcinfo -p
+---------------
+
+You should see mountd on port 33333. If not, restart server.
 
 [source, bash]
 ---------------
@@ -707,7 +761,9 @@ exportfs
 
 ==== On the Deployment Servers
 
-Remember to open the firewall access between the NFS client (* Deployment server *) and the NFS server (* Master server *).
+Remember to open the firewall access between the NFS client (*Deployment server*) and the NFS server (*Master server*).
+
+TODO ...
 
 Install the NFS client and install it manually. Editing is performed by default in NFSv4.
 
@@ -764,12 +820,15 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install ntp git gzip zip zstd memcached ncdu
+sudo apt install mariadb-server mariadb-client
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 sudo apt install soffice libreoffice-common libreoffice-writer
+sudo apt install mailutils postfix
 ---------------
 
 * Installation of the 20.04+ Ubuntu packages
@@ -777,12 +836,15 @@ sudo apt install soffice libreoffice-common libreoffice-writer
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached rrdtool ncdu
-sudo apt install php mysql-server mysql-client php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install ntp git gzip zip zstd memcached ncdu
+sudo apt install mariadb-server mariadb-client
+sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install bind9
 sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
 sudo apt install libreoffice-common libreoffice-writer
+sudo apt install mailutils
 ---------------
 
 Now, we need to install *php-mcrypt* for Ubuntu 20.04+ (optional)
@@ -835,8 +897,9 @@ Enable apache *modules* to work with MPM_PREFORK and MPM_ITK:
 ---------------
 a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
-a2enmod mem_cache mime mime_magic negotiation php7.0 | php7.2 reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
+a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
 a2enmod mpm_itk mpm_prefork
+a2enmod php7.0|php7.2|php7.4
 ---------------
 
 Enable apache *configurations* to work with MPM_PREFORK and MPM_ITK:
@@ -902,7 +965,6 @@ On the *Master server*:
         #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
         #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster@mysaasdomainname.com"
         php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/jail/home:/home/admin/backup/dump:/home/admin/tools/
-        php_admin_value memory_limit 64M
 
         ServerName      admin.mysaasdomainname.com
         DocumentRoot /home/admin/wwwroot/dolibarr/htdocs/
@@ -1012,9 +1074,10 @@ You can create another virtual host for the HTTPS on port 443
 
 === Timeout of server launches
 
-On Ubuntu 18.04+ and with MariaDb migrated from a MySql:
+On Ubuntu 18.04+ when MariaDb has been migrated from a MySql:
 
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. 
+To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
 
 [source, bash]
 ---------------
@@ -1035,18 +1098,40 @@ systemctl reload service_name.service
 
 === Installation of the firewall ===
 
-* Create a firewall launch file (for example in */home/admin/tools/firewall*). Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
+TODO Graphic with flux and ports
+
+
+* Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. However, 2 methods with example are provided:
+
+
+==== With iptables ====
 
 [source, bash]
 ---------------
-ln -fs /home/admin/tools/firewall /etc/init.d/firewallsellyoursaas
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
 systemctl daemon-reload
 systemctl enable firewallsellyoursaas
 systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-TODO Graphic with flux and ports
+==== With ufw
+
+Edit file */etc/ufw/before.rules* to allow out ping, by adding this:
+
+[source, bash]
+---------------
+# allow outbound icmp
+-A ufw-before-output -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+-A ufw-before-output -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
+---------------
+
+Then launch and enable the firewall
+
+[source, bash]
+---------------
+/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaasufw.sh start
+---------------
 
 
 === Installation of unix watchdog (optional) ===
@@ -1156,14 +1241,14 @@ systemctl stop remote-server-launcher.service
   
 * As well as the specific rules for sellyoursaas:
   
-  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
 
 To do this, first create a */etc/fail2ban/jail.local* file with this content:
 
 NOTE: The rules available may vary depending on the version of the OS installed.
 
-NOTE: Remember to also modify "mybusinessips" by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
+NOTE: Remember to also modify *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
 
 
 [source, bash]
@@ -1336,26 +1421,13 @@ findtime = 3600      ; 1 hour
 maxretry = 5
 
 
-[email-dol-perhour]
-
-; rule against intensive email ko - too high number of recipient (see file etc/fail2ban/filter.d/apache-dolibarr-rulesko)
-; A log for this rule wil be reported if nb of recipients is higher than $MAXOK defined into phpsendmail.php file
-; Note: For Dolibarr app, you can set MAIL_MAX_NB_OF_RECIPIENTS_IN_SAME_EMAIL to match same value.
-enabled = true
-port    = http,https
-filter  = apache-dolibarr-rulesko
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 7200      ; 2 hours
-findtime = 3600      ; 1 hour
-maxretry = 5
 
 [email-dol-blacklist]
 
-; rule against email ko - blacklist ip, email or content (see file etc/fail2ban/filter.d/apache-dolibarr-ruleskoblacklist)
+; rule against email ko - blacklist ip, email or content
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-ruleskoblacklist
+filter  = email-dolibarr-ruleskoblacklist
 logpath = /var/log/phpsendmail.log
 action = %(action_mw)s
 bantime  = 4320000   ; 50 days
@@ -1364,22 +1436,34 @@ maxretry = 1
 
 [email-dol-perday]
 
-; rule against out of limit emails (max 500 emails per day) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesall)
+; rule against out of limit emails (max 500 emails per day)
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-rulesall
+filter  = email-dolibarr-rulesall
 logpath = /var/log/phpsendmail.log
 action  = %(action_mw)s
 bantime  = 86400     ; 1 day
 findtime = 86400     ; 1 day
 maxretry = 500
 
-[email-dol-perhouradmin]
+[email-dol-perhour]
 
-; rule against out of limit emails (max 10 from admin) (see file etc/fail2ban/filter.d/apache-dolibarr-rulesadmin)
+; rule against intensive email ko - too high number of recipient
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-rulesadmin
+filter  = email-dolibarr-rulesko
+logpath = /var/log/phpsendmail.log
+action = %(action_mw)s
+bantime  = 7200      ; 2 hour
+findtime = 3600      ; 1 hour
+maxretry = 5
+
+[email-dol-perhouradmin]
+
+; rule against out of limit emails (max 10 from admin)
+enabled = true
+port    = http,https
+filter  = email-dolibarr-rulesadmin
 logpath = /var/log/phpsendmail.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
@@ -1388,25 +1472,36 @@ maxretry = 10
 
 [web-dol-passforgotten]
 
-; rule against call to passwordforgottenpage (see file etc/fail2ban/filter.d/apache-dolibarr-rulespasswordforgotten)
-; disable this rule by setting enable to false on deployment only servers
+; rule against call of passwordforgottenpage
 enabled = true
 port    = http,https
-filter  = apache-dolibarr-rulespassforgotten
+filter  = web-dolibarr-rulespassforgotten
 logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 10
 
+[web-dol-bruteforce]
+
+; rule against bruteforce hacking (login + api)
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulesbruteforce
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 3600      ; 1 hour
+maxretry = 10
+
 [web-dol-registerinstance]
 
-; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/apache-dolibarr-rulesregisterinstance)
+; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
 ; disable this rule by setting enable to false on deployment servers
 ;enabled = true
 ;port    = http,https
-;filter  = apache-dolibarr-rulesregisterinstance
-;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaas.log
+;filter  = web-dolibarr-rulesregisterinstance
+;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
 ;action  = %(action_mw)s
 ;bantime  = 4320000   ; 50 days
 ;findtime = 86400     ; 1 day
@@ -1414,7 +1509,21 @@ maxretry = 10
 
 ---------------
 
-Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d*
+Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating a link:
+
+[source, bash]
+---------------
+cd /etc/fail2ban/filter.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+---------------
+
+Relaunch fail2ban and check errors into */var/log/fail2ban.log*
 
 
 === Test spamassassin ===
@@ -1482,21 +1591,27 @@ Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called fr
 
 [source,bash]
 ---------------
-cd /etc/apparmor.d/disable
-ln -fs /etc/apparmor.d/usr.sbin.clamd
+aa-disable usr.sbin.clamd
+ls -alrt /etc/apparmor.d/disable
 service apparmor reload
 service apparmor status
 service apache2 stop
 service apache2 start
 ---------------
 
-You should see into the status a line saying that Profile *usr/sbin/clamd* is disabled.
+You should see into the status of apparmor a line saying that Profile *usr/sbin/clamd* is disabled.
 It seems we must also restart apache to have this effective inside apache.
 
 
 === Installation of Afick
 
 * Install afick.pl tool from the debian package found on afick web site.
+
+[source,bash]
+---------------
+wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
+dpkg -i afick.deb
+---------------
 
 * Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
 
@@ -1592,8 +1707,10 @@ Test that execution by crontab works correcly by running under root:
 /etc/cron.daily/afick_cron
 ---------------
 
+Ignore if you have error when sending emails, sending emails is setup later.
 
-=== Configuration de cpulimit (optionnel)
+
+=== Setup of cpulimit (optional)
 
 * Launch cpulimit at startup to execute:
 
@@ -1606,9 +1723,9 @@ See script *cpulimit_daemon* to put into */etc/init.d*.
 
 
 
-=== Setup of /etc/security/limits.conf (optionnel)
+=== Setup of /etc/security/limits.conf (optional)
 
-* Editer le fichier */etc/security/limits.conf* par exemple pour augmenter le nombre de fichiers max ouvert par processus
+* Edit the file */etc/security/limits.conf* for example to increase the max number of files open by a process
 
 [source,conf]
 ---------------
@@ -1624,10 +1741,9 @@ ulimit -a
 ---------------
 
 
-=== Configuration de Postfix
+=== Setup of Postfix
 
-Créer un fichier */etc/postfix/generic* pour ajouter la correspondance entre l'email utilisé par les envois de mails système qui ont un from vide
-et l'email à utiliser qui est officiellement valide.
+Create a file */etc/postfix/generic* to add binding between email used to send email by the system that has a "from" empty and the email to use that is authorized to send emails officially (postfix will do the replacement).
 
 [source,bash]
 ---------------
@@ -1635,7 +1751,7 @@ root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
 admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
 
-Compiler le fichier par:
+Compile the file with:
 
 [source,bash]
 ---------------
@@ -1655,7 +1771,7 @@ vi /etc/mailname
 
 
 
-Compléter le fichier */etc/postfix/main.cf* avec:
+Complete the file */etc/postfix/main.cf* with:
 
 [source,bash]
 ---------------
@@ -1664,7 +1780,6 @@ myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-mydestination = $myhostname, apollon.localdomain, localhost.localdomain, localhost
 # mynetworks contains only localhost. Allowed external host are allowed with firewall on port 25 + because we use sasl authentication
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
@@ -1803,13 +1918,17 @@ On *Deployment servers*, use a dedicated setup of the database.
 
 ==== Setup
 
-Edit the config file */lib/systemd/system/mysql.service* to put into section *[Service]* a value that is a limit number of files that is higher than the default value of *4096* (visible with *sudo systemctl show -p DefaultLimitNOFILE*) of systemd:
+Edit the config file 
+*/lib/systemd/system/mysql.service*  or  */lib/systemd/system/mariadb.service*
+to put into section *[Service]* a value that is a limit number of files that is higher than the default value of *4096* (visible with *sudo systemctl show -p DefaultLimitNOFILE*) of systemd:
 
 [source,bash]
 ---------------
 LimitNOFILE=50000
 Restart=on-watchdog
 ---------------
+
+This may avoid warning like "Could not increase number of max_open_files to more than".
 
 Take the change into account with command:
 
@@ -1818,8 +1937,11 @@ Take the change into account with command:
 systemctl daemon-reload
 ---------------
 
-Edition du fichier de config *mysqld.cnf* dans */etc/mysql/mysql.conf.d* (si mysql) 
-ou *50-server.cnf* dans */etc/mysql/mariadb.conf.d* (si mariadb) pour changer :
+Edit config file 
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
+or
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
+to change:
 
 
 [source,bash]
@@ -1856,10 +1978,19 @@ innodb_log_buffer_size=32M
 log_warnings = 2
 ---------------
 
-This may also be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
+Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
-==== Secure the root account
+==== Set mysql root password
+
+[source,bash]
+---------------
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
+FLUSH PRIVILEGES;
+---------------
+
+
+==== Secure the root account (optional)
 
 In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
 from the system root account only (using *auth_socket* or *unix_socket*):
@@ -1886,6 +2017,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
 # Identification by unix socket
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
+You must stop/start database server to validate this change.
 
 For MariaDb:
 
@@ -1896,6 +2028,7 @@ update mysql.user set plugin='' where user='root' and host='localhost';
 # Identification by unix socket
 update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
+You must stop/start database server to validate this change.
 
 
 Note: The show specific parameters that are not the default values, you can launch:
@@ -1906,12 +2039,12 @@ mysqld --print-defaults
 ---------------
 
 
-Note: To delete active plugins, empty the mysql * plugins * table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
+Note: To delete active plugins, empty the mysql *plugin* table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
 
 
 
 [[creer_un_compte_db_sellyoursaas]]
-==== Create a user sellyoursaas to administer database of user instances
+==== Create a user sellyoursaas to control databases of user instances
 
 On the *Master* server and each *Deployment server*, donner l'accès localement au compte *sellyoursaas*:
 
@@ -1949,30 +2082,31 @@ update mysql.user SET authentication_string = PASSWORD('...') where user  = 'sel
 FLUSH PRIVILEGES;
 ---------------
 
+==== Create a user to login for remote administration (optional)
 
 Give access rights on the database server to allow remote administration on all databases from your desktop:
 
 [source,sql]
 ---------------
-CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordfordatadog...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
+CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
 
+==== Create a user for supervision (optional)
 
 If you use a supervision agent like *DataDog* to superize the database, create an accunt to access localy to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
 
 [source,sql]
 ---------------
-CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...';
+CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...passwordfordatadog...';
 GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
 GRANT PROCESS ON *.* TO 'datadog'@'localhost';
 FLUSH PRIVILEGES;
 ---------------
 
 
-==== Setup mariadb cluster in mode master-slave (optionnel, abandonned)
+==== Setup mariadb cluster in mode master-slave (optional, abandonned)
 
 On the server, activate the mode MASTER by adding the directives:
 
@@ -2065,15 +2199,21 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 
 === Setup of AppArmor
 
-Copy */bin/bash* or */bin/dash* into */bin/secureBash*
+Copy */bin/bash* or */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
-Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
+[source,bash]
+---------------
+cp /bin/bash /bin/secureBash
+---------------
+
+Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 
 [source,bash]
 ---------------
 # Last Modified: Thu Nov 10 11:20:06 2016
 #include <tunables/global>
 
+# You must use here the real path and not the symlink path
 /bin/secureBash {
   #include <abstractions/base>
   #include <abstractions/nameservice>
@@ -2088,6 +2228,7 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   deny /etc/default/nss r,
   deny /etc/host.conf r,
   deny /etc/hosts r,
+  #deny /etc/passwd r,
   deny /etc/securetty r,
   deny /etc/shadow r,
   deny /etc/sudoers r,
@@ -2145,20 +2286,13 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   /etc/mysql/my.cnf r,
   /etc/pam.d/* r,
   /etc/papersize r,
-  /etc/php/7.0/cli/* r,
-  /etc/php/7.0/cli/conf.d/ r,
-  /etc/php/7.0/cli/conf.d/* r,
-  /etc/php/7.0/fpm/conf.d/ r,
-  /etc/php/7.0/fpm/conf.d/* r,
-  /etc/php/7.0/mods-available/ r,
-  /etc/php/7.0/mods-available/* r,
-  /etc/php/7.2/cli/* r,
-  /etc/php/7.2/cli/conf.d/ r,
-  /etc/php/7.2/cli/conf.d/* r,
-  /etc/php/7.2/fpm/conf.d/ r,
-  /etc/php/7.2/fpm/conf.d/* r,
-  /etc/php/7.2/mods-available/ r,
-  /etc/php/7.2/mods-available/* r,
+  /etc/php/7.*/cli/* r,
+  /etc/php/7.*/cli/conf.d/ r,
+  /etc/php/7.*/cli/conf.d/* r,
+  /etc/php/7.*/fpm/conf.d/ r,
+  /etc/php/7.*/fpm/conf.d/* r,
+  /etc/php/7.*/mods-available/ r,
+  /etc/php/7.*/mods-available/* r,
   /etc/postfix/dynamicmaps.cf r,
   /etc/postfix/main.cf r,
   /etc/profile r,
@@ -2179,6 +2313,25 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   /tmp/** rw,
   /sys/devices/system/cpu/ r,
   /usr/bin/ r,
+  /usr/bin/cat rix,
+  /usr/bin/chmod rix,
+  /usr/bin/cp rix,
+  /usr/bin/customerCocoonBash mr,
+  /usr/bin/dash rix,
+  /usr/bin/grep rix,
+  /usr/bin/gzip rix,
+  /usr/bin/less rix,
+  /usr/bin/lesspipe rix,
+  /usr/bin/ls rix,
+  /usr/bin/more rix,
+  /usr/bin/mkdir rix,
+  /usr/bin/mv rix,
+  /usr/bin/rm rix,
+  /usr/bin/rmdir rix,
+  /usr/bin/sed rix,
+  /usr/bin/tar rix,
+  /usr/bin/uname rix,
+  /usr/bin/zstd rix,
   /usr/bin/awk rix,
   /usr/bin/basename rix,
   /usr/bin/clear rix,
@@ -2201,8 +2354,7 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   /usr/bin/mysqldump rix,
   /usr/bin/passwd rix,
   /usr/bin/php rix,
-  /usr/bin/php7.0 rix,
-  /usr/bin/php7.2 rix,
+  /usr/bin/php7.* rix,
   /usr/bin/python rix,
   /usr/bin/python2.7 rix,
   /usr/bin/rsync rix,
@@ -2254,79 +2406,39 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
   /usr/share/pyshared/lazr.restfulclient-0.12.0-nspkg.pth r,
   /usr/share/pyshared/lazr.uri-1.0.3-nspkg.pth r,
   /usr/share/pyshared/zope.interface-3.6.1-nspkg.pth r,
-  /usr/share/vim/vim72/debian.vim r,
-  /usr/share/vim/vim72/filetype.vim r,
-  /usr/share/vim/vim72/lang/en_GB/LC_MESSAGES/vim.mo r,
-  /usr/share/vim/vim72/plugin/ r,
-  /usr/share/vim/vim72/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim72/plugin/gzip.vim r,
-  /usr/share/vim/vim72/plugin/matchparen.vim r,
-  /usr/share/vim/vim72/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim72/plugin/rrhelper.vim r,
-  /usr/share/vim/vim72/plugin/spellfile.vim r,
-  /usr/share/vim/vim72/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim72/plugin/tohtml.vim r,
-  /usr/share/vim/vim72/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim72/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim72/scripts.vim r,
-  /usr/share/vim/vim72/syntax/syncolor.vim r,
-  /usr/share/vim/vim72/syntax/synload.vim r,
-  /usr/share/vim/vim72/syntax/syntax.vim r,
-  /usr/share/vim/vim73/debian.vim r,
-  /usr/share/vim/vim73/filetype.vim r,
-  /usr/share/vim/vim73/plugin/ r,
-  /usr/share/vim/vim73/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim73/plugin/gzip.vim r,
-  /usr/share/vim/vim73/plugin/matchparen.vim r,
-  /usr/share/vim/vim73/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim73/plugin/rrhelper.vim r,
-  /usr/share/vim/vim73/plugin/spellfile.vim r,
-  /usr/share/vim/vim73/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim73/plugin/tohtml.vim r,
-  /usr/share/vim/vim73/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim73/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim73/syntax/css.vim r,
-  /usr/share/vim/vim73/syntax/html.vim r,
-  /usr/share/vim/vim73/syntax/javascript.vim r,
-  /usr/share/vim/vim73/syntax/php.vim r,
-  /usr/share/vim/vim73/syntax/sql.vim r,
-  /usr/share/vim/vim73/syntax/sqloracle.vim r,
-  /usr/share/vim/vim73/syntax/syncolor.vim r,
-  /usr/share/vim/vim73/syntax/synload.vim r,
-  /usr/share/vim/vim73/syntax/syntax.vim r,
-  /usr/share/vim/vim73/syntax/vb.vim r,
-  /usr/share/vim/vim80/debian.vim r,
-  /usr/share/vim/vim80/defaults.vim r,
-  /usr/share/vim/vim80/filetype.vim r,
-  /usr/share/vim/vim80/ftplugin.vim r,
-  /usr/share/vim/vim80/indent.vim r,
-  /usr/share/vim/vim80/pack/ r,
-  /usr/share/vim/vim80/plugin/ r,
-  /usr/share/vim/vim80/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim80/plugin/gzip.vim r,
-  /usr/share/vim/vim80/plugin/logiPat.vim r,
-  /usr/share/vim/vim80/plugin/matchparen.vim r,
-  /usr/share/vim/vim80/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim80/plugin/manpager.vim r,
-  /usr/share/vim/vim80/plugin/rrhelper.vim r,
-  /usr/share/vim/vim80/plugin/spellfile.vim r,
-  /usr/share/vim/vim80/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim80/plugin/tohtml.vim r,
-  /usr/share/vim/vim80/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim80/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim80/rgb.txt r,
-  /usr/share/vim/vim80/scripts.vim r,
-  /usr/share/vim/vim80/syntax/css.vim r,
-  /usr/share/vim/vim80/syntax/html.vim r,
-  /usr/share/vim/vim80/syntax/javascript.vim r,
-  /usr/share/vim/vim80/syntax/php.vim r,
-  /usr/share/vim/vim80/syntax/sql.vim r,
-  /usr/share/vim/vim80/syntax/sqloracle.vim r,
-  /usr/share/vim/vim80/syntax/syncolor.vim r,
-  /usr/share/vim/vim80/syntax/synload.vim r,
-  /usr/share/vim/vim80/syntax/syntax.vim r,
-  /usr/share/vim/vim80/syntax/nosyntax.vim r,
-  /usr/share/vim/vim80/syntax/vb.vim r,
+  /usr/share/vim/vim*/debian.vim r,
+  /usr/share/vim/vim*/defaults.vim r,
+  /usr/share/vim/vim*/filetype.vim r,
+  /usr/share/vim/vim*/ftplugin.vim r,
+  /usr/share/vim/vim*/indent.vim r,
+  /usr/share/vim/vim*/pack/ r,
+  /usr/share/vim/vim*/lang/en_GB/LC_MESSAGES/vim.mo r,
+  /usr/share/vim/vim*/plugin/ r,
+  /usr/share/vim/vim*/plugin/getscriptPlugin.vim r,
+  /usr/share/vim/vim*/plugin/gzip.vim r,
+  /usr/share/vim/vim*/plugin/logiPat.vim r,
+  /usr/share/vim/vim*/plugin/manpager.vim r,
+  /usr/share/vim/vim*/plugin/matchparen.vim r,
+  /usr/share/vim/vim*/plugin/netrwPlugin.vim r,
+  /usr/share/vim/vim*/plugin/rrhelper.vim r,
+  /usr/share/vim/vim*/plugin/spellfile.vim r,
+  /usr/share/vim/vim*/plugin/tarPlugin.vim r,
+  /usr/share/vim/vim*/plugin/tohtml.vim r,
+  /usr/share/vim/vim*/plugin/vimballPlugin.vim r,
+  /usr/share/vim/vim*/plugin/zipPlugin.vim r,
+  /usr/share/vim/vim*/rgb.txt r,
+  /usr/share/vim/vim*/scripts.vim r,
+  /usr/share/vim/vim*/syntax/css.vim r,
+  /usr/share/vim/vim*/syntax/html.vim r,
+  /usr/share/vim/vim*/syntax/javascript.vim r,
+  /usr/share/vim/vim*/syntax/php.vim r,
+  /usr/share/vim/vim*/syntax/sql.vim r,
+  /usr/share/vim/vim*/syntax/sqloracle.vim r,
+  /usr/share/vim/vim*/syntax/syncolor.vim r,
+  /usr/share/vim/vim*/syntax/synload.vim r,
+  /usr/share/vim/vim*/syntax/syntax.vim r,
+  /usr/share/vim/vim*/syntax/nosyntax.vim r,
+  /usr/share/vim/vim*/syntax/vb.vim r,
   /usr/share/ImageMagick-6/ r,
   /usr/share/ImageMagick-6/* r,
   owner /var/spool/postfix/maildrop/ rw,
@@ -2341,6 +2453,7 @@ Add apparmor file *bin.secureBash* in */etc/apparmor.d* with this content:
 }
 ---------------
 
+!!! Set */usr/bin/secureBash* with Ubuntu 20.04+
 
 
 * Activate the rule apparmor in mode *enforce* (or *complain*)
@@ -2358,18 +2471,25 @@ aa-status
 
 [source,bash]
 ---------------
-aa-enforce usr.sbin.mysqld
+aa-enforce bin.secureBash
 ---------------
 
 
-* to disable a profile of rules
+* To disable a profile of rules
 
 [source,bash]
 ---------------
 apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
+or 
+aa-disable usr.sbin.mysqld
 ---------------
 
-To avois to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no*
+A reboot of server may be required to take into account any change on profile files.
+
+All the disabled profiles are visible into */etc/apparmor.d/disable*
+
+
+* To remove: To avoid to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no*
 
 [source,bash]
 ---------------
@@ -2544,7 +2664,8 @@ Mettre en commentaire
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
 
-=== Setup of DNS server for Master server
+
+=== Setup of DNS server for domains served by Master server
 
 ==== On registar side
 
@@ -2552,6 +2673,7 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
 
     *admin.mysaasdomainname.com*         Domain de l'outil d'administration pointant sur l'ip du serveur Master
     *myaccount.mysaasdomainname.com*     Domain de l'outil d'administration pointant sur l'ip du serveur Master
+
 
 
 === Setup of DNS server for deployment servers
@@ -2605,7 +2727,7 @@ test	A	ip.of.server.deployment
 ---------------
 
 
-Ajouter une entrée dans */etc/bind/named.conf.local* pour que ce nouveau fichier soit pris en compte
+Add an entry into */etc/bind/named.conf.local* so the new file will be taken into account
 
 [source,bash]
 ---------------
@@ -2617,7 +2739,7 @@ zone "withX.mysaasdomainname.com" {
 ---------------
 
 
-Créer un répertoire */etc/bind/archives*
+Create a directory */etc/bind/archives*
 
 [source,bash]
 ---------------
@@ -2663,12 +2785,16 @@ nslookup test.withX.mysaasdomainname.com 8.8.8.8
 
 === Setup of PHP
 
-==== Securisation du répertoire des sessions PHP
+==== Secure the directory of PHP sessions
 
-Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php*
+Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
 
+[source,bash]
+---------------
+TODO
+---------------
 
-==== Définition taille upload et durée sessions
+==== Define size of upload and session duration
 
 Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
 
@@ -2677,12 +2803,17 @@ Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow 
 upload_max_filesize = 20M
 
 post_max_size = 25M
+max_input_vars = 4000
+
+memory_limit = 256M
 
 session.gc_maxlifetime = 3600
 ---------------
 
 
-==== Ajout du wrapper PHP pour la fonction PHP mail
+==== Add a wrapper PHP for the mail() function
+
+On *Deployment servers*:
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 
@@ -2795,6 +2926,7 @@ su root syslog
 
 [source,bash]
 ---------------
+cd /etc/logrotate.d
 logrotate -f logrotate_admin_log
 logrotate -f logrotate_sellyoursaas_log
 ---------------
@@ -2841,7 +2973,7 @@ journalctl --header
 ---------------
 
 
-=== Désactivation ou activation de apport (optionnel, "on" recommandé)
+=== Disable or enable apport (optional, "on" recommended)
 
 Pour activer:
 
@@ -2870,6 +3002,7 @@ Note: Reports are into */var/crash*
 ---------------
 apt remove cerbot
 sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
 # Old method was:
 #cd /root
@@ -2950,13 +3083,50 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
-* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* to replace the lines that declare SSL certificate with the new one:
+* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* with this content:
 
 ---------------
-SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
-SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
-SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
-SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:443>
+                ServerAdmin webmaster@localhost
+
+                DocumentRoot /var/www/html
+
+                ErrorLog ${APACHE_LOG_DIR}/error_ssl.log
+                CustomLog ${APACHE_LOG_DIR}/access_ssl.log combined
+
+                #   SSL Engine Switch:
+                #   Enable/Disable SSL for this virtual host.
+                SSLEngine on
+
+                #   A self-signed (snakeoil) certificate can be created by installing
+                #   the ssl-cert package. See
+                #   /usr/share/doc/apache2/README.Debian.gz for more info.
+                #   If both key and certificate are stored in the same file, only the
+                #   SSLCertificateFile directive is needed.
+				  SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
+				  SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
+				  SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+				  SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+
+				#
+				# Allow server status reports generated by mod_status,
+				# THIS IS REQUIRED FOR /usr/sbin/apachectl fullstatus
+				#
+				<Location /server-status>
+				    SetHandler server-status
+				    Order allow,deny
+				    Deny from env=bad_bots
+				    Allow from all
+				    Require all granted
+				</Location>
+				
+        </VirtualHost>
+</IfModule>
 ---------------
 
 So if a user is using an old URL with a delete virtual host, he will reach the default page */var/www/html/index.html*. 
@@ -2987,12 +3157,11 @@ You must have inside the cron of user *root*
 [source,bash]
 ---------------
 # m h  dom mon dow   command
-# cron master root
-47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
-10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
+#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
+10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
-30 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
+00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
@@ -3014,7 +3183,7 @@ You must have inside the cron of user *admin*:
 
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key you set into the setup of module *Scheduled jobs* on the Dolibarr master.
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. You will also set it into module *Scheduled jobs* on the Dolibarr master later.
 
 ==== On deployment servers
 
@@ -3024,6 +3193,8 @@ You must have inside the cron of user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment root
+#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
+10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 30 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
@@ -3059,38 +3230,59 @@ On all servers (Master and Deploiement):
 ---------------
 cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr
+chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
 
 On *Master server*:
 
-* Install Dolibarr so that it responds to an Apache virtual host, for example: https://admin.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).
-Warning: Choose as the name of the document directory during the installation wizard */home/admin/wwwroot/dolibarr_documents* rather than
-*/home/admin/wwwroot/dolibarr/documents*
+* Create an Apache virtual for the Dolibarr Master, for example: https://admin.mysaasdomainname.com, therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*
 
-* If you configure the sending of emails from the Dolibarr backoffice via an SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
+* Call the URL to install Dolibarr. Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than */home/admin/wwwroot/dolibarr/documents*
 
-* Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
+* If you configure the sending of emails from the Dolibarr backoffice via an SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service with the IP of the Master server.
+
+* Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php* in the cron of user *admin*.
+
+
+On *Deployment servers*:
+
+* Create a file */home/admin/wwwroot/dolibarr/htdocs/conf/conf.php*:
+
+[source,ini]
+---------------
+sudo vi /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+---------------
+
+to add the following content:
+
+[source,ini]
+---------------
+<?php
+$dolibarr_main_document_root='/home/admin/wwwroot/dolibarr/htdocs';
+$dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
+---------------
+
 
 
 === Installation of Geoip2
 
-* Installer la base de données de MaxMind.
+* Install the free database file of Maxmind.
 
-mkdir */home/admin/tools/maxmind/*
+mkdir /home/admin/tools/maxmind/
 
-Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
+Copy the file GeoLite2-Country.mmdb you can get from website maxmind.com
 
-chmod -R o-w maxmind
+chmod -R o-w /home/admin/tools/maxmind
 
-Sur le Dolibarr master, activer et configurer le module GeoIP de Dolibarr pour utiliser cette base de donnée.
+On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr to use this database file.
 
 
 == Installation of plugin SellYourSaas
 
-Sur tous les serveurs (Master et Déploiement):
+On all servers (*Master and Deployment*):
 
-* Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
 
 [source,bash]
 ---------------
@@ -3098,22 +3290,19 @@ cd /home/admin/wwwroot
 git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
-* Créer un lien symbolique dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas*
+* Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
 [source,bash]
 ---------------
-cd /home/admin/wwwroot/dolibarr/htdocs/custom
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas sellyoursaas
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
 ---------------
 
-* Créer un lien symoblique dans *source* dans myaccounts.
+* Create a symbolic link called *source* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs* :
 
 [source,bash]
 ---------------
-cd /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
-ln -fs /home/admin/wwwroot/dolibarr/htdocs source
+ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
 ---------------
-
 
 Sur le *Master*:
 
@@ -3186,9 +3375,9 @@ Remarque: Les URL pour réaliser les déploiements des packages de type *Applica
 
 <<<<
 
-== Installation d'outils externes
+== Installation of external tools
 
-=== Installation de webmin (optionnel pour supervision)
+=== Installation de webmin (optional for supervision)
 
 * Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
 
@@ -3208,7 +3397,7 @@ foreach $db (@dbs) {
     if ($db =~ /^dbn/) { next; }
 ---------------
 
-=== Installation of DataDog (optionnel pour supervision)
+=== Installation of DataDog (optional for supervision)
 
 * Create an account on DataDog.
 
@@ -3243,7 +3432,14 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
 ---------------
 
-Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deffered*
+Edit the file to add *min_collection_interval: 300* under *postfix_user: postfix* and under *queues: - deffered*
+
+Add the following line into the file */etc/sudoers*
+
+[source,bash]
+---------------
+dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find
+---------------
 
 
 * Copy the datadog config file to supervize *memcached*.
@@ -3281,7 +3477,7 @@ instances:
 cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
 ---------------
 
-Editer le pour suivre les 3 process suivants:
+Editer le pour suivre les process suivants:
 
 [source,bash]
 ---------------
@@ -3292,6 +3488,18 @@ instances:
     thresholds:
       critical: [5, 5000]
 
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
+      
   - name: agent_sellyoursaas
     search_string: ['remote_server']
     exact_match: False
@@ -3309,18 +3517,6 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]
-      
-  - name: fail2ban
-    search_string: ['fail2ban-server']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]
-
-  - name: cron
-    search_string: ['/usr/sbin/cron']
-    exact_match: False
-    thresholds:
-      critical: [1, 5000]      
 ---------------
 
 
@@ -3436,15 +3632,28 @@ resize2fs /dev/vdX9
 
 
 [Clonage d une instance serveur pour production bis ou pour développement]
-=== Clone an server instance for a another production server or for development
+=== Clone or duplicate a server instance into another server
 
 Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
 
 - Créer un snapshot du *Deployment server* à cloner.
 
-- Créer un nouveau serveur OVH depuis le snapshot en spécifiant le nom du snapshot source et en copiant dans la zone *post installation script* le contenu du fichier */scripts/post_inst_script.sh*
+- Créer un nouveau serveur depuis le snapshot:
 
-- Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
+*With OVH*:
+
+Choose the snapshot or image to use and copy into area *post installation script* the content of file */scripts/post_inst_script.sh*.
+
+Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
+Il est possible qu'il faille aussi modifier les fichiers network pour obtenir l'ip v4 en dhcp. Pour cela:
+Se connecter à la console. Faire *ip link show* pour connaitre l'adresse MAC. Vérifier le fichier */etc/netplan/50-cloud-init.yaml* afin d'avoir la bonne MAC address.
+Corriger et redémmarer si nécessaire. Corriger ensuite aussi pour l'ipv6.
+
+
+*With ScaleWay*:
+
+TODO
+
 
 - Une fois le serveur prêt: Se connecter pour désactiver les crons en doublons avec le serveur cloné (possibilité de désactiver le process cron complètement) par
 
@@ -3474,7 +3683,7 @@ systemctl status cron
 touch /mnt/diskhome/DATA_MYDEPLOYMENTSERVERX
 ---------------
 
-- Ajouter une autorisation d'accès NFS au nouveau serveur sur le *Master*
+- Add a new permision for NFS access for the new server on *Master server*
 
 [source,bash]
 ---------------
@@ -3502,9 +3711,11 @@ systemctl restart nfs-kernel-server
 ip.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
-- Allow access between the new server *Deployment server* and the *Master server* at firewall level.
+- Allow access between the new server *Deployment server* and the *Master server* at Firewall level.
 
-For exemple, on the *Master server*:
+*If using iptables*
+
+On the *Master server*:
 
 [source,bash]
 ---------------
@@ -3540,6 +3751,12 @@ then
 fi
 ---------------
 
+*If using ufw*
+
+Nothing to do.
+
+
+==== Other changes to do
 
 - Modifier le fichiers de configuration de Postfix suivant  (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement):
   
@@ -3740,20 +3957,39 @@ Voir la documentation *afick.pl* pour plus d'options.
 
 
 
+=== Restore a lost config file of a package
+
+Launch this command to find the package that provide the file:
+
+[source,bash]
+---------------
+dpkg -S '/path/to/file'
+---------------
+
+Then launch a command to restore file:
+
+[source,bash]
+---------------
+sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" <package-name>
+or
+sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" <package-name>
+---------------
+
+
 === Utilisation de OpenStack pour gérer les images de serveurs
 
 - Installer les utilitaires OpenStack
 
 [source,bash]
 ---------------
-apt install python3-openstackclient python3-novaclient -y
+apt install python3-openstackclient python3-novaclient python3-glanceclient -y
 ---------------
 
-- Récupérer le fichier OpenStack RC File v3
+- Create an API account for OpenStack Horizon and get the file RC OpenStack File v3. Launch it.
 
 [source,bash]
 ---------------
-source fichiersource.sh
+source openrc.sh
 ---------------
 
 - Les commandes openstack sont alors disponibles.
@@ -3763,28 +3999,34 @@ Pour récupérer une image d'instance:
 [source,bash]
 ---------------
 nova list
-nova image-create aaa115b3-83df-4375-b2ee-19339041dcfa nom_du_snap_serveur1
-glance image-list   ou   openstack image list
-glance image-download --file mon_fichier_snap_serveur1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
+nova image-create aaa115b3-83df-4375-b2ee-19339041dcfa image-myfile-server1
+glance image-list   
+   ou   openstack image list
+glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a   
+   ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
 
 Pour pousser une image d'instance sur un projet:
 
 [source,bash]
 ---------------
-source fichiertarget.sh
+source openrctarget.sh
 export OS_REGION_NAME=SBG1
 glance image-create --name nom_image_snaphot_new_server --disk-format qcow2 --container-format bare --file mon_fichier_snap_serveur1.qcow2
 ---------------
 
-Pour récupérer une image de volume, il faut la backup sous forme d'image d'instance:
+Pour récupérer une image de volume, il faut d'abord la créer depuis le volume détaché (Pas de possibilité de faire depuis un snapshot):
 
 [source,bash]
 ---------------
 openstack volume list
 ...Then detach the volume from its server...
 openstack image create --disk-format qcow2 --container-format bare --volume 673b0ad9-1fca-485c-ae2b-8ee271b71dc7 nom_image_snaphot_new_volume
-openstack volume list
+
+...wait until the copy is finished...
+
+openstack image list
+
 openstack image save --file nom_image_snaphot_new_volume.qcow2 8625f87e-8248-4e62-a0ce-a89c7bd1a9be
 ---------------
 
@@ -3928,7 +4170,7 @@ aa-enforce usr.sbin.mysqld
 [[special_start_mysql_mariadb]]
 === Special start of mysql or mariadb
 
-* Sans permissions :
+* Without permission (to bypass root password for example):
 
 [source,bash]
 ---------------
@@ -3948,13 +4190,19 @@ innodb_force_recovery=1
 A partir de 3 ou +, risque de perte de données.
 
 
-NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un lsof -p PID_de_mysql pour voir les fichiers et base traitées en relog. Ils sont ouverts, soit par ordre de dates sur le disque, soit par ordre alphabétique du répertoire dbn... (en faire plusieurs de suite pour déterminer l'ordre).
+NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un 
+
+[source,bash]
+---------------
+lsof -p PID_de_mysql 
+---------------
+pour voir les fichiers et base traitées en relog. Ils sont ouverts, soit par ordre de dates sur le disque, soit par ordre alphabétique du répertoire dbn... (en faire plusieurs de suite pour déterminer l'ordre).
 
 
 
 === Désactivation de toutes les instances utilisateurs
 
-Utiliser le script *make_instance_offline* qui désactivera tous les accès en remplaçant chaque virtual host par un virtual host réalisant une redirection sur une page d'attente.
+Utiliser le script *make_instance_offline.sh* qui désactivera tous les accès en remplaçant chaque virtual host par un virtual host réalisant une redirection sur une page d'attente.
 
 Le même script peut etre utilisé pour l'opération inverse.
 
@@ -4270,7 +4518,7 @@ Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 == Annexes
 
-=== Quelques URL type pour les objectifs Google Analytics ou Statistiques DataDog
+=== Some common URLs fot Google Analytics objectives or DataDog Statistics
 
 To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
 
@@ -4316,7 +4564,7 @@ Example of supervision of sellyoursaas using DataDog:
 image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 
-=== Hidden options
+=== Hidden options of SellYourSaas module
 
 You can force different values for some setup parameters to overwrite the default value when the customer has registered itself from a page with *mydomain.com* as main domain.
 
@@ -4348,7 +4596,28 @@ To activate Jailkit, a chroot security system (see Jailkit configuration)
 * SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 
+=== Command ScaleWay
+
+scw instance image list
+scw instance server list
+
+Create a new server:
+
+scw instance server create type=DEV1-S zone=fr-par-1|nl-ams-1 image=ubuntu_focal name=remotebackupXscw \
+    root-volume=l:10G [additional-volumes.0=l:10G] \
+    tags.0=build_method=from-qcow2 \
+    tags.1=disk_img_url=http://51.15.201.97/focal-server-cloudimg-amd64-disk-kvm.img \
+
+
+
 === TroubleShooting
+
+==== Ping hangs in input, not in output
+
+If you are using a server hosted on OpenStack, a security group may exists that block network in some direction/protocols.
+Check that your security group match the following setup
+
+image::Example_setup_security_group_horizon.png[Example of setup of security group on horizon]
 
 
 ==== ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
@@ -4394,6 +4663,26 @@ We found into log file /var/log/fail2ban.log
 Edit the file /etc/fail2ban/jail/conf to replace *imap3* (it does not exists) into *imap* for rule postfix-sasl
 
 
+==== Error when starting fail2ban
+
+You can get more information by running 
+
+sudo fail2ban-client -vvv -x start
+
+
+==== Problem when starting mariadb / mariadb stop after a timetout
+
+Launching mariadb launch the database but the command never return to the command line prompt and the database is automatically stopped after few minutes.
+
+Check the /var/log/kern.log, you may have apparmor error on /usr/sbin/mysqld.
+
+If yes, disable the apparmor rule: 
+
+aa-disable usr.sbin.mysqld
+
+Then reboot server.
+
+
 ==== Extracting a zip file extract files into filename with path with \ including into name
 
 The problem is into the zip file (may be generated by the bugged Powershell). To solve this, try to unzip from command line with 
@@ -4419,3 +4708,18 @@ The value for *max_execution_time* is too low or there is a table that has an ab
 
 - Check the temp directory is writable by the web server user.
 	
+
+==== Error when doing PHP ssh2_connect to a server
+
+If you find into */var/log/auth.log* an error like:
+
+... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
+
+The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the sshd_config of the server by adding:
+
+# Legacy changes - To allow an old client to connect to
+KexAlgorithms +diffie-hellman-group1-sha1
+Ciphers +aes128-cbc
+
+Then reload ssh with /etc/init.d/ssh reload
+

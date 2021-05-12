@@ -35,15 +35,15 @@ if (is_numeric($entity)) define("DOLENTITY", $entity);
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
-if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
+if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
 if (! $res) die("Include of main fails");
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
@@ -55,7 +55,7 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 
 
 $tmpfile = '/var/log/sellyoursaas_spamreport.log';
-$date = strftime("%Y-%m-%d %H:%M:%S" ,time());
+$date = strftime("%Y-%m-%d %H:%M:%S", time());
 $body = file_get_contents('php://input');
 
 file_put_contents($tmpfile, "\n***** Spam report received ".$date."*****\n", FILE_APPEND);
@@ -78,58 +78,50 @@ $success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam repor
 if (!$success) {
 	$errorMessage = error_get_last()['message'];
 	print dol_escape_htmltag($errorMessage);
-}
-else
-{
-    echo "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
+} else {
+	echo "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
 }
 
 // Send to DataDog (metric + event)
-if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
-{
-    try {
-        file_put_contents($tmpfile, "Now we send ping to DataDog\n", FILE_APPEND);
-        echo "Now we send ping to DataDog<br>\n";
+if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+	try {
+		file_put_contents($tmpfile, "Now we send ping to DataDog\n", FILE_APPEND);
+		echo "Now we send ping to DataDog<br>\n";
 
-        dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+		dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-        $arrayconfig=array();
-        if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-        {
-            $arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-        }
+		$arrayconfig=array();
+		if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+			$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+		}
 
-        $statsd = new DataDog\DogStatsd($arrayconfig);
+		$statsd = new DataDog\DogStatsd($arrayconfig);
 
-        $arraytags=null;
+		$arraytags=null;
 
-        $statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
+		$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
 
-        $sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-        $sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
+		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+		$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
 
-        $domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);          // exemple 'DoliCloud'
-        $constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;     // exemple 'dolicloud.com'
-        if (! empty($conf->global->$constforaltname))
-        {
-            $sellyoursaasdomain = $domainname;
-            $sellyoursaasname = $conf->global->$constforaltname;
-        }
+		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);          // exemple 'DoliCloud'
+		$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;     // exemple 'dolicloud.com'
+		if (! empty($conf->global->$constforaltname)) {
+			$sellyoursaasdomain = $domainname;
+			$sellyoursaasname = $conf->global->$constforaltname;
+		}
 
-        $titleofevent =  dol_trunc('[Alert] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
-        $statsd->event($titleofevent,
-            array(
-                'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
-                'alert_type' => 'warning',
-                'source_type_name' => 'API',
-                'host'       => gethostname()
-            )
-        );
+		$titleofevent =  dol_trunc('[Alert] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
+		$statsd->event($titleofevent,
+			array(
+				'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
+				'alert_type' => 'warning',
+				'source_type_name' => 'API',
+				'host'       => gethostname()
+			)
+		);
 
-        echo "Ping sent to DataDog<br>\n";
-    }
-    catch(Exception $e)
-    {
-
-    }
+		echo "Ping sent to DataDog<br>\n";
+	} catch (Exception $e) {
+	}
 }

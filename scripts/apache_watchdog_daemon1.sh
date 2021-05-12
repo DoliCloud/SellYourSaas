@@ -27,8 +27,15 @@ echo $now" Try to detect lines 'AH00060: seg fault or similar nasty error detect
 #echo "# realname name --> $(basename $(realpath ${0}))"
 #echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
-export EMAILFROM=support@$DOMAIN
-export EMAILTO=supervision@$DOMAIN
+export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [ "x$EMAILFROM" == "x" ]; then
+	export EMAILFROM=support@$DOMAIN
+fi
+if [ "x$EMAILTO" == "x" ]; then
+	export EMAILTO=supervision@$DOMAIN
+fi
+
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 

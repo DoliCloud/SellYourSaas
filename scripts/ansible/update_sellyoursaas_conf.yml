@@ -1,0 +1,16 @@
+---
+# Script to update an entry into sellyoursaas conf.
+#
+# To run the script:
+# ansible-playbook update_sellyoursaas_conf.yml
+#
+
+- name: Update an entry into sellyoursaas.conf
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+  hosts: all
+  tasks:
+
+    - name: Display the config
+      debug:
+        msg: "The hostname is {{ ansible_net_hostname }} and the OS is {{ ansible_net_version }}"

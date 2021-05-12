@@ -3,14 +3,18 @@
 # Script to update sources found into a directory
 #
 # To include into cron
-# /pathto/git_update_sources.sh documentdir/sellyoursaas/git > /pathto/git_update_sources.log 2>&
+# /pathto/git_update_sources.sh documentdir/sellyoursaas/git all > /pathto/git_update_sources.log 2>&
 #---------------------------------------------------------
 
+source /etc/lsb-release
+
 if [ "x$1" == "x" ]; then
-   echo "Usage:   $0  dir_document_of_git_repositories [subdir]"
+   echo "Usage:   $0  dir_document_of_git_repositories [subdir|all]"
    echo "Example: $0  /pathtodocuments/documents/sellyoursaas/git"
    exit 1
 fi
+
+export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export currentpath=$(dirname "$0")
 
@@ -19,7 +23,7 @@ echo "Update git dirs found into $1 and generate the tgz image."
 for dir in `ls -d $1/* | grep -v "tgz\|zstd"`
 do
 	# If a subdir is given, discard if not subdir
-	if [ "x$2" != "x" ]; then
+	if [ "x$2" != "x" -a "x$2" != "xall" ]; then
 		if [ "x$1/$2" != "x$dir" ]; then
 			continue;
 		fi
@@ -54,8 +58,10 @@ do
 		rm -fr htdocs/includes/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* htdocs/includes/tecnickcom/tcpdf/fonts/freefont-* htdocs/includes/tecnickcom/tcpdf/fonts/ae_fonts_*
 		#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
 		rm -fr files/_cache/*
-		# We remove subdir of build. We need files.
+		# We remove subdir of build. We need files into build root only.
 		find build/* -type d -exec rm -fr {} \;
+		echo "Clean some files to save disk spaces"
+		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -exec rm -f {} \;
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php"
@@ -63,13 +69,17 @@ do
 	    fi
 	
 		# Create a deployment tar file
-		#if [[ -x /usr/bin/zstd ]]; then
-		#	echo "Compress the repository into an archive $gitdir.tar.zst"
-		#	tar c --zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
-		#else
+		if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+			echo "Compress the repository into an archive $gitdir.tar.zst"$dir/../$gitdir.tar.zst
+			tar c -I zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
+			# Delete archive in other format
+			rm $dir/../$gitdir.tgz 2>/dev/null
+		else
 			echo "Compress the repository into an archive $gitdir.tgz"
-			tar cz --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
-		#fi
+			tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
+			# Delete archive in other format
+			rm $dir/../$gitdir.tar.zst 2>/dev/null
+		fi
 	
 	    cd -
 	fi

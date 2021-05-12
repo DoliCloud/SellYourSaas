@@ -6,9 +6,8 @@
 
 $DEBUG = 1;
 
-$fh = fopen('/var/log/remote_server.log','a+');
-if (empty($fh))
-{
+$fh = fopen('/var/log/remote_server.log', 'a+');
+if (empty($fh)) {
 	http_response_code(501);
 	exit();
 }
@@ -23,37 +22,29 @@ $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
-	foreach($array as $val)
-	{
+	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
-		if ($tmpline[0] == 'allowed_hosts')
-		{
-		    $allowed_hosts_array = explode(",", $tmpline[1]);
+		if ($tmpline[0] == 'allowed_hosts') {
+			$allowed_hosts_array = explode(",", $tmpline[1]);
 		}
-		if ($tmpline[0] == 'dnsserver')
-		{
-		    $dnsserver = $tmpline[1];
+		if ($tmpline[0] == 'dnsserver') {
+			$dnsserver = $tmpline[1];
 		}
-		if ($tmpline[0] == 'instanceserver')
-		{
-		    $instanceserver = $tmpline[1];
+		if ($tmpline[0] == 'instanceserver') {
+			$instanceserver = $tmpline[1];
 		}
-		if ($tmpline[0] == 'backupdir')
-		{
+		if ($tmpline[0] == 'backupdir') {
 			$backupdir = $tmpline[1];
 		}
 	}
-}
-else
-{
+} else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit;
 }
 if (! in_array('127.0.0.1', $allowed_hosts_array)) $allowed_hosts_array[]='127.0.0.1';	// Add localhost if not present
 
 
-if (empty($allowed_hosts_array) || ! in_array($_SERVER['REMOTE_ADDR'], $allowed_hosts_array))
-{
+if (empty($allowed_hosts_array) || ! in_array($_SERVER['REMOTE_ADDR'], $allowed_hosts_array)) {
 	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>> Call done with bad ip '.$_SERVER['REMOTE_ADDR']." : Not into 'allowed_hosts' of /etc/sellyoursaas.conf.\n");
 	fclose($fh);
 
@@ -71,11 +62,9 @@ $tmparray=explode('?', $param, 2);
 
 $paramspace='';
 $paramarray=array();
-if (! empty($tmparray[1]))
-{
+if (! empty($tmparray[1])) {
 	$paramarray = explode('&', urldecode($tmparray[1]));
-	foreach($paramarray as $val)
-	{
+	foreach ($paramarray as $val) {
 		$paramspace.=($val!='' ? $val : '-').' ';
 	}
 }
@@ -93,20 +82,18 @@ else fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>> Call for action '.$tmparr
 
 fwrite($fh, "\n".date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
 
-if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployall', 'undeployall')))
-{
+if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployall', 'undeployall'))) {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");
 	else fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' ...'."\n");
 
 	exec('./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
 	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
-	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n",$output));
+	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output));
 	fclose($fh);
 
 	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
-	if ($return_var == 0)
-	{
+	if ($return_var == 0) {
 		$httpresponse = 200;
 	}
 	http_response_code($httpresponse);
@@ -115,20 +102,18 @@ if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployall', 'undeployall
 
 	exit();
 }
-if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'unsuspend')))
-{
+if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'unsuspend'))) {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspace."\n");
 	else fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' ...'."\n");
 
 	exec('./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
 	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
-	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n",$output));
+	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output));
 	fclose($fh);
 
 	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
-	if ($return_var == 0)
-	{
+	if ($return_var == 0) {
 		$httpresponse = 200;
 	}
 	http_response_code($httpresponse);
@@ -138,8 +123,7 @@ if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'uns
 	exit();
 }
 
-if (in_array($tmparray[0], array('backup')))
-{
+if (in_array($tmparray[0], array('backup'))) {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
 	else fwrite($fh, date('Y-m-d H:i:s').' ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
 	fwrite($fh, "getcwd() = ".getcwd()."\n");
@@ -147,12 +131,11 @@ if (in_array($tmparray[0], array('backup')))
 	exec('sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir.' confirm 2>&1', $output, $return_var);
 
 	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
-	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n",$output)."\n");
+	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output)."\n");
 	fclose($fh);
 
 	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
-	if ($return_var == 0)
-	{
+	if ($return_var == 0) {
 		$httpresponse = 200;
 	}
 	http_response_code($httpresponse);
@@ -170,5 +153,3 @@ http_response_code(404);
 print 'action code "'.$tmparray[0].'" not supported'."\n";
 
 exit();
-
-

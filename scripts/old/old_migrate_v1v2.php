@@ -37,39 +37,38 @@ $error=0;
 
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
-define('EVEN_IF_ONLY_LOGIN_ALLOWED',1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/master.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include("../master.inc.php");
-if (! $res && file_exists("../../master.inc.php")) $res=@include("../../master.inc.php");
-if (! $res && file_exists("../../../master.inc.php")) $res=@include("../../../master.inc.php");
+if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
 if (! $res) die("Include of master fails");
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once('/sellyoursaas/class/packages.class.php');
-include_once(DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php');
-include_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');
-include_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
-include_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php');
-include_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
-include_once(DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php');
-include_once(DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php');
+include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
+include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 
 $langs->loadLangs(array("main", "errors"));
 
 $db2=getDoliDBInstance('mysqli', $conf->global->DOLICLOUD_DATABASE_HOST, $conf->global->DOLICLOUD_DATABASE_USER, $conf->global->DOLICLOUD_DATABASE_PASS, $conf->global->DOLICLOUD_DATABASE_NAME, $conf->global->DOLICLOUD_DATABASE_PORT);
-if ($db2->error)
-{
-	dol_print_error($db2,"host=".$conf->global->DOLICLOUD_DATABASE_HOST.", port=".$conf->global->DOLICLOUD_DATABASE_PORT.", user=".$conf->global->DOLICLOUD_DATABASE_USER.", databasename=".$conf->global->DOLICLOUD_DATABASE_NAME.", ".$db2->error);
+if ($db2->error) {
+	dol_print_error($db2, "host=".$conf->global->DOLICLOUD_DATABASE_HOST.", port=".$conf->global->DOLICLOUD_DATABASE_PORT.", user=".$conf->global->DOLICLOUD_DATABASE_USER.", databasename=".$conf->global->DOLICLOUD_DATABASE_NAME.", ".$db2->error);
 	exit(-1);
 }
 
@@ -94,8 +93,7 @@ $user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 
 print "***** ".$script_file." *****\n";
 
-if (empty($oldinstance) || empty($newinstance) || empty($mode))
-{
+if (empty($oldinstance) || empty($newinstance) || empty($mode)) {
 	print "Migrate an old instance on new server. Script must be ran with root.\n";
 	print "Usage: ".$script_file." oldinstance newinstance (test|confirm) [".$defaultproductref."]\n";
 	print "Return code: 0 if success, <>0 if error\n";
@@ -107,60 +105,43 @@ if (0 != posix_getuid()) {
 	exit(-1);
 }
 
-if (! empty($oldinstance) && ! preg_match('/\.on\.dolicloud\.com$/',$oldinstance) && ! preg_match('/\.home\.lan$/',$oldinstance))
-{
+if (! empty($oldinstance) && ! preg_match('/\.on\.dolicloud\.com$/', $oldinstance) && ! preg_match('/\.home\.lan$/', $oldinstance)) {
 	$oldinstance=$oldinstance.".on.dolicloud.com";
 }
 // Forge complete name of instance
-if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance))
-{
-    $tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-    $tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
-    $newinstance=$newinstance.".".$tmpstring;   // Automatically concat first domain name
+if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance)) {
+	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
+	$newinstance=$newinstance.".".$tmpstring;   // Automatically concat first domain name
 }
 
 $oldobject = new Contrat($db2);
-$result=$oldobject->fetch('',$oldinstance);
-if ($result <= 0)
-{
+$result=$oldobject->fetch('', $oldinstance);
+if ($result <= 0) {
 	print "Error: old instance ".$oldinstance." not found.\n";
 	exit(-2);
 }
-if (empty($oldobject->instance) || empty($oldobject->username_web) || empty($oldobject->password_web) || empty($oldobject->database_db))
-{
+if (empty($oldobject->instance) || empty($oldobject->username_web) || empty($oldobject->password_web) || empty($oldobject->database_db)) {
 	print "Error: Some properties for old instance ".$oldinstance." was not registered into database.\n";
 	exit(-3);
 }
 if (isset($argv[4])) $productref = $argv[4];
-else if ($oldobject->plan == 'Dolibarr ERP & CRM Basic')
-{
+elseif ($oldobject->plan == 'Dolibarr ERP & CRM Basic') {
 	$productref='DOLICLOUD-PACK-Dolibarr';
-}
-else if ($oldobject->plan == 'Dolibarr ERP & CRM Basic (yearly)')
-{
+} elseif ($oldobject->plan == 'Dolibarr ERP & CRM Basic (yearly)') {
 	$productref='DOLICLOUD-PACK-Dolibarr';
 	$overwritefrequencyunit='y';
-}
-else if ($oldobject->plan == 'Dolibarr ERP & CRM Premium')
-{
+} elseif ($oldobject->plan == 'Dolibarr ERP & CRM Premium') {
 	$productref='DOLICLOUD-PACK-DolibarrPrem';
-}
-else if ($oldobject->plan == 'Dolibarr ERP & CRM Premium (yearly)')
-{
+} elseif ($oldobject->plan == 'Dolibarr ERP & CRM Premium (yearly)') {
 	$productref='DOLICLOUD-PACK-DolibarrPrem';
 	$overwritefrequencyunit='y';
-}
-else if ($oldobject->plan == 'DoliPos Basic')
-{
+} elseif ($oldobject->plan == 'DoliPos Basic') {
 	$productref='DOLICLOUD-PACK-DoliPos';
-}
-else if ($oldobject->plan == 'Dolibarr ERP & CRM 2Byte Basic')
-{
+} elseif ($oldobject->plan == 'Dolibarr ERP & CRM 2Byte Basic') {
 	$productref='DOLICLOUD-PACK-Dolibarr';
 	$overwritefksoc=414;
-}
-else
-{
+} else {
 	print 'Unknown plan '.$oldobject->plan."\n";
 	exit(-4);
 }
@@ -177,19 +158,15 @@ $sql.= " AND c.statut > 0";
 $sql.= " AND c.ref_customer = '".$db->escape($newinstance)."'";
 $sql.= " AND ce.deployment_status = 'done'";
 $resql = $db->query($sql);
-if (! $resql)
-{
+if (! $resql) {
 	dol_print_error($resql);
 	exit(-2);
 }
 $num_rows = $db->num_rows($resql);
-if ($num_rows > 1)
-{
+if ($num_rows > 1) {
 	print 'Error: several instance with this name found'."\n";
 	exit(-2);
-}
-else
-{
+} else {
 	$obj = $db->fetch_object($resql);
 	if ($obj) $idofinstancefound = $obj->rowid;
 }
@@ -198,17 +175,14 @@ include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $newobject = new Contrat($db);
 $result=0;
 if ($idofinstancefound) $result=$newobject->fetch($idofinstancefound);
-if ($result <= 0 || $newobject->statut == 0)
-{
-    print "newinstance ".$newinstance." with status > 0 not found. Do you want to create new instance (and thirdparty with email ".$oldobject->email." if required)";
+if ($result <= 0 || $newobject->statut == 0) {
+	print "newinstance ".$newinstance." with status > 0 not found. Do you want to create new instance (and thirdparty with email ".$oldobject->email." if required)";
 
 	$line = '';
-	while (strtolower(trim($line)) != 'y' && strtolower(trim($line)) != 'n')
-	{
+	while (strtolower(trim($line)) != 'y' && strtolower(trim($line)) != 'n') {
 		$line = readline(' (y/N) ? ');
 	}
-	if (trim($line) != 'y')
-	{
+	if (trim($line) != 'y') {
 		// Exit by default
 		print "Canceled\n";
 		exit(-2);
@@ -233,30 +207,25 @@ if ($result <= 0 || $newobject->statut == 0)
 
 	$tmpproduct = new Product($db);
 	$tmppackage = new Packages($db);
-	if (empty($reusecontractid))
-	{
+	if (empty($reusecontractid)) {
 		$result = $tmpproduct->fetch($productid, $productref);
-		if (empty($tmpproduct->id))
-		{
+		if (empty($tmpproduct->id)) {
 			print 'Service/Plan (Product id / ref) '.$productid.' / '.$productref.' was not found.';
 			exit(-1);
 		}
 		// We have the main product, we are searching the package
-		if (empty($tmpproduct->array_options['options_package']))
-		{
+		if (empty($tmpproduct->array_options['options_package'])) {
 			print 'Service/Plan (Product id / ref) '.$tmpproduct->id.' / '.$productref.' has no package defined on it.';
 			exit(-1);
 		}
 		// We have the main product, we are searching the duration
-		if (empty($tmpproduct->duration_value) || empty($tmpproduct->duration_unit))
-		{
+		if (empty($tmpproduct->duration_value) || empty($tmpproduct->duration_unit)) {
 			print 'Service/Plan name (Product ref) '.$productref.' has no default duration';
 			exit(-1);
 		}
 
 		$tmppackage->fetch($tmpproduct->array_options['options_package']);
-		if (empty($tmppackage->id))
-		{
+		if (empty($tmppackage->id)) {
 			print 'Package with id '.$tmpproduct->array_options['options_package'].' was not found.';
 			exit(-1);
 		}
@@ -272,22 +241,17 @@ if ($result <= 0 || $newobject->statut == 0)
 
 	$tmpthirdparty = new Societe($db);
 	$result = $tmpthirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $email);
-	if ($result < 0)
-	{
+	if ($result < 0) {
 		dol_print_error_email('FETCHTP'.$email, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
 		exit(-1);
-	}
-	else if ($result > 0)	// Found one record
-	{
+	} elseif ($result > 0) {	// Found one record
 		$reusesocid = $tmpthirdparty->id;
 
 		// Comment this to accept existing thirdparties
 		//dol_print_error_email('FETCHTP'.$email, 'Thirdparty already exists', null, 'alert alert-error');
 		//exit(-2);
-	}
-	else
-	{
-	    dol_syslog("Email not already used. Good.");
+	} else {
+		dol_syslog("Email not already used. Good.");
 	}
 
 	$generatedunixlogin = strtolower('osu'.substr(getRandomPassword(true, array('I')), 0, 9));		// Must be lowercase as it can be used for default email
@@ -324,19 +288,15 @@ if ($result <= 0 || $newobject->statut == 0)
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_oldpassword'] = $oldobject->personpassword;	// Come from  person.password (search is possible in table with email)
 
-	if ($country_code)
-	{
+	if ($country_code) {
 		$tmpthirdparty->country_id = getCountry($country_code, 3, $db);
 	}
 
-	if ($tmpthirdparty->id > 0)
-	{
-		if (empty($reusesocid) || $tmpthirdparty->oldcopy->array_options['options_dolicloud'] == 'yesv1')
-		{
+	if ($tmpthirdparty->id > 0) {
+		if (empty($reusesocid) || $tmpthirdparty->oldcopy->array_options['options_dolicloud'] == 'yesv1') {
 			print "Update thirdparty with id=".$tmpthirdparty->id."\n";
 			$result = $tmpthirdparty->update(0, $user);
-			if ($result <= 0)
-			{
+			if ($result <= 0) {
 				$db->rollback();
 				//setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 				//header("Location: ".$newurl);
@@ -344,9 +304,7 @@ if ($result <= 0 || $newobject->statut == 0)
 				exit(-1);
 			}
 		}
-	}
-	else
-	{
+	} else {
 		// Set lang to backoffice language
 		$savlangs = $langs;
 		$langs = $langsen;
@@ -356,8 +314,7 @@ if ($result <= 0 || $newobject->statut == 0)
 
 		print "Create thirdparty\n";
 		$result = $tmpthirdparty->create($user);
-		if ($result <= 0)
-		{
+		if ($result <= 0) {
 			$db->rollback();
 			//setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 			//header("Location: ".$newurl);
@@ -369,21 +326,17 @@ if ($result <= 0 || $newobject->statut == 0)
 		$langs = $savlangs;
 	}
 
-	if (! empty($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG))
-	{
+	if (! empty($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG)) {
 		print "Set category of customer ".$conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG."\n";
 		$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG), 'customer');
-		if ($result < 0)
-		{
+		if ($result < 0) {
 			$db->rollback();
 			//setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 			//header("Location: ".$newurl);
 			dol_print_error($db, $tmpthirdparty->error, $tmpthirdparty->errors);
 			exit(-1);
 		}
-	}
-	else
-	{
+	} else {
 		$db->rollback();
 		dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default customer tag is not defined.', null, 'alert alert-error');
 		exit(-1);
@@ -391,8 +344,7 @@ if ($result <= 0 || $newobject->statut == 0)
 
 	// Date new payment for recurring invoice
 	$date_next_execution = 0;
-	if (! empty($oldobject->date_current_period_end))
-	{
+	if (! empty($oldobject->date_current_period_end)) {
 		$date_next_execution = $oldobject->date_current_period_end;
 		if ($date_next_execution < (dol_now() + 3600 * 24 * 7)) $date_next_execution = dol_time_plus_duree($date_next_execution, 1, 'm');
 	}
@@ -401,8 +353,7 @@ if ($result <= 0 || $newobject->statut == 0)
 	$date_end = dol_time_plus_duree($date_start, $freeperioddays, 'd');
 	$date_endfreeperiod = $oldobject->date_endfreeperiod;
 
-	if (! $error)
-	{
+	if (! $error) {
 		print "Create contract with deployment status 'Processing'\n";
 		dol_syslog("Create contract with deployment status 'Processing'");
 
@@ -441,18 +392,15 @@ if ($result <= 0 || $newobject->statut == 0)
 		$cookieregistrationa='DOLREGISTERA_'.$prefix;
 		$cookieregistrationb='DOLREGISTERB_'.$prefix;
 		$nbregistration = (int) $_COOKIE[$cookieregistrationa];
-		if (! empty($_COOKIE[$cookieregistrationa]))
-		{
+		if (! empty($_COOKIE[$cookieregistrationa])) {
 			$contract->array_options['options_cookieregister_counter'] = ($nbregistration ? $nbregistration : 1);
 		}
-		if (! empty($_COOKIE[$cookieregistrationb]))
-		{
+		if (! empty($_COOKIE[$cookieregistrationb])) {
 			$contract->array_options['options_cookieregister_previous_instance'] = dol_decode($_COOKIE[$cookieregistrationb]);
 		}
 
 		$idofinstancecreated = $contract->create($user);
-		if ($idofinstancecreated <= 0)
-		{
+		if ($idofinstancecreated <= 0) {
 			$db->rollback();
 			dol_print_error_email('CREATECONTRACT', $contract->error, $contract->errors, 'alert alert-error');
 			exit(-1);
@@ -462,13 +410,11 @@ if ($result <= 0 || $newobject->statut == 0)
 	$object = $tmpthirdparty;
 
 	// Create contract line for INSTANCE
-	if (! $error)
-	{
+	if (! $error) {
 		print "Add line to contract for INSTANCE with freeperioddays = ".$freeperioddays."\n";
 		dol_syslog("Add line to contract for INSTANCE with freeperioddays = ".$freeperioddays);
 
-		if (empty($object->country_code))
-		{
+		if (empty($object->country_code)) {
 			$object->country_code = dol_getIdFromCode($db, $object->country_id, 'c_country', 'rowid', 'code');
 		}
 
@@ -491,8 +437,7 @@ if ($result <= 0 || $newobject->statut == 0)
 		$productidtocreate = $tmpproduct->id;
 
 		$contractlineid = $contract->addline('', $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $productidtocreate, $discount, $date_start, $date_end, 'HT', 0);
-		if ($contractlineid < 0)
-		{
+		if ($contractlineid < 0) {
 			$db->rollback();
 			dol_print_error_email('CREATECONTRACTLINE1', $contract->error, $contract->errors, 'alert alert-error');
 			exit(-1);
@@ -506,16 +451,14 @@ if ($result <= 0 || $newobject->statut == 0)
 	$j=1;
 
 	// Create contract line for other products
-	if (! $error)
-	{
+	if (! $error) {
 		print "Add line to contract for depending products (like USERS or options)\n";
 		dol_syslog("Add line to contract for depending products (like USERS or options)");
 
-		$prodschild = $tmpproduct->getChildsArbo($tmpproduct->id,1);
+		$prodschild = $tmpproduct->getChildsArbo($tmpproduct->id, 1);
 
 		$tmpsubproduct = new Product($db);
-		foreach($prodschild as $prodid => $arrayprodid)
-		{
+		foreach ($prodschild as $prodid => $arrayprodid) {
 			$tmpsubproduct->fetch($prodid);	// To load the price
 
 			$qty = 1;
@@ -530,13 +473,11 @@ if ($result <= 0 || $newobject->statut == 0)
 			$discount = 0;
 			if (! empty($overwritediscount)) $discount = $overwritediscount;
 
-			if ($qty > 0)
-			{
+			if ($qty > 0) {
 				$j++;
 
 				$contractlineid = $contract->addline('', $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $prodid, $discount, $date_start, $date_end, 'HT', 0);
-				if ($contractlineid < 0)
-				{
+				if ($contractlineid < 0) {
 					$db->rollback();
 					dol_print_error_email('CREATECONTRACTLINE'.$j, $contract->error, $contract->errors, 'alert alert-error');
 					exit(-1);
@@ -550,31 +491,25 @@ if ($result <= 0 || $newobject->statut == 0)
 	$contract->fetch_lines();
 
 	$result=$newobject->fetch($idofinstancecreated);
-	if ($result <= 0)
-	{
+	if ($result <= 0) {
 		$db->rollback();
 		print "Error: newinstance ".$newinstance." still not found";
 		exit(-1);
 	}
 
-	if (! $error)
-	{
+	if (! $error) {
 		$db->commit();
-	}
-	else
-	{
+	} else {
 		$db->rollback();
 	}
 
 
-	if (! $error && $productref != 'none')
-	{
+	if (! $error && $productref != 'none') {
 		dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction('deployall', $contract, 'admin', $email, $password);
-		if ($result <= 0)
-		{
+		if ($result <= 0) {
 			$error++;
 			$errormessages[]=$sellyoursaasutils->errors;
 			if ($sellyoursaasutils->error) $errormessages[]=$sellyoursaasutils->error;
@@ -583,8 +518,7 @@ if ($result <= 0 || $newobject->statut == 0)
 
 
 	// Finish deployall - Activate all lines
-	if (! $error && $productref != 'none')
-	{
+	if (! $error && $productref != 'none') {
 		dol_syslog("Activate all lines - by register_instance");
 
 		$contract->context['deployallwasjustdone']=1;		// Add a key so trigger into activateAll will know we have just made a "deployall"
@@ -593,8 +527,7 @@ if ($result <= 0 || $newobject->statut == 0)
 		else $comment = 'Activation after deployment from migration';
 
 		$result = $contract->activateAll($user, dol_now(), 1, $comment);			// This may execute the triggers
-		if ($result <= 0)
-		{
+		if ($result <= 0) {
 			$error++;
 			$errormessages[]=$contract->error;
 			$errormessages[]=array_merge($contract->errors, $errormessages);
@@ -602,8 +535,7 @@ if ($result <= 0 || $newobject->statut == 0)
 	}
 
 	// End of deployment is now OK / Complete
-	if (! $error && $productref != 'none')
-	{
+	if (! $error && $productref != 'none') {
 		$contract->array_options['options_deployment_status'] = 'done';
 		$contract->array_options['options_deployment_date_end'] = dol_now();
 		$contract->array_options['options_undeployment_date'] = '';
@@ -618,36 +550,30 @@ if ($result <= 0 || $newobject->statut == 0)
 		//setcookie($cookieregistrationb, dol_encode($contract->ref_customer), 0, "/", null, false, true);					// Cookie to save previous registered instance
 
 		$result = $contract->update($user);
-		if ($result < 0)
-		{
+		if ($result < 0) {
 			// We ignore errors. This should not happen in real life.
 			//setEventMessages($contract->error, $contract->errors, 'errors');
 		}
 	}
 
 	// Create template invoice if there is not yet template invoice
-	if (! $error && $productref != 'none')
-	{
+	if (! $error && $productref != 'none') {
 		dol_syslog("--- Create recurring invoice on contract if it does not have yet.", LOG_DEBUG, 0);
 
 		// Make a test to pass loop if there is already a template invoice
 		$result = $contract->fetchObjectLinked();
-		if ($result < 0)
-		{
+		if ($result < 0) {
 			print 'Error in fetch object linked on contract, so we cancel migration.';
 			exit(1);							// There is an error, so we discard this contract to avoid to create template twice
 		}
-		if (! empty($contract->linkedObjectsIds['facturerec']))
-		{
+		if (! empty($contract->linkedObjectsIds['facturerec'])) {
 			$templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
-			if ($templateinvoice > 0)			// There is already a template invoice, so we discard this contract to avoid to create template twice
-			{
+			if ($templateinvoice > 0) {			// There is already a template invoice, so we discard this contract to avoid to create template twice
 				print 'There is already a template invoice on target instance, so we cancel migration.';
 				exit(2);
 			}
 		}
-		if ($contract->array_options['options_deployment_status'] != 'done')
-		{
+		if ($contract->array_options['options_deployment_status'] != 'done') {
 			print 'Not a valid target instance (status not Done), so we cancel migration.';
 			exit(3);							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
 		}
@@ -669,8 +595,7 @@ if ($result <= 0 || $newobject->statut == 0)
 		$tmpproduct = new Product($db);
 
 		// Create empty invoice
-		if (! $error)
-		{
+		if (! $error) {
 			$invoice_draft->socid				= $contract->socid;
 			$invoice_draft->type				= Facture::TYPE_STANDARD;
 			$invoice_draft->number				= '';
@@ -693,21 +618,18 @@ if ($result <= 0 || $newobject->statut == 0)
 			$invoice_draft->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
 
 			$idinvoice = $invoice_draft->create($user);      // This include class to add_object_linked() and add add_contact()
-			if (! ($idinvoice > 0))
-			{
+			if (! ($idinvoice > 0)) {
 				setEventMessages($invoice_draft->error, $invoice_draft->errors, 'errors');
 				$error++;
 			}
 		}
 		// Add lines on invoice
-		if (! $error)
-		{
+		if (! $error) {
 			// Add lines of contract to template invoice
 			$srcobject = $contract;
 
 			$lines = $srcobject->lines;
-			if (empty($lines) && method_exists($srcobject, 'fetch_lines'))
-			{
+			if (empty($lines) && method_exists($srcobject, 'fetch_lines')) {
 				$srcobject->fetch_lines();
 				$lines = $srcobject->lines;
 			}
@@ -718,8 +640,7 @@ if ($result <= 0 || $newobject->statut == 0)
 			$date_start = false;
 			$fk_parent_line=0;
 			$num=count($lines);
-			for ($i=0; $i<$num; $i++)
-			{
+			for ($i=0; $i<$num; $i++) {
 				$label=(! empty($lines[$i]->label)?$lines[$i]->label:'');
 				$desc=(! empty($lines[$i]->desc)?$lines[$i]->desc:$lines[$i]->libelle);
 				if ($invoice_draft->situation_counter == 1) $lines[$i]->situation_percent =  0;
@@ -741,8 +662,7 @@ if ($result <= 0 || $newobject->statut == 0)
 
 				// If date start is in past, we set it to now
 				$now = dol_now();
-				if ($date_start < $now)
-				{
+				if ($date_start < $now) {
 					dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
 					$tmparray = sellyoursaasGetExpirationDate($srcobject);
 					$duration_value = $tmparray['duration_value'];
@@ -802,8 +722,7 @@ if ($result <= 0 || $newobject->statut == 0)
 				$tmpproduct->fetch($lines[$i]->fk_product);
 
 				dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
-				if ($tmpproduct->array_options['options_app_or_option'] == 'app')
-				{
+				if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
 					$frequency = $tmpproduct->duration_value;
 					$frequency_unit = $tmpproduct->duration_unit;
 				}
@@ -811,8 +730,7 @@ if ($result <= 0 || $newobject->statut == 0)
 		}
 
 		// Now we convert invoice into a template
-		if (! $error)
-		{
+		if (! $error) {
 			//var_dump($invoice_draft->lines);
 			//var_dump(dol_print_date($date_start,'dayhour'));
 			//exit;
@@ -853,14 +771,12 @@ if ($result <= 0 || $newobject->statut == 0)
 			$invoice_rec->date_when = $date_next_execution;
 
 			// Get first contract linked to invoice used to generate template
-			if ($invoice_draft->id > 0)
-			{
+			if ($invoice_draft->id > 0) {
 				$srcObject = $invoice_draft;
 
 				$srcObject->fetchObjectLinked();
 
-				if (! empty($srcObject->linkedObjectsIds['contrat']))
-				{
+				if (! empty($srcObject->linkedObjectsIds['contrat'])) {
 					$contractidid = reset($srcObject->linkedObjectsIds['contrat']);
 
 					$invoice_rec->origin = 'contrat';
@@ -873,40 +789,33 @@ if ($result <= 0 || $newobject->statut == 0)
 			$oldinvoice->fetch($invoice_draft->id);
 
 			$invoicerecid = $invoice_rec->create($user, $oldinvoice->id);
-			if ($invoicerecid > 0)
-			{
+			if ($invoicerecid > 0) {
 				$sql = 'UPDATE '.MAIN_DB_PREFIX.'facturedet_rec SET date_start_fill = 1, date_end_fill = 1 WHERE fk_facture = '.$invoice_rec->id;
 				$result = $db->query($sql);
-				if (! $error && $result < 0)
-				{
+				if (! $error && $result < 0) {
 					$error++;
 					$errormessages[]=$db->lasterror();
 				}
 
 				$result=$oldinvoice->delete($user, 1);
-				if (! $error && $result < 0)
-				{
+				if (! $error && $result < 0) {
 					$error++;
 					$errormessages[]=$oldinvoice->errors;
 				}
-			}
-			else
-			{
+			} else {
 				$error++;
 				$errormessages[]=$invoice_rec->errors;
 			}
 		}
 	}
 
-	if ($error)
-	{
+	if ($error) {
 		print 'Error '.join("\n", $errormessages);
 		exit(-8);
 	}
-}
-else {
-    print 'Error: instance '.$newinstance.' with id '.$idofinstancefound.' already exists'."\n";
-    exit(-9);
+} else {
+	print 'Error: instance '.$newinstance.' with id '.$idofinstancefound.' already exists'."\n";
+	exit(-9);
 }
 
 $newobject->instance = $newinstance;
@@ -917,13 +826,12 @@ $newobject->username_db  = $newobject->array_options['options_username_db'];
 $newobject->password_db  = $newobject->array_options['options_password_db'];
 $newobject->database_db  = $newobject->array_options['options_database_db'];
 
-if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db))
-{
+if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db)) {
 	print "Error: Some properties for instance ".$newinstance." was not registered into database (missing instance, username_web, password_web or database_db.\n";
 	exit(-3);
 }
 
-$olddirdb=preg_replace('/_([a-zA-Z0-9]+)/','',$oldobject->database_db);
+$olddirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $oldobject->database_db);
 $oldlogin=$oldobject->username_web;
 $oldpassword=$oldobject->password_web;
 $oldloginbase=$oldobject->username_db;
@@ -939,14 +847,13 @@ $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb;
 $oldserver=$oldobject->hostname_web;
 $newserver=$newobject->array_options['options_hostname_os'];
 
-if (empty($oldlogin) || empty($olddirdb))
-{
+if (empty($oldlogin) || empty($olddirdb)) {
 	print "Error: properties for instance ".$oldinstance." are not registered completely (missing at least login or database name).\n";
 	exit(-5);
 }
 
-$oldsftpconnectstring=$oldobject->username_web.'@'.$oldobject->hostname_web.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$olddirdb);
-$newsftpconnectstring=$newobject->username_web.'@'.$newobject->hostname_web.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$newdirdb);
+$oldsftpconnectstring=$oldobject->username_web.'@'.$oldobject->hostname_web.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $olddirdb);
+$newsftpconnectstring=$newobject->username_web.'@'.$newobject->hostname_web.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdirdb);
 
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
@@ -956,9 +863,9 @@ print 'SFTP old password '.$oldobject->password_web."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode,array('confirm'))) $param[]="-n";
+if (! in_array($mode, array('confirm'))) $param[]="-n";
 //$param[]="-a";
-if (! in_array($mode,array('diff','diffadd','diffchange'))) $param[]="-rlt";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
 $param[]="-v";
 if (empty($createthirdandinstance)) $param[]="-u";		// If we have just created instance, we overwrite file during rsync
@@ -970,8 +877,8 @@ $param[]="--exclude .gitignore";
 $param[]="--exclude .settings";
 $param[]="--exclude .project";
 $param[]="--exclude htdocs/conf/conf.php";
-if (! in_array($mode,array('diff','diffadd','diffchange'))) $param[]="--stats";
-if (in_array($mode,array('clean','confirmclean'))) $param[]="--delete";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
+if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 
 $param[]=$oldlogin.'@'.$oldserver.":".$sourcedir.'/*';
@@ -979,18 +886,16 @@ $param[]=$oldlogin.'@'.$oldserver.":".$sourcedir.'/*';
 $param[]=$targetdir;
 
 //var_dump($param);
-$fullcommand=$command." ".join(" ",$param);
+$fullcommand=$command." ".join(" ", $param);
 $output=array();
 $return_var=0;
 print $fullcommand."\n";
-if ($mode != 'test')
-{
+if ($mode != 'test') {
 	exec($fullcommand, $output, $return_var);
 }
 
 // Output result
-foreach($output as $outputline)
-{
+foreach ($output as $outputline) {
 	print $outputline."\n";
 }
 
@@ -1005,10 +910,8 @@ print "\n";
 print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb."\n";
 $output=array();
 $return_varchmod=0;
-if ($mode == 'confirm')
-{
-	if (empty($conf->global->DOLICLOUD_INSTANCES_PATH) || empty($newlogin) || empty($newdirdb))
-	{
+if ($mode == 'confirm') {
+	if (empty($conf->global->DOLICLOUD_INSTANCES_PATH) || empty($newlogin) || empty($newdirdb)) {
 		print 'Bad value for data. We stop to avoid drama';
 		exit(-7);
 	}
@@ -1016,8 +919,7 @@ if ($mode == 'confirm')
 }
 
 // Output result
-foreach($output as $outputline)
-{
+foreach ($output as $outputline) {
 	print $outputline."\n";
 }
 
@@ -1035,7 +937,7 @@ $param[]="-h";
 $param[]=$oldserver;
 $param[]="-u";
 $param[]=$oldobject->username_db;
-$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$oldobject->password_db).'"';
+$param[]='-p"'.str_replace(array('"','`'), array('\"','\`'), $oldobject->password_db).'"';
 $param[]="--compress";
 $param[]="-l";
 $param[]="--single-transaction";
@@ -1046,20 +948,18 @@ $param[]="-e";
 $param[]="--hex-blob";
 $param[]="--default-character-set=utf8";
 
-$fullcommand=$command." ".join(" ",$param);
+$fullcommand=$command." ".join(" ", $param);
 $fullcommand.=' > /tmp/mysqldump_'.$oldobject->database_db.'_'.gmstrftime('%d').'.sql';
 $output=array();
 $return_varmysql=0;
 print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
-if ($mode != 'test')
-{
+if ($mode != 'test') {
 	exec($fullcommand, $output, $return_varmysql);
 	print strftime("%Y%m%d-%H%M%S").' mysqldump done (return='.$return_varmysql.')'."\n";
 }
 
 // Output result
-foreach($output as $outputline)
-{
+foreach ($output as $outputline) {
 	print $outputline."\n";
 }
 
@@ -1074,22 +974,20 @@ $param[]="-h";
 $param[]=$oldserver;
 $param[]="-u";
 $param[]=$oldobject->username_db;
-$param[]='-p"'.str_replace(array('"','`'),array('\"','\`'),$oldobject->password_db).'"';
+$param[]='-p"'.str_replace(array('"','`'), array('\"','\`'), $oldobject->password_db).'"';
 
-$fullcommand=$command." ".join(" ",$param);
+$fullcommand=$command." ".join(" ", $param);
 $fullcommand.=' -e "REPLACE INTO llx_const (name, entity, value, type, visible) values(\'MAIN_ONLY_LOGIN_ALLOWED\', 0, \'nobody\', \'chaine\', 0);"';	//  UPDATE llx_user SET statut = 0 where login=\'admin\'"
 $output=array();
 $return_varmysql2=0;
 print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
-if ($mode != 'test')
-{
+if ($mode != 'test') {
 	exec($fullcommand, $output, $return_varmysql2);
 	print strftime("%Y%m%d-%H%M%S").' mysql done (return='.$return_varmysql2.')'."\n";
 }
 
 // Output result
-foreach($output as $outputline)
-{
+foreach ($output as $outputline) {
 	print $outputline."\n";
 }
 
@@ -1102,58 +1000,51 @@ $fullcommanda='echo "drop table llx_accounting_account;" | mysql -u'.$newloginba
 $output=array();
 $return_varload=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanda."\n";
-if ($mode == 'confirm')
-{
-    exec($fullcommanda, $output, $return_varload);
-	foreach($output as $line) print $line."\n";
+if ($mode == 'confirm') {
+	exec($fullcommanda, $output, $return_varload);
+	foreach ($output as $line) print $line."\n";
 }
 
 $fullcommandb='echo "drop table llx_accounting_system;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
 $output=array();
 $return_varload=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommandb."\n";
-if ($mode == 'confirm')
-{
-    exec($fullcommandb, $output, $return_varload);
-	foreach($output as $line) print $line."\n";
+if ($mode == 'confirm') {
+	exec($fullcommandb, $output, $return_varload);
+	foreach ($output as $line) print $line."\n";
 }
 
 $fullcommand="cat /tmp/mysqldump_".$oldobject->database_db.'_'.gmstrftime('%d').".sql | mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
-if ($mode == 'confirm')
-{
+if ($mode == 'confirm') {
 	$output=array();
 	$return_varload=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_varload);
-	foreach($output as $line) print $line."\n";
+	foreach ($output as $line) print $line."\n";
 }
 
 $fullcommandc='echo "UPDATE llx_const set value = \''.$newlogin.'\' WHERE name = \'CRON_KEY\';" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
 $output=array();
 $return_varcron=0;
 print strftime("%Y%m%d-%H%M%S").' Update cron key '.$fullcommandc."\n";
-if ($mode == 'confirm')
-{
-    exec($fullcommandc, $output, $return_varcron);
-	foreach($output as $line) print $line."\n";
+if ($mode == 'confirm') {
+	exec($fullcommandc, $output, $return_varcron);
+	foreach ($output as $line) print $line."\n";
 }
 
 
 
 print "\n";
 
-if ($mode == 'confirm')
-{
+if ($mode == 'confirm') {
 	print '-> Dump loaded into database '.$newobject->database_db.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	if (empty($createthirdandinstance)) print 'WARNING: The rsync was done with -u'."\n";
 	print "Finished. DON'T FORGET TO\n";
 	print " - SET INVOICING ON OLD SYSTEM FOR ".$oldinstance." TO MANUAL COLLECTION\n";
 	print " - CHANGE TEMPLATE INVOICE PRICE IF SPECIFIC INVOICING\n";
 	print " - CHANGE DNS /etc/bind/on.dolicloud.com.hosts OF ".$newobject->ref_customer." TO ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP." AND THEN rndc reload on.dolicloud.com\n";
-}
-else
-{
+} else {
 	print '-> Dump NOT loaded (test mode) into database '.$newobject->database_db.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	print "Finished. DON'T FORGET TO DELETE CONTRACT AND TEMPLATE INVOICE AFTER THIS TEST !!!\n";
 }
@@ -1164,4 +1055,3 @@ exit($return_var + $return_varchmod + $return_varmysql + $return_varmysql2 + $re
 
 // Add end do something like
 // update record set address = '79.137.96.15' where address <> '79.137.96.15' AND domain_id IN (select id from domain where sld = 'testldr14') LIMIT 1;
-

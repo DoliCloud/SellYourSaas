@@ -6,6 +6,8 @@
 
 #set -e
 
+source /etc/lsb-release
+
 export now=`date +%Y%m%d%H%M%S`
 
 echo
@@ -35,6 +37,7 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 export DATABASE=`grep 'database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter 1 - test|confirm" 1>&2
@@ -49,6 +52,7 @@ export testorconfirm=$1
 # For debug
 echo "testorconfirm = $testorconfirm"
 
+export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 MYSQLDUMP=`which mysqldump`
 
@@ -61,7 +65,7 @@ if [[ ! -d $targetdir2 ]]; then
 	exit 1
 fi
 
-if [[ -x /usr/bin/zstd ]]; then
+if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	echo "Do a tar of config files"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst
@@ -69,7 +73,7 @@ if [[ -x /usr/bin/zstd ]]; then
 	chmod o-rwx $targetdir2/conffiles.tar.zst
 	rm -f $targetdir2/conffiles.tar.gz
 	rm -f $targetdir2/conffiles.tar.bz2
-	
+
 	export dbname="mysql" 
 	echo "Do a dump of database $dbname"
 	echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
@@ -79,7 +83,7 @@ if [[ -x /usr/bin/zstd ]]; then
 	rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	
-	if [ "x$DATABASE" != "x" ]; then
+	if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
 		export dbname=$DATABASE 
 		echo "Do a dump of database $dbname"
 		echo "$MYSQLDUMP $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
@@ -107,7 +111,7 @@ else
 	chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
 	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	
-	if [ "x$DATABASE" != "x" ]; then
+	if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
 		export dbname=$DATABASE 
 		echo "Do a dump of database $dbname"
 		echo "$MYSQLDUMP $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"

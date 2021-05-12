@@ -21,8 +21,7 @@
 // $focus_element
 
 // Protection to avoid direct call of template
-if (empty($conf) || ! is_object($conf))
-{
+if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
 	exit;
 }
@@ -54,9 +53,9 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 if ($favicon) {
-    $href = 'img/'.$favicon;
-    if (preg_match('/^http/i', $favicon)) $href = $favicon;
-    $head.='<link rel="icon" href="'.$href.'">'."\n";
+	$href = 'img/'.$favicon;
+	if (preg_match('/^http/i', $favicon)) $href = $favicon;
+	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
 
 print top_htmlhead_sellyoursaas($head, $titleofpage, 0, 0, $arrayofjs, array(), 0, $disablenofollow);
@@ -96,9 +95,9 @@ $(document).ready(function () {
 
 <div class="block medium">
 
-        <header class="inverse">
-          <h1><?php echo dol_escape_htmltag($title); ?></h1>
-        </header>
+		<header class="inverse">
+		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
+		</header>
 
 
 <div class="login_table">
@@ -109,42 +108,39 @@ $(document).ready(function () {
 
 <?php
 if (! preg_match('/class="ok"/', $message)) {
-?>
+	?>
 <table class="center">
 <!-- Login -->
 <tr>
 <td class="nowrap valignmiddle" style="text-align: center;">
-<?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
+	<?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
 <span class="span-icon-user">
-<?php
-if (empty($asknewpass))
-{
-?>
+	<?php
+	if (empty($asknewpass)) {
+		?>
 	<input type="text" id="username" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  autofocus="autofocus" />
 	<br><br>
-<?php
-}
-else
-{
-	print $langs->trans("PasswordChangeRequest", $username).'<br><br>';
-	print '<input type="hidden" name="action" value="confirmpasswordreset">';
-	print '<input type="hidden" name="id" value="'.$id.'">';
-	print '<input type="hidden" name="hashreset" value="'.$hashreset.'">';
+		<?php
+	} else {
+		print $langs->trans("PasswordChangeRequest", $username).'<br><br>';
+		print '<input type="hidden" name="action" value="confirmpasswordreset">';
+		print '<input type="hidden" name="id" value="'.$id.'">';
+		print '<input type="hidden" name="hashreset" value="'.$hashreset.'">';
 
-	print '<input type="password" id="newpassword1" placeholder="'.$langs->trans("Password").'" name="newpassword1" class="flat input-icon-user" tabindex="1"  autofocus="autofocus" />';
-	print '<br><br>';
+		print '<input type="password" id="newpassword1" placeholder="'.$langs->trans("Password").'" name="newpassword1" class="flat input-icon-user" tabindex="1"  autofocus="autofocus" />';
+		print '<br><br>';
 
-	print '<input type="password" id="newpassword2" placeholder="'.$langs->trans("ConfirmPassword").'" name="newpassword2" class="flat input-icon-user" tabindex="1"  autofocus="autofocus" />';
-	print '<br><br>';
-}
-?>
+		print '<input type="password" id="newpassword2" placeholder="'.$langs->trans("ConfirmPassword").'" name="newpassword2" class="flat input-icon-user" tabindex="1"  autofocus="autofocus" />';
+		print '<br><br>';
+	}
+	?>
 </span>
 </td>
 </tr>
 
-<?php
-/*
-if (! empty($morelogincontent)) {
+	<?php
+	/*
+	if (! empty($morelogincontent)) {
 	if (is_array($morelogincontent)) {
 		foreach ($morelogincontent as $format => $option)
 		{
@@ -158,15 +154,15 @@ if (! empty($morelogincontent)) {
 		echo '<!-- Option by hook -->';
 		echo $morelogincontent;
 	}
-}
-*/
+	}
+	*/
 
-if (empty($asknewpass) && 1) {
-	// Add a variable param to force not using cache (jmobile)
-	$php_self = preg_replace('/[&\?]time=(\d+)/','',$php_self);	// Remove param time
-	if (preg_match('/\?/',$php_self)) $php_self.='&time='.dol_print_date(dol_now(),'dayhourlog');
-	else $php_self.='?time='.dol_print_date(dol_now(),'dayhourlog');
-?>
+	if (empty($asknewpass) && 1) {
+		// Add a variable param to force not using cache (jmobile)
+		$php_self = preg_replace('/[&\?]time=(\d+)/', '', $php_self);	// Remove param time
+		if (preg_match('/\?/', $php_self)) $php_self.='&time='.dol_print_date(dol_now(), 'dayhourlog');
+		else $php_self.='?time='.dol_print_date(dol_now(), 'dayhourlog');
+		?>
 	<!-- Captcha -->
 	<tr>
 	<td class="nowrap none center">
@@ -183,7 +179,7 @@ if (empty($asknewpass) && 1) {
 
 	</br>
 	</td></tr>
-<?php } ?>
+	<?php } ?>
 </table>
 <?php } ?>
 </div> <!-- end div login-right -->
@@ -195,9 +191,8 @@ if (empty($asknewpass) && 1) {
 
 <?php
 // Show error message if defined
-if ($message)
-{
-?>
+if ($message) {
+	?>
 	<div class="center">
 	<?php
 	if (preg_match('/class="ok"/', $message)) print '<font class="ok">';
@@ -206,7 +201,7 @@ if ($message)
 	print '</font>';
 	?>
 	</div><br>
-<?php
+	<?php
 }
 ?>
 
@@ -215,27 +210,25 @@ if ($message)
 
 <?php
 if (empty($asknewpass) && ! preg_match('/class="ok"/', $message)) {
-?>
+	?>
 <!-- Button SendNewPassword -->
 <input type="submit" class="btn btn-primary" name="password" value="&nbsp; <?php echo $langs->trans('SendNewPasswordLink'); ?> &nbsp;" tabindex="4" />
-<?php
-}
-elseif (! empty($asknewpass) && $asknewpass == 1)
-{
-?>
+	<?php
+} elseif (! empty($asknewpass) && $asknewpass == 1) {
+	?>
 <!-- Button ConfirmReset -->
 <input type="submit" class="btn btn-primary" name="confirmpasswordreset" value="&nbsp; <?php echo $langs->trans('ConfirmPasswordReset'); ?> &nbsp;" tabindex="4" />
-<?php
+	<?php
 }
 ?>
 
 <div align="center" style="margin-top: 8px;">
 	<?php
 	$moreparam='';
-	if (! empty($conf->dol_hide_topmenu))   $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
-	if (! empty($conf->dol_hide_leftmenu))  $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_hide_leftmenu='.$conf->dol_hide_leftmenu;
-	if (! empty($conf->dol_no_mouse_hover)) $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_no_mouse_hover='.$conf->dol_no_mouse_hover;
-	if (! empty($conf->dol_use_jmobile))    $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_use_jmobile='.$conf->dol_use_jmobile;
+	if (! empty($conf->dol_hide_topmenu))   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
+	if (! empty($conf->dol_hide_leftmenu))  $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_leftmenu='.$conf->dol_hide_leftmenu;
+	if (! empty($conf->dol_no_mouse_hover)) $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_no_mouse_hover='.$conf->dol_no_mouse_hover;
+	if (! empty($conf->dol_use_jmobile))    $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_use_jmobile='.$conf->dol_use_jmobile;
 
 	print '<a class="alogin" href="'.$dol_url_root.'/index.php'.$moreparam.'">('.((empty($asknewpass) || $asknewpass == 2)? $langs->trans('BackToLoginPage') : $langs->trans("Cancel")).')</a>';
 	?>
@@ -264,7 +257,7 @@ elseif (! empty($asknewpass) && $asknewpass == 1)
 	}
 	?>
 	</span>
-<?php }else{ ?>
+<?php } else { ?>
 	<div class="warning" align="center">
 	<?php echo $langs->trans('AuthenticationDoesNotAllowSendNewPassword', $mode); ?>
 	</div>
@@ -284,24 +277,20 @@ elseif (! empty($asknewpass) && $asknewpass == 1)
 if (! empty($conf->global->MAIN_HTML_FOOTER)) print $conf->global->MAIN_HTML_FOOTER;
 
 if (! empty($morelogincontent) && is_array($morelogincontent)) {
-	foreach ($morelogincontent as $format => $option)
-	{
+	foreach ($morelogincontent as $format => $option) {
 		if ($format == 'js') {
 			echo "\n".'<!-- Javascript by hook -->';
 			echo $option."\n";
 		}
 	}
-}
-else if (! empty($moreloginextracontent)) {
+} elseif (! empty($moreloginextracontent)) {
 	echo '<!-- Javascript by hook -->';
 	echo $moreloginextracontent;
 }
 
 // Google Analytics (need Google module)
-if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AN_ID))
-{
-	if (empty($conf->dol_use_jmobile))
-	{
+if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AN_ID)) {
+	if (empty($conf->dol_use_jmobile)) {
 		print "\n";
 		print '<script type="text/javascript">'."\n";
 		print '  var _gaq = _gaq || [];'."\n";
@@ -322,8 +311,7 @@ if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AN_ID)
 </div>	<!-- end of center -->
 
 <?php
-if (! empty($conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER))
-{
+if (! empty($conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER)) {
 	print $conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER;
 }
 ?>

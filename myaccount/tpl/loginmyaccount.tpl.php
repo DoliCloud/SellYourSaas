@@ -22,8 +22,7 @@
 // Caller can also set 	$morelogincontent = array(['options']=>array('js'=>..., 'table'=>...);
 
 // Protection to avoid direct call of template
-if (empty($conf) || ! is_object($conf))
-{
+if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
 	exit;
 }
@@ -43,7 +42,7 @@ if (! empty($conf->dol_use_jmobile)) $conf->use_javascript_ajax=1;
 
 $php_self = dol_escape_htmltag($_SERVER['PHP_SELF']);
 $php_self.= dol_escape_htmltag($_SERVER["QUERY_STRING"])?'?'.dol_escape_htmltag($_SERVER["QUERY_STRING"]):'';
-if (! preg_match('/mainmenu=/',$php_self)) $php_self.=(preg_match('/\?/',$php_self)?'&':'?').'mainmenu=home';
+if (! preg_match('/mainmenu=/', $php_self)) $php_self.=(preg_match('/\?/', $php_self)?'&':'?').'mainmenu=home';
 
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
 $arrayofjs=array(
@@ -59,9 +58,9 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 if ($favicon) {
-    $href = 'img/'.$favicon;
-    if (preg_match('/^http/i', $favicon)) $href = $favicon;
-    $head.='<link rel="icon" href="'.$href.'">'."\n";
+	$href = 'img/'.$favicon;
+	if (preg_match('/^http/i', $favicon)) $href = $favicon;
+	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
 
 print top_htmlhead_sellyoursaas($head, $titleofpage, 0, 0, $arrayofjs, array(), 0, $disablenofollow);
@@ -115,44 +114,37 @@ $(document).ready(function () {
 
 <?php
 // Show global announce
-if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE))
-{
-    $sql = "SELECT tms from ".MAIN_DB_PREFIX."const where name = 'SELLYOURSAAS_ANNOUNCE'";
-    $resql=$db->query($sql);
-    if ($resql)
-    {
-        $obj = $db->fetch_object($resql);
-        $datemessage = $db->jdate($obj->tms);
+if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
+	$sql = "SELECT tms from ".MAIN_DB_PREFIX."const where name = 'SELLYOURSAAS_ANNOUNCE'";
+	$resql=$db->query($sql);
+	if ($resql) {
+		$obj = $db->fetch_object($resql);
+		$datemessage = $db->jdate($obj->tms);
 
-    	print '
+		print '
     		<div class="containermessage"><br><div class="note note-warning">';
-    	print '<b>'.dol_print_date($datemessage, 'dayhour').'</b> : ';
-    	   $reg=array();
-    	   if (preg_match('/^\((.*)\)$/', $conf->global->SELLYOURSAAS_ANNOUNCE, $reg))
-    	   {
-    	       $texttoshow = $langs->trans($reg[1]);
-    	   }
-    	   else
-    	   {
-    	       $texttoshow = $conf->global->SELLYOURSAAS_ANNOUNCE;
-    	   }
-    	print '<h5 class="block">'.$texttoshow.'</h5>
+		print '<b>'.dol_print_date($datemessage, 'dayhour').'</b> : ';
+		   $reg=array();
+		if (preg_match('/^\((.*)\)$/', $conf->global->SELLYOURSAAS_ANNOUNCE, $reg)) {
+			$texttoshow = $langs->trans($reg[1]);
+		} else {
+			$texttoshow = $conf->global->SELLYOURSAAS_ANNOUNCE;
+		}
+		print '<h5 class="block">'.$texttoshow.'</h5>
     		</div></div>
     	';
-    }
-    else
-    {
-        dol_print_error($db);
-    }
+	} else {
+		dol_print_error($db);
+	}
 }
 ?>
 
 <div class="block medium">
 
-        <header class="inverse">
-          <h1><?php echo dol_escape_htmltag($title); ?></h1>
-          <span class="opacitymedium" style="font-size: 0.85em; margin-top: 4px; line-height: 1;"><?php echo $langs->trans("MyAcountDesc", $homepage, $sellyoursaasname); ?></span>
-        </header>
+		<header class="inverse">
+		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
+		  <span class="opacitymedium" style="font-size: 0.85em; margin-top: 4px; line-height: 1;"><?php echo $langs->trans("MyAcountDesc", $homepage, $sellyoursaasname); ?></span>
+		</header>
 
 
 <div class="login_table">
@@ -166,11 +158,10 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 <tr>
 <td class="nowrap center valignmiddle">
 <?php
-if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER))
-{
+if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
 	?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php
 }
-if (GETPOST('usernamebis','alpha')) $login=GETPOST('usernamebis','alpha');
+if (GETPOST('usernamebis', 'alpha')) $login=GETPOST('usernamebis', 'alpha');
 ?>
 <span class="span-icon-user">
 <input type="text" id="username" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" name="username" class="flat input-icon-user" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
@@ -208,10 +199,10 @@ if (! empty($morelogincontent)) {
 
 if (0) {
 	// Add a variable param to force not using cache (jmobile)
-	$php_self = preg_replace('/[&\?]time=(\d+)/','',$php_self);	// Remove param time
-	if (preg_match('/\?/',$php_self)) $php_self.='&time='.dol_print_date(dol_now(),'dayhourlog');
-	else $php_self.='?time='.dol_print_date(dol_now(),'dayhourlog');
-?>
+	$php_self = preg_replace('/[&\?]time=(\d+)/', '', $php_self);	// Remove param time
+	if (preg_match('/\?/', $php_self)) $php_self.='&time='.dol_print_date(dol_now(), 'dayhourlog');
+	else $php_self.='?time='.dol_print_date(dol_now(), 'dayhourlog');
+	?>
 	<!-- Captcha -->
 	<tr>
 	<td class="nowrap none center">
@@ -239,13 +230,12 @@ if (0) {
 
 <?php
 // Show error message if defined
-if (! empty($_SESSION['dol_loginmesg']))
-{
-?>
+if (! empty($_SESSION['dol_loginmesg'])) {
+	?>
 	<div class="center"><font class="error">
 	<?php echo $_SESSION['dol_loginmesg']; ?>
 	</font></div><br>
-<?php
+	<?php
 }
 ?>
 
@@ -255,13 +245,12 @@ if (! empty($_SESSION['dol_loginmesg']))
 <input type="submit" class="btn btn-primary" value="&nbsp; <?php echo $langs->trans('LogIn'); ?> &nbsp;" tabindex="5" />
 
 <?php
-if ($forgetpasslink || $helpcenterlink)
-{
+if ($forgetpasslink || $helpcenterlink) {
 	$moreparam='';
-	if ($dol_hide_topmenu)   $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_hide_topmenu='.$dol_hide_topmenu;
-	if ($dol_hide_leftmenu)  $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_hide_leftmenu='.$dol_hide_leftmenu;
-	if ($dol_no_mouse_hover) $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_no_mouse_hover='.$dol_no_mouse_hover;
-	if ($dol_use_jmobile)    $moreparam.=(strpos($moreparam,'?')===false?'?':'&').'dol_use_jmobile='.$dol_use_jmobile;
+	if ($dol_hide_topmenu)   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$dol_hide_topmenu;
+	if ($dol_hide_leftmenu)  $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_leftmenu='.$dol_hide_leftmenu;
+	if ($dol_no_mouse_hover) $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_no_mouse_hover='.$dol_no_mouse_hover;
+	if ($dol_use_jmobile)    $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_use_jmobile='.$dol_use_jmobile;
 
 	echo '<br>';
 	echo '<div class="center" style="margin-top: 8px;">';
@@ -301,24 +290,20 @@ if ($forgetpasslink || $helpcenterlink)
 if (! empty($conf->global->MAIN_HTML_FOOTER)) print $conf->global->MAIN_HTML_FOOTER;
 
 if (! empty($morelogincontent) && is_array($morelogincontent)) {
-	foreach ($morelogincontent as $format => $option)
-	{
+	foreach ($morelogincontent as $format => $option) {
 		if ($format == 'js') {
 			echo "\n".'<!-- Javascript by hook -->';
 			echo $option."\n";
 		}
 	}
-}
-else if (! empty($moreloginextracontent)) {
+} elseif (! empty($moreloginextracontent)) {
 	echo '<!-- Javascript by hook -->';
 	echo $moreloginextracontent;
 }
 
 // Google Analytics (need Google module)
-if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AN_ID))
-{
-	if (empty($conf->dol_use_jmobile))
-	{
+if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AN_ID)) {
+	if (empty($conf->dol_use_jmobile)) {
 		print "\n";
 		print '<script type="text/javascript">'."\n";
 		print '  var _gaq = _gaq || [];'."\n";
@@ -339,8 +324,7 @@ if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AN_ID)
 </div>	<!-- end of center -->
 
 <?php
-if (! empty($conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER))
-{
+if (! empty($conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER)) {
 	print $conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER;
 }
 ?>

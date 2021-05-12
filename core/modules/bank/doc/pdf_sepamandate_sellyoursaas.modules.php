@@ -36,17 +36,17 @@ require_once DOL_DOCUMENT_ROOT.'/core/modules/bank/doc/pdf_sepamandate.modules.p
  */
 class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 {
-    /**
-     * Issuer
-     * @var Societe
-     */
-    public $emetteur;
+	/**
+	 * Issuer
+	 * @var Societe
+	 */
+	public $emetteur;
 
-    /**
-     * Dolibarr version of the loaded document
-     * @public string
-     */
-    public $version = 'dolibarr';
+	/**
+	 * Dolibarr version of the loaded document
+	 * @public string
+	 */
+	public $version = 'dolibarr';
 
 	/**
 	 *	Constructor
@@ -81,7 +81,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 		// Recupere emmetteur
 		$this->emetteur=$mysoc;
-		if (! $this->emetteur->country_code) $this->emetteur->country_code=substr($langs->defaultlang,-2);    // By default if not defined
+		if (! $this->emetteur->country_code) $this->emetteur->country_code=substr($langs->defaultlang, -2);    // By default if not defined
 
 		// Defini position des colonnes
 		$this->posxref=$this->marge_gauche+1;
@@ -99,17 +99,17 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 	 *
 	 *	@param	    Project		$object   		    Object project a generer
 	 *	@param	    Translate	$outputlangs	    Lang output object
-     *  @param		string		$srctemplatepath	Full path of source filename for generator using a template file
-     *  @param		int			$hidedetails		Do not show line details (not used for this template)
-     *  @param		int			$hidedesc			Do not show desc (not used for this template)
-     *  @param		int			$hideref			Do not show ref (not used for this template)
-     *  @param      null|array  $moreparams         More parameters
+	 *  @param		string		$srctemplatepath	Full path of source filename for generator using a template file
+	 *  @param		int			$hidedetails		Do not show line details (not used for this template)
+	 *  @param		int			$hidedesc			Do not show desc (not used for this template)
+	 *  @param		int			$hideref			Do not show ref (not used for this template)
+	 *  @param      null|array  $moreparams         More parameters
 	 *	@return	    int         				    1 if OK, <=0 if KO
 	 */
-	function write_file($object, $outputlangs, $srctemplatepath='', $hidedetails=0, $hidedesc=0, $hideref=0, $moreparams=null)
+	function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
 	{
 	    // phpcs:enable
-	    global $conf, $hookmanager, $langs, $user, $mysoc;
+		global $conf, $hookmanager, $langs, $user, $mysoc;
 
 		if (! is_object($outputlangs)) $outputlangs=$langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
@@ -118,65 +118,56 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 		// Load traductions files requiredby by page
 		$outputlangs->loadLangs(array("main", "dict", "withdrawals", "companies", "projects", "bills"));
 
-		if (! empty($conf->bank->dir_output))
-		{
+		if (! empty($conf->bank->dir_output)) {
 			//$nblines = count($object->lines);  // This is set later with array of tasks
 
-		    // Definition of $dir and $file
-		    if ($object->specimen)
-		    {
-		        if (! empty($moreparams['force_dir_output'])) $dir = $moreparams['force_dir_output'];
-		        else $dir = $conf->bank->dir_output;
-		        $file = $dir . "/SPECIMEN.pdf";
-		    }
-		    else
-		    {
-		        $objectref = dol_sanitizeFileName($object->ref);
-		        if (! empty($moreparams['force_dir_output'])) $dir = $moreparams['force_dir_output'];
-		        else $dir = $conf->bank->dir_output . "/" . $objectref;
-		        $file = $dir . "/" . $langs->transnoentitiesnoconv("SepaMandateShort").' '.$objectref . "-".dol_sanitizeFileName($object->rum).".pdf";
-		    }
+			// Definition of $dir and $file
+			if ($object->specimen) {
+				if (! empty($moreparams['force_dir_output'])) $dir = $moreparams['force_dir_output'];
+				else $dir = $conf->bank->dir_output;
+				$file = $dir . "/SPECIMEN.pdf";
+			} else {
+				$objectref = dol_sanitizeFileName($object->ref);
+				if (! empty($moreparams['force_dir_output'])) $dir = $moreparams['force_dir_output'];
+				else $dir = $conf->bank->dir_output . "/" . $objectref;
+				$file = $dir . "/" . $langs->transnoentitiesnoconv("SepaMandateShort").' '.$objectref . "-".dol_sanitizeFileName($object->rum).".pdf";
+			}
 
-			if (! file_exists($dir))
-			{
-				if (dol_mkdir($dir) < 0)
-				{
-					$this->error=$langs->transnoentities("ErrorCanNotCreateDir",$dir);
+			if (! file_exists($dir)) {
+				if (dol_mkdir($dir) < 0) {
+					$this->error=$langs->transnoentities("ErrorCanNotCreateDir", $dir);
 					return 0;
 				}
 			}
 
-			if (file_exists($dir))
-			{
+			if (file_exists($dir)) {
 				// Add pdfgeneration hook
-				if (! is_object($hookmanager))
-				{
+				if (! is_object($hookmanager)) {
 					include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 					$hookmanager=new HookManager($this->db);
 				}
 				$hookmanager->initHooks(array('pdfgeneration'));
 				$parameters=array('file'=>$file,'object'=>$object,'outputlangs'=>$outputlangs);
 				global $action;
-				$reshook=$hookmanager->executeHooks('beforePDFCreation',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+				$reshook=$hookmanager->executeHooks('beforePDFCreation', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 
-                $pdf=pdf_getInstance($this->format);
-                $default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
-                $heightforinfotot = 50;	// Height reserved to output the info and total part
-		        $heightforfreetext= (isset($conf->global->MAIN_PDF_FREETEXT_HEIGHT)?$conf->global->MAIN_PDF_FREETEXT_HEIGHT:5);	// Height reserved to output the free text on last page
-	            $heightforfooter = $this->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
-	            if (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS)) $heightforfooter+= 6;
-	            $pdf->SetAutoPageBreak(1,0);
+				$pdf=pdf_getInstance($this->format);
+				$default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
+				$heightforinfotot = 50;	// Height reserved to output the info and total part
+				$heightforfreetext= (isset($conf->global->MAIN_PDF_FREETEXT_HEIGHT)?$conf->global->MAIN_PDF_FREETEXT_HEIGHT:5);	// Height reserved to output the free text on last page
+				$heightforfooter = $this->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
+				if (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS)) $heightforfooter+= 6;
+				$pdf->SetAutoPageBreak(1, 0);
 
-                if (class_exists('TCPDF'))
-                {
-                    $pdf->setPrintHeader(false);
-                    $pdf->setPrintFooter(false);
-                }
-                $pdf->SetFont(pdf_getPDFFont($outputlangs));
+				if (class_exists('TCPDF')) {
+					$pdf->setPrintHeader(false);
+					$pdf->setPrintFooter(false);
+				}
+				$pdf->SetFont(pdf_getPDFFont($outputlangs));
 
 				$pdf->Open();
 				$pagenb=0;
-				$pdf->SetDrawColor(128,128,128);
+				$pdf->SetDrawColor(128, 128, 128);
 
 				$pdf->SetTitle($outputlangs->convToOutputCharset($object->ref));
 				$pdf->SetSubject($outputlangs->transnoentities("SepaMandate"));
@@ -191,32 +182,29 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$pdf->AddPage();
 				$pagenb++;
 				$this->_pagehead($pdf, $object, 1, $outputlangs);
-				$pdf->SetFont('','', $default_font_size - 1);
+				$pdf->SetFont('', '', $default_font_size - 1);
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
-				$pdf->SetTextColor(0,0,0);
+				$pdf->SetTextColor(0, 0, 0);
 
 				$tab_top = 50;
 				$tab_height = 200;
 				$tab_top_newpage = 40;
-                $tab_height_newpage = 210;
+				$tab_height_newpage = 210;
 
 				// Affiche notes
-				if (! empty($object->note_public))
-				{
-					$pdf->SetFont('','', $default_font_size - 1);
+				if (! empty($object->note_public)) {
+					$pdf->SetFont('', '', $default_font_size - 1);
 					$pdf->writeHTMLCell(190, 3, $this->posxref-1, $tab_top-2, dol_htmlentitiesbr($object->note_public), 0, 1);
 					$nexY = $pdf->GetY();
 					$height_note=$nexY-($tab_top-2);
 
 					// Rect prend une longueur en 3eme param
-					$pdf->SetDrawColor(192,192,192);
+					$pdf->SetDrawColor(192, 192, 192);
 					$pdf->Rect($this->marge_gauche, $tab_top-3, $this->page_largeur-$this->marge_gauche-$this->marge_droite, $height_note+1);
 
 					$tab_height = $tab_height - $height_note;
 					$tab_top = $nexY+6;
-				}
-				else
-				{
+				} else {
 					$height_note=0;
 				}
 
@@ -226,7 +214,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 				$posY = $curY;
 
-				$pdf->SetFont('','', $default_font_size);
+				$pdf->SetFont('', '', $default_font_size);
 
 				$pdf->line($this->marge_gauche, $posY, $this->page_largeur - $this->marge_droite, $posY);
 				$posY+=2;
@@ -257,7 +245,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 				$pdf->line($this->marge_gauche, $posY, $this->page_largeur - $this->marge_droite, $posY);
 
-				$pdf->SetFont('','', $default_font_size - 1);
+				$pdf->SetFont('', '', $default_font_size - 1);
 
 				$posY+=8;
 				$pdf->SetXY($this->marge_gauche, $posY);
@@ -269,7 +257,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$pdf->line($this->marge_gauche, $posY, $this->page_largeur - $this->marge_droite, $posY);
 				$posY+=2;
 
-				$pdf->SetFont('','', $default_font_size);
+				$pdf->SetFont('', '', $default_font_size);
 
 				$pdf->SetXY($this->marge_gauche, $posY);
 				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $outputlangs->transnoentitiesnoconv("SEPAFillForm"), 0, 'C');
@@ -278,9 +266,8 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				if ($object->socid > 0) $thirdparty->fetch($object->socid);
 
 				$sepaname = '______________________________________________';
-				if ($thirdparty->id > 0)
-				{
-				    $sepaname = $thirdparty->name.($object->account_owner?' ('.$object->account_owner.')':'');
+				if ($thirdparty->id > 0) {
+					$sepaname = $thirdparty->name.($object->account_owner?' ('.$object->account_owner.')':'');
 				}
 				$posY=$pdf->GetY();
 				$posY+=3;
@@ -289,10 +276,9 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$pdf->SetXY(80, $posY);
 				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $sepaname, 0, 'L');
 
-			    $address = '______________________________________________';
-				if ($thirdparty->id > 0)
-				{
-				    $address = $thirdparty->getFullAddress();
+				$address = '______________________________________________';
+				if ($thirdparty->id > 0) {
+					$address = $thirdparty->getFullAddress();
 				}
 				$posY=$pdf->GetY();
 				$posY+=1;
@@ -300,11 +286,10 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $outputlangs->transnoentitiesnoconv("Address").' : ', 0, 'L');
 				$pdf->SetXY(80, $posY);
 				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $address, 0, 'L');
-				if (preg_match('/_____/', $address))
-				{
-    				$posY+=6;
-    				$pdf->SetXY(80, $posY);
-    				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $address, 0, 'L');
+				if (preg_match('/_____/', $address)) {
+					$posY+=6;
+					$pdf->SetXY(80, $posY);
+					$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $address, 0, 'L');
 				}
 
 				$ban = '__________________________________________________';
@@ -344,12 +329,11 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$pdf->SetXY(86, $posY);
 				$txt = $langs->transnoentitiesnoconv("ModeFRST");
 				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $txt, 0, 'L');
-				if (empty($object->frstrecur))
-				{
-    				$posY+=6;
-    				$pdf->SetXY(80, $posY);
-				    $txt = '('.$langs->transnoentitiesnoconv("PleaseCheckOne").')';
-    				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $txt, 0, 'L');
+				if (empty($object->frstrecur)) {
+					$posY+=6;
+					$pdf->SetXY(80, $posY);
+					$txt = '('.$langs->transnoentitiesnoconv("PleaseCheckOne").')';
+					$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $txt, 0, 'L');
 				}
 
 				$posY=$pdf->GetY();
@@ -359,13 +343,10 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 
 				// Show square
-				if ($pagenb == 1)
-				{
+				if ($pagenb == 1) {
 					$this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 0, 0);
 					$bottomlasttab=$this->page_hauteur - $heightforinfotot - $heightforfreetext - $heightforfooter + 1;
-				}
-				else
-				{
+				} else {
 					$this->_tableau($pdf, $tab_top_newpage, $this->page_hauteur - $tab_top_newpage - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 1, 0);
 					$bottomlasttab=$this->page_hauteur - $heightforinfotot - $heightforfreetext - $heightforfooter + 1;
 				}
@@ -382,23 +363,22 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				/*
 				 * Pied de page
 				 */
-				$this->_pagefoot($pdf,$object,$outputlangs);
-				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
+				$this->_pagefoot($pdf, $object, $outputlangs);
+				if (method_exists($pdf, 'AliasNbPages')) $pdf->AliasNbPages();
 
 				$pdf->Close();
 
-				$pdf->Output($file,'F');
+				$pdf->Output($file, 'F');
 
 				// Add pdfgeneration hook
-				if (! is_object($hookmanager))
-				{
+				if (! is_object($hookmanager)) {
 					include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 					$hookmanager=new HookManager($this->db);
 				}
 				$hookmanager->initHooks(array('pdfgeneration'));
 				$parameters=array('file'=>$file,'object'=>$object,'outputlangs'=>$outputlangs);
 				global $action;
-				$reshook=$hookmanager->executeHooks('afterPDFCreation',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
+				$reshook=$hookmanager->executeHooks('afterPDFCreation', $parameters, $this, $action);    // Note that $action and $object may have been modified by some hooks
 
 				if (! empty($conf->global->MAIN_UMASK))
 				@chmod($file, octdec($conf->global->MAIN_UMASK));
@@ -406,15 +386,13 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$this->result = array('fullpath'=>$file);
 
 				return 1;   // Pas d'erreur
-			}
-			else
-			{
-				$this->error=$langs->transnoentities("ErrorCanNotCreateDir",$dir);
+			} else {
+				$this->error=$langs->transnoentities("ErrorCanNotCreateDir", $dir);
 				return 0;
 			}
 		}
 
-		$this->error=$langs->transnoentities("ErrorConstantNotDefined","LIVRAISON_OUTPUTDIR");
+		$this->error=$langs->transnoentities("ErrorConstantNotDefined", "LIVRAISON_OUTPUTDIR");
 		return 0;
 	}
 
@@ -434,52 +412,45 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 
-		pdf_pagehead($pdf,$outputlangs,$this->page_hauteur);
+		pdf_pagehead($pdf, $outputlangs, $this->page_hauteur);
 
-		$pdf->SetTextColor(0,0,60);
-		$pdf->SetFont('','B', $default_font_size + 3);
+		$pdf->SetTextColor(0, 0, 60);
+		$pdf->SetFont('', 'B', $default_font_size + 3);
 
-        $posx=$this->page_largeur-$this->marge_droite-100;
+		$posx=$this->page_largeur-$this->marge_droite-100;
 		$posy=$this->marge_haute;
 
-		$pdf->SetXY($this->marge_gauche,$posy);
+		$pdf->SetXY($this->marge_gauche, $posy);
 
 		// Logo
 		$logo=$conf->mycompany->dir_output.'/logos/'.$mysoc->logo;
 		//$paramlogo='ONLINE_PAYMENT_LOGO_dolicloud';
 		//if (! empty($conf->global->$paramlogo)) $logo=$conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$paramlogo;
-		if ($mysoc->logo)
-		{
-			if (is_readable($logo))
-			{
-			    $height=pdf_getHeightForLogo($logo);
-			    $pdf->Image($logo, $this->marge_gauche, $posy, 0, $height);	// width=0 (auto)
-			}
-			else
-			{
-				$pdf->SetTextColor(200,0,0);
-				$pdf->SetFont('','B', $default_font_size - 2);
-				$pdf->MultiCell(100, 3, $langs->transnoentities("ErrorLogoFileNotFound",$logo), 0, 'L');
+		if ($mysoc->logo) {
+			if (is_readable($logo)) {
+				$height=pdf_getHeightForLogo($logo);
+				$pdf->Image($logo, $this->marge_gauche, $posy, 0, $height);	// width=0 (auto)
+			} else {
+				$pdf->SetTextColor(200, 0, 0);
+				$pdf->SetFont('', 'B', $default_font_size - 2);
+				$pdf->MultiCell(100, 3, $langs->transnoentities("ErrorLogoFileNotFound", $logo), 0, 'L');
 				$pdf->MultiCell(100, 3, $langs->transnoentities("ErrorGoToModuleSetup"), 0, 'L');
 			}
-		}
-		else $pdf->MultiCell(100, 4, $outputlangs->transnoentities($this->emetteur->name), 0, 'L');
+		} else $pdf->MultiCell(100, 4, $outputlangs->transnoentities($this->emetteur->name), 0, 'L');
 
-		$pdf->SetFont('','B', $default_font_size + 3);
-		$pdf->SetXY($posx,$posy);
-		$pdf->SetTextColor(0,0,60);
+		$pdf->SetFont('', 'B', $default_font_size + 3);
+		$pdf->SetXY($posx, $posy);
+		$pdf->SetTextColor(0, 0, 60);
 		$pdf->MultiCell(100, 4, $outputlangs->transnoentities("SepaMandate"), '', 'R');
-		$pdf->SetFont('','', $default_font_size + 2);
+		$pdf->SetFont('', '', $default_font_size + 2);
 
 		$posy+=6;
-		$pdf->SetXY($posx,$posy);
-		$pdf->SetTextColor(0,0,60);
+		$pdf->SetXY($posx, $posy);
+		$pdf->SetTextColor(0, 0, 60);
 		$daterum = '__________________';
-		if (! empty($object->date_rum))
-		{
-            $daterum = dol_print_date($object->date_rum,'day',false,$outputlangs,true);
-		}
-		else $daterum = dol_print_date($object->datec,'day',false,$outputlangs,true);   // For old record, the date_rum was not saved.
+		if (! empty($object->date_rum)) {
+			$daterum = dol_print_date($object->date_rum, 'day', false, $outputlangs, true);
+		} else $daterum = dol_print_date($object->datec, 'day', false, $outputlangs, true);   // For old record, the date_rum was not saved.
 
 		$pdf->MultiCell(100, 4, $outputlangs->transnoentities("Date")." : " . $daterum, '', 'R');
 		/*$posy+=6;
@@ -487,32 +458,31 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 		$pdf->MultiCell(100, 4, $outputlangs->transnoentities("DateEnd")." : " . dol_print_date($object->date_end,'day',false,$outputlangs,true), '', 'R');
 		*/
 
-		$pdf->SetTextColor(0,0,60);
+		$pdf->SetTextColor(0, 0, 60);
 
 		// Add list of linked objects
 		/* Removed: A project can have more than thousands linked objects (orders, invoices, proposals, etc....
 		$object->fetchObjectLinked();
 
-	    foreach($object->linkedObjects as $objecttype => $objects)
-	    {
-	        var_dump($objects);exit;
-	    	if ($objecttype == 'commande')
-	    	{
-	    		$outputlangs->load('orders');
-	    		$num=count($objects);
-	    		for ($i=0;$i<$num;$i++)
-	    		{
-	    			$posy+=4;
-	    			$pdf->SetXY($posx,$posy);
-	    			$pdf->SetFont('','', $default_font_size - 1);
-	    			$text=$objects[$i]->ref;
-	    			if ($objects[$i]->ref_client) $text.=' ('.$objects[$i]->ref_client.')';
-	    			$pdf->MultiCell(100, 4, $outputlangs->transnoentities("RefOrder")." : ".$outputlangs->transnoentities($text), '', 'R');
-	    		}
-	    	}
-	    }
-        */
-
+		foreach($object->linkedObjects as $objecttype => $objects)
+		{
+			var_dump($objects);exit;
+			if ($objecttype == 'commande')
+			{
+				$outputlangs->load('orders');
+				$num=count($objects);
+				for ($i=0;$i<$num;$i++)
+				{
+					$posy+=4;
+					$pdf->SetXY($posx,$posy);
+					$pdf->SetFont('','', $default_font_size - 1);
+					$text=$objects[$i]->ref;
+					if ($objects[$i]->ref_client) $text.=' ('.$objects[$i]->ref_client.')';
+					$pdf->MultiCell(100, 4, $outputlangs->transnoentities("RefOrder")." : ".$outputlangs->transnoentities($text), '', 'R');
+				}
+			}
+		}
+		*/
 	}
 
 
@@ -536,19 +506,16 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 		$posy+=$this->_signature_area($pdf, $object, $posy, $outputlangs);
 
 		$pdf->SetXY($this->marge_gauche, $posy);
-		$pdf->SetFont('','', $default_font_size);
+		$pdf->SetFont('', '', $default_font_size);
 		$pdf->MultiCell(100, 3, $outputlangs->transnoentitiesnoconv("PleaseReturnMandate", (empty($conf->global->SELLYOURSAAS_MAIN_EMAIL) ? $mysoc->email : $conf->global->SELLYOURSAAS_MAIN_EMAIL)), 0, 'L', 0);
 		$posy=$pdf->GetY()+2;
 
 		$pdf->SetXY($this->marge_gauche, $posy);
-		$pdf->SetFont('','', $default_font_size - $diffsizetitle);
+		$pdf->SetFont('', '', $default_font_size - $diffsizetitle);
 		$pdf->MultiCell(100, 6, $mysoc->name, 0, 'L', 0);
 		$pdf->MultiCell(100, 6, $outputlangs->convToOutputCharset($mysoc->getFullAddress()), 0, 'L', 0);
 		$posy=$pdf->GetY()+2;
 
 		return $posy;
 	}
-
-
 }
-

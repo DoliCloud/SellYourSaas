@@ -1,33 +1,33 @@
 <?php
-if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER','1');
+if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
 //if (! defined('NOREQUIREDB'))    define('NOREQUIREDB','1');
-if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC','1');
-if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
-if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test
-if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
-if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
-if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
-if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
-if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
-if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    // If this page is public (can be called outside logged session)
-if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC', '1');
+if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN', '1');
+if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK', '1');			// Do not check anti CSRF attack test
+if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK', '1');			// Do not check style html tag into posted data
+if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', '1');		// Do not check anti POST attack test
+if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');			// If there is no need to load and show top and left menu
+if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');			// If we don't need to load the html.form.class.php
+if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX', '1');
+if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
+if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 
-include ('./mainmyaccount.inc.php');
+include './mainmyaccount.inc.php';
 
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include($_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php");
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include(substr($tmp, 0, ($i+1))."/main.inc.php");
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=include(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php");
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include("../../main.inc.php");
-if (! $res && file_exists("../../../main.inc.php")) $res=@include("../../../main.inc.php");
+if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
+if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
 if (! $res) die("Include of main fails");
 
 
@@ -88,6 +88,10 @@ display: inline-block;padding: 4px 6px;
 line-height: 20px;color: #555555;
 }
 
+.pictofixedwidth {
+    width: 22px;
+}
+
 input,textarea,.uneditable-input { width: 256px;}
 textarea {height: auto;}
 textarea,input[type='text'],input[type='password'],input[type='datetime'],input[type='datetime-local'],input[type='date'],input[type='month'],input[type='time'],input[type='week'],input[type='number'],input[type='email'],input[type='url'],input[type='search'],input[type='tel'],input[type='color'],.uneditable-input
@@ -136,6 +140,15 @@ border: 1px solid #e5e5e5;*zoom: 1;
 .margintoponly { margin-top: 10px; }
 .marginrightonly { margin-right: 10px; }
 .marginbottomonly { margin-bottom: 10px; }
+
+.supportemailfield {
+    display: inline-block;
+    min-width: 150px;
+}
+
+.prioritylow { color: #811; }
+.prioritymedium { color: #881; }
+.priorityhigh { color: #181; }
 
 .row-fluid .offset2:first-child {margin-left: 17.02127659574468%;*margin-left: 16.914893617021278%;}.row-fluid .offset1 {margin-left: 10.638297872340425%;*margin-left: 10.53191489361702%;}.row-fluid .offset1:first-child {margin-left: 8.51063829787234%;*margin-left: 8.404255319148938%;}
 [class*='span'].hide,.row-fluid [class*='span'].hide {display: none;}
@@ -277,19 +290,19 @@ margin-top: 20px;
 }
 
 div#waitMask {
-text-align: center;
-z-index: 999;
-position: absolute;
-top: 0;
-right: 0;
-height: 100%;
-width: 100%;
-cursor: wait;
-padding-top: 250px;
-background-color: #000;
-opacity: 0;
-transition-duration: 0.5s;
--webkit-transition-duration: 0.5s;
+	text-align: center;
+	z-index: 999;
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 100%;
+	width: 100%;
+	cursor: wait;
+	padding-top: 250px;
+	background-color: #000;
+	opacity: 0;
+	transition-duration: 0.5s;
+	-webkit-transition-duration: 0.5s;
 }
 
 

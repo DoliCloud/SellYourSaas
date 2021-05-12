@@ -265,6 +265,7 @@ UndeploymentDate=Date désinstallation (UTC)
 DeploymentInProgress=Deploiement en cours
 Alive=En service
 Undeployed=Désinstallé
+Unreachable=Injoignable
 Suspended=Suspendu
 SuspendWillBeDoneSoon=La suspension sera bientôt effective
 CompanyAliasIsRequiredWhenWeSetResellerTag=Le nom alternatif est obligatoire si vous positionnez le tag Revendeur

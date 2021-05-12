@@ -63,8 +63,7 @@ $lSecondary = isset($argv[2])?$argv[2]:'';
 $lEnglish = 'en_US';
 $filesToProcess = isset($argv[3])?$argv[3]:'';
 
-if (empty($lPrimary) || empty($lSecondary) || empty($filesToProcess))
-{
+if (empty($lPrimary) || empty($lSecondary) || empty($filesToProcess)) {
 	$rc = 1;
 	$msg = '***** Script to clean language files *****'."\n";
 	$msg.= 'Usage: ./dev/translation/strip_language_file.php xx_XX xx_YY [file.lang|all]'."\n";
@@ -77,25 +76,22 @@ $aSecondary = array();
 $aEnglish = array();
 
 // Define array $filesToProcess
-if ($filesToProcess == 'all')
-{
+if ($filesToProcess == 'all') {
 	$dir = new DirectoryIterator('htdocs/cabinetmed/langs/'.$lPrimary);
-	while($dir->valid()) {
-		if(!$dir->isDot() && $dir->isFile() && ! preg_match('/^\./',$dir->getFilename())) {
+	while ($dir->valid()) {
+		if (!$dir->isDot() && $dir->isFile() && ! preg_match('/^\./', $dir->getFilename())) {
 			$files[] =  $dir->getFilename();
 		}
 		$dir->next();
 	}
 	$filesToProcess=$files;
-}
-else $filesToProcess=explode(',',$filesToProcess);
+} else $filesToProcess=explode(',', $filesToProcess);
 
 // Arguments should be OK here.
 
 
 // Loop on each file
-foreach($filesToProcess as $fileToProcess)
-{
+foreach ($filesToProcess as $fileToProcess) {
 	$lPrimaryFile = 'htdocs/cabinetmed/langs/'.$lPrimary.'/'.$fileToProcess;
 	$lSecondaryFile = 'htdocs/cabinetmed/langs/'.$lSecondary.'/'.$fileToProcess;
 	$lEnglishFile = 'htdocs/cabinetmed/langs/'.$lEnglish.'/'.$fileToProcess;
@@ -126,12 +122,10 @@ foreach($filesToProcess as $fileToProcess)
 
 	// Start reading and parsing Secondary
 
-	if ( $handle = fopen($lSecondaryFile, 'r') )
-	{
+	if ( $handle = fopen($lSecondaryFile, 'r') ) {
 		print "Read Secondary File $lSecondaryFile:\n";
 		$cnt = 0;
-		while (($line = fgets($handle)) !== false)
-		{
+		while (($line = fgets($handle)) !== false) {
 			$cnt++;
 
 			// strip comments
@@ -165,16 +159,14 @@ foreach($filesToProcess as $fileToProcess)
 
 			$aSecondary[$key] = trim($value);
 		}
-		if ( ! feof($handle) )
-		{
+		if ( ! feof($handle) ) {
 			$rc = 5;
 			$msg = "Unexpected fgets() fail";
 			print $msg . " (rc=$rc).\n";
 			exit($rc);
 		}
 		fclose($handle);
-	}
-	else {
+	} else {
 		$rc = 6;
 		$msg = "Cannot open file $lSecondaryFile";
 		print $msg . " (rc=$rc).\n";
@@ -184,12 +176,10 @@ foreach($filesToProcess as $fileToProcess)
 
 	// Start reading and parsing English
 
-	if ( $handle = fopen($lEnglishFile, 'r') )
-	{
+	if ( $handle = fopen($lEnglishFile, 'r') ) {
 		print "Read English File $lEnglishFile:\n";
 		$cnt = 0;
-		while (($line = fgets($handle)) !== false)
-		{
+		while (($line = fgets($handle)) !== false) {
 			$cnt++;
 
 			// strip comments
@@ -223,16 +213,14 @@ foreach($filesToProcess as $fileToProcess)
 
 			$aEnglish[$key] = trim($value);
 		}
-		if ( ! feof($handle) )
-		{
+		if ( ! feof($handle) ) {
 			$rc = 5;
 			$msg = "Unexpected fgets() fail";
 			print $msg . " (rc=$rc).\n";
 			exit($rc);
 		}
 		fclose($handle);
-	}
-	else {
+	} else {
 		$rc = 6;
 		$msg = "Cannot open file $lEnglishFile";
 		print $msg . " (rc=$rc).\n";
@@ -246,21 +234,18 @@ foreach($filesToProcess as $fileToProcess)
 	$arrayofkeytoalwayskeep=array('DIRECTION','FONTFORPDF','FONTSIZEFORPDF','SeparatorDecimal','SeparatorThousand');
 
 
-	if ( $handle = fopen($lPrimaryFile, 'r') )
-	{
-		if ( ! $oh = fopen($output, 'w') )
-		{
+	if ( $handle = fopen($lPrimaryFile, 'r') ) {
+		if ( ! $oh = fopen($output, 'w') ) {
 			print "ERROR in writing to file $output\n";
 			exit;
 		}
 
 		print "Read Primary File $lPrimaryFile and write ".$output.":\n";
 
-		fwrite($oh, "# Dolibarr language file - Source file is en_US - ".(preg_replace('/\.lang$/','',$fileToProcess))."\n");
+		fwrite($oh, "# Dolibarr language file - Source file is en_US - ".(preg_replace('/\.lang$/', '', $fileToProcess))."\n");
 
 		$cnt = 0;
-		while (($line = fgets($handle)) !== false)
-		{
+		while (($line = fgets($handle)) !== false) {
 			$cnt++;
 
 			// strip comments
@@ -284,9 +269,7 @@ foreach($filesToProcess as $fileToProcess)
 			if ( array_key_exists($key, $aPrimary) ) {
 				print "Key $key is redundant in file $lPrimaryFile (line: $cnt) - Already found into ".$fileFirstFound[$key]." (line: ".$lineFirstFound[$key].").\n";
 				continue;
-			}
-			else
-			{
+			} else {
 				$fileFirstFound[$key] = $fileToProcess;
 				$lineFirstFound[$key] = $cnt;
 			}
@@ -304,12 +287,9 @@ foreach($filesToProcess as $fileToProcess)
 			// ----- Process output now -----
 
 			// Key not in other file
-			if (in_array($key, $arrayofkeytoalwayskeep) || preg_match('/^FormatDate/',$key) || preg_match('/^FormatHour/',$key))
-			{
+			if (in_array($key, $arrayofkeytoalwayskeep) || preg_match('/^FormatDate/', $key) || preg_match('/^FormatHour/', $key)) {
 				//print "Key $key is a key we always want to see into secondary file (line: $cnt).\n";
-			}
-			else if ( ! array_key_exists($key, $aSecondary))
-			{
+			} elseif ( ! array_key_exists($key, $aSecondary)) {
 				//print "Key $key does NOT exist in secondary language (line: $cnt).\n";
 				continue;
 			}
@@ -317,10 +297,9 @@ foreach($filesToProcess as $fileToProcess)
 			// String exists in both files and value into alternative language differs from main language but also from english files
 			if (
 				(! empty($aSecondary[$key]) && $aSecondary[$key] != $aPrimary[$key]
-			    && ! empty($aEnglish[$key]) && $aSecondary[$key] != $aEnglish[$key])
-				|| in_array($key, $arrayofkeytoalwayskeep) || preg_match('/^FormatDate/',$key) || preg_match('/^FormatHour/',$key)
-				)
-			{
+				&& ! empty($aEnglish[$key]) && $aSecondary[$key] != $aEnglish[$key])
+				|| in_array($key, $arrayofkeytoalwayskeep) || preg_match('/^FormatDate/', $key) || preg_match('/^FormatHour/', $key)
+				) {
 				//print "Key $key differs so we add it into new secondary language (line: $cnt).\n";
 				fwrite($oh, $key."=".(empty($aSecondary[$key])?$aPrimary[$key]:$aSecondary[$key])."\n");
 			}
@@ -333,8 +312,7 @@ foreach($filesToProcess as $fileToProcess)
 		}
 		fclose($oh);
 		fclose($handle);
-	}
-	else {
+	} else {
 		$rc = 8;
 		$msg = "Cannot open file $lPrimaryFile";
 		print $msg . " (rc=$rc).\n";

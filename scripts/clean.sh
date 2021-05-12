@@ -7,6 +7,8 @@
 
 #set -e
 
+source /etc/lsb-release
+
 export now=`date +%Y%m%d%H%M%S`
 
 echo
@@ -110,6 +112,8 @@ if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
 	exit 1
 fi
+
+export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export testorconfirm=$1
 
@@ -328,7 +332,7 @@ if [ -s /tmp/osutoclean ]; then
 			if [[ "x$dbname" != "xNULL" ]]; then	
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
-				if [[ -x /usr/bin/zstd ]]; then
+				if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
 					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
 				else
@@ -592,7 +596,7 @@ if [[ $testorconfirm == "test" ]]; then
 	fi
 fi
 
-# Clean backup dir of payed instances that are now archived
+# Clean backup dir of instances that are now archived
 > /tmp/deletedirs.sh
 for fic in `find $backupdir/*/last_mysqldump* -name "last_mysqldump*" -mtime +90`
 do
