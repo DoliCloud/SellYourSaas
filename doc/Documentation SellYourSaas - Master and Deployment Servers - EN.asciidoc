@@ -25,13 +25,13 @@ This document describes the technical and functional implementation of Sell-Your
 
 == Introduction ==
 
-Sell-Your-Saas is an Open Source project, born out of the need to provide, in real time, Web application instances (like Dolibarr ERP CRM) to users, for immediate use, with the following requirements:
+Sell-Your-Saas is an Open Source project, born out of the need to provide, in real time, Web application instances (like Dolibarr ERP CRM, GLPI, MediaWiki, ...) to end users, for immediate use, with the following requirements:
 
 * Able to manage a very high number of instances and users.
 * Very low costs (must be at least 10x lower than Cloud solutions by containers).
 * Real-time deployment.
 * Offer full and private access to the proposed application, including administration, with full access without restricting functionality or configuration.
-* Offer an open SaaS, with SSH, SFTP access and direct database possible to users.
+* Offer optionaly a 100% open SaaS, with SSH, SFTP and direct database access to users.
 * Multi-language.
 
 Following the deployment of v1 and at the request of users to perpetuate their instance via a subscription, the platform evolved to add other objectives:
@@ -40,7 +40,7 @@ Following the deployment of v1 and at the request of users to perpetuate their i
 * Dedicated customer area for managing these invoices, accounts and support.
 * 100% automated system (from the arrival of the prospect to the termination of his subscription through the delivery of the service, backups, supervision and supply of accounting: no human intervention).
 * Flexibility in the subscription mode (frequency, prices, additional service, options, ...)
-* Compatible (or at least adaptable) for any web application.
+* Compatible (or at least adaptable) for any Web application.
 * Management of a reseller network.
 * Available in OpenSource.
 

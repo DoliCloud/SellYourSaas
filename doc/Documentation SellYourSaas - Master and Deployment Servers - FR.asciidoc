@@ -25,19 +25,19 @@ Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas 
 
 == Introduction ==
 
-SellYourSaas est un projet Open Source, né suite au besoin de fournir, en temps réel, des instances d'application Web (comme Dolibarr ERP CRM) à des utilisateurs, à des fins d'utilisation immédiate, avec les impératifs suivants:
+SellYourSaas est un projet Open Source, né suite au besoin de fournir, en temps réel, des instances d'application Web (comme Dolibarr ERP CRM, GLPI, MediaWiki, ...) à des utilisateurs, à des fins d'utilisation immédiate, avec les impératifs suivants:
 
 	* Capable de gérer un nombre très élevé d'instances et d'utilisateurs.
 	* Cout très faibles (devant être au moins 10x inférieurs aux solutions Cloud par containers).
 	* Déploiement en temps réel.
 	* Offrir un accès complet et privé à l'application proposée, y compris à l'administration, avec accès complet sans bridage de fonctionnalités ou paramétrage.
-	* Offrir un SaaS ouvert, avec accès SSH, SFTP et base de donnée direct possible aux utilisateurs. 
+	* Offrir en option du SaaS 100% ouvert, donc avec accès SSH, SFTP et base de donnée direct possible aux utilisateurs. 
 
 Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser leur instance via une souscription, la plateforme évolua pour ajouter d'autres objectifs :
 
-	* Prendre en compte la souscription à l'application proposée sous forme d'abonnements payants.
-	* Espace client dédié pour gestion de ces factures, comptes et support.
-	* Système 100% automatisé (de l'arrivée du prospect à la résiliation de son abonnement en passant par la délivrance du service, sauvegardes, supervision et alimentation de la comptabilité: pas d'intervention humaine).
+	* Prendre en compte la souscription au applications édployées sous forme d'abonnements payants.
+	* Offrir un espace client dédié pour gestion de ces factures, comptes et support.
+	* Système 100% automatisé (de l'arrivée du prospect à la résiliation de son abonnement, en passant par la délivrance du service, sauvegardes, supervision et alimentation de la comptabilité: pas d'intervention humaine).
 	* Une souplesse dans le mode d'abonnement (fréquence, tarifs, service complémentaires, options, ...)
 	* Compatible (ou à minima adaptable) pour toute application Web.
 	* Gestion d'un réseau de revendeur.
@@ -46,7 +46,7 @@ Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser 
 Financé par les sociétés Open Source https://www.dolicloud.com[DoliCloud] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici une synthèse de ses capacités:
 
     * Déploiement de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
-    * Diffusion d'instances gratuites sans demande d'informations confidentiels ni cartes bancaires.
+    * Diffusion d'instances gratuites ou de tests sans demande d'informations confidentiels ni cartes bancaires.
     * Diffusion d'instances payantes avec différents niveaux de tarifications.
     * Site web vitrine (optionnel) prêt à l'emploi pour vendre votre application.
     * Espace client dédié (facturation, ticket, compte client).
