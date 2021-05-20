@@ -554,3 +554,5 @@ NoResourceToCountUsersFound=This instance contains no products that need to coun
 GroupOfTicket=Category
 DoNotUseDefaultStripeAccount=Do not use default stripe account
 ThirdPartyModified=Third party modified
+YouCanClainAmountWhen=You can claim your due amount, once per quarter, and if the remainder to bill is higher than <b>%s</b>
+SendYourInvoiceTo=Send your invoice for %s to <b>%s</b> 
