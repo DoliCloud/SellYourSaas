@@ -32,7 +32,7 @@ if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');			// If there is 
 //if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 //if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    	// If this page is public (can be called outside logged session)
-if (! defined("MAIN_LANG_DEFAULT")) define('MAIN_LANG_DEFAULT', 'auto');
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined("MAIN_AUTHENTICATION_MODE")) define('MAIN_AUTHENTICATION_MODE', 'sellyoursaas');
 if (! defined("MAIN_AUTHENTICATION_POST_METHOD")) define('MAIN_AUTHENTICATION_POST_METHOD', '0');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
