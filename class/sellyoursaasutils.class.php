@@ -987,6 +987,7 @@ class SellYourSaasUtils
 
 					$nbhoursbetweentries    = (empty($conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES) ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
 					$nbdaysbeforeendoftries = (empty($conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES) ? 35 : $conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES);
+					$labeltouse = '';
 
 					if ($resultthirdparty > 0 && ! empty($customer)) {
 						if (!$error && !empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
@@ -1028,7 +1029,7 @@ class SellYourSaasUtils
 							}
 						}
 
-						if (!$error) {
+						if (!$error) {	// Payment was not canceled
 							$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
 							if ($stripecard) {  // Can be card_... (old mode) or pm_... (new mode)
 								$FULLTAG='INV='.$invoice->id.'-CUS='.$thirdparty->id;
@@ -1068,8 +1069,7 @@ class SellYourSaasUtils
 										$stripefailurecode='UnknownChargeError';
 										$stripefailuremessage=$e->getMessage();
 									}
-								} else // Using new SCA method
-								{
+								} else { // Using new SCA method
 									dol_syslog("* Create payment on card ".$stripecard->id.", amounttopay=".$amounttopay.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
 									// Create payment intent and charge payment (confirmnow = true)
@@ -1261,113 +1261,13 @@ class SellYourSaasUtils
 
 								$object = $invoice;
 
-								// Send email
-								include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-								$formmail=new FormMail($this->db);
-
-								// Set output language
-								$outputlangs = new Translate('', $conf);
-								$outputlangs->setDefaultLang(empty($object->thirdparty->default_lang) ? $mysoc->default_lang : $object->thirdparty->default_lang);
-								$outputlangs->loadLangs(array("main", "members", "bills"));
-
-								// Get email content from templae
-								$arraydefaultmessage=null;
-
+								// Send emails
+								$labeltouse = 'InvoicePaymentSuccess';
 								$sendemailtocustomer = 1;
 
 								if (empty($charge) || $charge->status == 'failed') {
 									$labeltouse = 'InvoicePaymentFailure';
 									if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
-								} else {
-									$labeltouse = 'InvoicePaymentSuccess';
-								}
-
-								if ($sendemailtocustomer) {
-									dol_syslog("* Send email with result of payment - ".$labeltouse);
-
-									if (! empty($labeltouse)) $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
-
-									if (! empty($labeltouse) && is_object($arraydefaultmessage) && $arraydefaultmessage->id > 0) {
-										$subject = $arraydefaultmessage->topic;
-										$msg     = $arraydefaultmessage->content;
-									}
-
-									$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
-
-									$substitutionarray['__SELLYOURSAAS_PAYMENT_ERROR_DESC__']=$stripefailurecode.' '.$stripefailuremessage;
-
-									complete_substitutions_array($substitutionarray, $outputlangs, $object);
-
-									// Set the property ->ref_customer with ref_customer of contract so __REFCLIENT__ will be replaced in email content
-									// Search contract linked to invoice
-									$foundcontract = null;
-									$invoice->fetchObjectLinked();
-									if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
-										//dol_sort_array($object->linkedObjects['facture'], 'date');
-										foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-											$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
-											$substitutionarray['__REFCLIENT__']=$contract->ref_customer;
-											$foundcontract = $contract;
-											break;
-										}
-									}
-
-									dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-
-									$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
-									if ($urlforsellyoursaasaccount) {
-										$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-										if ($tmpforurl) {
-											$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
-										} else {
-											$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
-										}
-									}
-
-									$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
-									$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
-
-									// Attach a file ?
-									$file='';
-									$listofpaths=array();
-									$listofnames=array();
-									$listofmimes=array();
-									if (is_object($invoice)) {
-										$invoicediroutput = $conf->facture->dir_output;
-										$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
-										$file = $fileparams['fullname'];
-										$file = '';		// Disable attachment of invoice in emails
-
-										if ($file) {
-											$listofpaths=array($file);
-											$listofnames=array(basename($file));
-											$listofmimes=array(dol_mimetype($file));
-										}
-									}
-									$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-
-
-									$trackid='inv'.$invoice->id;
-									$moreinheader='X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
-
-									// Send email (substitutionarray must be done just before this)
-									include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-									$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, '', '', 0, -1, '', '', $trackid, $moreinheader);
-									if ($mailfile->sendfile()) {
-										$result = 1;
-									} else {
-										$this->error=$langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
-										$result = -1;
-									}
-
-									if ($result < 0) {
-										$errmsg=$this->error;
-										$postactionmessages[] = $errmsg;
-										$ispostactionok = -1;
-									} else {
-										if ($file) $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' with invoice document attached: '.$file.', language = '.$outputlangs->defaultlang.')';
-										else $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' without any attached document, language = '.$outputlangs->defaultlang.')';
-									}
 								}
 
 								// Track an event
@@ -1380,73 +1280,197 @@ class SellYourSaasUtils
 									$actioncode='PAYMENT_STRIPE_OK';
 									$extraparams='';
 								}
-
-								dol_syslog("* Record event for payment result");
-
-								// Insert record of payment (success or error)
-								$actioncomm = new ActionComm($this->db);
-
-								$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-								$actioncomm->code         = 'AC_'.$actioncode;
-								$actioncomm->label        = $description;
-								$actioncomm->note_private = join(",\n", $postactionmessages);
-								$actioncomm->fk_project   = $invoice->fk_project;
-								$actioncomm->datep        = $now;
-								$actioncomm->datef        = $now;
-								$actioncomm->percentage   = -1;   // Not applicable
-								$actioncomm->socid        = $thirdparty->id;
-								$actioncomm->contactid    = 0;
-								$actioncomm->authorid     = $user->id;   // User saving action
-								$actioncomm->userownerid  = $user->id;	// Owner of action
-								// Fields when action is en email (content should be added into note)
-								/*$actioncomm->email_msgid = $object->email_msgid;
-								 $actioncomm->email_from  = $object->email_from;
-								 $actioncomm->email_sender= $object->email_sender;
-								 $actioncomm->email_to    = $object->email_to;
-								 $actioncomm->email_tocc  = $object->email_tocc;
-								 $actioncomm->email_tobcc = $object->email_tobcc;
-								 $actioncomm->email_subject = $object->email_subject;
-								 $actioncomm->errors_to   = $object->errors_to;*/
-								$actioncomm->fk_element   = $invoice->id;
-								$actioncomm->elementtype  = $invoice->element;
-								$actioncomm->extraparams  = dol_trunc($extraparams, 250);
-
-								$actioncomm->create($user);
-
-								$this->description=$description;
-								$this->postactionmessages=$postactionmessages;
 							} else {
 								$error++;
 								$errorforinvoice++;
 								dol_syslog("No card or payment method found for this stripe customer ".$customer->id, LOG_WARNING);
 								$this->errors[]='Failed to get card | payment method for stripe customer = '.$customer->id;
+
+								$labeltouse = 'InvoicePaymentFailure';
+								$description = 'Failed to find or use your payment mode (no credit card defined for your customer account)';
+								$stripefailurecode = 'BADPAYMENTMODE';
+								$stripefailuremessage = 'Failed to find or use your payment mode (no credit card defined for your customer account)';
+								if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+
+								$object = $invoice;
+
+								$actioncode='PAYMENT_STRIPE_KO';
+								$extraparams='';
 							}
-						}
-					} else {
+						}	// If an error because payment was canceled for a logical reason, we do nothing (not email and no event added)
+					} else {	// Else of the   if ($resultthirdparty > 0 && ! empty($customer)) {
 						if ($resultthirdparty <= 0) {
-							dol_syslog('Failed to load customer for thirdparty_id = '.$thirdparty->id, LOG_WARNING);
+							dol_syslog('SellYourSaasUtils Failed to load customer for thirdparty_id = '.$thirdparty->id, LOG_WARNING);
 							$this->errors[]='Failed to load customer for thirdparty_id = '.$thirdparty->id;
-						} else // $customer stripe not found
-						{
-							dol_syslog('Failed to get Stripe customer id for thirdparty_id = '.$thirdparty->id." in mode ".$servicestatus." in Stripe env ".$stripearrayofkeysbyenv[$servicestatus]['publishable_key'], LOG_WARNING);
+						} else { // $customer stripe not found
+							dol_syslog('SellYourSaasUtils Failed to get Stripe customer id for thirdparty_id = '.$thirdparty->id." in mode ".$servicestatus." in Stripe env ".$stripearrayofkeysbyenv[$servicestatus]['publishable_key'], LOG_WARNING);
 							$this->errors[]='Failed to get Stripe customer id for thirdparty_id = '.$thirdparty->id." in mode ".$servicestatus." in Stripe env ".$stripearrayofkeysbyenv[$servicestatus]['publishable_key'];
 						}
 						$error++;
 						$errorforinvoice++;
+
+						$labeltouse = 'InvoicePaymentFailure';
+						$description = 'Failed to find or use your payment mode (no payment mode for this customer id)';
+						$stripefailurecode = 'BADPAYMENTMODE';
+						$stripefailuremessage = 'Failed to find or use your payment mode (no payment mode for this customer id)';
+						if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+
+						$object = $invoice;
+
+						$actioncode='PAYMENT_STRIPE_KO';
+						$extraparams='';
 					}
+
+					// Send email + create action
+					if ($sendemailtocustomer && $labeltouse) {
+						dol_syslog("* Send email with result of payment - ".$labeltouse);
+
+						// Set output language
+						$outputlangs = new Translate('', $conf);
+						$outputlangs->setDefaultLang(empty($object->thirdparty->default_lang) ? $mysoc->default_lang : $object->thirdparty->default_lang);
+						$outputlangs->loadLangs(array("main", "members", "bills"));
+
+						// Get email content from templae
+						$arraydefaultmessage=null;
+
+						include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+						$formmail=new FormMail($this->db);
+
+						if (! empty($labeltouse)) $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
+
+						if (! empty($labeltouse) && is_object($arraydefaultmessage) && $arraydefaultmessage->id > 0) {
+							$subject = $arraydefaultmessage->topic;
+							$msg     = $arraydefaultmessage->content;
+						}
+
+						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
+
+						$substitutionarray['__SELLYOURSAAS_PAYMENT_ERROR_DESC__']=$stripefailurecode.' '.$stripefailuremessage;
+
+						complete_substitutions_array($substitutionarray, $outputlangs, $object);
+
+						// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
+						// Search contract linked to invoice
+						$foundcontract = null;
+						$invoice->fetchObjectLinked();
+						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
+							//dol_sort_array($object->linkedObjects['facture'], 'date');
+							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
+								$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
+								$substitutionarray['__REFCLIENT__']=$contract->ref_customer;	// For backward compatibility
+								$substitutionarray['__REF_CLIENT__']=$contract->ref_customer;
+								$foundcontract = $contract;
+								break;
+							}
+						}
+
+						dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+
+						$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
+						if ($urlforsellyoursaasaccount) {
+							$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+							if ($tmpforurl) {
+								$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
+							} else {
+								$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
+							}
+						}
+
+						$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
+						$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
+
+						// Attach a file ?
+						$file='';
+						$listofpaths=array();
+						$listofnames=array();
+						$listofmimes=array();
+						if (is_object($invoice)) {
+							$invoicediroutput = $conf->facture->dir_output;
+							$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
+							$file = $fileparams['fullname'];
+							$file = '';		// Disable attachment of invoice in emails
+
+							if ($file) {
+								$listofpaths=array($file);
+								$listofnames=array(basename($file));
+								$listofmimes=array(dol_mimetype($file));
+							}
+						}
+						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+
+
+						$trackid='inv'.$invoice->id;
+						$moreinheader='X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
+
+						// Send email (substitutionarray must be done just before this)
+						include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+						$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, '', '', 0, -1, '', '', $trackid, $moreinheader);
+						if ($mailfile->sendfile()) {
+							$result = 1;
+						} else {
+							$this->error=$langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
+							$result = -1;
+						}
+
+						if ($result < 0) {
+							$errmsg=$this->error;
+							$postactionmessages[] = $errmsg;
+							$ispostactionok = -1;
+						} else {
+							if ($file) $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' with invoice document attached: '.$file.', language = '.$outputlangs->defaultlang.')';
+							else $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' without any attached document, language = '.$outputlangs->defaultlang.')';
+						}
+					}
+
+					dol_syslog("* Record event for payment result");
+
+					// Insert record of payment (success or error)
+					$actioncomm = new ActionComm($this->db);
+
+					$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+					$actioncomm->code         = 'AC_'.$actioncode;
+					$actioncomm->label        = $description;
+					$actioncomm->note_private = join(",\n", $postactionmessages);
+					$actioncomm->fk_project   = $invoice->fk_project;
+					$actioncomm->datep        = $now;
+					$actioncomm->datef        = $now;
+					$actioncomm->percentage   = -1;   // Not applicable
+					$actioncomm->socid        = $thirdparty->id;
+					$actioncomm->contactid    = 0;
+					$actioncomm->authorid     = $user->id;   // User saving action
+					$actioncomm->userownerid  = $user->id;	// Owner of action
+					// Fields when action is a real email (content is already into note)
+					/*$actioncomm->email_msgid = $object->email_msgid;
+					 $actioncomm->email_from  = $object->email_from;
+					 $actioncomm->email_sender= $object->email_sender;
+					 $actioncomm->email_to    = $object->email_to;
+					 $actioncomm->email_tocc  = $object->email_tocc;
+					 $actioncomm->email_tobcc = $object->email_tobcc;
+					 $actioncomm->email_subject = $object->email_subject;
+					 $actioncomm->errors_to   = $object->errors_to;*/
+					$actioncomm->fk_element   = $invoice->id;
+					$actioncomm->elementtype  = $invoice->element;
+					$actioncomm->extraparams  = dol_trunc($extraparams, 250);
+
+					$actioncomm->create($user);
+
+					$this->description=$description;
+					$this->postactionmessages=$postactionmessages;
+
+
 				} catch (Exception $e) {
 					$error++;
 					$errorforinvoice++;
 					dol_syslog('Error '.$e->getMessage(), LOG_ERR);
 					$this->errors[]='Error '.$e->getMessage();
 				}
-			} else {
+			} else {	// If remain to pay is null
 				$error++;
 				$errorforinvoice++;
 				dol_syslog("Remain to pay is null for the invoice ".$invoice->id." ".$invoice->ref.". Why is the invoice not classified 'Paid' ?", LOG_WARNING);
 				$this->errors[]="Remain to pay is null for the invoice ".$invoice->id." ".$invoice->ref.". Why is the invoice not classified 'Paid' ?";
 			}
-		}
+		}	// End of loop on each invoice
 
 		// Payments are processed, and next batch will be to make renewal
 
