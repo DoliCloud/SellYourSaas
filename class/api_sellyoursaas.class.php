@@ -34,7 +34,7 @@ dol_include_once('/sellyoursaas/class/packages.class.php');
  * @access protected
  * @class  DolibarrApiAccess {@requires user,external}
  */
-class SellYourSaasApi extends DolibarrApi
+class Sellyoursaasapi extends DolibarrApi
 {
 	/**
 	 * @var Packages $packages {@type Packages}
@@ -119,7 +119,7 @@ class SellYourSaasApi extends DolibarrApi
 	 *
 	 * @throws RestException
 	 *
-	 * @url	GET /packages/
+	 * @url	GET packages/
 	 */
 	public function index($sortfield = "t.rowid", $sortorder = 'ASC', $limit = 100, $page = 0, $sqlfilters = '')
 	{
@@ -177,7 +177,7 @@ class SellYourSaasApi extends DolibarrApi
 			if (!DolibarrApi::_checkFilters($sqlfilters)) {
 				throw new RestException(503, 'Error when validating parameter sqlfilters '.$sqlfilters);
 			}
-			$regexstring = '\(([^:\'\(\)]+:[^:\'\(\)]+:[^:\(\)]+)\)';
+			$regexstring = '\(([^:\'\(\)]+:[^:\'\(\)]+:[^\(\)]+)\)';
 			$sql .= " AND (".preg_replace_callback('/'.$regexstring.'/', 'DolibarrApi::_forge_criteria_callback', $sqlfilters).")";
 		}
 
@@ -313,6 +313,56 @@ class SellYourSaasApi extends DolibarrApi
 				'message' => 'Packages deleted'
 			)
 		);
+	}
+
+
+	/**
+	 * Get properties of a packages object
+	 *
+	 * Return an array with packages informations
+	 *
+	 * @param	string		$yearmonth	'YYYYMM' or 'last'
+	 * @return 	array|mixed 			data without useless information
+	 *
+	 * @url	GET statistics/
+	 *
+	 * @throws RestException 401 Not allowed
+	 */
+	public function statistics($yearmonth)
+	{
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+
+		$result = array();
+
+		if (!DolibarrApiAccess::$user->rights->sellyoursaas->read) {
+			throw new RestException(401);
+		}
+
+		$now = dol_now();
+		$tmparray = dol_getdate($now);
+		$tmpprev = dol_get_prev_month($tmparray['mon'], $tmparray['year']);
+
+		$sql = 'SELECT name, x, y, tms FROM '.MAIN_DB_PREFIX."dolicloud_stats";
+
+		if ($yearmonth == 'last') {
+			$sql .= " WHERE x = '".$this->db->escape(dol_print_date($now, '%Y%m'))."' OR x = '".sprintf('%04d%02d', $tmpprev['year'], $tmpprev['month'])."'";
+		} else {
+			$sql .= " WHERE x = '".$this->db->escape($yearmonth)."'";
+		}
+		$sql .= ' ORDER BY x DESC';
+
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			while ($obj = $this->db->fetch_object($resql)) {
+				if (empty($result[$obj->name])) {
+					$result[$obj->name] = array('x' => $obj->x, 'y' => $obj->y, 'tms'=>$obj->tms);
+				}
+			}
+		} else {
+			throw new RestException(500, 'Error  sql : '.$this->db->lasterror());
+		}
+
+		return $result;
 	}
 
 

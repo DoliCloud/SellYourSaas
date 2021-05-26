@@ -379,28 +379,28 @@ if ($nbtotalofrecords > $limit2) {
 		$sql.=' AND paye = 1';
 
 		$resql = $db->query($sql);
-if ($resql) {
-	$obj = $db->fetch_object($resql);
-	$totalamountcommission = $obj->total;
-} else {
-	dol_print_error($db);
-}
+		if ($resql) {
+			$obj = $db->fetch_object($resql);
+			$totalamountcommission = $obj->total;
+		} else {
+			dol_print_error($db);
+		}
 
 		print '<!-- Total of commissions earned -->';
 		print '<tr class="liste_titre"><td colspan="6">'.$langs->trans("Total").'</td>';
 		print '<td align="right"><strong>'.price($commoldystem + $totalamountcommission).'</strong></td>';
 		print '</tr>';
 
-if ($totalpaidht) {
-	print '<tr style="background-color: #f0f0F0;">';
-	print '<td colspan="2">'.$langs->trans("AlreadyPaid").'</td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td align="right">'.price($totalpaidht).'</td>';
-	print '</tr>';
-}
+		if ($totalpaidht) {
+			print '<tr style="background-color: #f0f0F0;">';
+			print '<td colspan="2">'.$langs->trans("AlreadyPaid").'</td>';
+			print '<td></td>';
+			print '<td></td>';
+			print '<td></td>';
+			print '<td></td>';
+			print '<td align="right">'.price($totalpaidht).'</td>';
+			print '</tr>';
+		}
 
 		print '<tr style="background-color: #f0f0F0;">';
 		print '<td colspan="2">'.$langs->trans("RemainderToBill").'</td>';
@@ -411,8 +411,13 @@ if ($totalpaidht) {
 		print '<td align="right">'.price($commoldystem + $totalamountcommission - $totalpaidht).'</td>';
 		print '</tr>';
 
-		print '</table>
-        		</div>';
+		print '</table>';
+
+		print '<br>';
+		print $langs->trans("YouCanClainAmountWhen", price(empty($conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM) ? 100 : $conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM, 1, $langs, 1, -1, -1, $conf->currency)).'<br>';
+		$labelforcompany = $mysoc->name. ' ('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Country").': '.$langs->trans("Country".$mysoc->country_code).')';
+		print $langs->trans("SendYourInvoiceTo", $labelforcompany, $mysoc->email);
+		print '</div>';
 
 		print '
         </div></div>

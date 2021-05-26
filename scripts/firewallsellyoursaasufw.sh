@@ -9,11 +9,15 @@ case $1 in
 ufw enable
 
 # From local to external target - Out
+# SSH
 ufw allow out 22/tcp
+# HTTP
 ufw allow out 80/tcp
 ufw allow out 8080/tcp
 ufw allow out 443/tcp
+# Mysql/Mariadb
 ufw allow out 3306/tcp
+# Mail
 ufw allow out 25/tcp
 ufw allow out 2525/tcp
 ufw allow out 465/tcp
@@ -36,15 +40,30 @@ ufw allow out 43/tcp
 # DNS
 ufw allow out 53/tcp
 ufw allow out 53/udp
+# NFS
+ufw allow out 2049/tcp
+ufw allow out 2049/udp
 
 # From external source to local - In
+# SSH
 ufw allow in 22/tcp
+# HTTP
 ufw allow in 80/tcp
 ufw allow in 8080/tcp
 ufw allow in 443/tcp
 # DNS
 ufw allow in 53/tcp
 ufw allow in 53/udp
+# Mysql/Mariadb
+ufw allow in 3306/tcp
+
+# For master server
+ufw allow in 111/udp
+ufw allow in 111/tcp
+ufw allow in 2049/tcp
+ufw allow in 2049/udp
+
+
 
 ufw default deny incoming
 ufw default deny outgoing

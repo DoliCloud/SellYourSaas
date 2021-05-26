@@ -56,14 +56,19 @@ dol_include_once('/sellyoursaas/class/packages.class.php');
 
 // Re set variables specific to new environment
 $conf->global->SYSLOG_FILE_ONEPERSESSION=1;
-$langs=new Translate('', $conf);
-$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
 
-$langsen=new Translate('', $conf);
-$langsen->setDefaultLang('en_US');
 
+//$langs=new Translate('', $conf);
+//$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
 $langs->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
-$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+
+if ($langs->defaultlang == 'en_US') {
+	$langsen = $langs;
+} else {
+	$langsen=new Translate('', $conf);
+	$langsen->setDefaultLang('en_US');
+	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+}
 
 
 $partner=GETPOST('partner', 'int');
@@ -365,6 +370,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 		  <form action="register_instance.php" method="post" id="formregister">
 			<div class="form-content">
 			  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
+			  <input type="hidden" name="forcesubdomain" value="<?php echo dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')); ?>" />
 			  <input type="hidden" name="service" value="<?php echo dol_escape_htmltag($tmpproduct->id); ?>" />
 			  <input type="hidden" name="productref" value="<?php echo ($productref == 'none' ? 'none' : dol_escape_htmltag($tmpproduct->ref)); ?>" />
 			  <input type="hidden" name="extcss" value="<?php echo dol_escape_htmltag($extcss); ?>" />
@@ -559,7 +565,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							if (! $forcesubdomainfound) {
 								print '<br>Error: Value for forcesubdomain = '.GETPOST('forcesubdomain', 'alpha').' is not in list of available subdomains.';
 							} else {
-								print '<input type="hidden" name="forcesubdomain" value="'.GETPOST('forcesubdomain', 'alpha').'">';
+								print '<input type="hidden" name="forcesubdomain" value="'.dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')).'">';
 							}
 						}
 						?>

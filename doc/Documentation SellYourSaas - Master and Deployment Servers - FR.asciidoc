@@ -25,19 +25,19 @@ Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas 
 
 == Introduction ==
 
-SellYourSaas est un projet Open Source, né suite au besoin de fournir, en temps réel, des instances d'application Web (comme Dolibarr ERP CRM) à des utilisateurs, à des fins d'utilisation immédiate, avec les impératifs suivants:
+SellYourSaas est un projet Open Source, né suite au besoin de fournir, en temps réel, des instances d'application Web (comme Dolibarr ERP CRM, GLPI, MediaWiki, ...) à des utilisateurs, à des fins d'utilisation immédiate, avec les impératifs suivants:
 
 	* Capable de gérer un nombre très élevé d'instances et d'utilisateurs.
 	* Cout très faibles (devant être au moins 10x inférieurs aux solutions Cloud par containers).
 	* Déploiement en temps réel.
 	* Offrir un accès complet et privé à l'application proposée, y compris à l'administration, avec accès complet sans bridage de fonctionnalités ou paramétrage.
-	* Offrir un SaaS ouvert, avec accès SSH, SFTP et base de donnée direct possible aux utilisateurs. 
+	* Offrir en option du SaaS 100% ouvert, donc avec accès SSH, SFTP et base de donnée direct possible aux utilisateurs. 
 
 Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser leur instance via une souscription, la plateforme évolua pour ajouter d'autres objectifs :
 
-	* Prendre en compte la souscription à l'application proposée sous forme d'abonnements payants.
-	* Espace client dédié pour gestion de ces factures, comptes et support.
-	* Système 100% automatisé (de l'arrivée du prospect à la résiliation de son abonnement en passant par la délivrance du service, sauvegardes, supervision et alimentation de la comptabilité: pas d'intervention humaine).
+	* Prendre en compte la souscription au applications édployées sous forme d'abonnements payants.
+	* Offrir un espace client dédié pour gestion de ces factures, comptes et support.
+	* Système 100% automatisé (de l'arrivée du prospect à la résiliation de son abonnement, en passant par la délivrance du service, sauvegardes, supervision et alimentation de la comptabilité: pas d'intervention humaine).
 	* Une souplesse dans le mode d'abonnement (fréquence, tarifs, service complémentaires, options, ...)
 	* Compatible (ou à minima adaptable) pour toute application Web.
 	* Gestion d'un réseau de revendeur.
@@ -46,7 +46,7 @@ Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser 
 Financé par les sociétés Open Source https://www.dolicloud.com[DoliCloud] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici une synthèse de ses capacités:
 
     * Déploiement de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
-    * Diffusion d'instances gratuites sans demande d'informations confidentiels ni cartes bancaires.
+    * Diffusion d'instances gratuites ou de tests sans demande d'informations confidentiels ni cartes bancaires.
     * Diffusion d'instances payantes avec différents niveaux de tarifications.
     * Site web vitrine (optionnel) prêt à l'emploi pour vendre votre application.
     * Espace client dédié (facturation, ticket, compte client).
@@ -276,6 +276,10 @@ AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 
 AllowUsers admin osu*
 AllowUsers myunixlogin
+
+# Legacy changes - To allow an old client (like old PHP) to connect to
+KexAlgorithms +diffie-hellman-group1-sha1
+Ciphers +aes128-cbc
 ---------------
 
 Attention, à bien remplacer *myunixlogin* par la bonne valeur avant de prendre en compte les modifications par:
@@ -353,8 +357,7 @@ Afin de ne pas donner d'information aux utilisateurs qui feront du SSH, sur les 
 [source,bash]
 ---------------
 rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
-rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo 
-rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
     
@@ -1010,9 +1013,10 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
 
 === Timeout des lancements de serveurs
 
-Sur Ubuntu 18.04+ et avec MariaDb migré depuis un MySql:
+Sur Ubuntu 18.04+ lorsque MariaDb a été migrée depuis un MySql:
 
-Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long suite à un plantage. Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
+Augmenter le timeout de lancement des processus car parfois les lancements de mysql/mariadb peuvent être long suite à un plantage. 
+Pour cela, modifier le fichier */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* et mettre
 
 [source,bash]
 ---------------
@@ -1039,7 +1043,7 @@ TODO Graphic avec les flux et les ports.
 * Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
 
 
-==== With iptables ====
+==== Avec iptables ====
 
 [source, bash]
 ---------------
@@ -1050,7 +1054,18 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-==== With ufw
+==== Avec ufw
+
+Editer le fichier */etc/ufw/before.rules* pour permettre les ping sortant, en ajoutant ceci:
+
+[source, bash]
+---------------
+# allow outbound icmp
+-A ufw-before-output -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+-A ufw-before-output -p icmp -m state --state ESTABLISHED,RELATED -j ACCEPT
+---------------
+
+Puis lancer le firewall et rendez le actif à chaque lancement par:
 
 [source, bash]
 ---------------
@@ -2134,13 +2149,14 @@ Copy */bin/bash* or */bin/dash* into */bin/secureBash*  (Ce fichier shell sera p
 cp /bin/bash /bin/secureBash
 ---------------
 
-Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
+Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.secureBash* (with Ubuntu 20.04+) with this content:
 
 [source,bash]
 ---------------
 # Last Modified: Thu Nov 10 11:20:06 2016
 #include <tunables/global>
 
+# You must use here the real path and not the symlink path
 /bin/secureBash {
   #include <abstractions/base>
   #include <abstractions/nameservice>
@@ -2155,6 +2171,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   deny /etc/default/nss r,
   deny /etc/host.conf r,
   deny /etc/hosts r,
+  #deny /etc/passwd r,
   deny /etc/securetty r,
   deny /etc/shadow r,
   deny /etc/sudoers r,
@@ -2212,20 +2229,13 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /etc/mysql/my.cnf r,
   /etc/pam.d/* r,
   /etc/papersize r,
-  /etc/php/7.0/cli/* r,
-  /etc/php/7.0/cli/conf.d/ r,
-  /etc/php/7.0/cli/conf.d/* r,
-  /etc/php/7.0/fpm/conf.d/ r,
-  /etc/php/7.0/fpm/conf.d/* r,
-  /etc/php/7.0/mods-available/ r,
-  /etc/php/7.0/mods-available/* r,
-  /etc/php/7.2/cli/* r,
-  /etc/php/7.2/cli/conf.d/ r,
-  /etc/php/7.2/cli/conf.d/* r,
-  /etc/php/7.2/fpm/conf.d/ r,
-  /etc/php/7.2/fpm/conf.d/* r,
-  /etc/php/7.2/mods-available/ r,
-  /etc/php/7.2/mods-available/* r,
+  /etc/php/7.*/cli/* r,
+  /etc/php/7.*/cli/conf.d/ r,
+  /etc/php/7.*/cli/conf.d/* r,
+  /etc/php/7.*/fpm/conf.d/ r,
+  /etc/php/7.*/fpm/conf.d/* r,
+  /etc/php/7.*/mods-available/ r,
+  /etc/php/7.*/mods-available/* r,
   /etc/postfix/dynamicmaps.cf r,
   /etc/postfix/main.cf r,
   /etc/profile r,
@@ -2246,6 +2256,25 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /tmp/** rw,
   /sys/devices/system/cpu/ r,
   /usr/bin/ r,
+  /usr/bin/cat rix,
+  /usr/bin/chmod rix,
+  /usr/bin/cp rix,
+  /usr/bin/customerCocoonBash mr,
+  /usr/bin/dash rix,
+  /usr/bin/grep rix,
+  /usr/bin/gzip rix,
+  /usr/bin/less rix,
+  /usr/bin/lesspipe rix,
+  /usr/bin/ls rix,
+  /usr/bin/more rix,
+  /usr/bin/mkdir rix,
+  /usr/bin/mv rix,
+  /usr/bin/rm rix,
+  /usr/bin/rmdir rix,
+  /usr/bin/sed rix,
+  /usr/bin/tar rix,
+  /usr/bin/uname rix,
+  /usr/bin/zstd rix,
   /usr/bin/awk rix,
   /usr/bin/basename rix,
   /usr/bin/clear rix,
@@ -2268,8 +2297,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /usr/bin/mysqldump rix,
   /usr/bin/passwd rix,
   /usr/bin/php rix,
-  /usr/bin/php7.0 rix,
-  /usr/bin/php7.2 rix,
+  /usr/bin/php7.* rix,
   /usr/bin/python rix,
   /usr/bin/python2.7 rix,
   /usr/bin/rsync rix,
@@ -2321,79 +2349,39 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /usr/share/pyshared/lazr.restfulclient-0.12.0-nspkg.pth r,
   /usr/share/pyshared/lazr.uri-1.0.3-nspkg.pth r,
   /usr/share/pyshared/zope.interface-3.6.1-nspkg.pth r,
-  /usr/share/vim/vim72/debian.vim r,
-  /usr/share/vim/vim72/filetype.vim r,
-  /usr/share/vim/vim72/lang/en_GB/LC_MESSAGES/vim.mo r,
-  /usr/share/vim/vim72/plugin/ r,
-  /usr/share/vim/vim72/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim72/plugin/gzip.vim r,
-  /usr/share/vim/vim72/plugin/matchparen.vim r,
-  /usr/share/vim/vim72/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim72/plugin/rrhelper.vim r,
-  /usr/share/vim/vim72/plugin/spellfile.vim r,
-  /usr/share/vim/vim72/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim72/plugin/tohtml.vim r,
-  /usr/share/vim/vim72/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim72/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim72/scripts.vim r,
-  /usr/share/vim/vim72/syntax/syncolor.vim r,
-  /usr/share/vim/vim72/syntax/synload.vim r,
-  /usr/share/vim/vim72/syntax/syntax.vim r,
-  /usr/share/vim/vim73/debian.vim r,
-  /usr/share/vim/vim73/filetype.vim r,
-  /usr/share/vim/vim73/plugin/ r,
-  /usr/share/vim/vim73/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim73/plugin/gzip.vim r,
-  /usr/share/vim/vim73/plugin/matchparen.vim r,
-  /usr/share/vim/vim73/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim73/plugin/rrhelper.vim r,
-  /usr/share/vim/vim73/plugin/spellfile.vim r,
-  /usr/share/vim/vim73/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim73/plugin/tohtml.vim r,
-  /usr/share/vim/vim73/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim73/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim73/syntax/css.vim r,
-  /usr/share/vim/vim73/syntax/html.vim r,
-  /usr/share/vim/vim73/syntax/javascript.vim r,
-  /usr/share/vim/vim73/syntax/php.vim r,
-  /usr/share/vim/vim73/syntax/sql.vim r,
-  /usr/share/vim/vim73/syntax/sqloracle.vim r,
-  /usr/share/vim/vim73/syntax/syncolor.vim r,
-  /usr/share/vim/vim73/syntax/synload.vim r,
-  /usr/share/vim/vim73/syntax/syntax.vim r,
-  /usr/share/vim/vim73/syntax/vb.vim r,
-  /usr/share/vim/vim80/debian.vim r,
-  /usr/share/vim/vim80/defaults.vim r,
-  /usr/share/vim/vim80/filetype.vim r,
-  /usr/share/vim/vim80/ftplugin.vim r,
-  /usr/share/vim/vim80/indent.vim r,
-  /usr/share/vim/vim80/pack/ r,
-  /usr/share/vim/vim80/plugin/ r,
-  /usr/share/vim/vim80/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim80/plugin/gzip.vim r,
-  /usr/share/vim/vim80/plugin/logiPat.vim r,
-  /usr/share/vim/vim80/plugin/matchparen.vim r,
-  /usr/share/vim/vim80/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim80/plugin/manpager.vim r,
-  /usr/share/vim/vim80/plugin/rrhelper.vim r,
-  /usr/share/vim/vim80/plugin/spellfile.vim r,
-  /usr/share/vim/vim80/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim80/plugin/tohtml.vim r,
-  /usr/share/vim/vim80/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim80/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim80/rgb.txt r,
-  /usr/share/vim/vim80/scripts.vim r,
-  /usr/share/vim/vim80/syntax/css.vim r,
-  /usr/share/vim/vim80/syntax/html.vim r,
-  /usr/share/vim/vim80/syntax/javascript.vim r,
-  /usr/share/vim/vim80/syntax/php.vim r,
-  /usr/share/vim/vim80/syntax/sql.vim r,
-  /usr/share/vim/vim80/syntax/sqloracle.vim r,
-  /usr/share/vim/vim80/syntax/syncolor.vim r,
-  /usr/share/vim/vim80/syntax/synload.vim r,
-  /usr/share/vim/vim80/syntax/syntax.vim r,
-  /usr/share/vim/vim80/syntax/nosyntax.vim r,
-  /usr/share/vim/vim80/syntax/vb.vim r,
+  /usr/share/vim/vim*/debian.vim r,
+  /usr/share/vim/vim*/defaults.vim r,
+  /usr/share/vim/vim*/filetype.vim r,
+  /usr/share/vim/vim*/ftplugin.vim r,
+  /usr/share/vim/vim*/indent.vim r,
+  /usr/share/vim/vim*/pack/ r,
+  /usr/share/vim/vim*/lang/en_GB/LC_MESSAGES/vim.mo r,
+  /usr/share/vim/vim*/plugin/ r,
+  /usr/share/vim/vim*/plugin/getscriptPlugin.vim r,
+  /usr/share/vim/vim*/plugin/gzip.vim r,
+  /usr/share/vim/vim*/plugin/logiPat.vim r,
+  /usr/share/vim/vim*/plugin/manpager.vim r,
+  /usr/share/vim/vim*/plugin/matchparen.vim r,
+  /usr/share/vim/vim*/plugin/netrwPlugin.vim r,
+  /usr/share/vim/vim*/plugin/rrhelper.vim r,
+  /usr/share/vim/vim*/plugin/spellfile.vim r,
+  /usr/share/vim/vim*/plugin/tarPlugin.vim r,
+  /usr/share/vim/vim*/plugin/tohtml.vim r,
+  /usr/share/vim/vim*/plugin/vimballPlugin.vim r,
+  /usr/share/vim/vim*/plugin/zipPlugin.vim r,
+  /usr/share/vim/vim*/rgb.txt r,
+  /usr/share/vim/vim*/scripts.vim r,
+  /usr/share/vim/vim*/syntax/css.vim r,
+  /usr/share/vim/vim*/syntax/html.vim r,
+  /usr/share/vim/vim*/syntax/javascript.vim r,
+  /usr/share/vim/vim*/syntax/php.vim r,
+  /usr/share/vim/vim*/syntax/sql.vim r,
+  /usr/share/vim/vim*/syntax/sqloracle.vim r,
+  /usr/share/vim/vim*/syntax/syncolor.vim r,
+  /usr/share/vim/vim*/syntax/synload.vim r,
+  /usr/share/vim/vim*/syntax/syntax.vim r,
+  /usr/share/vim/vim*/syntax/nosyntax.vim r,
+  /usr/share/vim/vim*/syntax/vb.vim r,
   /usr/share/ImageMagick-6/ r,
   /usr/share/ImageMagick-6/* r,
   owner /var/spool/postfix/maildrop/ rw,
@@ -2408,6 +2396,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 }
 ---------------
 
+!!! Mettre /usr/bin/secureBash avec Ubuntu 20.04+
 
 
 * Activer la règle apparmor en mode *enforce* (ou *complain*)
@@ -2438,10 +2427,12 @@ or
 aa-disable usr.sbin.mysqld
 ---------------
 
+Un redémarrage du serveur peut etre nécessaire pour prise en compte d'un changement de profils.
+
 Tous les profils désactivés sont visible dans */etc/apparmor.d/disable*
 
 
-* Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour mettre *RemainAfterExit=no*
+* A revoir: Pour éviter que apparmor se relance en cas d'arrêt manuel, modifier */lib/systemd/system/apparmor.service* pour mettre *RemainAfterExit=no*
 
 [source,bash]
 ---------------
@@ -3041,13 +3032,50 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
-* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
+* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* avec ce contenu:
 
 ---------------
-SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
-SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
-SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
-SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:443>
+                ServerAdmin webmaster@localhost
+
+                DocumentRoot /var/www/html
+
+                ErrorLog ${APACHE_LOG_DIR}/error_ssl.log
+                CustomLog ${APACHE_LOG_DIR}/access_ssl.log combined
+
+                #   SSL Engine Switch:
+                #   Enable/Disable SSL for this virtual host.
+                SSLEngine on
+
+                #   A self-signed (snakeoil) certificate can be created by installing
+                #   the ssl-cert package. See
+                #   /usr/share/doc/apache2/README.Debian.gz for more info.
+                #   If both key and certificate are stored in the same file, only the
+                #   SSLCertificateFile directive is needed.
+				  SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
+				  SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
+				  SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+				  SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+
+				#
+				# Allow server status reports generated by mod_status,
+				# THIS IS REQUIRED FOR /usr/sbin/apachectl fullstatus
+				#
+				<Location /server-status>
+				    SetHandler server-status
+				    Order allow,deny
+				    Deny from env=bad_bots
+				    Allow from all
+				    Require all granted
+				</Location>
+				
+        </VirtualHost>
+</IfModule>
 ---------------
 
 Ainsi, si un utilisateur utilise une vieille URL sans virtual host, il arrivera sur la page par défaut */var/www/html/index.html*. 
@@ -3079,10 +3107,9 @@ Avoir dans le cron du user *root*
 [source,bash]
 ---------------
 # m h  dom mon dow   command
-# cron master root
+# cron master and deployment root
 #47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
-# cron master and deployment root
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
@@ -3115,6 +3142,8 @@ Avoir dans le cron du user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment root
+#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
+10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 30 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
@@ -3868,6 +3897,24 @@ vi /var/lib/afick/archive/afick.YYYMMDD*
 Voir la documentation *afick.pl* pour plus d'options.
 
 
+=== Restore a lost config file of a package
+
+Launch this command to find the package that provide the file:
+
+[source,bash]
+---------------
+dpkg -S '/path/to/file'
+---------------
+
+Then launch a commande to restore file:
+
+[source,bash]
+---------------
+sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" <package-name>
+or
+sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" <package-name>
+---------------
+
 
 === Utilisation de OpenStack pour gérer les images de serveurs
 
@@ -4583,4 +4630,19 @@ The value for *max_execution_time* is too low or there is a table that has an ab
 ==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
 
 - Check the temp directory is writable by the web server user.
+
+
+==== Error when doing PHP ssh2_connect to a server
+
+If you find into */var/log/auth.log* an error like:
+
+... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
+
+The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the sshd_config of the server by adding:
+
+# Legacy changes - To allow an old client to connect to
+KexAlgorithms +diffie-hellman-group1-sha1
+Ciphers +aes128-cbc
+
+Then reload ssh with /etc/init.d/ssh reload
 

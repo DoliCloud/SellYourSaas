@@ -236,17 +236,18 @@ if (empty($reshook)) {
 			$conf->global->MAIN_SECURITY_SALT = $savsalt;
 			$conf->global->MAIN_SECURITY_HASH_ALGO = $savalgo;
 
-
 			// TODO Set definition of algorithm to hash password into the package
 			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
-				$password_crypted = dol_hash($password, 'md5');
+				if (!empty($conf->global->MAIN_SHOW_PASSWORD_INTO_LOG)) {
+					dol_syslog("new password=".$password);
+				}
+				$password_crypted = md5($password);
 			}
 
-
 			// TODO Set definition to update password of a userinto the package
-			$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted)."' where rowid = ".GETPOST('remoteid', 'int');
+			$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
 			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
-				$sql="UPDATE ".$prefix_db."glpi_user set password='".$newdb->escape($password_crypted)."' WHERE rowid = ".GETPOST('remoteid', 'int');
+				$sql="UPDATE glpi_users set password='".$newdb->escape($password_crypted)."' WHERE id = ".((int) GETPOST('remoteid', 'int'));
 			}
 
 
@@ -506,6 +507,7 @@ function print_user_table($newdb, $object)
 	// Nb of users
 	print '<tr class="liste_titre">';
 	print '<td>#</td>';
+	print '<td>'.$langs->trans("ID").'</td>';
 	print '<td>'.$langs->trans("Login").'</td>';
 	print '<td>'.$langs->trans("Lastname").'</td>';
 	print '<td>'.$langs->trans("Firstname").'</td>';
@@ -525,10 +527,18 @@ function print_user_table($newdb, $object)
 		// Get user/pass of all users in database
 		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
 		$sql.=" FROM llx_user ORDER BY statut DESC";
-		// TODO Set definition of algorithm to hash password into the package
+
+		// TODO Set definition of SQL to get list of all users into the package
 		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
-			$sql="SELECT id as rowid, name as login, realname as lastname, firstname, 0 as admin, 'emailunknown' as email, '' as pass, password as pass_crypted, date_creation as datec, date_mod as datem, last_login as datelastlogin, 0, 0, 0, entities_id as entity, is_active as statut";
-			$sql.=" FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC";
+			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
+			//$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, concat(gp.name, ' ', gp.interface) as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
+			$sql .= " glpi_useremails.email as email";
+			$sql .= " FROM glpi_users as gu";
+			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
+			$sql .= " LEFT JOIN glpi_profiles_users as gpu ON gpu.users_id = gu.id LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id AND gp.interface = 'central'";
+			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.name = 'supportcloud' OR gu2.is_deleted = 1)";
+			// TODO Limit payant uniquement
+			$sql .= " ORDER BY gu.is_active DESC";
 		}
 
 		$resql=$newdb->query($sql);
@@ -555,6 +565,9 @@ function print_user_table($newdb, $object)
 				print '<td>';
 				print ($i+1);
 				print '</td>';
+				print '<td>';
+				print $obj->rowid;
+				print '</td>';
 				print '<td class="nowraponall">';
 				print $obj->login;
 				print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
@@ -563,7 +576,8 @@ function print_user_table($newdb, $object)
 				print '<td>'.$obj->firstname.'</td>';
 				print '<td>'.$obj->admin.'</td>';
 				print '<td>'.$obj->email.'</td>';
-				print '<td class="tdoverflowmax100">'.($obj->pass ? $obj->pass.' ' : '').'('.($obj->pass_crypted?$obj->pass_crypted:'NA').')</td>';
+				$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+				print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
 				print '<td>'.dol_print_date($newdb->jdate($obj->datec), 'dayhour').'</td>';
 				print '<td>'.dol_print_date($newdb->jdate($obj->datem), 'dayhour').'</td>';
 				print '<td>'.dol_print_date($newdb->jdate($obj->datelastlogin), 'dayhour').'</td>';

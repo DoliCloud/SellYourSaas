@@ -37,6 +37,7 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 export DATABASE=`grep 'database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter 1 - test|confirm" 1>&2
@@ -72,7 +73,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	chmod o-rwx $targetdir2/conffiles.tar.zst
 	rm -f $targetdir2/conffiles.tar.gz
 	rm -f $targetdir2/conffiles.tar.bz2
-	
+
 	export dbname="mysql" 
 	echo "Do a dump of database $dbname"
 	echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
@@ -82,7 +83,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	
-	if [ "x$DATABASE" != "x" ]; then
+	if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
 		export dbname=$DATABASE 
 		echo "Do a dump of database $dbname"
 		echo "$MYSQLDUMP $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
@@ -110,7 +111,7 @@ else
 	chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
 	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	
-	if [ "x$DATABASE" != "x" ]; then
+	if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
 		export dbname=$DATABASE 
 		echo "Do a dump of database $dbname"
 		echo "$MYSQLDUMP $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"

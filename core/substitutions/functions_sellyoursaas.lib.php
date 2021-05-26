@@ -143,7 +143,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 			}
 		}
 
-
+		$conf->global->SELLYOURSAAS_DOMAIN_REGISTRATION = $constforaltname;
 		$conf->global->SELLYOURSAAS_ACCOUNT_URL        = $urlmyaccount;
 		$conf->global->SELLYOURSAAS_MAIN_EMAIL         = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_MAIN_EMAIL);
 		$conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM);

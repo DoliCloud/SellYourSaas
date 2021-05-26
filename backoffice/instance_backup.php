@@ -354,7 +354,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	// Backup dir
 	print '<tr class="oddeven">';
-	print '<td class="titlefieldcreate">'.$langs->trans("DeploymentHost").'</td>';
+	print '<td class="titlefieldmiddle">'.$langs->trans("DeploymentHost").'</td>';
 	print '<td>'.$object->array_options['options_deployment_host'].'</td>';
 	print '</tr>';
 
