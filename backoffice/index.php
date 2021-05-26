@@ -277,9 +277,10 @@ $totalinstancespaying=0;
 $totalcommissions=0;
 $totalresellers=0;
 $serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'0':$conf->global->SELLYOURSAAS_INFRA_COST;
+$suppliercateg = empty($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG) ? '0' : $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG;
 
 $sql = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'categorie_fournisseur as c';
-$sql.= ' WHERE c.fk_soc = s.rowid AND s.status = 1 AND c.fk_categorie = '.$conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG;
+$sql.= ' WHERE c.fk_soc = s.rowid AND s.status = 1 AND c.fk_categorie = '.((int) $suppliercateg);
 $resql = $db->query($sql);
 if ($resql) {
 	$obj = $db->fetch_object($resql);
