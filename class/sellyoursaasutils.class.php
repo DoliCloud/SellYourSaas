@@ -988,6 +988,7 @@ class SellYourSaasUtils
 					$nbhoursbetweentries    = (empty($conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES) ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
 					$nbdaysbeforeendoftries = (empty($conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES) ? 35 : $conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES);
 					$labeltouse = '';
+					$postactionmessages=array();
 
 					if ($resultthirdparty > 0 && ! empty($customer)) {
 						if (!$error && !empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
@@ -1108,8 +1109,6 @@ class SellYourSaasUtils
 									//var_dump("stripefailurecode=".$stripefailurecode." stripefailuremessage=".$stripefailuremessage." stripefailuredeclinecode=".$stripefailuredeclinecode);
 									//exit;
 								}
-
-								$postactionmessages=array();
 
 								// Return $charge = array('id'=>'ch_XXXX', 'status'=>'succeeded|pending|failed', 'failure_code'=>, 'failure_message'=>...)
 								if (empty($charge) || $charge->status == 'failed') {
@@ -1287,17 +1286,33 @@ class SellYourSaasUtils
 								$this->errors[]='Failed to get card | payment method for stripe customer = '.$customer->id;
 
 								$labeltouse = 'InvoicePaymentFailure';
-								$description = 'Failed to find or use your payment mode (no credit card defined for your customer account)';
-								$stripefailurecode = 'BADPAYMENTMODE';
-								$stripefailuremessage = 'Failed to find or use your payment mode (no credit card defined for your customer account)';
+								$sendemailtocustomer = 1;
 								if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+
+								$description = 'Failed to find or use the payment mode - no credit card defined for the customer account';
+								$stripefailurecode = 'BADPAYMENTMODE';
+								$stripefailuremessage = 'Failed to find or use the payment mode - no credit card defined for the customer account';
+								$postactionmessages[] = $description.' ('.$stripearrayofkeys['publishable_key'].')';
 
 								$object = $invoice;
 
 								$actioncode='PAYMENT_STRIPE_KO';
 								$extraparams='';
 							}
-						}	// If an error because payment was canceled for a logical reason, we do nothing (not email and no event added)
+						} else {
+							// If error because payment was canceled for a logical reason, we do nothing (no email and no event added)
+							$labeltouse = '';
+							$sendemailtocustomer = 0;
+
+							$description = '';
+							$stripefailurecode = '';
+							$stripefailuremessage = '';
+
+							$object = $invoice;
+
+							$actioncode='';
+							$extraparams='';
+						}
 					} else {	// Else of the   if ($resultthirdparty > 0 && ! empty($customer)) {
 						if ($resultthirdparty <= 0) {
 							dol_syslog('SellYourSaasUtils Failed to load customer for thirdparty_id = '.$thirdparty->id, LOG_WARNING);
@@ -1310,10 +1325,13 @@ class SellYourSaasUtils
 						$errorforinvoice++;
 
 						$labeltouse = 'InvoicePaymentFailure';
+						$sendemailtocustomer = 1;
+						if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+
 						$description = 'Failed to find or use your payment mode (no payment mode for this customer id)';
 						$stripefailurecode = 'BADPAYMENTMODE';
 						$stripefailuremessage = 'Failed to find or use your payment mode (no payment mode for this customer id)';
-						if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+						$postactionmessages=array();
 
 						$object = $invoice;
 
@@ -1321,7 +1339,7 @@ class SellYourSaasUtils
 						$extraparams='';
 					}
 
-					// Send email + create action
+					// Send email + create action after
 					if ($sendemailtocustomer && $labeltouse) {
 						dol_syslog("* Send email with result of payment - ".$labeltouse);
 
@@ -1422,42 +1440,42 @@ class SellYourSaasUtils
 						}
 					}
 
-					dol_syslog("* Record event for payment result");
+					if ($description) {
+						dol_syslog("* Record event for payment result - ".$description);
 
-					// Insert record of payment (success or error)
-					$actioncomm = new ActionComm($this->db);
+						// Insert record of payment (success or error)
+						$actioncomm = new ActionComm($this->db);
 
-					$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-					$actioncomm->code         = 'AC_'.$actioncode;
-					$actioncomm->label        = $description;
-					$actioncomm->note_private = join(",\n", $postactionmessages);
-					$actioncomm->fk_project   = $invoice->fk_project;
-					$actioncomm->datep        = $now;
-					$actioncomm->datef        = $now;
-					$actioncomm->percentage   = -1;   // Not applicable
-					$actioncomm->socid        = $thirdparty->id;
-					$actioncomm->contactid    = 0;
-					$actioncomm->authorid     = $user->id;   // User saving action
-					$actioncomm->userownerid  = $user->id;	// Owner of action
-					// Fields when action is a real email (content is already into note)
-					/*$actioncomm->email_msgid = $object->email_msgid;
-					 $actioncomm->email_from  = $object->email_from;
-					 $actioncomm->email_sender= $object->email_sender;
-					 $actioncomm->email_to    = $object->email_to;
-					 $actioncomm->email_tocc  = $object->email_tocc;
-					 $actioncomm->email_tobcc = $object->email_tobcc;
-					 $actioncomm->email_subject = $object->email_subject;
-					 $actioncomm->errors_to   = $object->errors_to;*/
-					$actioncomm->fk_element   = $invoice->id;
-					$actioncomm->elementtype  = $invoice->element;
-					$actioncomm->extraparams  = dol_trunc($extraparams, 250);
+						$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+						$actioncomm->code         = 'AC_'.$actioncode;
+						$actioncomm->label        = $description;
+						$actioncomm->note_private = join(",\n", $postactionmessages);
+						$actioncomm->fk_project   = $invoice->fk_project;
+						$actioncomm->datep        = $now;
+						$actioncomm->datef        = $now;
+						$actioncomm->percentage   = -1;   // Not applicable
+						$actioncomm->socid        = $thirdparty->id;
+						$actioncomm->contactid    = 0;
+						$actioncomm->authorid     = $user->id;   // User saving action
+						$actioncomm->userownerid  = $user->id;	// Owner of action
+						// Fields when action is a real email (content is already into note)
+						/*$actioncomm->email_msgid = $object->email_msgid;
+						 $actioncomm->email_from  = $object->email_from;
+						 $actioncomm->email_sender= $object->email_sender;
+						 $actioncomm->email_to    = $object->email_to;
+						 $actioncomm->email_tocc  = $object->email_tocc;
+						 $actioncomm->email_tobcc = $object->email_tobcc;
+						 $actioncomm->email_subject = $object->email_subject;
+						 $actioncomm->errors_to   = $object->errors_to;*/
+						$actioncomm->fk_element   = $invoice->id;
+						$actioncomm->elementtype  = $invoice->element;
+						$actioncomm->extraparams  = dol_trunc($extraparams, 250);
 
-					$actioncomm->create($user);
+						$actioncomm->create($user);
+					}
 
-					$this->description=$description;
-					$this->postactionmessages=$postactionmessages;
-
-
+					$this->description = $description;
+					$this->postactionmessages = $postactionmessages;
 				} catch (Exception $e) {
 					$error++;
 					$errorforinvoice++;
