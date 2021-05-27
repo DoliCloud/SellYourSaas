@@ -304,13 +304,14 @@ if ($sellyoursaassupporturl) {
 
 		//Combobox for Group of ticket
 		$stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
-		$stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth400">';
+		$stringtoprint .= '<select name="groupticket" id ="groupticket" class="maxwidth500 minwidth400">';
 		$stringtoprint .= '<option value="">&nbsp;</option>';
 
-		$sql = "SELECT ctc.code, ctc.label";
+		$sql = "SELECT ctc.rowid, ctc.code, ctc.label, ctc.fk_parent";
 		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
 		$sql .= " WHERE ctc.public = 1";
 		$sql .= " AND ctc.active = 1";
+		$sql .= " AND ctc.fk_parent = 0";
 		$sql .= $db->order('ctc.pos', 'ASC');
 		$resql = $db->query($sql);
 		if ($resql) {
@@ -319,9 +320,10 @@ if ($sellyoursaassupporturl) {
 			while ($i < $num_rows) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
+					$grouprowid = $obj->rowid;
 					$groupvalue = $obj->code;
 					$grouplabel = $obj->label;
-					$stringtoprint .= '<option value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
+					$stringtoprint .= '<option class="groupticket'.dol_escape_htmltag($grouprowid).'" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
 				}
 				$i++;
 			}
@@ -329,6 +331,57 @@ if ($sellyoursaassupporturl) {
 
 		$stringtoprint .= '</select>';
 		$stringtoprint .= ajax_combobox("groupticket");
+		
+		$stringtoprint .= '<select name="groupticket_child" id ="groupticket_child" class="maxwidth500 minwidth400">';
+		$stringtoprint .= '<option value="">&nbsp;</option>';
+
+		$sql = "SELECT ctc.rowid, ctc.code, ctc.label, ctc.fk_parent, ctcjoin.code as codefather";
+		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
+		$sql .= " JOIN ".MAIN_DB_PREFIX."c_ticket_category as ctcjoin ON ctc.fk_parent = ctcjoin.rowid";
+		$sql .= " WHERE ctc.public = 1";
+		$sql .= " AND ctc.active = 1";
+		$sql .= " AND ctc.fk_parent <> 0";
+		$resql = $db->query($sql);
+		if ($resql) {
+			$num_rows = $db->num_rows($resql);
+			$i = 0;
+			while ($i < $num_rows) {
+				$obj = $db->fetch_object($resql);
+				if ($obj) {
+					$grouprowid = $obj->rowid;
+					$groupvalue = $obj->code;
+					$grouplabel = $obj->label;
+					$fatherid = $obj->fk_parent;
+					$groupcodefather = $obj->codefather;
+					$stringtoprint .= '<option class="groupticket_'.dol_escape_htmltag($fatherid).'_child" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
+					$tabscript[] = 'if(this.value == "'.dol_escape_js($groupcodefather).'"){
+						$(".groupticket_'.dol_escape_htmltag($fatherid).'_child").show()
+					}else{
+						$(".groupticket_'.dol_escape_htmltag($fatherid).'_child").hide()
+					}';
+				}
+				$i++;
+			}
+		}
+		$stringtoprint .='</select>';
+		//$stringtoprint .= ajax_combobox("groupticket_child");
+
+		$stringtoprint .='<script>';
+		$stringtoprint .='$("#groupticket_child").hide()
+		$("#groupticket").change(function() {
+			if (this.value != "") {
+			  $("#groupticket_child").show()
+			} else {
+			  $("#groupticket_child")[0].value = ""
+			  $("#groupticket_child").hide()
+			}
+		';
+		foreach ($tabscript as $value) {
+			$stringtoprint .= $value;
+		};
+		$stringtoprint .='})';
+		$stringtoprint .='</script>';
+
 		$stringtoprint .= '<br><br>';
 		if ($num_rows > 1) {
 			print $stringtoprint;
