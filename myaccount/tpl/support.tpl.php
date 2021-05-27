@@ -303,11 +303,15 @@ if ($sellyoursaassupporturl) {
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
 		//Combobox for Group of ticket
+		$groupticket=GETPOST('groupticket', 'aZ09');
+		$groupticketchild=GETPOST('groupticket_child', 'aZ09');
+		$arraycodenotparent[] = "";
 		$stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
 		$stringtoprint .= '<select name="groupticket" id ="groupticket" class="maxwidth500 minwidth400">';
 		$stringtoprint .= '<option value="">&nbsp;</option>';
 
-		$sql = "SELECT ctc.rowid, ctc.code, ctc.label, ctc.fk_parent";
+		$sql = "SELECT ctc.rowid, ctc.code, ctc.label, ctc.fk_parent, ";
+		$sql .= $db->ifsql("ctc.rowid NOT IN (SELECT ctcfather.rowid FROM llx_c_ticket_category as ctcfather JOIN llx_c_ticket_category as ctcjoin ON ctcfather.rowid = ctcjoin.fk_parent)","'NOTPARENT'","'PARENT'")." as isparent";
 		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
 		$sql .= " WHERE ctc.public = 1";
 		$sql .= " AND ctc.active = 1";
@@ -323,14 +327,20 @@ if ($sellyoursaassupporturl) {
 					$grouprowid = $obj->rowid;
 					$groupvalue = $obj->code;
 					$grouplabel = $obj->label;
-					$stringtoprint .= '<option class="groupticket'.dol_escape_htmltag($grouprowid).'" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
+					$isparent = $obj->isparent;
+					$iselected = $groupticket == $obj->code ?'selected':'';
+					$stringtoprint .= '<option '.$iselected.' class="groupticket'.dol_escape_htmltag($grouprowid).'" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
+					if ($isparent == 'NOTPARENT') {
+						$arraycodenotparent[] = $groupvalue;
+					}
 				}
 				$i++;
 			}
+		}else{
+			dol_print_error($db);
 		}
 
-		$stringtoprint .= '</select>';
-		$stringtoprint .= ajax_combobox("groupticket");
+		$stringtoprint .= '</select>&nbsp';
 		
 		$stringtoprint .= '<select name="groupticket_child" id ="groupticket_child" class="maxwidth500 minwidth400">';
 		$stringtoprint .= '<option value="">&nbsp;</option>';
@@ -341,6 +351,7 @@ if ($sellyoursaassupporturl) {
 		$sql .= " WHERE ctc.public = 1";
 		$sql .= " AND ctc.active = 1";
 		$sql .= " AND ctc.fk_parent <> 0";
+		$sql .= $db->order('ctc.pos', 'ASC');
 		$resql = $db->query($sql);
 		if ($resql) {
 			$num_rows = $db->num_rows($resql);
@@ -353,8 +364,9 @@ if ($sellyoursaassupporturl) {
 					$grouplabel = $obj->label;
 					$fatherid = $obj->fk_parent;
 					$groupcodefather = $obj->codefather;
-					$stringtoprint .= '<option class="groupticket_'.dol_escape_htmltag($fatherid).'_child" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
-					$tabscript[] = 'if(this.value == "'.dol_escape_js($groupcodefather).'"){
+					$iselected = $groupticketchild == $obj->code ?'selected':'';
+					$stringtoprint .= '<option '.$iselected.' class="groupticket_'.dol_escape_htmltag($fatherid).'_child" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
+					$tabscript[] = 'if($("#groupticket")[0].value == "'.dol_escape_js($groupcodefather).'"){
 						$(".groupticket_'.dol_escape_htmltag($fatherid).'_child").show()
 					}else{
 						$(".groupticket_'.dol_escape_htmltag($fatherid).'_child").hide()
@@ -362,22 +374,29 @@ if ($sellyoursaassupporturl) {
 				}
 				$i++;
 			}
+		}else{
+			dol_print_error($db);
 		}
 		$stringtoprint .='</select>';
-		//$stringtoprint .= ajax_combobox("groupticket_child");
 
 		$stringtoprint .='<script>';
-		$stringtoprint .='$("#groupticket_child").hide()
+		$stringtoprint .='var arraynotparents = '.json_encode($arraycodenotparent).';';
+		$stringtoprint .='if (arraynotparents.includes($("#groupticket")[0].value)){$("#groupticket_child").hide()}
+		else{';
+		foreach ($tabscript as $script) {
+			$stringtoprint .= $script;
+		};
+		$stringtoprint .='}
 		$("#groupticket").change(function() {
-			if (this.value != "") {
+			$("#groupticket_child")[0].value = ""
+			if (!arraynotparents.includes(this.value)) {
 			  $("#groupticket_child").show()
 			} else {
-			  $("#groupticket_child")[0].value = ""
 			  $("#groupticket_child").hide()
 			}
 		';
-		foreach ($tabscript as $value) {
-			$stringtoprint .= $value;
+		foreach ($tabscript as $script) {
+			$stringtoprint .= $script;
 		};
 		$stringtoprint .='})';
 		$stringtoprint .='</script>';

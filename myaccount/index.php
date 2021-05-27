@@ -376,6 +376,7 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 	$topic = GETPOST('subject', 'restricthtml');
 	$content = GETPOST('content', 'restricthtml');
 	$groupticket=GETPOST('groupticket', 'aZ09');
+	$groupticketchild=GETPOST('groupticket_child', 'aZ09');
 
 	if (empty($replyto)) {
 		$error++;
@@ -403,7 +404,20 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 			$content .= "<br><br>\n";
 			$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
 			if ($groupticket) {
-				$content .= 'Group: '.dol_escape_htmltag($groupticket)."<br>\n";
+				$sql = "SELECT ctc.label FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc WHERE ctc.code = '".$db->escape($groupticket)."'";
+				$resql = $db->query($sql);
+				if ($resql) {
+					$obj = $db->fetch_object($resql);
+					$content .= 'Group: '.dol_escape_htmltag($groupticket)." - ".dol_escape_htmltag($obj->label)."<br>\n";
+				}
+			}
+			if($groupticketchild){
+				$sql = "SELECT ctc.label FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc WHERE ctc.code = '".$db->escape($groupticketchild)."'";
+				$resql = $db->query($sql);
+				if ($resql) {
+					$obj = $db->fetch_object($resql);
+					$content .= 'Sub Group: '.dol_escape_htmltag($groupticketchild)." - ".dol_escape_htmltag($obj->label)."<br>\n";
+				}
 			}
 			$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
 			//$content .= 'Ref contract: <a href="xxx/contrat/card.php?id='.$tmpcontract->ref.">".$tmpcontract->ref."</a><br>\n"; 	// No link to backoffice as the mail is used with answer to.
