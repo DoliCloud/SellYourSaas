@@ -112,6 +112,11 @@ $head[$h][1] = $langs->trans("Home");
 $head[$h][2] = 'home';
 $h++;
 
+$head[$h][0] = 'deployment_servers.php';
+$head[$h][1] = $langs->trans("DeploymentServers");
+$head[$h][2] = 'deploymentservers';
+$h++;
+
 $head[$h][0] = DOL_URL_ROOT.'/core/customreports.php?objecttype=contract&tabfamily=sellyoursaas';
 $head[$h][1] = $langs->trans("CustomReports");
 $head[$h][2] = 'customreports';
