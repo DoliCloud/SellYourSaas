@@ -195,7 +195,12 @@ print '
 	                  <label>'.$langs->trans("Email").'</label>
 	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->email.'" name="email">
 	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->email.'" name="oldemail">
-	                </div>
+					</div>
+					<div class="form-group">
+					  <label>'.$langs->trans("PhoneNumber").'</label>
+	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->phone.'" name="phone">
+	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->phone.'" name="oldphone">
+					</div>
 	                <div class="row">
 	                  <div class="col-md-6">
 	                    <div class="form-group">
