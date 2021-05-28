@@ -25,7 +25,7 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
-
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
 	$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
 
 if (!empty($_POST['addfile'])) {
@@ -303,110 +303,10 @@ if ($sellyoursaassupporturl) {
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
 		//Combobox for Group of ticket
-		$groupticket=GETPOST('groupticket', 'aZ09');
-		$groupticketchild=GETPOST('groupticket_child', 'aZ09');
-		$arraycodenotparent[] = "";
-		$stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
-		$stringtoprint .= '<select name="groupticket" id ="groupticket" class="maxwidth500 minwidth400">';
-		$stringtoprint .= '<option value="">&nbsp;</option>';
-
-		$sql = "SELECT ctc.rowid, ctc.code, ctc.label, ctc.fk_parent, ";
-		$sql .= $db->ifsql("ctc.rowid NOT IN (SELECT ctcfather.rowid FROM llx_c_ticket_category as ctcfather JOIN llx_c_ticket_category as ctcjoin ON ctcfather.rowid = ctcjoin.fk_parent)","'NOTPARENT'","'PARENT'")." as isparent";
-		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
-		$sql .= " WHERE ctc.public = 1";
-		$sql .= " AND ctc.active = 1";
-		$sql .= " AND ctc.fk_parent = 0";
-		$sql .= $db->order('ctc.pos', 'ASC');
-		$resql = $db->query($sql);
-		if ($resql) {
-			$num_rows = $db->num_rows($resql);
-			$i = 0;
-			while ($i < $num_rows) {
-				$obj = $db->fetch_object($resql);
-				if ($obj) {
-					$grouprowid = $obj->rowid;
-					$groupvalue = $obj->code;
-					$grouplabel = $obj->label;
-					$isparent = $obj->isparent;
-					$iselected = $groupticket == $obj->code ?'selected':'';
-					$stringtoprint .= '<option '.$iselected.' class="groupticket'.dol_escape_htmltag($grouprowid).'" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
-					if ($isparent == 'NOTPARENT') {
-						$arraycodenotparent[] = $groupvalue;
-					}
-				}
-				$i++;
-			}
-		}else{
-			dol_print_error($db);
-		}
-
-		$stringtoprint .= '</select>&nbsp';
-		
-		$stringtoprint .= '<select name="groupticket_child" id ="groupticket_child" class="maxwidth500 minwidth400">';
-		$stringtoprint .= '<option value="">&nbsp;</option>';
-
-		$sql = "SELECT ctc.rowid, ctc.code, ctc.label, ctc.fk_parent, ctcjoin.code as codefather";
-		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
-		$sql .= " JOIN ".MAIN_DB_PREFIX."c_ticket_category as ctcjoin ON ctc.fk_parent = ctcjoin.rowid";
-		$sql .= " WHERE ctc.public = 1";
-		$sql .= " AND ctc.active = 1";
-		$sql .= " AND ctc.fk_parent <> 0";
-		$sql .= $db->order('ctc.pos', 'ASC');
-		$resql = $db->query($sql);
-		if ($resql) {
-			$num_rows = $db->num_rows($resql);
-			$i = 0;
-			while ($i < $num_rows) {
-				$obj = $db->fetch_object($resql);
-				if ($obj) {
-					$grouprowid = $obj->rowid;
-					$groupvalue = $obj->code;
-					$grouplabel = $obj->label;
-					$fatherid = $obj->fk_parent;
-					$groupcodefather = $obj->codefather;
-					$iselected = $groupticketchild == $obj->code ?'selected':'';
-					$stringtoprint .= '<option '.$iselected.' class="groupticket_'.dol_escape_htmltag($fatherid).'_child" value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
-					$tabscript[] = 'if($("#groupticket")[0].value == "'.dol_escape_js($groupcodefather).'"){
-						$(".groupticket_'.dol_escape_htmltag($fatherid).'_child").show()
-					}else{
-						$(".groupticket_'.dol_escape_htmltag($fatherid).'_child").hide()
-					}';
-				}
-				$i++;
-			}
-		}else{
-			dol_print_error($db);
-		}
-		$stringtoprint .='</select>';
-
-		$stringtoprint .='<script>';
-		$stringtoprint .='var arraynotparents = '.json_encode($arraycodenotparent).';';
-		$stringtoprint .='if (arraynotparents.includes($("#groupticket")[0].value)){$("#groupticket_child").hide()}
-		else{';
-		foreach ($tabscript as $script) {
-			$stringtoprint .= $script;
-		};
-		$stringtoprint .='}
-		$("#groupticket").change(function() {
-			$("#groupticket_child")[0].value = ""
-			if (!arraynotparents.includes(this.value)) {
-			  $("#groupticket_child").show()
-			} else {
-			  $("#groupticket_child").hide()
-			}
-		';
-		foreach ($tabscript as $script) {
-			$stringtoprint .= $script;
-		};
-		$stringtoprint .='})';
-		$stringtoprint .='</script>';
-
+		$formticket = new FormTicket($db);
+		$stringtoprint = $formticket->selectGroupTickets($selected = '', $htmlname = 'ticketcategory', $filtertype = '', $format = 0, $empty = 0, $noadmininfo = 0, $maxlength = 0, $morecss = '', $use_multilevel = 1);
 		$stringtoprint .= '<br><br>';
-		if ($num_rows > 1) {
-			print $stringtoprint;
-		} elseif ($num_rows == 1) {
-			print '<input type="hidden" name="groupticket" id="groupticket" value="'.dol_escape_htmltag($groupvalue).'">';
-		}
+		print $stringtoprint;
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
