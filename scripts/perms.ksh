@@ -66,9 +66,10 @@ if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
 fi
 
 if [[ "x$instanceserver" == "x1" ]]; then
-	echo "Nettoyage fichier logs error"
+	echo We are on a deployment server, so we clean log files 
+	echo "Clean web server _error logs"
 	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done
-	echo "Nettoyage fichier logs"
+	echo "Clean applicative log files"
 	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
 	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
 fi
