@@ -14,6 +14,7 @@ fi
 
 echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 cd /home
 
@@ -64,12 +65,14 @@ if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
 	chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 fi
 
-echo "Nettoyage fichier logs error"
-for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done
-echo "Nettoyage fichier logs"
-for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
-for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
- 
+if [[ "x$instanceserver" == "x1" ]]; then
+	echo "Nettoyage fichier logs error"
+	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done
+	echo "Nettoyage fichier logs"
+	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
+	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+fi
+
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 
 	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -exec rm {} \;
