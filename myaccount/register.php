@@ -438,7 +438,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					<label class="control-label" for="password" trans="1"><?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
-						<input<?php echo $disabled; ?> name="password" type="password" required />
+						<input<?php echo $disabled; ?> name="password" type="password" required maxlength="72" />
 
 					</div>
 				</div>
@@ -448,7 +448,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				  <div class="control-group required">
 					<label class="control-label" for="password2" trans="1"><?php echo $langs->trans("ConfirmPassword") ?></label>
 					<div class="controls">
-					  <input<?php echo $disabled; ?> name="password2" type="password" required />
+					  <input<?php echo $disabled; ?> name="password2" type="password" required maxlength="72"/>
 					</div>
 				  </div>
 				</div>
