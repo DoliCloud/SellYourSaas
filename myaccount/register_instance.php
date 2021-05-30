@@ -117,11 +117,11 @@ if (empty($user->id)) {
 }
 
 $action = GETPOST('action', 'alpha');
-$orgname = ucfirst(trim(GETPOST('orgName', 'alpha')));
-$email = trim(GETPOST('username', 'alpha'));
+$orgname = dol_trunc(ucfirst(trim(GETPOST('orgName', 'alpha'))), 250, 'right', 'UTF-8', 1);
+$email = dol_trunc(trim(GETPOST('username', 'alpha')), 255, 'right', 'UTF-8', 1);
 $domainemail = preg_replace('/^.*@/', '', $email);
-$password = trim(GETPOST('password', 'alpha'));
-$password2 = trim(GETPOST('password2', 'alpha'));
+$password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
+$password2 = dol_trunc(trim(GETPOST('password2', 'alpha')), 128, 'right', 'UTF-8', 1);
 $country_code = trim(GETPOST('address_country', 'alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
