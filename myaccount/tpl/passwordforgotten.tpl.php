@@ -118,7 +118,7 @@ if (! preg_match('/class="ok"/', $message)) {
 	<?php
 	if (empty($asknewpass)) {
 		?>
-	<input type="text" id="username" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  autofocus="autofocus" />
+	<input type="text" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  autofocus="autofocus" />
 	<br><br>
 		<?php
 	} else {
@@ -127,10 +127,10 @@ if (! preg_match('/class="ok"/', $message)) {
 		print '<input type="hidden" name="id" value="'.$id.'">';
 		print '<input type="hidden" name="hashreset" value="'.$hashreset.'">';
 
-		print '<input type="password" maxlength="72" id="newpassword1" placeholder="'.$langs->trans("Password").'" name="newpassword1" class="flat input-icon-user" tabindex="2" autofocus="autofocus" />';
+		print '<input type="password" maxlength="128" id="newpassword1" placeholder="'.$langs->trans("Password").'" name="newpassword1" class="flat input-icon-user" tabindex="2" autofocus="autofocus" />';
 		print '<br><br>';
 
-		print '<input type="password" maxlength="72" id="newpassword2" placeholder="'.$langs->trans("ConfirmPassword").'" name="newpassword2" class="flat input-icon-user" tabindex="3" autofocus="autofocus" />';
+		print '<input type="password" maxlength="128" id="newpassword2" placeholder="'.$langs->trans("ConfirmPassword").'" name="newpassword2" class="flat input-icon-user" tabindex="3" autofocus="autofocus" />';
 		print '<br><br>';
 	}
 	?>
