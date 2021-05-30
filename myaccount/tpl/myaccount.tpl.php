@@ -250,11 +250,11 @@ if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
 	              <div class="form-body">
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Password").'</label>
-	                  <input type="password" class="form-control" name="password">
+	                  <input type="password" class="form-control" name="password" maxlength="128">
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("RepeatPassword").'</label>
-	                  <input type="password" class="form-control" name="password2">
+	                  <input type="password" class="form-control" name="password2" maxlength="128">
 	                </div>
 	              </div>
 	              <div>

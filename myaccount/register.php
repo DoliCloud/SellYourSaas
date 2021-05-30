@@ -416,7 +416,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<div class="control-group  required">
 				<label class="control-label" for="username" trans="1"><?php echo $langs->trans("Email") ?></label>
 				<div class="controls">
-					<input type="text"<?php echo $disabled; ?> name="username" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="" id="username" />
+					<input type="text"<?php echo $disabled; ?> name="username" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="" id="username" />
 
 				</div>
 			</div>
@@ -424,7 +424,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<div class="control-group  required">
 				<label class="control-label" for="orgName" trans="1"><?php echo $langs->trans("NameOfCompany") ?></label>
 				<div class="controls">
-					<input type="text"<?php echo $disabled; ?> name="orgName" value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" maxlength="250" id="orgName" />
+					<input type="text"<?php echo $disabled; ?> name="orgName" maxlength="250" value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" id="orgName" />
 				</div>
 			</div>
 				<?php
@@ -438,7 +438,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					<label class="control-label" for="password" trans="1"><?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
-						<input<?php echo $disabled; ?> name="password" type="password" required maxlength="72" />
+						<input<?php echo $disabled; ?> name="password" type="password" maxlength="128" required />
 
 					</div>
 				</div>
@@ -448,7 +448,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				  <div class="control-group required">
 					<label class="control-label" for="password2" trans="1"><?php echo $langs->trans("ConfirmPassword") ?></label>
 					<div class="controls">
-					  <input<?php echo $disabled; ?> name="password2" type="password" required maxlength="72"/>
+					  <input<?php echo $disabled; ?> name="password2" type="password" maxlength="128" required />
 					</div>
 				  </div>
 				</div>

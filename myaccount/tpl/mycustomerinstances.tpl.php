@@ -692,12 +692,12 @@ if ($form->result['nbofthirdparties'] == 0) {
 
     		<div class="horizontal-fld clearboth">
     		<div class="control-group required">
-    		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" required />
+    		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128" required />
     		</div>
     		</div>
     		<div class="horizontal-fld ">
     		<div class="control-group required">
-    		<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" required />
+    		<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
     		</div>
     		</div>
     		</div> <!-- end group -->
