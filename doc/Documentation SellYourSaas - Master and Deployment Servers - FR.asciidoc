@@ -1002,6 +1002,9 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
 	    ExpiresByType application/x-javascript A2592000
 	    ExpiresByType application/javascript A2592000
 
+#RewriteEngine On
+#RewriteRule !^/maintenance.php https://%{SERVER_NAME}/maintenance.php?instance=myaccount [R,L]
+
 RewriteEngine on
 RewriteCond %{SERVER_NAME} =myaccount.mysaasdomainname.com
 RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
