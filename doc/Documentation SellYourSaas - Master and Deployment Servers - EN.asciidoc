@@ -2049,7 +2049,7 @@ Note: To delete active plugins, empty the mysql *plugin* table. See "Starting my
 [[creer_un_compte_db_sellyoursaas]]
 ==== Create a user sellyoursaas to control databases of user instances
 
-On the *Master* server and each *Deployment server*, donner l'accès localement au compte *sellyoursaas*:
+On the *Master* server and each *Deployment server*, grant access localy to the login *sellyoursaas*:
 
 [source,sql]
 ---------------
@@ -2062,7 +2062,7 @@ GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT
 FLUSH PRIVILEGES;
 ---------------
 
-Give permission, on the *Master server*, to the account of each deployment server, on the database *dolibarr*:
+Give permission, on the *Master server*, to the account *sellyoursaas* of each deployment server, on the database *dolibarr*:
 
 [source,sql]
 ---------------
