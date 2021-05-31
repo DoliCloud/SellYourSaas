@@ -3071,6 +3071,18 @@ openssl x509 -in fullchain.pem -text
 ---------------
 
 
+* To renew a certificate, run
+
+[source,bash]
+---------------
+certbot renew --manual
+ou
+certbot renew --manual --force-renewal
+---------------
+
+TODO Make renewal working with --preferred-challenges=dns and wildcard.
+
+
 ==== Install certificates files
 
 * Get the SSL certificate files (file *.crt* of the certificate and the intermediate certificate) and install them into */etc/apache2*)
