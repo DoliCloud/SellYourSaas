@@ -3016,6 +3016,7 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 === Create a wildcard SSL certificate for user instances
 
 Into the following instructions, we will use X with value '', 2, 3, ... (numero of pool of instance = numero of the deployment server).
+This must be done on deployment servers only.
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
 
@@ -3087,13 +3088,15 @@ TODO Make renewal working with --preferred-challenges=dns and wildcard.
 
 * Get the SSL certificate files (file *.crt* of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
-* Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
+* Créer un lien symbolique vers ces certificats avec le nom générique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
 ---------------
 cd /etc/apache2
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
+
+NOTE: This is the certificate that will be used for the client instances. Custom certificates for instances will be in */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
 * Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* with this content:
 

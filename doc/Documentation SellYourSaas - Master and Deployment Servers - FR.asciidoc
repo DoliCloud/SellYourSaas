@@ -3032,6 +3032,8 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
 
+NOTE: Il s'agit ici du certificat qui sera utilisé pour les instances clients. Les certificats custom des instances seront dans */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
+
 * Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* avec ce contenu:
 
 ---------------
