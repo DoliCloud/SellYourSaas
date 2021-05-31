@@ -73,6 +73,8 @@ if [ "x$USER" == "x" ]; then
 	export USER="admin"
 fi
 
+instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 echo "DOMAIN=$DOMAIN"
 echo "DIRSOURCE1=$DIRSOURCE1"
 echo "DIRSOURCE2=$DIRSOURCE2"
@@ -81,6 +83,7 @@ echo "SERVPORTDESTI=$SERVPORTDESTI"
 echo "EMAILFROM=$EMAILFROM"
 echo "EMAILTO=$EMAILTO"
 echo "PID=$PID"
+echo "instanceserver=$instanceserver"
 echo "backupdir=$backupdir"
 echo "remotebackupdir=$remotebackupdir"
 
@@ -134,38 +137,40 @@ do
 	export ret1=$?
 	
 	export ret2=0
-	if [ "x$ret1" == "x0" ]; then
-		echo
-		echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories to $SERVDESTICURSOR..."
-	
-		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-				echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
-				nbofdir=`ls -d $backupdir/osu$i* | wc -l`
-				if [ "x$nbofdir" != "x0" ]; then
-					# Test if we force backup on a given dir
-					if [ "x$2" != "x" ]; then
-						if [ "x$2" != "xosu$i" ]; then
-							break
+	if [[ "x$instanceserver" == "x1" ]]; then
+		if [ "x$ret1" == "x0" ]; then
+			echo
+			echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories to $SERVDESTICURSOR..."
+		
+			for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
+					echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
+					nbofdir=`ls -d $backupdir/osu$i* | wc -l`
+					if [ "x$nbofdir" != "x0" ]; then
+						# Test if we force backup on a given dir
+						if [ "x$2" != "x" ]; then
+							if [ "x$2" != "xosu$i" ]; then
+								break
+							fi
 						fi
-					fi
-					
-					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-			        export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
-		        	echo "$command";
-		        	
-			        $command 2>&1
-			        if [ "x$?" != "x0" ]; then
-			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i"
-			        	export ret2=$(($ret2 + 1));
-			        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
-			        fi
-			    else
-			    	echo No directory found starting with name $backupdir/osu$i
-			    fi
-				echo
-		done
-	else
-		export errstring="ERROR Failed to make $command"
+						
+						export RSYNC_RSH="ssh -p $SERVPORTDESTI"
+				        export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+			        	echo "$command";
+			        	
+				        $command 2>&1
+				        if [ "x$?" != "x0" ]; then
+				        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i"
+				        	export ret2=$(($ret2 + 1));
+				        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
+				        fi
+				    else
+				    	echo No directory found starting with name $backupdir/osu$i
+				    fi
+					echo
+			done
+		else
+			export errstring="ERROR Failed to make $command"
+		fi
 	fi
 	
 	echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
