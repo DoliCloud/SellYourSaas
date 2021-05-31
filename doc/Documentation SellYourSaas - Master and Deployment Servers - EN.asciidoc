@@ -761,9 +761,8 @@ exportfs
 
 ==== On the Deployment Servers
 
-Remember to open the firewall access between the NFS client (*Deployment server*) and the NFS server (*Master server*).
-
-TODO ...
+Be sure to have firewall open between the NFS client (*Deployment server*) and the NFS server (*Master server*). 
+Note: The firewall will be installed later.
 
 Install the NFS client and install it manually. Editing is performed by default in NFSv4.
 
