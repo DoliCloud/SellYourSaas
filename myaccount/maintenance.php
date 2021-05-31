@@ -52,7 +52,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance = GETPOST('instance');	// example: testldr3.with.dolicloud.com
+$instance = GETPOST('instance');	// example: 'testldr3.with.mysaasdomainname.com', 'myaccount'
 
 // SEarch instance
 $contract = new Contrat($db);
@@ -83,13 +83,17 @@ top_htmlhead('', 'Maintenance Page');
 <div style="text-align: center">
 <span class="fa fa-desktop" style="font-size: 40px; opacity: 0.3"></span><br><br>
 <?php
-print $langs->trans("SorryInstanceInMaintenance", dol_escape_htmltag($instance));
+if ($instance == 'myaccount') {
+	print $langs->trans("SorryServerInMaintenance");
+} else {
+	print $langs->trans("SorryInstanceInMaintenance", dol_escape_htmltag($instance));
+}
 print '<br>';
 if (! empty($contract->array_options['options_suspendmaintenance_message']) && $contract->array_options['options_suspendmaintenance_message'] != 'nomessage') {
 	print $langs->trans($contract->array_options['options_suspendmaintenance_message']).'<br>';
 }
 print '<br>';
-if ($instance) {
+if ($instance && $instance != 'myaccount') {
 	print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
 }
 print '<br>';
