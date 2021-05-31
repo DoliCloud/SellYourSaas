@@ -304,6 +304,9 @@ if (($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstan
 	print $langs->trans("ClosingAccountResellerNotPossible", ($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstancessuspendedreseller), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
 } elseif (($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended) > 0) {
 	print $langs->trans("ClosingAccountNotPossible", ($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
+} elseif (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+	print '<!-- ClosingAccountIsTemporarlyDisabledTryLater -->'."\n";
+	print $langs->trans("ClosingAccountIsTemporarlyDisabledTryLater").'<br>';
 } else {
 	print $langs->trans("PleaseBeSureCustomerAccount", $contract->ref_customer);
 	print '
