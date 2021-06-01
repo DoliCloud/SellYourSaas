@@ -3474,7 +3474,7 @@ class SellYourSaasUtils
 
 						// SFTP refresh
 						if (function_exists("ssh2_connect")) {
-							$server=$object->array_options['options_hostname_os'];
+							$server=$contract->array_options['options_hostname_os'];
 
 							$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 							$connection = @ssh2_connect($server, $server_port);
@@ -3483,7 +3483,7 @@ class SellYourSaasUtils
 
 								$newqty = 0;
 
-								$respass = @ssh2_auth_password($connection, $object->array_options['options_username_os'], $object->array_options['options_password_os']);
+								$respass = @ssh2_auth_password($connection, $contract->array_options['options_username_os'], $contract->array_options['options_password_os']);
 								if ($respass) {
 									$stream = @ssh2_exec($connection, $bashformula);
 									if ($stream) {
@@ -3520,7 +3520,7 @@ class SellYourSaasUtils
 								dol_syslog("newqty = ".$newqty." resultstring = ".$resultstring);
 							} else {
 								$error++;
-								$this->error = 'ssh2_connect failed to connect to server '.$server.' port '.$server_port;
+								$this->error = 'ssh2_connect failed to connect to server '.$server.', port '.$server_port;
 								dol_syslog($this->error, LOG_WARNING);
 							}
 						} else {
@@ -3570,7 +3570,7 @@ class SellYourSaasUtils
 									}
 									if ($sometemplateinvoice > 1) {
 										$error++;
-										$this->error = 'Contract '.$object->ref.' has too many template invoice ('.$sometemplateinvoice.') so we dont know which one to update';
+										$this->error = 'Contract '.$contract->ref.' has too many template invoice ('.$sometemplateinvoice.') so we dont know which one to update';
 									} elseif (is_object($lasttemplateinvoice)) {
 										$sqlsearchline = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'facturedet_rec WHERE fk_facture = '.$lasttemplateinvoice->id.' AND fk_product = '.$tmpobject->fk_product;
 										$resqlsearchline = $this->db->query($sqlsearchline);
@@ -3578,7 +3578,7 @@ class SellYourSaasUtils
 											$num_search_line = $this->db->num_rows($resqlsearchline);
 											if ($num_search_line > 1) {
 												$error++;
-												$this->error = 'Contract '.$object->ref.' has a template invoice with id ('.$lasttemplateinvoice->id.') that has several lines for product id '.$tmpobject->fk_product.' so we don t know wich line to update qty';
+												$this->error = 'Contract '.$contract->ref.' has a template invoice with id ('.$lasttemplateinvoice->id.') that has several lines for product id '.$tmpobject->fk_product.' so we don t know on which line to update qty';
 											} else {
 												$objsearchline = $this->db->fetch_object($resqlsearchline);
 												if ($objsearchline) {	// If empty, it means, template invoice has no line corresponding to contract line
