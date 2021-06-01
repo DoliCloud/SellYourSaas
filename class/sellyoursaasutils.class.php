@@ -3499,7 +3499,7 @@ class SellYourSaasUtils
 											$resultstring .= stream_get_contents($errorStream);
 										}
 									} else {
-										dol_syslog("Get resource BASH failed to ssh2_exec");
+										dol_syslog("Get resource BASH failed to ssh2_exec", LOG_ERR);
 									}
 								} else {
 									dol_syslog("Get resource BASH failed to ssh2_auth_password");
@@ -3507,6 +3507,7 @@ class SellYourSaasUtils
 
 								if (function_exists('ssh2_disconnect')) {
 									if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+										dol_syslog("If it hangs here on ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
 										ssh2_disconnect($connection);     // Hang on some config
 									}
 									$connection = null;
@@ -3519,8 +3520,13 @@ class SellYourSaasUtils
 								dol_syslog("newqty = ".$newqty." resultstring = ".$resultstring);
 							} else {
 								$error++;
-								$this->error = 'ssh2_connect function not supported by your PHP';
+								$this->error = 'ssh2_connect failed to connect to server '.$server_port.' port '.$server_port;
+								dol_syslog($this->error, LOG_WARNING);
 							}
+						} else {
+							$error++;
+							$this->error = 'ssh2_connect function not supported by your PHP';
+							dol_syslog($this->error, LOG_ERR);
 						}
 					} elseif ($tmparray[0] === 'PHPMETHOD') {
 						// keyword : PHPMETHOD then function name to call, then args (use ':' as sep.)
