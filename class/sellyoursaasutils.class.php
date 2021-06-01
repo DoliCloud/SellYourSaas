@@ -2963,8 +2963,8 @@ class SellYourSaasUtils
 						unset($connection);
 					}
 				} else {
-					dol_syslog('Failed to connect with ssh2_connect to '.$server, LOG_ERR);
-					$this->errors[]='Failed to connect with ssh2_connect to '.$server;
+					dol_syslog('Failed to connect with ssh2_connect to server '.$server.', server_port '.$server_port, LOG_ERR);
+					$this->errors[]='Failed to connect with ssh2_connect to '.$server.', server_port '.$server_port;
 					$error++;
 					$errorforsshconnect++;
 				}

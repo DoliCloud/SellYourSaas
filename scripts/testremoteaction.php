@@ -73,7 +73,7 @@ print "***** ".$script_file." *****\n";
 $utils = new SellYourSaasUtils($db);
 
 $contractline = new ContratLigne($db);
-$contractline->fetch(123);
+$contractline->fetch(99704);
 
 $result = $utils->sellyoursaasRemoteAction('refresh', $contractline);
 
