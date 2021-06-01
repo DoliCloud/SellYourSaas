@@ -2758,9 +2758,9 @@ class SellYourSaasUtils
 	 *
 	 * @param	string					$remoteaction	Remote action ('suspend/unsuspend/rename'=change apache virtual file, 'deploy/undeploy'=create/delete database, 'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics)
 	 * @param 	Contrat|ContratLigne	$object			Object contract or contract line
-	 * @param	string					$appusername	App login
-	 * @param	string					$email			Initial email
-	 * @param	string					$password		Initial password
+	 * @param	string					$appusername	App login. Used for replacement of __APPUSERNAME__
+	 * @param	string					$email			Initial email. Used for replacement of __APPEMAIL__
+	 * @param	string					$password		Initial password. Used for replacement of __APPPASSWORD__
 	 * @param	string					$forceaddevent	'1'=Force to add event. If '0', add of event is done only for remoteaction = 'deploy','deployall','deployoption','rename','suspend','unsuspend','undeploy'
 	 *													$forceaddevent is set by caller but is overwrote to on when we detect qty has changed.
 	 * @param	string					$comment		Comment
