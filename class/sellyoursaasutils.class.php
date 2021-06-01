@@ -3520,7 +3520,7 @@ class SellYourSaasUtils
 								dol_syslog("newqty = ".$newqty." resultstring = ".$resultstring);
 							} else {
 								$error++;
-								$this->error = 'ssh2_connect failed to connect to server '.$server_port.' port '.$server_port;
+								$this->error = 'ssh2_connect failed to connect to server '.$server.' port '.$server_port;
 								dol_syslog($this->error, LOG_WARNING);
 							}
 						} else {

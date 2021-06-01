@@ -61,6 +61,8 @@ if (! $res) die("Include of master fails");
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
+include_once dol_buildpath("/sellyoursaas/class/sellyoursaasutils.class.php");
+
 
 /*
  *	Main
@@ -75,5 +77,6 @@ $contractline->fetch(123);
 
 $result = $utils->sellyoursaasRemoteAction('refresh', $contractline);
 
-print "result = ".$result;
+print "result = ".$result."\n";
 
+exit($result);
