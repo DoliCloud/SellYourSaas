@@ -137,7 +137,7 @@ SignMeUp=Sign Me Up!
 ErrorPasswordMismatch=Error, the 2 passwords must not differ
 ErrorOnlyCharAZAllowedFor=Only character a-z, 0-9 or - are allowed for the %s
 NameForYourApplication=application address
-AccountAlreadyExistsForEmail=An account already exists for this email. If you are an already registered user and want to create another instance for the your account, just loggin to your <a href="%s" target="_myaccount">customer dashboard</a> to create another instance.
+AccountAlreadyExistsForEmail=An account already exists for this email. If you are an already registered user and want to create another instance for the account, just login to your <a href="%s" target="_myaccount">customer dashboard</a> to create another instance.
 AnonymousUser=Anonymous user
 NotLanguage=Not language
 DeploymentDateStart=Deployment start date (UTC)
