@@ -165,11 +165,17 @@ if (count($listofcontractid) > 0) {
 						// There is at least one payment error
 						$lasttrystring = $langs->trans("LastTry").': '.dol_print_date($db->jdate($obj->datep));
 						if ($obj->label == 'Cancellation of payment by the bank') {
-							print '<span title="'.dol_escape_htmltag($langs->trans("PaymentChargedButReversedByBank").' - '.$lasttrystring).'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
+							print '<span title="'.dol_escape_htmltag($langs->trans("PaymentChargedButReversedByBank").' - '.$lasttrystring).'">';
+							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 						} elseif ($obj->extraparams == 'PAYMENT_ERROR_INSUFICIENT_FUNDS') {
-							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png" alt="Insuficient funds"> '.$langs->trans("PaymentError").'</span>';
+							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
+							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError").' Insuficient funds', $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png" alt="Insuficient funds"> '.$langs->trans("PaymentError").'</span>';
 						} else {
-							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
+							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
+							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 						}
 					}
 				}
