@@ -38,9 +38,9 @@ dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
  */
 class SellYourSaasUtils
 {
-	var $db;							//!< To store db handler
-	var $error;							//!< To return error code (or message)
-	var $errors=array();				//!< To return several error codes (or messages)
+	public $db;							//!< To store db handler
+	public $error;							//!< To return error code (or message)
+	public $errors = array();				//!< To return several error codes (or messages)
 
 	public $stripechargedone;
 	public $stripechargeerror;
@@ -51,7 +51,7 @@ class SellYourSaasUtils
 	 *
 	 *  @param	DoliDb		$db      Database handler
 	 */
-	function __construct($db)
+	public function __construct($db)
 	{
 		$this->db = $db;
 		return 1;
@@ -803,7 +803,7 @@ class SellYourSaasUtils
 	 * @param   int                  $calledinmyaccountcontext  1=The payment is called in a myaccount GUI context. So we can ignore control on delayed payments.
 	 * @return	int					                 			0 if no error, >0 if error
 	 */
-	function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice = null, $includedraft = 0, $noemailtocustomeriferror = 0, $nocancelifpaymenterror = 0, $calledinmyaccountcontext = 0)
+	public function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice = null, $includedraft = 0, $noemailtocustomeriferror = 0, $nocancelifpaymenterror = 0, $calledinmyaccountcontext = 0)
 	{
 		global $conf, $mysoc, $user, $langs;
 
@@ -1196,7 +1196,7 @@ class SellYourSaasUtils
 										$error++;
 										$errorforinvoice++;
 									}
-									$paiement->paiementid   = $paymentTypeId;
+									$paiement->paiementid = $paymentTypeId;
 									$paiement->num_paiement = '';
 									$paiement->num_payment = '';
 									// Add a comment with keyword 'SellYourSaas' in text. Used by trigger.
@@ -2659,7 +2659,7 @@ class SellYourSaasUtils
 												$res = $invoicetodelete->delete($user);
 												//var_dump($idinvoice.' '.$res);
 											} else {
-												dol_syslog("The draft invoice ".$invoicetodelete->ref." has not a ref that match '(...)' so we do not delete it.", LOG_WAR);
+												dol_syslog("The draft invoice ".$invoicetodelete->ref." has not a ref that match '(...)' so we do not delete it.", LOG_WARNING);
 											}
 										}
 									}
@@ -2767,7 +2767,7 @@ class SellYourSaasUtils
 	 * @param   int                     $timeout        Time out in seconds
 	 * @return	int										<0 if KO (-1 = generic error, -2 = failed to connect), >0 if OK
 	 */
-	function sellyoursaasRemoteAction($remoteaction, $object, $appusername = 'admin', $email = '', $password = '', $forceaddevent = '0', $comment = '', $timeout = 90)
+	public function sellyoursaasRemoteAction($remoteaction, $object, $appusername = 'admin', $email = '', $password = '', $forceaddevent = '0', $comment = '', $timeout = 90)
 	{
 		global $conf, $langs, $user;
 
@@ -2856,11 +2856,12 @@ class SellYourSaasUtils
 								$dircreated=0;
 								$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh');
 								if ($result) {
+									// Created
 									$dircreated=1;
-								}	// Created
-								else {
+								} else {
+									// Creation fails or already exists
 									$dircreated=0;
-								}	// Creation fails or already exists
+								}
 
 								// Check if authorized_key exists
 								//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
@@ -3060,20 +3061,20 @@ class SellYourSaasUtils
 					$archivedir = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH;
 				}
 
-				$generatedunixlogin    =$contract->array_options['options_username_os'];
-				$generatedunixpassword =$contract->array_options['options_password_os'];
-				$generateddbname       =$contract->array_options['options_database_db'];
-				$generateddbport       =($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
-				$generateddbusername   =$contract->array_options['options_username_db'];
-				$generateddbpassword   =$contract->array_options['options_password_db'];
-				$generateddbprefix     =($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
-				$generatedunixhostname =$contract->array_options['options_hostname_os'];
-				$generateddbhostname   =$contract->array_options['options_hostname_db'];
-				$generateduniquekey    =getRandomPassword(true);
+				$generatedunixlogin    = $contract->array_options['options_username_os'];
+				$generatedunixpassword = $contract->array_options['options_password_os'];
+				$generateddbname       = $contract->array_options['options_database_db'];
+				$generateddbport       = ($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
+				$generateddbusername   = $contract->array_options['options_username_db'];
+				$generateddbpassword   = $contract->array_options['options_password_db'];
+				$generateddbprefix     = ($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
+				$generatedunixhostname = $contract->array_options['options_hostname_os'];
+				$generateddbhostname   = $contract->array_options['options_hostname_db'];
+				$generateduniquekey    = getRandomPassword(true);
 
-				$sshaccesstype         =(empty($contract->array_options['options_sshaccesstype'])?0:$contract->array_options['options_sshaccesstype']);
-				$customurl             =$contract->array_options['options_custom_url'];
-				$customvirtualhostline =$contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
+				$sshaccesstype         = (empty($contract->array_options['options_sshaccesstype'])?0:$contract->array_options['options_sshaccesstype']);
+				$customurl             = $contract->array_options['options_custom_url'];
+				$customvirtualhostline = $contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
 				$SSLON='On';
 				$CERTIFFORCUSTOMDOMAIN =$customurl;
 				if ($CERTIFFORCUSTOMDOMAIN) {
@@ -3734,7 +3735,7 @@ class SellYourSaasUtils
 	 * @param	string		$domainname		Domain name to select remote ip to deploy to (example: 'home.lan', 'dolicloud.com', ...)
 	 * @return	string						'' if KO, IP if OK
 	 */
-	function getRemoveServerDeploymentIp($domainname)
+	public function getRemoveServerDeploymentIp($domainname)
 	{
 		global $conf;
 
