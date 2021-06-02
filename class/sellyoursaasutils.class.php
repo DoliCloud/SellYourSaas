@@ -2954,7 +2954,8 @@ class SellYourSaasUtils
 
 					if (function_exists('ssh2_disconnect')) {
 						if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
-							//ssh2_disconnect($connection);     // Hang on some config
+							dol_syslog("If it hangs or core dump due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
+							ssh2_disconnect($connection);     // Hang on some config
 						}
 						$connection = null;
 						unset($connection);
@@ -3507,7 +3508,7 @@ class SellYourSaasUtils
 
 								if (function_exists('ssh2_disconnect')) {
 									if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
-										dol_syslog("If it hangs here on ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
+										dol_syslog("If it hangs or core dump due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
 										ssh2_disconnect($connection);     // Hang on some config
 									}
 									$connection = null;

@@ -4659,3 +4659,10 @@ Ciphers +aes128-cbc
 
 Then reload ssh with /etc/init.d/ssh reload
 
+
+==== Some remoteaction generates a PHP coredump
+
+This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
+You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1
+
+
