@@ -562,6 +562,8 @@ elseif ($action == 'sendbecomereseller') {
 	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
 	$firstname = trim(GETPOST('firstName', 'nohtml'));
 	$lastname = trim(GETPOST('lastName', 'nohtml'));
+	$phone = trim(GETPOST('phone', 'nohtml'));
+	$oldphone = trim(GETPOST('oldphone', 'nohtml')); 
 
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
@@ -583,11 +585,17 @@ elseif ($action == 'sendbecomereseller') {
 			exit;
 		}
 	}
-
+	if (!empty($phone) && !isValidPhone($phone)) {
+		setEventMessages($langs->trans("ErrorBadValueForPhone"), null, 'errors');
+		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
+		exit;
+	}
+	
 	$db->begin();	// Start transaction
 
 	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
 	$mythirdpartyaccount->email = $email;
+	$mythirdpartyaccount->phone = $phone;
 	$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
 	$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
 	$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
