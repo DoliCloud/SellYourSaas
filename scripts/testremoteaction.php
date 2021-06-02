@@ -73,10 +73,14 @@ print "***** ".$script_file." *****\n";
 $utils = new SellYourSaasUtils($db);
 
 $contractline = new ContratLigne($db);
-$contractline->fetch(99704);
+$result = $contractline->fetch(99704);
 
-$result = $utils->sellyoursaasRemoteAction('refresh', $contractline);
-
-print "result = ".$result."\n";
+if ($result > 0) {
+	$result = $utils->sellyoursaasRemoteAction('refresh', $contractline);
+	print "result = ".$result."\n";
+} else {
+	print "Contract line not found\n";
+}
 
 exit($result);
+
