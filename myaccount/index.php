@@ -585,12 +585,7 @@ elseif ($action == 'sendbecomereseller') {
 			exit;
 		}
 	}
-	if (empty($phone)) {
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("PhoneNumber")), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
-	}
-	if (! isValidPhone($phone)) {
+	if (!empty($phone) && !isValidPhone($phone)) {
 		setEventMessages($langs->trans("ErrorBadValueForPhone"), null, 'errors');
 		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
 		exit;
