@@ -1672,7 +1672,7 @@ class SellYourSaasUtils
 
 							$comment = 'Refresh contract '.$object->ref." by doRenewalContracts";
 							// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines + linked template invoice
-							$result = $this->sellyoursaasRemoteAction('refresh', $object, 'admin', '', '', '0', $comment);	// This include add of event if qty has changed
+							$result = $this->sellyoursaasRemoteAction('refresh', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
 							if ($result <= 0) {
 								$contracterror[$object->id]=$object->ref;
 
@@ -2756,7 +2756,12 @@ class SellYourSaasUtils
 	 * Make a remote action on a contract (deploy/undeploy/suspend/suspendmaintenance/unsuspend/rename/backup...).
 	 * This function is called on Master but remote action is done on remote agent.
 	 *
-	 * @param	string					$remoteaction	Remote action ('suspend/unsuspend/rename'=change apache virtual file, 'deploy/undeploy'=create/delete database, 'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics)
+	 * @param	string					$remoteaction	Remote action:
+	 * 													'suspend/unsuspend/rename'=change apache virtual file,
+	 * 													'deploy/undeploy'=create/delete database,
+	 * 													'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics
+	 * 													'refreshmetrics'=loop on each line and read remote data and update qty of metrics
+	 * 													'recreateauthorizedkeys', 'deletelock', 'recreatelock'
 	 * @param 	Contrat|ContratLigne	$object			Object contract or contract line
 	 * @param	string					$appusername	App login. Used for replacement of __APPUSERNAME__
 	 * @param	string					$email			Initial email. Used for replacement of __APPEMAIL__
@@ -2791,7 +2796,8 @@ class SellYourSaasUtils
 		include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
-		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract, check install.lock file
+		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract
+		// No need for 'refreshmetrics' here.
 		if (in_array($remoteaction, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat') {
 			// SFTP refresh
 			if (function_exists("ssh2_connect")) {
@@ -2830,7 +2836,7 @@ class SellYourSaasUtils
 								$datelockfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
 								// Check if authorized_keys_support exists (created during os account creation, into skel dir)
-								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fstatlock=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
 								$dateauthorizedkeysfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
@@ -3295,8 +3301,8 @@ class SellYourSaasUtils
 				}
 			}
 
-			// remoteaction = refresh => update the qty for this line if it is a line that is a metric
-			if ($remoteaction == 'refresh') {
+			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
+			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				dol_syslog("Start refresh of nb of resources for a customer");
 
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
