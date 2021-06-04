@@ -137,8 +137,8 @@ class Sellyoursaasapi extends DolibarrApi
 		$restrictonsocid = 0; // Set to 1 if there is a field socid in table of object
 
 		// If the internal user must only see his customers, force searching by him
-		/*$search_sale = 0;
-		if ($restrictonsocid && !DolibarrApiAccess::$user->rights->societe->client->voir && !$socid) {
+		$search_sale = 0;
+		/*if ($restrictonsocid && !DolibarrApiAccess::$user->rights->societe->client->voir && !$socid) {
 			$search_sale = DolibarrApiAccess::$user->id;
 		}*/
 

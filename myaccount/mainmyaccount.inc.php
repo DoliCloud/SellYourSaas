@@ -250,7 +250,9 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				}
 				print '<script type="text/javascript">';
 				print 'var CKEDITOR_BASEPATH = \''.$pathckeditor.'\';'."\n";
-				print 'var ckeditorConfig = \''.dol_buildpath($themesubdir.'/theme/'.$conf->theme.'/ckeditor/config.js'.($ext?'?'.$ext:''), 1).'\';'."\n";		// $themesubdir='' in standard usage
+				// $themesubdir='' in standard usage
+				$themesubdir = '';
+				print 'var ckeditorConfig = \''.dol_buildpath($themesubdir.'/theme/'.$conf->theme.'/ckeditor/config.js'.($ext?'?'.$ext:''), 1).'\';'."\n";
 				print 'var ckeditorFilebrowserBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print 'var ckeditorFilebrowserImageBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Type=Image&Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print '</script>'."\n";
@@ -333,13 +335,12 @@ if (! function_exists("llxFooter")) {
 
 		// Core error message
 		if (! empty($conf->global->MAIN_CORE_ERROR)) {
-			// Ajax version
 			if ($conf->use_javascript_ajax) {
+				// Ajax version
 				$title = img_warning().' '.$langs->trans('CoreErrorTitle');
 				print ajax_dialog($title, $langs->trans('CoreErrorMessage'));
-			}
-			// html version
-			else {
+			} else {
+				// html version
 				$msg = img_warning().' '.$langs->trans('CoreErrorMessage');
 				print '<div class="error">'.$msg.'</div>';
 			}
@@ -442,16 +443,16 @@ if (! function_exists("llxFooter")) {
 }
 
 
-/**
- *  Return a prefix to use for this Dolibarr instance, for session/cookie names or email id.
- *  This prefix is valid in a web context only and is unique for instance and avoid conflict
- *  between multi-instances, even when having two instances with one root dir or two instances
- *  in virtual servers.
- *
- *  @param  string  $mode       			'' (prefix for session name) or 'email' (prefix for email id)
- *  @return	string      					A calculated prefix
- */
 if (! function_exists('dol_getprefix')) {
+	/**
+	 *  Return a prefix to use for this Dolibarr instance, for session/cookie names or email id.
+	 *  This prefix is valid in a web context only and is unique for instance and avoid conflict
+	 *  between multi-instances, even when having two instances with one root dir or two instances
+	 *  in virtual servers.
+	 *
+	 *  @param  string  $mode       			'' (prefix for session name) or 'email' (prefix for email id)
+	 *  @return	string      					A calculated prefix
+	 */
 	function dol_getprefix($mode = '')
 	{
 		// If prefix is for email (we need to have $conf alreayd loaded for this case)
