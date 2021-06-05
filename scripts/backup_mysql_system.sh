@@ -93,7 +93,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas master database found to backup."
 	fi
 else
 	echo "Do a tar of config files"
@@ -120,7 +120,7 @@ else
 		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas master database found to backup."
 	fi
 fi
 
