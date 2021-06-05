@@ -607,7 +607,7 @@ function print_user_table($newdb, $object)
 			dol_print_error($newdb);
 		}
 	} else {
-		print '<tr><td class="opacitymedium">'.$langs->trans("FailedToConnectMayBeOldInstance").'</td></tr>';
+		print '<tr><td class="opacitymedium" colspan="15">'.$langs->trans("FailedToConnectMayBeOldInstance").'</td></tr>';
 	}
 
 	print "</table>";
