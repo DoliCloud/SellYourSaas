@@ -304,7 +304,7 @@ if ($sellyoursaassupporturl) {
 
 		//Combobox for Group of ticket
 		$formticket = new FormTicket($db);
-		$stringtoprint = $formticket->selectGroupTickets($selected = '', $htmlname = 'ticketcategory', $filtertype = '', $format = 0, $empty = 0, $noadmininfo = 0, $maxlength = 0, $morecss = '', $use_multilevel = 1);
+		$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', '', 0, 0, 1, 0, '', 1);
 		$stringtoprint .= '<br><br>';
 		print $stringtoprint;
 
