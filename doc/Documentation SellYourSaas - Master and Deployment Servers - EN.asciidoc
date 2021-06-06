@@ -318,7 +318,7 @@ And set the *root*.*root* and the permissions *r--r-----*
 
 [source, conf]
 ---------------
-chmod o-w /etc/sudoers.d/myunixlogin
+chmod a-w /etc/sudoers.d/myunixlogin
 chmod o-r /etc/sudoers.d/myunixlogin
 ---------------
 
