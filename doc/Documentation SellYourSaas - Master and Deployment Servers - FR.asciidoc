@@ -308,7 +308,7 @@ Et positionner le owner *root.root* et les permissions *r--r-----*
 [source, conf]
 ---------------
 chmod a-w /etc/sudoers.d/myunixlogin
-chmod a-r /etc/sudoers.d/myunixlogin
+chmod o-r /etc/sudoers.d/myunixlogin
 ---------------
 
 
