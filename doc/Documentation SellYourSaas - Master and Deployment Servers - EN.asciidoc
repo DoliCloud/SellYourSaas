@@ -53,7 +53,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * Dedicated customer area (invoicing, ticket, customer account).
 * Pre-wired for supervision via DataDog.
 * Pre-wired for performance analysis, conversion rate via Google Analytics.
-* Payment by credit card via Stripe, SCA (Strong Customer Authentication) compliant.
+* Payment by credit or debit card via Stripe, SCA (Strong Customer Authentication) compliant.
 * Payment by SEPA direct debit (but no direct interface to submit SEPA files to the bank).
 * Anti-abuse systems for applications.
 * Instance subscription quota systems.
