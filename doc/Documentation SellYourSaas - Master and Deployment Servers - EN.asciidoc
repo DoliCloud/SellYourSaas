@@ -40,20 +40,20 @@ Following the deployment of v1 and at the request of users to perpetuate their i
 * Dedicated customer area for managing these invoices, accounts and support.
 * 100% automated system (from the arrival of the prospect to the termination of his subscription through the delivery of the service, backups, supervision and supply of accounting: no human intervention).
 * Flexibility in the subscription mode (frequency, prices, additional service, options, ...)
-* Compatible (or at least adaptable) for any Web application.
+* Compatible (or at least adaptable) with any Web application.
 * Management of a reseller network.
 * Available in OpenSource.
 
 Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and https://www.teclib.com [TecLib], SellYourSaas v2 has achieved these objectives and is now in production for several companies offering Saas services (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], https://www.doliondemand.fr[DoliOnDemand],...). Here is a summary of its capabilities:
 
 * Deployment of any WAMP application. Management of multiple solutions / different applications at the same time.
-* Free distribution of proceedings without request for confidential information or bank cards.
+* Free distribution of proceedings without request for confidential information or credit card.
 * Distribution of paid instances with different pricing levels.
 * Ready-to-use showcase website (optional) to sell your application.
 * Dedicated customer area (invoicing, ticket, customer account).
 * Pre-wired for supervision via DataDog.
 * Pre-wired for performance analysis, conversion rate via Google Analytics.
-* Payment by bank card via Stripe, SCA (Strong Customer Authentication) compliant.
+* Payment by credit or debit card via Stripe, SCA (Strong Customer Authentication) compliant.
 * Payment by SEPA direct debit (but no direct interface to submit SEPA files to the bank).
 * Anti-abuse systems for applications.
 * Instance subscription quota systems.
@@ -89,7 +89,7 @@ The first step is to make one (or more) server available. If we are going on sev
 
 * Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Master server*.
 
-* Obtain one or n servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
+* Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
 _Example with Amazon Standard Medium: _
 
@@ -104,7 +104,7 @@ For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server
 
 
 [[adding_disk]]
-=== Adding the harddisk of data (home of user instances and home of backups)
+=== Adding the hard disk for data (home of user instances and home of backups)
 
 On *Master server*:
 
@@ -126,7 +126,7 @@ With OVH Public Cloud:
 * Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
 Note, the disk becomes visible with *fdisk -l* and *lsblk*
 
-* If it is a disk never partitioned, add the partition on the disk (Linux type) and format it by doing:
+* If the disk is not partitioned, add the partition on the disk (Linux type) and format it by doing:
 
 [source, bash]
 ---------------
@@ -149,7 +149,7 @@ Whether the disk has just been formatted or whether it is an added disk already 
 blkid
 ---------------
 
-* Declare the assembly for an automatic assembly at each reboot by adding a line in */etc/fstab*
+* Declare the mount point for an automatic mounting at each reboot by adding a line in */etc/fstab*
 
 [source, bash]
 ---------------
@@ -314,12 +314,12 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 myunixlogin ALL=(ALL) NOPASSWD:ALL
 ---------------
 
-And set the *root*.*root* and the permissions *r-r-----*
+And set the *root*.*root* and the permissions *r--r-----*
 
 [source, conf]
 ---------------
 chmod a-w /etc/sudoers.d/myunixlogin
-chmod a-r /etc/sudoers.d/myunixlogin
+chmod o-r /etc/sudoers.d/myunixlogin
 ---------------
 
 
@@ -348,7 +348,7 @@ passwd root
 passwd admin
 ---------------
 
-Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
+Run *ssh-keygen* for all these acounts : *root*, *admin* and *myunixlogin*
 
 
 ==== Default shell
@@ -633,14 +633,14 @@ instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
 # Set to its own IP if it is a deployment server. Keep empty for master only server.
-ipserverdeployment=ipduserverdeployment
+ipserverdeployment=ipOfDeploymentServer
 
 # Set location of the master database
 databasehost=ipduserveurmaster ou localhost si serveur master
 # Set port of the master database (default is 3306)
 databaseport=3306
 # Set database name of the master server
-database=databaseduservermaster
+database=databaseNameOnMasterServer
 # Set a credential for an access to the master database (each server can have a different account to access the master database)
 databaseuser=sellyoursaas
 databasepass=...
@@ -870,7 +870,7 @@ Write the following line in /etc/php/7.4/cli/php.ini and /etc/php/7.4/apache2/ph
 extension=mcrypt.so
 ---------------
 
-Then *reboot* the *Apache* server
+Then *restart* the *Apache* server
 
 [source,bash]
 ---------------
@@ -1088,7 +1088,7 @@ TimeoutStartSec = 3600s
 TimeoutStopSec = 3600s
 ---------------
 
-Rem: Instead of putting *3600s*, it is possible to put *infinity* (but 3600 is preferred)
+Note: Instead of putting *3600s*, it is possible to put *infinity* (but 3600 is preferred)
 
 Then reload the new configuration:
 
@@ -1103,7 +1103,7 @@ systemctl reload service_name.service
 TODO Graphic with flux and ports
 
 
-* Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. However, 2 methods with example are provided:
+* Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
 
 
 ==== With iptables ====
@@ -1145,7 +1145,7 @@ Then launch and enable the firewall
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/repair.ksh /usr/sbin/repair
 ---------------
 
-To consult, no longer launch at startup, launch at startup, stop, launch:
+To consult, disable at startup, enable at startup, stop, launch respectively:
 
 [source, bash]
 ---------------
@@ -2072,7 +2072,7 @@ GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dol
 FLUSH PRIVILEGES;
 ---------------
 
-Rem: If the user already exists, to set only the password:
+Note: If the user already exists, to set only the password:
 
 [source,sql]
 ---------------
@@ -3026,7 +3026,7 @@ systemctl status snap.certbot.renew.timer
 [[creation_certificat_ssl]]
 === Create a wildcard SSL certificate for user instances
 
-Into the following instructions, we will use X with value '', 2, 3, ... (numero of pool of instance = numero of the deployment server).
+Into the following instructions, we will use X with value '', 2, 3, ... (digit of pool of instance = digit of the deployment server).
 This must be done on deployment servers only.
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
@@ -3109,7 +3109,7 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sel
 
 NOTE: This is the certificate that will be used for the client instances. Custom certificates for instances will be in */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
-* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* with this content:
+* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* or */etc/apache2/sites-available/default-ssl.conf* with this content:
 
 ---------------
 <IfModule mod_ssl.c>
@@ -3164,7 +3164,7 @@ So if a user is using an old URL with a delete virtual host, he will reach the d
 <body>
 <center>
 <br>
-<strong>Server (name_of_server_x)<br></strong>Sorry, there is currently no service available to this URL. May be this domain name was used in the past to host a customer instance that was definitely undeployed.<br>
+<strong>Server (name_of_server_x)<br></strong>Sorry, there is currently no service available to this URL. May be this domain name was used in the past to host a customer instance that was permanently undeployed.<br>
 You may try later or create a new instance from scratch from page <a href="https://www.mysaasdomainname.com">https://www.mysaasdomainname.com</a>.
 <br>
 </center>
@@ -3204,7 +3204,6 @@ You must have inside the cron of user *admin*:
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 ---------------
 
-#7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 
 Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. You will also set it into module *Scheduled jobs* on the Dolibarr master later.
 
@@ -4452,7 +4451,7 @@ services souscrit, ou encore le nom du revendeur).
 [[remote_actions]]
 === Description of the 8 remote actions
 
-A remote action is an action requested by the server to tha agent to be executed on the deployment server.
+A remote action is an action requested by the server to the agent to be executed on the deployment server.
 
 ==== deploy / deployall
 
@@ -4465,7 +4464,7 @@ Steps realized by the agent and the remote action *deploy* or *deployall* are:
 - Create a virtual host apache
 - Deploy files with cp -pr pathtogitofpackage/* /home/jail/home/usrABCDEFGHIK/appAZERTYUIOP
 - Deploy documents with cp -pr pathtogitofpackagebis/* /home/jail/home/usrABCDEFGHIK/appAZERTYUIOP
-- Copy/create/update configartion files and update them with all variables.
+- Copy/create/update configuration files and update them with all variables.
 - Copy/create/update cron file and update them with all variables.
 
 ==== undeploy / undeployall
@@ -4541,7 +4540,7 @@ Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 == Annexes
 
-=== Some common URLs fot Google Analytics objectives or DataDog Statistics
+=== Some common URLs for Google Analytics objectives or DataDog Statistics
 
 To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
 
@@ -4659,7 +4658,7 @@ Error when sending email in */var/log/mail.log*:
 
 	Mar  2 22:41:59 novafirstcloud6 postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 
-=> Check you have a file */etc/resolv.conf* that is link to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
+=> Check you have a file */etc/resolv.conf* that is linked to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
 
 nameserver 127.0.0.1
 or 
@@ -4695,9 +4694,9 @@ sudo fail2ban-client -vvv -x start
 
 ==== Problem when starting mariadb / mariadb stop after a timetout
 
-Launching mariadb launch the database but the command never return to the command line prompt and the database is automatically stopped after few minutes.
+Launching mariadb launches the database but the command never returns to the command line prompt and the database is automatically stopped after few minutes.
 
-Check the /var/log/kern.log, you may have apparmor error on /usr/sbin/mysqld.
+Check the /var/log/kern.log, you may have an apparmor error on /usr/sbin/mysqld.
 
 If yes, disable the apparmor rule: 
 
@@ -4706,7 +4705,7 @@ aa-disable usr.sbin.mysqld
 Then reboot server.
 
 
-==== Extracting a zip file extract files into filename with path with \ including into name
+==== Extracting a zip file with file paths or names including backslash \
 
 The problem is into the zip file (may be generated by the bugged Powershell). To solve this, try to unzip from command line with 
 
@@ -4738,7 +4737,7 @@ If you find into */var/log/auth.log* an error like:
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
 
-The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the sshd_config of the server by adding:
+The client (maybe an old PHP version) uses a deprecated algorithm for negotiation. Edit the sshd_config of the server by adding:
 
 # Legacy changes - To allow an old client to connect to
 KexAlgorithms +diffie-hellman-group1-sha1
