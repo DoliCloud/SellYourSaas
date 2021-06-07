@@ -484,7 +484,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '</div>';
 		}
 
-								// Add new option
+		// Add new option
 		if ($statuslabel != 'processing' && $statuslabel != 'undeployed') {
 			print '<div class="resource inline-block boxresource opacitymedium small">';
 			print '<br><br><br>';
@@ -492,10 +492,10 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '</div>';
 		}
 
-								print '<br><br>';
+		print '<br><br>';
 
-								// Show the current Plan (with link to change it)
-								print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
+		// Show the current Plan (with link to change it)
+		print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
 		if ($action == 'changeplan' && $planid > 0 && $id == GETPOST('id', 'int')) {
 			print '<input type="hidden" name="mode" value="instances"/>';
 			print '<input type="hidden" name="action" value="updateplan" />';
@@ -543,10 +543,10 @@ if (count($listofcontractid) == 0) {				// Should not happen
 				}
 			}
 		}
-								print '</span>';
-								print '<br>';
+		print '</span>';
+		print '<br>';
 
-								// Billing
+		// Billing
 		if ($statuslabel != 'undeployed') {
 			print '<!-- Billing information of contract -->'."\n";
 			print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.$langs->trans("Billing").' : </span>';
@@ -617,7 +617,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '</span>';
 		}
 
-								print '
+		print '
 								  </div>
 				              </div>
 
@@ -693,7 +693,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			}
 		}
 
-								print '
+		print '
 				              </div> <!-- END TAB SSH PANE -->
 
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
@@ -761,7 +761,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			}
 		}
 
-								print '
+		print '
 				              </div> <!-- END TAB DB PANE -->
 
 				            <div class="tab-pane" id="tab_danger_'.$contract->id.'">
@@ -783,7 +783,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 										<input type="text" required="required" class="urlofinstancetodestroy" name="urlofinstancetodestroy" value="'.GETPOST('urlofinstancetodestroy', 'alpha').'" placeholder="'.$langs->trans("NameOfInstanceToDestroy").'" autofocus>
 									</p>';
 		}
-								print '
+		print '
 								<p class="center">
 									<input type="hidden" name="mode" value="instances"/>
 									<input type="hidden" name="action" value="undeploy" />
