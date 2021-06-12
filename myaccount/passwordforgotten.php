@@ -141,7 +141,7 @@ if (empty($reshook)) {
 				} else {
 					$username = $editthirdparty->email;
 					if (GETPOST('confirmpasswordreset')) {
-						$MINPASSWORDLENGTH = 6;
+						$MINPASSWORDLENGTH = 8;
 						if (empty($newpassword1) && empty($newpassword2)) {
 							$langs->load("install");
 							$message = '<div class="error">'.$langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")).'</div>';
