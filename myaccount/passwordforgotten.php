@@ -137,6 +137,7 @@ if (empty($reshook)) {
 						} elseif (empty($newpassword1) || empty($newpassword2) || ($newpassword1 != $newpassword2)) {
 							$langs->load("install");
 							$message = '<div class="error">'.$langs->trans("PasswordsMismatch").'</div>';
+							//dol_syslog("newpassword1 = ".$newpassword1." - newpassword2 = ".$newpassword2, LOG_DEBUG);
 							$asknewpass = 1;
 						} elseif (strlen($newpassword1) < $MINPASSWORDLENGTH) {
 							$langs->load("other");
