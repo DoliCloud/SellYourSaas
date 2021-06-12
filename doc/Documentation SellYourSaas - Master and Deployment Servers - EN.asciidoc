@@ -400,28 +400,6 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 ---------------
 
 
-=== Max size increase UID
-
-On the deployment servers, modify */etc/login.defs* to put the
-
-[source, conf]
----------------
-UID_MIN 1000
-UID_MAX 500000
-
-GID_MIN 1000
-GID_MAX 500000
----------------
-
-Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc/apache2/conf-enabled/security.conf* (otherwise)
-
-[source, conf]
----------------
-LimitUIDRange 1 500000
-LimitGIDRange 1 500000
----------------
-
-
 === Hostname and IP configuration
 
 Add an entry from the new server to the DNS provided by the domain provider.
@@ -810,7 +788,7 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 
-=== Deploy the public key of master on admin account
+=== Deploy the public key of master admin on deployment admin account
 
 ==== On deployment servers
 
@@ -828,7 +806,7 @@ Complete the file */home/admin/.ssh/config* to indicate to use this public key w
 
 [source, bash]
 ---------------
-Host ipserveurdeploiment
+Host ip.server.deployment
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
 Host github.com
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas    
@@ -914,6 +892,28 @@ Uninstall the package *unattended-upgrades* if it was installed.
 [source, bash]
 ---------------
 apt remove unattended-upgrades
+---------------
+
+
+=== Max size increase UID
+
+On the deployment servers, modify */etc/login.defs* to put the
+
+[source, conf]
+---------------
+UID_MIN                  1000
+UID_MAX                 500000
+
+GID_MIN                  1000
+GID_MAX                 500000
+---------------
+
+Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc/apache2/conf-enabled/security.conf* (otherwise)
+
+[source, conf]
+---------------
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 

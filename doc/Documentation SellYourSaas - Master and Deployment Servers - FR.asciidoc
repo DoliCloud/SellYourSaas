@@ -372,27 +372,6 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 ---------------
 
 
-=== Augmentation taille max UID
-
-Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le 
-
-[source,conf]
----------------
-	UID_MIN                  1000
-	UID_MAX                 500000
-
-	GID_MIN                  1000
-	GID_MAX                 500000
----------------
-
-Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* (sinon) pour mettre 
-
-[source,conf]
----------------
-LimitUIDRange 1 500000
-LimitGIDRange 1 500000
----------------
-
 
 === Configuration hostname et IP
 
@@ -853,6 +832,28 @@ Désinstaller le package *unattended-upgrades* au cas où il aurait été instal
 [source,bash]
 ---------------
 apt remove unattended-upgrades
+---------------
+
+
+=== Augmentation taille max UID
+
+Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le 
+
+[source,conf]
+---------------
+UID_MIN                  1000
+UID_MAX                 500000
+
+GID_MIN                  1000
+GID_MAX                 500000
+---------------
+
+Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* (sinon) pour mettre 
+
+[source,conf]
+---------------
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 
