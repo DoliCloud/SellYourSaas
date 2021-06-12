@@ -4114,17 +4114,20 @@ select @@datadir;
 This output confirms that MySQL is configured to use the default data directory, /var/lib/mysql/, so that’s the directory we need to move. Once you’ve confirmed this, type exit and press “ENTER” to leave the monitor:
 
 exit
+
 To ensure the integrity of the data, we’ll shut down MySQL before we actually make changes to the data directory:
 
 sudo systemctl stop mysqld
+
 systemctl doesn’t display the outcome of all service management commands, so if you want to be sure you’ve succeeded, use the following command:
 
 sudo systemctl status mysqld
-You can be sure it’s shut down if the final line of the output tells you the server is stopped:
 
-Output
-. . .
+You can be sure it’s shut down if the final line of the output tells you the server is stopped like in this example:
+
+...
 Jul 18 11:24:20 ubuntu-512mb-nyc1-01 systemd[1]: Stopped MySQL Community Server.
+
 Now that the server is shut down, we’ll copy the existing database directory to the new location with rsync. Using the -a flag preserves the permissions and other directory properties, while-v provides verbose output so you can follow the progress.
 
 Note: Be sure there is no trailing slash on the directory, which may be added if you use tab completion. When there’s a trailing slash, rsync will dump the contents of the directory into the mount point instead of transferring it into a containing mysql directory:
@@ -4271,7 +4274,7 @@ Launch the script:
 
 Go into menu *SellYourSaas - Packages* to create your new package.
 
-For example, to deploy an application like Dolibarr with sources available into directory *documents/sellyoursaas/git*, enter the values of the following fields:
+For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, enter the values of the following fields:
 
 
 Into field *Dir with sources 1*
