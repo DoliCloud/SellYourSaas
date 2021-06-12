@@ -208,13 +208,14 @@ To check:
 cat /proc/mounts | grep diskX
 ---------------
 
-Rem: If you need to recover data files from another disk, use:
+Rem: If you need to recover data files from another source disk, use:
 
 [source, bash]
 ---------------
 rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
+cd /mnt/diskSource
 rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
 After launching mysql, you can test all databases with
