@@ -127,10 +127,10 @@ if (! preg_match('/class="ok"/', $message)) {
 		print '<input type="hidden" name="id" value="'.$id.'">';
 		print '<input type="hidden" name="hashreset" value="'.$hashreset.'">';
 
-		print '<input type="password" maxlength="128" id="newpassword1" placeholder="'.$langs->trans("Password").'" name="newpassword1" class="flat input-icon-user" tabindex="2" autofocus="autofocus" />';
+		print '<input type="password" maxlength="128" id="newpassword1" placeholder="'.$langs->trans("NewPassword").'" name="newpassword1" class="flat input-icon-user" tabindex="2" autofocus="autofocus" />';
 		print '<br><br>';
 
-		print '<input type="password" maxlength="128" id="newpassword2" placeholder="'.$langs->trans("ConfirmPassword").'" name="newpassword2" class="flat input-icon-user" tabindex="3" autofocus="autofocus" />';
+		print '<input type="password" maxlength="128" id="newpassword2" placeholder="'.$langs->trans("ConfirmPassword").'" name="newpassword2" class="flat input-icon-user" tabindex="3" />';
 		print '<br><br>';
 	}
 	?>

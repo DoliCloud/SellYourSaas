@@ -185,7 +185,7 @@ if (empty($reshook)) {
 				 {*/
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 				$hashreset = getRandomPassword(true, array('I'));
-				$thirdparty->array_options['options_pass_temp']=$hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now(), 1, 'd'), 'dayhourlog');
+				$thirdparty->array_options['options_pass_temp']=$hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now('gmt'), 1, 'd'), 'dayhourlog', 'gmt');
 				$result=$thirdparty->update($thirdparty->id, $user, 0);
 				if ($result < 0) {
 					// Failed
