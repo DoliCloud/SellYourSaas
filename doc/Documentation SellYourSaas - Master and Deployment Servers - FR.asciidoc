@@ -731,6 +731,13 @@ Ajouter la ligne au fichier */etc/fstab* pour avoir le montage automatique au re
 i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
+et tester que ce montage se fait bien
+ 
+[source, bash]
+---------------
+mount -a
+---------------
+
 
 === Déploiement de la clé publique ssh du compte admin
 

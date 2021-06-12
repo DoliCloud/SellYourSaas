@@ -788,6 +788,12 @@ Add the line to the */etc/fstab* file to have automatic reboot mounting
 i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
+and try the automatic mount
+ 
+[source, bash]
+---------------
+mount -a
+---------------
 
 === Deploy the public key of master admin on deployment admin account
 
