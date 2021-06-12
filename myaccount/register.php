@@ -28,6 +28,7 @@
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 // Add specific definition to allow a dedicated session management
@@ -362,8 +363,17 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 			<?php
 			if (! empty($tmpproduct->array_options['options_register_text'])) {
-				print '<!-- show custom registration text of service -->';
-				print '<div class="register_text">'.$langs->trans($tmpproduct->array_options['options_register_text']).'</div>';
+				$keytouse = $tmpproduct->array_options['options_register_text'];
+				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
+				print '<div class="register_text">'."\n";
+				if ($langs->trans($keytouse) != $keytouse) {
+					print $langs->trans($keytouse);
+				} else {	// We try english version
+					if ($langsen->trans($keytouse) != $keytouse) {
+						print $langsen->trans($keytouse);
+					}
+				}
+				print '</div>'."\n";
 			}
 			?>
 

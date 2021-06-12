@@ -164,9 +164,9 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (do
 ---------------
 mkdir /mnt/diskhome
 mount /dev/vdxY /mnt/diskhome
-
-And if a disk was created for backup:
 mkdir /mnt/diskbackup
+
+And if a disk was created for the backup:
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -208,13 +208,14 @@ To check:
 cat /proc/mounts | grep diskX
 ---------------
 
-Rem: If you need to recover data files from another disk, use:
+Note: If you need to recover data files from another source disk, use:
 
 [source, bash]
 ---------------
 rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
+cd /mnt/diskSource
 rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
 After launching mysql, you can test all databases with
@@ -400,28 +401,6 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 ---------------
 
 
-=== Max size increase UID
-
-On the deployment servers, modify */etc/login.defs* to put the
-
-[source, conf]
----------------
-UID_MIN 1000
-UID_MAX 500000
-
-GID_MIN 1000
-GID_MAX 500000
----------------
-
-Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc/apache2/conf-enabled/security.conf* (otherwise)
-
-[source, conf]
----------------
-LimitUIDRange 1 500000
-LimitGIDRange 1 500000
----------------
-
-
 === Hostname and IP configuration
 
 Add an entry from the new server to the DNS provided by the domain provider.
@@ -594,6 +573,35 @@ chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskb
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
 ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
+---------------
+
+
+=== Getting files of Dolibarr and SellYourSaas application
+
+On all servers (*Master and Deploiement*):
+
+* Under the *root* login, install git tool:
+
+[source,bash]
+---------------
+apt install git
+---------------
+
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+chown -R admin.admin /home/admin/wwwroot/dolibarr
+---------------
+
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 
@@ -780,16 +788,22 @@ Add the line to the */etc/fstab* file to have automatic reboot mounting
 i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
+and try the automatic mount
+ 
+[source, bash]
+---------------
+mount -a
+---------------
 
-=== Deploy the public key of master on admin account
+=== Deploy the public key of master admin on deployment admin account
 
 ==== On deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access user accounts). Put the right permissios.
+On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access user accounts). Put the right permissions.
 
 [source, bash]
 ---------------
-chmod u +rw /home/admin/.ssh/id_rsa_sellyoursaas*
+chmod u+rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod go-rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
@@ -799,7 +813,7 @@ Complete the file */home/admin/.ssh/config* to indicate to use this public key w
 
 [source, bash]
 ---------------
-Host ipserveurdeploiment
+Host ip.server.deployment
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
 Host github.com
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas    
@@ -888,6 +902,28 @@ apt remove unattended-upgrades
 ---------------
 
 
+=== Max size increase UID
+
+On the deployment servers, modify */etc/login.defs* to put the
+
+[source, conf]
+---------------
+UID_MIN                  1000
+UID_MAX                 500000
+
+GID_MIN                  1000
+GID_MAX                 500000
+---------------
+
+Modify the file */etc/apache2/mods-enabled/mpm_itk.conf* (if it exists) or */etc/apache2/conf-enabled/security.conf* (otherwise)
+
+[source, conf]
+---------------
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
+---------------
+
+
 === Apache web server configuration
 
 Enable apache *modules* to work with MPM_PREFORK and MPM_ITK:
@@ -905,7 +941,7 @@ Enable apache *configurations* to work with MPM_PREFORK and MPM_ITK:
 
 [source,bash]
 ---------------
-a2enconf charset indexignore localized-error-pages other-vhosts-access-log security
+a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 
@@ -1103,10 +1139,12 @@ systemctl reload service_name.service
 TODO Graphic with flux and ports
 
 
-* Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
+* Add a firewall. Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
 
 
-==== With iptables ====
+==== With iptables (deprecated) ====
+
+Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
 
 [source, bash]
 ---------------
@@ -1117,7 +1155,7 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-==== With ufw
+==== With ufw (recommended) ====
 
 Edit file */etc/ufw/before.rules* to allow out ping, by adding this:
 
@@ -1198,10 +1236,10 @@ systemctl is-enabled remote_server_launcher
 systemctl status remote_server_launcher
 ---------------
 
-Note: The agent is launched on port 8080
+Note: The agent is launched on port 8080 and is waiting master orders.
 
 
-Pour utiliser systemd créer un fichier /etc/systemd/system/remote-server-launcher.service :
+To use systemd create a file /etc/systemd/system/remote-server-launcher.service :
 
 [source,bash]
 ---------------
@@ -1222,9 +1260,9 @@ Pour utiliser systemd créer un fichier /etc/systemd/system/remote-server-launch
  WantedBy=multi-user.target
 ---------------
 
-La directive "RequiresMountsFor" permet d'attendre la disponibilité du répertoire où se trouve le script "remote_server_launcher.sh"
+The "RequiresMountsFor" directive allows us to wait for the directory of "remote_server_launcher.sh" to be available.
 
-Activation du service :
+Service activation :
 
 [source,bash]
 ---------------
@@ -1499,15 +1537,15 @@ maxretry = 10
 [web-dol-registerinstance]
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enable to false on deployment servers
-;enabled = true
-;port    = http,https
-;filter  = web-dolibarr-rulesregisterinstance
-;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
-;action  = %(action_mw)s
-;bantime  = 4320000   ; 50 days
-;findtime = 86400     ; 1 day
-;maxretry = 10
+; disable this rule by setting enabled to false on non master servers
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulesregisterinstance
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 10
 
 ---------------
 
@@ -1526,6 +1564,14 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ---------------
 
 Relaunch fail2ban and check errors into */var/log/fail2ban.log*
+
+Note: If you need to have the existing log files re-parsed fully again, you must change a char at begin of file to checksum for recovery point will fails. If it fails, delete file /var/lib/fail2ban/fail2ban.sqlite3
+
+Note: To test a rule works, append a line into the log file and check the /var/log/fail2ban.log file. For example:
+echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - /user/card.php?id=1 )" >> /var/log/phpsendmail.log
+
+Note: To test rule file on an existing log file:
+fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
 
 === Test spamassassin ===
@@ -1835,18 +1881,18 @@ smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, che
 
 !!! IMPORTANT
 
-Pensez à modifier dans */etc/postfix/main.cf*, les entrées :
+Remember to change those lines in */etc/postfix/main.cf*:
  
 [source,bash]
 ---------------
-inet_interfaces = ip_publique_associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
+inet_interfaces = public_ip_returned_by_server_s_reverse_dns
 inet_protocols = ipv4
 ---------------
 
 
-=== Configuration de Postfix pour authentification externe SMTP sécurisée (optionnel)
+=== Configuring Postfix for a secured external SMTP authentication (optional)
 
-En cas de besoin d'utiliser postfix depuis un accès externe (et donc authentifié)
+If you need to use postix from an external (and thus authenticated) access
 
 [source,bash]
 ---------------
@@ -1854,21 +1900,21 @@ sudo apt install sasl2-bin
 vi /etc/default/saslauthd  pour mettre START=yes
 ---------------
 
-Vérifier que le user postfix se trouve dans le groupe *sasl*. Si non, l'ajouter par:
+Check that user postfix is in the *sasl* group. If not, add it:
 
 [source,bash]
 ---------------
 adduser postfix sasl
 ---------------
 
-Modifier le fichier */etc/postfix/master.cf* pour ajouter un 'n' afin de désactiver le chroot de smtpd
+Add 'n' to */etc/postfix/master.cf*, to deactivate the smtpd chroot
 
 [source,bash]
 ---------------
 smtp      inet  n       -       n       -       -       smtpd
 ---------------
 
-Ajouter un fichier *smtpd.conf* dans */etc/postfix/sasl*
+Add a *smtpd.conf* file in */etc/postfix/sasl*
 
 [source,bash]
 ---------------
@@ -1877,7 +1923,7 @@ pwcheck_method: saslauthd
 mech_list: plain login
 ---------------
 
-Pour du SMTPS, créer un certificat:
+To use SMTPS, create a certificate:
  
 [source,bash]
 ---------------
@@ -1885,7 +1931,7 @@ cd /etc/postfix
 openssl req -nodes -new -x509 -keyout dsfc.key -out dsfc.crt
 ---------------
 
-Compléter le fichier */etc/postfix/main.cf* avec:
+Complete */etc/postfix/main.cf*:
 
 [source,bash]
 ---------------
@@ -2144,9 +2190,9 @@ GRANT SUPER, RELOAD, REPLICATION SLAVE ON *.* TO 'repluser'@'%' IDENTIFIED BY 'r
 SHOW GRANTS FOR 'repluser'
 ---------------
 
-Relancer les serveurs.
+Reboot the servers.
 
-Vérifier que le SLAVE peut atteindre le master sur un host fixe et via le port 3306.
+Check that the *slave* can reach the master on a fixed IP, on port 3306.
 
 On master:
 
@@ -2156,10 +2202,10 @@ FLUSH TABLES WITH READ LOCK;
 SHOW MASTER STATUS;
 ---------------
 
--> Récuperer les identifiants
+-> Get login info
 
 
-Dumper les bases de données et le mettre sur le Slave.
+Dump the databases and transfer them on the slave.
 
 
 On slave:
@@ -2171,16 +2217,15 @@ CHANGE MASTER TO MASTER_HOST='myservername.mycomapny.com', MASTER_USER='repluser
 ---------------
 
 
-Pour voir si un slave est en attente de replication du master, pour voir si le *Slave_IO_State* est à *Waiting for master to send event* et si
-*Slave_IO_Running* et *Slave_SQL_Running* sont à YES et voir la dernière erreur:
+To check if the slave is waiting to replicate the master, if *Slave_IO_State* is set to *Waiting for master to send event*, if *Slave_IO_Running* and *Slave_SQL_Running* are set to YES, and see the last error :
 
 [source,sql]
 ---------------
 SHOW SLAVE STATUS;
 ---------------
 
-Remarque: Le *Exec_Master_Log_Pos* Doit aussi valoir la même valeur que le SHOW MASTER STATUS sur le serveur.
-Pour forcer un slave a relancer les requêtes master en suspens suite à un arrêt après erreur:
+Note: *Exec_Master_Log_Pos* should show the same value as SHOW MASTER STATUS on the server.
+To force a slave to run the master requests on hold after a shutdown caused by an error:
 
 [source,sql]
 ---------------
@@ -2190,9 +2235,9 @@ START SLAVE;
 ---------------
 
 
-En cas de probleme pour relance mysql slave, mettre
-innodb_force_recovery = 1 dans */etc/mysql/mariadb.conf.d/50-server.cnf*
-Mais à enlever pour avoir les tables en écritures à nouveau après avoir résolue le problème.
+In case there is a problem restarting the slave, set
+innodb_force_recovery = 1 in */etc/mysql/mariadb.conf.d/50-server.cnf*
+But remove it after you solve the problem, to have the tables writable again.
 
 
 (Voir https://www.howtoforge.com/tutorial/replicating-a-master-database-using-mariadb-10/)
@@ -2538,9 +2583,9 @@ mkdir /home/jail/chroot
 [source,bash]
 ---------------
 # /home/jail/home
-/mnt/diskhome/home /home/jail/home bind defaults,bind 0
+/mnt/diskhome/home /home/jail/home bind defaults,bind 0 0
 # /home/jail/chroot
-/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
+/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0 0
 ---------------
 
 * Mount directories
@@ -2656,12 +2701,11 @@ image::config_jailkit_contrat.png[SSH access type]
 
 === Allow generation of PNG thumbs from PDFs
 
-Supprimer la règle de désactivation du format Ghostscript PDF dans ImageMagick. Ceci permettra à ImageMagick et donc les librairies PHP de 
-pouvoir fabriquer une image png d'aperçu depuis un fichier PDF.
+Remove the rule disabling the Ghostscript PDF format in ImageMagick. This allows ImageMagick and thus the PHP libraries to generate PNG thumbnails of a PDF file.
 
     vi /etc/ImageMagick-6/policy.xml
 
-Mettre en commentaire
+Comment
 
     <!--  <policy domain="coder" rights="none" pattern="PDF" /> -->
 
@@ -2669,24 +2713,24 @@ Mettre en commentaire
 
 === Setup of DNS server for domains served by Master server
 
-==== On registar side
+==== On registrar side
 
-Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
+In the registrar, update the DNS of the main domain *mysaasdomainname.com* with *A* records 
 
-    *admin.mysaasdomainname.com*         Domain de l'outil d'administration pointant sur l'ip du serveur Master
-    *myaccount.mysaasdomainname.com*     Domain de l'outil d'administration pointant sur l'ip du serveur Master
+    *admin.mysaasdomainname.com*         Domain of the admin tool, points to the master server's IP
+    *myaccount.mysaasdomainname.com*     Domain of the user account tools, points to the master server's IP
 
 
 
 === Setup of DNS server for deployment servers
 
-==== On registar side
+==== On registrar side
 
-Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
+In the registrar, update the DNS of the main domain *mysaasdomainname.com* with *A* records 
 
-    *withX.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
-    *ns1with1.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
-    *ns2with1.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *withX.mysaasdomainname.com*          Subdomain of the actual user instances, points to the deployment server's IP
+    *ns1with1.mysaasdomainname.com*       DNS server 1 of the user instances, points to the deployment server's IP
+    *ns2with1.mysaasdomainname.com*       DNS server 2 of the user instances, points to the deployment server's IP
 
 You can also add record *GLUE record* on your register side for (optional)
 
@@ -2748,15 +2792,15 @@ Create a directory */etc/bind/archives*
 mkdir /etc/bind/archives
 ---------------
 
-Vérifier que la résolution DNS se fait bien par défaut sur 127.0.0.1 en faisant par exempl:
+Check that the default DNS resolver is indeed 127.0.0.1 with:
 
 [source,bash]
 ---------------
 nslookup test.withX.mysaasdomainname.com
 ---------------
 
-Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
-Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local:
+If not deactivate *systemd-resolver* (see below) and create the file */etc/resolv.conf* manually.
+Deactivate *systemd-resolver* that adds 127.0.0.53 as resolver and bypasses bind locally:
 
 [source,bash]
 ---------------
@@ -2774,9 +2818,9 @@ Do a test of DNS resolution using the local DNS server with
 host -a test.withX.mysaasdomainname.com 127.0.0.1
 ---------------
 
-Cela doit renvoyer l'ip du serveur de déploiement.
+This must return the deployment server's IP.
 
-Essayez ensuite en passant par un DNS exterieur comme celui de Google:
+Then double check with an external DNS, like Google's:
 
 [source,bash]
 ---------------
@@ -2789,11 +2833,12 @@ nslookup test.withX.mysaasdomainname.com 8.8.8.8
 
 ==== Secure the directory of PHP sessions
 
-Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
+Set permissions to *drwx-wx-wt* for php sessions directories */dev/shm/* and/or */var/lib/php/sessions*
 
 [source,bash]
 ---------------
-TODO
+chmod -Rv 733 /dev/shm /var/lib/php/sessions
+chmod +t /dev/shm /var/lib/php/sessions
 ---------------
 
 ==== Define size of upload and session duration
@@ -2817,7 +2862,7 @@ session.gc_maxlifetime = 3600
 
 On *Deployment servers*:
 
-Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
+The PHP wrapper to send mail allows to intercept any mail sent via PHP before actually sending it (to do an antispam analysis and log it in a file that can be used by fail2ban)
 
 Create the links to the 2 tools for preprocessing PHP
 
@@ -2844,7 +2889,7 @@ sendmail_path = /usr/local/bin/phpsendmail.php
 mail.log = /var/log/phpmail.log
 ---------------
 
-Créer les fichiers *phpmail.log* et *phpsendmail.log*:
+Create the files *phpmail.log* and *phpsendmail.log*:
 
 [source,bash]
 ---------------
@@ -2866,7 +2911,7 @@ su root syslog
 ---------------
 
 
-* Créer un fichier */etc/logrotate.d/logrotate_admin_log*
+* Create a file */etc/logrotate.d/logrotate_admin_log*
 
 [source,conf]
 ---------------
@@ -2924,7 +2969,7 @@ su root syslog
 }
 ---------------
 
-* Pour tester la rotation immédiatement:
+* To test rotation immediately:
 
 [source,bash]
 ---------------
@@ -2977,7 +3022,7 @@ journalctl --header
 
 === Disable or enable apport (optional, "on" recommended)
 
-Pour activer:
+To enable:
 
 [source,bash]
 ---------------
@@ -2986,7 +3031,7 @@ sudo systemctl start apport.service
 sudo systemctl status apport.service
 ---------------
 
-Pour désactiver:
+To disable:
 
 [source,bash]
 ---------------
@@ -3026,16 +3071,16 @@ systemctl status snap.certbot.renew.timer
 [[creation_certificat_ssl]]
 === Create a wildcard SSL certificate for user instances
 
-Into the following instructions, we will use X with value '', 2, 3, ... (digit of pool of instance = digit of the deployment server).
+Into the following instructions, we will use X with value 1, 2, 3, ... (digit of pool of instance = digit of the deployment server).
 This must be done on deployment servers only.
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
 
 ===== From a SSL provider 
 
-* Créer le fichier key *withX.mysaasdomainname.com.key* et csr *withX.mysaasdomainname.com.csr* ainsi:
+* Create the key *withX.mysaasdomainname.com.key* and csr *withX.mysaasdomainname.com.csr* files like so:
 
-Pour générer le fichier .key:   
+To generate the .key file:   
     
 [source,bash]
 ---------------
@@ -3044,14 +3089,14 @@ openssl genrsa 2048 > withX.mysaasdomainname.com.key
 chmod go-r withX.mysaasdomainname.com.key
 ---------------
 
-Pour générer le fichier .csr:
+To generate the .csr file:
 
 [source,bash]
 ---------------
 openssl req -nodes -newkey rsa:2048 -sha256 -keyout withX.mysaasdomainname.com.key -out withX.mysaasdomainname.com.csr
 ---------------
 
-Choisir:
+Choose:
 
 	CN	*.withX.mysaasdomainname.com
 	OU	IT
@@ -3173,6 +3218,7 @@ You may try later or create a new instance from scratch from page <a href="https
 ---------------
 
 
+[[installing_cron_tasks]]
 [[installation_des_taches_cron]]
 === Installation of Cron tasks
 
@@ -3198,7 +3244,7 @@ You must have inside the cron of user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
@@ -3243,18 +3289,6 @@ cd / && run-parts --report /etc/cron.daily
 
 
 == Installation of Dolibarr
-
-On all servers (Master and Deploiement):
-
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
-chown -R admin.admin /home/admin/wwwroot/dolibarr
----------------
-
 
 On *Master server*:
 
@@ -3302,16 +3336,6 @@ On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr
 
 == Installation of plugin SellYourSaas
 
-On all servers (*Master and Deployment*):
-
-* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
----------------
-
 * Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
 [source,bash]
@@ -3326,70 +3350,71 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/ht
 ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
 ---------------
 
-Sur le *Master*:
+On the *Master*:
 
-Se connecter à l'interface utilisateur du master Dolibarr (https://admin.mysaasdomainname.com):
+Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainname.com):
 
-* Activer le module SellYourSaas
+* Activate the module SellYourSaas
 
-* Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants:
+* Create a generic user account Dolibarr to access the client interface (for instance: "Client user"). Give him the permissions below:
 
-** Module Agenda
-*** Lires les actions
-*** Créer modifier les actions
-*** Lire les actions des autres
-*** Créer des actions pour les autres.
-** Module Banque
-*** Consulter les comptes financiers
-*** Créer/modifier montant/supprimer écritures bancaires
-** Module Catégories
-*** Consulter les catégories
-** Contrats/Abonnements
-*** Lire les contrats/abonnements
-*** Créer modifier les contrats abonnements
-*** Activer un service abonnement
-*** Désactiver un service abonnement
-** Module GED
-*** Lire/ Récuperer les documents
-*** Soumettre ou supprimer un document
-** Module Factures et avoir
-*** Consulter les factures
-** Module Fournisseurs
-*** Consulter les fournisseurs
-** Module Prélèvement
-*** Consulter les prélèvements
-** Module Produit
-*** Consulter les produits
-** Module SellYourSaas
+** Agenda Module 
+*** Read actions
+*** Create/modify actions
+*** Read other's actions 
+*** Create actions for others
+** Bank Module
+*** View financial accounts
+*** Create/modify amount/delete bank posting
+** Categories Module 
+*** View categories
+** Contracts/Subscriptions
+*** Read contracts/subscriptions
+*** Create/modify contracts/subscriptions
+*** Activate a subscription
+*** Deactivate a subscription
+** DMS Module 
+*** Read/get documents
+*** Submit/delete a document
+** Invoices and credits Module
+*** View invoices
+** Vendors Module
+*** View vendors
+** Taxes Module 
+*** View Taxes
+** Product Module 
+*** View products
+** SellYourSaas Module 
 *** Read SellYourSaaS data
-** Module Services
-*** Consulter les services
-** Module Tiers
-*** Consulter les tiers liés à l'utilisateur
-*** Consulter les contacts
-** Module Utilisateurs et Groupes
+** Services Module 
+*** View services
+** Third Parties Module
+*** View third parties related to user
+*** View contacts
+** View Users and Groups Module 
 *** Créer/modifier ses propres informations utilisateur
+*** Create/modify one's own user data
 
-* Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
+* Create a *Package* to configure the applications to be deployed (files, config, database dump...)
 
-Voir le chapitre "Configuration des packages" plus loin.
+See "Packages configuration" chapter below.
 
-* Créer un *Service* de type *Application* pour définir la politique de tarification d'un abonnement et le *Package* associé.
+* Create a *Service* of *Application* type to define the pricing of a subscription and associated *Package*.
 
-Voir le chapitre "Configuration des services" pour un description des champs.
+See "Services Configuration" for a description of the fields.
 
-* Créer éventuellement des *Services* de type *Metric*. 
+* Create *Metric* type *Services* if you want
 
-Voir le chapitre "Configuration des services" pour un description des champs.
+See "Services Configuration" for a description of the fields.
 
-* Créer éventuellement des *Services* de type *Options*. 
+* Create *Options* type *Services* if you want
 
-Voir le chapitre "Configuration des services" pour un description des champs.
+See "Services Configuration" for a description of the fields.
 
 
-Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
+Note: The *Options* and *Metrics* type services must be linked to an *Application* type service in The Virtual Products tab. 
 
-Remarque: Les URL pour réaliser les déploiements des packages de type *Applications* seront visibles dans le menu *SellYourSaas - URL de déploiement*
+Note: The URL to deploy *Applications* type packages can be viewed in the *SellYourSaas - Deployment URL* menu
 
 
 * Go to the configuration of the *Scheduled jobs* module and retrieve the instruction to add in the cron of the user *admin*. Check if not add this instruction so that the Sell-Your-Saas batches can run.
@@ -3398,26 +3423,6 @@ Remarque: Les URL pour réaliser les déploiements des packages de type *Applica
 <<<<
 
 == Installation of external tools
-
-=== Installation de webmin (optional for supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-* Si la fonction sauvegarde de toutes les bases de Webmin est active, modifier les fichiers */usr/share/webmin/mysql/backup.pl*  et  */usr/share/webmin/mysql/backup_db.cgi*
-
-[source,perl]
----------------
-foreach $db (@dbs) {
----------------
-
-in
-
-[source,perl]
----------------
-foreach $db (@dbs) {
-    # @CHANGE LDR
-    if ($db =~ /^dbn/) { next; }
----------------
 
 === Installation of DataDog (optional for supervision)
 
@@ -3499,7 +3504,7 @@ instances:
 cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
 ---------------
 
-Editer le pour suivre les process suivants:
+Edit it to supervise the processes below:
 
 [source,bash]
 ---------------
@@ -3542,7 +3547,7 @@ instances:
 ---------------
 
 
-Relancer datadog
+Restart datadog
 
 [source,bash]
 ---------------
@@ -3555,38 +3560,38 @@ sudo service datadog-agent start
 
 == Exploitation - Supervision
 
-=== Backup / Restauration
+=== Backup / Restore
 
 ==== Backup system
 
-La sauvegarde du serveur+bases peut se faire par un snapshot d'image de la VM.
-Il est aussi possible de ne faire un snapshot que des disques complémentaires.
+A backup of the server+bases can be done with a VM snapshot.
+It is also possible to snapshot only extra disks.
 
-Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+See chapter <<Cloning a server instance for an extra production server or a dev server>>
 
-==== Restauration system
+==== Restoration system
 
-Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure ou égale en terme de capacité de stockage.
+From OVH's "Snapshots" interface, you can restore a VM image on a server or a disk image on a disk, provided the target has at least the same amount of storage.
 
-Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+See chapter <<Cloning a server instance for an extra production server or a dev server>>
 
 
 ==== Backup files and database
 
 ===== Local backup
 
-- Une sauvegarde locale de la configuration du serveur et des instances payantes est assurée par le cron
+- Configuration of the server and paying instances is done locally via the cron
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* de *root* (voir <<installation_des_taches_cron>>) vers le disque */home/admin/backup/conf* et */home/admin/backup/mysql*
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* of *root* (see <<installing_cron_tasks>>) to the disks */home/admin/backup/conf* and */home/admin/backup/mysql*
 
-- Une sauvegarde locale des instances utilisateurs payantes est assurée par le cron 
+- Paying user instances are backed up locally by the cron
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* de *admin* (voir <<installation_des_taches_cron>>) vers le disque */mnt/diskbackup/backup/osu*
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* of *admin* (see <<installing_cron_tasks>>) to the disk */mnt/diskbackup/backup/osu*
 
 
 ===== Remote backup
 
-- Une sauvegarde externe doit être assurée vers un autre serveur par le cron de l'utilisateur *root* en lançant le fichier */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* pour copier de */mnt/diskbackup/backup* vers */mnt/diskbackup/backup_serversource* (d'un autre serveur sur un autre datacenter). Ce script est intégré dans la crontab de root (Voir <<installation_des_taches_cron>>).
+- An external backup must be done to another server by the *root* user crons running */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* to copy from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_serversource* (from another server in another datacenter). This script is in root's crontab (see <<installing_cron_tasks>>).
 
 
 - For a remote backup as AWS:
@@ -3599,21 +3604,21 @@ pip install awscli --upgrade --user
 ---------------
 
 
-=== Mise à jour des images à déployer
+=== Update deployment images
 
-- Un script cron permet de réaliser le git pull nécessaire pour mettre à jour les images des packages à déployer en lançant le script sur le serveur *Master*: 
+- A cron script on the *Master* does the git pull to update the images of the packages to deploy.
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git*
 
 
 === Update Sell-Your-Saas statistics
 
-- Un script cron permet de réaliser le calcul des statistiques en lançant le script sur le serveur *Master*: 
+- A cron script on *Master* calulates statistics: 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly*
 
 
 === Increase size of disk
 
-* Faire le snapshot du disque à redimensionner pour sauvegarde. Créer un nouveau disque depuis ce snapshot et le rattacher à un autre serveur (voir chapitre <<ajout_de_disque>>) pour s'assurer qu'il est lisible et ainsi avoir les fichiers de la sauvegarde sous la main.
+* Take a snapshot of the disk to resize for backup. Create a new disk from this snapshot and attach it to another server (see chapter <<adding_a_disk>>) to ensure it is readable and you have backup files handy.
 
 * Unmount the filesystem:
 
@@ -3622,28 +3627,29 @@ pip install awscli --upgrade --user
 umount /mnt/disk/
 ---------------
 
-Rem: Pour voir les fichiers ouverts sur un disque si le démontage échoue:
+Note: To see open files on a disk if umount fails:
 
 [source,bash]
 ---------------
 lsof | grep "/mnt/disk"
 ---------------
 
-* Détacher le disque du serveur. S'assurer que son nom ne contient pas d'espaces ou caractères spéciaux. Changer la taille du disque depuis le manager du Public Cloud et le réattacher au serveur.
+* Detach the disk from the server. Ensure its name does not contain white space or special characters. Change the disk size from the Public Cloud manager and re-attach it to the server.
 
-* Agrandir la partition en lançant: 
+* Increase the partition size by running:
 
 [source,bash]
 ---------------
 fdisk -l
-parted /dev/vdX    (X=a, b, !!! SANS le chiffre, on veut le disque complet)
+parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print all
 resizepart 
 Y
-999GB    (Ne pas saisir la valeur proposé par défaut mais la valeur max du disque qui a été affiché par le "print all")
+999GB    (Don't input the default value but the max value of the disk that was shown by "print all")
 q
 ---------------
 
+* Remount the disk for acknoledgement and resizing without erasing data.
 * Remonter le disque pour prise en compte et augmenter le formatage du filesystem sans effacement.
 
 [source,bash]
@@ -3654,13 +3660,14 @@ resize2fs /dev/vdX9
 
 
 [Clonage d une instance serveur pour production bis ou pour développement]
+[Cloning a server instance for an extra production server or a dev server]
 === Clone or duplicate a server instance into another server
 
-Les étapes suivantes résumes les opérations à réaliser pour cloner un serveur de déploiement en un autre serveur de déploiement.
+The following explains the operations to clone a deployment server into another deployment server.
 
-- Créer un snapshot du *Deployment server* à cloner.
+- Create a snapshot of *Deployment server* to be cloned.
 
-- Créer un nouveau serveur depuis le snapshot:
+- Create a new server from that snapshot:
 
 *With OVH*:
 
@@ -4097,17 +4104,20 @@ select @@datadir;
 This output confirms that MySQL is configured to use the default data directory, /var/lib/mysql/, so that’s the directory we need to move. Once you’ve confirmed this, type exit and press “ENTER” to leave the monitor:
 
 exit
+
 To ensure the integrity of the data, we’ll shut down MySQL before we actually make changes to the data directory:
 
 sudo systemctl stop mysqld
+
 systemctl doesn’t display the outcome of all service management commands, so if you want to be sure you’ve succeeded, use the following command:
 
 sudo systemctl status mysqld
-You can be sure it’s shut down if the final line of the output tells you the server is stopped:
 
-Output
-. . .
+You can be sure it’s shut down if the final line of the output tells you the server is stopped like in this example:
+
+...
 Jul 18 11:24:20 ubuntu-512mb-nyc1-01 systemd[1]: Stopped MySQL Community Server.
+
 Now that the server is shut down, we’ll copy the existing database directory to the new location with rsync. Using the -a flag preserves the permissions and other directory properties, while-v provides verbose output so you can follow the progress.
 
 Note: Be sure there is no trailing slash on the directory, which may be added if you use tab completion. When there’s a trailing slash, rsync will dump the contents of the directory into the mount point instead of transferring it into a containing mysql directory:
@@ -4254,7 +4264,7 @@ Launch the script:
 
 Go into menu *SellYourSaas - Packages* to create your new package.
 
-For example, to deploy an application like Dolibarr with sources available into directory *documents/sellyoursaas/git*, enter the values of the following fields:
+For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, enter the values of the following fields (Note: variables __XXX__ are reserved keywrods that will be replaced by SellYourSaas process that uses those fields):
 
 
 Into field *Dir with sources 1*
@@ -4746,7 +4756,7 @@ Ciphers +aes128-cbc
 Then reload ssh with /etc/init.d/ssh reload
 
 
-==== Some remoteaction generates a PHP coredump
+==== Some remote action generates a PHP coredump
 
 This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
 You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1

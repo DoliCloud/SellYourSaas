@@ -157,9 +157,9 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (ne
 ---------------
 mkdir /mnt/diskhome
 mount /dev/vdxY /mnt/diskhome
+mkdir /mnt/diskbackup
 
 And if a disk was created for backup:
-mkdir /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -199,13 +199,14 @@ Pour vérifier:
 cat /proc/mounts | grep diskX
 ---------------
 
-Rem: Pour information, si il faut récupérer les fichiers de données d'un autre disque après avoir créé le disque, utilisez:
+Rem: Pour information, si il faut récupérer les fichiers de données d'un autre disque source, utilisez:
 
 [source,bash]
 ---------------
 rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
+cd /mnt/diskSource
 rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
 Après avoir lancé mysql, il est possible de tester les bases par
@@ -371,27 +372,6 @@ Ajouter à la fin de */etc/bash.bashrc*:
 alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,cmd'
 ---------------
 
-
-=== Augmentation taille max UID
-
-Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le 
-
-[source,conf]
----------------
-	UID_MIN                  1000
-	UID_MAX                 500000
-
-	GID_MIN                  1000
-	GID_MAX                 500000
----------------
-
-Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* (sinon) pour mettre 
-
-[source,conf]
----------------
-LimitUIDRange 1 500000
-LimitGIDRange 1 500000
----------------
 
 
 === Configuration hostname et IP
@@ -569,6 +549,35 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
 
+=== Getting files of Dolibarr and SellYourSaas application
+
+On all servers (*Master and Deploiement*):
+
+* Under the *root* login, install git tool:
+
+[source,bash]
+---------------
+apt install git
+---------------
+
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+chown -R admin.admin /home/admin/wwwroot/dolibarr
+---------------
+
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+---------------
+
+
 === Creation of sellyoursaas.conf with credentials
 
 * Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
@@ -722,6 +731,13 @@ Ajouter la ligne au fichier */etc/fstab* pour avoir le montage automatique au re
 i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
+et tester que ce montage se fait bien
+ 
+[source, bash]
+---------------
+mount -a
+---------------
+
 
 === Déploiement de la clé publique ssh du compte admin
 
@@ -827,6 +843,28 @@ apt remove unattended-upgrades
 ---------------
 
 
+=== Augmentation taille max UID
+
+Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le 
+
+[source,conf]
+---------------
+UID_MIN                  1000
+UID_MAX                 500000
+
+GID_MIN                  1000
+GID_MAX                 500000
+---------------
+
+Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* (sinon) pour mettre 
+
+[source,conf]
+---------------
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
+---------------
+
+
 === Configuration du serveur Web Apache
 
 On active les *modules* apache pour fonctionner en MPM_PREFORK and MPM_ITK:
@@ -845,7 +883,7 @@ On active les *configurations* apache pour fonctionner en MPM_PREFORK and MPM_IT
 
 [source,bash]
 ---------------
-a2enconf charset indexignore localized-error-pages other-vhosts-access-log security
+a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 
@@ -1043,10 +1081,12 @@ systemctl reload nom_du_service.service
 TODO Graphic avec les flux et les ports.
 
 
-* Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
+* Créer un firewall. La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
 
 
-==== Avec iptables ====
+==== Avec iptables (déprécié) ====
+
+Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
 
 [source, bash]
 ---------------
@@ -1057,7 +1097,7 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-==== Avec ufw
+==== Avec ufw (recommandé) ====
 
 Editer le fichier */etc/ufw/before.rules* pour permettre les ping sortant, en ajoutant ceci:
 
@@ -1139,7 +1179,7 @@ systemctl is-enabled remote_server_launcher
 systemctl status remote_server_launcher
 ---------------
 
-Remarque: L'agent se lance sur le port 8080
+Remarque: L'agent se lance sur le port 8080 et est en attente d'instructions du master.
 
 
 Pour utiliser systemd créer un fichier /etc/systemd/system/remote-server-launcher.service :
@@ -1440,15 +1480,15 @@ maxretry = 10
 [web-dol-registerinstance]
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enable to false on deployment servers
-;enabled = true
-;port    = http,https
-;filter  = web-dolibarr-rulesregisterinstance
-;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXXX.log
-;action  = %(action_mw)s
-;bantime  = 4320000   ; 50 days
-;findtime = 86400     ; 1 day
-;maxretry = 10
+; disable this rule by setting enabled to false on non master servers
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulesregisterinstance
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 10
 
 ---------------
 
@@ -1467,6 +1507,11 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ---------------
 
 Relancer fail2ban et vérifier les erreurs dans */var/log/fail2ban.log*
+
+Note: If you need to have the existing log files re-parsed fully again, you must change a char at begin of file to checksum for recovery point will fails. If it fails, delete file /var/lib/fail2ban/fail2ban.sqlite3
+
+Note: To test rule file on an existing log file:
+fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
 
 === Test spamassassin ===
@@ -2482,9 +2527,9 @@ mkdir /home/jail/chroot
 [source,bash]
 ---------------
 # /home/jail/home
-/mnt/diskhome/home /home/jail/home bind defaults,bind 0
+/mnt/diskhome/home /home/jail/home bind defaults,bind 0 0
 # /home/jail/chroot
-/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
+/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0 0
 ---------------
 
 * Monter les répertoires
@@ -2742,7 +2787,8 @@ Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/
 
 [source,bash]
 ---------------
-TODO
+chmod -Rv 733 /dev/shm /var/lib/php/sessions
+chmod +t /dev/shm /var/lib/php/sessions
 ---------------
 
 ==== Définition taille upload et durée sessions
@@ -3136,7 +3182,7 @@ Mettre dans le cron du user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 # cron master and deployment root
@@ -3183,17 +3229,6 @@ cd / && run-parts --report /etc/cron.daily
 
 
 == Installation de Dolibarr
-
-Sur tous les serveurs (Master et Déploiement):
-
-* Sous le compte *admin*, récupérer les sources de *Dolibarr* (v13 ou +) à placer dans */home/admin/wwwroot/dolibarr*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
----------------
-
 
 Sur le *Serveur Master*:
 
@@ -3242,15 +3277,7 @@ Sur le *Serveur maitre* Dolibarr, activer et configurer le module GeoIP de Dolib
 
 == Installation du plugin SellYourSaas
 
-Sur tous les serveurs (Master et Déploiement):
-
-* Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
----------------
+Sur tous les serveurs (*Master et Déploiement*):
 
 * Créer un lien symbolique appelé *sellyoursaas* dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
@@ -3338,26 +3365,6 @@ Remarque: Les URL pour réaliser les déploiements des packages de type *Applica
 <<<<
 
 == Installation d'outils externes
-
-=== Installation de webmin (optionnel pour supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-* Si la fonction sauvegarde de toutes les bases de Webmin est active, modifier les fichiers */usr/share/webmin/mysql/backup.pl*  et  */usr/share/webmin/mysql/backup_db.cgi*
-
-[source,perl]
----------------
-foreach $db (@dbs) {
----------------
-
-en
-
-[source,perl]
----------------
-foreach $db (@dbs) {
-    # @CHANGE LDR
-    if ($db =~ /^dbn/) { next; }
----------------
 
 === Installation de DataDog (optionnel pour supervision)
 
@@ -4028,17 +4035,20 @@ select @@datadir;
 This output confirms that MySQL is configured to use the default data directory, /var/lib/mysql/, so that’s the directory we need to move. Once you’ve confirmed this, type exit and press “ENTER” to leave the monitor:
 
 exit
+
 To ensure the integrity of the data, we’ll shut down MySQL before we actually make changes to the data directory:
 
 sudo systemctl stop mysqld
+
 systemctl doesn’t display the outcome of all service management commands, so if you want to be sure you’ve succeeded, use the following command:
 
 sudo systemctl status mysqld
-You can be sure it’s shut down if the final line of the output tells you the server is stopped:
 
-Output
-. . .
+You can be sure it’s shut down if the final line of the output tells you the server is stopped like in this example:
+
+...
 Jul 18 11:24:20 ubuntu-512mb-nyc1-01 systemd[1]: Stopped MySQL Community Server.
+
 Now that the server is shut down, we’ll copy the existing database directory to the new location with rsync. Using the -a flag preserves the permissions and other directory properties, while-v provides verbose output so you can follow the progress.
 
 Note: Be sure there is no trailing slash on the directory, which may be added if you use tab completion. When there’s a trailing slash, rsync will dump the contents of the directory into the mount point instead of transferring it into a containing mysql directory:
@@ -4185,7 +4195,7 @@ Lancer le script:
 
 Aller dans le menu *SellYourSaas - Packages* et créer un nouveau package.
 
-Par exemple, pour déployer une application comme *Dolibarr* dont les sources ont été placées dans le répertoire *documents/sellyoursaas/git*, saisissez les valeurs de champs suivants:
+Par exemple, pour déployer une application comme *Dolibarr* dont les sources ont été placées dans le répertoire *documents/sellyoursaas/git*, saisissez les valeurs de champs suivants (Note: Les variables __XXX__ sont des mots réservés qui seront remplacés par les process de SellYourSaas qui exploitent ces champs):
 
 
 Dans le champ *Dir with sources 1*
