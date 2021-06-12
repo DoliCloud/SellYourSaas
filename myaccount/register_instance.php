@@ -323,6 +323,11 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		header("Location: ".$newurl);
 		exit(-1);
 	}
+	if (empty($tldid)) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Domain")), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-1);
+	}
 	if (! preg_match('/[a-zA-Z0-9][a-zA-Z0-9]/', $orgname)) {
 		setEventMessages($langs->trans("ErrorFieldMustHaveXChar", $langs->transnoentitiesnoconv("NameOfCompany"), 2), null, 'errors');
 		header("Location: ".$newurl);
