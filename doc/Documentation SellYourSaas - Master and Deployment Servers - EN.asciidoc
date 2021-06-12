@@ -164,9 +164,9 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (do
 ---------------
 mkdir /mnt/diskhome
 mount /dev/vdxY /mnt/diskhome
-
-And if a disk was created for backup:
 mkdir /mnt/diskbackup
+
+And if a disk was created for the backup:
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -208,13 +208,14 @@ To check:
 cat /proc/mounts | grep diskX
 ---------------
 
-Note: If you need to recover data files from another disk, use:
+Note: If you need to recover data files from another source disk, use:
 
 [source, bash]
 ---------------
 rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
+cd /mnt/diskSource
 rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
 After launching mysql, you can test all databases with
@@ -787,6 +788,12 @@ Add the line to the */etc/fstab* file to have automatic reboot mounting
 i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
+and try the automatic mount
+ 
+[source, bash]
+---------------
+mount -a
+---------------
 
 === Deploy the public key of master admin on deployment admin account
 
@@ -796,7 +803,7 @@ On the deployment servers, copy the public and private key of the master's ssh *
 
 [source, bash]
 ---------------
-chmod u +rw /home/admin/.ssh/id_rsa_sellyoursaas*
+chmod u+rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod go-rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
@@ -934,7 +941,7 @@ Enable apache *configurations* to work with MPM_PREFORK and MPM_ITK:
 
 [source,bash]
 ---------------
-a2enconf charset indexignore localized-error-pages other-vhosts-access-log security
+a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 
@@ -1229,7 +1236,7 @@ systemctl is-enabled remote_server_launcher
 systemctl status remote_server_launcher
 ---------------
 
-Note: The agent is launched on port 8080
+Note: The agent is launched on port 8080 and is waiting master orders.
 
 
 To use systemd create a file /etc/systemd/system/remote-server-launcher.service :
@@ -2576,9 +2583,9 @@ mkdir /home/jail/chroot
 [source,bash]
 ---------------
 # /home/jail/home
-/mnt/diskhome/home /home/jail/home bind defaults,bind 0
+/mnt/diskhome/home /home/jail/home bind defaults,bind 0 0
 # /home/jail/chroot
-/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
+/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0 0
 ---------------
 
 * Mount directories
@@ -2830,7 +2837,8 @@ Set permissions to *drwx-wx-wt* for php sessions directories */dev/shm/* and/or 
 
 [source,bash]
 ---------------
-TODO
+chmod -Rv 733 /dev/shm /var/lib/php/sessions
+chmod +t /dev/shm /var/lib/php/sessions
 ---------------
 
 ==== Define size of upload and session duration
@@ -3236,7 +3244,7 @@ You must have inside the cron of user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
@@ -3415,26 +3423,6 @@ Note: The URL to deploy *Applications* type packages can be viewed in the *SellY
 <<<<
 
 == Installation of external tools
-
-=== Installation de webmin (optional for supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-* If the backup of all Webmin bases is active, modify the files */usr/share/webmin/mysql/backup.pl* and  */usr/share/webmin/mysql/backup_db.cgi*
-
-[source,perl]
----------------
-foreach $db (@dbs) {
----------------
-
-in
-
-[source,perl]
----------------
-foreach $db (@dbs) {
-    # @CHANGE LDR
-    if ($db =~ /^dbn/) { next; }
----------------
 
 === Installation of DataDog (optional for supervision)
 

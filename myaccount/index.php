@@ -357,10 +357,8 @@ if ($action == 'updateurl') {
 
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 	$action = '';
-}
-
-// Send support ticket
-elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
+} elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
+	// Send support ticket
 	$error = 0;
 
 	$emailfrom = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
@@ -458,10 +456,8 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 	} else {
 		$action = 'presend';
 	}
-}
-
-// Send reseller request
-elseif ($action == 'sendbecomereseller') {
+} elseif ($action == 'sendbecomereseller') {
+	// Send reseller request
 	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 	$sellyoursaasnoreplyemail = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
@@ -563,7 +559,7 @@ elseif ($action == 'sendbecomereseller') {
 	$firstname = trim(GETPOST('firstName', 'nohtml'));
 	$lastname = trim(GETPOST('lastName', 'nohtml'));
 	$phone = trim(GETPOST('phone', 'nohtml'));
-	$oldphone = trim(GETPOST('oldphone', 'nohtml')); 
+	$oldphone = trim(GETPOST('oldphone', 'nohtml'));
 
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
@@ -590,7 +586,7 @@ elseif ($action == 'sendbecomereseller') {
 		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
 		exit;
 	}
-	
+
 	$db->begin();	// Start transaction
 
 	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
