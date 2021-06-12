@@ -597,6 +597,30 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
 
+=== Getting files of Dolibarr and SellYourSaas application
+
+On all servers (*Master and Deploiement*):
+
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+chown -R admin.admin /home/admin/wwwroot/dolibarr
+---------------
+
+On all servers (*Master and Deployment*):
+
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+---------------
+
+
 === Creation of sellyoursaas.conf with credentials
 
 * Create a file */etc/sellyoursaas.conf* on the server (on the server *Master* and the *Deployment servers*)
@@ -1106,7 +1130,7 @@ TODO Graphic with flux and ports
 * Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
 
 
-==== With iptables ====
+==== With iptables (deprecated) ====
 
 [source, bash]
 ---------------
@@ -1117,7 +1141,7 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-==== With ufw
+==== With ufw (recommanded) ====
 
 Edit file */etc/ufw/before.rules* to allow out ping, by adding this:
 
@@ -3252,18 +3276,6 @@ cd / && run-parts --report /etc/cron.daily
 
 == Installation of Dolibarr
 
-On all servers (Master and Deploiement):
-
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
-chown -R admin.admin /home/admin/wwwroot/dolibarr
----------------
-
-
 On *Master server*:
 
 * Create an Apache virtual for the Dolibarr Master, for example: https://admin.mysaasdomainname.com, therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*
@@ -3309,16 +3321,6 @@ On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr
 
 
 == Installation of plugin SellYourSaas
-
-On all servers (*Master and Deployment*):
-
-* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
----------------
 
 * Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
