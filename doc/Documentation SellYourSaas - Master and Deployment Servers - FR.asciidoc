@@ -883,7 +883,7 @@ On active les *configurations* apache pour fonctionner en MPM_PREFORK and MPM_IT
 
 [source,bash]
 ---------------
-a2enconf charset indexignore localized-error-pages other-vhosts-access-log security
+a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 

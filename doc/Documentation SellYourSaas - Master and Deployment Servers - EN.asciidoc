@@ -941,7 +941,7 @@ Enable apache *configurations* to work with MPM_PREFORK and MPM_ITK:
 
 [source,bash]
 ---------------
-a2enconf charset indexignore localized-error-pages other-vhosts-access-log security
+a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 
