@@ -1148,7 +1148,7 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-==== With ufw (recommanded) ====
+==== With ufw (recommended) ====
 
 Edit file */etc/ufw/before.rules* to allow out ping, by adding this:
 
