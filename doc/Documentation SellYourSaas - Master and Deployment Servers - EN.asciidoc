@@ -803,7 +803,7 @@ On the deployment servers, copy the public and private key of the master's ssh *
 
 [source, bash]
 ---------------
-chmod u +rw /home/admin/.ssh/id_rsa_sellyoursaas*
+chmod u+rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod go-rw /home/admin/.ssh/id_rsa_sellyoursaas*
 chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
