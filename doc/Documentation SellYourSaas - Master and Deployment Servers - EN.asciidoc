@@ -4274,7 +4274,7 @@ Launch the script:
 
 Go into menu *SellYourSaas - Packages* to create your new package.
 
-For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, enter the values of the following fields:
+For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, enter the values of the following fields (Note: variables __XXX__ are reserved keywrods that will be replaced by SellYourSaas process that uses those fields):
 
 
 Into field *Dir with sources 1*

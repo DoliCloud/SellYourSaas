@@ -4206,7 +4206,7 @@ Lancer le script:
 
 Aller dans le menu *SellYourSaas - Packages* et créer un nouveau package.
 
-Par exemple, pour déployer une application comme *Dolibarr* dont les sources ont été placées dans le répertoire *documents/sellyoursaas/git*, saisissez les valeurs de champs suivants:
+Par exemple, pour déployer une application comme *Dolibarr* dont les sources ont été placées dans le répertoire *documents/sellyoursaas/git*, saisissez les valeurs de champs suivants (Note: Les variables __XXX__ sont des mots réservés qui seront remplacés par les process de SellYourSaas qui exploitent ces champs):
 
 
 Dans le champ *Dir with sources 1*
