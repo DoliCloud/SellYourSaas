@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /**
@@ -75,11 +75,13 @@ if (! empty($conf->global->SELLYOURSAAS_SECURITY_DISABLEFORGETPASSLINK)) {
 }
 
 $id=GETPOST('id', 'int');
-$action=GETPOST('action', 'alpha');
+$action=GETPOST('action', 'aZ09');
 $mode=$dolibarr_main_authentication;
-if (! $mode) $mode='http';
+if (!$mode) {
+	$mode='http';
+}
 
-$username 		= GETPOST('username', 'alpha');
+$username 		= GETPOST('username', 'alphanohtml');
 $hashreset		= GETPOST('hashreset', 'alpha');
 $newpassword1   = GETPOST('newpassword1', 'none');
 $newpassword2   = GETPOST('newpassword2', 'none');
@@ -90,11 +92,21 @@ $conf->entity 	= (GETPOST('entity', 'int') ? GETPOST('entity', 'int') : 1);
 $hookmanager->initHooks(array('sellyoursaas-passwordforgottenpage'));
 
 
-if (GETPOST('dol_hide_leftmenu', 'alpha') || ! empty($_SESSION['dol_hide_leftmenu']))               $conf->dol_hide_leftmenu=1;
-if (GETPOST('dol_hide_topmenu', 'alpha') || ! empty($_SESSION['dol_hide_topmenu']))                 $conf->dol_hide_topmenu=1;
-if (GETPOST('dol_optimize_smallscreen', 'alpha') || ! empty($_SESSION['dol_optimize_smallscreen'])) $conf->dol_optimize_smallscreen=1;
-if (GETPOST('dol_no_mouse_hover', 'alpha') || ! empty($_SESSION['dol_no_mouse_hover']))             $conf->dol_no_mouse_hover=1;
-if (GETPOST('dol_use_jmobile', 'alpha') || ! empty($_SESSION['dol_use_jmobile']))                   $conf->dol_use_jmobile=1;
+if (GETPOST('dol_hide_leftmenu', 'alpha') || ! empty($_SESSION['dol_hide_leftmenu'])) {
+	$conf->dol_hide_leftmenu=1;
+}
+if (GETPOST('dol_hide_topmenu', 'alpha') || ! empty($_SESSION['dol_hide_topmenu'])) {
+	$conf->dol_hide_topmenu=1;
+}
+if (GETPOST('dol_optimize_smallscreen', 'alpha') || ! empty($_SESSION['dol_optimize_smallscreen'])) {
+	$conf->dol_optimize_smallscreen=1;
+}
+if (GETPOST('dol_no_mouse_hover', 'alpha') || ! empty($_SESSION['dol_no_mouse_hover'])) {
+	$conf->dol_no_mouse_hover=1;
+}
+if (GETPOST('dol_use_jmobile', 'alpha') || ! empty($_SESSION['dol_use_jmobile'])) {
+	$conf->dol_use_jmobile=1;
+}
 
 $asknewpass=0;
 
@@ -178,12 +190,6 @@ if (empty($reshook)) {
 				$message = '<div class="error">'.$langs->trans("ErrorLoginDoesNotExists", $username).'</div>';
 				$username='';
 			} else {
-				/*if (! $edituser->email)
-				 {
-				 $message = '<div class="error">'.$langs->trans("ErrorLoginHasNoEmail").'</div>';
-				 }
-				 else
-				 {*/
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 				$hashreset = getRandomPassword(true, array('I'));
 				$thirdparty->array_options['options_pass_temp']=$hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now('gmt'), 1, 'd'), 'dayhourlog', 'gmt');
@@ -234,7 +240,6 @@ if (empty($reshook)) {
 						$message.= '<div class="error">'.$newemail->error.'</div>';
 					}
 				}
-				//}
 			}
 		}
 	}
@@ -249,19 +254,28 @@ $dol_url_root = '';
 
 // Title
 $title='Dolibarr '.DOL_VERSION;
-if (! empty($conf->global->MAIN_APPLICATION_TITLE)) $title=$conf->global->MAIN_APPLICATION_TITLE;
+if (!empty($conf->global->MAIN_APPLICATION_TITLE)) {
+	$title = $conf->global->MAIN_APPLICATION_TITLE;
+}
 $title=$langs->trans("YourCustomerDashboard");
 
 // Select templates
 $template_dir = dirname(__FILE__).'/tpl/';
 
-if (! $username) $focus_element = 'username';
-else $focus_element = 'password';
+if (!$username) {
+	$focus_element = 'username';
+} else {
+	$focus_element = 'password';
+}
 
 // Send password button enabled ?
 $disabled='disabled';
-if (preg_match('/dolibarr/i', $mode)) $disabled='';
-if (! empty($conf->global->MAIN_SECURITY_ENABLE_SENDPASSWORD)) $disabled='';	 // To force button enabled
+if (preg_match('/dolibarr/i', $mode)) {
+	$disabled = '';
+}
+if (!empty($conf->global->MAIN_SECURITY_ENABLE_SENDPASSWORD)) {
+	$disabled = '';	 // To force button enabled
+}
 
 // Show logo (search in order: small company logo, large company logo, theme logo, common logo)
 $width=0;
