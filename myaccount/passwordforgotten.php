@@ -140,7 +140,7 @@ if (empty($reshook)) {
 					$message = '<div class="error">'.$langs->trans("ErrorLinkToResetPasswordHasExpired").'</div>';
 				} else {
 					$username = $editthirdparty->email;
-					if (GETPOST('confirmpasswordreset')) {
+					if (GETPOST('confirmpasswordreset') || $action == 'confirmpasswordreset') {
 						$MINPASSWORDLENGTH = 8;
 						if (empty($newpassword1) && empty($newpassword2)) {
 							$langs->load("install");
