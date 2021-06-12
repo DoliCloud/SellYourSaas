@@ -1132,10 +1132,12 @@ systemctl reload service_name.service
 TODO Graphic with flux and ports
 
 
-* Create a firewall launch file (for example in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
+* Add a firewall. Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
 
 
 ==== With iptables (deprecated) ====
+
+Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
 
 [source, bash]
 ---------------
