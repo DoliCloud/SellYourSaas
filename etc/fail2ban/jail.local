@@ -235,7 +235,7 @@ maxretry = 10
 [web-dol-registerinstance]
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting 'enabled' to false on non master servers
+; disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesregisterinstance

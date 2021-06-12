@@ -1499,7 +1499,7 @@ maxretry = 10
 [web-dol-registerinstance]
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting 'enabled' to false on non master servers
+; disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesregisterinstance
@@ -1526,6 +1526,14 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ---------------
 
 Relaunch fail2ban and check errors into */var/log/fail2ban.log*
+
+Note: If you need to have the existing log files re-parsed fully again, you must change a char at begin of file to checksum for recovery point will fails. If it fails, delete file /var/lib/fail2ban/fail2ban.sqlite3
+
+Note: To test a rule works, append a line into the log file and check the /var/log/fail2ban.log file. For example:
+echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - /user/card.php?id=1 )" >> /var/log/phpsendmail.log
+
+Note: To test rule file on an existing log file:
+fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
 
 === Test spamassassin ===
