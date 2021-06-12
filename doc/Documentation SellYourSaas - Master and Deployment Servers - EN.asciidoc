@@ -601,6 +601,13 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 
 On all servers (*Master and Deploiement*):
 
+* Under the *root* login, install git tool:
+
+[source,bash]
+---------------
+apt install git
+---------------
+
 * Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
 
 [source,bash]
@@ -609,8 +616,6 @@ cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
-
-On all servers (*Master and Deployment*):
 
 * Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
 

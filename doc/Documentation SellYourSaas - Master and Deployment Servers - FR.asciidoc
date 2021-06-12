@@ -569,6 +569,35 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
 
+=== Getting files of Dolibarr and SellYourSaas application
+
+On all servers (*Master and Deploiement*):
+
+* Under the *root* login, install git tool:
+
+[source,bash]
+---------------
+apt install git
+---------------
+
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+chown -R admin.admin /home/admin/wwwroot/dolibarr
+---------------
+
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+---------------
+
+
 === Creation of sellyoursaas.conf with credentials
 
 * Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
@@ -3189,17 +3218,6 @@ cd / && run-parts --report /etc/cron.daily
 
 == Installation de Dolibarr
 
-Sur tous les serveurs (Master et Déploiement):
-
-* Sous le compte *admin*, récupérer les sources de *Dolibarr* (v13 ou +) à placer dans */home/admin/wwwroot/dolibarr*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
----------------
-
-
 Sur le *Serveur Master*:
 
 * Installer un virtual host Apache, par exemple: https://admin.mysaasdomainname.com, pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*
@@ -3247,15 +3265,7 @@ Sur le *Serveur maitre* Dolibarr, activer et configurer le module GeoIP de Dolib
 
 == Installation du plugin SellYourSaas
 
-Sur tous les serveurs (Master et Déploiement):
-
-* Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
----------------
+Sur tous les serveurs (*Master et Déploiement*):
 
 * Créer un lien symbolique appelé *sellyoursaas* dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
