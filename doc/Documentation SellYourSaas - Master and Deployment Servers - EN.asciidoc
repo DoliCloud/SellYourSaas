@@ -1236,7 +1236,7 @@ systemctl is-enabled remote_server_launcher
 systemctl status remote_server_launcher
 ---------------
 
-Note: The agent is launched on port 8080
+Note: The agent is launched on port 8080 and is waiting master orders.
 
 
 Pour utiliser systemd créer un fichier /etc/systemd/system/remote-server-launcher.service :
@@ -2584,9 +2584,9 @@ mkdir /home/jail/chroot
 [source,bash]
 ---------------
 # /home/jail/home
-/mnt/diskhome/home /home/jail/home bind defaults,bind 0
+/mnt/diskhome/home /home/jail/home bind defaults,bind 0 0
 # /home/jail/chroot
-/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
+/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0 0
 ---------------
 
 * Mount directories
@@ -2839,7 +2839,8 @@ Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/
 
 [source,bash]
 ---------------
-TODO
+chmod -Rv 733 /dev/shm /var/lib/php/sessions
+chmod +t /dev/shm /var/lib/php/sessions
 ---------------
 
 ==== Define size of upload and session duration
