@@ -45,7 +45,7 @@ dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not 
 
 
 // Load traductions files requiredby by page
-$langs->loadLangs(array("companies","other","sellyoursaas@sellyoursaas"));
+$langs->loadLangs(array("admin", "companies", "other", "sellyoursaas@sellyoursaas"));
 
 // Get parameters
 $id			= GETPOST('id', 'int');
