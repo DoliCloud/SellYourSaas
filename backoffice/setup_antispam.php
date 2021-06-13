@@ -133,17 +133,40 @@ print "<!-- section of deployment servers -->\n";
 print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder nohover centpercent">';
 print '<tr class="liste_titre">';
-print '<td>'.$langs->trans('Options').'</td></tr>';
-/*
+print '<td>'.$langs->trans('Options').'</td>';
+print '<td></td>';
+print '</tr>';
+
 print '<tr class="oddeven nohover">';
 print '<td>';
-print $langs->trans("SELLYOURSAAS_SECURITY_KEY");
+$htmltext = $langs->trans("File").' = '.DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistip';
+print $form->textwithpicto($langs->trans("blacklistip"), $htmltext, 1, 'help', '', 0, 3, 'blacklistip');
 print '</td>';
 print '<td>';
-print $conf->global->SELLYOURSAAS_SECURITY_KEY;
+print dol_htmlentitiesbr(file_get_contents(DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistip'));
 print '</td>';
 print '</tr>';
-*/
+
+print '<tr class="oddeven nohover">';
+print '<td>';
+$htmltext = $langs->trans("File").' = '.DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistfrom';
+print $form->textwithpicto($langs->trans("blacklistfrom"), $htmltext, 1, 'help', '', 0, 3, 'blacklistfrom');
+print '</td>';
+print '<td>';
+print dol_htmlentitiesbr(file_get_contents(DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistfrom'));
+print '</td>';
+print '</tr>';
+
+print '<tr class="oddeven nohover">';
+print '<td>';
+$htmltext = $langs->trans("File").' = '.DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistfrom';
+print $form->textwithpicto($langs->trans("blacklistcontent"), $htmltext, 1, 'help', '', 0, 3, 'blacklistcontent');
+print '</td>';
+print '<td>';
+print dol_htmlentitiesbr(file_get_contents(DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistcontent'));
+print '</td>';
+print '</tr>';
+
 print "</table>";
 print '</div>';
 
