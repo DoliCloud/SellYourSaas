@@ -1,6 +1,7 @@
 <?php
 /**
  * This script is a prepend file so env is set for phpsendmail.php
+ *
  * It allows also to force use of antivirus whatever is setup in application.
  *
  * Modify your php.ini file to add:
@@ -8,7 +9,9 @@
  */
 
 // if (! empty($_SERVER) && (preg_match('/phpsendmail/', @$_SERVER['SCRIPT_FILENAME']) || preg_match('/phpsendmail/', @$_SERVER['SCRIPT_NAME'])) )
-if (@$_POST['action'] == 'send' || @$_POST['action'] == 'sendallconfirmed') {
+$tmpactionprepend = @$_POST['action'];
+
+if (preg_match('/^send_/', $tmpactionprepend) || in_array($tmpactionprepend, array('send', 'sendallconfirmed', 'relance'))) {
 	$tmpfile='/tmp/phpsendmailprepend-'.posix_getuid().'-'.getmypid().'.tmp';
 	@unlink($tmpfile);
 	file_put_contents($tmpfile, var_export($_SERVER, true));
