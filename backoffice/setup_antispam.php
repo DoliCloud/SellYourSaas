@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2007-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2021 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  */
 
 /**
- *   	\file       htdocs/sellyoursaas/backoffice/deployment_servers.php
+ *   	\file       htdocs/sellyoursaas/backoffice/setup_antispam.php
  *		\ingroup    sellyoursaas
- *		\brief      Home page of DoliCloud service
+ *		\brief      Home to setup antispam
  */
 
 // Load Dolibarr environment
@@ -71,9 +71,11 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 $keytodesactivate	= GETPOST('key', 'alpha');
 $value	= GETPOST('value', 'alpha');
 
+
 /*
  *	Actions
  */
+
 if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
 	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 	$tmpdomainkey = explode(':',$listofdomains[$keytodesactivate]);
@@ -106,7 +108,7 @@ if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
 
 $form=new Form($db);
 
-llxHeader('', $langs->transnoentitiesnoconv('DoliCloudCustomers'), '');
+llxHeader('', $langs->transnoentitiesnoconv('AntiSpam'), '');
 
 //print_fiche_titre($langs->trans("DoliCloudArea"));
 
@@ -114,7 +116,7 @@ $head = sellYourSaasBackofficePrepareHead();
 
 
 //$head = commande_prepare_head(null);
-dol_fiche_head($head, 'deploymentservers', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');
+dol_fiche_head($head, 'antispam', $langs->trans("AntiSpam"), -1, 'sellyoursaas@sellyoursaas');
 
 
 $tmparray=dol_getdate(dol_now());
@@ -125,11 +127,6 @@ $startyear=$endyear-2;
 
 
 print '<div class="fichecenter">';
-
-
-/*
- * Announce
- */
 
 $param = '';
 $listofipwithinstances=array();
@@ -147,84 +144,41 @@ print "<!-- section of deployment servers -->\n";
 print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder nohover centpercent">';
 print '<tr class="liste_titre">';
-print '<td>'.$langs->trans('DeploymentServers').'</td></tr>';
+print '<td>'.$langs->trans('Options').'</td></tr>';
 print '<tr class="oddeven nohover">';
-print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ', $listofipwithinstances).'</strong></td>';
-print '</tr>';
-print '<tr class="">';
 print '<td>';
-$helptooltip = "SELLYOURSAAS_SUB_DOMAIN_IP = ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
-print $form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), $helptooltip).':<br>';
-print '<table class="noborder">';
-print '<tr class="liste_titre_bidon"><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>';
-$helptooltip = img_warning('', '').' '.$langs->trans("EvenIfDomainIsOpenTo");
-print $form->textwithpicto($langs->trans("Registration"), $helptooltip);
-print '<td class="center">'.$langs->trans("Closed").'|'.$langs->trans("Open").'</td>';
-print '</td><td></td><td></td></tr>';
-$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
-$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-foreach ($listofips as $key => $val) {
-	$tmparraydomain = explode(':', $listofdomains[$key]);
-	print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
-	if (! empty($tmparraydomain[1])) {
-		if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
-			print $langs->trans("Closed");
-		} else {
-			print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("OnDomainOnly", $tmparraydomain[1]);
-		}
-	} else {
-		print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("Open");
-	}
-	print '</td>';
-	print '<td class="center">';
-	if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))){
-		// Button off, click to enable
-		$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.$key.'">';
-		$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
-		$enabledisablehtml.='</a>';
-	} else {
-		// Button on, click to disable
-		$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.$key.'">';
-		$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
-		$enabledisablehtml.='</a>';
-	}
-	print $enabledisablehtml;
-	print '</td>';
-	print '<td>';
-	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
-	print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
-	print '</td>';
-	print '<td>';
-	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
-	print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
-	print '</td>';
-	print '</tr>';
-}
-print '</table>';
+print $langs->trans("SELLYOURSAAS_SECURITY_KEY");
+print '</td>';
+print '<td>';
+print $conf->global->SELLYOURSAAS_SECURITY_KEY;
 print '</td>';
 print '</tr>';
-/*
-print '<tr class="oddeven"><td>';
-print $langs->trans("CommandToManageRemoteDeploymentAgent").'<br>';
-print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
-print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
-print '</textarea>';
-print '</td></tr>';
-print '<tr class="oddeven"><td>';
-print $langs->trans("CommandToPutInstancesOnOffline").'<br>';
-print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
-print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
-print '</textarea>';
-print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline">'.$langs->trans("PutAllInstancesOffLine").'</a>';
-print ' &nbsp; - &nbsp; ';
-print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeonline">'.$langs->trans("PutAllInstancesOnLine").'</a>';
-print '</td></tr>';
-*/
 print "</table>";
 print '</div>';
+
 print "</div>";
 
 dol_fiche_end();
+
+
+print '<br>';
+
+$message='';
+$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
+$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
+$message = str_replace('{s1}', $url, $message);
+print $message;
+
+print '<br>';
+
+$message='';
+$url='<a href="'.dol_buildpath('/sellyoursaas/myaccount/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
+$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "Test", '{s1}');
+$message = str_replace('{s1}', $url, $message);
+print $message;
+
+print '<br>';
+
 
 
 // End of page

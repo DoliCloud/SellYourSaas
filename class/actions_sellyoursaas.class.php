@@ -1117,6 +1117,11 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'deploymentservers';
 			$h++;
 
+			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php',1);
+			$head[$h][1] = $langs->trans("AntiSpam");
+			$head[$h][2] = 'antispam';
+			$h++;
+
 			$this->results['title'] = $langs->trans("DoliCloudArea");
 			$this->results['picto'] = 'sellyoursaas@sellyoursaas';
 		}
@@ -1128,10 +1133,12 @@ class ActionsSellyoursaas
 			$h++;
 		//}
 
+		if ($parameters['tabfamily'] == 'sellyoursaas') {
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
 			$head[$h][1] = $langs->trans("Notes");
 			$head[$h][2] = 'notes';
 			$h++;
+		}
 
 		$this->results['head'] = $head;
 
