@@ -68,6 +68,18 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 
 $mode = GETPOST('mode', 'aZ09');
+$key = GETPOST('key', 'aZ09');
+
+if ($key != $conf->global->SELLYOURSAAS_SECURITY_KEY) {
+	print 'Bad value for securitykey';
+	http_response_code(400);
+	exit(0);
+}
+
+
+/*
+ * View
+ */
 
 $tmpfile = '/var/log/sellyoursaas_spamreport.log';
 $date = strftime("%Y-%m-%d %H:%M:%S", time());
