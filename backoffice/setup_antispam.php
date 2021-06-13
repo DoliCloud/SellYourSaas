@@ -128,23 +128,13 @@ $startyear=$endyear-2;
 
 print '<div class="fichecenter">';
 
-$param = '';
-$listofipwithinstances=array();
-$sql="SELECT DISTINCT deployment_host FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
-$resql=$db->query($sql);
-if ($resql) {
-	while ($obj = $db->fetch_object($resql)) {
-		$listofipwithinstances[]=$obj->deployment_host;
-	}
-	$db->free($resql);
-} else dol_print_error($db);
-
 print "\n";
 print "<!-- section of deployment servers -->\n";
 print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder nohover centpercent">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('Options').'</td></tr>';
+/*
 print '<tr class="oddeven nohover">';
 print '<td>';
 print $langs->trans("SELLYOURSAAS_SECURITY_KEY");
@@ -153,6 +143,7 @@ print '<td>';
 print $conf->global->SELLYOURSAAS_SECURITY_KEY;
 print '</td>';
 print '</tr>';
+*/
 print "</table>";
 print '</div>';
 
@@ -164,11 +155,12 @@ dol_fiche_end();
 print '<br>';
 
 $message='';
-$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
+$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'&mode=test" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'[&mode=test]</a>';
 $message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
 $message = str_replace('{s1}', $url, $message);
 print $message;
 
+/*
 print '<br>';
 
 $message='';
@@ -176,6 +168,7 @@ $url='<a href="'.dol_buildpath('/sellyoursaas/myaccount/public/test.php', 3).'?k
 $message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "Test", '{s1}');
 $message = str_replace('{s1}', $url, $message);
 print $message;
+*/
 
 print '<br>';
 

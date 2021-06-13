@@ -23,9 +23,23 @@
  *		\brief      Page to report SPAM
  */
 
-if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
-if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK', '1');
-if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+if (!defined('NOCSRFCHECK')) {
+	define('NOCSRFCHECK', '1');
+}
+// Do not check anti CSRF attack test
+if (!defined('NOREQUIREMENU')) {
+	define('NOREQUIREMENU', '1');
+}
+// If there is no need to load and show top and left menu
+if (!defined("NOLOGIN")) {
+	define("NOLOGIN", '1');
+}
+if (!defined('NOIPCHECK')) {
+	define('NOIPCHECK', '1'); // Do not check IP defined into conf $dolibarr_main_restrict_ip
+}
+if (!defined('NOBROWSERNOTIF')) {
+	define('NOBROWSERNOTIF', '1');
+}
 
 // For MultiCompany module.
 // Do not use GETPOST here, function is not defined and get of entity must be done before including main.inc.php
@@ -53,6 +67,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 
+$mode = GETPOST('mode', 'aZ09');
 
 $tmpfile = '/var/log/sellyoursaas_spamreport.log';
 $date = strftime("%Y-%m-%d %H:%M:%S", time());
@@ -112,16 +127,20 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 		}
 
 		$titleofevent =  dol_trunc('[Alert] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
-		$statsd->event($titleofevent,
-			array(
-				'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
-				'alert_type' => 'warning',
-				'source_type_name' => 'API',
-				'host'       => gethostname()
-			)
-		);
 
-		echo "Ping sent to DataDog<br>\n";
+		if ($mode != 'test') {
+			$statsd->event($titleofevent,
+				array(
+					'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
+					'alert_type' => 'warning',
+					'source_type_name' => 'API',
+					'host'       => gethostname()
+				)
+			);
+		}
+
+		echo "Ping ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog<br>\n";
 	} catch (Exception $e) {
+
 	}
 }
