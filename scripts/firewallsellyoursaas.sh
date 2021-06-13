@@ -179,9 +179,9 @@ ${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p tcp --sport 993 -m state
 #${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p tcp --sport 990 -m state --state ESTABLISHED,RELATED -j ACCEPT
 # Whois
 ${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p tcp --sport 43 -m state --state ESTABLISHED,RELATED -j ACCEPT
-# DCC
-${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p tcp --sport 6277 -m state --state ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p udp --sport 6277 -m state --state ESTABLISHED,RELATED -j ACCEPT
+# DCC (anti spam public services)
+#${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p tcp --sport 6277 -m state --state ESTABLISHED,RELATED -j ACCEPT
+#${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p udp --sport 6277 -m state --state ESTABLISHED,RELATED -j ACCEPT
 # RDATE
 ${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p tcp --sport 37 -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -i ens3 -d $IP_SERVER -p udp --sport 123 -m state --state ESTABLISHED,RELATED -j ACCEPT

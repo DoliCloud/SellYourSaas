@@ -29,9 +29,9 @@ ufw allow out 636/tcp
 # IMAP
 ufw allow out 143/tcp
 ufw allow out 993/tcp
-# DCC
-ufw allow out 6227/tcp
-ufw allow out 6227/udp
+# DCC (anti spam public services)
+#ufw allow out 6277/tcp
+#ufw allow out 6277/udp
 # Rdate
 ufw allow out 37/tcp
 ufw allow out 123/udp
