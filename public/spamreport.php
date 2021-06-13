@@ -81,7 +81,7 @@ if ($key != $conf->global->SELLYOURSAAS_SECURITY_KEY) {
  * View
  */
 
-$tmpfile = '/var/log/sellyoursaas_spamreport.log';
+$tmpfile = DOL_DOCUMENT_ROOT.'/sellyoursaas_spamreport.log';
 $date = strftime("%Y-%m-%d %H:%M:%S", time());
 $body = file_get_contents('php://input');
 
