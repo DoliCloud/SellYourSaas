@@ -123,6 +123,10 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_MYACCOUNT_FOOTER", GETPOST("SELLYOURSAAS_MYACCOUNT_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_CONVERSION_FOOTER", GETPOST("SELLYOURSAAS_CONVERSION_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
+
+		dolibarr_set_const($db, "SELLYOURSAAS_CSS", GETPOST("SELLYOURSAAS_CSS", 'none'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_SECURITY_KEY", GETPOST("SELLYOURSAAS_SECURITY_KEY", 'none'), 'chaine', 0, '', $conf->entity);
+
 		dolibarr_set_const($db, "SELLYOURSAAS_PUBLIC_KEY", GETPOST("SELLYOURSAAS_PUBLIC_KEY", 'none'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT", GETPOST("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT", 'int'), 'chaine', 0, '', $conf->entity);
@@ -512,6 +516,22 @@ print '</td>';
 print '<td><span class="opacitymedium">&lt;script&gt;Your conversion trackers&lt;/script&gt;</span></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("CSSForCustomerAndRegisterPages").'</td>';
+print '<td>';
+print '<textarea name="SELLYOURSAAS_CSS" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_CSS.'</textarea>';
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" value="'.$conf->global->SELLYOURSAAS_SECURITY_KEY.'">';
+print '</td>';
+print '<td><span class="opacitymedium">123456abcdef</span></td>';
+print '</tr>';
+
+
+
 // Other
 
 print '<tr class="liste_titre"><td>'.$langs->trans("Automation").'</td>';
@@ -828,6 +848,7 @@ print '</td>';
 print '<td><span class="opacitymedium">/home/jail/archives-paid, /mnt/diskbackup/archives-paid</span></td>';
 print '</tr>';
 
+// SSH public keys to deploy on authized_public file.
 print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_PUBLIC_KEY" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_PUBLIC_KEY.'</textarea>';
