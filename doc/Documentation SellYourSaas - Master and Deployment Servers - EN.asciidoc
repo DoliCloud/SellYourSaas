@@ -1631,7 +1631,6 @@ And to test *clamav* command line and daemon:
 
 [source,bash]
 ---------------
-clamscan /tmp/testvirus
 clamdscan /tmp/testvirus --fdpass
 ---------------
 

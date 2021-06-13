@@ -1571,7 +1571,6 @@ Et pour tester *clamav* en ligne de commande et le démon:
 
 [source,bash]
 ---------------
-clamscan /tmp/testvirus
 clamdscan /tmp/testvirus --fdpass
 ---------------
 
