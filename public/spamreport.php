@@ -101,6 +101,7 @@ if (!$success) {
 if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 	try {
 		file_put_contents($tmpfile, "Now we send ping to DataDog\n", FILE_APPEND);
+
 		echo "Now we send ping to DataDog<br>\n";
 
 		dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
@@ -114,8 +115,12 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 
 		$arraytags=null;
 
-		$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
+		// Add metric in Datadog
+		if ($mode != 'test') {
+			$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
+		}
 
+		// Add event in Datadog
 		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 		$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
 
