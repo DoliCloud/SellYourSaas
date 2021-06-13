@@ -107,9 +107,11 @@ if ($mode != 'test') {
 		$errorMessage = error_get_last()['message'];
 		print dol_escape_htmltag($errorMessage);
 	} else {
+		file_put_contents($tmpfile, "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."\n", FILE_APPEND);
 		print "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
 	}
 } else {
+	file_put_contents($tmpfile, "Email not sent (test mode)\n", FILE_APPEND);
 	print "Email not sent (test mode)<br>\n";
 }
 
