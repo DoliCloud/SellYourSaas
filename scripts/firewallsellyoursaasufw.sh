@@ -2,6 +2,26 @@
 
 IPTABLES=iptables
 
+masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$masterserver" == "x" ]]; then
+	echo Failed to get masterserver parameter
+	exit 1
+fi
+
+dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dnsserver" == "x" ]]; then
+	echo Failed to get dnsserver parameter 
+	exit 1
+fi
+
+instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$instanceserver" == "x" ]]; then
+	echo Failed to get instanceserver parameter
+	exit 1
+fi
+
+
+
 
 case $1 in
   start)
