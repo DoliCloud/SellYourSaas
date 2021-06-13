@@ -101,12 +101,16 @@ echo "<br>\n";
 file_put_contents($tmpfile, "Now we send an email to supervisor ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n", FILE_APPEND);
 
 $headers = 'From: <'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.">\r\n";
-$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from external SMTP service', 'Spam was reported by external SMTP service:'."\r\n".($body ? $body : 'Body empty'), $headers);
-if (!$success) {
-	$errorMessage = error_get_last()['message'];
-	print dol_escape_htmltag($errorMessage);
+if ($mode != 'test') {
+	$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from external SMTP service', 'Spam was reported by external SMTP service:'."\r\n".($body ? $body : 'Body empty'), $headers);
+	if (!$success) {
+		$errorMessage = error_get_last()['message'];
+		print dol_escape_htmltag($errorMessage);
+	} else {
+		print "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
+	}
 } else {
-	echo "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
+	print "Email not sent (test mode)<br>\n";
 }
 
 // Send to DataDog (metric + event)
