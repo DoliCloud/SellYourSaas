@@ -154,7 +154,7 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 				$sellyoursaasname = $conf->global->$constforaltname;
 			}
 
-			$titleofevent =  dol_trunc('[Alert] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
+			$titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
 
 			if ($mode != 'test' && $mode != 'nodatadog') {
 				$statsd->event($titleofevent,
