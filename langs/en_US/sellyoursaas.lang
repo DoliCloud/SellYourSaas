@@ -562,3 +562,5 @@ ExampleContentOfFileOnMaster=Example, content of file %s on master
 EnableAlertEmailOnWebhookSpamReport=Enable the email alert on spam report webhook
 EnableAlertDatadogOnWebhookSpamReport=Enable the datadog ping on spam report webhook
 FileFor=File for %s
+FileToEditedManually=File edited manually
+FileEditedAutomaticallyByMailWrapperOnAbuseDetection=File edited automatcally by the mail wrapper on abuse detection

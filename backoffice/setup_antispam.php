@@ -142,22 +142,10 @@ $dirforspam = '/tmp/spam';
 
 print '<tr class="oddeven nohover">';
 print '<td>';
-$filemaster = $dirforspam.'/blacklistip';
-$file = $filemaster;
-$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>'.dol_htmlentitiesbr(file_get_contents($filemaster));
-print $form->textwithpicto($langs->trans("FileFor", 'blacklistip'), '', 1, 'help', '', 0, 3, 'blacklistip');
-print '</td>';
-print '<td>';
-print $form->textwithpicto($file, $htmltext, 1, 'help', '', 0, 3, 'blacklistip');
-print '</td>';
-print '</tr>';
-
-print '<tr class="oddeven nohover">';
-print '<td>';
 $filemaster = $dirforspam.'/blacklistfrom';
 $file = $filemaster;
 $htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>'.dol_htmlentitiesbr(file_get_contents($filemaster));
-print $form->textwithpicto($langs->trans("FileFor", 'blacklistfrom'), '', 1, 'help', '', 0, 3, 'blacklistfrom');
+print $form->textwithpicto($langs->trans("FileFor", 'blacklistfrom').' <span class="opacitymedium">('.$langs->trans("FileToEditedManually").')</span>', '', 1, 'help', '', 0, 3, 'blacklistfrom');
 print '</td>';
 print '<td>';
 print $form->textwithpicto($file, $htmltext, 1, 'help', '', 0, 3, 'blacklistfrom');
@@ -169,10 +157,22 @@ print '<td>';
 $filemaster = $dirforspam.'/blacklistcontent';
 $file = $filemaster;
 $htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>'.dol_htmlentitiesbr(file_get_contents($filemaster));
-print $form->textwithpicto($langs->trans("FileFor", 'blacklistcontent'), '', 1, 'help', '', 0, 3, 'blacklistcontent');
+print $form->textwithpicto($langs->trans("FileFor", 'blacklistcontent').' <span class="opacitymedium">('.$langs->trans("FileToEditedManually").')</span>', '', 1, 'help', '', 0, 3, 'blacklistcontent');
 print '</td>';
 print '<td>';
 print $form->textwithpicto($file, $htmltext, 1, 'help', '', 0, 3, 'blacklistcontent');
+print '</td>';
+print '</tr>';
+
+print '<tr class="oddeven nohover">';
+print '<td>';
+$filemaster = $dirforspam.'/blacklistip';
+$file = $filemaster;
+$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>'.dol_htmlentitiesbr(file_get_contents($filemaster));
+print $form->textwithpicto($langs->trans("FileFor", 'blacklistip'), $langs->trans("FileEditedAutomaticallyByMailWrapperOnAbuseDetection"), 1, 'help', '', 0, 3, 'blacklistip');
+print '</td>';
+print '<td>';
+print $form->textwithpicto($file, $htmltext, 1, 'help', '', 0, 3, 'blacklistip');
 print '</td>';
 print '</tr>';
 
