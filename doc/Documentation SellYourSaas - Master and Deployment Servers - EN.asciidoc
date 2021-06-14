@@ -2902,24 +2902,20 @@ Create a directory for blacklist files used by *phpsendmail.php*
 
 [source,bash]
 ---------------
-mkdir -p /var/lib/sellyoursaas/; chmod a+rwx /var/lib/sellyoursaas/
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+chown admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
 ---------------
 
-And link files on master or copy them on deployment server:
+And copy them on local directory:
 
 [source,bash]
 ---------------
-On master server:
-ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /var/lib/sellyoursaas/blacklistmail;
-ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /var/lib/sellyoursaas/blacklistip;
-ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /var/lib/sellyoursaas/blacklistfrom;
-ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /var/lib/sellyoursaas/blacklistcontent;
-On deployment server:
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /var/lib/sellyoursaas/blacklistmail;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /var/lib/sellyoursaas/blacklistip;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /var/lib/sellyoursaas/blacklistfrom;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /var/lib/sellyoursaas/blacklistcontent;
-chmod -R a+rw /var/lib/sellyoursaas;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent;
+chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
 ---------------
 
 
