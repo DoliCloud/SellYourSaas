@@ -206,7 +206,7 @@ print '<br>';
 
 $message='';
 $url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'&mode=test" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'[&mode=test]</a>';
-$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
+$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "WebHook SpamReport", '{s1}');
 $message = str_replace('{s1}', $url, $message);
 print $message;
 
