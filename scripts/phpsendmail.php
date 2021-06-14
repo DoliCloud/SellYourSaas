@@ -124,10 +124,10 @@ if (! empty($mail) && $blacklistofcontents) {
 			file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 4. Blacklisted content has the key '.trim($blackcontent)." found into file blacklistcontent\n", FILE_APPEND);
 			// Save spam mail content and ip
 			file_put_contents('/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail', $mail."\n", FILE_APPEND);
-			chmod("/var/lib/sellyoursaas/blacklistmail", 0666);
+			chmod("/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail", 0666);
 			if (! empty($ip)) {
 				file_put_contents('/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip', $ip."\n", FILE_APPEND);
-				chmod("/var/lib/sellyoursaas/blacklistip", 0666);
+				chmod("/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip", 0666);
 			}
 			exit(5);
 		}
