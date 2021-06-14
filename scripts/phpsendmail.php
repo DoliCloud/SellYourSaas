@@ -13,6 +13,9 @@
 
 $sendmail_bin = '/usr/sbin/sendmail';
 $logfile = '/var/log/phpsendmail.log';
+//$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
+$pathtospamdir = '/tmp';
+
 
 //* Get the email content
 $mail='';
@@ -98,7 +101,7 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APP
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - ".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
 
-$blacklistofips = @file_get_contents('/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip');
+$blacklistofips = @file_get_contents($pathtospamdir.'/blacklistip');
 if (! empty($ip) && $blacklistofips) {
 	$blacklistofipsarray = explode("\n", $blacklistofips);
 	if (is_array($blacklistofipsarray) && in_array($ip, $blacklistofipsarray)) {
@@ -107,7 +110,7 @@ if (! empty($ip) && $blacklistofips) {
 	}
 }
 
-$blacklistoffroms = @file_get_contents('/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom');
+$blacklistoffroms = @file_get_contents($pathtospamdir.'/blacklistfrom');
 if (! empty($emailfrom) && $blacklistoffroms) {
 	$blacklistoffromsarray = explode("\n", $blacklistoffroms);
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
@@ -116,18 +119,18 @@ if (! empty($emailfrom) && $blacklistoffroms) {
 	}
 }
 
-$blacklistofcontents = @file_get_contents('/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent');
+$blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
 if (! empty($mail) && $blacklistofcontents) {
 	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);
 	foreach ($blacklistofcontentsarray as $blackcontent) {
 		if (trim($blackcontent) && preg_match('/'.preg_quote(trim($blackcontent), '/').'/ims', $mail)) {
 			file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 4. Blacklisted content has the key '.trim($blackcontent)." found into file blacklistcontent\n", FILE_APPEND);
 			// Save spam mail content and ip
-			file_put_contents('/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail', $mail."\n", FILE_APPEND);
-			chmod("/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail", 0666);
+			file_put_contents($pathtospamdir.'/blacklistmail', $mail."\n", FILE_APPEND);
+			chmod($pathtospamdir."/blacklistmail", 0666);
 			if (! empty($ip)) {
-				file_put_contents('/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip', $ip."\n", FILE_APPEND);
-				chmod("/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip", 0666);
+				file_put_contents($pathtospamdir.'/blacklistip', $ip."\n", FILE_APPEND);
+				chmod($pathtospamdir."/blacklistip", 0666);
 			}
 			exit(5);
 		}
