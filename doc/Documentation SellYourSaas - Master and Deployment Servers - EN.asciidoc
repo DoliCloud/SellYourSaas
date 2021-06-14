@@ -2898,6 +2898,30 @@ chown syslog.adm phpmail.log phpsendmail.log
 chmod a+rw phpmail.log phpsendmail.log
 ---------------
 
+Create a directory for blacklist files used by *phpsendmail.php*
+
+[source,bash]
+---------------
+mkdir -p /var/lib/sellyoursaas/; chmod a+rwx /var/lib/sellyoursaas/
+---------------
+
+And link files on master or copy them on deployment server:
+
+[source,bash]
+---------------
+On master server:
+ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /var/lib/sellyoursaas/blacklistmail;
+ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /var/lib/sellyoursaas/blacklistip;
+ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /var/lib/sellyoursaas/blacklistfrom;
+ln -fs /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /var/lib/sellyoursaas/blacklistcontent;
+On deployment server:
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /var/lib/sellyoursaas/blacklistmail;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /var/lib/sellyoursaas/blacklistip;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /var/lib/sellyoursaas/blacklistfrom;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /var/lib/sellyoursaas/blacklistcontent;
+chmod -R a+rw /var/lib/sellyoursaas;
+---------------
+
 
 === Setup of logrotate
 

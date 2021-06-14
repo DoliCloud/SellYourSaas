@@ -139,31 +139,34 @@ print '</tr>';
 
 print '<tr class="oddeven nohover">';
 print '<td>';
-$htmltext = $langs->trans("File").' = '.DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistip';
+$file = '/var/lib/sellyoursaas/spam/blacklistip';
+$htmltext = $langs->trans("File").' = '.$file;
 print $form->textwithpicto($langs->trans("blacklistip"), $htmltext, 1, 'help', '', 0, 3, 'blacklistip');
 print '</td>';
 print '<td>';
-print dol_htmlentitiesbr(file_get_contents(DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistip'));
+print dol_htmlentitiesbr(file_get_contents($file));
 print '</td>';
 print '</tr>';
 
 print '<tr class="oddeven nohover">';
 print '<td>';
-$htmltext = $langs->trans("File").' = '.DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistfrom';
+$file = '/var/lib/sellyoursaas/spam/blacklistfrom';
+$htmltext = $langs->trans("File").' = '.$file;
 print $form->textwithpicto($langs->trans("blacklistfrom"), $htmltext, 1, 'help', '', 0, 3, 'blacklistfrom');
 print '</td>';
 print '<td>';
-print dol_htmlentitiesbr(file_get_contents(DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistfrom'));
+print dol_htmlentitiesbr(file_get_contents($file));
 print '</td>';
 print '</tr>';
 
 print '<tr class="oddeven nohover">';
 print '<td>';
-$htmltext = $langs->trans("File").' = '.DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistfrom';
+$file = '/var/lib/sellyoursaas/spam/blacklistcontent';
+$htmltext = $langs->trans("File").' = '.$file;
 print $form->textwithpicto($langs->trans("blacklistcontent"), $htmltext, 1, 'help', '', 0, 3, 'blacklistcontent');
 print '</td>';
 print '<td>';
-print dol_htmlentitiesbr(file_get_contents(DOL_DATA_ROOT.'/sellyoursaas/spam/blacklistcontent'));
+print dol_htmlentitiesbr(file_get_contents($file));
 print '</td>';
 print '</tr>';
 
