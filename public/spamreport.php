@@ -157,9 +157,11 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 			$titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
 
 			if ($mode != 'test' && $mode != 'nodatadog') {
+				$body = file_get_contents('php://input');
+
 				$statsd->event($titleofevent,
 					array(
-						'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
+						'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true)."\n".$body,
 						'alert_type' => 'warning',
 						'source_type_name' => 'API',
 						'host'       => gethostname()
