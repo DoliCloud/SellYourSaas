@@ -120,7 +120,10 @@ if (! empty($emailfrom) && $blacklistoffroms) {
 }
 
 $blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
-if (! empty($mail) && $blacklistofcontents) {
+if ($blacklistofcontents === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents can't be read.\n", FILE_APPEND);
+} elseif (! empty($mail)) {
+	//file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents = ".$blacklistofcontents."\n", FILE_APPEND);
 	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);
 	foreach ($blacklistofcontentsarray as $blackcontent) {
 		if (trim($blackcontent) && preg_match('/'.preg_quote(trim($blackcontent), '/').'/ims', $mail)) {

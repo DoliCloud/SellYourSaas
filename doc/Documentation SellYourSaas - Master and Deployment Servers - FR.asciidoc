@@ -2440,6 +2440,8 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /mnt/diskhome/home/osu*/dbn*/*_error.log r,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
+  /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+  /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
 }
 ---------------
 
