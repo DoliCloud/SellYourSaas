@@ -102,7 +102,9 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(em
 
 
 $blacklistofips = @file_get_contents($pathtospamdir.'/blacklistip');
-if (! empty($ip) && $blacklistofips) {
+if ($blacklistofips === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofips can't be read.\n", FILE_APPEND);
+} elseif (! empty($ip)) {
 	$blacklistofipsarray = explode("\n", $blacklistofips);
 	if (is_array($blacklistofipsarray) && in_array($ip, $blacklistofipsarray)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 2. Blacklisted ip '.$ip." found into file blacklistip\n", FILE_APPEND);
@@ -111,7 +113,9 @@ if (! empty($ip) && $blacklistofips) {
 }
 
 $blacklistoffroms = @file_get_contents($pathtospamdir.'/blacklistfrom');
-if (! empty($emailfrom) && $blacklistoffroms) {
+if ($blacklistoffroms === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistoffroms can't be read.\n", FILE_APPEND);
+} elseif (! empty($emailfrom)) {
 	$blacklistoffromsarray = explode("\n", $blacklistoffroms);
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 3. Blacklisted from '.$emailfrom." found into file blacklistfrom\n", FILE_APPEND);
@@ -121,7 +125,7 @@ if (! empty($emailfrom) && $blacklistoffroms) {
 
 $blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
 if ($blacklistofcontents === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofcontents can't be read.\n", FILE_APPEND);
 } elseif (! empty($mail)) {
 	//file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents = ".$blacklistofcontents."\n", FILE_APPEND);
 	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);

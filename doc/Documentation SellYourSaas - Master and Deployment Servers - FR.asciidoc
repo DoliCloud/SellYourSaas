@@ -2863,6 +2863,12 @@ Et copier les dans le répertoire local:
 
 [source,bash]
 ---------------
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp;
+chmod -R a+rw /tmp/black*;
+
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom;
