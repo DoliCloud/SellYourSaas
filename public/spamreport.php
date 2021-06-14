@@ -101,7 +101,7 @@ echo "<br>\n";
 file_put_contents($tmpfile, "Now we send an email to supervisor ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n", FILE_APPEND);
 
 $headers = 'From: <'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.">\r\n";
-if ($mode != 'test') {
+if ($mode != 'test' && $mode != 'nomail') {
 	$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from external SMTP service', 'Spam was reported by external SMTP service:'."\r\n".($body ? $body : 'Body empty'), $headers);
 	if (!$success) {
 		$errorMessage = error_get_last()['message'];
@@ -133,7 +133,7 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 		$arraytags=null;
 
 		// Add metric in Datadog
-		if ($mode != 'test') {
+		if ($mode != 'test' && $mode != 'nodatadog') {
 			$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
 		}
 
@@ -150,7 +150,7 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 
 		$titleofevent =  dol_trunc('[Alert] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
 
-		if ($mode != 'test') {
+		if ($mode != 'test' && $mode != 'nodatadog') {
 			$statsd->event($titleofevent,
 				array(
 					'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
