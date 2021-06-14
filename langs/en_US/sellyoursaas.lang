@@ -559,3 +559,6 @@ YouCanClainAmountWhen=You can claim your due amount, once per quarter, and if th
 SendYourInvoiceTo=Send your invoice for %s to <b>%s</b>
 LastTry=Last try
 ExampleContentOfFileOnMaster=Example, content of file %s on master
+EnableAlertEmailOnWebhookSpamReport=Enable the email alert on spam report webhook
+EnableAlertDatadogOnWebhookSpamReport=Enable the datadog ping on spam report webhook
+FileFor=File for %s
