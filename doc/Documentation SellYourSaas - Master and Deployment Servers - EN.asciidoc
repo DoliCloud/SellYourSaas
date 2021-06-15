@@ -1616,9 +1616,9 @@ echo $?
 ---------------
 
 
-=== Installation of ClamAV
+=== Test and setup of ClamAV
 
-The process *freshclam* and *clamd* must be running. Start them manually the first time.
+The processes *freshclam* and *clamd* should be running. Test them.
 
 To test clamav tool, create a file */tmp/testvirus* with content
 
@@ -1647,7 +1647,7 @@ service apache2 start
 ---------------
 
 You should see into the status of apparmor a line saying that Profile *usr/sbin/clamd* is disabled.
-It seems we must also restart apache to have this effective inside apache.
+Note: It seems we must also restart apache to have this effective inside apache.
 
 
 === Installation of Afick

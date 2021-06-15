@@ -1556,7 +1556,7 @@ echo $?
 ---------------
 
 
-=== Installation de ClamAV
+=== Test et paramétrage de ClamAV
 
 Le process *freshclam* et *clamd* doit tourner. Lancer les manuellement la première fois si ce n'est pas le cas.
 
@@ -1587,7 +1587,7 @@ service apache2 start
 ---------------
 
 Vous devez voir dans le statut apparmor une ligne disant que le profil *usr/sbin/clamd* est désactivée.
-Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans apache.
+Rem: Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans apache.
 
 
 === Installation de Afick
