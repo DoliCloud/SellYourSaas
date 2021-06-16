@@ -329,6 +329,34 @@ if ($sellyoursaassupporturl) {
 
 		$stringtoprint .= '</select>';
 		$stringtoprint .= ajax_combobox("groupticket");
+		
+		// TODO: remove error of CORS in ajax request
+		$stringtoprint .= '<script>
+		function groupticketchange(){
+			$("#KWwithajax")[0].innerHTML="";
+			if($("#groupticket_child").length!=0 &&($("#groupticket_child")[0].style[0] == "display" || this.id == "groupticket_child") && this.value != "" ){
+				var urllist = "";
+				/*$.ajax({ url: \''.dol_buildpath('/sellyoursaas/fetchKnowledgeRecord.php',2).'\',
+						 data: {action: \'getKnowledgeRecord\',codeticket: \'this.value\'},
+						 type: \'POST\',
+						 success: function(response) {
+							for (key in response) {
+								urllist += response[key].title + " " + \'<a href="\'+response[key].url + "\">"+response[key].url+"</a> <br>";
+							}
+						 },
+						 error : function(output) {
+							console.log("error");
+						 },
+				});*/
+				if(urllist != ""){
+					$("#KWwithajax")[0].innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist;
+				}
+			}
+		};
+		$("#groupticket").change(groupticketchange);
+		$("#groupticket_child").change(groupticketchange);
+		</script>';
+		$stringtoprint .= '<br> <div class="supportemailfield" id="KWwithajax"></div>';
 		$stringtoprint .= '<br><br>';
 		if ($num_rows > 1) {
 			print $stringtoprint;
