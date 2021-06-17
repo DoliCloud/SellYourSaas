@@ -302,12 +302,13 @@ if ($sellyoursaassupporturl) {
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
-		//Combobox for Group of ticket
+		// Combobox for Group of ticket
+		// TODO Replace this with the component available in dolibarr v14
 		$stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
-		$stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth400">';
+		$stringtoprint .= '<select name="groupticket" id="groupticket" class="maxwidth500 minwidth400">';
 		$stringtoprint .= '<option value="">&nbsp;</option>';
 
-		$sql = "SELECT ctc.code, ctc.label";
+		$sql = "SELECT ctc.rowid, ctc.code, ctc.label";
 		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
 		$sql .= " WHERE ctc.public = 1";
 		$sql .= " AND ctc.active = 1";
@@ -319,9 +320,10 @@ if ($sellyoursaassupporturl) {
 			while ($i < $num_rows) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
+					$groupid = $obj->rowid;
 					$groupvalue = $obj->code;
 					$grouplabel = $obj->label;
-					$stringtoprint .= '<option value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
+					$stringtoprint .= '<option value="'.dol_escape_htmltag($groupid).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
 				}
 				$i++;
 			}
@@ -329,6 +331,50 @@ if ($sellyoursaassupporturl) {
 
 		$stringtoprint .= '</select>';
 		$stringtoprint .= ajax_combobox("groupticket");
+
+		// TODO: remove error of CORS in ajax request
+		$stringtoprint .= '<!-- Script to manage change of ticket group -->
+		<script>
+		jQuery(document).ready(function() {
+			function groupticketchange(){
+				console.log("We called groupticketchange, so we try to load list KM linked to event");
+				$("#KWwithajax").innerHTML="";
+
+				idgroupticket = $("#groupticket_child option:selected").val();
+				if (idgroupticket === undefined) {
+					idgroupticket = $("#groupticket option:selected").val();
+				}
+
+				console.log("We have selected id="+idgroupticket);
+
+				if (idgroupticket > 0) {
+					$.ajax({ url: \''.$sellyoursaasaccounturl.'/ajax/fetchKnowledgeRecord.php\',
+						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\' },
+						 type: \'GET\',
+						 success: function(response) {
+							var urllist = \'\';
+							console.log("We received response "+response);
+							for (key in response) {
+								// TODO Loop on each answer urls
+								//urllist += response[key].title + " " + \'<a href="\'+response[key].url + "\">"+response[key].url+"</a> <br>";
+							}
+							console.log(urllist);
+							if (urllist != \'\') {
+								$("#KWwithajax").innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist;
+							}
+						 },
+						 error : function(output) {
+							console.log("error");
+						 },
+					});
+				}
+			};
+
+			$("#groupticket").change(function() { groupticketchange(); });
+			$("#groupticket_child").change(function() { groupticketchange(); });
+		});
+		</script>';
+		$stringtoprint .= '<br> <div class="supportemailfield" id="KWwithajax"></div>';
 		$stringtoprint .= '<br><br>';
 		if ($num_rows > 1) {
 			print $stringtoprint;
