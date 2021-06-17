@@ -89,7 +89,7 @@ if (empty($reshook)) {
 	}
 
 	// Add action to create file, etc...
-	include 'refresh_action.inc.php';
+	require 'refresh_action.inc.php';
 
 	if ($action == 'markasspamandclose') {
 		$idtoclose = GETPOST('idtoclose', 'int');

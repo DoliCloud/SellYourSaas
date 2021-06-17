@@ -295,6 +295,14 @@ llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 $linkback='<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
+print '<span class="opacitymedium">'.$langs->trans("Prerequisites")."</span><br>\n";
+print '<br>';
+
+print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+print "<br>\n";
+
 //$head=array();
 //dol_fiche_head($head, 'serversetup', $langs->trans("SellYourSaas"), -1);
 
@@ -319,14 +327,6 @@ print '<td>';
 print ajax_constantonoff('SELLYOURSAAS_FORCE_STRIPE_TEST', array(), $conf->entity, 0, 0, 1);
 print '</td>';
 print '<td><span class="opacitymedium">1</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
-print '</td>';
-print '<td colspan="2">';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.$conf->global->SELLYOURSAAS_MAIN_FAQ_URL.'">';
-print '</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasName").'</td>';
@@ -502,6 +502,14 @@ print '</td>';
 print '<td><span class="opacitymedium">https://status.mysaasdomainname.com</span></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
+print '</td>';
+print '<td colspan="2">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.$conf->global->SELLYOURSAAS_MAIN_FAQ_URL.'">';
+print '</td>';
+print '</tr>';
+
 print '<tr class="oddeven"><td>'.$langs->trans("FooterContent").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_MYACCOUNT_FOOTER" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER.'</textarea>';
@@ -523,7 +531,7 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").'</td>';
+print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").' <span class="opacitymedium">(To protect the URL for Spam reporting webhooks)</spam></td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" value="'.$conf->global->SELLYOURSAAS_SECURITY_KEY.'">';
 print '</td>';
@@ -905,13 +913,6 @@ $message = str_replace('{s1}', $url, $message);
 print $message;
 
 print "<br>";
-print '<br>';
-
-
-print 'idn_to_ascii function: '.yn(function_exists('idn_to_ascii')).'<br>';
-print 'checkdnsrr function: '.yn(function_exists('checkdnsrr')).'<br>';
-print "<br>\n";
-
 
 //dol_fiche_end();
 
