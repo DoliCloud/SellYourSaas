@@ -1600,7 +1600,7 @@ wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick
 dpkg -i afick.deb
 ---------------
 
-* Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+* Commenter les ligne qui exclut les extension que l'on veut voir incluse dans l'analyse dans */etc/afick.conf* et ne garder décommenter que ces lignes ci (on veut uniquement exclure les log et backup):
 
 [source,bash]
 ---------------

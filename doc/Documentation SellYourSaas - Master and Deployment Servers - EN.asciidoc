@@ -1660,7 +1660,7 @@ wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick
 dpkg -i afick.deb
 ---------------
 
-* Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+* Comment the lines that exclude suffixes that we want to include in analysis in */etc/afick.conf* and keep uncommented only these ones (we only want to exclude log and backup):
 
 [source,bash]
 ---------------
