@@ -1902,7 +1902,7 @@ broken_sasl_auth_clients = yes
 
 === Configuration de Mysql ou Mariadb
 
-On *Deployment servers*, use a dedicated setup of the database.
+Sur les *Serveurs de déploiement*:
 
 ==== Configuration
 

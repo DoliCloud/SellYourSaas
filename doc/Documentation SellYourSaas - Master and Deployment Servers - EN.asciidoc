@@ -1961,9 +1961,9 @@ broken_sasl_auth_clients = yes
 
 === Setup of Mysql or Mariadb
 
-On *Deployment servers*, use a dedicated setup of the database.
-
 ==== Setup
+
+On *Deployment servers*:
 
 Edit the config file 
 */lib/systemd/system/mysql.service*  or  */lib/systemd/system/mariadb.service*
@@ -2030,6 +2030,8 @@ Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 ==== Set mysql root password
 
+On *all servers*:
+
 [source,bash]
 ---------------
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
@@ -2038,6 +2040,8 @@ FLUSH PRIVILEGES;
 
 
 ==== Secure the root account (optional)
+
+On *all servers*:
 
 In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
 from the system root account only (using *auth_socket* or *unix_socket*):
