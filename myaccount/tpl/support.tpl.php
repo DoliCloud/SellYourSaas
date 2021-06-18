@@ -25,6 +25,7 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
 
 	$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
 
@@ -303,64 +304,42 @@ if ($sellyoursaassupporturl) {
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
 		// Combobox for Group of ticket
-		// TODO Replace this with the component available in dolibarr v14
-		$stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
-		$stringtoprint .= '<select name="groupticket" id="groupticket" class="maxwidth500 minwidth400">';
-		$stringtoprint .= '<option value="">&nbsp;</option>';
-
-		$sql = "SELECT ctc.rowid, ctc.code, ctc.label";
-		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
-		$sql .= " WHERE ctc.public = 1";
-		$sql .= " AND ctc.active = 1";
-		$sql .= $db->order('ctc.pos', 'ASC');
-		$resql = $db->query($sql);
-		if ($resql) {
-			$num_rows = $db->num_rows($resql);
-			$i = 0;
-			while ($i < $num_rows) {
-				$obj = $db->fetch_object($resql);
-				if ($obj) {
-					$groupid = $obj->rowid;
-					$groupvalue = $obj->code;
-					$grouplabel = $obj->label;
-					$stringtoprint .= '<option value="'.dol_escape_htmltag($groupid).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
-				}
-				$i++;
-			}
-		}
-
-		$stringtoprint .= '</select>';
-		$stringtoprint .= ajax_combobox("groupticket");
-
+		$formticket = new FormTicket($db);
+		$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', '', 0, 0, 1, 0, '', 1);
+		$stringtoprint .= ajax_combobox('groupticket');
 		// TODO: remove error of CORS in ajax request
 		$stringtoprint .= '<!-- Script to manage change of ticket group -->
 		<script>
 		jQuery(document).ready(function() {
 			function groupticketchange(){
 				console.log("We called groupticketchange, so we try to load list KM linked to event");
-				$("#KWwithajax").innerHTML="";
+				$("#KWwithajax")[0].innerHTML="";
 
 				idgroupticket = $("#groupticket_child option:selected").val();
-				if (idgroupticket === undefined) {
+				if (idgroupticket == "") {
 					idgroupticket = $("#groupticket option:selected").val();
+					if(!arraynotparents.includes(idgroupticket)){
+						idgroupticket = ""
+					}
 				}
 
 				console.log("We have selected id="+idgroupticket);
 
-				if (idgroupticket > 0) {
+				if (idgroupticket != "") {
 					$.ajax({ url: \''.$sellyoursaasaccounturl.'/ajax/fetchKnowledgeRecord.php\',
 						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\' },
 						 type: \'GET\',
 						 success: function(response) {
 							var urllist = \'\';
 							console.log("We received response "+response);
+							response = JSON.parse(response)
 							for (key in response) {
-								// TODO Loop on each answer urls
-								//urllist += response[key].title + " " + \'<a href="\'+response[key].url + "\">"+response[key].url+"</a> <br>";
+								console.log(response[key])
+								urllist += response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a> <br>";
 							}
-							console.log(urllist);
-							if (urllist != \'\') {
-								$("#KWwithajax").innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist;
+							if (urllist != "") {
+								console.log(urllist)
+								$("#KWwithajax")[0].innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist;
 							}
 						 },
 						 error : function(output) {
@@ -376,11 +355,7 @@ if ($sellyoursaassupporturl) {
 		</script>';
 		$stringtoprint .= '<br> <div class="supportemailfield" id="KWwithajax"></div>';
 		$stringtoprint .= '<br><br>';
-		if ($num_rows > 1) {
-			print $stringtoprint;
-		} elseif ($num_rows == 1) {
-			print '<input type="hidden" name="groupticket" id="groupticket" value="'.dol_escape_htmltag($groupvalue).'">';
-		}
+		print $stringtoprint;
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';

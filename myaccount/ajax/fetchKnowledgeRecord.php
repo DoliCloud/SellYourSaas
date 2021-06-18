@@ -27,34 +27,28 @@ if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main
 if (! $res) die("Include of main fails");
 
 $action = GETPOST('action', 'aZ09');
-$idticketgroup = GETPOST('idticketgroup', 'int');
+$idticketgroup = GETPOST('idticketgroup', 'aZ09');
 
-if ($action == "getKnowledgeRecord" && $idticketgroup > 0) {
+if ($action == "getKnowledgeRecord") {
     $response = '';
-    // TODO Take list of URL found into subtable llx_links
-    $sql = "SELECT kr.rowid, kr.ref, kr.question, kr.answer, kr.fk_c_ticket_category, kr.url";
-    $sql .= " FROM ".MAIN_DB_PREFIX."knowledgemanagement_knowledgerecord as kr";
-    $sql .= " WHERE kr.fk_c_ticket_category = ".((int) $idticketgroup);
-    //$sql .= " AND entity = ".$conf->entity;
+    $sql = "SELECT kr.rowid, kr.ref, kr.question, kr.answer,l.url,ctc.code";
+    $sql .= " FROM ".MAIN_DB_PREFIX."links as l";
+    $sql .= " INNER JOIN ".MAIN_DB_PREFIX."knowledgemanagement_knowledgerecord as kr ON kr.rowid = l.objectid";
+    $sql .= " INNER JOIN ".MAIN_DB_PREFIX."c_ticket_category as ctc ON ctc.rowid = kr.fk_c_ticket_category";
+    $sql .= " WHERE ctc.code = '".$idticketgroup."'";
     $resql = $db->query($sql);
     if ($resql) {
         $num = $db->num_rows($resql);
         $i = 0;
-        // TODO Do not forge a json string. Just forge a PHP array and return it with json_encode($response)
-        $response .= '[';
+        $response = array();
         while ($i < $num) {
             $obj = $db->fetch_object($resql);
-            $response .= $i.'\':{ title:\''.$obj->question.'\', ';
-            $response .= 'ref:\''.$obj->url.'\', ';
-            $response .= 'answer:\''.$obj->answer.'\', ';
-            $response .= 'url:\''.$obj->url.'\'';	// Return array of url for this question.
-            $response .= '}';
+            $response[] = array('title'=>$obj->question,'ref'=>$obj->url,'answer'=>$obj->answer,'url'=>$obj->url);
             $i++;
         }
-        $response .= ']';
     } else{
         dol_print_error($db);
     }
-    $response = json_encode($response);
+    $response =json_encode($response);
     echo $response;
 }
