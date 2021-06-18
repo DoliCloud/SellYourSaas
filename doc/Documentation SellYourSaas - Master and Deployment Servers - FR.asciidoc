@@ -1772,7 +1772,7 @@ myorigin = /etc/mailname
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
 recipient_delimiter = +
-inet_interfaces = ip.public.du.serveur
+inet_interfaces = ip.publique.serveur.associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
 inet_protocols = ipv4
 smtp_generic_maps = hash:/etc/postfix/generic
 
@@ -1825,7 +1825,7 @@ Pensez à modifier dans */etc/postfix/main.cf*, les entrées :
  
 [source,bash]
 ---------------
-inet_interfaces = ip_publique_associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
+inet_interfaces = ip.publique.serveur.associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
 inet_protocols = ipv4
 ---------------
 
