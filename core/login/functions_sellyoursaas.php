@@ -72,7 +72,10 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 			return '';
 		}
 
-		// Standard test
+		// Test password validity.
+		// Default usage is to have password stored into extrafields (options_password) and encoded with password_hash (Value looks like $2y$10B...)
+		// Old versions may have stored password using sha/md5 encoding.
+		// The column oldpassword was used to store the password hash coming from an another information system.
 
 		$passwordtotest_crypted = dol_hash($passwordtotest);
 
