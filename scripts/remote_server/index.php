@@ -145,6 +145,16 @@ if (in_array($tmparray[0], array('backup'))) {
 	exit();
 }
 
+if (in_array($tmparray[0], array('test'))) {
+	$httpresponse = 200;
+
+	http_response_code($httpresponse);
+
+	fwrite($fh, date('Y-m-d H:i:s').' action code "'.$tmparray[0].'" called. Nothing done.'."\n");
+
+	exit();
+}
+
 fwrite($fh, date('Y-m-d H:i:s').' action code "'.$tmparray[0].'" not supported'."\n");
 fclose($fh);
 
