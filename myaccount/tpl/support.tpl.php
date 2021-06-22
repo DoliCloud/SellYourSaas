@@ -451,8 +451,59 @@ if (empty($sellyoursaassupporturl) && $action != 'presend') {
     					<div class="col-md-12">';
 
 
-	print $langs->trans("SoonAvailable");
+	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticketstats.class.php';
+	$staticticket = new Ticket($db);
 
+	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut";
+	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
+	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";
+	$sql .= $db->order('t.fk_statut','ASC');
+
+	$resql=$db->query($sql);
+	if ($resql) {
+		print '<div class="div-table-responsive-no-min">';
+		print '<table class="noborder centpercent">';
+		$num_rows = $db->num_rows($resql);
+		$i = 0;
+		while ($i < $num_rows) {
+			$obj = $db->fetch_object($resql);
+			$staticticket->id = $obj->rowid;
+			$staticticket->ref = $obj->ref;
+			$staticticket->track_id = $obj->track_id;
+			$staticticket->fk_statut = $obj->fk_statut;
+			$staticticket->progress = $obj->progress;
+			$staticticket->subject = $obj->subject;
+
+			print '<tr class="oddeven">';
+
+			// Ref
+			print '<td class="nowraponall">';
+			print $staticticket->getNomUrl(1);
+			print "</td>\n";
+
+			// Creation date
+			print '<td class="left">';
+			print dol_print_date($db->jdate($obj->datec), 'dayhour');
+			print "</td>";
+
+			// Subject
+			print '<td class="nowrap">';
+			print $obj->subject;
+			print "</td>\n";
+
+			print '<td class="nowraponall right">';
+			print $staticticket->getLibStatut(5);
+			print "</td>";
+
+			print "</tr>\n";
+			$i++;
+		}
+		print "</table>";
+		print '</div>';
+	}else {
+		dol_print_error($db);
+	}
 	print '</div></div>';
 
 
