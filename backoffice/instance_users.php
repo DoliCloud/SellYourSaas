@@ -51,9 +51,11 @@ $confirm	= GETPOST('confirm', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 $id			= GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
-
 $error = 0; $errors = array();
 
+if (!$sortorder) {
+	$sortorder = "ASC";
+}
 
 if ($action != 'create') {
 	$object = new Contrat($db);
@@ -106,6 +108,7 @@ if (empty($reshook)) {
 		header("Location: ".$backtopage);
 		exit;
 	}
+	include DOL_DOCUMENT_ROOT.'/core/actions_changeselectedfields.inc.php';
 
 	if ($action == "createsupportuser") {
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
@@ -440,13 +443,17 @@ if ($action == 'resetpassword') {
 	print $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&remoteid=' . GETPOST('remoteid', 'int'), $langs->trans('ResetPassword'), $langs->trans('ConfirmResetPassword'), 'confirm_resetpassword', $formquestion, 0, 1);
 }
 
+print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 if (!$error) {
+	print '<input type="hidden" name="action" value="list">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<table class="border" width="100%">';
 
 	print_user_table($dbcustomerinstance, $object);
 
 	print "</table><br>";
 }
+print '</form>'."\n";
 
 
 // Application instance url
@@ -501,26 +508,42 @@ function print_user_table($newdb, $object)
 {
 	global $langs;
 	global $id;
-
+	$form = new Form($db);
+	$arrayfields = array(
+		'rowid'=>array('label'=>$langs->trans("ID"), 'checked'=>1, 'position'=>10),
+		'login'=>array('label'=>$langs->trans("Login"), 'checked'=>1, 'position'=>15),
+		'lastname'=>array('label'=>$langs->trans("Lastname"), 'checked'=>1, 'position'=>20),
+		'firstname'=>array('label'=>$langs->trans("Firstname"), 'checked'=>1, 'position'=>50),
+		'admin'=>array('label'=>$langs->trans("Admin"), 'checked'=>1, 'position'=>22),
+		'email'=>array('label'=>$langs->trans("Email"), 'checked'=>1, 'position'=>25),
+		'pass'=>array('label'=>$langs->trans("Pass"), 'checked'=>1, 'position'=>27),
+		'datec'=>array('label'=>$langs->trans("DateCreation"), 'checked'=>1, 'position'=>31),
+		'datem'=>array('label'=>$langs->trans("DateModification"), 'checked'=>1, 'position'=>32),
+		'datelastlogin'=>array('label'=>$langs->trans("DateLastLogin"), 'checked'=>1, 'position'=>35),
+		'entity'=>array('label'=>$langs->trans("Entity"), 'checked'=>1, 'position'=>100),
+		'fk_soc'=>array('label'=>$langs->trans("ParentsId"), 'checked'=>1, 'position'=>105),
+		'statut'=>array('label'=>$langs->trans("Status"), 'checked'=>1, 'position'=>110),
+	);
 	print '<table class="noborder" width="100%">';
 
 	// Nb of users
 	print '<tr class="liste_titre">';
 	print '<td>#</td>';
-	print '<td>'.$langs->trans("ID").'</td>';
-	print '<td>'.$langs->trans("Login").'</td>';
-	print '<td>'.$langs->trans("Lastname").'</td>';
-	print '<td>'.$langs->trans("Firstname").'</td>';
-	print '<td>'.$langs->trans("Admin").'</td>';
-	print '<td>'.$langs->trans("Email").'</td>';
-	print '<td>'.$langs->trans("Pass").'</td>';
-	print '<td>'.$langs->trans("DateCreation").'</td>';
-	print '<td>'.$langs->trans("DateModification").'</td>';
-	print '<td>'.$langs->trans("DateLastLogin").'</td>';
-	print '<td>'.$langs->trans("Entity").'</td>';
-	print '<td>'.$langs->trans("ParentsId").'</td>';
-	print '<td class="center">'.$langs->trans("Status").'</td>';
+	foreach ($arrayfields as $key => $value) {
+		if ($key == 'statut') {
+			$cssforfield = ($cssforfield ? ' ' : '').'center';
+		}else{
+			$cssforfield = "";
+		}
+		if (!empty($arrayfields[$key]['checked'])) {
+			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "", ($cssforfield ? 'class="'.$cssforfield.'"' : ''), "", "", ($cssforfield ? $cssforfield.' ' : ''))."\n";
+		}
+	}
 	print '<td></td>';
+	
+	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
+	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
+	print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";	
 	print '</tr>';
 
 	if (is_object($newdb) && $newdb->connected) {
@@ -599,6 +622,8 @@ function print_user_table($newdb, $object)
 				print '</td>';
 				print '<td align="right">';
 				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&remoteid='.$obj->rowid.'&id='.$id.'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+				print '</td>';
+				print '<td>';
 				print '</td>';
 				print '</tr>';
 				$i++;
