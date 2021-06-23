@@ -510,7 +510,9 @@ function print_user_table($newdb, $object)
 {
 	global $langs;
 	global $id;
-	$form = new Form($db);
+	$sortfield = GETPOST('sortfield', 'aZ09comma');
+	$sortorder = GETPOST('sortorder', 'aZ09comma');
+	$form = new Form($newdb);
 	$arrayfields = array(
 		'rowid'=>array('label'=>$langs->trans("ID"), 'checked'=>1, 'position'=>10),
 		'login'=>array('label'=>$langs->trans("Login"), 'checked'=>1, 'position'=>15),
@@ -526,6 +528,13 @@ function print_user_table($newdb, $object)
 		'fk_soc'=>array('label'=>$langs->trans("ParentsId"), 'checked'=>1, 'position'=>105),
 		'statut'=>array('label'=>$langs->trans("Status"), 'checked'=>1, 'position'=>110),
 	);
+	if (!$sortfield) {
+		$sortfield = key($arrayfields); // Set here default search field. By default 1st field in definition.
+	}
+	if (!$sortorder) {
+		$sortorder = "ASC";
+	}
+
 	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 	print '<table class="noborder" width="100%">';
@@ -540,7 +549,7 @@ function print_user_table($newdb, $object)
 			$cssforfield = "";
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
-			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "", ($cssforfield ? 'class="'.$cssforfield.'"' : ''), "", "", ($cssforfield ? $cssforfield.' ' : ''))."\n";
+			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 		}
 	}
 	print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";	
@@ -549,7 +558,8 @@ function print_user_table($newdb, $object)
 	if (is_object($newdb) && $newdb->connected) {
 		// Get user/pass of all users in database
 		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
-		$sql.=" FROM llx_user ORDER BY statut DESC";
+		$sql.=" FROM llx_user";
+		$sql .= $newdb->order($sortfield, $sortorder);
 
 		// TODO Set definition of SQL to get list of all users into the package
 		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
@@ -567,11 +577,13 @@ function print_user_table($newdb, $object)
 		$resql=$newdb->query($sql);
 		if (empty($resql)) {	// Alternative for Dolibarr 3.7-
 			$sql ="SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-			$sql.=" FROM llx_user ORDER BY statut DESC";
+			$sql.=" FROM llx_user ORDER";
+			$sql .= $newdb->order($sortfield, $sortorder);
 			$resql=$newdb->query($sql);
 			if (empty($resql)) {	// Alternative for Dolibarr 3.3-
 				$sql ="SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-				$sql.=" FROM llx_user ORDER BY statut DESC";
+				$sql.=" FROM llx_user";
+				$sql .= $newdb->order($sortfield, $sortorder);
 				$resql=$newdb->query($sql);
 			}
 		}
