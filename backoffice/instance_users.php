@@ -447,6 +447,8 @@ print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'"
 if (!$error) {
 	print '<input type="hidden" name="action" value="list">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
+	print '<input type="hidden" name="id" value="'.$id.'">';
+	print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
 	print '<table class="border" width="100%">';
 
 	print_user_table($dbcustomerinstance, $object);
@@ -524,6 +526,8 @@ function print_user_table($newdb, $object)
 		'fk_soc'=>array('label'=>$langs->trans("ParentsId"), 'checked'=>1, 'position'=>105),
 		'statut'=>array('label'=>$langs->trans("Status"), 'checked'=>1, 'position'=>110),
 	);
+	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
+	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 	print '<table class="noborder" width="100%">';
 
 	// Nb of users
@@ -539,10 +543,6 @@ function print_user_table($newdb, $object)
 			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "", ($cssforfield ? 'class="'.$cssforfield.'"' : ''), "", "", ($cssforfield ? $cssforfield.' ' : ''))."\n";
 		}
 	}
-	print '<td></td>';
-	
-	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
-	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 	print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";	
 	print '</tr>';
 
@@ -588,42 +588,24 @@ function print_user_table($newdb, $object)
 				print '<td>';
 				print ($i+1);
 				print '</td>';
-				print '<td>';
-				print $obj->rowid;
-				print '</td>';
-				print '<td class="nowraponall">';
-				print $obj->login;
-				print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
-				print '</td>';
-				print '<td>'.$obj->lastname.'</td>';
-				print '<td>'.$obj->firstname.'</td>';
-				print '<td>'.$obj->admin.'</td>';
-				print '<td>'.$obj->email.'</td>';
-				$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-				print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
-				print '<td>'.dol_print_date($newdb->jdate($obj->datec), 'dayhour').'</td>';
-				print '<td>'.dol_print_date($newdb->jdate($obj->datem), 'dayhour').'</td>';
-				print '<td>'.dol_print_date($newdb->jdate($obj->datelastlogin), 'dayhour').'</td>';
-				print '<td>'.$obj->entity.'</td>';
-				print '<td>';
-				$txtparent='';
-				if ($obj->fk_user > 0)      $txtparent.=($txtparent?'<br>':'').'Parent user: '.$obj->fk_user;
-				if ($obj->fk_soc > 0)       $txtparent.=($txtparent?'<br>':'').'Parent thirdparty: '.$obj->fk_soc;
-				if ($obj->fk_socpeople > 0) $txtparent.=($txtparent?'<br>':'').'Parent contact: '.$obj->fk_socpeople;
-				if ($obj->fk_member > 0)    $txtparent.=($txtparent?'<br>':'').'Parent member: '.$obj->fk_member;
-				print $txtparent;
-				print '</td>';
-				print '<td class="center">';
-				if ($obj->statut) {
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
-				} else {
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
+				foreach ($arrayfields as $key => $value) {
+					if ($key == 'statut'&& !empty($arrayfields[$key]['checked'])) {
+						if ($obj->statut) {
+							print '<td class="center">';
+							print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
+							print '</td>';
+						} else {
+							print '<td class="center">';
+							print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
+							print '</td>';
+						}
+
+					}else if (!empty($arrayfields[$key]['checked'])) {
+						print '<td>'.$obj->$key.'</td>';
+					}
 				}
-				print '</td>';
-				print '<td align="right">';
+				print '<td align="center">';
 				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&remoteid='.$obj->rowid.'&id='.$id.'">'.img_picto('ResetPassword', 'object_technic').'</a>';
-				print '</td>';
-				print '<td>';
 				print '</td>';
 				print '</tr>';
 				$i++;
