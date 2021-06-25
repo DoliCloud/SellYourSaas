@@ -2867,6 +2867,18 @@ session.gc_maxlifetime = 3600
 
 ==== Add a wrapper PHP for the mail() function
 
+On *Master server*:
+
+Create the sample files that will be used for antispam internal features of SellYourSaas.
+
+[source,bash]
+---------------
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail;
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip;
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom;
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent;
+---------------
+
 On *Deployment servers*:
 
 The PHP wrapper to send mail allows to intercept any mail sent via PHP before actually sending it (to do an antispam analysis and log it in a file that can be used by fail2ban)
