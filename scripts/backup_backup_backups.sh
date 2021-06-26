@@ -2,11 +2,11 @@
 # Copy all backup of backups from other locations (on a remote backup server)
 #
 # Put the following entry into your root cron
-# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.sh confirm server
+# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.sh test|confirm /mnt/diskbackup remotebackupserver1,remotebackupserver2,...
 
 #set -e
 
-source /etc/lsb-release
+#source /etc/lsb-release
 
 export now=`date +%Y%m%d%H%M%S`
 
@@ -28,8 +28,8 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 
-export remotebackupdir=$1
-export SERVSOURCE=$2
+export remotebackupdir=$2
+export SERVSOURCE=$3
 
 # Source
 export SERVPORTSOURCE="22"
