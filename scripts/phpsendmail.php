@@ -160,7 +160,7 @@ if (empty($fromline) && empty($emailfrom)) {
 
 file_put_contents($logfile, $command."\n", FILE_APPEND);
 
-//* Execute the command
+// Execute the command
 $resexec =  shell_exec($command);
 
 if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);
