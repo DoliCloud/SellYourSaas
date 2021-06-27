@@ -301,6 +301,14 @@ print '<br>';
 print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+$arrayoffunctionsdisabled = explode(',', ini_get('disable_functions'));
+if (in_array('exec', $arrayoffunctionsdisabled)) {
+	print 'Parameter <b>disable_functions</b>: must not contains: exec<br>';
+} elseif (in_array('shell_exec', $arrayoffunctionsdisabled)) {
+	print 'Parameter <b>disable_functions</b>: must not contains: shell_exec<br>';
+} else {
+	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec,shell_exec<br>';
+}
 print "<br>\n";
 
 //$head=array();
