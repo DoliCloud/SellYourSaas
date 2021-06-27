@@ -64,6 +64,7 @@ include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 //include_once(DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
 // Read /etc/sellyoursaas.conf file
@@ -283,10 +284,16 @@ echo $command."\n";
 $return_val = 0;
 if ($mode == 'confirm') {
 	//$output = shell_exec($command);
-	ob_start();
+	/*ob_start();
 	passthru($command, $return_val);
 	$content_grabbed=ob_get_contents();
 	ob_end_clean();
+	$return_val = $resultarray['result'];
+	*/
+	$utils = new Utils($db);
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	$resultarray = $utils->executeCLI($command, $outputfile);
+	$content_grabbed = $resultarray['output'];
 
 	echo "Result: ".$return_val."\n";
 	echo "Output: ".$content_grabbed."\n";
