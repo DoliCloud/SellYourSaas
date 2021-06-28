@@ -189,7 +189,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 				if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
 					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
 			        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
-		        	echo "$command";
+		        	echo `date +%Y%m%d%H%M%S`" $command";
 
 			        $command 2>&1
 			        if [ "x$?" != "x0" ]; then
