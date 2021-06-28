@@ -61,7 +61,7 @@ fi
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS="-v -4 --stats -rlt --chmod=u=rwX --backup --backup-dir=/histo_$HISTODIR";
+export OPTIONS="-v -4 --stats -rlt --chmod=u=rwX --backup --backup-dir=$DIRDESTI1/histo_$HISTODIR";
 if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 	# Version must be 20.10+ on both side !
 	#export OPTIONS="$OPTIONS --open-noatime" 
@@ -88,7 +88,7 @@ echo "instanceserver=$instanceserver"
 echo "backupdir=$backupdir"
 echo "remotebackupdir=$remotebackupdir"
 echo "HISTODIR=$HISTODIR"
-
+echo "OPTIONS=$OPTIONS"
 
 echo "**** ${0} started"
 echo `date +%Y%m%d%H%M%S`" Start to copy backups on a remote server" 
