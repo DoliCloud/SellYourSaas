@@ -213,9 +213,10 @@ done
 
 
 if [ "x$ret" != "x0" ]; then
-	echo "Send email to $EMAILTO to inform about backup success"
-	echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 	exit $ret
 fi
+
+echo "Send email to $EMAILTO to inform about backup success"
+echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 
 exit 0
