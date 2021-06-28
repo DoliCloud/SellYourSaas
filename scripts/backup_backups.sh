@@ -61,7 +61,7 @@ fi
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS="-4 --stats -rlt --chmod=u=rwX --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR";
+export OPTIONS="-4 --stats -rlt --chmod=u=rwX";
 if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 	# Version must be 20.10+ on both side !
 	#export OPTIONS="$OPTIONS --open-noatime" 
@@ -154,7 +154,7 @@ do
 
 	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-	export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
+	export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
 	echo "$command";
 	
 	
@@ -180,6 +180,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 	done
 	
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
+		echo
 		echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
 		nbofdir=`ls -d $backupdir/osu$i* | wc -l`
 		if [ "x$nbofdir" != "x0" ]; then
@@ -194,7 +195,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 			do
 				if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
 					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-			        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+			        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
 		        	echo `date +%Y%m%d%H%M%S`" $command";
 
 			        $command 2>&1
