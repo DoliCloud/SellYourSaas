@@ -30,6 +30,7 @@ export scriptdir=$(dirname $(realpath ${0}))
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export HISTODIR=`date +%A`
 
 if [ "x$remotebackupdir" == "x" ]; then
 	export remotebackupdir=/mnt/diskbackup
@@ -60,7 +61,7 @@ fi
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS="-v -4 --stats -rlt --chmod=u=rwX --backup --suffix=.old";
+export OPTIONS="-v -4 --stats -rlt --chmod=u=rwX --backup --backup-dir=/histo_$HISTODIR";
 if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 	# Version must be 20.10+ on both side !
 	#export OPTIONS="$OPTIONS --open-noatime" 
@@ -86,6 +87,7 @@ echo "PID=$PID"
 echo "instanceserver=$instanceserver"
 echo "backupdir=$backupdir"
 echo "remotebackupdir=$remotebackupdir"
+echo "HISTODIR=$HISTODIR"
 
 
 echo "**** ${0} started"
@@ -125,6 +127,11 @@ export ret=0
 declare -A ret1
 declare -A ret2
 
+
+# the following line clears the last weeks incremental directory
+[ -d $HOME/emptydir ] || mkdir $HOME/emptydir
+
+
 # Loop on each target server
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
@@ -136,9 +143,13 @@ done
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
 	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
+	rsync --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/histo_$HISTODIR/
+
+	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-	export command="rsync -x --delete --delete-excluded --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
+	export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
 	echo "$command";
+	
 	
 	$command 2>&1
     if [ "x$?" != "x0" ]; then
@@ -210,6 +221,10 @@ do
 
 	echo
 done
+
+
+# Delete temporary emptydir
+rmdir $HOME/emptydir
 
 
 if [ "x$ret" != "x0" ]; then
