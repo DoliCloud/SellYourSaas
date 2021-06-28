@@ -217,7 +217,8 @@ if [[ "x$instanceserver" == "x1" ]]; then
 fi
 	
 
-echo errstring=$errstring
+echo `date +%Y%m%d%H%M%S`" End with errstring=$errstring"
+echo
 
 
 # Loop on each target server
@@ -249,5 +250,6 @@ fi
 
 echo "Send email to $EMAILTO to inform about backup success"
 echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+echo
 
 exit 0
