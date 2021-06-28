@@ -564,3 +564,4 @@ EnableAlertDatadogOnWebhookSpamReport=Enable the datadog ping on spam report web
 FileFor=File for %s
 FileToEditedManually=File edited manually
 FileEditedAutomaticallyByMailWrapperOnAbuseDetection=File edited automatcally by the mail wrapper on abuse detection
+ThePaymentModeWillBeUseToPayYourDueAmount=The payment mode will also be used to pay the pending invoice (%s) for an amout of %s
