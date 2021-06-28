@@ -722,14 +722,79 @@ vi /etc/default/saslauthd  pour mettre START=yes
 
 === Installation de Open DKIM
 
-Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix
+Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix or
+
+apt-get install opendkim opendkim-tools
+
+mkdir -p /etc/opendkim/
+mv /etc/opendkim.conf /etc/opendkim/
+ln -s /etc/opendkim/opendkim.conf /etc/opendkim.conf
+
+openssl genrsa -out /etc/opendkim/opendkim.key 1024
+openssl rsa -in /etc/opendkim/opendkim.key -pubout -out /etc/opendkim/opendkim.pub.key
+chmod "u=rw,o=,g=" /etc/opendkim/opendkim.key
+chown opendkim:opendkim /etc/opendkim/opendkim.key
+
+
+Edit the file */etc/opendkim.conf*
+
+Domain                  mysellyoursaasdomain.com
+KeyFile                 /etc/opendkim/opendkim.key
+Selector                dkim
+Socket                  inet:12345@localhost
+
+Choose the value for 'dkim'
+
+
+Edit the file */etc/default/opendkim*
+
+SOCKET="inet:12345@localhost" # listen on loopback on port 12345
+
+
+Create file */etc/opendkim/KeyTable*
+
+# nom de domaine        nom de domaine  selector   fichier clef priv
+dkim._domainkey.mysellyoursaasdomain.com            mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
+mysellyoursaasdomain.com             				mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
+
+Reuse the value for 'dkim'
+
+
+Create file */etc/opendkim/SigningTable*
+
+# nom de domaine        nom de domaine  selector   fichier clef priv
+*@mysellyoursaasdomain.com             mysellyoursaasdomain.com
+
+
+Create file */etc/opendkim/TrustedHosts*
+
+127.0.0.1
+localhost
+mysellyoursaasdomain.com
+
+
+Edit postfix file */etc/postfix/main.cf*
+
+milter_default_action = accept
+milter_protocol = 6
+smtpd_milters = inet:localhost:12345
+non_smtpd_milters = inet:localhost:12345
+
+
 
 To test DKIM, send an email to  check-auth@verifier.port25.com, you will receive a response with success or failure.
 To test SPF + DKIM + spam analysis of an email,  send an email to email suggested by  https://www.mail-tester.com
 
+mail -aFrom:test@mysellyoursaasdomain.com test-email@test-email-service.com
+
+
+
 Setup of domains to protect are into */etc/opendkim/*
 
 Note: SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @mysubdomain.mysellyoursaasmydomain.com
+
+
+
 
 
 === Configuration du nom de domain
@@ -1642,5 +1707,15 @@ Une fois une restauration faite, si elle a été faite sur un autre serveur, il 
 == TroubleShooting
 
 See the chapter available into the *Documentation SellYourSaas - Master and Deployment servers*
+
+== Error when launching dkim daemon: opendkim.service: Can't open PID file /var/run/opendkim/opendkim.pid
+
+Open the file */etc/opendkim.conf* and add the line 
+
+PidFile                 /run/opendkim/opendkim.pid
+
+The PIDFile is defined into the */lib/systemd/system/opendkim.service* but seems not taken into account correctly. You must force it into the /etc/opendkim.conf
+
+
 
 
