@@ -142,10 +142,10 @@ done
 # Loop on each target server to make backup of SOURCE1
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
-	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
+	echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/histo_$HISTODIR/..."
 	rsync --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/histo_$HISTODIR/
 
-	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
+	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
 	export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
 	echo "$command";
