@@ -61,7 +61,7 @@ fi
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS="-v -4 --stats -rlt --chmod=u=rwX --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR";
+export OPTIONS="-4 --stats -rlt --chmod=u=rwX --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR";
 if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 	# Version must be 20.10+ on both side !
 	#export OPTIONS="$OPTIONS --open-noatime" 
