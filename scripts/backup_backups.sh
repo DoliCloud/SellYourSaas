@@ -170,23 +170,23 @@ done
 	
 # Loop on each target server to make backup of SOURCE2 (if no error during backup of SOURCE1)
 if [[ "x$instanceserver" == "x1" ]]; then
-	if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
-		echo
-		echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories to $SERVDESTICURSOR..."
-	
-		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-			echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
-			nbofdir=`ls -d $backupdir/osu$i* | wc -l`
-			if [ "x$nbofdir" != "x0" ]; then
-				# Test if we force backup on a given dir
-				if [ "x$2" != "x" ]; then
-					if [ "x$2" != "xosu$i" ]; then
-						break
-					fi
+	echo
+	echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories $DIRSOURCE2/osu to $SERVDESTI..."
+
+	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
+		echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
+		nbofdir=`ls -d $backupdir/osu$i* | wc -l`
+		if [ "x$nbofdir" != "x0" ]; then
+			# Test if we force backup on a given dir
+			if [ "x$2" != "x" ]; then
+				if [ "x$2" != "xosu$i" ]; then
+					break
 				fi
-					
-				for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
-				do
+			fi
+				
+			for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
+			do
+				if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
 					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
 			        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
 		        	echo "$command";
@@ -198,13 +198,15 @@ if [[ "x$instanceserver" == "x1" ]]; then
 			        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
 			        	export errstring="$errstring Dir osu$i to $SERVDESTICURSOR "`date '+%Y-%m-%d %H:%M:%S'`
 			        fi
-				done
-		    else
-		    	echo No directory found starting with name $backupdir/osu$i
-		    fi
-			echo
-		done
-	fi
+				else
+					echo "Canceled. An error occured in backup of DIRSOURCE1"
+				fi
+			done
+	    else
+	    	echo No directory found starting with name $backupdir/osu$i
+	    fi
+		echo
+	done
 fi
 	
 
