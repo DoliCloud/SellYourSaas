@@ -30,7 +30,7 @@ export scriptdir=$(dirname $(realpath ${0}))
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export HISTODIR=`date +%A`
+export HISTODIR=`date +%d`
 
 if [ "x$remotebackupdir" == "x" ]; then
 	export remotebackupdir=/mnt/diskbackup
