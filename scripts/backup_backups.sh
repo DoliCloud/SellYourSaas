@@ -178,6 +178,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 
 	for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 	do
+		echo
 		#echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/..."
 		#rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
 	done
