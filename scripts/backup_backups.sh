@@ -152,8 +152,8 @@ done
 # Loop on each target server to make backup of SOURCE1
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
-	echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/..."
-	rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/
+	#echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/..."
+	#rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/
 
 	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
@@ -178,10 +178,10 @@ if [[ "x$instanceserver" == "x1" ]]; then
 
 	for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 	do
-		echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/..."
-		rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
+		#echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/..."
+		#rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
 	done
-	
+
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 		echo
 		echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
@@ -193,7 +193,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 					break
 				fi
 			fi
-				
+
 			for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 			do
 				if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
@@ -218,7 +218,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 		echo
 	done
 fi
-	
+
 
 echo `date +%Y%m%d%H%M%S`" End with errstring=$errstring"
 echo
