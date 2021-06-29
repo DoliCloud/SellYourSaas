@@ -2,7 +2,7 @@
 # Copy all backups on other locations (on a remote backup server)
 #
 # Put the following entry into your root cron
-#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm
+#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm [m|w] [osu...]
 
 #set -e
 
@@ -30,7 +30,12 @@ export scriptdir=$(dirname $(realpath ${0}))
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+export testorconfirm=$1
 export HISTODIR=`date +%d`
+if [ "x$2" == "xw" ]; then
+	HISTODIR=`date +%u`
+fi
 
 if [ "x$remotebackupdir" == "x" ]; then
 	export remotebackupdir=/mnt/diskbackup
@@ -76,8 +81,6 @@ fi
 
 instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
-export testorconfirm=$1
-
 export TESTN=""
 if [ "x$testorconfirm" != "xconfirm" ]; then
 	TESTN="-n"
@@ -108,7 +111,7 @@ fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter 1 - test|confirm" 1>&2
-	echo "Usage: ${0} (test|confirm)"
+	echo "Usage: ${0} (test|confirm) [m|w] [osu...]"
 fi
 if [[ "x$1" == "x" ]]; then
 	exit 1
@@ -185,8 +188,8 @@ if [[ "x$instanceserver" == "x1" ]]; then
 		nbofdir=`ls -d $backupdir/osu$i* | wc -l`
 		if [ "x$nbofdir" != "x0" ]; then
 			# Test if we force backup on a given dir
-			if [ "x$2" != "x" ]; then
-				if [ "x$2" != "xosu$i" ]; then
+			if [ "x$3" != "x" ]; then
+				if [ "x$3" != "xosu$i" ]; then
 					break
 				fi
 			fi
