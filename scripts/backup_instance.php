@@ -422,19 +422,19 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	exec($fullcommand, $output, $return_varmysql);
 	$dateaftermysqldump = strftime("%Y%m%d-%H%M%S");
 
-	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
+	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
 	print $outputerr;
 
 	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
 	//$return_outputmysql = strpos($outputerr, ' Error ');
-	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
+	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
 	if ($return_outputmysql > 0) {
 		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
 	} else {
 		$return_outputmysql = 0;
 
 		// Delete temporary file once backup is done when file is empty
-		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
 
 		// Rename dump file with a constant name file
 		if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
