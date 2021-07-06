@@ -3402,7 +3402,8 @@ Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainn
 
 * Activate the module SellYourSaas
 
-* Create a generic user account Dolibarr to access the client interface (for instance: "Client user"). Give him the permissions below:
+* Create a generic user account Dolibarr to access the client interface (for instance: "Client user"). Give him the permissions below
+and only the permission below:
 
 ** Agenda Module 
 *** Read actions
@@ -3438,7 +3439,6 @@ Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainn
 *** View third parties related to user
 *** View contacts
 ** View Users and Groups Module 
-*** Créer/modifier ses propres informations utilisateur
 *** Create/modify one's own user data
 
 * Create a *Package* to configure the applications to be deployed (files, config, database dump...)

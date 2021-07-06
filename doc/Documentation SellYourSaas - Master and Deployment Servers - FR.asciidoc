@@ -3343,7 +3343,8 @@ Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainn
 
 * Activer le module SellYourSaas
 
-* Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants:
+* Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants
+et uniquement les accès suivant:
 
 ** Module Agenda
 *** Lires les actions
