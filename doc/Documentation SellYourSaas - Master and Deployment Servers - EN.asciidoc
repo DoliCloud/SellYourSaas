@@ -3400,7 +3400,7 @@ On the *Master*:
 
 Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainname.com):
 
-* Activate the module SellYourSaas
+* Activate the module SellYourSaas and Vendor
 
 * Create a generic user account Dolibarr to access the client interface (for instance: "Client user"). Give him the permissions below
 and only the permission below:
