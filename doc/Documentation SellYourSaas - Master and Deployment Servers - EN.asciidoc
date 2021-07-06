@@ -4447,7 +4447,7 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SO
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAIN_MAIL_EMAIL_FROM';
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAILING_EMAIL_FROM';
 UPDATE llx_const set value = '10.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
-REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'ip.server.deployment1, ip.servr.deployment23', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'ip.server.deployment1, ip.server.deployment2...', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_USING_PHPMAIL', 0, '1', 'chaine', 1);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, '1', 'password_hash', 1);
 ---------------
