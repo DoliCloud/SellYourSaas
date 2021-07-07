@@ -539,6 +539,7 @@ function print_user_table($newdb, $object)
 	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 	print '<table class="noborder" width="100%">';
 
+	$cssforfield = '';
 	// Nb of users
 	print '<tr class="liste_titre">';
 	print '<td>#</td>';
