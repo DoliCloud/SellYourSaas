@@ -451,6 +451,7 @@ if (empty($sellyoursaassupporturl) && $action != 'presend') {
     					<div class="col-md-12">';
 
 
+	
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticketstats.class.php';
 	$staticticket = new Ticket($db);
@@ -463,43 +464,47 @@ if (empty($sellyoursaassupporturl) && $action != 'presend') {
 	$resql=$db->query($sql);
 	if ($resql) {
 		print '<div class="div-table-responsive-no-min">';
-		print '<table class="noborder centpercent">';
 		$num_rows = $db->num_rows($resql);
-		$i = 0;
-		while ($i < $num_rows) {
-			$obj = $db->fetch_object($resql);
-			$staticticket->id = $obj->rowid;
-			$staticticket->ref = $obj->ref;
-			$staticticket->track_id = $obj->track_id;
-			$staticticket->fk_statut = $obj->fk_statut;
-			$staticticket->progress = $obj->progress;
-			$staticticket->subject = $obj->subject;
+		if ($num_rows) {
+			print '<table class="noborder centpercent">';
+			$i = 0;
+			while ($i < $num_rows) {
+				$obj = $db->fetch_object($resql);
+				$staticticket->id = $obj->rowid;
+				$staticticket->ref = $obj->ref;
+				$staticticket->track_id = $obj->track_id;
+				$staticticket->fk_statut = $obj->fk_statut;
+				$staticticket->progress = $obj->progress;
+				$staticticket->subject = $obj->subject;
 
-			print '<tr class="oddeven">';
+				print '<tr class="oddeven">';
 
-			// Ref
-			print '<td class="nowraponall">';
-			print $staticticket->getNomUrl(1);
-			print "</td>\n";
+				// Ref
+				print '<td class="nowraponall">';
+				print $staticticket->getNomUrl(1);
+				print "</td>\n";
 
-			// Creation date
-			print '<td class="left">';
-			print dol_print_date($db->jdate($obj->datec), 'dayhour');
-			print "</td>";
+				// Creation date
+				print '<td class="left">';
+				print dol_print_date($db->jdate($obj->datec), 'dayhour');
+				print "</td>";
 
-			// Subject
-			print '<td class="nowrap">';
-			print $obj->subject;
-			print "</td>\n";
+				// Subject
+				print '<td class="nowrap">';
+				print $obj->subject;
+				print "</td>\n";
 
-			print '<td class="nowraponall right">';
-			print $staticticket->getLibStatut(5);
-			print "</td>";
+				print '<td class="nowraponall right">';
+				print $staticticket->getLibStatut(5);
+				print "</td>";
 
-			print "</tr>\n";
-			$i++;
+				print "</tr>\n";
+				$i++;
+			}
+			print "</table>";
+		} else {
+			print $langs->trans("SoonAvailable");
 		}
-		print "</table>";
 		print '</div>';
 	}else {
 		dol_print_error($db);
