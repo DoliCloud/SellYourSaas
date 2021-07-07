@@ -213,7 +213,6 @@ if ($sellyoursaassupporturl) {
 
 				print '</form>';
 
-
 	if ($action == 'presend' && GETPOST('supportchannel', 'alpha')) {
 		print '<br><br>';
 
@@ -307,7 +306,7 @@ if ($sellyoursaassupporturl) {
 		$formticket = new FormTicket($db);
 		$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', '', 0, 0, 1, 0, '', 1);
 		$stringtoprint .= ajax_combobox('groupticket');
-		// TODO: remove error of CORS in ajax request
+
 		$stringtoprint .= '<!-- Script to manage change of ticket group -->
 		<script>
 		jQuery(document).ready(function() {
@@ -326,7 +325,7 @@ if ($sellyoursaassupporturl) {
 				console.log("We have selected id="+idgroupticket);
 
 				if (idgroupticket != "") {
-					$.ajax({ url: \''.$sellyoursaasaccounturl.'/ajax/fetchKnowledgeRecord.php\',
+					$.ajax({ url: \'/ajax/fetchKnowledgeRecord.php\',
 						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\' },
 						 type: \'GET\',
 						 success: function(response) {
@@ -393,7 +392,7 @@ if ($sellyoursaassupporturl) {
 			';
 }
 
-if (empty($sellyoursaassupporturl) && $action != 'presend') {
+if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
 	print '
     				<!-- BEGIN PAGE HEADER-->
     				<!-- BEGIN PAGE HEAD -->
@@ -426,7 +425,7 @@ if (empty($sellyoursaassupporturl) && $action != 'presend') {
     					<div class="col-md-12">';
 
 
-	
+
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticketstats.class.php';
 	$staticticket = new Ticket($db);

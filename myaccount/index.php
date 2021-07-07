@@ -373,7 +373,7 @@ if ($action == 'updateurl') {
 	$replyto = GETPOST('from', 'alpha');
 	$topic = GETPOST('subject', 'restricthtml');
 	$content = GETPOST('content', 'restricthtml');
-	$groupticket=GETPOST('groupticket', 'aZ09');
+	$groupticket=GETPOST('ticketcategory', 'aZ09');
 
 	if (empty($replyto)) {
 		$error++;
@@ -383,7 +383,7 @@ if ($action == 'updateurl') {
 		$error++;
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("MailTopic")), null, 'errors');
 	}
-	if (GETPOSTISSET('groupticket') && ! GETPOST('groupticket')) {
+	if (GETPOSTISSET('ticketcategory') && !GETPOST('ticketcategory', 'aZ09')) {
 		$error++;
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("GroupOfTicket")), null, 'errors');
 	}
