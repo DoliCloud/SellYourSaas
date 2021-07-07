@@ -552,7 +552,7 @@ function print_user_table($newdb, $object)
 			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 		}
 	}
-	print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";	
+	print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";
 	print '</tr>';
 
 	if (is_object($newdb) && $newdb->connected) {
@@ -611,13 +611,15 @@ function print_user_table($newdb, $object)
 							print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
 							print '</td>';
 						}
-
-					}else if (!empty($arrayfields[$key]['checked'])) {
+					} elseif($key == 'pass' && !empty($arrayfields[$key]['checked'])) {
+						$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+						print '<td>'.$valtoshow.'</td>';
+					} elseif (!empty($arrayfields[$key]['checked'])) {
 						print '<td>'.$obj->$key.'</td>';
 					}
 				}
 				print '<td align="center">';
-				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&remoteid='.$obj->rowid.'&id='.$id.'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&remoteid='.$obj->rowid.'&id='.$id.'&token='.newToken().'">'.img_picto('ResetPassword', 'object_technic').'</a>';
 				print '</td>';
 				print '</tr>';
 				$i++;
