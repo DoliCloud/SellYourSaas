@@ -1225,7 +1225,7 @@ systemctl status apache_watchdog_launcher2
 
 On the *Deployment servers* :
 
-* Agent installation and activation in */home/admin/wwwroot /dolibarr_sellyoursaas/scripts/remote_server_launcher.sh* by creating a link by
+* Agent installation and activation in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/remote_server_launcher.sh* by creating a link by
 
 [source, bash]
 ---------------
@@ -2043,7 +2043,7 @@ FLUSH PRIVILEGES;
 
 On *all servers*:
 
-In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
+In order not to allow brute force cracking, if it is not already the case, put the user *root* of the database in authentication
 from the system root account only (using *auth_socket* or *unix_socket*):
 
 For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
@@ -2755,7 +2755,7 @@ Create a file */etc/bind/withX.mysaasdomainname.com.hosts* for the DNS *withX.my
 ---------------
 $ttl 1d
 $ORIGIN withX.mysaasdomainname.com.
-@               IN     SOA     ns1withXmysaasdomainname.com. admin.mysaasdomainname.com. ((
+@               IN     SOA     ns1withX.mysaasdomainname.com. admin.mysaasdomainname.com. (
                 2101011200       ; serial
                 600              ; refresh = 10 minutes
                 300              ; update retry = 5 minutes
@@ -2774,8 +2774,8 @@ _acme-challenge IN	  TXT      "a-value-that-will-be-filled-later-for-lets-encryp
 
 ; other sub-domain records
 ; here will be added entry like this one
-; client1  A   ip.of.server.deployment
-test	A	ip.of.server.deployment
+; client1  A   ip.of.deployment.server
+test	A	ip.of.deployment.server
 
 ---------------
 
@@ -3402,7 +3402,7 @@ Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainn
 
 * Activate the module SellYourSaas and Vendor
 
-* Create a generic user account Dolibarr to access the client interface (for instance: "Client user"). Give him the permissions below
+* Create a generic Dolibarr user account to access the client interface (for instance: "Client user"). Give him the permissions below
 and only the permission below:
 
 ** Agenda Module 
@@ -4317,21 +4317,21 @@ Into field *Dir with sources 1*
 
 [source,bash]
 ---------------
-__DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/htdocs
+__DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_13.0/htdocs
 ---------------
 
 Into field *Dir with sources 2*
 
 [source,bash]
 ---------------
-__DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/htdocs/install/doctemplates
+__DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_13.0/htdocs/install/doctemplates
 ---------------
 
 Into field *Dir with sources 3*
 
 [source,bash]
 ---------------
-__DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_10.0/scripts
+__DOL_DATA_ROOT__/sellyoursaas/git/dolibarr_13.0/scripts
 ---------------
 
 Into field *Target relative dir for sources 1*
@@ -4408,10 +4408,10 @@ Into field *Dir with dump files*
 
 [source,bash]
 ---------------
-	__DOL_DATA_ROOT__/sellyoursaas/packages/__PACKAGEREF__
+__DOL_DATA_ROOT__/sellyoursaas/packages/__PACKAGEREF__
 ---------------
 
-(Avec cette valeur, il sera alors possible de soumettre le fichier dump à charger vi l'onglet *Fichiers joints*
+(Avec cette valeur, il sera alors possible de soumettre le fichier dump à charger via l'onglet *Fichiers joints*
 
 
 Into field *template fo cron file*
@@ -4447,7 +4447,7 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SO
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAIN_MAIL_EMAIL_FROM';
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAILING_EMAIL_FROM';
 UPDATE llx_const set value = '10.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
-REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'ip.server.deployment1, ip.server.deployment2...', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, '<deployment-server-1.ip>[, deployment-server-23.ip, \[deployment-server-1-IPv^-between-actual-brackets\]]', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_USING_PHPMAIL', 0, '1', 'chaine', 1);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, '1', 'password_hash', 1);
 ---------------
