@@ -51,7 +51,7 @@ if (empty($conf) || ! is_object($conf)) {
 
 	          <div class="portlet-title">
 	            <div class="caption">
-	              <span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("MyInstances").'</span>
+	              <i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("MyInstances").'</span>
 	            </div>
 	          </div>
 
@@ -84,7 +84,7 @@ if ($nbofinstancessuspended) {
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<i class="fa fa-server opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'
+						<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'
 		                </a>
 					</div></div>';
 
@@ -95,7 +95,7 @@ if ($mythirdpartyaccount->isareseller) {
 	print '
 				<div class="portlet-title">
 				<div class="caption"><br><br>
-				<span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesOfMyCustomers").'</span>
+				<i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesOfMyCustomers").'</span>
 				</div>
 				</div>
 
@@ -128,7 +128,7 @@ if ($mythirdpartyaccount->isareseller) {
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<i class="fa fa-server opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'
+						<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'
 		                </a>
 					</div></div>';
 
@@ -147,7 +147,7 @@ if ($mythirdpartyaccount->isareseller) {
 
 	          <div class="portlet-title">
 	            <div class="caption">
-	              <span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("MyAccount").'</span>
+	              <i class="fa fa-user font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("MyAccount").'</span>
 	            </div>
 	          </div>
 
@@ -175,7 +175,7 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<i class="fa fa-user opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">'.$langs->trans("SeeOrEditProfile").'
+					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">'.$langs->trans("SeeOrEditProfile").'
 	                </a>
 				</div>
 				</div>
@@ -199,7 +199,7 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 
 	          <div class="portlet-title">
 	            <div class="caption">
-	              <span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("PaymentBalance").'</span>
+	              <i class="fa fa-usd font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("PaymentBalance").'</span>
 	            </div>
 	          </div>';
 
@@ -255,7 +255,7 @@ else print $langs->trans("RemainderToPay");
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<i class="fa fa-usd opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfPayments").'
+					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfPayments").'
 	                </a>
 				</div>
 				</div>
@@ -272,7 +272,7 @@ else print $langs->trans("RemainderToPay");
 
 	          <div class="portlet-title">
 	            <div class="caption">
-	              <span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("SupportTickets").'</span>
+	              <i class="fa fa-hands-helping font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("SupportTickets").'</span>
 	            </div>
 	          </div>';
 
@@ -306,7 +306,7 @@ else print $langs->trans("RemainderToPay");
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<i class="fa fa-hands-helping opacitymedium paddingright"></i><a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'
+					<a class="wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'
 	                </a>
 				</div></div>
 
