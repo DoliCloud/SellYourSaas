@@ -394,25 +394,59 @@ if ($action == 'updateurl') {
 
 	if (!$error) {
 		$channel = GETPOST('supportchannel', 'alpha');
-		$contractid = GETPOST('contractid', 'int');
+		$tmparray = explode('_', $channel, 2);
+		$priority = 'low';
+		if (!empty($tmparray[1])) {
+			$priority = $tmparray[0];
+			$contractid = $tmparray[1];
+		}
+		$tmpcontract = null;
 		if ($contractid > 0) {
 			$tmpcontract = $listofcontractid[$contractid];
+		}
+
+		// Set $topic + check thirdparty validity
+		if (is_object($tmpcontract)) {
 			$topic = '[Ticket - '.$tmpcontract->ref_customer.'] '.$topic;
-			$content .= "<br><br>\n";
-			$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
-			if ($groupticket) {
-				$content .= 'Group: '.dol_escape_htmltag($groupticket)."<br>\n";
+
+			$tmpcontract->fetch_thirdparty();	// Note: It should match $mythirdpartyaccount
+			if (!is_object($tmpcontract->thirdparty) || $tmpcontract->thirdparty->id != $mythirdpartyaccount->id) {
+				// Error, we try to post a ticket using a contract id of another thirdparty
+				$action = 'presend';
+				$error++;
 			}
+		} else {
+			$topic = '[Ticket - '.$mythirdpartyaccount->name.'] '.$topic;
+		}
+
+		// Set $content
+		$content .= "<br><br>\n";
+		$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
+		if ($groupticket) {
+			$content .= 'Group: '.dol_escape_htmltag($groupticket)."<br>\n";
+		}
+		$content .= 'Priority: '.$priority."<br>\n";
+		if (is_object($tmpcontract)) {
 			$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
 			//$content .= 'Ref contract: <a href="xxx/contrat/card.php?id='.$tmpcontract->ref.">".$tmpcontract->ref."</a><br>\n"; 	// No link to backoffice as the mail is used with answer to.
 			$content .= 'Ref contract: '.$tmpcontract->ref."<br>\n";
-			$tmpcontract->fetch_thirdparty();
-			if (is_object($tmpcontract->thirdparty)) {
-				$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
-				$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
-				$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
-			}
-			// Add the support type
+		} else {
+			$content .= "Instance: None<br>\n";
+			$content .= "Ref contract: None<br>\n";
+		}
+
+		// Sender
+		if (is_object($tmpcontract) && is_object($tmpcontract->thirdparty)) {
+			$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
+			$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
+			$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
+		} else {
+			$content .= 'Organization: '.$mythirdpartyaccount->name."<br>\n";
+			$content .= 'Email: '.$mythirdpartyaccount->email."<br>\n";
+		}
+
+		// Add the services and support of contract
+		if (is_object($tmpcontract)) {
 			foreach ($tmpcontract->lines as $key => $val) {
 				if ($val->fk_product > 0) {
 					$product = new Product($db);
@@ -428,6 +462,7 @@ if ($action == 'updateurl') {
 				$content .= "<br>\n";;
 			}
 		}
+
 		$arr_file = array();
 		$arr_mime = array();
 		$arr_name = array();
@@ -441,8 +476,12 @@ if ($action == 'updateurl') {
 			}
 		}
 
-		$trackid = 'sellyoursaas'.$contractid;
+		$trackid = 'thi'.$mythirdpartyaccount->id;
+		if (is_object($tmpcontract)) {
+			$trackid = 'con'.$tmpcontract->id;
+		}
 
+		// Send email
 		$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, $arr_file, $arr_mime, $arr_name, '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
 		$result = $cmailfile->sendfile();
 

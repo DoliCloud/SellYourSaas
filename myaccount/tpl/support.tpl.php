@@ -178,7 +178,9 @@ if ($sellyoursaassupporturl) {
 						}
 					}
 				}
+
 				$optionid = $priority.'_'.$id;
+				$labeltoshow = '';
 				$labeltoshow .= $langs->trans("Instance").' <strong>'.$contract->ref_customer.'</strong> ';
 				//$labeltoshow = $tmpproduct->label.' - '.$contract->ref_customer.' ';
 				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
@@ -186,6 +188,7 @@ if ($sellyoursaassupporturl) {
 				$labeltoshow .= ' <span class="opacitymedium">('.$langs->trans("Priority").': ';
 				$labeltoshow .= $prioritylabel;
 				$labeltoshow .= ')</span>';
+
 				print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
 				print '</option>';
@@ -421,7 +424,7 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
     		</div>';
 
 	print '
-    					<div class="row" id="contractid'.$contract->id.'" data-contractref="'.$contract->ref.'">
+    					<!-- <div class="row" id="contractid'.$contract->id.'" data-contractref="'.$contract->ref.'"> -->
     					<div class="col-md-12">';
 
 
@@ -432,7 +435,7 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
 
 	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut";
 	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
-	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";
+	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";		// $socid is id of third party account
 	$sql .= $db->order('t.fk_statut','ASC');
 
 	$resql=$db->query($sql);
@@ -444,6 +447,7 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
 			$i = 0;
 			while ($i < $num_rows) {
 				$obj = $db->fetch_object($resql);
+
 				$staticticket->id = $obj->rowid;
 				$staticticket->ref = $obj->ref;
 				$staticticket->track_id = $obj->track_id;
