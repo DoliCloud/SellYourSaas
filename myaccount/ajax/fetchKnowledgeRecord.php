@@ -35,7 +35,7 @@ if ($action == "getKnowledgeRecord") {
     $sql .= " FROM ".MAIN_DB_PREFIX."links as l";
     $sql .= " INNER JOIN ".MAIN_DB_PREFIX."knowledgemanagement_knowledgerecord as kr ON kr.rowid = l.objectid";
     $sql .= " INNER JOIN ".MAIN_DB_PREFIX."c_ticket_category as ctc ON ctc.rowid = kr.fk_c_ticket_category";
-    $sql .= " WHERE ctc.code = '".$idticketgroup."'";
+    $sql .= " WHERE ctc.code = '".$db->escape($idticketgroup)."'";
     $resql = $db->query($sql);
     if ($resql) {
         $num = $db->num_rows($resql);
