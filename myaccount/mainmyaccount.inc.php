@@ -43,21 +43,23 @@ if (! function_exists("llxHeader")) {
 	/**
 	 *	Show HTML header HTML + BODY + Top menu + left menu + DIV
 	 *
-	 * @param 	string 	$head				Optionnal head lines
-	 * @param 	string 	$title				HTML title
-	 * @param	string	$help_url			Url links to help page
-	 * 		                            	Syntax is: For a wiki page: EN:EnglishPage|FR:FrenchPage|ES:SpanishPage
-	 *                                  	For other external page: http://server/url
-	 * @param	string	$target				Target to use on links
-	 * @param 	int    	$disablejs			More content into html header
-	 * @param 	int    	$disablehead		More content into html header
-	 * @param 	array  	$arrayofjs			Array of complementary js files
-	 * @param 	array  	$arrayofcss			Array of complementary css files
-	 * @param	string	$morequerystring	Query string to add to the link "print" to get same parameters (use only if autodetect fails)
-	 * @param   string  $morecssonbody      More CSS on body tag.
+	 * @param 	string 			$head				Optionnal head lines
+	 * @param 	string 			$title				HTML title
+	 * @param	string			$help_url			Url links to help page
+	 * 		                            			Syntax is: For a wiki page: EN:EnglishPage|FR:FrenchPage|ES:SpanishPage
+	 *                                  			For other external page: http://server/url
+	 * @param	string			$target				Target to use on links
+	 * @param 	int    			$disablejs			More content into html header
+	 * @param 	int    			$disablehead		More content into html header
+	 * @param 	array|string  	$arrayofjs			Array of complementary js files
+	 * @param 	array|string  	$arrayofcss			Array of complementary css files
+	 * @param	string			$morequerystring	Query string to add to the link "print" to get same parameters (use only if autodetect fails)
+	 * @param   string  		$morecssonbody      More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
+	 * @param	string			$replacemainareaby	Replace call to main_area() by a print of this string
+	 * @param	int				$disablenofollow	Disable the "nofollow" on page
 	 * @return	void
 	 */
-	function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '')
+	function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0)
 	{
 		global $conf;
 
@@ -67,7 +69,7 @@ if (! function_exists("llxHeader")) {
 		print '<body id="mainbody"'.($morecssonbody?' class="'.$morecssonbody.'"':'').'>' . "\n";
 
 		// top menu and left menu area
-		if (empty($conf->dol_hide_topmenu)) {
+		if (empty($conf->dol_hide_topmenu) || GETPOST('dol_invisible_topmenu', 'int')) {
 			//top_menu($head, $title, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $help_url);
 		}
 
@@ -76,13 +78,17 @@ if (! function_exists("llxHeader")) {
 		}
 
 		// main area
+		if ($replacemainareaby) {
+			print $replacemainareaby;
+			return;
+		}
 		//main_area($title);
 	}
 }
 
 
 /**
- *  Show HTTP header
+ *  Show HTTP header. Called by top_htmlhead().
  *
  *  @param  string  $contenttype    Content type. For example, 'text/html'
  *  @param	int		$forcenocache	Force disabling of cache for the page
@@ -90,19 +96,30 @@ if (! function_exists("llxHeader")) {
  */
 function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0)
 {
-	global $conf;
+	global $db, $conf, $hookmanager;
 
-	if ($contenttype == 'text/html' ) header("Content-Type: text/html; charset=".$conf->file->character_set_client);
-	else header("Content-Type: ".$contenttype);
+	if ($contenttype == 'text/html') {
+		header("Content-Type: text/html; charset=".$conf->file->character_set_client);
+	} else {
+		header("Content-Type: ".$contenttype);
+	}
+	
+	// Security options
 	header("X-Content-Type-Options: nosniff");
 	header("X-Frame-Options: ALLOWALL");           // So we can include page into an IFRAME
-	if (! empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY)) {
-		// For example, to restrict script, object, frames or img to some domains
-		// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; child-src https://youtube.com; img-src: https://static.example.com
-		// For example, to restrict everything to one domain, except object, ...
-		// default-src https://cdn.example.net; object-src 'none'
-		header("Content-Security-Policy: ".$conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY);
+	if (!defined('FORCECSP')) {
+		$contentsecuritypolicy = empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY) ? '' : $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
+		if (!empty($contentsecuritypolicy)) {
+			// For example, to restrict script, object, frames or img to some domains
+			// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; child-src https://youtube.com; img-src: https://static.example.com
+			// For example, to restrict everything to one domain, except object, ...
+			// default-src https://cdn.example.net; object-src 'none'
+			header("Content-Security-Policy: ".$contentsecuritypolicy);
+		}
+	} elseif (constant('FORCECSP')) {
+		header("Content-Security-Policy: ".constant('FORCECSP'));
 	}
+		
 	if ($forcenocache) {
 		header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
 	}
@@ -124,30 +141,39 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
  */
 function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $disablejmobile = 0, $disablenofollow = 0)
 {
-	global $user, $conf, $langs, $db;
+	global $db, $conf, $langs, $user, $mysoc, $hookmanager;
 
 	top_httphead_sellyoursaas();
 
-	if (empty($conf->css)) $conf->css = '/theme/eldy/style.css.php';	// If not defined, eldy by default
-
-	if (! empty($conf->global->MAIN_ACTIVATE_HTML4)) {
-		$doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
-	} else {
-		$doctype = '<!doctype html>';
+	if (empty($conf->css)) {
+		$conf->css = '/theme/eldy/style.css.php';	// If not defined, eldy by default
 	}
-	print $doctype."\n";
-	if (! empty($conf->global->MAIN_USE_CACHE_MANIFEST)) print '<html lang="'.substr($langs->defaultlang, 0, 2).'" manifest="'.DOL_URL_ROOT.'/cache.manifest">'."\n";
-	else {
+
+	print '<!doctype html>'."\n";
+
+	if (! empty($conf->global->MAIN_USE_CACHE_MANIFEST)) {
+		print '<html lang="'.substr($langs->defaultlang, 0, 2).'" manifest="'.DOL_URL_ROOT.'/cache.manifest">'."\n";
+	} else {
 		print '<html lang="'.substr($langs->defaultlang, 0, 2).'">'."\n";
 		print '<!-- You language detected: '.$langs->defaultlang." -->\n";
 	}
 
 	if (empty($disablehead)) {
+		if (!is_object($hookmanager)) {
+			$hookmanager = new HookManager($db);
+		}
+		
 		print "<head>\n";
-		if (GETPOST('dol_basehref', 'alpha')) print '<base href="'.dol_escape_htmltag(GETPOST('dol_basehref', 'alpha')).'">'."\n";
+		
+		if (GETPOST('dol_basehref', 'alpha')) {
+			print '<base href="'.dol_escape_htmltag(GETPOST('dol_basehref', 'alpha')).'">'."\n";
+		}
+		
 		// Displays meta
 		print '<meta name="robots" content="noindex'.($disablenofollow?'':',nofollow').'">'."\n";      				// Do not index
 		print '<meta name="viewport" content="width=device-width, initial-scale=1.0">'."\n";	// Scale for mobile device
+		print '<meta name="author" content="Dolibarr Development Team">'."\n";
+		
 		// Favicon. Note, even if we remove this meta, the browser and android webview try to find a favicon.ico
 		$favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
@@ -160,7 +186,9 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 
 		// Displays title
 		$appli=constant('DOL_APPLICATION_TITLE');
-		if (!empty($conf->global->MAIN_APPLICATION_TITLE)) $appli=$conf->global->MAIN_APPLICATION_TITLE;
+		if (!empty($conf->global->MAIN_APPLICATION_TITLE)) {
+			$appli=$conf->global->MAIN_APPLICATION_TITLE;
+		}
 
 		if ($title && ! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) print '<title>'.dol_htmlentities($title).'</title>';
 		elseif ($title) print '<title>'.dol_htmlentities($appli.' - '.$title).'</title>';
@@ -170,17 +198,31 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		//$ext='';
 		//if (! empty($conf->dol_use_jmobile)) $ext='version='.urlencode(DOL_VERSION);
 		$ext='version='.urlencode(DOL_VERSION);
-		if (GETPOST('version', 'int')) $ext='version='.GETPOST('version', 'int');	// usefull to force no cache on css/js
+		if (GETPOST('version', 'int')) {
+			$ext='version='.GETPOST('version', 'int');	// usefull to force no cache on css/js
+		}
 
 		$themeparam='?lang='.$langs->defaultlang.'&amp;theme='.$conf->theme.(GETPOST('optioncss', 'aZ09')?'&amp;optioncss='.GETPOST('optioncss', 'aZ09', 1):'').'&amp;userid='.$user->id.'&amp;entity='.$conf->entity;
-		$themeparam.=($ext?'&amp;'.$ext:'');
-		if (! empty($_SESSION['dol_resetcache'])) $themeparam.='&amp;dol_resetcache='.$_SESSION['dol_resetcache'];
-		if (GETPOST('dol_hide_topmenu', 'int')) { $themeparam.='&amp;dol_hide_topmenu='.GETPOST('dol_hide_topmenu', 'int'); }
-		if (GETPOST('dol_hide_leftmenu', 'int')) { $themeparam.='&amp;dol_hide_leftmenu='.GETPOST('dol_hide_leftmenu', 'int'); }
-		if (GETPOST('dol_optimize_smallscreen', 'int')) { $themeparam.='&amp;dol_optimize_smallscreen='.GETPOST('dol_optimize_smallscreen', 'int'); }
-		if (GETPOST('dol_no_mouse_hover', 'int')) { $themeparam.='&amp;dol_no_mouse_hover='.GETPOST('dol_no_mouse_hover', 'int'); }
-		if (GETPOST('dol_use_jmobile', 'int')) { $themeparam.='&amp;dol_use_jmobile='.GETPOST('dol_use_jmobile', 'int'); $conf->dol_use_jmobile=GETPOST('dol_use_jmobile', 'int'); }
-
+		$themeparam .= ($ext ? '&amp;'.$ext : '');
+		if (!empty($_SESSION['dol_resetcache'])) {
+			$themeparam .= '&amp;dol_resetcache='.$_SESSION['dol_resetcache'];
+		}
+		if (GETPOSTISSET('dol_hide_topmenu')) {
+			$themeparam .= '&amp;dol_hide_topmenu='.GETPOST('dol_hide_topmenu', 'int');
+		}
+		if (GETPOSTISSET('dol_hide_leftmenu')) {
+			$themeparam .= '&amp;dol_hide_leftmenu='.GETPOST('dol_hide_leftmenu', 'int');
+		}
+		if (GETPOSTISSET('dol_optimize_smallscreen')) {
+			$themeparam .= '&amp;dol_optimize_smallscreen='.GETPOST('dol_optimize_smallscreen', 'int');
+		}
+		if (GETPOSTISSET('dol_no_mouse_hover')) {
+			$themeparam .= '&amp;dol_no_mouse_hover='.GETPOST('dol_no_mouse_hover', 'int');
+		}
+		if (GETPOSTISSET('dol_use_jmobile')) {
+			$themeparam .= '&amp;dol_use_jmobile='.GETPOST('dol_use_jmobile', 'int'); $conf->dol_use_jmobile = GETPOST('dol_use_jmobile', 'int');
+		}
+		
 		if (! defined('DISABLE_JQUERY') && ! $disablejs && $conf->use_javascript_ajax) {
 			print '<!-- Includes CSS for JQuery (Ajax library) -->'."\n";
 			$jquerytheme = 'base';
@@ -207,7 +249,9 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		//print 'themepath='.$themepath.' themeparam='.$themeparam;exit;
 		print '<link rel="stylesheet" type="text/css" href="'.$themepath.$themeparam.'">'."\n";
 		print '<link href="dist/css/bootstrap.css" rel="stylesheet">'."\n";
-		if (! empty($conf->global->MAIN_FIX_FLASH_ON_CHROME)) print '<!-- Includes CSS that does not exists as a workaround of flash bug of chrome -->'."\n".'<link rel="stylesheet" type="text/css" href="filethatdoesnotexiststosolvechromeflashbug">'."\n";
+		if (! empty($conf->global->MAIN_FIX_FLASH_ON_CHROME)) {
+			print '<!-- Includes CSS that does not exists as a workaround of flash bug of chrome -->'."\n".'<link rel="stylesheet" type="text/css" href="filethatdoesnotexiststosolvechromeflashbug">'."\n";
+		}
 
 
 		// CSS forced by page in top_htmlhead call (relative url starting with /)
@@ -215,7 +259,9 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			foreach ($arrayofcss as $cssfile) {
 				print '<!-- Includes CSS added by page -->'."\n".'<link rel="stylesheet" type="text/css" title="default" href="'.dol_buildpath($cssfile, 1);
 				// We add params only if page is not static, because some web server setup does not return content type text/css if url has parameters and browser cache is not used.
-				if (!preg_match('/\.css$/i', $cssfile)) print $themeparam;
+				if (!preg_match('/\.css$/i', $cssfile)) {
+					print $themeparam;
+				}
 				print '">'."\n";
 			}
 		}
@@ -224,31 +270,48 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		if (! defined('DISABLE_JQUERY') && ! $disablejs && ! empty($conf->use_javascript_ajax)) {
 			// JQuery. Must be before other includes
 			print '<!-- Includes JS for JQuery -->'."\n";
-			if (defined('JS_JQUERY') && constant('JS_JQUERY')) print '<script type="text/javascript" src="'.JS_JQUERY.'jquery.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
-			else print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
-			if (defined('JS_JQUERY_UI') && constant('JS_JQUERY_UI')) print '<script type="text/javascript" src="'.JS_JQUERY_UI.'jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
-			else print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
-			if (! defined('DISABLE_JQUERY_TABLEDND')) print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/tablednd/jquery.tablednd.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+			if (defined('JS_JQUERY') && constant('JS_JQUERY')) {
+				print '<script src="'.JS_JQUERY.'jquery.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+			} else {
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+			}
+			if (defined('JS_JQUERY_UI') && constant('JS_JQUERY_UI')) {
+				print '<script src="'.JS_JQUERY_UI.'jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+			} else {
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+			}
+			if (!defined('DISABLE_JQUERY_TABLEDND')) {
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/tablednd/jquery.tablednd.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+			}
 			// jQuery jnotify
 			if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY) && ! defined('DISABLE_JQUERY_JNOTIFY')) {
-				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
-			if (! defined('DISABLE_SELECT2') && (! empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {     // jQuery plugin "mutiselect", "multiple-select", "select2", ...
-				$tmpplugin=empty($conf->global->MAIN_USE_JQUERY_MULTISELECT)?constant('REQUIRE_JQUERY_MULTISELECT'):$conf->global->MAIN_USE_JQUERY_MULTISELECT;
-				print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/js/'.$tmpplugin.'.full.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+			// Chart
+			if ((empty($conf->global->MAIN_JS_GRAPH) || $conf->global->MAIN_JS_GRAPH == 'chart') && !defined('DISABLE_JS_GRAPH')) {
+				print '<script src="'.DOL_URL_ROOT.'/includes/nnnick/chartjs/dist/Chart.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+			}
+			if (!defined('DISABLE_SELECT2') && (!empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {
+				// jQuery plugin "mutiselect", "multiple-select", "select2", ...
+				$tmpplugin = empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) ?constant('REQUIRE_JQUERY_MULTISELECT') : $conf->global->MAIN_USE_JQUERY_MULTISELECT;
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/js/'.$tmpplugin.'.full.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n"; // We include full because we need the support of containerCssClass
+			}
+			if (!defined('DISABLE_MULTISELECT')) {     // jQuery plugin "mutiselect" to select with checkboxes. Can be removed once we have an enhanced search tool
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/multiselect/jquery.multi-select.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			}
 		}
 
 		if (! $disablejs && ! empty($conf->use_javascript_ajax)) {
 			// CKEditor
-			if (! empty($conf->fckeditor->enabled) && (empty($conf->global->FCKEDITOR_EDITORNAME) || $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor') && ! defined('DISABLE_CKEDITOR')) {
+			if ((!empty($conf->fckeditor->enabled) && (empty($conf->global->FCKEDITOR_EDITORNAME) || $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor') && !defined('DISABLE_CKEDITOR')) || defined('FORCE_CKEDITOR')) {
 				print '<!-- Includes JS for CKEditor -->'."\n";
 				$pathckeditor = DOL_URL_ROOT . '/includes/ckeditor/ckeditor/';
 				$jsckeditor='ckeditor.js';
 				if (constant('JS_CKEDITOR')) {	// To use external ckeditor 4 js lib
 					$pathckeditor=constant('JS_CKEDITOR');
 				}
-				print '<script type="text/javascript">';
+				print '<script>';
+				print '/* enable ckeditor by mainmyaccount.inc.php */';
 				print 'var CKEDITOR_BASEPATH = \''.$pathckeditor.'\';'."\n";
 				// $themesubdir='' in standard usage
 				$themesubdir = '';
@@ -256,40 +319,47 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				print 'var ckeditorFilebrowserBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print 'var ckeditorFilebrowserImageBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Type=Image&Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print '</script>'."\n";
-				print '<script type="text/javascript" src="'.$pathckeditor.$jsckeditor.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.$pathckeditor.$jsckeditor.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
 
 			// Browser notifications (if NOREQUIREMENU is on, it is mostly a page for popup, so we do not enable notif too. We hide also for public pages).
 			if (!defined('NOBROWSERNOTIF') && !defined('NOREQUIREMENU') && !defined('NOLOGIN')) {
 				$enablebrowsernotif=false;
-				if (! empty($conf->agenda->enabled) && ! empty($conf->global->AGENDA_REMINDER_BROWSER)) $enablebrowsernotif=true;
-				if ($conf->browser->layout == 'phone') $enablebrowsernotif=false;
+				if (!empty($conf->agenda->enabled) && !empty($conf->global->AGENDA_REMINDER_BROWSER)) {
+					$enablebrowsernotif = true;
+				}
+				if ($conf->browser->layout == 'phone') {
+					$enablebrowsernotif = false;
+				}
 				if ($enablebrowsernotif) {
-					print '<!-- Includes JS of Dolibarr (brwoser layout = '.$conf->browser->layout.')-->'."\n";
-					print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/lib_notification.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
+					print '<!-- Includes JS of Dolibarr (browser layout = '.$conf->browser->layout.')-->'."\n";
+					print '<script src="'.DOL_URL_ROOT.'/core/js/lib_notification.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
 				}
 			}
 
 			// Global js function
 			print '<!-- Includes JS of Dolibarr -->'."\n";
-			print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
+			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
 
 			// JS forced by page in top_htmlhead (relative url starting with /)
 			if (is_array($arrayofjs)) {
 				print '<!-- Includes JS added by page -->'."\n";
 				foreach ($arrayofjs as $jsfile) {
-					if (preg_match('/^http/i', $jsfile)) {
-						print '<script type="text/javascript" src="'.$jsfile.'"></script>'."\n";
+					if (preg_match('/^(http|\/\/)/i', $jsfile)) {
+						print '<script src="'.$jsfile.'"></script>'."\n";
 					} else {
-						if (! preg_match('/^\//', $jsfile)) $jsfile='/'.$jsfile;	// For backward compatibility
-						print '<script type="text/javascript" src="'.dol_buildpath($jsfile, 1).'"></script>'."\n";
+						print '<script src="'.dol_buildpath($jsfile, 1).'"></script>'."\n";
 					}
 				}
 			}
 		}
 
-		if (! empty($head)) print $head."\n";
-		if (! empty($conf->global->MAIN_HTML_HEADER)) print $conf->global->MAIN_HTML_HEADER."\n";
+		if (!empty($head)) {
+			print $head."\n";
+		}
+		if (!empty($conf->global->MAIN_HTML_HEADER)) {
+			print $conf->global->MAIN_HTML_HEADER."\n";
+		}
 
 		print "</head>\n\n";
 	}
