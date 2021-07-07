@@ -199,7 +199,7 @@ if (count($listofcontractid) > 0) {
 					            <div class="row" style="margin-top:20px">
 
 					              <div class="col-md-12">
-								<span class="opacitymedium">'.$langs->trans("NoneF").'</span>
+								<span class="opacitymedium">'.$langs->trans("NoInvoice").'</span>
 								  </div>
 								</div>
 						';
@@ -215,7 +215,7 @@ if (count($listofcontractid) > 0) {
 					            <div class="row" style="margin-top:20px">
 
 					              <div class="col-md-12">
-								<span class="opacitymedium">'.$langs->trans("NoneF").'</span>
+								<span class="opacitymedium">'.$langs->trans("NoInvoice").'</span>
 								  </div>
 								</div>
 						';
