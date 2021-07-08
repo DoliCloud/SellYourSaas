@@ -400,7 +400,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 			<?php
 			$disabled='';
-			if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+			if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 				$disabled=' disabled';
 				print '<div class="alert alert-warning">';
 				print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
