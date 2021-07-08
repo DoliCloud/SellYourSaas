@@ -674,7 +674,7 @@ if ($reusecontractid) {
 			$myaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL_FORDOMAIN-'.$tmpthirdparty->array_options['options_domain_registration_page'];
+				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
 				if (! empty($conf->global->$newnamekey)) $myaccounturl = $conf->global->$newnamekey;
 			}
 
