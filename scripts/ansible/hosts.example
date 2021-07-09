@@ -1,6 +1,15 @@
-[dolicloud]
-apollon3.nltechno.com
+# Ansible example for the host file.
+# Declare here all your servers
 
-[novafirstcloud]
-novafirstcloud1.novafirstcloud.com
-novafirstcloud10.novafirstcloud.com
+[master]
+admin.mysellyoursaasdomain.com
+
+[web]
+adminweb.mysellyoursaasdomain.com
+
+[deployment]
+with1.mysellyoursaasdomain.com
+with2.mysellyoursaasdomain.com
+
+[remotebackup]
+remotebackup.mysellyoursaasdomain.com

@@ -103,30 +103,35 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
 	} else {
 		header("Content-Type: ".$contenttype);
 	}
-	
+
 	// Security options
-	header("X-Content-Type-Options: nosniff");
+	header("X-Content-Type-Options: nosniff"); // With the nosniff option, if the server says the content is text/html, the browser will render it as text/html (note that most browsers now force this option to on)
 	header("X-Frame-Options: ALLOWALL");           // So we can include page into an IFRAME
 	if (!defined('FORCECSP')) {
 		$contentsecuritypolicy = empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY) ? '' : $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
+		
 		if (!empty($contentsecuritypolicy)) {
-			// For example, to restrict script, object, frames or img to some domains
-			// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; child-src https://youtube.com; img-src: https://static.example.com
-			// For example, to restrict everything to one domain, except object, ...
+			// For example, to restrict 'script', 'object', 'frames' or 'img' to some domains:
+			// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; frame-src https://youtube.com; img-src: https://static.example.com
+			// For example, to restrict everything to one domain, except 'object', ...:
 			// default-src https://cdn.example.net; object-src 'none'
+			// For example, to restrict everything to itself except img that can be on other servers:
+			// default-src 'self'; img-src *;
+			// Pre-existing site that uses too much inline code to fix but wants to ensure resources are loaded only over https and disable plugins:
+			// default-src http: https: 'unsafe-eval' 'unsafe-inline'; object-src 'none'
 			header("Content-Security-Policy: ".$contentsecuritypolicy);
 		}
 	} elseif (constant('FORCECSP')) {
 		header("Content-Security-Policy: ".constant('FORCECSP'));
 	}
-		
+
 	if ($forcenocache) {
 		header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
 	}
 }
 
 /**
- * Ouput html header of a page.
+ * Ouput html header of a page. It calls also top_httphead_sellyoursaas()
  * This code is also duplicated into security2.lib.php::dol_loginfunction
  *
  * @param 	string 	$head			 Optionnal head lines
@@ -162,18 +167,21 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		if (!is_object($hookmanager)) {
 			$hookmanager = new HookManager($db);
 		}
+
+		$ext = 'layout='.$conf->browser->layout.'&amp;version='.urlencode(DOL_VERSION);
 		
 		print "<head>\n";
-		
+
 		if (GETPOST('dol_basehref', 'alpha')) {
 			print '<base href="'.dol_escape_htmltag(GETPOST('dol_basehref', 'alpha')).'">'."\n";
 		}
-		
+
 		// Displays meta
+		print '<meta charset="utf-8">'."\n";
 		print '<meta name="robots" content="noindex'.($disablenofollow?'':',nofollow').'">'."\n";      				// Do not index
 		print '<meta name="viewport" content="width=device-width, initial-scale=1.0">'."\n";	// Scale for mobile device
 		print '<meta name="author" content="Dolibarr Development Team">'."\n";
-		
+
 		// Favicon. Note, even if we remove this meta, the browser and android webview try to find a favicon.ico
 		$favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
@@ -222,14 +230,31 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		if (GETPOSTISSET('dol_use_jmobile')) {
 			$themeparam .= '&amp;dol_use_jmobile='.GETPOST('dol_use_jmobile', 'int'); $conf->dol_use_jmobile = GETPOST('dol_use_jmobile', 'int');
 		}
+		if (GETPOSTISSET('THEME_DARKMODEENABLED')) {
+			$themeparam .= '&amp;THEME_DARKMODEENABLED='.GETPOST('THEME_DARKMODEENABLED', 'int');
+		}
+		if (GETPOSTISSET('THEME_SATURATE_RATIO')) {
+			$themeparam .= '&amp;THEME_SATURATE_RATIO='.GETPOST('THEME_SATURATE_RATIO', 'int');
+		}
+		if (!empty($conf->global->MAIN_ENABLE_FONT_ROBOTO)) {
+			print '<link rel="preconnect" href="https://fonts.gstatic.com">'."\n";
+			print '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@200;300;400;500;600&display=swap" rel="stylesheet">'."\n";
+		}
 		
 		if (! defined('DISABLE_JQUERY') && ! $disablejs && $conf->use_javascript_ajax) {
 			print '<!-- Includes CSS for JQuery (Ajax library) -->'."\n";
 			$jquerytheme = 'base';
-			if (!empty($conf->global->MAIN_USE_JQUERY_THEME)) $jquerytheme = $conf->global->MAIN_USE_JQUERY_THEME;
-			if (constant('JS_JQUERY_UI')) print '<link rel="stylesheet" type="text/css" href="'.JS_JQUERY_UI.'css/'.$jquerytheme.'/jquery-ui.min.css'.($ext?'?'.$ext:'').'">'."\n";  // JQuery
-			else print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/css/'.$jquerytheme.'/jquery-ui.css'.($ext?'?'.$ext:'').'">'."\n";    // JQuery
-			if (! defined('DISABLE_JQUERY_JNOTIFY')) print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css'.($ext?'?'.$ext:'').'">'."\n";          // JNotify
+			if (!empty($conf->global->MAIN_USE_JQUERY_THEME)) {
+				$jquerytheme = $conf->global->MAIN_USE_JQUERY_THEME;
+			}
+			if (constant('JS_JQUERY_UI')) {
+				print '<link rel="stylesheet" type="text/css" href="'.JS_JQUERY_UI.'css/'.$jquerytheme.'/jquery-ui.min.css'.($ext?'?'.$ext:'').'">'."\n";  // JQuery
+			} else {
+				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/css/'.$jquerytheme.'/jquery-ui.css'.($ext?'?'.$ext:'').'">'."\n";    // JQuery
+			}
+			if (! defined('DISABLE_JQUERY_JNOTIFY')) {
+				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css'.($ext?'?'.$ext:'').'">'."\n";          // JNotify
+			}
 			if (! defined('DISABLE_SELECT2') && (! empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {     // jQuery plugin "mutiselect", "multiple-select", "select2"...
 				$tmpplugin=empty($conf->global->MAIN_USE_JQUERY_MULTISELECT)?constant('REQUIRE_JQUERY_MULTISELECT'):$conf->global->MAIN_USE_JQUERY_MULTISELECT;
 				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/css/'.$tmpplugin.'.css'.($ext?'?'.$ext:'').'">'."\n";
@@ -307,7 +332,8 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				print '<!-- Includes JS for CKEditor -->'."\n";
 				$pathckeditor = DOL_URL_ROOT . '/includes/ckeditor/ckeditor/';
 				$jsckeditor='ckeditor.js';
-				if (constant('JS_CKEDITOR')) {	// To use external ckeditor 4 js lib
+				if (constant('JS_CKEDITOR')) {
+					// To use external ckeditor 4 js lib
 					$pathckeditor=constant('JS_CKEDITOR');
 				}
 				print '<script>';
@@ -346,9 +372,9 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				print '<!-- Includes JS added by page -->'."\n";
 				foreach ($arrayofjs as $jsfile) {
 					if (preg_match('/^(http|\/\/)/i', $jsfile)) {
-						print '<script src="'.$jsfile.'"></script>'."\n";
+						print '<script src="'.$jsfile.((strpos($jsfile, '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
 					} else {
-						print '<script src="'.dol_buildpath($jsfile, 1).'"></script>'."\n";
+						print '<script src="'.dol_buildpath($jsfile, 1).((strpos($jsfile, '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
 					}
 				}
 			}
