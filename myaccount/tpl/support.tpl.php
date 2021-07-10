@@ -26,6 +26,7 @@ if (empty($conf) || ! is_object($conf)) {
 <?php
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticket.class.php';
 
 	$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
 
@@ -307,8 +308,13 @@ if ($sellyoursaassupporturl) {
 
 		// Combobox for Group of ticket
 		$formticket = new FormTicket($db);
-		$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', '', 0, 0, 1, 0, '', 1);
-		$stringtoprint .= ajax_combobox('groupticket');
+
+		$ticketstat = new Ticket($db);
+		$ticketstat->loadCacheCategoriesTickets();
+		if (is_array($ticketstat->cache_category_tickets) && count($ticketstat->cache_category_tickets)) {
+			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', '', 0, 0, 1, 0, '', 1);
+			$stringtoprint .= ajax_combobox('groupticket');
+		}
 
 		$stringtoprint .= '<!-- Script to manage change of ticket group -->
 		<script>
