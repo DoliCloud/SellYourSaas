@@ -191,7 +191,6 @@ if [[ "x$instanceserver" == "x1" ]]; then
 			if [ "x$3" != "x" ]; then
 				if [ "x$3" != "xosu$i" ]; then
 					echo "Ignored."
-					echo
 					continue
 				fi
 			fi
@@ -219,11 +218,10 @@ if [[ "x$instanceserver" == "x1" ]]; then
 	    	echo No directory found starting with name $backupdir/osu$i
 			export errstring="$errstring\nNo directory found starting with name $backupdir/osu$i"
 	    fi
-		echo
 	done
 fi
 
-
+echo
 echo `date +%Y%m%d%H%M%S`" End with errstring=$errstring"
 echo
 
