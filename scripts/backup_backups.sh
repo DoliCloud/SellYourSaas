@@ -210,10 +210,12 @@ if [[ "x$instanceserver" == "x1" ]]; then
 			        fi
 				else
 					echo "Canceled. An error occured in backup of DIRSOURCE1"
+					export errstring="$errstring\nCanceled. An error occured in backup of DIRSOURCE1"
 				fi
 			done
 	    else
 	    	echo No directory found starting with name $backupdir/osu$i
+			export errstring="$errstring\nNo directory found starting with name $backupdir/osu$i"
 	    fi
 		echo
 	done
