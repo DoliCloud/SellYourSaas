@@ -190,6 +190,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 			# Test if we force backup on a given dir
 			if [ "x$3" != "x" ]; then
 				if [ "x$3" != "xosu$i" ]; then
+					echo "Ignored."
 					continue
 				fi
 			fi
