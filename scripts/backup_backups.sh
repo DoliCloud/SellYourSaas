@@ -191,6 +191,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 			if [ "x$3" != "x" ]; then
 				if [ "x$3" != "xosu$i" ]; then
 					echo "Ignored."
+					echo
 					continue
 				fi
 			fi
