@@ -1,0 +1,10 @@
+---
+- name: Cleanup servers
+  hosts: deployment
+  user: gkervern
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Launch clean.sh
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
