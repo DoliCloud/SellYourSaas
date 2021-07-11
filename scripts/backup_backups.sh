@@ -207,16 +207,16 @@ if [[ "x$instanceserver" == "x1" ]]; then
 			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR"
 					   	echo "Command was: $command"
 			        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
-			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. Command was: $command\n"
+			        	export errstring="$errstring\r\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. Command was: $command\r\n"
 			        fi
 				else
 					echo "Canceled. An error occured in backup of DIRSOURCE1"
-					export errstring="$errstring\nCanceled. An error occured in backup of DIRSOURCE1"
+					export errstring="$errstring\r\nCanceled. An error occured in backup of DIRSOURCE1"
 				fi
 			done
 	    else
 	    	echo No directory found starting with name $backupdir/osu$i
-			export errstring="$errstring\nNo directory found starting with name $backupdir/osu$i"
+			export errstring="$errstring\r\nNo directory found starting with name $backupdir/osu$i"
 	    fi
 	done
 fi
