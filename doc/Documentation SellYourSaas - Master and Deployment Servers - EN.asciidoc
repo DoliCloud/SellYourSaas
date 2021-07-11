@@ -2025,6 +2025,13 @@ innodb_log_buffer_size=32M
 log_warnings = 2
 ---------------
 
+On the master, change only the address :
+
+[source,bash]
+--------------
+bind-address = 0.0.0.0
+--------------
+
 Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
