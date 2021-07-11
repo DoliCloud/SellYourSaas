@@ -1,4 +1,5 @@
 ---
+#launch with --extra-vars='command=(test|confirm)'
 - name: Cleanup servers
   hosts: deployment
   user: gkervern
@@ -7,4 +8,4 @@
   become_user: root
   tasks:
   - name: Launch clean.sh
-    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh {{ command }}"
