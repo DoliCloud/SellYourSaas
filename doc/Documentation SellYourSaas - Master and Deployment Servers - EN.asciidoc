@@ -826,22 +826,22 @@ Host github.com
 
 === Installation of packages
 
-There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one
+There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
 
 * Installation of the 18.04- Ubuntu packages
 
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached ncdu
-sudo apt install mariadb-server mariadb-client
-sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install bind9
-sudo apt install spamc spamassassin clamav clamav-daemon
-sudo apt install fail2ban
-sudo apt install soffice libreoffice-common libreoffice-writer
-sudo apt install mailutils postfix
+sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
+sudo apt install -y mariadb-server mariadb-client
+sudo apt install -y php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y bind9
+sudo apt install -y spamc spamassassin clamav clamav-daemon
+sudo apt install -y fail2ban
+sudo apt install -y soffice libreoffice-common libreoffice-writer
+sudo apt install -y mailutils postfix
 ---------------
 
 * Installation of the 20.04+ Ubuntu packages
@@ -849,15 +849,15 @@ sudo apt install mailutils postfix
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached ncdu
-sudo apt install mariadb-server mariadb-client
-sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
-sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install bind9
-sudo apt install spamc spamassassin clamav clamav-daemon
-sudo apt install fail2ban
-sudo apt install libreoffice-common libreoffice-writer
-sudo apt install mailutils
+sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
+sudo apt install -y mariadb-server mariadb-client
+sudo apt install -y php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y bind9
+sudo apt install -y spamc spamassassin clamav clamav-daemon
+sudo apt install -y fail2ban
+sudo apt install -y libreoffice-common libreoffice-writer
+sudo apt install -y mailutils
 ---------------
 
 Now, we need to install *php-mcrypt* for Ubuntu 20.04+ (optional)
