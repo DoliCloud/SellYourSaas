@@ -1,0 +1,16 @@
+---
+#launch with --extra-vars='option=<your_option> value=<new_value>'
+- name: Change value in conf
+  hosts: deployment
+  become: yes
+  remote_user: gkervern
+
+  tasks:
+  - name: Change conf value
+    ini_file:
+      path: /etc/sellyoursaas.conf
+      section: null
+      option: "{{ option }}"
+      value: "{{ value }}"
+      no_extra_spaces: yes
+      backup: yes
