@@ -212,7 +212,7 @@ Note: If you need to recover data files from another source disk, use:
 
 [source, bash]
 ---------------
-rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
+rsync --info=progress2 -au sourceServer:/mnt/sourceDisk /mnt/targetDisk
 
 Example:
 cd /mnt/diskSource
@@ -644,7 +644,7 @@ dnsserver=1
 ipserverdeployment=ipOfDeploymentServer
 
 # Set location of the master database
-databasehost=ipduserveurmaster ou localhost si serveur master
+databasehost=ipOfMasterServer or localhost if on master server
 # Set port of the master database (default is 3306)
 databaseport=3306
 # Set database name of the master server
@@ -1835,14 +1835,14 @@ inet_interfaces = public.ip.returned.by_server_s_reverse_dns
 inet_protocols = ipv4
 smtp_generic_maps = hash:/etc/postfix/generic
 
-# Activer ces lignes pour utiliser SendGrid comme serveur envoi pour les envois d'emails depuis les instances utilisateurs
+# Uncomment those lignes to use Sendgrid as a mailserver for emails sent from user instances
 #smtp_sasl_auth_enable = yes
 #smtp_sasl_password_maps = static:apikey:abc1234567890abc12345678901234567890
 #smtp_sasl_security_options = noanonymous
 #smtp_tls_security_level = encrypt
 #header_size_limit = 4096000
 #relayhost = [smtp.sendgrid.net]:2525
-# Ou mettre relayhost à vide pour utiliser le serveur local commant agent d'envoi des emails.
+# Or set relayhost empty to use the local server as mailserver
 relayhost =
 
 smtpd_recipient_limit = 100
@@ -3115,6 +3115,7 @@ systemctl status snap.certbot.renew.timer
 
 
 [[creation_certificat_ssl]]
+[[ssl_certificated_creation]]
 === Create a wildcard SSL certificate for user instances
 
 Into the following instructions, we will use X with value 1, 2, 3, ... (digit of pool of instance = digit of the deployment server).
@@ -3474,7 +3475,7 @@ Note: The URL to deploy *Applications* type packages can be viewed in the *SellY
 
 * Create an account on DataDog.
 
-* Install the agent on serveur with:
+* Install the agent on server with:
 
 [source,bash]
 ---------------
@@ -3637,7 +3638,7 @@ See chapter <<Cloning a server instance for an extra production server or a dev 
 
 ===== Remote backup
 
-- An external backup must be done to another server by the *root* user crons running */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* to copy from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_serversource* (from another server in another datacenter). This script is in root's crontab (see <<installing_cron_tasks>>).
+- An external backup must be done to another server by the *root* user crons running */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* to copy from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). This script is in root's crontab (see <<installing_cron_tasks>>).
 
 
 - For a remote backup as AWS:
@@ -3696,7 +3697,6 @@ q
 ---------------
 
 * Remount the disk for acknoledgement and resizing without erasing data.
-* Remonter le disque pour prise en compte et augmenter le formatage du filesystem sans effacement.
 
 [source,bash]
 ---------------
@@ -3719,9 +3719,11 @@ The following explains the operations to clone a deployment server into another 
 
 Choose the snapshot or image to use and copy into area *post installation script* the content of file */scripts/post_inst_script.sh*.
 
-Une fois le serveur créé, vérifiez qu'il a bien un IP associé. Si non, aller dans la console horizon est sur le serveur, supprimer les interfaces réseaux (Detach) puis ajouter un interface réseaux (laisser l'ip fixe vide pour qu'elle soit déterminée par OVH). Rebooter le serveur.
-Il est possible qu'il faille aussi modifier les fichiers network pour obtenir l'ip v4 en dhcp. Pour cela:
+Once the server is created, double check it does have an associated IP. If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field Fixed IP empty so it is set by OVH. Reboot the server.
+It is possible you have to configure /etc/network/interfaces to get your IPv4 via DHCP. To do so :
+Connect to the console. Execute *ip link show* to get the MAC address. Check the file */etc/netplan/50-cloud-init.yaml* to get the right MAC address.
 Se connecter à la console. Faire *ip link show* pour connaitre l'adresse MAC. Vérifier le fichier */etc/netplan/50-cloud-init.yaml* afin d'avoir la bonne MAC address.
+Correct and reboot if needed. Then correct IPv6 too.
 Corriger et redémmarer si nécessaire. Corriger ensuite aussi pour l'ipv6.
 
 
@@ -3730,7 +3732,7 @@ Corriger et redémmarer si nécessaire. Corriger ensuite aussi pour l'ipv6.
 TODO
 
 
-- Une fois le serveur prêt: Se connecter pour désactiver les crons en doublons avec le serveur cloné (possibilité de désactiver le process cron complètement) par
+- Once the server is ready: connect to deactivate the duplicated crons from the cloned server, you can also deactivate the cron process itself with :
 
 [source,bash]
 ---------------
@@ -3739,20 +3741,20 @@ systemctl disable cron
 systemctl status cron
 ---------------
 
-- Editer la cron de *root* et de *admin* 
+- Edit the crons from *root* and *admin* 
 
-- Editer le fichier */etc/fstab* pour supprimer montage du/des disques données.
+- Edit */etc/fstab* to remove the mounting of data disks.
 
-- Créer un snapshot du Disque de donnée.
+- Create a snapshot of the data disk.
 
-- Créer un nouveau disque dur de donnée OVH depuis le snapshot et l'associer au serveur. Après association, il doit être visible avec la commande:
+- Create a new OVH data disk from the snapshot and attach it to the server. After association it must be visible with :
 
 	fdisk -l
 
-- Si on est parti sur un disque vierge, formater le nouveau disque dur de donnée. Pour cela, voir la chapitre <<ajout_de_disque>>.
-  Si il s'agit d'un dique déjà formatté, voir la chapitre <<ajout_de_disque>> pour ne réaliser que les opérations de montage et d'ajout en */etc/fstab*.
+- If it is an empty disk, format the new data disk. To do so, see the chapter <<adding_a_disk>>.
+  If the disk was formatted before, see the chapter <<adding_a_disk>> to only mount and add in */etc/fstab*.
 
-- Ajouter un fichier à la racine du disque pour identifier le volume (Par exemple: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...). 
+- Add a file at the root of the disk to identify the volume (for instance: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...). 
 
 ---------------
 touch /mnt/diskhome/DATA_MYDEPLOYMENTSERVERX
@@ -3769,24 +3771,24 @@ to add a line that looks like:
 
 [source,bash]
 ---------------
-/home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.server(ro,no_root_squash,sync,no_subtree_check)
+/home/admin/wwwroot/dolibarr_documents/sellyoursaas <deployment.server.IP>(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
 [source,bash]
 ---------------
-exportfs -v -a			(to validate new entries to add)
+exportfs -v -a			#(to validate new entries to add)
 exportfs
 systemctl restart nfs-kernel-server
 ---------------
 
-- Add, into file */etc/fstab* of the new deployment server an entry to have the NFS mounted after a restart.
+- Add an entry to have the NFS mounted after a reboot, in */etc/fstab* on the new deployment server .
 
 [source,bash]
 ---------------
-ip.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
+<master.server.IP>:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
-- Allow access between the new server *Deployment server* and the *Master server* at Firewall level.
+- Allow access between the new *Deployment server* and the *Master server* in the firewall.
 
 *If using iptables*
 
@@ -3794,15 +3796,15 @@ On the *Master server*:
 
 [source,bash]
 ---------------
-${IPTABLES} -t filter -A INPUT -p tcp -s ip.server.deployment --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A INPUT -p udp -s ip.server.deployment --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A OUTPUT -p tcp -d ip.server.deployment --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
-${IPTABLES} -t filter -A OUTPUT -p udp -d ip.server.deployment --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A INPUT -p tcp -s <deployment.server.IP> --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A INPUT -p udp -s <deployment.server.IP> --dport nfs -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -p tcp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
+${IPTABLES} -t filter -A OUTPUT -p udp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
 
 And on the *Deployment servers*
 
-If we have a IP_SERVER and IP_SERVER2 get like this:
+If we have two IPs get them like so:
 
 [source,bash]
 ---------------
@@ -3815,7 +3817,7 @@ You must add
 
 [source,bash]
 ---------------
-IP_SELLYOURSAAS_ADMIN=ip.server.master
+IP_SELLYOURSAAS_ADMIN=<master.server.IP>
 
 ${IPTABLES} -t filter -A OUTPUT -s $IP_SERVER -d $IP_SELLYOURSAAS_ADMIN -j ACCEPT
 ${IPTABLES} -t filter -A INPUT -s $IP_SELLYOURSAAS_ADMIN -d $IP_SERVER -j ACCEPT
@@ -3831,65 +3833,65 @@ fi
 Nothing to do.
 
 
-==== Other changes to do
+==== Other changes to make
 
-- Modifier le fichiers de configuration de Postfix suivant  (possibilité de désactiver postfix complètement ou juste envoyer les emails vers un SMTP bidon pour du développement):
+- Modify the Postfix configuration files beloew (you can also deactivate Postfix completely or simply send emails to a dummy SMTP server for development purposes)
   
   */etc/postfix/main.cf*
   */etc/postfix/mydestination*
   */etc/postfix/generic*
   */etc/mailname*
 
-- Ajouter les entrées du nouveau serveur *mynewserverX.mydomain.com* dans le DNS du domaine *mydomain.com* avec l'IP v4 (record A) et l'IP v6 (record AAA) attribué par OVH lors de la création du nouveau serveur.
+- Add new entries for *mynewserverX.mydomain.com* in the DNS of *mydomain.com*, with the IPv4 (A record) and IPv6 (AAAA record) given by OVH during server creation.
 
-- Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement. Mettre un nom court, par exemple *myserverX*).
+- Log in OVH servers' management interface to change their hostnames. This will modify */etc/hostname* automatically (If not change it manually. Set a hostname, like *myserverX*).
 
-- Aller dans l'interface de gestion des IP OVH, pour ajouter aussi 
+- Open the OVH IP management interface too, to add
  
-  - le reverse sur l'IP du nouveau serveur: *myserverX.mydomain.com*
-  - le reverse sur l'IP virtuel si vous en avez pris une sur: *with.mydomain.com*
+  - the reverse (PTR record) for the new server's IP : *myserverX.mydomain.com*
+  - the reverse for the virtual IP if you got one : *with.mydomain.com*
    
-- Se connecter et modifier le fichier */etc/hosts* avec le nom du nouveau serveur et nouvelle ip du serveur.
+- Connect and modify */etc/hosts* with the IP and name of the new server.
 
-- Editer le fichier */var/www/html/index.html* si il existe pour positionner le nouveau nom de serveur.
+- Edit */var/www/html/index.html* if it exists to set the new server name.
 
-- Vérifier les fichiers */etc/network/interfaces* et */etc/network/interfaces.d/* (pour remettre à la bonne valeur les ip publiques, virtuelles et internes vrack si le vrack OVH est utilisé)
+- Check */etc/network/interfaces* and */etc/network/interfaces.d/* to set the right values for vrack public, virtual and internal IPs if OVH vrack is used
 
-- Si webmin a été installé, se connecter à webmin pour désactiver les actions de supervision en doublons avec celle du serveur cloné.
+- If webmin was installed connect to it to deactivate the supervision actions duplicated from the cloning of the server
 
-- Modifier les fichiers de serveurs virtuels Apache dans */etc/apache2/sites-enabled* pour mettre la nouvelle IP/nouveau nom.
+- Modify Apache virtualhosts in */etc/apache2/sites-enabled* to set the new IP and name.
 
-- Déclarer l'IP pour l'envoi d'emails:
-  - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
-  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé *@mydomain.com* et pour chaque sous-domaines *@myserverX.mydomain.com*).
+- Declare the IP for mail sending:
+    - If a remote SMTP server is used, authorize the new server's IP in that server.
+    - Add the new server IPs in the DNS SPF entries (SPF requires one entry for every domain *@mydomain.com* and subdomain.
 
-- Créer un compte *sellyoursaas* avec les permissions d'accès depuis le serveur de déploiement sur la base de donnée du *Master*. Voir <<creer_un_compte_db_sellyoursaas>>.
+- Create a user *sellyoursaas* on the *master* server's DB, with permissions to access from the deployment server. See <<create_a_database_account_sellyoursaas>>.
 
-- Modifier le fichier */etc/sellyoursaas.conf* avec la nouvelle IP et nom de sous-domaine du nouveau pool et information du compte d'accès base de donnée du master.
+- Modify */etc/sellyoursaas.conf* with the new IP, subdomain of the new pool and master database access information.
 
-- Effacer les fichiers dans :
+- Remove files in :
 
   */etc/apache2/sellyoursaas-online*
   */etc/apache2/sellyoursaas-offline*
   */etc/apache2/sellyoursaas-available*
 
-- Et les fichiers ayant pour nom :
+- And files matching:
   
   */var/spool/mail/osu**
   */var/spool/cron/crontabs/osu**
 
-- Effacer les lignes osu* des fichiers
+- Erase osu* lines from those files 
 
   */etc/passwd*
   */etc/shadow*
   */etc/group*
   
-- Effacer les répertoires */mnt/diskhome/home/osu...*
+- Remove the folders */mnt/diskhome/home/osu...*
   
 - Destroy the database
 
-  - of *dolibarr* master if source was the *Master* server.
-  - of user instances if source was a deployment server. This can be done by doing:
+    - of *dolibarr* master if source was the *Master* server.
+    - of user instances if source was a deployment server. This can be done by doing:
   
 [source,bash]
 ---------------
@@ -3897,19 +3899,19 @@ mysql -uroot -e "show databases" | grep dbn | gawk '{print "drop database `" $1 
 mysql -uroot < /tmp/dbntodelete.sql
 ---------------
   
-- Renommer le fichier DNS */etc/bind/withX.mydomain.com.hosts* en */etc/bind/with(X+1).mydomain.com.hosts* et l'éditer pour prendre en compte le nouveau prefix.
+- Rename the DNS file */etc/bind/withX.mydomain.com.hosts* into */etc/bind/with(X+1).mydomain.com.hosts* and edit it to use the new prefix.
 
-- Modifier le fichier */etc/bind/named.conf.local* pour prendre en compte le nouveau nom.
+- Modify */etc/bind/named.conf.local* to use the new name.
 
-- Ajouter l'entrée DNS A pour *ns1withX*, *ns2withX* au domain *mydomain.com* pointant sur l'IP du nouveau serveur de déploiement.
+- Add A records *ns1withX*, *ns2withX* pointing to the new deployement server IP to the domain *mydomain.com*
 
-- Ajouter l'entrée DNS NS pour *withX* au domain *mydomain.com* pointant sur *ns1withX.mydomain.com*.
+- Add NS record pointing for *withX* to the domain *mydomain.com*, pointing to *ns1withX.mydomain.com*.
 
-- Arrêter, relancer le firewall, fail2ban, bind9, apache, postfix, remote_server et le datadog-agent si utilisé.
+- Stop, restart the firewall, fail2ban, bind9, apache, postfix, remote_server and datadog-agent if they are used.
 
-- Vérifier que, depuis le serveur Master, l'url *http://ipnouveauserverdeployment:8080/index.php/test* répond par un "404 Not Found".
+- Check that *http://ipnouveauserverdeployment:8080/index.php/test* returns "404 Not Found" when requested from the *master*.
 
-- Vérifier que les répertoires existent avec les bons droits ou les forcer: 
+- Double check that folders existent with the right permissions or force them:
 
 [source,bash]
 ---------------
@@ -3917,17 +3919,16 @@ mkdir /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archi
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
 ---------------
 
-- Acquerir les certificats SSL du nouveau nom de domaine *withX.mydomain.com*, les déposer sur le serveur
-et créer les liens symboliques (Voir <<creation_certificat_ssl>>).
+- Aquire the SSL certificates of the new subdomain *withX.mydomain.com*, upload them to the server and create the symbolic links. (see <<ssl_certificate_creation>>).
 
-- Si vous configurez l'envoi des emails depuis le backoffice Dolibarr via un relai SMTP comme Google et/ou SendGrid, pensez à mettre à jour les IP (v4 et v6) autorisées par le relay sur la console du relai. 
+- If you configured sending emails from Dolibarr's backoffice via a SMTP relay like Google and/or Sendgrid, remember to update the authorized IPs (v4 and v6) in the relay console.
 
-En complément, si d'autres applications étaient actives sur le serveur clonés:
+In addition, if other applications were active on the cloned server:
 
 * For Prestashop sites, if the new server has a new url:
 ** go into database to set correct url into table *ps_configuration* (var PS_SHOP_DOMAIN, PS_SHOP_DOMAIN_SSL, CANONICAL_URL) and *ps_shop_url*
 ** remove all cache files: cd cache; rm -fr **; cd themes/xxx/cache; rm -fr **;
-** check also that templates does not contains hard coded redirect like "<a href="http{if Tools::usingSecureMode()}s{/if}://dev.dolistore.com" title="{$shop_name|escape:'html':'UTF-8'}">
+** check also that templates do not contain hard coded redirect like "<a href="http{if Tools::usingSecureMode()}s{/if}://dev.dolistore.com" title="{$shop_name|escape:'html':'UTF-8'}">
 ** change payment modules from Live to Test if the copy is for development
 
 * For Mediawiki sites, if VM has a new url, go into database to set correct url into file *LocalSettings.php*
