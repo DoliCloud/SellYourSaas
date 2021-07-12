@@ -1835,15 +1835,13 @@ inet_interfaces = public.ip.returned.by_server_s_reverse_dns
 inet_protocols = ipv4
 smtp_generic_maps = hash:/etc/postfix/generic
 
-# Activer ces lignes pour utiliser SendGrid comme serveur envoi pour les envois d'emails depuis les instances utilisateurs
-#Uncomment those lignes to use Sendgrid as a mailserver for emails coming from user instances
+# Uncomment those lignes to use Sendgrid as a mailserver for emails sent from user instances
 #smtp_sasl_auth_enable = yes
 #smtp_sasl_password_maps = static:apikey:abc1234567890abc12345678901234567890
 #smtp_sasl_security_options = noanonymous
 #smtp_tls_security_level = encrypt
 #header_size_limit = 4096000
 #relayhost = [smtp.sendgrid.net]:2525
-# Ou mettre relayhost à vide pour utiliser le serveur local comme agent d'envoi des emails.
 # Or set relayhost empty to use the local server as mailserver
 relayhost =
 
