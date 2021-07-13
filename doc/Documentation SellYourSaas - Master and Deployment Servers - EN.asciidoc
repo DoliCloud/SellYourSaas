@@ -3642,11 +3642,11 @@ See chapter <<Cloning a server instance for an extra production server or a dev 
 
 ===== Local backup
 
-- Configuration of the server and paying instances is done locally via the cron
+- Configuration of the server and paying instances is done locally via the cron task
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* of *root* (see <<installing_cron_tasks>>) to the disks */home/admin/backup/conf* and */home/admin/backup/mysql*
 
-- Paying user instances are backed up locally by the cron
+- Paying user instances are backed up locally by the cron task
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* of *admin* (see <<installing_cron_tasks>>) to the disk */mnt/diskbackup/backup/osu*
 
@@ -3720,7 +3720,6 @@ resize2fs /dev/vdX9
 ---------------
 
 
-[Clonage d une instance serveur pour production bis ou pour développement]
 [Cloning a server instance for an extra production server or a dev server]
 === Clone or duplicate a server instance into another server
 
@@ -3737,9 +3736,7 @@ Choose the snapshot or image to use and copy into area *post installation script
 Once the server is created, double check it does have an associated IP. If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field Fixed IP empty so it is set by OVH. Reboot the server.
 It is possible you have to configure /etc/network/interfaces to get your IPv4 via DHCP. To do so :
 Connect to the console. Execute *ip link show* to get the MAC address. Check the file */etc/netplan/50-cloud-init.yaml* to get the right MAC address.
-Se connecter à la console. Faire *ip link show* pour connaitre l'adresse MAC. Vérifier le fichier */etc/netplan/50-cloud-init.yaml* afin d'avoir la bonne MAC address.
 Correct and reboot if needed. Then correct IPv6 too.
-Corriger et redémmarer si nécessaire. Corriger ensuite aussi pour l'ipv6.
 
 
 *With ScaleWay*:
@@ -3817,7 +3814,7 @@ ${IPTABLES} -t filter -A OUTPUT -p tcp -d <deployment.server.IP> --sport nfs -m 
 ${IPTABLES} -t filter -A OUTPUT -p udp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
 
-And on the *Deployment servers*
+And on the *deployment servers*
 
 If we have two IPs get them like so:
 
@@ -3934,7 +3931,7 @@ mkdir /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archi
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
 ---------------
 
-- Aquire the SSL certificates of the new subdomain *withX.mydomain.com*, upload them to the server and create the symbolic links. (see <<ssl_certificate_creation>>).
+- Acquire the SSL certificates of the new subdomain *withX.mydomain.com*, upload them to the server and create the symbolic links. (see <<ssl_certificate_creation>>).
 
 - If you configured sending emails from Dolibarr's backoffice via a SMTP relay like Google and/or Sendgrid, remember to update the authorized IPs (v4 and v6) in the relay console.
 
@@ -3951,7 +3948,7 @@ In addition, if other applications were active on the cloned server:
 
 === Upgrade OS
 
-Pour mettre à jour Ubuntu 16.04 vers 18.04 sur un serveur SellYourSaas:
+To update Ubuntu from 16.04 to 18.04 on a SellYourSaas server:
 
 [source,sql]
 ---------------
@@ -3966,7 +3963,7 @@ apt remove php-fpm php7-fpm
 [[check_database_used]]
 === Follow space used by database
 
-La requête suivante permet d'avoir une vision de l'espace réél (sans le gachis) en base de données.
+The following request gives the "real" space taken by databases (without the "padding")
 
 [source,sql]
 ---------------
@@ -3992,6 +3989,8 @@ GROUP BY table_schema, table_name;
 
 or old request:
 
+[source,sql]
+---------------
 SELECT IFNULL(B.engine,'Total') "Storage Engine",
 CONCAT(LPAD(REPLACE(FORMAT(B.DSize/POWER(1024,pw),3),',',''),17,' '),' ',
 SUBSTR(' KMGTP',pw+1,1),'B') "Data Size", CONCAT(LPAD(REPLACE(
@@ -4004,6 +4003,7 @@ SUM(data_length+index_length) TSize FROM information_schema.tables
 WHERE table_schema NOT IN ('mysql','information_schema','performance_schema')
 AND engine IS NOT NULL GROUP BY engine WITH ROLLUP) B,
 (SELECT 3 pw) A ORDER BY TSize;
+--------------
 
 
 === Read or find deadlocks on the database
@@ -4023,28 +4023,28 @@ kill ...
 
 === Follow files modified
 
-Pour détecter la liste des fichiers modifiés depuis la dernière mise à jour afick:
+To update the list of modified files since afick run last:
 
 [source,bash]
 ---------------
 afick.pl -k
 ---------------
 
-Voir le résumé des historiques de chaque changements:
+See the history of changes:
 
 [source,bash]
 ---------------
 vi /var/lib/afick/history
 ---------------
 
-Voir le détail des changements d'un jour:
+See details of changes for a specific day:
 
 [source,bash]
 ---------------
 vi /var/lib/afick/archive/afick.YYYMMDD*
 ---------------
 
-Voir la documentation *afick.pl* pour plus d'options.
+Check out *afick.pl* documentation for more options.
 
 
 
@@ -4067,9 +4067,9 @@ sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmis
 ---------------
 
 
-=== Utilisation de OpenStack pour gérer les images de serveurs
+=== Using OpenStack to manage server images
 
-- Installer les utilitaires OpenStack
+- Install OPenStack utilities
 
 [source,bash]
 ---------------
@@ -4083,9 +4083,9 @@ apt install python3-openstackclient python3-novaclient python3-glanceclient -y
 source openrc.sh
 ---------------
 
-- Les commandes openstack sont alors disponibles.
+- OpenStack commands are now available.
 
-Pour récupérer une image d'instance:
+To get an instance's image:
 
 [source,bash]
 ---------------
@@ -4097,7 +4097,7 @@ glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-
    ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
 
-Pour pousser une image d'instance sur un projet:
+To push an instance's image on a project:
 
 [source,bash]
 ---------------
@@ -4106,7 +4106,7 @@ export OS_REGION_NAME=SBG1
 glance image-create --name nom_image_snaphot_new_server --disk-format qcow2 --container-format bare --file mon_fichier_snap_serveur1.qcow2
 ---------------
 
-Pour récupérer une image de volume, il faut d'abord la créer depuis le volume détaché (Pas de possibilité de faire depuis un snapshot):
+To get a volume image, you need to create from the detached volume (can't use a snapshot)
 
 [source,bash]
 ---------------
@@ -4121,31 +4121,31 @@ openstack image list
 openstack image save --file nom_image_snaphot_new_volume.qcow2 8625f87e-8248-4e62-a0ce-a89c7bd1a9be
 ---------------
 
-Pour pousser une image sur un projet:
+To push an image on a project:
 
 [source,bash]
 ---------------
 
 ---------------
 
-- Pour recréer un serveur depuis une image
+- To recreate a server from an image
 
-Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+See chapter <<Cloning a server instance for an extra production server ordéveloppement>>
 
 
-=== Passage en mode rescue d'un serveur
+=== Booting a server in rescue mode
 
-Aller sur l'interface du service Cloud pour passer en mode rescue. Le serveur sera rebooté et un lien pour se logué sera fourni.
+Use the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
 
-Trouver les disques attachées et montez le disque système.
+Find attached disks and mount the system disk.
 
 [source,bash]
 ---------------
 lsblk
-mount /dev/sdXY /mnt
+mount /dev/sdXY /mnt    #(with X=a, b, c, etc and Y the partition number, 1, 2, 3, etc)
 ---------------
 
-Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
+The disk is then accessible and writable in /mnt
 
 
 === Move the database (var/lib/mysql into /mnt/diskhome/mysql/)
@@ -4225,6 +4225,8 @@ To make sure that the new data directory is indeed in use, start the MySQL monit
 mysql -u root -p
 Look at the value for the data directory again:
 
+[source,sql]
+----------------
 select @@datadir;
 Output
 +----------------------------+
@@ -4233,11 +4235,13 @@ Output
 | /mnt/volume-nyc1-01/mysql/ |
 +----------------------------+
 1 row in set (0.01 sec)
+----------------
+
 Now that you’ve restarted MySQL and confirmed that it’s using the new location, take the opportunity to ensure that your database is fully functional. Once you’ve verified the integrity of any existing data, you can remove the backup data directory with sudo rm -Rf /var/lib/mysql.bak.
 
 
-!!!!! Sur Ubuntu 18.04
-Ajouter */mnt/diskhome/mysql* dans les profiles apparmor qui contiennent */var/lib/mysql* (fichier */etc/apparmor.d/usr.sbin.mysqld*)
+!!!!! On Ubuntu 18.04
+Add */mnt/diskhome/mysql* in the apparmor profiles containing */var/lib/mysql* (file */etc/apparmor.d/usr.sbin.mysqld*)
 
 [source,bash]
 ---------------
@@ -4252,7 +4256,7 @@ Ajouter */mnt/diskhome/mysql* dans les profiles apparmor qui contiennent */var/l
 ---------------
 
 
-Recharger le profile apparmor
+Reload the apparmor profile
 
 [source,bash]
 ---------------
@@ -4273,7 +4277,7 @@ sudo chown mysql /var/run/mysqld;
 sudo mysqld_safe --skip-grant-tables &
 ---------------
 
-* Avec un mode different de recovery, modifier le fichier server.conf pour mettre 1, 2, 3, 4
+* With a mode different from recovery, modify server.conf to set 1, 2, 3, 4
 
 [source,bash]
 ---------------
@@ -4281,28 +4285,28 @@ sudo mysqld_safe --skip-grant-tables &
 innodb_force_recovery=1
 ---------------
 
-A partir de 3 ou +, risque de perte de données.
+At 3 or more, there is a risk of data loss.
 
 
-NOTE: Si le lancement est long, pour suivre l'état d'avancement, faire un 
+NOTE: If launching takes a long time, to follow what's happening, do:
 
 [source,bash]
 ---------------
 lsof -p PID_de_mysql 
 ---------------
-pour voir les fichiers et base traitées en relog. Ils sont ouverts, soit par ordre de dates sur le disque, soit par ordre alphabétique du répertoire dbn... (en faire plusieurs de suite pour déterminer l'ordre).
+to see files and DBs treated in relog. They are open either by date of the inodes or by alphabetical order in the dbn folder... (do it several times to determine which)
 
 
 
-=== Désactivation de toutes les instances utilisateurs
+=== Deactivation of all user instances
 
-Utiliser le script *make_instance_offline.sh* qui désactivera tous les accès en remplaçant chaque virtual host par un virtual host réalisant une redirection sur une page d'attente.
+Use the scrip *make_instance_offline.sh* which deactivates all accesses by replacing every virtual host by one redirecting to a waiting page.
 
-Le même script peut etre utilisé pour l'opération inverse.
+The same script can be used to reverse it.
 
 [source,bash]
 ---------------
-scripts/make_instance_offline.sh  https://myaccount.mydomain.com/offline.php  test|offline|online
+scripts/make_instance_offline.sh  https://myaccount.mydomain.com/offline.php  test|offline|online #replace FQDN and select appropriate command
 ---------------
 
 
@@ -4326,7 +4330,7 @@ Launch the script:
 
 Go into menu *SellYourSaas - Packages* to create your new package.
 
-For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, enter the values of the following fields (Note: variables __XXX__ are reserved keywrods that will be replaced by SellYourSaas process that uses those fields):
+For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, enter the values of the following fields (Note: dunder variables __XXX__ are reserved keywords that will be replaced by SellYourSaas process that uses those fields):
 
 
 Into field *Dir with sources 1*
@@ -4427,7 +4431,7 @@ Into field *Dir with dump files*
 __DOL_DATA_ROOT__/sellyoursaas/packages/__PACKAGEREF__
 ---------------
 
-(Avec cette valeur, il sera alors possible de soumettre le fichier dump à charger via l'onglet *Fichiers joints*
+(With this value, you can then upload the dump file to load in the *Attachments* tab)
 
 
 Into field *template fo cron file*
@@ -4473,45 +4477,44 @@ Change the value 10.0.0 with version of the image you will build to deploy.
 
 === Setup of Services
 
-Les services représentent la politique de tarification.
+Services represent pricing policies.
 
-Il faut créer un service de type *Application* qui sera lié au *Package* pour permettre le déploiement.
+You need to create an *Application* type service that will be linked to the *Package* to allow deployment.
 
-Le service de type *Application* peut ensuite avoir dans l'onglet *Produit virtuel*, d'autres services de type *Options* ou *Métrique*.
+The *Application* type service can then have other types of services like *Options* or *Statistics* in the *Virtual Product* tab.
 
 
-Exemple de service de type Application pour déployer l'application PHP Dolibarr ERP CRM:
+Example of Application type service to deploy the Dolibarr ERP CRM PHP application:
 
 image::Example_service_application.png[Exemple service application]
 
-Exemple pour un service qui ajoute une métrique de tarification par Utilisateur:
+Example for a service adding pricing statistics by User:
 
 image::Example_service_metric_USER.png[Exemple service metric]
 
-Exemple pour un service qui ajoute une option pour plus de Go:
+Example for a service adding an option for more Go:
 
 image::Example_service_option_GO.png[Exemple service option GO]
 
 
-Remarque: Les services de types *Options* et *Metrics* doivent être attachés à un service de type *Application* depuis l'onglet Produit Virtuels. 
+Note: *Options* and *Metrics* type services must be attached to an *Application* type service from the Virtual Products tab. 
 
 
 
 === Get the URL for subscription
 
-Aller dans le menu *SellYourSaas - Pages d'inscriptions* pour obtenir l'URL à utiliser pour souscrire à une instance (package de type Application et ses dépendances). 
+Go to the menu *SellYourSaas - Subscription Pags* to get the URL for subscribing an instance (Application type package and its dependencies. 
 
 
 
-=== Principe de déploiement d'une nouvelle instance SellYourSaas
+=== Inner workings of a new SellYourSaas instance deployment
 
-- Le visiteur va sur la page d'inscription  https://myaccount.mydomain.com/register.php et saisit son email et choisit un nom d'URL pour son instance (l'URL peut accepter des paramètres pour spécifier le
-services souscrit, ou encore le nom du revendeur).
+- The visitor goes to https://myaccount.mydomain.com/register.php , enters his email and chooses a URL for his instance (the URL can incorporate parameters to specify the subscribed service or the name of the vendor)
 
-- En cliquant sur La page d'inscription, les opérations suivantes sont réalisées :
-  * Check thirdparty exists or not. If not create the third party, if yes, it says to create the new instance from the customer dashboard.
-  * Create a contract (main subscription) into database with status "DEPLOY_IN_PROGRESS" and with a unix account name, pass, database account and pass, and other properties defined on contract. The subscribed service are lines of contracts.
-  * Appelle listener de deploiement des instances (micro serveur web qui sert que la page *scripts/remote_server/index.php* et qui exécute l'action "deploy" (1 des 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") sur le serveur de déploiement (par exemple pour Dolibarr, cela appelle les scripts *action_deploy_undeploy.sh* ou *action_suspend_unsuspend.sh* selon le code action) pour créer/détruire ou suspendre/réactiver l'instance du client. Voir le chapitre <<remote_actions>>.
+- By submitting on the subscription page, the following operations are triggered :
+  * Check if third party exists or not. If not create the third party, if so tell to create the new instance from the customer dashboard.
+  * Create a contract (main subscription) into database with status "DEPLOY_IN_PROGRESS" and with a Unix account name, pass, database account and pass, and other properties defined in the contract. The subscribed services are lines of contracts.
+  * Calls instance deployment listener (micro web server serving only *scripts/remote_server/index.php* and execfuting the "deploy" on the deployment server (1 of the 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") (in Dolibarr's case for instance, this calls the scripts *action_deploy_undeploy.sh* or *action_suspend_unsuspend.sh* according to the action code), to create/destroy or suspend/reactivate the client instance. See chapter <<remote_actions>>.
   * Edit contract/subscription with status "DEPLOYED" if result of remote action is OK.
   * Send an email to user: Show result to user and send en email (if subscriptions is done from backoffice, this option is off).
 
@@ -4525,82 +4528,82 @@ A remote action is an action requested by the server to the agent to be executed
 
 Steps realized by the agent and the remote action *deploy* or *deployall* are:
 
-- Create unix user, pass and home with a restricted shell
-- Add a dns entry
-- Create a database
-- Create database user with password and permissions to access the database.
-- Create a virtual host apache
-- Deploy files with cp -pr pathtogitofpackage/* /home/jail/home/usrABCDEFGHIK/appAZERTYUIOP
-- Deploy documents with cp -pr pathtogitofpackagebis/* /home/jail/home/usrABCDEFGHIK/appAZERTYUIOP
-- Copy/create/update configuration files and update them with all variables.
-- Copy/create/update cron file and update them with all variables.
+- Creates Unix user, pass and home with a restricted shell
+- Adds a DNS entry
+- Creates a database
+- Creates database user with password and permissions to access the database.
+- Creates a virtual host apache
+- Deploys files with cp -pr pathToGitRepotOfPackage/* /home/jail/home/usrABCDEFGHIK/appAZERTYUIOP
+- Deploy documents with cp -pr pathToGitRepoOfPackageBis/* /home/jail/home/usrABCDEFGHIK/appAZERTYUIOP
+- Copies/creates/updates configuration files and updates them with all variables.
+- Copies/creates/updates cron file and updates them with all variables.
 
 ==== undeploy / undeployall
 
 Steps realized by the agent and the remote action *undeploy* are:
 
-- Toutes les actions inverses de le l'actions "deploy" (à l'exception de la première action pour le "undeploy": "undeploy" ne détruit pas l'utilisateur Unix, mais "undeployall" oui). 
+- All steps triggered by the "deploy" action are reversed (execpt for the first action : "undeploy" doesn't remove the Unix account, but "undeployall" does). 
 
 ==== suspend
 
 Steps realized by the agent and the remote action *suspend* are:
 
-- Désactivation du virtual host et reload apache.
+- Deactivation of the virtual host and Apache reload.
 
-Le but est de bloquer l'accès à l'instance avec un lien vers la dashboard pour mettre à jour son mode de paiement, sans toucher à l'instance.
+The goal is to lock the access to the instace with a link to the dashboard to update the payment method, without changing the instance itself.
 
 ==== unsuspend
 
 Steps realized by the agent and the remote action *unsuspend* are:
 
-- Réactivation du virtual host et reload apache.
+- Reactivation of the virtual host and Apache reload.
 
 ==== rename
 
 Steps realized by the agent and the remote action *rename* are:
 
-- Renommer le nom de domaine et/ou le nom de domaine personnalisé (recrée les fichiers virtual hosts).
+- Changes the domain name and/or the customized domain name (recreates the virtual host conf files).
 
 ==== refresh
 
 Steps realized by the agent and the remote action *refresh* are:
 
-- Execution du calcul des métriques shell et renvoi des valeurs.
+- Calculates the shell metrics and returns the data.
 
 ==== backup
 
 Steps realized by the agent and the remote action *backup* are:
 
-- Appel du script backup_instance pour exécuter le sauvegarde d'une instance
+- Calls the scripts backup_instance to backup an instance.
 
 ==== recreateauthorizedkeys
 
-Cette remote action ne sert que pour le logiciel Dolibarr ERP CRM. Elle est inutile et inutilisé pour le déploiement d'autres logiciels.
+This remote action is used solely for Dolibarr ERP CRM. It's useless and unused for other software.
 
 Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
-- Mise à jour du fichier ssh */etc/skel/authorized_keys_support* avec les clés publiques passées en paramètres.
+- Updates */etc/skel/authorized_keys_support* with the public keys passed as arguments.
 
 
 === Some business rules of Sell-Your-Saas
 
-- Le traitement qui valide les factures à l'état brouillon ne valide qu'une seule facture par client à la fois. Si il y en a 2 en attente, il faudra donc 2 lancements du batch de validation des factures pour les valider toutes les 2.
+- The process that validates draft invoices does validate only one invoice per client at a time. If there are 2 waiting to be processed 2 runs of the invoice validation batch will be necessary to validate both.
 
-- Un traitement régulier renouvelle la période de fin de contrat 1 ou 2 jours avant l'expiration du service, mais uniquement si aucune facture impayée n'est ouverte pour le client.
+- A recurrent process renews the end of contract date 1 or 2 days before the contract's expiry, provided there are no pending invoice for that client.
 
-- Si une instance a expirée depuis N jours (N paramétrable et différent si utilisateur avec mode de paiement saisie ou pas), le batch de suspension suspend l'instance.
+- If an instance expired more than N days ago (N is configurable and different for a user with a registered payment method), the suspension cron suspends the instance.
 
-- Si une instance est suspendue depuis M jours (M paramétrable et différent si client avec mode de paiement saisie ou pas), le batch de désinstallation désinstalle l'instance.
+- If an instance is suspended since more than N days (M is configurable and different for a user with a registered payment method), the removal cron uninstalls the instance.
 
-- Si un utilisateur met à jour son mode de paiement, on regarde les factures impayées et on essaie d'encaisser le solde. Si ok, le mode de paiement est validé, sinon refusé.
+- When a user updates his payment method, we lookup pending invoices and try to get them paid. If it works, the payment method is validated, if not it is refused.
 
-- Quand une facture est payée, si il n'y a plus de facture impayées et si l'instance du client avait été suspendu, elle est réactivée.
+- When a bill is paid, if there are no more pending invoices and if the client was suspended, it is reactivated.
 
-- Si un client a une facture impayée, la facture suivante reste à l'état brouillon.
+- If a client has an unpaid bill, the next bill remains in draft status.
 
-- Quand une instance est détruite définitivement, les factures brouillons qui lui sont liées sont aussi détruites.  
+- When an insntance is destroyed forever, the draft invoices linked to it are destroyed as well.
 
-- Les sauvegardes des bases et fichiers des instances ne se font que pour les clients SellYourSaas payants (ayant saisi au moins une fois un mode de paiement).
+- The backups of the instances' databases and files are done only for paying SellYourSaas clients (having registered a payment method at least once).
 
 
 
@@ -4615,37 +4618,37 @@ To activate Google Analytics statistics, put the tag in the configuration of the
 To activate DataDog statistics, fill in the constants:
  
   - SELLYOURSAAS_DATADOG_ENABLED à 1
-  - SELLYOURSAAS_DATADOG_APIKEY avec la clé API de DataDog
-  - SELLYOURSAAS_DATADOG_APPKEY avec la clé APP de DataDog
+  - SELLYOURSAAS_DATADOG_APIKEY with the Datadog API key
+  - SELLYOURSAAS_DATADOG_APIKEY with the Datadog APP key
 
 This is a detail of events or URL that can be tracked:
 
-* Page affichée lorsqu'on affiche le formulaire d'inscription
-- URL: /register.php   (peut servir d'objectif *Google Analytics "Prospect intéressé"*)                 
-- Event DataDog: Aucun
+* Page returned when we show the subscription form
+- URL: /register.php   (can be used as goal in *Google Analytics "Prospective client"*)                 
+- Event DataDog: None
 
-* Page affichée suite à une inscription faite jusqu'au bout
-- URL: /index.php?welcomid=   (peut servir d'objectif *Google Analytics "Prospect inscrit"*)
-- Event DataDog: Aucun
+* Page shown after a completed subscription
+- URL: /register.php   (can be used as goal in *Google Analytics "Subscribed client"*)                 
+- Event DataDog: None
 
-* Page affichée lorsqu'un mode de paiement est ajouté pour la première fois avec succès = Nouveau client
-- URL: /index.php?paymentrecorded=1   (peut servir d'objectif *Google Analytics "Client gagné"*)
+* Page shown when a payment method is added for the first time = New client
+- URL: /register.php   (can be used as goal in *Google Analytics "Won client"*)                 
 - Event Datadog: *sellyoursaas.paymentmodeadded*
 
-* Page affichée lorsqu'un mode de paiement est modifié avec succès
+* Page shown when a payment method is modified with success
 - URL: /index.php?paymentmodified=1
 - Event Datadog: *sellyoursaas.paymentmodemodified*
 
-* Paiement réalisé (avec la valeur 1)
-- URL: Aucune
+* Payment done (with value 1)
+- URL: None
 - Event DataDog: *sellyoursaas.paymentdone*
 
-* Paiement réalisé (avec la valeur du montant du paiement)
-- URL: Aucune
+* Payment done (with amount paid as value)
+- URL: None
 - Event DataDog: *sellyoursaas.payment*
 
-* Client perdu, lorsqu'une instance payante est désinstallé (avec la valeur 1), que ce soit par le batch en automatique ou sur demande du client depuis l'espace client
-- URL: Aucune
+* Client lose, when a paying instance is uninstalled (with value 1), whether automatically by the cron or upon client request from the client interface
+- URL: None
 - Event DataDog: *sellyoursaas.payingcustomerlost*
 
 
@@ -4737,9 +4740,15 @@ If not, create it and restart postfix.
 ==== php sessions files in /var/lib/php/sessions are not purged
 
 php session purge can be done by 
-	/etc/cron.d/php
+[source,bash]
+-------------
+/etc/cron.d/php
+-------------
 or if systemd is available by
-	systemctl status phpsessionclean.timer
+[source,bash]
+-------------
+systemctl status phpsessionclean.timer
+-------------
 
 Check the correct one is enabled.
 
