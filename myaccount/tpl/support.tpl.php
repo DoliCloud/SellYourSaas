@@ -322,7 +322,7 @@ if ($sellyoursaassupporturl) {
 
 		if ($atleastonepublicgroup) {
 			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1);
-			$stringtoprint .= ajax_combobox('groupticket');
+			//$stringtoprint .= ajax_combobox('groupticket');
 			$stringtoprint .= '<br>';
 		}
 
@@ -332,15 +332,8 @@ if ($sellyoursaassupporturl) {
 			function groupticketchange(){
 				console.log("We called groupticketchange, so we try to load list KM linked to event");
 				$("#KWwithajax")[0].innerHTML="";
-				$("#KWwithajax")[0].hide();
 
-				idgroupticket = $("#groupticket_child option:selected").val();
-				if (idgroupticket == "") {
-					idgroupticket = $("#groupticket option:selected").val();
-					if(!arraynotparents.includes(idgroupticket)){
-						idgroupticket = ""
-					}
-				}
+				idgroupticket = $("#ticketcategory_select")[0].value;
 
 				console.log("We have selected id="+idgroupticket);
 
@@ -358,8 +351,8 @@ if ($sellyoursaassupporturl) {
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax")[0].innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist;
-								$("#KWwithajax")[0].show();
+								$("#KWwithajax")[0].innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist+"<br>";
+								$("#KWwithajax").show();
 							}
 						 },
 						 error : function(output) {
@@ -368,12 +361,23 @@ if ($sellyoursaassupporturl) {
 					});
 				}
 			};
+			$("#ticketcategory_select").bind("change",function() { groupticketchange(); });
+			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+			var trackChange = function(element) {
+			var observer = new MutationObserver(function(mutations, observer) {
+				if (mutations[0].attributeName == "value") {
+				$(element).trigger("change");
+				}
+			});
+			observer.observe(element, {
+				attributes: true
+			});
+			}
 
-			$("#groupticket").change(function() { groupticketchange(); });
-			$("#groupticket_child").change(function() { groupticketchange(); });
+			trackChange($("#ticketcategory_select")[0]);
 		});
 		</script>'."\n";
-		$stringtoprint .= '<div class="supportemailfield hidden" id="KWwithajax"></div>';
+		$stringtoprint .= '<div class="supportemailfield " id="KWwithajax"></div>';
 		$stringtoprint .= '<br>';
 		print $stringtoprint;
 
