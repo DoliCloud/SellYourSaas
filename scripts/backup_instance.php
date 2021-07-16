@@ -429,9 +429,19 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	if (empty($return_outputmysql)) {	// If no error detected with the number of lines, we try also to detect by searching ' Error ' into .err content
 		$return_outputmysql = strpos($outputerr, ' Error ');
 	}
+	if (empty($return_outputmysql)) {	// If no error detected previously, we try also to detect by getting size file
+		if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
+			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
+		} else {
+			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz');
+		}
+		if ($filesizeofsql < 100) {
+			$return_outputmysql = 1;
+		}
+	}
 
 	if ($return_outputmysql > 0) {
-		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
+		print $dateaftermysqldump.' mysqldump found string error in output err file or into dump filesize.'."\n";
 	} else {
 		$return_outputmysql = 0;
 
