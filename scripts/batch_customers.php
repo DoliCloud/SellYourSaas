@@ -326,6 +326,8 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 				$utils = new Utils($db);
 				$outputfile = $conf->admin->dir_temp.'/out.tmp';
 				$resultarray = $utils->executeCLI($command, $outputfile);
+
+				$return_val = $resultarray['result'];
 				$content_grabbed = $resultarray['output'];
 
 				echo "Result: ".$return_val."\n";
