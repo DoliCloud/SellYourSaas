@@ -425,9 +425,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
 	print $outputerr;
 
-	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
-	//$return_outputmysql = strpos($outputerr, ' Error ');
 	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
+	if (empty($return_outputmysql)) {	// If no error detected with the number of lines, we try also to detect by searching ' Error ' into .err content
+		$return_outputmysql = strpos($outputerr, ' Error ');
+	}
+
 	if ($return_outputmysql > 0) {
 		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
 	} else {
