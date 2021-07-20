@@ -331,9 +331,9 @@ if ($sellyoursaassupporturl) {
 		jQuery(document).ready(function() {
 			function groupticketchange(){
 				console.log("We called groupticketchange, so we try to load list KM linked to event");
-				$("#KWwithajax")[0].innerHTML="";
+				$("#KWwithajax").html("");
 
-				idgroupticket = $("#ticketcategory_select")[0].value;
+				idgroupticket = $("#ticketcategory_select").val();
 
 				console.log("We have selected id="+idgroupticket);
 
@@ -351,7 +351,7 @@ if ($sellyoursaassupporturl) {
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax")[0].innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist+"<br>";
+								$("#KWwithajax").html("We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist+"<br>");
 								$("#KWwithajax").show();
 							}
 						 },
