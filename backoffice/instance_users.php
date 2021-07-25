@@ -602,7 +602,7 @@ function print_user_table($newdb, $object)
 				print ($i+1);
 				print '</td>';
 				foreach ($arrayfields as $key => $value) {
-					if ($key == 'statut'&& !empty($arrayfields[$key]['checked'])) {
+					if ($key == 'statut' && !empty($arrayfields[$key]['checked'])) {
 						if ($obj->statut) {
 							print '<td class="center">';
 							print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
@@ -616,7 +616,14 @@ function print_user_table($newdb, $object)
 						$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
 						print '<td>'.$valtoshow.'</td>';
 					} elseif (!empty($arrayfields[$key]['checked'])) {
-						print '<td>'.$obj->$key.'</td>';
+					    if ($key == 'login') {
+					        print '<td class="nowraponall">';
+					        print $obj->$key;
+					        print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
+					        print '</td>';
+					    } else {
+					        print '<td>'.$obj->$key.'</td>';
+					    }
 					}
 				}
 				print '<td align="center">';
