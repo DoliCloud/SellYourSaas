@@ -614,7 +614,7 @@ function print_user_table($newdb, $object)
 						}
 					} elseif($key == 'pass' && !empty($arrayfields[$key]['checked'])) {
 						$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-						print '<td>'.$valtoshow.'</td>';
+						print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
 					} elseif (!empty($arrayfields[$key]['checked'])) {
 					    if ($key == 'login') {
 					        print '<td class="nowraponall">';
