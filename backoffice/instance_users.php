@@ -626,7 +626,7 @@ function print_user_table($newdb, $object)
 					    } elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
 					        print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
 					    } else {
-					        print '<td>'.$obj->$key.'</td>'; dol_print
+					        print '<td>'.$obj->$key.'</td>';
 					    }
 					}
 				}
