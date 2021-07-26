@@ -621,10 +621,12 @@ function print_user_table($newdb, $object)
 					        print $obj->$key;
 					        print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 					        print '</td>';
+					    } elseif ($key == 'email') {
+					        print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
 					    } elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
 					        print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
 					    } else {
-					        print '<td>'.$obj->$key.'</td>';
+					        print '<td>'.$obj->$key.'</td>'; dol_print
 					    }
 					}
 				}
