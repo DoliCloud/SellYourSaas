@@ -602,25 +602,27 @@ function print_user_table($newdb, $object)
 				print ($i+1);
 				print '</td>';
 				foreach ($arrayfields as $key => $value) {
-					if ($key == 'statut' && !empty($arrayfields[$key]['checked'])) {
-						if ($obj->statut) {
-							print '<td class="center">';
-							print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
-							print '</td>';
-						} else {
-							print '<td class="center">';
-							print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
-							print '</td>';
-						}
-					} elseif($key == 'pass' && !empty($arrayfields[$key]['checked'])) {
-						$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-						print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
-					} elseif (!empty($arrayfields[$key]['checked'])) {
-					    if ($key == 'login') {
+					if (! empty($arrayfields[$key]['checked'])) {
+					    if ($key == 'statut') {
+					        if ($obj->statut) {
+					            print '<td class="center">';
+					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
+					            print '</td>';
+					        } else {
+					            print '<td class="center">';
+					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
+					            print '</td>';
+					        }
+					    } elseif ($key == 'pass') {
+					        $valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+					        print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
+					    } elseif ($key == 'login') {
 					        print '<td class="nowraponall">';
 					        print $obj->$key;
 					        print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 					        print '</td>';
+					    } elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
+					        print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
 					    } else {
 					        print '<td>'.$obj->$key.'</td>';
 					    }
