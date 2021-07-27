@@ -3210,6 +3210,7 @@ TODO Make renewal working with --preferred-challenges=dns and wildcard.
 
 ---------------
 cd /etc/apache2
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.key
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
