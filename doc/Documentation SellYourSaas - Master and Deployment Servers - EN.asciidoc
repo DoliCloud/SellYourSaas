@@ -3417,10 +3417,9 @@ On the *Master*:
 
 Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainname.com):
 
-* Activate the module SellYourSaas and Vendor
+* Activate the module *SellYourSaas* and *Vendor*
 
-* Create a generic Dolibarr user account to access the client interface (for instance: "Client user"). Give him the permissions below
-and only the permission below:
+* Create a *Generic Dolibarr user account* called "Service account for Saas anonymous" that will be used to access Dolibarr data and functions when a customer is using the public customer interface. Give this user the permissions below and only the permission below:
 
 ** Agenda Module 
 *** Read actions
@@ -3458,11 +3457,17 @@ and only the permission below:
 ** View Users and Groups Module 
 *** Create/modify one's own user data
 
+* Create a *Product tag* called "SaaS products"
+
+* Create a *Third-party tag* called "SaaS customers" and "Saas resellers"
+
+* Setup the module *SellYoursSaas*, at least the mandatory fields.
+
 * Create a *Package* to configure the applications to be deployed (files, config, database dump...)
 
 See "Packages configuration" chapter below.
 
-* Create a *Service* of *Application* type to define the pricing of a subscription and associated *Package*.
+* Create a *Service* with type *Application* to define the pricing of a subscription and choose the application *Package*.
 
 See "Services Configuration" for a description of the fields.
 

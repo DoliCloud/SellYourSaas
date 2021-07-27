@@ -3342,10 +3342,9 @@ Sur le *Master*:
 
 Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainname.com):
 
-* Activer le module SellYourSaas et Fournisseur
+* Activer le module *SellYourSaas* et *Fournisseur*
 
-* Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants
-et uniquement les accès suivant:
+* Créer un *Compte utilisateur générique Dolibarr* nommé "Service account for Saas anonymous" qui sera utilisé pour les accès aux données et services Dolibarr par l'espace client publique ou privée. Donner à cet utilisateur les accès suivants et uniquement les accès suivant:
 
 ** Module Agenda
 *** Lires les actions
@@ -3382,6 +3381,12 @@ et uniquement les accès suivant:
 *** Consulter les contacts
 ** Module Utilisateurs et Groupes
 *** Créer/modifier ses propres informations utilisateur
+
+* Créer un *Product tag* appelé "SaaS products"
+
+* Créer un *Third-party tag* appelé "SaaS customers" and "Saas resellers"
+
+* Configurer le module *SellYourSaas*, à minima, les champs obligatoires (en gras).
 
 * Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
 
