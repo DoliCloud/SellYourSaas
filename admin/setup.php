@@ -568,7 +568,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.$conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD.'">';
 print '</td>';
-print '<td><span class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__ (\'sha1md5\', \'sha256\', \'password_hash\', ...)</span></td>';
+print '<td><span class="opacitymedium">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
 print '</tr>';
 
 if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
@@ -576,7 +576,7 @@ if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION.'">';
 	print '</td>';
-	print '<td><span class="opacitymedium">Salt use to build substitution keys __APPPASSWORDxxxSALTED__</span></td>';
+	print '<td><span class="opacitymedium"></span></td>';
 	print '</tr>';
 }
 
