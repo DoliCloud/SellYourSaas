@@ -42,7 +42,7 @@ fi
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
-	exit 1
+	exit 100
 fi
 
 if [ "x$1" == "x" ]; then
@@ -51,35 +51,35 @@ if [ "x$1" == "x" ]; then
 fi
 if [ "x$2" == "x" ]; then
 	echo "Missing parameter 2 - osusername" 1>&2
-	exit 1
+	exit 20
 fi
 if [ "x$3" == "x" ]; then
 	echo "Missing parameter 3 - ospassword" 1>&2
-	exit 1
+	exit 30
 fi
 if [ "x$4" == "x" ]; then
 	echo "Missing parameter 4 - instancename" 1>&2
-	exit 1
+	exit 40
 fi
 if [ "x$5" == "x" ]; then
 	echo "Missing parameter 5 - domainname" 1>&2
-	exit 1
+	exit 50
 fi
 if [ "x$6" == "x" ]; then
 	echo "Missing parameter 6 - dbname" 1>&2
-	exit 1
+	exit 60
 fi
 if [ "x$7" == "x" ]; then
 	echo "Missing parameter 7 - dbport" 1>&2
-	exit 1
+	exit 70
 fi
 if [ "x${22}" == "x" ]; then
 	echo "Missing parameter 22 - EMAILFROM" 1>&2
-	exit 1
+	exit 22
 fi
 if [ "x${23}" == "x" ]; then
 	echo "Missing parameter 23 - REMOTEIP" 1>&2
-	exit 1
+	exit 23
 fi
 
 
@@ -219,7 +219,7 @@ if [[ "$mode" == "rename" ]]; then
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
 		if [ -f $apacheconf ]; then
 			echo "Error failed to rename. New name is already used (found file /etc/apache2/sellyoursaas-online/$fqn.conf)." 
-			exit 1
+			exit 80
 		fi
 	fi
 	
@@ -393,7 +393,7 @@ if [[ "$mode" == "rename" ]]; then
 		echo Error when running apache2ctl configtest 
 		echo "Failed to unsuspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
 		sleep 1
-		exit 1
+		exit 9
 	fi 
 
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
@@ -403,7 +403,7 @@ if [[ "$mode" == "rename" ]]; then
 			echo Error when running service apache2 reload
 			echo "Failed to unsuspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
 			sleep 1
-			exit 2
+			exit 20
 		fi
 	else
 		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."

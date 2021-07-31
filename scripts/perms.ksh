@@ -3,7 +3,7 @@
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
-	exit 1
+	exit 100
 fi
 
 # possibility to change the directory of instances are stored

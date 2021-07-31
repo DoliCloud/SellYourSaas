@@ -16,7 +16,7 @@ fi
 if [ -f /var/log/repair.lock ]
 then
         echo "Repair locked by file /var/log/repair.lock"
-        exit 1
+        exit 2
 fi
 echo Lancement repair.ksh - $1 - $$ - $UID >/var/log/repair01_start$$.log
 

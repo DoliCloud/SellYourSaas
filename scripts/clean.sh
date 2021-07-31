@@ -37,7 +37,7 @@ export archivedircron="/var/spool/cron/crontabs.disabled"
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
-   exit 1
+   exit 100
 fi
 
 # possibility to change the directory of instances are stored
@@ -63,29 +63,29 @@ fi
 if [ "x$database" == "x" ]; then
     echo "Failed to find the DATABASE by reading entry 'database=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
-	exit 1
+	exit 29
 fi
 if [ "x$databasehost" == "x" ]; then
     echo "Failed to find the DATABASEHOST by reading entry 'databasehost=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
-	exit 1
+	exit 30
 fi
 if [ "x$databaseuser" == "x" ]; then
     echo "Failed to find the DATABASEUSER by reading entry 'databaseuser=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
-	exit 1
+	exit 4
 fi
 echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
 databasepass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepass" == "x" ]]; then
 	echo Failed to get password for mysql user sellyoursaas 
-	exit 1
+	exit 5
 fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
 	echo "Usage: ${0} [test|confirm] (tempdirs)"
-	exit 1
+	exit 6
 fi
 
 echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
@@ -110,7 +110,7 @@ fi
 dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
-	exit 1
+	exit 7
 fi
 
 export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -127,11 +127,11 @@ MYSQLDUMP=`which mysqldump`
 
 if [[ ! -d $archivedirtest ]]; then
 	echo Failed to find archive directory $archivedirtest
-	exit 1
+	exit 8
 fi
 if [[ ! -d $archivedirpaid ]]; then
 	echo Failed to find archive directory $archivedirpaid
-	exit 1
+	exit 9
 fi
 
 echo "***** Clean temporary files"
@@ -139,31 +139,31 @@ echo rm -f /tmp/instancefound*
 rm -f /tmp/instancefound*
 if [ -f /tmp/instancefound-dbinsellyoursaas ]; then
 	echo Failed to delete file /tmp/instancefound-dbinsellyoursaas
-	exit 1
+	exit 21
 fi
 if [ -f /tmp/instancefound-activedbinsellyoursaas ]; then
 	echo Failed to delete file /tmp/instancefound-activedbinsellyoursaas
-	exit 1
+	exit 20
 fi
 if [ -f /tmp/instancefound-dbinmysqldic ]; then
 	echo Failed to delete file /tmp/instancefound-dbinmysqldic
-	exit 1
+	exit 19
 fi
 echo rm -f /tmp/osutoclean*
 rm -f /tmp/osutoclean*
 if [ -f /tmp/osutoclean ]; then
 	echo Failed to delete file /tmp/osutoclean
-	exit 1
+	exit 13
 fi
 if [ -f /tmp/osutoclean-oldundeployed ]; then
 	echo Failed to delete file /tmp/osutoclean-oldundeployed
-	exit 1
+	exit 14
 fi
 echo rm -f /tmp/osusernamefound*
 rm -f /tmp/osusernamefound*
 if [ -f /tmp/osusernamefound ]; then
 	echo Failed to delete file /tmp/osusernamefound
-	exit 1
+	exit 15
 fi
 
 
@@ -195,7 +195,7 @@ echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL
 $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-dbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make first SQL request to get instances. Exit 1."
-	exit 1
+	exit 16
 fi
 
 
@@ -211,7 +211,7 @@ echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL
 $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-activedbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make second SQL request to get instances. Exit 1."
-	exit 1
+	exit 17
 fi
 
 
@@ -225,7 +225,7 @@ echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseus
 $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
-	exit 1
+	exit 18
 fi
 
 
@@ -432,7 +432,7 @@ if [ -s /tmp/osutoclean ]; then
 							named-checkzone ${ZONENOHOST} /tmp/${ZONE}.$PID
 							if [[ "$?x" != "0x" ]]; then
 								echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid 
-								exit 1
+								exit 22
 							fi 
 							
 							echo "   ** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"

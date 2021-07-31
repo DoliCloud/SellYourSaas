@@ -29,7 +29,7 @@ fi
 
 if [ "x$2" != "xtest" -a "x$2" != "xoffline" -a "x$2" != "xonline" ]; then
    echo "Parameter 2 must be test|offline|online"
-   exit 1
+   exit 2
 fi
 
 export scriptdir=$(dirname $(realpath ${0}))
