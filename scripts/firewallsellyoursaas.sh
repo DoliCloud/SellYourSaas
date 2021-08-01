@@ -279,5 +279,5 @@ echo "Firewall is running."
     ;;
   *)
     echo "Usage: $0 {start|stop|restart|status}"
-    exit 1
+    exit 2
 esac

@@ -106,7 +106,7 @@ echo `date +%Y%m%d%H%M%S`" Start to copy backups on a remote server"
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
-   exit 1
+   exit 100
 fi
 
 if [ "x$1" == "x" ]; then
