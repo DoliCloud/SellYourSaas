@@ -29,6 +29,18 @@ if (! $res) die("Include of main fails");
 $action = GETPOST('action', 'aZ09');
 $idticketgroup = GETPOST('idticketgroup', 'aZ09');
 
+
+/*
+ * Actions
+ */
+
+// None
+
+
+/*
+ * View
+ */
+
 if ($action == "getKnowledgeRecord") {
     $response = '';
     $sql = "SELECT kr.rowid, kr.ref, kr.question, kr.answer,l.url,ctc.code";
@@ -36,6 +48,7 @@ if ($action == "getKnowledgeRecord") {
     $sql .= " INNER JOIN ".MAIN_DB_PREFIX."knowledgemanagement_knowledgerecord as kr ON kr.rowid = l.objectid";
     $sql .= " INNER JOIN ".MAIN_DB_PREFIX."c_ticket_category as ctc ON ctc.rowid = kr.fk_c_ticket_category";
     $sql .= " WHERE ctc.code = '".$db->escape($idticketgroup)."'";
+    $sql .= " AND ctc.active = 1 AND ctc.public = 1";
     $resql = $db->query($sql);
     if ($resql) {
         $num = $db->num_rows($resql);

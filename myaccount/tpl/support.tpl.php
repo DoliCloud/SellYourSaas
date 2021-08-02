@@ -347,11 +347,11 @@ if ($sellyoursaassupporturl) {
 							response = JSON.parse(response)
 							for (key in response) {
 								console.log(response[key])
-								urllist += response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a> <br>";
+								urllist += "<li>" + response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax").html("We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist+"<br>");
+								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.$langs->trans("KMFoundForTicketGroup").':</div><ul class="kmlist">\'+urllist+\'<ul>\');
 								$("#KWwithajax").show();
 							}
 						 },
