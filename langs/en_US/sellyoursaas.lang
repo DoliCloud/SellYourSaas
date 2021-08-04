@@ -565,3 +565,6 @@ FileFor=File for %s
 FileToEditedManually=File edited manually
 FileEditedAutomaticallyByMailWrapperOnAbuseDetection=File edited automatcally by the mail wrapper on abuse detection
 ThePaymentModeWillBeUseToPayYourDueAmount=The payment mode may also be used to pay your current unpaid pending invoices (%s) for an amout of %s
+SELLYOURSAAS_HASHALGOFORPASSWORD=Algorithm used to build the substitution key __APPPASSWORD0__
+SELLYOURSAAS_SALTFORPASSWORDENCRYPTION=Salt use to build the substitution key __APPPASSWORD0SALTED__
+KMFoundForTicketGroup=We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket

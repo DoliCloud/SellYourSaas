@@ -11,13 +11,13 @@ fi
 dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dnsserver parameter 
-	exit 1
+	exit 2
 fi
 
 instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$instanceserver" == "x" ]]; then
 	echo Failed to get instanceserver parameter
-	exit 1
+	exit 3
 fi
 
 
@@ -116,5 +116,5 @@ ufw disable
     ;;
   *)
     echo "Usage: $0 {start|stop|restart|status}"
-    exit 1
+    exit 4
 esac

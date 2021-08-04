@@ -322,7 +322,7 @@ if ($sellyoursaassupporturl) {
 
 		if ($atleastonepublicgroup) {
 			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1);
-			$stringtoprint .= ajax_combobox('groupticket');
+			//$stringtoprint .= ajax_combobox('groupticket');
 			$stringtoprint .= '<br>';
 		}
 
@@ -331,16 +331,9 @@ if ($sellyoursaassupporturl) {
 		jQuery(document).ready(function() {
 			function groupticketchange(){
 				console.log("We called groupticketchange, so we try to load list KM linked to event");
-				$("#KWwithajax")[0].innerHTML="";
-				$("#KWwithajax")[0].hide();
+				$("#KWwithajax").html("");
 
-				idgroupticket = $("#groupticket_child option:selected").val();
-				if (idgroupticket == "") {
-					idgroupticket = $("#groupticket option:selected").val();
-					if(!arraynotparents.includes(idgroupticket)){
-						idgroupticket = ""
-					}
-				}
+				idgroupticket = $("#ticketcategory_select").val();
 
 				console.log("We have selected id="+idgroupticket);
 
@@ -354,12 +347,12 @@ if ($sellyoursaassupporturl) {
 							response = JSON.parse(response)
 							for (key in response) {
 								console.log(response[key])
-								urllist += response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a> <br>";
+								urllist += "<li>" + response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax")[0].innerHTML="We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket: <br>"+urllist;
-								$("#KWwithajax")[0].show();
+								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.$langs->trans("KMFoundForTicketGroup").':</div><ul class="kmlist">\'+urllist+\'<ul>\');
+								$("#KWwithajax").show();
 							}
 						 },
 						 error : function(output) {
@@ -368,12 +361,23 @@ if ($sellyoursaassupporturl) {
 					});
 				}
 			};
+			$("#ticketcategory_select").bind("change",function() { groupticketchange(); });
+			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+			var trackChange = function(element) {
+			var observer = new MutationObserver(function(mutations, observer) {
+				if (mutations[0].attributeName == "value") {
+				$(element).trigger("change");
+				}
+			});
+			observer.observe(element, {
+				attributes: true
+			});
+			}
 
-			$("#groupticket").change(function() { groupticketchange(); });
-			$("#groupticket_child").change(function() { groupticketchange(); });
+			trackChange($("#ticketcategory_select")[0]);
 		});
 		</script>'."\n";
-		$stringtoprint .= '<div class="supportemailfield hidden" id="KWwithajax"></div>';
+		$stringtoprint .= '<div class="supportemailfield " id="KWwithajax"></div>';
 		$stringtoprint .= '<br>';
 		print $stringtoprint;
 

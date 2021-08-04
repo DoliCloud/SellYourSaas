@@ -3112,9 +3112,10 @@ class SellYourSaasUtils
 
 				$conf->global->MAIN_SECURITY_SALT = '';
 				dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
-				$password0 = dol_hash($password);
+				$password0 = dol_hash($password);	// deprecated. Depend on master setup.
 				$passwordmd5 = dol_hash($password, 'md5');
 				$passwordsha256 = dol_hash($password, 'sha256');
+				$passwordpassword_hash = dol_hash($password, 'password_hash');
 				dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = $savsalt;
@@ -3145,10 +3146,11 @@ class SellYourSaasUtils
 					'__APPEMAIL__'=>$email,
 					'__APPUSERNAME__'=>$appusername,
 					'__APPPASSWORD__'=>$password,
-					'__APPPASSWORD0__'=>$password0,
+					'__APPPASSWORD0__'=>$password0,		// deprecated
 					'__APPPASSWORDMD5__'=>$passwordmd5,
 					'__APPPASSWORDSHA256__'=>$passwordsha256,
-					'__APPPASSWORD0SALTED__'=>$password0salted,
+					'__APPPASSWORDPASSWORD_HASH__'=>$passwordpassword_hash,
+					'__APPPASSWORD0SALTED__'=>$password0salted,		// deprecated
 					'__APPPASSWORDMD5SALTED__'=>$passwordmd5salted,
 					'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,
 					'__APPUNIQUEKEY__'=>$generateduniquekey,

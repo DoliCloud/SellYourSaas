@@ -37,7 +37,7 @@ export archivedircron="/var/spool/cron/crontabs.disabled"
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
-   exit 1
+   exit 100
 fi
 
 # possibility to change the directory of instances are stored
@@ -56,7 +56,7 @@ fi
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
 	echo "Usage: ${0} [test|confirm] (tempdirs)"
-	exit 1
+	exit 2
 fi
 
 
