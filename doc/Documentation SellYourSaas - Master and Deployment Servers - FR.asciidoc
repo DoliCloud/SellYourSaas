@@ -2808,6 +2808,10 @@ max_input_vars = 4000
 memory_limit = 256M
 
 session.gc_maxlifetime = 3600
+session.use_strict_mode = 1 
+session.use_only_cookies = 1
+session.cookie_httponly = 1
+session.cookie_samesite = Strict
 ---------------
 
 
