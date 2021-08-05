@@ -79,7 +79,9 @@ class pdf_sellyoursaas extends pdf_crabe
 		$savname = $this->emetteur->name;
 		$savlogo = $this->emetteur->logo;
 
-		$this->emetteur->name = $this->emetteur->name.' - '.$conf->global->SELLYOURSAAS_NAME;
+		if (!empty($conf->global->SELLYOURSAAS_NAME) && $conf->global->SELLYOURSAAS_NAME != $this->emetteur->name) {
+			$this->emetteur->name = $this->emetteur->name.' - '.$conf->global->SELLYOURSAAS_NAME;
+		}
 		$this->emetteur->logo = $conf->global->SELLYOURSAAS_LOGO;
 
 		parent::_pagehead($pdf, $object, $showaddress, $outputlangs);
