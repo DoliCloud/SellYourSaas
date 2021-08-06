@@ -1,5 +1,10 @@
 ---
-#launch with --extra-vars='option=<your_option> value=<new_value>'
+# Script to change value of an entry into sellyoursaas.conf
+#
+# To run the script:
+# ansible-playbook change_sellyoursaas_config.yml --extra-vars='option=<your_option> value=<new_value>'
+#
+
 - name: Change value in conf
   hosts: deployment
   become: yes

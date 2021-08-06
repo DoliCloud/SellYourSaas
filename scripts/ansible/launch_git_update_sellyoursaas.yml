@@ -1,4 +1,10 @@
 ---
+# Script to update SellYourSaas on servers
+#
+# To run the script:
+# ansible-playbook launch_git_update_sellyoursaas.yml
+#
+
 - name: Update SellYourSaas on servers
   hosts: deployment
   user: gkervern
