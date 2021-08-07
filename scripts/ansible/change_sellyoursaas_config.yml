@@ -9,7 +9,6 @@
 - name: Change value in conf
   hosts: '{{target}}'
   become: yes
-  remote_user: gkervern
 
   tasks:
   - name: Change conf value
