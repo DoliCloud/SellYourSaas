@@ -3376,6 +3376,7 @@ class SellYourSaasUtils
 					$password0 = dol_hash($password);
 					$passwordmd5 = dol_hash($password, 'md5');
 					$passwordsha256 = dol_hash($password, 'sha256');
+					$passwordpassword_hash = dol_hash($password, 'password_hash');
 					dol_syslog("passwordmd5=".$passwordmd5);
 
 					$conf->global->MAIN_SECURITY_SALT = $savsalt;
@@ -3401,10 +3402,11 @@ class SellYourSaasUtils
 						'__APPUSERNAME__'=>$appusername,
 						'__APPEMAIL__'=>$email,
 						'__APPPASSWORD__'=>$password,
-						'__APPPASSWORD0__'=>$password0,
+						'__APPPASSWORD0__'=>$password0,	// deprecated
 						'__APPPASSWORDMD5__'=>$passwordmd5,
 						'__APPPASSWORDSHA256__'=>$passwordsha256,
-						'__APPPASSWORD0SALTED__'=>$password0salted,
+						'__APPPASSWORDPASSWORD_HASH__'=>$passwordpassword_hash,
+						'__APPPASSWORD0SALTED__'=>$password0salted,	// deprecated
 						'__APPPASSWORDMD5SALTED__'=>$passwordmd5salted,
 						'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,
 						'__APPUNIQUEKEY__'=>$generateduniquekey,

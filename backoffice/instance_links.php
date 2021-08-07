@@ -473,6 +473,7 @@ if ($object->nbofusers == 0) {    // If value not already loaded
 					'__APPPASSWORD0__'=>$password0,
 					'__APPPASSWORDMD5__'=>$passwordmd5,
 					'__APPPASSWORDSHA256__'=>$passwordsha256,
+					'__APPPASSWORDPASSWORD_HASH__'=>$passwordpassword_hash,
 					'__APPPASSWORD0SALTED__'=>$password0salted,
 					'__APPPASSWORDMD5SALTED__'=>$passwordmd5salted,
 					'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,*/
