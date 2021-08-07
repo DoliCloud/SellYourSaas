@@ -1,8 +1,9 @@
 ---
 # Script to change value of an entry into sellyoursaas.conf
 #
-# To run the script:
+# Examples to run the script:
 # ansible-playbook change_sellyoursaas_config.yml -e 'target=targethost option=<your_option> value=<new_value>'
+# ansible-playbook change_sellyoursaas_config.yml -e 'target=targethost option=<your_option> value=<new_value>' --limit *.mydomain.com
 #
 
 - name: Change value in conf
