@@ -1,12 +1,12 @@
 ---
-# Script to update SellYourSaas on servers
+# Script to run git_update_sellyoursaas.sh to update SellYourSaas on servers
 #
 # To run the script:
-# ansible-playbook launch_git_update_sellyoursaas.yml
+# ansible-playbook launch_git_update_sellyoursaas.yml --extra-vars='target=targethost'
 #
 
 - name: Update SellYourSaas on servers
-  hosts: deployment
+  hosts: '{{target}}'
   user: gkervern
   become: yes
   become_method: sudo

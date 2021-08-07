@@ -2,11 +2,11 @@
 # Script to run clean.sh command on servers
 #
 # To run the script:
-# ansible-playbook launch_clean.yml --extra-vars='command=(test|confirm)'
+# ansible-playbook launch_clean.yml --extra-vars='target=targethost command=(test|confirm)'
 #
 
 - name: Cleanup servers
-  hosts: deployment
+  hosts: '{{target}}'
   user: gkervern
   become: yes
   become_method: sudo
