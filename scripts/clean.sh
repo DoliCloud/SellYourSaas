@@ -582,8 +582,9 @@ echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseus
 #$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 
 if [[ $testorconfirm == "test" ]]; then
-	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so they we can force to undeployed them correctly again"
-	rm -fr /tmp/idlistofdb 
+	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so we can force to undeployed them correctly again"
+	rm -fr /tmp/idlistofdb
+	>> /tmp/idlistofdb
 	for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`; 
 	do 
 		echo -n " '"$fic"'," >> /tmp/idlistofdb
