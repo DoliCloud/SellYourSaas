@@ -14,3 +14,7 @@
   tasks:
   - name: Launch clean.sh
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh {{ command }}"
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
