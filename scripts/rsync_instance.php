@@ -126,7 +126,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	exit(-1);
 }
 
-if (0 == posix_getuid()) {
+if (0 == posix_getuid() && empty($conf->global->SELLYOURSAAS_SCRIPT_BYPASS_ROOT_RESTRICTION)) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
 	exit(-1);
 }
