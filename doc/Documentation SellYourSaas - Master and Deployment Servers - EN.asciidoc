@@ -868,37 +868,6 @@ sudo apt install -y libreoffice-common libreoffice-writer
 sudo apt install -y mailutils
 ---------------
 
-Now, we need to install *php-mcrypt* for Ubuntu 20.04+ (optional)
-
-[source,bash]
----------------
-sudo apt install -y build-essential
-sudo pecl install mcrypt
----------------
-
-When you see :
-
-[source,bash]
----------------
-libmcrypt prefix? [autodetect] :
----------------
-
-Press *Enter*
-
-Write the following line in /etc/php/7.4/cli/php.ini and /etc/php/7.4/apache2/php.ini
-
-[source,bash]
----------------
-extension=mcrypt.so
----------------
-
-Then *restart* the *Apache* server
-
-[source,bash]
----------------
-sudo systemctl restart apache2
----------------
-
 
 === Disabling automatic update
 
