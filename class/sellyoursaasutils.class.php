@@ -2249,7 +2249,7 @@ class SellYourSaasUtils
 											$fk_parent_line = $result;
 										}
 
-										$tmpproduct->fetch($lines[$i]->fk_product);
+										$tmpproduct->fetch($lines[$i]->fk_product, '', '', '', 1, 1, 1);
 
 										dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
 										if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
@@ -2991,7 +2991,7 @@ class SellYourSaasUtils
 			}
 
 			$producttmp = new Product($this->db);
-			$producttmp->fetch($tmpobject->fk_product);
+			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
 
 			// Is it a product linked to a package ?
 			dol_include_once('/sellyoursaas/class/packages.class.php');

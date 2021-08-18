@@ -225,7 +225,7 @@ function sellyoursaasGetExpirationDate($contract)
 		if ($line->fk_product > 0) {
 			if (empty($cachefortmpprod[$line->fk_product])) {
 				$tmpprod = new Product($db);
-				$result = $tmpprod->fetch($line->fk_product);
+				$result = $tmpprod->fetch($line->fk_product, '', '', '', 1, 1, 1);
 				if ($result > 0) {
 					$cachefortmpprod[$line->fk_product] = $tmpprod;
 				} else {
