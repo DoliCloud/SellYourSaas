@@ -802,10 +802,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
 					echo `date +%Y%m%d%H%M%S`
-					echo chown -R root $archivedir/$osusername/$dbname
-					chown -R root $archivedir/$osusername/$dbname
-					echo chmod -R o-rwcd x $archivedir/$osusername/$dbname
-					chmod -R o-rwx $archivedir/$osusername/$dbname
+					echo chown -R root $archivedir/$osusername
+					chown -R root $archivedir/$osusername
+					echo chmod -R o-rwx $archivedir/$osusername
+					chmod -R o-rwx $archivedir/$osusername
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -826,10 +826,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
 					echo `date +%Y%m%d%H%M%S`
-					echo chown -R root $archivedir/$osusername/$dbname
-					chown -R root $archivedir/$osusername/$dbname
-					echo chmod -R o-rwx $archivedir/$osusername/$dbname
-					chmod -R o-rwx $archivedir/$osusername/$dbname
+					echo chown -R root $archivedir/$osusername
+					chown -R root $archivedir/$osusername
+					echo chmod -R o-rwx $archivedir/$osusername
+					chmod -R o-rwx $archivedir/$osusername
 				fi
 			fi
 		fi
@@ -837,7 +837,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo The dir $targetdir/$osusername/$dbname seems already removed/archived
 	fi
 
-	# Note, we archive the dir for instance but the dir for user and the user is still here. Will be removed by clean.sh or at end if mode = undeployall
+	# Note, we have archived the dir for instance but the dir for user and the user is still here. Will be removed by clean.sh or at end if mode = undeployall
 fi
 
 
