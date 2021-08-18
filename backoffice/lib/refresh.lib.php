@@ -525,7 +525,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 					// Get resource for instance
 					$object->fetch($obj->id);
 
-					$tmpdata = sellyoursaasGetExpirationDate($object);
+					$tmpdata = sellyoursaasGetExpirationDate($object, 0);
 					$nbofuser = $tmpdata['nbusers'];
 					$totalinstances++;
 					$totalusers+=$nbofuser;

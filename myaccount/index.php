@@ -1021,7 +1021,7 @@ if ($action == 'updateurl') {
 							$now = dol_now();
 							if ($date_start < $now) {
 								dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-								$tmparray = sellyoursaasGetExpirationDate($srcobject);
+								$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 								$duration_value = $tmparray['duration_value'];
 								$duration_unit = $tmparray['duration_unit'];
 
@@ -1689,7 +1689,7 @@ if ($action == 'updateurl') {
 							$now = dol_now();
 							if ($date_start < $now) {
 								dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-								$tmparray = sellyoursaasGetExpirationDate($srcobject);
+								$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 								$duration_value = $tmparray['duration_value'];
 								$duration_unit = $tmparray['duration_unit'];
 
@@ -2792,7 +2792,7 @@ if (empty($welcomecid)) {
 
 		$isAPayingContract = sellyoursaasIsPaidInstance($contract);		// At least one template or final invoice
 		$isASuspendedContract = sellyoursaasIsSuspended($contract);		// Is suspended or not ?
-		$tmparray = sellyoursaasGetExpirationDate($contract);
+		$tmparray = sellyoursaasGetExpirationDate($contract, 1);
 		$expirationdate = $tmparray['expirationdate'];					// End of date of service
 
 		$messageforinstance=array();

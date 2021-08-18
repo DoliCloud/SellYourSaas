@@ -94,7 +94,7 @@ class SellYourSaasUtils
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE f.fk_statut = '.Facture::STATUS_DRAFT;
 		$sql.= " AND se.fk_object = f.fk_soc AND se.dolicloud = 'yesv2'";
-		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".$restrictonthirdpartyid;
+		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".((int) $restrictonthirdpartyid);
 		$sql.= " ORDER BY f.datef, f.rowid";
 
 		$resql = $this->db->query($sql);
@@ -1623,7 +1623,7 @@ class SellYourSaasUtils
 
 					// Update expiration date of instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 0);
 					dol_syslog('', 0, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
@@ -1797,7 +1797,7 @@ class SellYourSaasUtils
 
 					// Update expiration date of instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 0);
 					dol_syslog('', 0, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
@@ -2065,7 +2065,7 @@ class SellYourSaasUtils
 
 					// Get expiration date
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 1);
 					dol_syslog('', 0, -1);
 					$expirationdate = $tmparray['expirationdate'];
 
@@ -2198,7 +2198,7 @@ class SellYourSaasUtils
 										$now = dol_now();
 										if ($date_start < $now) {
 											dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-											$tmparray = sellyoursaasGetExpirationDate($srcobject);
+											$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 											$duration_value = $tmparray['duration_value'];
 											$duration_unit = $tmparray['duration_unit'];
 
@@ -2583,7 +2583,7 @@ class SellYourSaasUtils
 					// Undeploy now
 					$this->db->begin();
 
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 1);
 					$expirationdate = $tmparray['expirationdate'];
 
 					$remotetouse = '';
@@ -3422,7 +3422,7 @@ class SellYourSaasUtils
 					$currentqty = $tmpobject->qty;
 					$newqty = null;
 
-					$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
+					$tmparray = explode(':', $producttmp->array_options['options_resource_formula'], 2);
 					if ($tmparray[0] === 'SQL') {
 						$sqlformula = make_substitutions($tmparray[1], $substitarray);
 

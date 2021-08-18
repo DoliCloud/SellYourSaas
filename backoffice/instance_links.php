@@ -422,7 +422,7 @@ if ($id > 0) {
 }
 
 
-if ($object->nbofusers == 0) {    // If value not already loaded
+if (empty($object->nbofusers)) {    // If value not already loaded
 	// Try to get data
 	if (is_object($newdb) && $newdb->connected) {
 		$contract = $object;
@@ -431,11 +431,12 @@ if ($object->nbofusers == 0) {    // If value not already loaded
 		foreach ($object->lines as $contractline) {
 			if (empty($contractline->fk_product)) continue;
 			$producttmp = new Product($db);
-			$producttmp->fetch($contractline->fk_product);
+			$producttmp->fetch($contractline->fk_product, '', '', '', 1, 1, 1);
 
 			// If this is a line for a metric
 			if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
 				&& ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref))) {
+
 				$generatedunixlogin=$contract->array_options['options_username_os'];
 				$generatedunixpassword=$contract->array_options['options_password_os'];
 				$tmp=explode('.', $object->ref_customer, 2);
