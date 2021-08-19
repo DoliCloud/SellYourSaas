@@ -65,7 +65,7 @@ do
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php"
-	        php build/generate_filelist_xml.php release=auto-sellyoursaas
+	        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
 	    fi
 	
 		# Create a deployment tar file
