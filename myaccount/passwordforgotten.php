@@ -164,7 +164,7 @@ if (empty($reshook)) {
 							$asknewpass = 2;
 						}
 					} else {
-						$asknewpass = 1;
+						$asknewpass = 1;	// So we will show a form to enter a new password into passwordforgotten.tpl.php
 					}
 				}
 			} else {
