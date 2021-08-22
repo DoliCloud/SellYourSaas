@@ -165,13 +165,13 @@ if (! is_file($dirroot.'/README.md')) {
 	exit(-4);
 }
 
-$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-$login=$object->username_web;
-$password=$object->password_web;
+$dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
+$login = $object->username_web;
+$password = $object->password_web;
 
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
-$server=$object->array_options['options_hostname_os'];
-$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+$targetdir = $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
+$server = $object->array_options['options_hostname_os'];
+$server_port = (empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? 22 : $conf->global->SELLYOURSAAS_SSH_SERVER_PORT);
 
 if (empty($login) || empty($dirdb)) {
 	print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
