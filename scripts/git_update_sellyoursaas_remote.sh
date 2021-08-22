@@ -10,7 +10,7 @@ source /etc/lsb-release
 if [ "x$1" == "x" ]; then
    echo "Usage:   $0  hostgroup  [target]"
    echo "         [target] can be 'master', 'deployment', 'web', 'backup'. It can also be a list separated with comma like 'master,deployment' (default)"
-   echo "Example: $0  mygroup    m,d"
+   echo "Example: $0  mygroup    master,deployment"
    exit 1
 fi
 
