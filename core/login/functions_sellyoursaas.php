@@ -43,7 +43,7 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 	if ($result <= 0) {
 		$login='';
 		$langs->load("errors");
-		$_SESSION["dol_loginmesg"]=$langs->trans("ErrorBadLoginPassword");
+		$_SESSION["dol_loginmesg"]=$langs->transnoentitiesnoconv("ErrorBadLoginPassword");
 	} else {
 		//dol_syslog("thirdparty found with id=".$thirdparty->id);
 
@@ -93,7 +93,7 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 			if (empty($conf->global->SELLYOURSAAS_ANONYMOUSUSER)) {
 				$login='';
 				$langs->load("errors");
-				$_SESSION["dol_loginmesg"]=$langs->trans("SellYourSaasSetupNotComplete");
+				$_SESSION["dol_loginmesg"]=$langs->transnoentitiesnoconv("SellYourSaasSetupNotComplete");
 			} else {
 				$tmpuser = new User($db);
 				$tmpuser->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
@@ -106,7 +106,7 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 		} else {
 			$login='';
 			$langs->load("errors");
-			$_SESSION["dol_loginmesg"]=$langs->trans("ErrorBadLoginPassword");
+			$_SESSION["dol_loginmesg"]=$langs->transnoentitiesnoconv("ErrorBadLoginPassword");
 		}
 	}
 
