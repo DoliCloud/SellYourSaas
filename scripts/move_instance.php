@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2020 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2020-2021 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * or see http://www.gnu.org/
  *
- * Migrate an old instance on a new server. Script must be ran with admin.
+ * Migrate an old instance on a new server.
+ * Script must be ran with admin from master server.
  */
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');
@@ -131,9 +132,9 @@ $user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 print "***** ".$script_file." *****\n";
 
 if (empty($newinstance) || empty($mode)) {
-	print "Migrate an old instance on a new server. Script must be ran with admin.\n";
-	print "Script must be ran from the master server.\n";
-	print "Usage: ".$script_file." oldinstance newinstance (test|confirm) [MYPRODUCTREF]\n";
+	print "Move an instance from an old server to a new server..\n";
+	print "Script must be ran from the master server with login admin.\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm) [MYPRODUCTREF]\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -250,7 +251,7 @@ $createthirdandinstance = 0;
 $newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
 if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
-	print "Error: An existing instance called '".$newinstance."' with deployment status != 'processing' already exists.\n";
+	print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
 	exit(-1);
 }
 
@@ -341,7 +342,9 @@ $createthirdandinstance=1;
 
 // Now sync files
 
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
+$tmptargetdir='/tmp/'.$newlogin.'/'.$newdatabasedb;
+dol_delete_dir_recursive($targetdir);
+
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
 print 'SFTP new connect string : '.$newsftpconnectstring."\n";
@@ -368,24 +371,77 @@ $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 
 $param[]=$oldosuser.'@'.$oldoshost.":".$sourcedir.'/*';
 //$param[]=$newlogin.'@'.$newserver.":".$targetdir;
-$param[]=$targetdir;
+$param[]=$tmptargetdir;
 
 //var_dump($param);
 $fullcommand=$command." ".join(" ", $param);
 $output=array();
 $return_var=0;
+
+print "Run the rsync command to get files of old instance and press a key to continue...\n";
 print $fullcommand."\n";
-//exec($fullcommand, $output, $return_var);
-
-print "Run this command on target host and press a key to continue...\n";
 $input = trim(fgets(STDIN));
+//exec($fullcommand, $output, $return_var);
+if ($return_var) {
+	print "-> Error during rsync\n";
+	exit(-1);
+} else {
+	print "-> Files were sync\n";
+}
 
 
+$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
+
+print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
+print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
+print 'SFTP new connect string : '.$newsftpconnectstring."\n";
+print 'SFTP old password '.$oldospass."\n";
+//print 'SFTP new password '.$newpassword."\n";
+
+$command="rsync";
+$param=array();
+if (! in_array($mode, array('confirm'))) $param[]="-n";
+//$param[]="-a";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
+else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
+$param[]="-v";
+if (empty($createthirdandinstance)) $param[]="-u";		// If we have just created instance, we overwrite file during rsync
+$param[]="--exclude .buildpath";
+$param[]="--exclude .git";
+$param[]="--exclude .gitignore";
+$param[]="--exclude .settings";
+$param[]="--exclude .project";
+$param[]="--exclude htdocs/conf/conf.php";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
+if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
+$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
+
+$param[]=$tmptargetdir;
+$param[]=$newlogin.'@'.$newserver.":".$targetdir;
+
+//var_dump($param);
+$fullcommand=$command." ".join(" ", $param);
+$output=array();
+$return_var=0;
+
+print "Run this rsync command to push files on remote target host and press a key to continue...\n";
+print $fullcommand."\n";
+$input = trim(fgets(STDIN));
+//exec($fullcommand, $output, $return_var);
+if ($return_var) {
+	print "-> Error during rsync\n";
+	exit(-1);
+} else {
+	print "-> Files were sync\n";
+}
+print "\n";
 
 // Output result
 foreach ($output as $outputline) {
 	print $outputline."\n";
 }
+
+
 
 // Remove install.lock file if mode )) confirmunlock
 /*
@@ -426,15 +482,6 @@ if ($mode == 'confirmunlock')
 }
 */
 
-if ($return_var) {
-	print "-> Error during rsync of instance ".$newobject->ref_customer.": ".$targetdir."\n";
-	exit(-1);
-} else {
-	print "-> Files were sync into dir of instance ".$newobject->ref_customer.": ".$targetdir."\n";
-}
-print "\n";
-
-
 
 print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb."\n";
 $output=array();
@@ -461,6 +508,7 @@ foreach ($output as $outputline) {
 print "\n";
 
 print "-> Files owner were modified for instance ".$newobject->ref_customer.": ".$targetdir." to user ".$newlogin."\n";
+
 
 
 print '--- Dump database '.$olddbname.' into /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
@@ -539,13 +587,6 @@ if ($return_var) {
 }
 
 
-// TODO Move link of template invoice on old contract to this new contract
-$sql = 'UPDATE '.MAIN_DB_PREFIX.'facture_rec SET fk_source = '.$newobject->id.' WHERE';
-$sql.= ' fk_source = '.$oldobject->id." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
-print $sql."\n";
-//$dbmaster->query($sql);
-
-
 print "\n";
 
 if ($mode == 'confirm') {
@@ -554,11 +595,25 @@ if ($mode == 'confirm') {
 } else {
 	print '-> Dump NOT loaded (test mode) into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 }
-print "Finished. DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM AND TO MOVE RECURRING INVOICE ON NEW INSTANCE !!!\n";
 
+print "DON'T FORGET TO UPDATE CUSTOM URL OF NEW INSTANCE !!!\n";
+// TODO Update custom url
+
+print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM !!!\n";
+// TODO Force closing all services of old instance (will be undeployed later)
+
+print "AND TO MOVE RECURRING INVOICE ON NEW INSTANCE !!!\n";
+// TODO Move link of template invoice on old contract to this new contract
+$sql = 'UPDATE '.MAIN_DB_PREFIX.'facture_rec SET fk_source = '.$newobject->id.' WHERE';
+$sql.= ' fk_source = '.$oldobject->id." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
+print $sql."\n";
+if ($mode == 'confirm') {
+	$dbmaster->query($sql);
+}
+
+
+print "Finished.\n";
 
 exit($return_var + $return_varmysql);
 
 
-// Add end do something like
-// update record set address = '79.137.96.15' where address <> '79.137.96.15' AND domain_id IN (select id from domain where sld = 'testldr14') LIMIT 1;
