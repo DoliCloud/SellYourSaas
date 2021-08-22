@@ -2,8 +2,8 @@
 # Script to run clean.sh command on servers
 #
 # To run the script:
-# ansible-playbook launch_clean.yml -i hosts-xxx -e 'target=targethost command=(test|confirm)'
-# ansible-playbook launch_clean.yml -i hosts-xxx -e 'target=targethost command=(test|confirm)' --limit=*.mydomain.com
+# ansible-playbook -K launch_clean.yml -i hosts-xxx -e 'target=targethost command=(test|confirm)'
+# ansible-playbook -K launch_clean.yml -i hosts-xxx -e 'target=targethost command=(test|confirm)' --limit=*.mydomain.com
 #
 
 - name: Cleanup servers

@@ -2,8 +2,8 @@
 # Script to run git_update_sellyoursaas.sh to update SellYourSaas on servers
 #
 # To run the script:
-# ansible-playbook launch_git_update_sellyoursaas.yml -i hosts-xxx -e 'target=targethost'
-# ansible-playbook launch_git_update_sellyoursaas.yml -i hosts-xxx -e 'target=targethost' --limit=*.mydomain.com
+# ansible-playbook -K launch_git_update_sellyoursaas.yml -i hosts-xxx -e 'target=targethost'
+# ansible-playbook -K launch_git_update_sellyoursaas.yml -i hosts-xxx -e 'target=targethost' --limit=*.mydomain.com
 
 - name: Update SellYourSaas on servers
   hosts: '{{target}}'

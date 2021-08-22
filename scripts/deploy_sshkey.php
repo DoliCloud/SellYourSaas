@@ -20,7 +20,9 @@
 /**
  *      \file       sellyoursaas/scripts/deploy_sshkey.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to run from master server to deploy public key into the authorized_keys_support file of all customers on deployment servers.
+ *      \brief      Script to run from master server to redeploy the public keys found into setup to the authorized_keys_support file of all customers
+ *                  on deployment servers. Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).
+ *                  This script erases the old version of authorized_keys_support files.
  */
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');
@@ -76,12 +78,14 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print "Create or recreate the file authorized_keys_support. Old file is erased if it already exists.\n";
-	print "Script must be ran from the master server.\n";
+	print 'Redeploy the public keys found into setup to the authorized_keys_support file of all customers on deployment servers.'."\n";
+	print 'Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).'."\n";
+	print "This script must be ran from the master server.\n";
+	print "\n";
 	print "Usage: ".$script_file." (test|confirm) [instancefilter]\n";
 	print "\n";
-	print "- test     test deploy of public key\n";
-	print "- confirm  deploy public key\n";
+	print "- test     test deployment of public key authorized_keys_support (nothing is done)\n";
+	print "- confirm  deploy public key authorized_keys_support (it erases old verions)\n";
 	exit;
 }
 print '--- start'."\n";
