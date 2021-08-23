@@ -92,8 +92,8 @@ if (count($listofcontractid) > 0) {
 		            <div class="row" style="border-bottom: 1px solid #ddd;">
 
 		              <div class="col-md-6">
-				          <a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">'.$instancename.'</a><br>
-						  <span class="opacitymedium">'.$langs->trans("ID").' : '.$contract->ref.'</span>
+				          <a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">'.$instancename.img_picto('', 'globe', 'class="paddingleft"').'</a><br>
+						  <span class="opacitymedium small">'.$langs->trans("ID").' : </span><span class="font-green-sharp small">'.$contract->ref.'</span>
 				          <span class="caption-helper"><!-- - '.$planlabel.'--></span>	<!-- This is service -->
 		              </div><!-- END COL -->
 		              <div class="col-md-2 hideonsmartphone">
@@ -354,10 +354,10 @@ if ($nbpaymentmodeok > 0) {
 
 print '
 	                <br><br>
-	                <a href="'.$urltoenterpaymentmode.'" class="btn default btn-xs green-stripe">';
+	                <center><a href="'.$urltoenterpaymentmode.'" class="wordbreak btn default green-stripe">';
 if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode").'...';
 else print $langs->trans("AddAPaymentMode").'...';
-print '</a>
+print '</a></center>
 
 	            </p>
 	          </div> <!-- END PORTLET-BODY -->
