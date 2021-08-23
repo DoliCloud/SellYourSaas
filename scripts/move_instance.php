@@ -42,6 +42,59 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 //if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');                                  // Do not create database handler $db
 //if (! defined('NOREQUIREUSER'))            define('NOREQUIREUSER', '1');                                // Do not load object $user
 
+
+// Read /etc/sellyoursaas.conf file
+$databasehost='localhost';
+$databaseport='3306';
+$database='';
+$databaseuser='sellyoursaas';
+$databasepass='';
+$dolibarrdir='';
+$usecompressformatforarchive='gzip';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'ipserverdeployment') {
+			$ipserverdeployment = $tmpline[1];
+		}
+		if ($tmpline[0] == 'instanceserver') {
+			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasehost') {
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport') {
+			$databaseport = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database') {
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseuser') {
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass') {
+			$databasepass = $tmpline[1];
+		}
+		if ($tmpline[0] == 'dolibarrdir') {
+			$dolibarrdir = $tmpline[1];
+		}
+		if ($tmpline[0] == 'usecompressformatforarchive') {
+			$usecompressformatforarchive = $tmpline[1];
+		}
+	}
+} else {
+	print "Failed to open /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
@@ -50,11 +103,16 @@ while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp
 if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
 if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
 // Try master.inc.php using relative path
-if (! $res && file_exists("./master.inc.php")) $res=@include "./master.inc.php";
 if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
 if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
 if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res) die("Include of master fails");
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include $dolibarrdir."/htdocs/master.inc.php";
+if (! $res) {
+	print ("Include of master fails");
+	exit(-1);
+}
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
@@ -65,6 +123,7 @@ include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 //include_once(DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
@@ -129,11 +188,14 @@ $user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
  *	Main
  */
 
+$utils = new Utils($db);
+
 print "***** ".$script_file." *****\n";
 
 if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server..\n";
 	print "Script must be ran from the master server with login admin.\n";
+	print "\n";
 	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm) [MYPRODUCTREF]\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
@@ -198,7 +260,7 @@ $result=$oldobject->fetch('', '', $oldinstance);
 $oldobject->fetch_thirdparty();
 
 if ($result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
-	print "Error: old instance to migrate '".$oldinstance."' with a deployment status = 'done' not found.\n";
+	print "Error: the old instance to move with full name '".$oldinstance."' and a deployment status = 'done' was not found.\n";
 	exit(-1);
 }
 
@@ -250,9 +312,11 @@ $createthirdandinstance = 0;
 
 $newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
-if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
-	print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
-	exit(-1);
+if ($mode == 'confirm') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
+	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
+		print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
+		exit(-1);
+	}
 }
 
 $newobject->instance = $newinstance;
@@ -280,6 +344,7 @@ $newpass = $oldobject->array_options['options_deployment_initial_password'];
 if (empty($newpass)) $newpass = getRandomPassword(true, array('I'), 16);
 
 $command='php '.($path?$path:'./')."../myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
+$command.=" ".escapeshellarg($oldinstance);
 echo $command."\n";
 
 $return_val = 0;
@@ -291,9 +356,8 @@ if ($mode == 'confirm') {
 	ob_end_clean();
 	$return_val = $resultarray['result'];
 	*/
-	$utils = new Utils($db);
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
-	$resultarray = $utils->executeCLI($command, $outputfile);
+	$resultarray = $utils->executeCLI($command, $outputfile, 0);
 
 	$return_val = $resultarray['result'];
 	$content_grabbed = $resultarray['output'];
@@ -306,7 +370,7 @@ if ($return_val != 0) $error++;
 
 // Return
 if (! $error) {
-	print '-> Creation of new instance success with name '.$newinstance."\n";
+	print '-> Creation of new instance success with name '.$newinstance." ".($mode == 'confirm' ? "done" : "canceled (test mode)")."\n";
 } else {
 	print '-> Failed to create new instance with name '.$newinstance."\n";
 	exit(-1);
@@ -343,21 +407,21 @@ $createthirdandinstance=1;
 // Now sync files
 
 $tmptargetdir='/tmp/'.$newlogin.'/'.$newdatabasedb;
-dol_delete_dir_recursive($targetdir);
+$countdeleted = 0;
+dol_delete_dir_recursive($tmptargetdir, 0, 0, 0, $countdeleted, 0, 1);
+dol_mkdir($tmptargetdir);
 
-print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
-print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
-print 'SFTP new connect string : '.$newsftpconnectstring."\n";
+
+print '--- Synchro of files '.$oldsftpconnectstring.' to '.$tmptargetdir."\n";
 print 'SFTP old password '.$oldospass."\n";
-//print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode, array('confirm'))) $param[]="-n";
+//if (! in_array($mode, array('confirm'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
-$param[]="-v";
+//$param[]="-v";
 if (empty($createthirdandinstance)) $param[]="-u";		// If we have just created instance, we overwrite file during rsync
 $param[]="--exclude .buildpath";
 $param[]="--exclude .git";
@@ -378,25 +442,33 @@ $fullcommand=$command." ".join(" ", $param);
 $output=array();
 $return_var=0;
 
-print "Run the rsync command to get files of old instance and press a key to continue...\n";
-print $fullcommand."\n";
+print "Press ENTER to continue by running the rsync command to get files of old instance...";
 $input = trim(fgets(STDIN));
-//exec($fullcommand, $output, $return_var);
+print $fullcommand."\n";
+
+$outputfile = $conf->admin->dir_temp.'/out.tmp';
+$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0);
+
+$return_var = $resultarray['result'];
+$content_grabbed = $resultarray['output'];
+
 if ($return_var) {
 	print "-> Error during rsync\n";
+	print $content_grabbed;
 	exit(-1);
 } else {
 	print "-> Files were sync\n";
 }
 
+// Output result
+print $content_grabbed."\n";
 
+
+$sourcedir=$tmptargetdir;
 $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
 
-print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
-print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
-print 'SFTP new connect string : '.$newsftpconnectstring."\n";
-print 'SFTP old password '.$oldospass."\n";
-//print 'SFTP new password '.$newpassword."\n";
+print '--- Synchro of files '.$sourcedir.' to '.$newsftpconnectstring."\n";
+print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
 $param=array();
@@ -404,7 +476,7 @@ if (! in_array($mode, array('confirm'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
-$param[]="-v";
+//$param[]="-v";
 if (empty($createthirdandinstance)) $param[]="-u";		// If we have just created instance, we overwrite file during rsync
 $param[]="--exclude .buildpath";
 $param[]="--exclude .git";
@@ -424,12 +496,20 @@ $fullcommand=$command." ".join(" ", $param);
 $output=array();
 $return_var=0;
 
-print "Run this rsync command to push files on remote target host and press a key to continue...\n";
-print $fullcommand."\n";
+print "Press ENTER to continue by running the rsync command to push files on remote target host...\n";
 $input = trim(fgets(STDIN));
+print $fullcommand."\n";
+
+$outputfile = $conf->admin->dir_temp.'/out.tmp';
+$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0);
+
+$return_var = $resultarray['result'];
+$content_grabbed = $resultarray['output'];
+
 //exec($fullcommand, $output, $return_var);
 if ($return_var) {
 	print "-> Error during rsync\n";
+	print $content_grabbed;
 	exit(-1);
 } else {
 	print "-> Files were sync\n";
@@ -437,10 +517,7 @@ if ($return_var) {
 print "\n";
 
 // Output result
-foreach ($output as $outputline) {
-	print $outputline."\n";
-}
-
+print $content_grabbed."\n";
 
 
 // Remove install.lock file if mode )) confirmunlock
@@ -483,6 +560,7 @@ if ($mode == 'confirmunlock')
 */
 
 
+/*
 print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb."\n";
 $output=array();
 $return_varchmod=0;
@@ -508,10 +586,10 @@ foreach ($output as $outputline) {
 print "\n";
 
 print "-> Files owner were modified for instance ".$newobject->ref_customer.": ".$targetdir." to user ".$newlogin."\n";
+*/
 
 
-
-print '--- Dump database '.$olddbname.' into /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 
 $command="mysqldump";
 $param=array();
@@ -531,18 +609,22 @@ $param[]="-e";
 $param[]="--hex-blob";
 $param[]="--default-character-set=utf8";
 
-$fullcommand=$command." ".join(" ", $param);
-$fullcommand.=' > /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').'.sql';
-$output=array();
-$return_varmysql=0;
-print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
-exec($fullcommand, $output, $return_varmysql);
+$fullcommand = $command." ".join(" ", $param);
+$fullcommandredirectionfile = $tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').'.sql';
+$output = array();
+$return_varmysql = 0;
+print strftime("%Y%m%d-%H%M%S").' '.$fullcommand." > ".$fullcommandredirectionfile."\n";
+
+$outputfile = $conf->admin->dir_temp.'/out.tmp';
+$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, $fullcommandredirectionfile);
+
+$return_varmysql = $resultarray['result'];
+$content_grabbed = $resultarray['output'];
+
 print strftime("%Y%m%d-%H%M%S").' mysqldump done (return='.$return_varmysql.')'."\n";
 
 // Output result
-foreach ($output as $outputline) {
-	print $outputline."\n";
-}
+print $content_grabbed."\n";
 
 if ($return_var) {
 	print "-> Error during mysql dump of instance ".$oldobject->ref_customer."\n";
@@ -550,35 +632,51 @@ if ($return_var) {
 }
 
 
-print '--- Load database '.$newdatabasedb.' from /tmp/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
-$fullcommanda='echo "drop table llx_accounting_account;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanda."\n";
+print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropa."\n";
 if ($mode == 'confirm' || $mode == 'confirmrm') {
-	exec($fullcommanda, $output, $return_var);
-	foreach ($output as $line) print $line."\n";
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
+
+	$return_var = $resultarray['result'];
+	$content_grabbed = $resultarray['output'];
+
+	print $content_grabbed."\n";
 }
 
-$fullcommandb='echo "drop table llx_accounting_system;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommandb."\n";
+print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropb."\n";
 if ($mode == 'confirm' || $mode == 'confirmrm') {
-	exec($fullcommandb, $output, $return_var);
-	foreach ($output as $line) print $line."\n";
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
+
+	$return_var = $resultarray['result'];
+	$content_grabbed = $resultarray['output'];
+
+	print $content_grabbed."\n";
 }
 
-$fullcommand="cat /tmp/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
+$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
-if ($mode == 'confirm' || $mode == 'confirmrm') {
+if ($mode $= 'confirm' || $mode == 'confirmrm') {
 	$output=array();
 	$return_var=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
-	exec($fullcommand, $output, $return_var);
-	foreach ($output as $line) print $line."\n";
+
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);
+
+	$return_var = $resultarray['result'];
+	$content_grabbed = $resultarray['output'];
+
+	print $content_grabbed."\n";
 }
 
 if ($return_var) {
@@ -597,15 +695,16 @@ if ($mode == 'confirm') {
 }
 
 print "DON'T FORGET TO UPDATE CUSTOM URL OF NEW INSTANCE !!!\n";
-// TODO Update custom url
+// TODO Update custom url.
+// Not already done when creating instance ?
 
 print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM !!!\n";
 // TODO Force closing all services of old instance (will be undeployed later)
 
-print "AND TO MOVE RECURRING INVOICE ON NEW INSTANCE !!!\n";
+print "AND TO MOVE RECURRING INVOICE FROM OLD TO NEW INSTANCE !!!\n";
 // TODO Move link of template invoice on old contract to this new contract
-$sql = 'UPDATE '.MAIN_DB_PREFIX.'facture_rec SET fk_source = '.$newobject->id.' WHERE';
-$sql.= ' fk_source = '.$oldobject->id." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
+$sql = 'UPDATE '.MAIN_DB_PREFIX.'facture_rec SET fk_source = '.((int) $newobject->id).", title='".$dbmaster->escape('Template invoice for '.$newobject->ref_customer)."'";
+$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
 print $sql."\n";
 if ($mode == 'confirm') {
 	$dbmaster->query($sql);
