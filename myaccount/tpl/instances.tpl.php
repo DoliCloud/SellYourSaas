@@ -256,6 +256,9 @@ if (count($listofcontractid) == 0) {				// Should not happen
 
 		print '<p style="padding-top: 8px;'.($statuslabel == 'undeployed'?' margin-bottom: 0px':'').'" class="clearboth">';
 
+		// ID
+		print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("ID").' : '.$contract->ref.'</span></span><br>';
+
 		// URL
 		if ($statuslabel != 'undeployed') {
 			print '<span class="caption-helper"><span class="opacitymedium">';
@@ -265,7 +268,6 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '</span><br>';
 		}
 
-		print '<!-- <span class="caption-helper"><span class="opacitymedium">'.$langs->trans("ID").' : '.$contract->ref.'</span></span><br> -->';
 		print '<span class="caption-helper">';
 		if ($contract->array_options['options_deployment_status'] == 'processing') {
 			print '<span class="opacitymedium">'.$langs->trans("DateStart").' : </span><span class="bold">'.dol_print_date($contract->array_options['options_deployment_date_start'], 'dayhour').'</span>';

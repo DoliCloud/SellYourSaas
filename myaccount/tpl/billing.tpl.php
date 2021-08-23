@@ -92,7 +92,8 @@ if (count($listofcontractid) > 0) {
 		            <div class="row" style="border-bottom: 1px solid #ddd;">
 
 		              <div class="col-md-6">
-				          <a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">'.$instancename.'</a>
+				          <a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">'.$instancename.'</a><br>
+						  <span class="opacitymedium">'.$langs->trans("ID").' : '.$contract->ref.'</span>
 				          <span class="caption-helper"><!-- - '.$planlabel.'--></span>	<!-- This is service -->
 		              </div><!-- END COL -->
 		              <div class="col-md-2 hideonsmartphone">
