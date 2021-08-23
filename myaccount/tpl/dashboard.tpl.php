@@ -84,8 +84,7 @@ if ($nbofinstancessuspended) {
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'
-		                </a>
+						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'</a>
 					</div></div>';
 
 			print '
@@ -128,8 +127,7 @@ if ($mythirdpartyaccount->isareseller) {
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
-						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'
-		                </a>
+						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'</a>
 					</div></div>';
 
 	print '</div>';		// end protlet-body
@@ -175,8 +173,7 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">'.$langs->trans("SeeOrEditProfile").'
-	                </a>
+					<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount" class="btn default btn-xs green-stripe">'.$langs->trans("SeeOrEditProfile").'</a>
 				</div>
 				</div>
 
@@ -255,8 +252,7 @@ else print $langs->trans("RemainderToPay");
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfPayments").'
-	                </a>
+					<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=billing" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfPayments").'</a>
 				</div>
 				</div>
 
@@ -306,8 +302,7 @@ else print $langs->trans("RemainderToPay");
 				<div class="row">
 				<div class="center col-md-12">
 					<br>
-					<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'
-	                </a>
+					<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'</a>
 				</div></div>
 
 	          </div> <!-- END PORTLET-BODY -->
