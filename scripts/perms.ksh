@@ -65,6 +65,14 @@ if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
 	chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 fi
 
+echo Set owner and permission on SSL certificates /etc/apache2/*.key
+for fic in `ls /etc/apache2/*.key`; 
+do 
+	chgrp admin /etc/apache2/$fic
+	chmod ug+r /etc/apache2/$fic
+	chmod o-rwx /etc/apache2/$fic
+done
+
 if [[ "x$instanceserver" == "x1" ]]; then
 	echo We are on a deployment server, so we clean log files 
 	echo "Clean web server _error logs"

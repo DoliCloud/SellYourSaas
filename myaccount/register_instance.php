@@ -169,7 +169,7 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 		print "***** ".$script_file." *****\n";
 		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
 		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.mysellyoursaasdomain.com password CustomerID [custom_domain]\n";
-		print 'Error:   A certificat file '.$conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'(.crt|.key|-intermediate.crt) not found.'."\n";
+		print 'Error:   A certificate file '.$conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'(.crt|.key|-intermediate.crt) not found.'."\n";
 		exit(-1);
 	}
 	$password2 = $password;

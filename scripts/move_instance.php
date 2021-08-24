@@ -337,6 +337,28 @@ $sourcedir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$oldobject->array_options
 
 $oldsftpconnectstring=$oldosuser.'@'.$oldoshost.':'.$sourcedir;
 
+$CERTIFFORCUSTOMDOMAIN = $oldinstance;
+if ($CERTIFFORCUSTOMDOMAIN) {
+	print '--- Copy current wild certificate to use it as the certificate for the custom url of the new instance (for backward compatibility)'."\n";
+	$tmparray = explode('.', $oldinstance);
+	unset($tmparray[0]);
+	$wilddomain = join('.', $tmparray);
+	foreach(array('.key', '.crt', '-intermediate.crt') as $ext) {
+		$srcfile = '/etc/apache2/'.$wilddomain.$ext;
+		$destfile = $conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.$ext;
+		print 'Copy '.$srcfile.' into '.$destfile."\n";
+		if (! dol_is_file($srcfile)) {
+			dol_copy($srcfile, $conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.$ext);
+			if (! dol_is_file($srcfile)) {
+				print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files for ".$wilddomain." must be found into /etc/apache2\n";
+			}
+		}
+		//if (! dol_is_file($destfile)) {
+		//	print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files for ".$wilddomain." must be found into ".$conf->sellyoursaas->dir_output.'/crt/'."\n";
+		//	exit(-1);
+		//}
+	}
+}
 
 print '--- Create new container for new instance'."\n";
 
