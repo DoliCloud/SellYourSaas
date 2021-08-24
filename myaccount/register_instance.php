@@ -255,38 +255,61 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if ($reusesocid < 0) { // -1, the thirdparty was not selected
 		// Return to dashboard, the only page where the customer is requested.
 		$newurl=preg_replace('/register/', 'index', $newurl);
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer")), null, 'errors');
-		header("Location: ".$newurl.'#addanotherinstance');
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer")), null, 'errors');
+			header("Location: ".$newurl.'#addanotherinstance');
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer"));
+		}
 		exit(-1);
 	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain)) {
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
-		header("Location: ".$newurl);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication"));
+		}
 		exit(-1);
 	}
 	if ($productref != 'none' && strlen($sldAndSubdomain) >= 29) {
-		setEventMessages($langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
-		header("Location: ".$newurl);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication"));
+		}
 		exit(-1);
 	}
 	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain)) {		// Only a-z A-Z 0-9 and - . Note: - is removed by javascript part of register page.
-		setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
-		header("Location: ".$newurl);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication"));
+		}
 		exit(-1);
 	}
 	if (empty($password) || empty($password2)) {
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
-		header("Location: ".$newurl);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password"));
+		}
 		exit(-1);
 	}
 	if ($password != $password2) {
-		setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
-		header("Location: ".$newurl);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorPasswordMismatch");
+		}
 		exit(-1);
 	}
-} else // When we deploy from the register.php page
-{
+} else { // When we deploy from the register.php page
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
 
