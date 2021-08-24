@@ -992,6 +992,20 @@ On the *Master server*:
         KeepAliveTimeout 5
         MaxKeepAliveRequests 20
 
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/>
+        AuthType Basic
+        AuthName "Authenticate to DoliAsso backoffice"
+        AuthUserFile /home/admin/wwwroot/dolibarr/htdocs/.htpasswd
+        require valid-user
+        </Directory>
+
+        #leaving /public accessible to everyone
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>
+
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks
