@@ -1040,6 +1040,13 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
+Create the file */home/admin/wwwroot/dolibarr/htdocs/.htpasswd* with 
+[source, bash]
+---------------
+htpasswd -cm /home/admin/wwwroot/dolibarr/htdocs/.htpasswd <wanted username>
+---------------
+Choose a password. You will need to give this user and password to anyone who wants to access *admin.mysaasdomainname.com* .
+
 You can create another virtual host for the HTTPS on port 443
 
 
