@@ -79,6 +79,8 @@ $backupstring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.$obj
 $restorestringfrombackup = '';
 $restorestringfromarchive = '';
 $restorestringpretoshow = '';
+$moveinstancestringtoshow = '';
+
 $ispaid = sellyoursaasIsPaidInstance($object);
 if ($ispaid) {
 	if ($object->array_options['options_deployment_status'] != 'undeployed') {
@@ -161,7 +163,8 @@ if ($ispaid) {
 	}
 }
 
-$moveinstancestringtoshow = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/move_instance.php '.$object->ref_customer.' newinstancename.withNEW.mydomain.com (test|confirm)'."\n";
+$moveinstancestringtoshow .= "su - admin"."\n";
+$moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/move_instance.php '.$object->ref_customer.' newinstancename.withNEW.mydomain.com (test|confirm)'."\n";
 
 
 // Increase limit of time. Works only if we are not in safe mode

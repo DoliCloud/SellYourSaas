@@ -343,7 +343,7 @@ print '--- Create new container for new instance'."\n";
 $newpass = $oldobject->array_options['options_deployment_initial_password'];
 if (empty($newpass)) $newpass = getRandomPassword(true, array('I'), 16);
 
-$command='php '.($path?$path:'./')."../myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
+$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
 $command.=" ".escapeshellarg($oldinstance);
 echo $command."\n";
 
@@ -366,11 +366,17 @@ if ($mode == 'confirm') {
 	echo "Output: ".$content_grabbed."\n";
 }
 
-if ($return_val != 0) $error++;
+if ($return_val != 0) {
+	$error++;
+}
 
 // Return
 if (! $error) {
-	print '-> Creation of new instance success with name '.$newinstance." ".($mode == 'confirm' ? "done" : "canceled (test mode)")."\n";
+	if ($mode == 'confirm') {
+		print '-> Creation of new instance with name '.$newinstance." done.\n";
+	} else {
+		print '-> Creation of new instance with name '.$newinstance." canceled (test mode)\n";
+	}
 } else {
 	print '-> Failed to create new instance with name '.$newinstance."\n";
 	exit(-1);
