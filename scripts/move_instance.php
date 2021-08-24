@@ -665,7 +665,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm') {
 
 $fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
-if ($mode $= 'confirm' || $mode == 'confirmrm') {
+if ($mode == 'confirm' || $mode == 'confirmrm') {
 	$output=array();
 	$return_var=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";

@@ -161,6 +161,9 @@ if ($ispaid) {
 	}
 }
 
+$moveinstancestringtoshow = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/move_instance.php '.$object->ref_customer.' newinstancename.withNEW.mydomain.com (test|confirm)'."\n";
+
+
 // Increase limit of time. Works only if we are not in safe mode
 $ExecTimeLimit = 1800; // 30mn
 if (!empty($ExecTimeLimit)) {
@@ -427,7 +430,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 // Backup command line
 $backupstringtoshow=$backupstring.' confirm';
 $backupstringtoshow2=$backupstring.' confirm';
-print '<span class="fa fa-database"></span> -> Backup command line string <span class="opacitymedium">(to run on the server where to store the backup)</span><br>';
+print '<span class="fa fa-database"></span> -> <span class="fa fa-file paddingright"></span> Backup command line string <span class="opacitymedium">(to run on the server where to store the backup)</span><br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
 print ajax_autoselect('backupstring');
 
@@ -436,7 +439,7 @@ print '<br>';
 // Restore command line from backup
 if ($restorestringfrombackup) {
 	$restorestringtoshow=$restorestringfrombackup.' (test|confirm)';
-	print '-> <span class="fa fa-database"></span> Restore command line string from Backup <span class="opacitymedium">(to run from the server hosting the backup)</span><br>';
+	print '<span class="fa fa-file paddingright"></span> -> <span class="fa fa-database paddingright"></span> Restore command line string from Backup <span class="opacitymedium">(to run from the server hosting the backup)</span><br>';
 	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
 	print ajax_autoselect('restorestring');
 
@@ -446,7 +449,7 @@ if ($restorestringfrombackup) {
 // Restore commands from archive
 if ($restorestringfromarchive) {
 	$restorestringtoshow=$restorestringfromarchive.' (test|confirm)';
-	print '-> <span class="fa fa-database"></span> Restore command line string from Archive <span class="opacitymedium">(to run from the server hosting the archives)</span><br>';
+	print '<span class="fa fa-file-archive paddingright"></span> -> <span class="fa fa-database paddingright"></span> Restore command line string from Archive <span class="opacitymedium">(to run from the server hosting the archives)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_9.'">';
 	print $restorestringpretoshow."\n";
 	print $restorestringtoshow."\n";
@@ -461,10 +464,22 @@ if ($restorestringfromarchive) {
 // Migrate to another instance container
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
-	print '<span class="fa fa-database"></span> -> <span class="fa fa-database"></span> Migration of instance into another instance <span class="opacitymedium">(can be run on any server)</span><br>';
+	print '<span class="fa fa-database"></span> -> <span class="fa fa-database"></span><span class="fa fa-database paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(can be run on any server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
 	print $backupstringtoshow."\n";
 	print $restorestringtoshow."\n";
+	print '</textarea>';
+
+	print '<br>';
+	print '<br>';
+}
+
+// Migrate to another instance container
+if ($moveinstancestringtoshow) {
+	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
+	print '<span class="fa fa-database opacitymedium"></span> -> <span class="fa fa-database paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run on master server)</span><br>';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
+	print $moveinstancestringtoshow."\n";
 	print '</textarea>';
 
 	print '<br>';
