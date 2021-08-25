@@ -4708,3 +4708,5 @@ You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS
 
 mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
 
+Try to add the parameter -not-tablespace into the mysqldump command.
+
