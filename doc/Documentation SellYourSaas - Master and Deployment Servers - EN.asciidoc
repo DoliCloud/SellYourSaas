@@ -4843,5 +4843,11 @@ You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS
 Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
 
 
+==== Error when doing mysqldump
+
+mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
+
+Try to add the parameter -not-tablespace into the mysqldump command.
+
 
 
