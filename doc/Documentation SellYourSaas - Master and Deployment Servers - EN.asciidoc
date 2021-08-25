@@ -992,6 +992,20 @@ On the *Master server*:
         KeepAliveTimeout 5
         MaxKeepAliveRequests 20
 
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/>
+        AuthType Basic
+        AuthName "Authenticate to DoliAsso backoffice"
+        AuthUserFile /etc/apache2/.htpasswd
+        require valid-user
+        </Directory>
+
+        #leaving /public accessible to everyone
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>
+
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks
@@ -1025,6 +1039,13 @@ RewriteCond %{REQUEST_URI} !fileserver\.php
 RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
+
+Create the file */etc/apache2/.htpasswd* with 
+[source, bash]
+---------------
+htpasswd -cm /etc/apache2/.htpasswd <wanted username>
+---------------
+Choose a password. You will need to give this user and password to anyone who wants to access the backoffice *admin.mysaasdomainname.com* .
 
 You can create another virtual host for the HTTPS on port 443
 
