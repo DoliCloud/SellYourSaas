@@ -995,7 +995,7 @@ On the *Master server*:
         <Directory /home/admin/wwwroot/dolibarr/htdocs/>
         AuthType Basic
         AuthName "Authenticate to DoliAsso backoffice"
-        AuthUserFile /home/admin/wwwroot/dolibarr_documents/.htpasswd
+        AuthUserFile /etc/apache2/.htpasswd
         require valid-user
         </Directory>
 
@@ -1040,10 +1040,10 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
-Create the file */home/admin/wwwroot/dolibarr_documents/.htpasswd* with 
+Create the file */etc/apache2/.htpasswd* with 
 [source, bash]
 ---------------
-htpasswd -cm /home/admin/wwwroot/dolibarr_documents/.htpasswd <wanted username>
+htpasswd -cm /etc/apache2/.htpasswd <wanted username>
 ---------------
 Choose a password. You will need to give this user and password to anyone who wants to access *admin.mysaasdomainname.com* .
 
