@@ -189,7 +189,7 @@ Pour prendre en compte le changement:
 
 [source,bash]
 ---------------
-mount -oremount /dev/diskX/
+mount -o remount /dev/diskX/
 ---------------
 
 Pour vérifier:

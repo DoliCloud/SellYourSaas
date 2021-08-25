@@ -68,7 +68,7 @@ fi
 echo Set owner and permission on SSL certificates /etc/apache2/*.key
 for fic in `ls /etc/apache2/ | grep '.key$'`; 
 do 
-	chgrp admin /etc/apache2/$fic
+	chown root.www-data /etc/apache2/$fic
 	chmod ug+r /etc/apache2/$fic
 	chmod o-rwx /etc/apache2/$fic
 done

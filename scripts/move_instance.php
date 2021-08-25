@@ -259,7 +259,7 @@ $oldobject = new Contrat($dbmaster);
 $result=$oldobject->fetch('', '', $oldinstance);
 $oldobject->fetch_thirdparty();
 
-if ($result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
+if ($oldinstance || $result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
 	print "Error: the old instance to move with full name '".$oldinstance."' and a deployment status = 'done' was not found.\n";
 	exit(-1);
 }
@@ -337,21 +337,23 @@ $sourcedir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$oldobject->array_options
 
 $oldsftpconnectstring=$oldosuser.'@'.$oldoshost.':'.$sourcedir;
 
+$tmparray = explode('.', $oldinstance);
+$oldshortname = $tmparray[0];
+unset($tmparray[0]);
+$oldwilddomain = join('.', $tmparray);
+
 // Share certificate of old instance
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
 	print '--- Copy current wild certificate to use it as the certificate for the custom url of the new instance (for backward compatibility)'."\n";
-	$tmparray = explode('.', $oldinstance);
-	unset($tmparray[0]);
-	$wilddomain = join('.', $tmparray);
 	foreach(array('.key', '.crt', '-intermediate.crt') as $ext) {
-		$srcfile = '/etc/apache2/'.$wilddomain.$ext;
+		$srcfile = '/etc/apache2/'.$oldwilddomain.$ext;
 		$destfile = $conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.$ext;
 		print 'Copy '.$srcfile.' into '.$destfile."\n";
 		if (! dol_is_file($destfile)) {
 			dol_copy($srcfile, $destfile, '0600');
 			if (! dol_is_file($destfile)) {
-				print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files for ".$wilddomain." must be found into /etc/apache2\n";
+				print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files for ".$oldwilddomain." must be found into /etc/apache2\n";
 				exit(-1);
 			}
 		}
@@ -403,6 +405,7 @@ if (! $error) {
 	exit(-1);
 }
 
+// Reload contract to get all values up to date
 $newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
 
@@ -413,6 +416,7 @@ $newserverbase=$newobject->array_options['options_hostname_db'];
 $newloginbase=$newobject->array_options['options_username_db'];
 $newpasswordbase=$newobject->array_options['options_password_db'];
 $newdatabasedb=$newobject->array_options['options_database_db'];
+
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 	print "Error: Failed to find instance '".$newinstance."' (it should have been created before). Are you in test mode ?\n";
@@ -721,7 +725,6 @@ if ($mode == 'confirm') {
 	print '-> Dump NOT loaded (test mode) into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 }
 
-print "DON'T FORGET TO UPDATE CUSTOM URL OF NEW INSTANCE !!!\n";
 // TODO Update custom url.
 // Not already done when creating instance ?
 
@@ -737,8 +740,11 @@ if ($mode == 'confirm') {
 	$dbmaster->query($sql);
 }
 
+print "NOW YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
+print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
 
 print "Finished.\n";
+print "\n";
 
 exit($return_var + $return_varmysql);
 

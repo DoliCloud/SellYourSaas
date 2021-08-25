@@ -645,7 +645,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		if (! empty($contract->array_options['options_custom_url'])) {
 			print '
 										<br><br>
-										<div class="opacitymedium" style="padding-top: 5px">'.$langs->trans("YourCustomUrl").' :</div><br>
+										<div class="opacitymedium" style="padding-top: 5px">'.$langs->trans("YourCustomUrl").' :</div>
 										<input type="text" class="urlofinstancecustom minwidth400" disabled="disabled" value="https://'.$contract->array_options['options_custom_url'].'">
 									';
 		}

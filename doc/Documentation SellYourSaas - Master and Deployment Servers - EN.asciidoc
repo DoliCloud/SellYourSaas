@@ -198,7 +198,7 @@ To take the change into account:
 
 [source, bash]
 ---------------
-mount -oremount /dev/diskX/
+mount -o remount /dev/diskX/
 ---------------
 
 To check:
@@ -4815,6 +4815,11 @@ Then reload ssh with
 
 This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
 You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1
+
+
+==== On a deployment server, the user root can read files into /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+
+Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
 
 
 
