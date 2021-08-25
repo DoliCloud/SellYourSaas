@@ -264,7 +264,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer")), null, 'errors');
 			header("Location: ".$newurl.'#addanotherinstance');
 		} else {
-			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer"));
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer"))."\n";
 		}
 		exit(-10);
 	}
@@ -274,7 +274,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication"));
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
 		}
 		exit(-11);
 	}
@@ -283,7 +283,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 			setEventMessages($langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication"));
+			print $langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
 		}
 		exit(-12);
 	}
@@ -292,7 +292,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 			setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication"));
+			print $langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
 		}
 		exit(-13);
 	}
@@ -301,7 +301,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password"));
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password"))."\n";
 		}
 		exit(-14);
 	}
@@ -310,7 +310,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 			setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("ErrorPasswordMismatch");
+			print $langs->trans("ErrorPasswordMismatch")."\n";
 		}
 		exit(-15);
 	}
@@ -505,7 +505,7 @@ if (empty($remoteip)) {
 		setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
 		header("Location: ".$newurl);
 	} else {
-		print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP');
+		print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP')."\n";
 	}
 	exit(-60);
 }
@@ -525,7 +525,7 @@ if ($reusecontractid) {
 			setEventMessages($langs->trans("NotFound"), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("NotFound");
+			print $langs->trans("NotFound")."\n";
 		}
 		exit(-65);
 	}
@@ -560,7 +560,7 @@ if ($reusecontractid) {
 				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 				header("Location: index.php");
 			} else {
-				print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+				print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
 			}
 			exit(-66);
 		}
@@ -601,7 +601,7 @@ if ($reusecontractid) {
 			setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIp");
+			print $langs->trans("TooManyInstancesForSameIp")."\n";
 		}
 		exit(-70);
 	}
@@ -623,7 +623,7 @@ if ($reusecontractid) {
 			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour"), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIpThisHour");
+			print $langs->trans("TooManyInstancesForSameIpThisHour")."\n";
 		}
 		exit(-71);
 	}
@@ -644,7 +644,7 @@ if ($reusecontractid) {
 			setEventMessages($langs->trans("TooManyRequestPleaseTryLater"), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyRequestPleaseTryLater");
+			print $langs->trans("TooManyRequestPleaseTryLater")."\n";
 		}
 		exit(-72);
 	}
@@ -667,7 +667,7 @@ if ($reusecontractid) {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 						header("Location: index.php");
 					} else {
-						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
 					}
 					exit(-74);
 				}
@@ -677,7 +677,7 @@ if ($reusecontractid) {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 						header("Location: index.php");
 					} else {
-						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
 					}
 					exit(-75);
 				}
@@ -688,7 +688,7 @@ if ($reusecontractid) {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 						header("Location: index.php");
 					} else {
-						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
 					}
 					exit(-76);
 				}
@@ -732,7 +732,7 @@ if ($reusecontractid) {
 				setEventMessages($langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail), null, 'errors');
 				header("Location: index.php");
 			} else {
-				print $langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail);
+				print $langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail)."\n";
 			}
 			exit(-77);
 		}
@@ -755,7 +755,7 @@ if ($reusecontractid) {
 				setEventMessages($langs->trans("AccountAlreadyExistsForEmail", $myaccounturl), null, 'errors');
 				header("Location: ".$newurl);
 			} else {
-				print $langs->trans("AccountAlreadyExistsForEmail", $myaccounturl);
+				print $langs->trans("AccountAlreadyExistsForEmail", $myaccounturl)."\n";
 			}
 			exit(-78);
 		} else dol_syslog("Email not already used. Good.");
@@ -787,7 +787,7 @@ if ($reusecontractid) {
 			setEventMessages($langs->trans("InstanceNameReseved", $fqdninstance), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("InstanceNameReseved", $fqdninstance);
+			print $langs->trans("InstanceNameReseved", $fqdninstance)."\n";
 		}
 		exit(-81);
 	}
@@ -850,7 +850,7 @@ if ($reusecontractid) {
 					setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 					header("Location: ".$newurl);
 				} else {
-					print $tmpthirdparty->error;
+					print $tmpthirdparty->error."\n";
 				}
 				exit(-90);
 			}
@@ -876,7 +876,7 @@ if ($reusecontractid) {
 				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 				header("Location: ".$newurl);
 			} else {
-				print $tmpthirdparty->error;
+				print $tmpthirdparty->error."\n";
 			}
 			exit(-91);
 		}
@@ -894,7 +894,7 @@ if ($reusecontractid) {
 				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 				header("Location: ".$newurl);
 			} else {
-				print $tmpthirdparty->error;
+				print $tmpthirdparty->error."\n";
 			}
 			exit(-92);
 		}
@@ -916,7 +916,7 @@ if ($reusecontractid) {
 					setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
 					header("Location: ".$newurl);
 				} else {
-					print $tmpthirdparty->error;
+					print $tmpthirdparty->error."\n";
 				}
 				exit(-93);
 			}
@@ -1153,7 +1153,7 @@ if ($reusecontractid) {
 				//http_response_code(403);
 				header("Location: ".$newurl);
 			} else {
-				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip);
+				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip)."\n";
 			}
 			exit(-95);
 		}
@@ -1407,16 +1407,19 @@ if (! $error) {
 			$error++;
 			setEventMessages($cmail->error, $cmail->errors, 'warnings');
 		}
-	} else // In rare cases, we are here
-	{
-		setEventMessages('NoEmailSent', null, 'warnings');
+	} else { // In rare cases, we are here
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages('NoEmailSent', null, 'warnings');
+		} else {
+			print 'NoEmailSent'."\n";
+		}
 	}
 
 	if (substr($sapi_type, 0, 3) != 'cli') {
-		dol_syslog("Deployment successful");
+		dol_syslog("Deployment successful with contract ID = ".$contract->id);
 		header("Location: ".$newurl);
 	} else {
-		print "Instance created\n";
+		print "Instance created with ID = ".$contract->id."\n";
 	}
 	exit(0);
 }
