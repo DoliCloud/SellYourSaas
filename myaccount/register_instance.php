@@ -552,16 +552,18 @@ if ($reusecontractid) {
 	$tmpthirdparty = $contract->thirdparty;
 
 	// Check thirdparty is same than the one in session
-	$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
-	if ($thirdpartyidinsession != $tmpthirdparty->id) {
-		dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$tmpthirdparty->id." when id in session is ".$thirdpartyidinsession);
-		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-			header("Location: index.php");
-		} else {
-			print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
+		if ($thirdpartyidinsession != $tmpthirdparty->id) {
+			dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$tmpthirdparty->id." when id in session is ".$thirdpartyidinsession);
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+				header("Location: index.php");
+			} else {
+				print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+			}
+			exit(-66);
 		}
-		exit(-66);
 	}
 
 	$email = $tmpthirdparty->email;
@@ -656,38 +658,40 @@ if ($reusecontractid) {
 		}
 
 		// Check that thirdparty is ok
-		$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
-		if ($fromsocid > 0) {
-			if ($thirdpartyidinsession != $fromsocid) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
-				if (substr($sapi_type, 0, 3) != 'cli') {
-					setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-					header("Location: index.php");
-				} else {
-					print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
+			if ($fromsocid > 0) {
+				if ($thirdpartyidinsession != $fromsocid) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
+					if (substr($sapi_type, 0, 3) != 'cli') {
+						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+						header("Location: index.php");
+					} else {
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+					}
+					exit(-74);
 				}
-				exit(-74);
-			}
-			if ($tmpthirdparty->parent != $thirdpartyidinsession) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
-				if (substr($sapi_type, 0, 3) != 'cli') {
-					setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-					header("Location: index.php");
-				} else {
-					print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+				if ($tmpthirdparty->parent != $thirdpartyidinsession) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
+					if (substr($sapi_type, 0, 3) != 'cli') {
+						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+						header("Location: index.php");
+					} else {
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+					}
+					exit(-75);
 				}
-				exit(-75);
-			}
-		} else {
-			if ($thirdpartyidinsession != $reusesocid) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
-				if (substr($sapi_type, 0, 3) != 'cli') {
-					setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-					header("Location: index.php");
-				} else {
-					print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+			} else {
+				if ($thirdpartyidinsession != $reusesocid) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
+					if (substr($sapi_type, 0, 3) != 'cli') {
+						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+						header("Location: index.php");
+					} else {
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt");
+					}
+					exit(-76);
 				}
-				exit(-76);
 			}
 		}
 
