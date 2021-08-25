@@ -1045,7 +1045,7 @@ Create the file */etc/apache2/.htpasswd* with
 ---------------
 htpasswd -cm /etc/apache2/.htpasswd <wanted username>
 ---------------
-Choose a password. You will need to give this user and password to anyone who wants to access *admin.mysaasdomainname.com* .
+Choose a password. You will need to give this user and password to anyone who wants to access the backoffice *admin.mysaasdomainname.com* .
 
 You can create another virtual host for the HTTPS on port 443
 
