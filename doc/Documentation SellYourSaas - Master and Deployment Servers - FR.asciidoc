@@ -4704,3 +4704,7 @@ This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
 You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1
 
 
+==== Error when doing mysqldump
+
+mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
+

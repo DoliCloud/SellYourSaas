@@ -635,6 +635,7 @@ $param[]="-l";
 $param[]="--single-transaction";
 $param[]="-K";
 $param[]="--tables";
+$param[]="--no-tablespaces";
 $param[]="-c";
 $param[]="-e";
 $param[]="--hex-blob";
