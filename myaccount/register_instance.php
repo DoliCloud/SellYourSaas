@@ -177,7 +177,12 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 }
 
 
-$remoteip = getUserRemoteIP();
+if (substr($sapi_type, 0, 3) != 'cli') {
+	$remoteip = getUserRemoteIP();
+} else {
+	$remoteip = '127.0.0.1';
+}
+
 $domainname = preg_replace('/^\./', '', $tldid);
 
 // Sanitize $sldAndSubdomain. Remove start and end -
