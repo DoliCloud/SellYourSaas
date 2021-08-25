@@ -259,7 +259,7 @@ $oldobject = new Contrat($dbmaster);
 $result=$oldobject->fetch('', '', $oldinstance);
 $oldobject->fetch_thirdparty();
 
-if ($oldinstance || $result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
+if (empty($oldinstance) || $result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
 	print "Error: the old instance to move with full name '".$oldinstance."' and a deployment status = 'done' was not found.\n";
 	exit(-1);
 }
