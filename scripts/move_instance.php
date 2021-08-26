@@ -196,7 +196,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server..\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|maintenance) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|maintenance|confirmmaintenance) [MYPRODUCTREF]\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -308,7 +308,7 @@ $createthirdandinstance = 0;
 
 $newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
-if ($mode == 'confirm') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
 	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
 		print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
 		exit(-1);
@@ -379,7 +379,7 @@ $command.=" ".escapeshellarg($oldinstance);
 echo $command."\n";
 
 $return_val = 0;
-if ($mode == 'confirm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	//$output = shell_exec($command);
 	/*ob_start();
 	passthru($command, $return_val);
@@ -404,7 +404,7 @@ if ($return_val != 0) {
 
 // Return
 if (! $error) {
-	if ($mode == 'confirm') {
+	if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 		print '-> Creation of a new instance with name '.$newinstance." done.\n";
 	} else {
 		print '-> Creation of a new instance with name '.$newinstance." canceled (test mode)\n";
@@ -435,7 +435,7 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 if (! empty($oldobject->array_options['options_custom_url'])) {
 	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
 	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
-	if ($mode == 'confirm') {
+	if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 		$newobject->update($user, 1);
 	}
 }
@@ -457,7 +457,7 @@ print 'SFTP old password '.$oldospass."\n";
 
 $command="rsync";
 $param=array();
-//if (! in_array($mode, array('confirm'))) $param[]="-n";
+//if (! in_array($mode, array('confirm', 'confirmmaintenance'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
@@ -511,7 +511,7 @@ print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode, array('confirm'))) $param[]="-n";
+if (! in_array($mode, array('confirm', 'confirmmaintenance'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
@@ -603,7 +603,7 @@ if ($mode == 'confirmunlock')
 print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb."\n";
 $output=array();
 $return_varchmod=0;
-if ($mode == 'confirm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	if (empty($conf->global->DOLICLOUD_INSTANCES_PATH) || empty($newlogin) || empty($newdatabasedb)) {
 		print 'Bad value for data. We stop to avoid drama';
 		exit(-7);
@@ -679,7 +679,7 @@ $fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -h'.$newser
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropa."\n";
-if ($mode == 'confirm' || $mode == 'confirmrm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
 
@@ -693,7 +693,7 @@ $fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -h'.$newserv
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropb."\n";
-if ($mode == 'confirm' || $mode == 'confirmrm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
 
@@ -705,7 +705,7 @@ if ($mode == 'confirm' || $mode == 'confirmrm') {
 
 $fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
-if ($mode == 'confirm' || $mode == 'confirmrm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	$output=array();
 	$return_var=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
@@ -727,7 +727,7 @@ if ($return_var) {
 
 print "\n";
 
-if ($mode == 'confirm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	print '-> Dump loaded into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	print "Finished.\n";
 } else {
@@ -741,13 +741,13 @@ $sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET title='".$dbmaster->escape('Tem
 $sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
 $sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
 print $sql."\n";
-if ($mode == 'confirm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	$dbmaster->query($sql);
 }
 $sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
 $sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
 print $sql."\n";
-if ($mode == 'confirm') {
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 	$dbmaster->query($sql);
 }
 print "Note: To revert the move of the recurring invoice, you can do:\n";
