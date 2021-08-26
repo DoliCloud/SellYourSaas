@@ -2757,8 +2757,11 @@ class SellYourSaasUtils
 	 * This function is called on Master but remote action is done on remote agent.
 	 *
 	 * @param	string					$remoteaction	Remote action:
-	 * 													'suspend/unsuspend/rename'=change apache virtual file,
-	 * 													'deploy/undeploy'=create/delete database,
+	 * 													'backup',
+	 * 													'deploy/deployall/undeploy/undeployall'=create/delete database,
+	 * 													'deployoption'=???
+	 * 													'rename'=change apache virtual host file
+	 * 													'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
 	 * 													'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics
 	 * 													'refreshmetrics'=loop on each line and read remote data and update qty of metrics
 	 * 													'recreateauthorizedkeys', 'deletelock', 'recreatelock'
@@ -2766,8 +2769,8 @@ class SellYourSaasUtils
 	 * @param	string					$appusername	App login. Used for replacement of __APPUSERNAME__
 	 * @param	string					$email			Initial email. Used for replacement of __APPEMAIL__
 	 * @param	string					$password		Initial password. Used for replacement of __APPPASSWORD__
-	 * @param	string					$forceaddevent	'1'=Force to add event. If '0', add of event is done only for remoteaction = 'deploy','deployall','deployoption','rename','suspend','unsuspend','undeploy'
-	 *													$forceaddevent is set by caller but is overwrote to on when we detect qty has changed.
+	 * @param	string					$forceaddevent	'1'=Force to add event. If '0', add of event is done only for remoteaction = 'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy','undeployall'
+	 *													$forceaddevent is set by caller but is also overwrote to on when we detect qty has changed.
 	 * @param	string					$comment		Comment
 	 * @param   int                     $timeout        Time out in seconds
 	 * @return	int										<0 if KO (-1 = generic error, -2 = failed to connect), >0 if OK

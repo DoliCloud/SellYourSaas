@@ -196,7 +196,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server..\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|maintenance) [MYPRODUCTREF]\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -245,10 +245,6 @@ if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match(
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
 	$newinstance=$newinstance.".".$tmpstring;   // Automatically concat first domain name
 }
-
-
-// TODO Test if $ipserverdeployment (in sellyoursaas.conf) match ip target by $newinstance. If not error.
-// Test $ipserverdeployment
 
 
 $tmppackage = new Packages($dbmaster);
@@ -342,6 +338,19 @@ $oldshortname = $tmparray[0];
 unset($tmparray[0]);
 $oldwilddomain = join('.', $tmparray);
 
+
+
+if ($mode == 'maintenance' || $mode == 'confirmmaintenance') {
+	print '--- Switch old instance in maintenance mode'."\n";
+	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+	$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', 'Suspended from script before moving instance into another server', 300);
+	if ($result <= 0) {
+		print "Error: ".$sellyoursaasutils->error."\n";
+		exit(-1);
+	}
+}
+
 // Share certificate of old instance
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
@@ -396,12 +405,12 @@ if ($return_val != 0) {
 // Return
 if (! $error) {
 	if ($mode == 'confirm') {
-		print '-> Creation of new instance with name '.$newinstance." done.\n";
+		print '-> Creation of a new instance with name '.$newinstance." done.\n";
 	} else {
-		print '-> Creation of new instance with name '.$newinstance." canceled (test mode)\n";
+		print '-> Creation of a new instance with name '.$newinstance." canceled (test mode)\n";
 	}
 } else {
-	print '-> Failed to create new instance with name '.$newinstance."\n";
+	print '-> Failed to create a new instance with name '.$newinstance."\n";
 	exit(-1);
 }
 
