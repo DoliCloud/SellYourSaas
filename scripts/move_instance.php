@@ -451,14 +451,14 @@ if (! empty($oldobject->array_options['options_custom_url'])) {
 // Set the date of end of period with same value than the source
 $dateendperiod = 0;
 foreach($newobject->lines as $line) {
-	if ($line->date_fin_validite && $line->date_fin_validite < $dateendperiod) {
-		$dateendperiod = $line->date_fin_validite;
+	if ($line->date_end && (empty($dateendperiod) || $line->date_end < $dateendperiod)) {
+		$dateendperiod = $line->date_end;
 	}
 }
-print "Lowest date of end of validity of services of old contract is ".dol_print_date($dateendperiod, 'dayhour').".\n";
+print "Lowest date of end of validity of services of old contract is ".dol_print_date($dateendperiod, 'standard').".\n";
 if ($dateendperiod > 0) {
-	$sql = 'UPDATE '.MAIN_DB_PREFIX."contratdet set date_fin_validite = '".$db->escape($dateendperiod)."'";
-	$sql .= " WHERE fk_contract = ".((int) $newobject->id);
+	$sql = 'UPDATE '.MAIN_DB_PREFIX."contratdet set date_fin_validite = '".$db->idate($dateendperiod)."'";
+	$sql .= " WHERE fk_contrat = ".((int) $newobject->id);
 	print $sql."\n";
 	if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 		$resql = $db->query($sql);
@@ -469,7 +469,7 @@ if ($dateendperiod > 0) {
 	}
 }
 print "Set end date of trial on new contract to the same value than the old contract.\n";
-$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields set date_endfreeperiod = '".$db->escape($oldobject->array_options['option_date_endfreeperiod'])."'";
+$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields set date_endfreeperiod = '".$db->idate($oldobject->array_options['options_date_endfreeperiod'])."'";
 $sql .= " WHERE fk_object = ".((int) $newobject->id);
 print $sql."\n";
 if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
