@@ -190,7 +190,7 @@ $user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 
 $utils = new Utils($db);
 
-print "***** ".$script_file." *****\n";
+print "***** ".$script_file." ".$version." *****\n";
 
 if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server..\n";
@@ -439,6 +439,7 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 	exit(-1);
 }
 
+// Set the custom url on newobject
 if (! empty($oldobject->array_options['options_custom_url'])) {
 	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
 	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
@@ -446,6 +447,39 @@ if (! empty($oldobject->array_options['options_custom_url'])) {
 		$newobject->update($user, 1);
 	}
 }
+
+// Set the date of end of period with same value than the source
+$dateendperiod = 0;
+foreach($newobject->lines as $line) {
+	if ($line->date_fin_validite && $line->date_fin_validite < $dateendperiod) {
+		$dateendperiod = $line->date_fin_validite;
+	}
+}
+print "Lowest date of end of validity of services of old contract is ".dol_print_date($dateendperiod, 'dayhour').".\n";
+if ($dateendperiod > 0) {
+	$sql = 'UPDATE '.MAIN_DB_PREFIX."contratdet set date_fin_validite = '".$db->escape($dateendperiod)."'";
+	$sql .= " WHERE fk_contract = ".((int) $newobject->id);
+	print $sql."\n";
+	if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
+		$resql = $db->query($sql);
+		if (!$resql) {
+			print 'Failed to set lowest date of end of validity'."\n";
+			exit(-1);
+		}
+	}
+}
+print "Set end date of trial on new contract to the same value than the old contract.\n";
+$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields set date_endfreeperiod = '".$db->escape($oldobject->array_options['option_date_endfreeperiod'])."'";
+$sql .= " WHERE fk_object = ".((int) $newobject->id);
+print $sql."\n";
+if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
+	$resql = $db->query($sql);
+	if (!$resql) {
+		print 'Failed to set end date of trial period'."\n";
+		exit(-1);
+	}
+}
+
 
 $newsftpconnectstring=$newlogin.'@'.$newserver.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdatabasedb);
 
