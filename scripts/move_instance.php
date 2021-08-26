@@ -725,8 +725,7 @@ if ($mode == 'confirm') {
 	print '-> Dump NOT loaded (test mode) into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 }
 
-print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM !!!\n";
-// TODO Force closing all services of old instance (will be undeployed later)
+print "\n";
 
 print "Move recurring invoice from old to new instance:\n";
 $sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET title='".$dbmaster->escape('Template invoice for '.$newobject->ref_customer)."'";
@@ -751,9 +750,16 @@ $sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element'
 $sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
 print $sql."\n";
 
+print "\n";
+
+print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM !!!\n";
+print "\n";
+// TODO Move old instance in maintenance mode at begin of script
+
 print "NOW YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
 print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
 
+print "\n";
 print "Finished.\n";
 print "\n";
 
