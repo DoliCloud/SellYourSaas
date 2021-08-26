@@ -152,9 +152,13 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print '<tr class="oddeven nohover">';
 	print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ', $listofipwithinstances).'</strong></td>';
 	print '</tr>';
+
+	$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+
 	print '<tr class="">';
 	print '<td>';
-	$helptooltip = "SELLYOURSAAS_SUB_DOMAIN_IP = ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
+	$helptooltip = "SELLYOURSAAS_SUB_DOMAIN_IP = ".join(', ', $listofips).'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.joint(', ', $listofdomains);
 	print $form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), $helptooltip).':<br>';
 	print '<table class="noborder">';
 	print '<tr class="liste_titre_bidon"><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>';
@@ -162,8 +166,6 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print $form->textwithpicto($langs->trans("Registration"), $helptooltip);
 	print '<td class="center">'.$langs->trans("Closed").'|'.$langs->trans("Open").'</td>';
 	print '</td><td></td><td></td></tr>';
-	$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
-	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 	foreach ($listofips as $key => $val) {
 		$tmparraydomain = explode(':', $listofdomains[$key]);
 		print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
