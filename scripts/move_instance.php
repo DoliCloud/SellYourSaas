@@ -465,7 +465,6 @@ if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 
 $param[]=$oldosuser.'@'.$oldoshost.":".$sourcedir.'/*';
-//$param[]=$newlogin.'@'.$newserver.":".$targetdir;
 $param[]=$tmptargetdir;
 
 //var_dump($param);
@@ -519,7 +518,7 @@ if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 
-$param[]=$tmptargetdir;
+$param[]=$sourcedir.'/';
 $param[]=$newlogin.'@'.$newserver.":".$targetdir;
 
 //var_dump($param);
