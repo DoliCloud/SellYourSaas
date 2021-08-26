@@ -730,15 +730,27 @@ print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM !!!\n";
 // TODO Force closing all services of old instance (will be undeployed later)
 
 print "Move recurring invoice from old to new instance:\n";
-// TODO Move link of template invoice on old contract to this new contract
-$sql = 'UPDATE '.MAIN_DB_PREFIX.'facture_rec SET fk_source = '.((int) $newobject->id).", title='".$dbmaster->escape('Template invoice for '.$newobject->ref_customer)."'";
+$sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET title='".$dbmaster->escape('Template invoice for '.$newobject->ref_customer)."'";
+$sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
+$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
+print $sql."\n";
+if ($mode == 'confirm') {
+	$dbmaster->query($sql);
+}
+$sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
 $sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
 print $sql."\n";
 if ($mode == 'confirm') {
 	$dbmaster->query($sql);
 }
-print "Note: To revers the move you can do:\n";
-print '...'."\n";
+print "Note: To revert the move of the recurring invoice, you can do:\n";
+$sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $oldobject->id);
+$sql.= ' WHERE fk_source = '.((int) $newobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
+print $sql."\n";
+$sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET title='".$dbmaster->escape('Template invoice for '.$oldobject->ref_customer)."'";
+$sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
+$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
+print $sql."\n";
 
 print "NOW YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
 print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
@@ -747,5 +759,3 @@ print "Finished.\n";
 print "\n";
 
 exit($return_var + $return_varmysql);
-
-
