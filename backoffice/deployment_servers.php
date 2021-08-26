@@ -158,7 +158,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 
 	print '<tr class="">';
 	print '<td>';
-	$helptooltip = "SELLYOURSAAS_SUB_DOMAIN_IP = ".join(', ', $listofips).'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.joint(', ', $listofdomains);
+	$helptooltip = "SELLYOURSAAS_SUB_DOMAIN_IP = ".join(', ', $listofips).'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.join(', ', $listofdomains);
 	print $form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), $helptooltip).':<br>';
 	print '<table class="noborder">';
 	print '<tr class="liste_titre_bidon"><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>';
