@@ -339,7 +339,7 @@ unset($tmparray[0]);
 $oldwilddomain = join('.', $tmparray);
 
 
-
+// Switch old instance in maintenance mode
 if ($mode == 'maintenance' || $mode == 'confirmmaintenance') {
 	print '--- Switch old instance in maintenance mode'."\n";
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
@@ -347,6 +347,13 @@ if ($mode == 'maintenance' || $mode == 'confirmmaintenance') {
 	$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', 'Suspended from script before moving instance into another server', 300);
 	if ($result <= 0) {
 		print "Error: ".$sellyoursaasutils->error."\n";
+		exit(-1);
+	}
+
+	$oldobject->array_options['options_suspendmaintenance_message'] = 'InstanceMoveInProgress';
+	$result = $oldobject->update($user);
+	if ($result < 0) {
+		print "Error: ".$oldobject->error."\n";
 		exit(-1);
 	}
 }

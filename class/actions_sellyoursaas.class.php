@@ -551,7 +551,9 @@ class ActionsSellyoursaas
 				} else {
 					if ($action == 'suspendmaintenance') {
 						setEventMessages($langs->trans('InstanceInMaintenanceMode', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), null, 'warnings');
-					} else setEventMessages('InstanceUnsuspended', null, 'mesgs');
+					} else {
+						setEventMessages('InstanceUnsuspended', null, 'mesgs');
+					}
 				}
 			}
 		}
