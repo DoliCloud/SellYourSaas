@@ -109,7 +109,7 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
 	header("X-Frame-Options: ALLOWALL");           // So we can include page into an IFRAME
 	if (!defined('FORCECSP')) {
 		$contentsecuritypolicy = empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY) ? '' : $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
-		
+
 		if (!empty($contentsecuritypolicy)) {
 			// For example, to restrict 'script', 'object', 'frames' or 'img' to some domains:
 			// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; frame-src https://youtube.com; img-src: https://static.example.com
@@ -169,7 +169,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		}
 
 		$ext = 'layout='.$conf->browser->layout.'&amp;version='.urlencode(DOL_VERSION);
-		
+
 		print "<head>\n";
 
 		if (GETPOST('dol_basehref', 'alpha')) {
@@ -240,7 +240,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			print '<link rel="preconnect" href="https://fonts.gstatic.com">'."\n";
 			print '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@200;300;400;500;600&display=swap" rel="stylesheet">'."\n";
 		}
-		
+
 		if (! defined('DISABLE_JQUERY') && ! $disablejs && $conf->use_javascript_ajax) {
 			print '<!-- Includes CSS for JQuery (Ajax library) -->'."\n";
 			$jquerytheme = 'base';
@@ -521,7 +521,8 @@ if (! function_exists("llxFooter")) {
 		print "\n<!-- A div to allow dialog popup -->\n";
 		print '<div id="dialogforpopup" style="display: none;"></div>'."\n";
 
-		// Show conversion tracker (the $_SESSION['showconversiontracker'] is set into output page after a payment record by myaccount/index.php)
+		// Show conversion tracker.
+		// The $_SESSION['showconversiontracker'] is set into code of the action 'createpaymentmode' after a payment mode has been recorded, into myaccount/index.php.
 		if (! empty($_SESSION['showconversiontracker'])) {
 			print "\n".'<!-- Conversion tracker $_SESSION[\'showconversiontracker\']='.$_SESSION['showconversiontracker'].' -->'."\n";
 			if ($_SESSION['showconversiontracker'] == 'paymentrecorded') {
