@@ -403,6 +403,10 @@ border-radius: 0 4px 4px 0;
 	.boxresource {
 		width: 155px !important;
 	}
+
+	.register_text {
+		font-size: 0.85em;
+	}
 }
 
 ";
