@@ -212,7 +212,9 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 $dbtousetosearch = $dbmaster;
 
 print $sql."\n";                                    // To have this into the ouput of cron job
-dol_syslog($script_file." sql=".$sql, LOG_DEBUG);
+
+dol_syslog($script_file, LOG_DEBUG);
+
 $resql=$dbtousetosearch->query($sql);
 if ($resql) {
 	$num = $dbtousetosearch->num_rows($resql);
@@ -411,7 +413,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		$sql.=" FROM ".MAIN_DB_PREFIX."dolicloud_stats";
 		$sql.=" WHERE service = '".$servicetouse."'";
 
-		dol_syslog($script_file." sql=".$sql, LOG_DEBUG);
+		dol_syslog($script_file."", LOG_DEBUG);
 		$resql=$dbmaster->query($sql);
 		if ($resql) {
 			$num = $dbmaster->num_rows($resql);

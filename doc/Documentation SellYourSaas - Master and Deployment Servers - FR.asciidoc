@@ -3096,6 +3096,21 @@ openssl x509 -in fullchain.pem -text
 ---------------
 
 
+Or if there is a wildcard certificate on a deployment server, run:
+
+[source,bash]
+---------------
+certbot --manual -d '*.withX.mysaasdomainname.com' --preferred-challenges=dns certonly
+Complete the DNS file /etc/bind/withX.mysaasdomainname.com.hosts with the TXT key suggested (Keep old one but remove very old one)
+rndc reload withX.mysaasdomainname.com
+/etc/init.d/apache2 reload
+---------------
+
+You can check that DNS update is ok with this URL
+https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
+or host -t txt _acme-challenge.withX.mysaasdomainname.com
+
+
 ==== Installer les fichiers certificats
 
 * Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)

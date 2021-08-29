@@ -3177,7 +3177,7 @@ certbot certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainnam
 
 Follow instructions to add DNS entries and validate generation.
 
-To read generated .pem files, run
+To read generated .pem files, you can run
 
 [source,bash]
 ---------------
@@ -3194,7 +3194,19 @@ ou
 certbot renew --manual --force-renewal
 ---------------
 
-TODO Make renewal working with --preferred-challenges=dns and wildcard.
+Or if there is a wildcard certificate on a deployment server, run:
+
+[source,bash]
+---------------
+certbot --manual -d '*.withX.mysaasdomainname.com' --preferred-challenges=dns certonly
+Complete the DNS file /etc/bind/withX.mysaasdomainname.com.hosts with the TXT key suggested (Keep old one but remove very old one)
+rndc reload withX.mysaasdomainname.com
+/etc/init.d/apache2 reload
+---------------
+
+You can check that DNS update is ok with this URL
+https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
+or host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 
 ==== Install certificates files

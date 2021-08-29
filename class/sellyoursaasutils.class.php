@@ -1855,7 +1855,7 @@ class SellYourSaasUtils
 								$this->errors=$this->errors;
 							} else {
 								$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
-								$sqlupdate.= ' WHERE fk_contrat = '.$object->id;
+								$sqlupdate.= ' WHERE fk_contrat = '.((int) $object->id);
 								$resqlupdate = $this->db->query($sqlupdate);
 								if ($resqlupdate) {
 									$contractprocessed[$object->id]=$object->ref;

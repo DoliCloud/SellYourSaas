@@ -128,8 +128,8 @@ $sql.= " AND ce.deployment_status IS NOT NULL";
 
 $dbtousetosearch = $db;
 
+dol_syslog($script_file, LOG_DEBUG);
 
-dol_syslog($script_file." sql=".$sql, LOG_DEBUG);
 $resql=$dbtousetosearch->query($sql);
 if ($resql) {
 	$num = $dbtousetosearch->num_rows($resql);

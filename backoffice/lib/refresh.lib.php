@@ -423,7 +423,7 @@ function dolicloud_calculate_stats($db, $datelim)
 	$sql.= " AND s.payment_status NOT IN ('TRIAL', 'TRIALING', 'TRIAL_EXPIRED')";	// We keep OK, FAILURE, PAST_DUE. Filter on CLOSED will be done later.
 	if ($datelim) $sql.= " AND i.deployed_date <= '".$db->idate($datelim)."'";
 
-	dol_syslog($script_file." dolicloud_calculate_stats sql=".$sql, LOG_DEBUG);
+	dol_syslog($script_file." dolicloud_calculate_stats", LOG_DEBUG);
 	$resql=$db->query($sql);
 	if ($resql) {
 		$num = $db->num_rows($resql);
