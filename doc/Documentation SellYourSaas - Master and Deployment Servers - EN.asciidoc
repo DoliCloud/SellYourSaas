@@ -4869,12 +4869,12 @@ mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privile
 
 Try to add the parameter -not-tablespace into the mysqldump command.
 
+
 ==== Error mysql when connecting to database
 
 When logged with a customer linux account osu..., you get this error:
 mysql -A -C -u dbu... -p'...' -h localhost -D dbn...
 ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (13)
 
-Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with 127.0.0.1.
-
+Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter --protocol tcp.
 
