@@ -14,7 +14,7 @@ if [ "x$1" == "x" ]; then
    exit 1
 fi
 
-export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export currentpath=$(dirname "$0")
 

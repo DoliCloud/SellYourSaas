@@ -41,13 +41,13 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 # possibility to change the directory of instances are stored
-export targetdir=`grep 'targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export targetdir=`grep '^targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$targetdir" == "x" ]]; then
 	export targetdir="/home/jail/home"
 fi
 
-export masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export IPSERVERDEPLOYMENT=`grep '^ipserverdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export databasehost=`grep '^databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export database=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -78,7 +78,7 @@ if [ "x$databaseuser" == "x" ]; then
 	exit 4
 fi
 echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
-databasepass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+databasepass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepass" == "x" ]]; then
 	echo Failed to get password for mysql user sellyoursaas 
 	exit 5
@@ -91,31 +91,31 @@ if [ "x$1" == "x" ]; then
 fi
 
 echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
-export databasehostdeployment=`grep 'databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databasehostdeployment=`grep '^databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasehostdeployment" == "x" ]]; then
 	databasehostdeployment="localhost"
 fi 
-export databaseportdeployment=`grep 'databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databaseportdeployment=`grep '^databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databaseportdeployment" == "x" ]]; then
 	databaseportdeployment="3306"
 fi
 echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
-export databaseuserdeployment=`grep 'databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databaseuserdeployment=`grep '^databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databaseuserdeployment" == "x" ]]; then
 	databaseuserdeployment=$databaseuser
 fi
-databasepassdeployment=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+databasepassdeployment=`grep '^databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepassdeployment" == "x" ]]; then
 	databasepassdeployment=$databasepass
 fi 
 
-dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dnsserver=`grep '^dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
 	exit 7
 fi
 
-export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export testorconfirm=$1
 

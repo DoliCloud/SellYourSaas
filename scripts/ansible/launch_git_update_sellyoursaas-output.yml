@@ -1,0 +1,14 @@
+---
+- name: Update SellYourSaas on servers
+  hosts: deployment
+  user: gkervern
+  become: yes
+  become_method: sudo
+  become_user: admin
+  tasks:
+  - name: Launch git_update_sellyoursaas.sh
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot/
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
