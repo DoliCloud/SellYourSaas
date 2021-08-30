@@ -8,15 +8,15 @@
 echo "***** $0 *****"
 
 # possibility to change the ssl certificates name
-export webSSLCertificateCRT=`grep 'websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateCRT" == "x" ]]; then
 	export webSSLCertificateCRT=with.sellyoursaas.com.crt
 fi
-export webSSLCertificateKEY=`grep 'websslcertificatekey=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export webSSLCertificateKEY=`grep '^websslcertificatekey=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateKEY" == "x" ]]; then
 	export webSSLCertificateKEY=with.sellyoursaas.com.key
 fi
-export webSSLCertificateIntermediate=`grep 'websslcertificateintermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export webSSLCertificateIntermediate=`grep '^websslcertificateintermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
@@ -35,7 +35,7 @@ fi
 export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
-templatesdir=`grep 'templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$templatesdir" != "x" ]]; then
 	export vhostfileoffline="$templatesdir/vhostHttps-sellyoursaas-offline.template"
 else

@@ -43,11 +43,11 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-remoteserverlistenip=`grep 'remoteserverlistenip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+remoteserverlistenip=`grep '^remoteserverlistenip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$remoteserverlistenip" == "x" ]]; then
 	remoteserverlistenip="0.0.0.0"
 fi
-remoteserverlistenport=`grep 'remoteserverlistenport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+remoteserverlistenport=`grep '^remoteserverlistenport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$remoteserverlistenport" == "x" ]]; then
 	remoteserverlistenport="8080"
 fi

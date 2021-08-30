@@ -79,7 +79,7 @@ if [ "x$USER" == "x" ]; then
 	export USER="admin"
 fi
 
-instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export TESTN=""
 if [ "x$testorconfirm" != "xconfirm" ]; then

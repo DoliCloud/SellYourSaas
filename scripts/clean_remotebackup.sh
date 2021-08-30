@@ -41,7 +41,7 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 # possibility to change the directory of instances are stored
-export targetdir=`grep 'targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export targetdir=`grep '^targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$targetdir" == "x" ]]; then
 	export targetdir="/home/jail/home"
 fi
@@ -61,7 +61,7 @@ fi
 
 
 
-export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export testorconfirm=$1
 

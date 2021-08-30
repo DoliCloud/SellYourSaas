@@ -7,14 +7,14 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 # possibility to change the directory of instances are stored
-export targetdir=`grep 'targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export targetdir=`grep '^targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$targetdir" == "x" ]]; then
 	export targetdir="/home/jail/home"
 fi
 
 echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
-masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 cd /home
 
