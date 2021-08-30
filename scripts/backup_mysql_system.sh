@@ -36,8 +36,8 @@ if [ "$(id -u)" != "0" ]; then
    exit 100
 fi
 
-export DATABASE=`grep 'database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export DATABASE=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter 1 - test|confirm" 1>&2
@@ -52,7 +52,7 @@ export testorconfirm=$1
 # For debug
 echo "testorconfirm = $testorconfirm"
 
-export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 MYSQLDUMP=`which mysqldump`
 

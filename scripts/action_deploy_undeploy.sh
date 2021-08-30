@@ -32,7 +32,7 @@ export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
-templatesdir=`grep 'templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$templatesdir" != "x" ]]; then
 	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
@@ -154,20 +154,20 @@ export fqnold=$instancenameold.$domainnameold
 export CRONHEAD=${VIRTUALHOSTHEAD/php_value date.timezone /TZ=}
 
 # possibility to change the ssl certificates name
-export webSSLCertificateCRT=`grep 'websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateCRT" == "x" ]]; then
 	export webSSLCertificateCRT=with.sellyoursaas.com.crt
 fi
-export webSSLCertificateKEY=`grep 'websslcertificatekey=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export webSSLCertificateKEY=`grep '^websslcertificatekey=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateKEY" == "x" ]]; then
 	export webSSLCertificateKEY=with.sellyoursaas.com.key
 fi
-export webSSLCertificateIntermediate=`grep 'websslcertificateintermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export webSSLCertificateIntermediate=`grep '^websslcertificateintermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
 
-export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 # possibility to change the path of sellyoursass directory
 olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -241,33 +241,33 @@ MYSQL=`which mysql`
 MYSQLDUMP=`which mysqldump`
 
 echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
-dbserverhost=`grep 'databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dbserverhost=`grep '^databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbserverhost" == "x" ]]; then
 	dbserverhost="localhost"
 fi 
-dbserverport=`grep 'databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dbserverport=`grep '^databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbserverport" == "x" ]]; then
 	dbserverport="3306"
 fi
 
 echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
-dbadminuser=`grep 'databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dbadminuser=`grep '^databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbadminuser" == "x" ]]; then
 	dbadminuser="sellyoursaas"
 fi 
-dbadminpass=`grep 'databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dbadminpass=`grep '^databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbadminpass" == "x" ]]; then
-	dbadminpass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	dbadminpass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 	if [[ "x$dbadminpass" == "x" ]]; then
 		echo Failed to get password for mysql admin user 
 		exit 10
 	fi
 fi 
-dbforcesetpassword=`grep 'dbforcesetpassword=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dbforcesetpassword=`grep '^dbforcesetpassword=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dbforcesetpassword" == "x" ]]; then
 	dbforcesetpassword="0"
 fi
-dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+dnsserver=`grep '^dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
 	exit 11
@@ -279,7 +279,7 @@ if [[ ! -d $archivedir ]]; then
 	exit 12
 fi
 
-archivetestinstances=`grep 'archivetestinstances=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+archivetestinstances=`grep '^archivetestinstances=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 testorconfirm="confirm"
 
@@ -323,7 +323,7 @@ if [[ "$mode" == "deployall" ]]; then
 		if [[ ! -f "/etc/jailkit/jk_init.ini" ]]; then
 			echo "Error failed to find jailkit package in your system"
 		else
-			chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+			chrootdir=`grep '^chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 			if [[ "x$chrootdir" == "x" ]]; then
 				echo "Error your jailkit chroot directory is not defined in sellyoursaas.conf"
 			else
@@ -332,8 +332,8 @@ if [[ "$mode" == "deployall" ]]; then
 					mkdir $chrootdir
 				fi
 				
-				privatejailtemplatename=`grep 'privatejailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-				commonjailtemplatename=`grep 'commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+				privatejailtemplatename=`grep '^privatejailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+				commonjailtemplatename=`grep '^commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 				
 				echo `date +%Y%m%d%H%M%S`" ***** Create jailkit chroot directory for user $osusername"
 				echo "chrootdir = $chrootdir"
@@ -443,13 +443,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		if [[ ! -f "/etc/jailkit/jk_init.ini" ]]; then
 			echo "Error failed to find jailkit package in your system"
 		else
-			chrootdir=`grep 'chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+			chrootdir=`grep '^chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 			if [[ "x$chrootdir" == "x" ]]; then
 				Error your jailkit chroot directory is not defined in sellyoursaas.conf
 			else
 				if [[ -d "$chrootdir" ]]; then
 				
-					commonjailtemplatename=`grep 'commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+					commonjailtemplatename=`grep '^commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 					
 					echo `date +%Y%m%d%H%M%S`" ***** Remove jailkit chroot directory for user $osusername"
 					echo "chrootdir = $chrootdir"
