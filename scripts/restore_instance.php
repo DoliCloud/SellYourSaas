@@ -229,7 +229,7 @@ $result=0;
 if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
 
 if ($result <= 0) {
-	print "Error: No instance named '".$instance."' with status 'done' could be found.\n";
+	print "Error: Instance named '".$instance."' with status 'done' could not be found.\n";
 	exit(-2);
 }
 
@@ -444,6 +444,22 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 $now=dol_now();
 
 // Update database
+if (!sellyoursaasIsPaidInstance($object)) {
+	// TODO Add message to update end date manually for the moment
+	if ($object->array_options['options_date_endfreeperiod'] < dol_now()) {
+		print "\n";
+		print "TRIAL HAS EXPIRED (".dol_print_date($object->array_options['options_date_endfreeperiod'], 'day')."), DON'T FORGET TO UPDATE THE END OF TRIAL TO AVOID TO HAVE INSTANCE DISABLED IN FEW MINUTES\n";
+		print "\n";
+	} else {
+		print "\n";
+		print "You may want to increase end of trial date (currently ".dol_print_date($object->array_options['options_date_endfreeperiod'], 'day')."). Do it from the backoffice if this is required.\n";
+		print "\n";
+	}
+} else {
+	// No message
+}
+
+// Send result to supervision if enabled
 if (empty($return_var) && empty($return_varmysql)) {
 	if ($mode == 'confirm') {
 		// Send to DataDog (metric + event)
