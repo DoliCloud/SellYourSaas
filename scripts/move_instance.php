@@ -780,24 +780,30 @@ print "\n";
 print "Move recurring invoice from old to new instance:\n";
 $sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET title='".$dbmaster->escape('Template invoice for '.$newobject->ref_customer)."'";
 $sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
-$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
+$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture'))";
 print $sql."\n";
 if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
-	$dbmaster->query($sql);
+	$result = $dbmaster->query($sql);
+	if ($result < 0) {
+		print 'ERROR '.$dbmaster->lasterror();
+	}
 }
 $sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
-$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
+$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
 print $sql."\n";
 if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
-	$dbmaster->query($sql);
+	$result = $dbmaster->query($sql);
+	if ($result < 0) {
+		print 'ERROR '.$dbmaster->lasterror();
+	}
 }
 print "Note: To revert the move of the recurring invoice, you can do:\n";
 $sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $oldobject->id);
-$sql.= ' WHERE fk_source = '.((int) $newobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
+$sql.= ' WHERE fk_source = '.((int) $newobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
 print $sql."\n";
 $sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET title='".$dbmaster->escape('Template invoice for '.$oldobject->ref_customer)."'";
 $sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
-$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
+$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture'))";
 print $sql."\n";
 
 print "\n";
