@@ -60,7 +60,7 @@ if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.in
 if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
 if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
 if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../master.inc.php";
 if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
 if (! $res) {
 	print "Include of master fails";
@@ -70,6 +70,7 @@ if (! $res) {
 // $user is created but empty.
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");
 
 
@@ -118,7 +119,7 @@ if ($fp) {
 
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error) {
-	dol_print_error($dbmaster, "host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
 	exit;
 }
 if ($dbmaster) {
@@ -211,7 +212,9 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 $dbtousetosearch = $dbmaster;
 
 print $sql."\n";                                    // To have this into the ouput of cron job
-dol_syslog($script_file." sql=".$sql, LOG_DEBUG);
+
+dol_syslog($script_file, LOG_DEBUG);
+
 $resql=$dbtousetosearch->query($sql);
 if ($resql) {
 	$num = $dbtousetosearch->num_rows($resql);
@@ -316,11 +319,18 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 			echo $command."\n";
 
 			if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase') {
+
 				//$output = shell_exec($command);
-				ob_start();
+				/*ob_start();
 				passthru($command, $return_val);
 				$content_grabbed=ob_get_contents();
-				ob_end_clean();
+				ob_end_clean();*/
+				$utils = new Utils($db);
+				$outputfile = $conf->admin->dir_temp.'/out.tmp';
+				$resultarray = $utils->executeCLI($command, $outputfile);
+
+				$return_val = $resultarray['result'];
+				$content_grabbed = $resultarray['output'];
 
 				echo "Result: ".$return_val."\n";
 				echo "Output: ".$content_grabbed."\n";
@@ -403,7 +413,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		$sql.=" FROM ".MAIN_DB_PREFIX."dolicloud_stats";
 		$sql.=" WHERE service = '".$servicetouse."'";
 
-		dol_syslog($script_file." sql=".$sql, LOG_DEBUG);
+		dol_syslog($script_file."", LOG_DEBUG);
 		$resql=$dbmaster->query($sql);
 		if ($resql) {
 			$num = $dbmaster->num_rows($resql);

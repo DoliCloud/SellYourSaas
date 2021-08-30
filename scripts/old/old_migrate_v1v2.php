@@ -664,7 +664,7 @@ if ($result <= 0 || $newobject->statut == 0) {
 				$now = dol_now();
 				if ($date_start < $now) {
 					dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-					$tmparray = sellyoursaasGetExpirationDate($srcobject);
+					$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 					$duration_value = $tmparray['duration_value'];
 					$duration_unit = $tmparray['duration_unit'];
 

@@ -21,13 +21,15 @@ if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
 //if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
 //if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test
 //if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
-//if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
+if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');
 if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');			// If there is no need to load and show top and left menu
 if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');			// If we don't need to load the html.form.class.php
 if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX', '1');
 if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');					// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+if (! defined('NOSESSION'))      define('NOSESSION', '1');					// On CLI mode, no need to use web sessions
 
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
@@ -52,7 +54,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance = GETPOST('instance');	// example: testldr3.with.dolicloud.com
+$instance = GETPOST('instance');	// example: 'testldr3.with.mysaasdomainname.com', 'myaccount'
 
 // SEarch instance
 $contract = new Contrat($db);
@@ -73,6 +75,8 @@ if ($langs->defaultlang == 'en_US') {
 	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
 }
 
+http_response_code(503);	// 503 Service Unavailable
+
 top_htmlhead('', 'Maintenance Page');
 
 ?>
@@ -83,13 +87,17 @@ top_htmlhead('', 'Maintenance Page');
 <div style="text-align: center">
 <span class="fa fa-desktop" style="font-size: 40px; opacity: 0.3"></span><br><br>
 <?php
-print $langs->trans("SorryInstanceInMaintenance", dol_escape_htmltag($instance));
+if ($instance == 'myaccount') {
+	print $langs->trans("SorryServerInMaintenance");
+} else {
+	print $langs->trans("SorryInstanceInMaintenance", dol_escape_htmltag($instance));
+}
 print '<br>';
 if (! empty($contract->array_options['options_suspendmaintenance_message']) && $contract->array_options['options_suspendmaintenance_message'] != 'nomessage') {
 	print $langs->trans($contract->array_options['options_suspendmaintenance_message']).'<br>';
 }
 print '<br>';
-if ($instance) {
+if ($instance && $instance != 'myaccount') {
 	print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
 }
 print '<br>';

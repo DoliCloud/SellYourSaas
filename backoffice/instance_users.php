@@ -51,9 +51,11 @@ $confirm	= GETPOST('confirm', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 $id			= GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
-
 $error = 0; $errors = array();
 
+if (!$sortorder) {
+	$sortorder = "ASC";
+}
 
 if ($action != 'create') {
 	$object = new Contrat($db);
@@ -106,6 +108,7 @@ if (empty($reshook)) {
 		header("Location: ".$backtopage);
 		exit;
 	}
+	include DOL_DOCUMENT_ROOT.'/core/actions_changeselectedfields.inc.php';
 
 	if ($action == "createsupportuser") {
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
@@ -440,13 +443,19 @@ if ($action == 'resetpassword') {
 	print $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&remoteid=' . GETPOST('remoteid', 'int'), $langs->trans('ResetPassword'), $langs->trans('ConfirmResetPassword'), 'confirm_resetpassword', $formquestion, 0, 1);
 }
 
+print '<form method="POST" id="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 if (!$error) {
+	print '<input type="hidden" name="action" value="list">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
+	print '<input type="hidden" name="id" value="'.$id.'">';
+	print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
 	print '<table class="border" width="100%">';
 
 	print_user_table($dbcustomerinstance, $object);
 
 	print "</table><br>";
 }
+print '</form>'."\n";
 
 
 // Application instance url
@@ -501,32 +510,57 @@ function print_user_table($newdb, $object)
 {
 	global $langs;
 	global $id;
+	$sortfield = GETPOST('sortfield', 'aZ09comma');
+	$sortorder = GETPOST('sortorder', 'aZ09comma');
+	$form = new Form($newdb);
+	$arrayfields = array(
+		'rowid'=>array('label'=>$langs->trans("ID"), 'checked'=>1, 'position'=>10),
+		'login'=>array('label'=>$langs->trans("Login"), 'checked'=>1, 'position'=>15),
+		'lastname'=>array('label'=>$langs->trans("Lastname"), 'checked'=>1, 'position'=>20),
+		'firstname'=>array('label'=>$langs->trans("Firstname"), 'checked'=>1, 'position'=>50),
+		'admin'=>array('label'=>$langs->trans("Admin"), 'checked'=>1, 'position'=>22),
+		'email'=>array('label'=>$langs->trans("Email"), 'checked'=>1, 'position'=>25),
+		'pass'=>array('label'=>$langs->trans("Pass"), 'checked'=>1, 'position'=>27),
+		'datec'=>array('label'=>$langs->trans("DateCreation"), 'checked'=>1, 'position'=>31),
+		'datem'=>array('label'=>$langs->trans("DateModification"), 'checked'=>1, 'position'=>32),
+		'datelastlogin'=>array('label'=>$langs->trans("DateLastLogin"), 'checked'=>1, 'position'=>35),
+		'entity'=>array('label'=>$langs->trans("Entity"), 'checked'=>1, 'position'=>100),
+		'fk_soc'=>array('label'=>$langs->trans("ParentsId"), 'checked'=>1, 'position'=>105),
+		'statut'=>array('label'=>$langs->trans("Status"), 'checked'=>1, 'position'=>110),
+	);
+	if (!$sortfield) {
+		$sortfield = key($arrayfields); // Set here default search field. By default 1st field in definition.
+	}
+	if (!$sortorder) {
+		$sortorder = "ASC";
+	}
 
+	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
+	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 	print '<table class="noborder" width="100%">';
 
+	$cssforfield = '';
 	// Nb of users
 	print '<tr class="liste_titre">';
 	print '<td>#</td>';
-	print '<td>'.$langs->trans("ID").'</td>';
-	print '<td>'.$langs->trans("Login").'</td>';
-	print '<td>'.$langs->trans("Lastname").'</td>';
-	print '<td>'.$langs->trans("Firstname").'</td>';
-	print '<td>'.$langs->trans("Admin").'</td>';
-	print '<td>'.$langs->trans("Email").'</td>';
-	print '<td>'.$langs->trans("Pass").'</td>';
-	print '<td>'.$langs->trans("DateCreation").'</td>';
-	print '<td>'.$langs->trans("DateModification").'</td>';
-	print '<td>'.$langs->trans("DateLastLogin").'</td>';
-	print '<td>'.$langs->trans("Entity").'</td>';
-	print '<td>'.$langs->trans("ParentsId").'</td>';
-	print '<td class="center">'.$langs->trans("Status").'</td>';
-	print '<td></td>';
+	foreach ($arrayfields as $key => $value) {
+		if ($key == 'statut') {
+			$cssforfield = ($cssforfield ? ' ' : '').'center';
+		}else{
+			$cssforfield = "";
+		}
+		if (!empty($arrayfields[$key]['checked'])) {
+			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+		}
+	}
+	print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";
 	print '</tr>';
 
 	if (is_object($newdb) && $newdb->connected) {
 		// Get user/pass of all users in database
 		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
-		$sql.=" FROM llx_user ORDER BY statut DESC";
+		$sql.=" FROM llx_user";
+		$sql .= $newdb->order($sortfield, $sortorder);
 
 		// TODO Set definition of SQL to get list of all users into the package
 		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
@@ -544,11 +578,13 @@ function print_user_table($newdb, $object)
 		$resql=$newdb->query($sql);
 		if (empty($resql)) {	// Alternative for Dolibarr 3.7-
 			$sql ="SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-			$sql.=" FROM llx_user ORDER BY statut DESC";
+			$sql.=" FROM llx_user ORDER";
+			$sql .= $newdb->order($sortfield, $sortorder);
 			$resql=$newdb->query($sql);
 			if (empty($resql)) {	// Alternative for Dolibarr 3.3-
 				$sql ="SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-				$sql.=" FROM llx_user ORDER BY statut DESC";
+				$sql.=" FROM llx_user";
+				$sql .= $newdb->order($sortfield, $sortorder);
 				$resql=$newdb->query($sql);
 			}
 		}
@@ -565,40 +601,37 @@ function print_user_table($newdb, $object)
 				print '<td>';
 				print ($i+1);
 				print '</td>';
-				print '<td>';
-				print $obj->rowid;
-				print '</td>';
-				print '<td class="nowraponall">';
-				print $obj->login;
-				print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
-				print '</td>';
-				print '<td>'.$obj->lastname.'</td>';
-				print '<td>'.$obj->firstname.'</td>';
-				print '<td>'.$obj->admin.'</td>';
-				print '<td>'.$obj->email.'</td>';
-				$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-				print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
-				print '<td>'.dol_print_date($newdb->jdate($obj->datec), 'dayhour').'</td>';
-				print '<td>'.dol_print_date($newdb->jdate($obj->datem), 'dayhour').'</td>';
-				print '<td>'.dol_print_date($newdb->jdate($obj->datelastlogin), 'dayhour').'</td>';
-				print '<td>'.$obj->entity.'</td>';
-				print '<td>';
-				$txtparent='';
-				if ($obj->fk_user > 0)      $txtparent.=($txtparent?'<br>':'').'Parent user: '.$obj->fk_user;
-				if ($obj->fk_soc > 0)       $txtparent.=($txtparent?'<br>':'').'Parent thirdparty: '.$obj->fk_soc;
-				if ($obj->fk_socpeople > 0) $txtparent.=($txtparent?'<br>':'').'Parent contact: '.$obj->fk_socpeople;
-				if ($obj->fk_member > 0)    $txtparent.=($txtparent?'<br>':'').'Parent member: '.$obj->fk_member;
-				print $txtparent;
-				print '</td>';
-				print '<td class="center">';
-				if ($obj->statut) {
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
-				} else {
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
+				foreach ($arrayfields as $key => $value) {
+					if (! empty($arrayfields[$key]['checked'])) {
+					    if ($key == 'statut') {
+					        if ($obj->statut) {
+					            print '<td class="center">';
+					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
+					            print '</td>';
+					        } else {
+					            print '<td class="center">';
+					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
+					            print '</td>';
+					        }
+					    } elseif ($key == 'pass') {
+					        $valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+					        print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
+					    } elseif ($key == 'login') {
+					        print '<td class="nowraponall">';
+					        print $obj->$key;
+					        print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
+					        print '</td>';
+					    } elseif ($key == 'email') {
+					        print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
+					    } elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
+					        print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
+					    } else {
+					        print '<td>'.$obj->$key.'</td>';
+					    }
+					}
 				}
-				print '</td>';
-				print '<td align="right">';
-				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&remoteid='.$obj->rowid.'&id='.$id.'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+				print '<td align="center">';
+				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&remoteid='.$obj->rowid.'&id='.$id.'&token='.newToken().'">'.img_picto('ResetPassword', 'object_technic').'</a>';
 				print '</td>';
 				print '</tr>';
 				$i++;
@@ -607,7 +640,7 @@ function print_user_table($newdb, $object)
 			dol_print_error($newdb);
 		}
 	} else {
-		print '<tr><td class="opacitymedium">'.$langs->trans("FailedToConnectMayBeOldInstance").'</td></tr>';
+		print '<tr><td class="opacitymedium" colspan="15">'.$langs->trans("FailedToConnectMayBeOldInstance").'</td></tr>';
 	}
 
 	print "</table>";

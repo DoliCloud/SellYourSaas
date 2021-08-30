@@ -21,22 +21,11 @@
  *		\brief      Page to create/edit/view packages
  */
 
-//if (! defined('NOREQUIREUSER'))          define('NOREQUIREUSER','1');
-//if (! defined('NOREQUIREDB'))            define('NOREQUIREDB','1');
-//if (! defined('NOREQUIRESOC'))           define('NOREQUIRESOC','1');
-//if (! defined('NOREQUIRETRAN'))          define('NOREQUIRETRAN','1');
 //if (! defined('NOSCANGETFORINJECTION'))  define('NOSCANGETFORINJECTION','1');			// Do not check anti CSRF attack test
 if (! defined('NOSCANPOSTFORINJECTION')) define('NOSCANPOSTFORINJECTION', '1');			// Do not check anti CSRF attack test
-//if (! defined('NOCSRFCHECK'))            define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test
-//if (! defined('NOSTYLECHECK'))           define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
-//if (! defined('NOTOKENRENEWAL'))         define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
-//if (! defined('NOREQUIREMENU'))          define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
-//if (! defined('NOREQUIREHTML'))          define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
-//if (! defined('NOREQUIREAJAX'))          define('NOREQUIREAJAX','1');         // Do not load ajax.lib.php library
-//if (! defined("NOLOGIN"))                define("NOLOGIN",'1');				// If this page is public (can be called outside logged session)
 
 // Load Dolibarr environment
-$res=0;
+$res = 0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
 if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
@@ -64,7 +53,9 @@ $ref        = GETPOST('ref', 'alpha');
 $action		= GETPOST('action', 'alpha');
 $confirm    = GETPOST('confirm', 'alpha');
 $cancel     = GETPOST('cancel', 'aZ09');
+$contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : 'myobjectcard'; // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha');
+$backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 
 // Initialize technical objects
 $object=new Packages($db);
@@ -75,21 +66,20 @@ $hookmanager->initHooks(array('packagescard'));     // Note that conf->hooks_mod
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 
-$search_array_options=$extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
+$search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
 
 // Initialize array of search criterias
-$search_all=trim(GETPOST("search_all", 'alpha'));
-$search=array();
+$search_all = GETPOST("search_all", 'alpha');
+$search = array();
 foreach ($object->fields as $key => $val) {
-	if (GETPOST('search_'.$key, 'alpha')) $search[$key]=GETPOST('search_'.$key, 'alpha');
+	if (GETPOST('search_'.$key, 'alpha')) {
+		$search[$key] = GETPOST('search_'.$key, 'alpha');
+	}
 }
 
-if (empty($action) && empty($id) && empty($ref)) $action='view';
-
-// Security check - Protection if external user
-//if ($user->societe_id > 0) accessforbidden();
-//if ($user->societe_id > 0) $socid = $user->societe_id;
-//$result = restrictedArea($user, 'sellyoursaas', $id);
+if (empty($action) && empty($id) && empty($ref)) {
+	$action='view';
+}
 
 // fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -98,37 +88,52 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';  // Must be include, not include_once  // Must be include, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 
 
+$permissiontoread = $user->rights->sellyoursaas->read;
+$permissiontoadd = $user->rights->sellyoursaas->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+$permissiontodelete = $user->rights->sellyoursaas->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissionnote = $user->rights->sellyoursaas->write; // Used by the include of actions_setnotes.inc.php
+$permissiondellink = $user->rights->sellyoursaas->write; // Used by the include of actions_dellink.inc.php
+$upload_dir = $conf->sellyoursaas->multidir_output[isset($object->entity) ? $object->entity : 1].'/packages';
+
+// Security check - Protection if external user
+//if ($user->societe_id > 0) accessforbidden();
+//if ($user->societe_id > 0) $socid = $user->societe_id;
+//$result = restrictedArea($user, 'sellyoursaas', $id);
 
 
 /*
- * ACTIONS
- *
- * Put here all code to do according to value of "action" parameter
+ * Actions
  */
 
-$parameters=array();
-$reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
-if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+$parameters = array();
+$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
 
 if (empty($reshook)) {
-	$error=0;
-
-	$permissiontoadd = $user->rights->sellyoursaas->write;
-	$permissiontodelete = $user->rights->sellyoursaas->delete;
+	$error = 0;
 
 	$backurlforlist = dol_buildpath('/sellyoursaas/packages_list.php', 1);
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
-			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) $backtopage = $backurlforlist;
-			else $backtopage = dol_buildpath('/sellyoursaas/packages_card.php', 1).'?id='.($id > 0 ? $id : '__ID__');
+			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
+				$backtopage = $backurlforlist;
+			}
+			else {
+				$backtopage = dol_buildpath('/sellyoursaas/packages_card.php', 1).'?id='.($id > 0 ? $id : '__ID__');
+			}
 		}
 	}
 
 	$triggermodname = 'SELLYOURSAAS_PACKAGE_MODIFY';
 
-	// Actions cancel, add, update or delete
+	// Actions cancel, add, update, update_extras, confirm_validate, confirm_delete, confirm_deleteline, confirm_clone, confirm_close, confirm_setdraft, confirm_reopen
 	include DOL_DOCUMENT_ROOT.'/core/actions_addupdatedelete.inc.php';
+
+	// Actions when linking object each other
+	include DOL_DOCUMENT_ROOT.'/core/actions_dellink.inc.php';
 
 	// Actions when printing a doc from card
 	include DOL_DOCUMENT_ROOT.'/core/actions_printing.inc.php';
@@ -143,31 +148,15 @@ if (empty($reshook)) {
 
 
 /*
- * VIEW
- *
- * Put here all code to build page
+ * View
  */
 
-$form=new Form($db);
-$formfile=new FormFile($db);
+$form = new Form($db);
+$formfile = new FormFile($db);
 
-llxHeader('', 'Packages', '');
+$title = $langs->trans('Packages');
 
-// Example : Adding jquery code
-print '<script type="text/javascript" language="javascript">
-jQuery(document).ready(function() {
-	function init_myfunc()
-	{
-		jQuery("#myid").removeAttr(\'disabled\');
-		jQuery("#myid").attr(\'disabled\',\'disabled\');
-	}
-	init_myfunc();
-	jQuery("#mybutton").click(function() {
-		init_myfunc();
-	});
-});
-</script>';
-
+llxHeader('', $title, '');
 
 // Part to create
 if ($action == 'create') {
@@ -178,24 +167,24 @@ if ($action == 'create') {
 	print '<input type="hidden" name="action" value="add">';
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 
-	dol_fiche_head(array(), '');
-
-	print '<table class="border centpercent">'."\n";
+	print dol_get_fiche_head(array(), '');
+	
+	print '<table class="border centpercent tableforfieldcreate">'."\n";
 
 	// Common attributes
-	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_add.tpl.php';
+	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_add.tpl.php';
 
 	// Other attributes
-	include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_add.tpl.php';
+	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_add.tpl.php';
 
 	print '</table>'."\n";
 
-	dol_fiche_end();
+	print dol_get_fiche_end();
 
 	print '<div class="center">';
 	print '<input type="submit" class="button" name="add" value="'.dol_escape_htmltag($langs->trans("Create")).'">';
 	print '&nbsp; ';
-	print '<input type="'.($backtopage?"submit":"button").'" class="button" name="cancel" value="'.dol_escape_htmltag($langs->trans("Cancel")).'"'.($backtopage?'':' onclick="javascript:history.go(-1)"').'>';	// Cancel for create does not post form if we don't know the backtopage
+	print '<input type="'.($backtopage ? "submit" : "button").'" class="button button-cancel" name="cancel" value="'.dol_escape_htmltag($langs->trans("Cancel")).'"'.($backtopage ? '' : ' onclick="javascript:history.go(-1)"').'>'; // Cancel for create does not post form if we don't know the backtopage
 	print '</div>';
 
 	print '</form>';
@@ -208,23 +197,28 @@ if (($id || $ref) && $action == 'edit') {
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="update">';
-	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 	print '<input type="hidden" name="id" value="'.$object->id.'">';
+	if ($backtopage) {
+		print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
+	}
+	if ($backtopageforcancel) {
+		print '<input type="hidden" name="backtopageforcancel" value="'.$backtopageforcancel.'">';
+	}
 
-	dol_fiche_head();
+	print dol_get_fiche_head();
 
-	print '<table class="border centpercent">'."\n";
+	print '<table class="border centpercent tableforfieldedit">'."\n";
 
 	// Common attributes
-	include DOL_DOCUMENT_ROOT . '/core/tpl/commonfields_edit.tpl.php';
+	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_edit.tpl.php';
 
 	// Other attributes
-	include DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_edit.tpl.php';
+	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_edit.tpl.php';
 
 	print '</table>';
 
-	dol_fiche_end();
-
+	print dol_get_fiche_end();
+	
 	print '<div class="center"><input type="submit" class="button" name="save" value="'.$langs->trans("Save").'">';
 	print ' &nbsp; <input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
 	print '</div>';
@@ -234,10 +228,10 @@ if (($id || $ref) && $action == 'edit') {
 
 // Part to show record
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
-	$res = $object->fetch_optionals($object->id);
-
+	$res = $object->fetch_optionals();
+	
 	$head = packagesPrepareHead($object);
-	dol_fiche_head($head, 'card', $langs->trans("Packages"), -1, 'label');
+	print dol_get_fiche_head($head, 'card', $langs->trans("Packages"), -1, 'label');
 
 	$formconfirm = '';
 
@@ -257,20 +251,25 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	if ($action == 'xxx') {
 		$formquestion=array();
 		/*
-			$formquestion = array(
-				// 'text' => $langs->trans("ConfirmClone"),
-				// array('type' => 'checkbox', 'name' => 'clone_content', 'label' => $langs->trans("CloneMainAttributes"), 'value' => 1),
-				// array('type' => 'checkbox', 'name' => 'update_prices', 'label' => $langs->trans("PuttingPricesUpToDate"), 'value' => 1),
-				// array('type' => 'other',    'name' => 'idwarehouse',   'label' => $langs->trans("SelectWarehouseForStockDecrease"), 'value' => $formproduct->selectWarehouses(GETPOST('idwarehouse')?GETPOST('idwarehouse'):'ifone', 'idwarehouse', '', 1))
-		}*/
+		$forcecombo=0;
+		if ($conf->browser->name == 'ie') $forcecombo = 1;	// There is a bug in IE10 that make combo inside popup crazy
+		$formquestion = array(
+			// 'text' => $langs->trans("ConfirmClone"),
+			// array('type' => 'checkbox', 'name' => 'clone_content', 'label' => $langs->trans("CloneMainAttributes"), 'value' => 1),
+			// array('type' => 'checkbox', 'name' => 'update_prices', 'label' => $langs->trans("PuttingPricesUpToDate"), 'value' => 1),
+			// array('type' => 'other',    'name' => 'idwarehouse',   'label' => $langs->trans("SelectWarehouseForStockDecrease"), 'value' => $formproduct->selectWarehouses(GETPOST('idwarehouse')?GETPOST('idwarehouse'):'ifone', 'idwarehouse', '', 1, 0, 0, '', 0, $forcecombo))
+		);
+		*/
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('XXX'), $text, 'confirm_xxx', $formquestion, 0, 1, 220);
 	}
 
-	if (! $formconfirm) {
-		$parameters = array('lineid' => $lineid);
-		$reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
-		if (empty($reshook)) $formconfirm.=$hookmanager->resPrint;
-		elseif ($reshook > 0) $formconfirm=$hookmanager->resPrint;
+	// Call Hook formConfirm
+	$parameters = array('formConfirm' => $formconfirm, 'lineid' => $lineid);
+	$reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+	if (empty($reshook)) {
+		$formconfirm .= $hookmanager->resPrint;
+	} elseif ($reshook > 0) {
+		$formconfirm = $hookmanager->resPrint;
 	}
 
 	// Print form confirm
@@ -279,9 +278,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="' .dol_buildpath('/sellyoursaas/packages_list.php', 1) . '?restore_lastsearch_values=1' . (! empty($socid) ? '&socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
+	$linkback = '<a href="'.dol_buildpath('/sellyoursaas/packages_list.php', 1).'?restore_lastsearch_values=1' . (! empty($socid) ? '&socid=' . $socid : '') . '">' . $langs->trans("BackToList") . '</a>';
 
-	$morehtmlref='<div class="refidno">';
+	$morehtmlref = '<div class="refidno">';
 	/*
 	// Ref bis
 	$morehtmlref.=$form->editfieldkey("RefBis", 'ref_client', $object->ref_client, $object, $user->rights->sellyoursaas->creer, 'string', '', 0, 1);
@@ -323,7 +322,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		}
 	}
 	*/
-	$morehtmlref.='</div>';
+	$morehtmlref .= '</div>';
 
 
 	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
@@ -332,7 +331,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<div class="fichecenter">';
 	print '<div class="fichehalfleft">';
 	print '<div class="underbanner clearboth"></div>';
-	print '<table class="border centpercent">'."\n";
+	print '<table class="border centpercent tableforfield">'."\n";
 
 	// Common attributes
 	$keyforbreak = 'conffile1';
@@ -345,10 +344,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '</div>';
 	print '</div>';
 
-	print '<div class="clearboth"></div><br>';
+	print '<div class="clearboth"></div>';
 
-	dol_fiche_end();
-
+	print dol_get_fiche_end();
+	
 
 	// Buttons for actions
 	if ($action != 'presend' && $action != 'editline') {
@@ -403,32 +402,46 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	if ($action != 'presend') {
 		print '<div class="fichecenter"><div class="fichehalfleft">';
 		print '<a name="builddoc"></a>'; // ancre
+
+		$includedocgeneration = 0;
+		
 		// Documents
-		$comref = dol_sanitizeFileName($object->ref);
-		$relativepath = $comref . '/' . $comref . '.pdf';
-		$filedir = $conf->sellyoursaas->dir_output . '/' . $comref;
-		$urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
-		$genallowed = $user->rights->sellyoursaas->creer;
-		$delallowed = $user->rights->sellyoursaas->supprimer;
-		$model_pdf = ($object->model_pdf ? $object->model_pdf : $object->modelpdf);
-		print $formfile->showdocuments('sellyoursaas', $comref, $filedir, $urlsource, $genallowed, $delallowed, $model_pdf, 1, 0, 0, 28, 0, '', '', '', $soc->default_lang);
-
-
+		if ($includedocgeneration) {
+			$objref = dol_sanitizeFileName($object->ref);
+			$relativepath = $objref.'/'.$objref.'.pdf';
+			$filedir = $conf->mymodule->dir_output.'/'.$object->element.'/'.$objref;
+			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
+			$genallowed = $user->rights->mymodule->myobject->read; // If you can read, you can build the PDF to read content
+			$delallowed = $user->rights->mymodule->myobject->write; // If you can create/edit, you can remove a file on card
+			print $formfile->showdocuments('mymodule:MyObject', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
+		}
+		
 		// Show links to link elements
-		$linktoelem = $form->showLinkToObjectBlock($object, null, array('packages'));
+		$linktoelem = $form->showLinkToObjectBlock($object, null, array('myobject'));
 		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
-
+		
 
 		print '</div><div class="fichehalfright"><div class="ficheaddleft">';
 
+		$MAXEVENT = 10;
+		
+		$morehtmlright = '<a href="'.dol_buildpath('/mymodule/myobject_agenda.php', 1).'?id='.$object->id.'">';
+		$morehtmlright .= $langs->trans("SeeAll");
+		$morehtmlright .= '</a>';
+		
 		// List of actions on element
-		include_once DOL_DOCUMENT_ROOT . '/core/class/html.formactions.class.php';
+		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
 		$formactions = new FormActions($db);
-		$somethingshown = $formactions->showactions($object, 'packages', $socid, 1);
-
+		$somethingshown = $formactions->showactions($object, $object->element.'@'.$object->module, (is_object($object->thirdparty) ? $object->thirdparty->id : 0), 1, '', $MAXEVENT, '', $morehtmlright);
+		
 		print '</div></div></div>';
 	}
 
+	//Select mail models is same action as presend
+	if (GETPOST('modelselected')) {
+		$action = 'presend';
+	}
+	
 	// Presend form
 	$modelmail='packages';
 	$defaulttopic='Information';
@@ -437,7 +450,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/card_presend.tpl.php';
 }
-
 
 // End of page
 llxFooter();

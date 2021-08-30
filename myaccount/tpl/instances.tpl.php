@@ -231,20 +231,14 @@ if (count($listofcontractid) == 0) {				// Should not happen
 
 				      <div class="portlet-title">
 				        <div class="caption">';
+
 		print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 		print '<input type="hidden" name="token" value="'.newToken().'">';
-
-		// Instance name
-		//print '<a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">';
-		print '<span class="bold uppercase">'.$instancename.'</span>';
-		//print '</a>';
-		print'<span class="caption-helper"> - '.$planlabel.'</span>	<!-- This is product ref -->';
 
 		// Instance status
 		print '<span class="caption-helper floatright clearboth">';
 		//print $langs->trans("Status").' : ';
 		print '<!-- status = '.dol_escape_htmltag($statuslabel).' -->';
-
 		print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
 		if ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
 		elseif ($statuslabel == 'done') print $langs->trans("Alive");
@@ -252,21 +246,34 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");
 		elseif ($statuslabel == 'unreachable') print $langs->trans("Unreachable").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
 		else print $statuslabel;
-		print '</span></span><br>';
+		print '</span></span>';
+
+		// Instance name
+		print '<span class="bold uppercase">'.$instancename.'</span>';
+		print '<span class="caption-helper"> - '.$planlabel.'</span>	<!-- This is product ref -->';
+
+		print '<br>';
 
 		print '<p style="padding-top: 8px;'.($statuslabel == 'undeployed'?' margin-bottom: 0px':'').'" class="clearboth">';
+
+		// ID
+		print '<span class="caption-helper small"><span class="opacitymedium">'.$langs->trans("ID").' : </span><span class="font-green-sharp">'.$contract->ref.'</span></span><br>';
 
 		// URL
 		if ($statuslabel != 'undeployed') {
 			print '<span class="caption-helper"><span class="opacitymedium">';
 			if ($conf->dol_optimize_smallscreen) print $langs->trans("URL");
 			else print $langs->trans("YourURLToGoOnYourAppInstance");
-			print ' : </span><a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">https://'.$contract->ref_customer.'</a>';
+			print ' : </span>';
+			print '<a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">';
+			print 'https://'.$contract->ref_customer;
+			print img_picto($langs->trans("YourURLToGoOnYourAppInstance"), 'globe', 'class="paddingleft"');
+			print '</a>';
 			print '</span><br>';
 		}
 
-		print '<!-- <span class="caption-helper"><span class="opacitymedium">'.$langs->trans("ID").' : '.$contract->ref.'</span></span><br> -->';
 		print '<span class="caption-helper">';
+		print "\n";
 		if ($contract->array_options['options_deployment_status'] == 'processing') {
 			print '<span class="opacitymedium">'.$langs->trans("DateStart").' : </span><span class="bold">'.dol_print_date($contract->array_options['options_deployment_date_start'], 'dayhour').'</span>';
 			if (($now - $contract->array_options['options_deployment_date_start']) > 120) {	// More than 2 minutes ago
@@ -279,8 +286,8 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '<br>';
 			print '<span class="opacitymedium">'.$langs->trans("UndeploymentDate").' : </span><span class="bold">'.dol_print_date($contract->array_options['options_undeployment_date'], 'dayhour').'</span>';
 		}
-		print '
-							</span><br>';
+		print "\n";
+		print '</span><br>';
 
 		// Calculate price on invoicing
 		$contract->fetchObjectLinked();
@@ -484,7 +491,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '</div>';
 		}
 
-								// Add new option
+		// Add new option
 		if ($statuslabel != 'processing' && $statuslabel != 'undeployed') {
 			print '<div class="resource inline-block boxresource opacitymedium small">';
 			print '<br><br><br>';
@@ -492,10 +499,10 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '</div>';
 		}
 
-								print '<br><br>';
+		print '<br><br>';
 
-								// Show the current Plan (with link to change it)
-								print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
+		// Show the current Plan (with link to change it)
+		print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
 		if ($action == 'changeplan' && $planid > 0 && $id == GETPOST('id', 'int')) {
 			print '<input type="hidden" name="mode" value="instances"/>';
 			print '<input type="hidden" name="action" value="updateplan" />';
@@ -543,10 +550,10 @@ if (count($listofcontractid) == 0) {				// Should not happen
 				}
 			}
 		}
-								print '</span>';
-								print '<br>';
+		print '</span>';
+		print '<br>';
 
-								// Billing
+		// Billing
 		if ($statuslabel != 'undeployed') {
 			print '<!-- Billing information of contract -->'."\n";
 			print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.$langs->trans("Billing").' : </span>';
@@ -617,7 +624,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			print '</span>';
 		}
 
-								print '
+		print '
 								  </div>
 				              </div>
 
@@ -693,7 +700,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			}
 		}
 
-								print '
+		print '
 				              </div> <!-- END TAB SSH PANE -->
 
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
@@ -761,7 +768,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			}
 		}
 
-								print '
+		print '
 				              </div> <!-- END TAB DB PANE -->
 
 				            <div class="tab-pane" id="tab_danger_'.$contract->id.'">
@@ -783,7 +790,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 										<input type="text" required="required" class="urlofinstancetodestroy" name="urlofinstancetodestroy" value="'.GETPOST('urlofinstancetodestroy', 'alpha').'" placeholder="'.$langs->trans("NameOfInstanceToDestroy").'" autofocus>
 									</p>';
 		}
-								print '
+		print '
 								<p class="center">
 									<input type="hidden" name="mode" value="instances"/>
 									<input type="hidden" name="action" value="undeploy" />
@@ -887,6 +894,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 	$MAXINSTANCES = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
 if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 	if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+		print '<!-- RegistrationSuspendedForTheMomentPleaseTryLater -->'."\n";
 		print '<div class="alert alert-warning" style="margin-bottom: 0px">';
 		print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
 		print '</div>';
@@ -904,12 +912,12 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 
         			<div class="horizontal-fld clearboth margintoponly">
         			<div class="control-group required">
-        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" required />
+        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128" required />
         			</div>
         			</div>
         			<div class="horizontal-fld margintoponly">
         			<div class="control-group required">
-        			<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" required />
+        			<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
         			</div>
         			</div>
         			</div> <!-- end group -->

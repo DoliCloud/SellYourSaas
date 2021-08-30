@@ -38,9 +38,9 @@ dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
  */
 class SellYourSaasUtils
 {
-	var $db;							//!< To store db handler
-	var $error;							//!< To return error code (or message)
-	var $errors=array();				//!< To return several error codes (or messages)
+	public $db;							//!< To store db handler
+	public $error;							//!< To return error code (or message)
+	public $errors = array();				//!< To return several error codes (or messages)
 
 	public $stripechargedone;
 	public $stripechargeerror;
@@ -51,7 +51,7 @@ class SellYourSaasUtils
 	 *
 	 *  @param	DoliDb		$db      Database handler
 	 */
-	function __construct($db)
+	public function __construct($db)
 	{
 		$this->db = $db;
 		return 1;
@@ -94,7 +94,7 @@ class SellYourSaasUtils
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE f.fk_statut = '.Facture::STATUS_DRAFT;
 		$sql.= " AND se.fk_object = f.fk_soc AND se.dolicloud = 'yesv2'";
-		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".$restrictonthirdpartyid;
+		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".((int) $restrictonthirdpartyid);
 		$sql.= " ORDER BY f.datef, f.rowid";
 
 		$resql = $this->db->query($sql);
@@ -803,7 +803,7 @@ class SellYourSaasUtils
 	 * @param   int                  $calledinmyaccountcontext  1=The payment is called in a myaccount GUI context. So we can ignore control on delayed payments.
 	 * @return	int					                 			0 if no error, >0 if error
 	 */
-	function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice = null, $includedraft = 0, $noemailtocustomeriferror = 0, $nocancelifpaymenterror = 0, $calledinmyaccountcontext = 0)
+	public function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice = null, $includedraft = 0, $noemailtocustomeriferror = 0, $nocancelifpaymenterror = 0, $calledinmyaccountcontext = 0)
 	{
 		global $conf, $mysoc, $user, $langs;
 
@@ -987,6 +987,8 @@ class SellYourSaasUtils
 
 					$nbhoursbetweentries    = (empty($conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES) ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
 					$nbdaysbeforeendoftries = (empty($conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES) ? 35 : $conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES);
+					$labeltouse = '';
+					$postactionmessages=array();
 
 					if ($resultthirdparty > 0 && ! empty($customer)) {
 						if (!$error && !empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now && empty($calledinmyaccountcontext)) {
@@ -1028,7 +1030,7 @@ class SellYourSaasUtils
 							}
 						}
 
-						if (!$error) {
+						if (!$error) {	// Payment was not canceled
 							$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
 							if ($stripecard) {  // Can be card_... (old mode) or pm_... (new mode)
 								$FULLTAG='INV='.$invoice->id.'-CUS='.$thirdparty->id;
@@ -1068,8 +1070,7 @@ class SellYourSaasUtils
 										$stripefailurecode='UnknownChargeError';
 										$stripefailuremessage=$e->getMessage();
 									}
-								} else // Using new SCA method
-								{
+								} else { // Using new SCA method
 									dol_syslog("* Create payment on card ".$stripecard->id.", amounttopay=".$amounttopay.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
 									// Create payment intent and charge payment (confirmnow = true)
@@ -1108,8 +1109,6 @@ class SellYourSaasUtils
 									//var_dump("stripefailurecode=".$stripefailurecode." stripefailuremessage=".$stripefailuremessage." stripefailuredeclinecode=".$stripefailuredeclinecode);
 									//exit;
 								}
-
-								$postactionmessages=array();
 
 								// Return $charge = array('id'=>'ch_XXXX', 'status'=>'succeeded|pending|failed', 'failure_code'=>, 'failure_message'=>...)
 								if (empty($charge) || $charge->status == 'failed') {
@@ -1197,7 +1196,7 @@ class SellYourSaasUtils
 										$error++;
 										$errorforinvoice++;
 									}
-									$paiement->paiementid   = $paymentTypeId;
+									$paiement->paiementid = $paymentTypeId;
 									$paiement->num_paiement = '';
 									$paiement->num_payment = '';
 									// Add a comment with keyword 'SellYourSaas' in text. Used by trigger.
@@ -1261,113 +1260,13 @@ class SellYourSaasUtils
 
 								$object = $invoice;
 
-								// Send email
-								include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-								$formmail=new FormMail($this->db);
-
-								// Set output language
-								$outputlangs = new Translate('', $conf);
-								$outputlangs->setDefaultLang(empty($object->thirdparty->default_lang) ? $mysoc->default_lang : $object->thirdparty->default_lang);
-								$outputlangs->loadLangs(array("main", "members", "bills"));
-
-								// Get email content from templae
-								$arraydefaultmessage=null;
-
+								// Send emails
+								$labeltouse = 'InvoicePaymentSuccess';
 								$sendemailtocustomer = 1;
 
 								if (empty($charge) || $charge->status == 'failed') {
 									$labeltouse = 'InvoicePaymentFailure';
 									if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
-								} else {
-									$labeltouse = 'InvoicePaymentSuccess';
-								}
-
-								if ($sendemailtocustomer) {
-									dol_syslog("* Send email with result of payment - ".$labeltouse);
-
-									if (! empty($labeltouse)) $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
-
-									if (! empty($labeltouse) && is_object($arraydefaultmessage) && $arraydefaultmessage->id > 0) {
-										$subject = $arraydefaultmessage->topic;
-										$msg     = $arraydefaultmessage->content;
-									}
-
-									$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
-
-									$substitutionarray['__SELLYOURSAAS_PAYMENT_ERROR_DESC__']=$stripefailurecode.' '.$stripefailuremessage;
-
-									complete_substitutions_array($substitutionarray, $outputlangs, $object);
-
-									// Set the property ->ref_customer with ref_customer of contract so __REFCLIENT__ will be replaced in email content
-									// Search contract linked to invoice
-									$foundcontract = null;
-									$invoice->fetchObjectLinked();
-									if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
-										//dol_sort_array($object->linkedObjects['facture'], 'date');
-										foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-											$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
-											$substitutionarray['__REFCLIENT__']=$contract->ref_customer;
-											$foundcontract = $contract;
-											break;
-										}
-									}
-
-									dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-
-									$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
-									if ($urlforsellyoursaasaccount) {
-										$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-										if ($tmpforurl) {
-											$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
-										} else {
-											$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
-										}
-									}
-
-									$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
-									$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
-
-									// Attach a file ?
-									$file='';
-									$listofpaths=array();
-									$listofnames=array();
-									$listofmimes=array();
-									if (is_object($invoice)) {
-										$invoicediroutput = $conf->facture->dir_output;
-										$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
-										$file = $fileparams['fullname'];
-										$file = '';		// Disable attachment of invoice in emails
-
-										if ($file) {
-											$listofpaths=array($file);
-											$listofnames=array(basename($file));
-											$listofmimes=array(dol_mimetype($file));
-										}
-									}
-									$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-
-
-									$trackid='inv'.$invoice->id;
-									$moreinheader='X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
-
-									// Send email (substitutionarray must be done just before this)
-									include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-									$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, '', '', 0, -1, '', '', $trackid, $moreinheader);
-									if ($mailfile->sendfile()) {
-										$result = 1;
-									} else {
-										$this->error=$langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
-										$result = -1;
-									}
-
-									if ($result < 0) {
-										$errmsg=$this->error;
-										$postactionmessages[] = $errmsg;
-										$ispostactionok = -1;
-									} else {
-										if ($file) $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' with invoice document attached: '.$file.', language = '.$outputlangs->defaultlang.')';
-										else $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' without any attached document, language = '.$outputlangs->defaultlang.')';
-									}
 								}
 
 								// Track an event
@@ -1380,73 +1279,216 @@ class SellYourSaasUtils
 									$actioncode='PAYMENT_STRIPE_OK';
 									$extraparams='';
 								}
-
-								dol_syslog("* Record event for payment result");
-
-								// Insert record of payment (success or error)
-								$actioncomm = new ActionComm($this->db);
-
-								$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-								$actioncomm->code         = 'AC_'.$actioncode;
-								$actioncomm->label        = $description;
-								$actioncomm->note_private = join(",\n", $postactionmessages);
-								$actioncomm->fk_project   = $invoice->fk_project;
-								$actioncomm->datep        = $now;
-								$actioncomm->datef        = $now;
-								$actioncomm->percentage   = -1;   // Not applicable
-								$actioncomm->socid        = $thirdparty->id;
-								$actioncomm->contactid    = 0;
-								$actioncomm->authorid     = $user->id;   // User saving action
-								$actioncomm->userownerid  = $user->id;	// Owner of action
-								// Fields when action is en email (content should be added into note)
-								/*$actioncomm->email_msgid = $object->email_msgid;
-								 $actioncomm->email_from  = $object->email_from;
-								 $actioncomm->email_sender= $object->email_sender;
-								 $actioncomm->email_to    = $object->email_to;
-								 $actioncomm->email_tocc  = $object->email_tocc;
-								 $actioncomm->email_tobcc = $object->email_tobcc;
-								 $actioncomm->email_subject = $object->email_subject;
-								 $actioncomm->errors_to   = $object->errors_to;*/
-								$actioncomm->fk_element   = $invoice->id;
-								$actioncomm->elementtype  = $invoice->element;
-								$actioncomm->extraparams  = dol_trunc($extraparams, 250);
-
-								$actioncomm->create($user);
-
-								$this->description=$description;
-								$this->postactionmessages=$postactionmessages;
 							} else {
 								$error++;
 								$errorforinvoice++;
 								dol_syslog("No card or payment method found for this stripe customer ".$customer->id, LOG_WARNING);
 								$this->errors[]='Failed to get card | payment method for stripe customer = '.$customer->id;
+
+								$labeltouse = 'InvoicePaymentFailure';
+								$sendemailtocustomer = 1;
+								if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+
+								$description = 'Failed to find or use the payment mode - no credit card defined for the customer account';
+								$stripefailurecode = 'BADPAYMENTMODE';
+								$stripefailuremessage = 'Failed to find or use the payment mode - no credit card defined for the customer account';
+								$postactionmessages[] = $description.' ('.$stripearrayofkeys['publishable_key'].')';
+
+								$object = $invoice;
+
+								$actioncode='PAYMENT_STRIPE_KO';
+								$extraparams='';
 							}
+						} else {
+							// If error because payment was canceled for a logical reason, we do nothing (no email and no event added)
+							$labeltouse = '';
+							$sendemailtocustomer = 0;
+
+							$description = '';
+							$stripefailurecode = '';
+							$stripefailuremessage = '';
+
+							$object = $invoice;
+
+							$actioncode='';
+							$extraparams='';
 						}
-					} else {
+					} else {	// Else of the   if ($resultthirdparty > 0 && ! empty($customer)) {
 						if ($resultthirdparty <= 0) {
-							dol_syslog('Failed to load customer for thirdparty_id = '.$thirdparty->id, LOG_WARNING);
+							dol_syslog('SellYourSaasUtils Failed to load customer for thirdparty_id = '.$thirdparty->id, LOG_WARNING);
 							$this->errors[]='Failed to load customer for thirdparty_id = '.$thirdparty->id;
-						} else // $customer stripe not found
-						{
-							dol_syslog('Failed to get Stripe customer id for thirdparty_id = '.$thirdparty->id." in mode ".$servicestatus." in Stripe env ".$stripearrayofkeysbyenv[$servicestatus]['publishable_key'], LOG_WARNING);
+						} else { // $customer stripe not found
+							dol_syslog('SellYourSaasUtils Failed to get Stripe customer id for thirdparty_id = '.$thirdparty->id." in mode ".$servicestatus." in Stripe env ".$stripearrayofkeysbyenv[$servicestatus]['publishable_key'], LOG_WARNING);
 							$this->errors[]='Failed to get Stripe customer id for thirdparty_id = '.$thirdparty->id." in mode ".$servicestatus." in Stripe env ".$stripearrayofkeysbyenv[$servicestatus]['publishable_key'];
 						}
 						$error++;
 						$errorforinvoice++;
+
+						$labeltouse = 'InvoicePaymentFailure';
+						$sendemailtocustomer = 1;
+						if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+
+						$description = 'Failed to find or use your payment mode (no payment mode for this customer id)';
+						$stripefailurecode = 'BADPAYMENTMODE';
+						$stripefailuremessage = 'Failed to find or use your payment mode (no payment mode for this customer id)';
+						$postactionmessages=array();
+
+						$object = $invoice;
+
+						$actioncode='PAYMENT_STRIPE_KO';
+						$extraparams='';
 					}
+
+					// Send email + create action after
+					if ($sendemailtocustomer && $labeltouse) {
+						dol_syslog("* Send email with result of payment - ".$labeltouse);
+
+						// Set output language
+						$outputlangs = new Translate('', $conf);
+						$outputlangs->setDefaultLang(empty($object->thirdparty->default_lang) ? $mysoc->default_lang : $object->thirdparty->default_lang);
+						$outputlangs->loadLangs(array("main", "members", "bills"));
+
+						// Get email content from templae
+						$arraydefaultmessage=null;
+
+						include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+						$formmail=new FormMail($this->db);
+
+						if (! empty($labeltouse)) $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
+
+						if (! empty($labeltouse) && is_object($arraydefaultmessage) && $arraydefaultmessage->id > 0) {
+							$subject = $arraydefaultmessage->topic;
+							$msg     = $arraydefaultmessage->content;
+						}
+
+						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
+
+						$substitutionarray['__SELLYOURSAAS_PAYMENT_ERROR_DESC__']=$stripefailurecode.' '.$stripefailuremessage;
+
+						complete_substitutions_array($substitutionarray, $outputlangs, $object);
+
+						// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
+						// Search contract linked to invoice
+						$foundcontract = null;
+						$invoice->fetchObjectLinked();
+						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
+							//dol_sort_array($object->linkedObjects['facture'], 'date');
+							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
+								$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
+								$substitutionarray['__REFCLIENT__']=$contract->ref_customer;	// For backward compatibility
+								$substitutionarray['__REF_CLIENT__']=$contract->ref_customer;
+								$foundcontract = $contract;
+								break;
+							}
+						}
+
+						dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+
+						$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
+						if ($urlforsellyoursaasaccount) {
+							$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+							if ($tmpforurl) {
+								$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
+							} else {
+								$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
+							}
+						}
+
+						$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
+						$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
+
+						// Attach a file ?
+						$file='';
+						$listofpaths=array();
+						$listofnames=array();
+						$listofmimes=array();
+						if (is_object($invoice)) {
+							$invoicediroutput = $conf->facture->dir_output;
+							$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
+							$file = $fileparams['fullname'];
+							$file = '';		// Disable attachment of invoice in emails
+
+							if ($file) {
+								$listofpaths=array($file);
+								$listofnames=array(basename($file));
+								$listofmimes=array(dol_mimetype($file));
+							}
+						}
+						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+
+
+						$trackid='inv'.$invoice->id;
+						$moreinheader='X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
+
+						// Send email (substitutionarray must be done just before this)
+						include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+						$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, '', '', 0, -1, '', '', $trackid, $moreinheader);
+						if ($mailfile->sendfile()) {
+							$result = 1;
+						} else {
+							$this->error=$langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
+							$result = -1;
+						}
+
+						if ($result < 0) {
+							$errmsg=$this->error;
+							$postactionmessages[] = $errmsg;
+							$ispostactionok = -1;
+						} else {
+							if ($file) $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' with invoice document attached: '.$file.', language = '.$outputlangs->defaultlang.')';
+							else $postactionmessages[] = 'Email sent to thirdparty (to '.$invoice->thirdparty->email.' without any attached document, language = '.$outputlangs->defaultlang.')';
+						}
+					}
+
+					if ($description) {
+						dol_syslog("* Record event for payment result - ".$description);
+
+						// Insert record of payment (success or error)
+						$actioncomm = new ActionComm($this->db);
+
+						$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+						$actioncomm->code         = 'AC_'.$actioncode;
+						$actioncomm->label        = $description;
+						$actioncomm->note_private = join(",\n", $postactionmessages);
+						$actioncomm->fk_project   = $invoice->fk_project;
+						$actioncomm->datep        = $now;
+						$actioncomm->datef        = $now;
+						$actioncomm->percentage   = -1;   // Not applicable
+						$actioncomm->socid        = $thirdparty->id;
+						$actioncomm->contactid    = 0;
+						$actioncomm->authorid     = $user->id;   // User saving action
+						$actioncomm->userownerid  = $user->id;	// Owner of action
+						// Fields when action is a real email (content is already into note)
+						/*$actioncomm->email_msgid = $object->email_msgid;
+						 $actioncomm->email_from  = $object->email_from;
+						 $actioncomm->email_sender= $object->email_sender;
+						 $actioncomm->email_to    = $object->email_to;
+						 $actioncomm->email_tocc  = $object->email_tocc;
+						 $actioncomm->email_tobcc = $object->email_tobcc;
+						 $actioncomm->email_subject = $object->email_subject;
+						 $actioncomm->errors_to   = $object->errors_to;*/
+						$actioncomm->fk_element   = $invoice->id;
+						$actioncomm->elementtype  = $invoice->element;
+						$actioncomm->extraparams  = dol_trunc($extraparams, 250);
+
+						$actioncomm->create($user);
+					}
+
+					$this->description = $description;
+					$this->postactionmessages = $postactionmessages;
 				} catch (Exception $e) {
 					$error++;
 					$errorforinvoice++;
 					dol_syslog('Error '.$e->getMessage(), LOG_ERR);
 					$this->errors[]='Error '.$e->getMessage();
 				}
-			} else {
+			} else {	// If remain to pay is null
 				$error++;
 				$errorforinvoice++;
 				dol_syslog("Remain to pay is null for the invoice ".$invoice->id." ".$invoice->ref.". Why is the invoice not classified 'Paid' ?", LOG_WARNING);
 				$this->errors[]="Remain to pay is null for the invoice ".$invoice->id." ".$invoice->ref.". Why is the invoice not classified 'Paid' ?";
 			}
-		}
+		}	// End of loop on each invoice
 
 		// Payments are processed, and next batch will be to make renewal
 
@@ -1581,7 +1623,7 @@ class SellYourSaasUtils
 
 					// Update expiration date of instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 0);
 					dol_syslog('', 0, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
@@ -1630,7 +1672,7 @@ class SellYourSaasUtils
 
 							$comment = 'Refresh contract '.$object->ref." by doRenewalContracts";
 							// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines + linked template invoice
-							$result = $this->sellyoursaasRemoteAction('refresh', $object, 'admin', '', '', '0', $comment);	// This include add of event if qty has changed
+							$result = $this->sellyoursaasRemoteAction('refresh', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
 							if ($result <= 0) {
 								$contracterror[$object->id]=$object->ref;
 
@@ -1755,7 +1797,7 @@ class SellYourSaasUtils
 
 					// Update expiration date of instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 0);
 					dol_syslog('', 0, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
@@ -1813,7 +1855,7 @@ class SellYourSaasUtils
 								$this->errors=$this->errors;
 							} else {
 								$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
-								$sqlupdate.= ' WHERE fk_contrat = '.$object->id;
+								$sqlupdate.= ' WHERE fk_contrat = '.((int) $object->id);
 								$resqlupdate = $this->db->query($sqlupdate);
 								if ($resqlupdate) {
 									$contractprocessed[$object->id]=$object->ref;
@@ -2023,7 +2065,7 @@ class SellYourSaasUtils
 
 					// Get expiration date
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 1);
 					dol_syslog('', 0, -1);
 					$expirationdate = $tmparray['expirationdate'];
 
@@ -2156,7 +2198,7 @@ class SellYourSaasUtils
 										$now = dol_now();
 										if ($date_start < $now) {
 											dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-											$tmparray = sellyoursaasGetExpirationDate($srcobject);
+											$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 											$duration_value = $tmparray['duration_value'];
 											$duration_unit = $tmparray['duration_unit'];
 
@@ -2207,7 +2249,7 @@ class SellYourSaasUtils
 											$fk_parent_line = $result;
 										}
 
-										$tmpproduct->fetch($lines[$i]->fk_product);
+										$tmpproduct->fetch($lines[$i]->fk_product, '', '', '', 1, 1, 1);
 
 										dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
 										if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
@@ -2541,7 +2583,7 @@ class SellYourSaasUtils
 					// Undeploy now
 					$this->db->begin();
 
-					$tmparray = sellyoursaasGetExpirationDate($object);
+					$tmparray = sellyoursaasGetExpirationDate($object, 1);
 					$expirationdate = $tmparray['expirationdate'];
 
 					$remotetouse = '';
@@ -2617,7 +2659,7 @@ class SellYourSaasUtils
 												$res = $invoicetodelete->delete($user);
 												//var_dump($idinvoice.' '.$res);
 											} else {
-												dol_syslog("The draft invoice ".$invoicetodelete->ref." has not a ref that match '(...)' so we do not delete it.", LOG_WAR);
+												dol_syslog("The draft invoice ".$invoicetodelete->ref." has not a ref that match '(...)' so we do not delete it.", LOG_WARNING);
 											}
 										}
 									}
@@ -2714,18 +2756,26 @@ class SellYourSaasUtils
 	 * Make a remote action on a contract (deploy/undeploy/suspend/suspendmaintenance/unsuspend/rename/backup...).
 	 * This function is called on Master but remote action is done on remote agent.
 	 *
-	 * @param	string					$remoteaction	Remote action ('suspend/unsuspend/rename'=change apache virtual file, 'deploy/undeploy'=create/delete database, 'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics)
+	 * @param	string					$remoteaction	Remote action:
+	 * 													'backup',
+	 * 													'deploy/deployall/undeploy/undeployall'=create/delete database,
+	 * 													'deployoption'=???
+	 * 													'rename'=change apache virtual host file
+	 * 													'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
+	 * 													'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics
+	 * 													'refreshmetrics'=loop on each line and read remote data and update qty of metrics
+	 * 													'recreateauthorizedkeys', 'deletelock', 'recreatelock'
 	 * @param 	Contrat|ContratLigne	$object			Object contract or contract line
-	 * @param	string					$appusername	App login
-	 * @param	string					$email			Initial email
-	 * @param	string					$password		Initial password
-	 * @param	string					$forceaddevent	'1'=Force to add event. If '0', add of event is done only for remoteaction = 'deploy','deployall','deployoption','rename','suspend','unsuspend','undeploy'
-	 *													$forceaddevent is set by caller but is overwrote to on when we detect qty has changed.
+	 * @param	string					$appusername	App login. Used for replacement of __APPUSERNAME__
+	 * @param	string					$email			Initial email. Used for replacement of __APPEMAIL__
+	 * @param	string					$password		Initial password. Used for replacement of __APPPASSWORD__
+	 * @param	string					$forceaddevent	'1'=Force to add event. If '0', add of event is done only for remoteaction = 'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy','undeployall'
+	 *													$forceaddevent is set by caller but is also overwrote to on when we detect qty has changed.
 	 * @param	string					$comment		Comment
 	 * @param   int                     $timeout        Time out in seconds
 	 * @return	int										<0 if KO (-1 = generic error, -2 = failed to connect), >0 if OK
 	 */
-	function sellyoursaasRemoteAction($remoteaction, $object, $appusername = 'admin', $email = '', $password = '', $forceaddevent = '0', $comment = '', $timeout = 90)
+	public function sellyoursaasRemoteAction($remoteaction, $object, $appusername = 'admin', $email = '', $password = '', $forceaddevent = '0', $comment = '', $timeout = 90)
 	{
 		global $conf, $langs, $user;
 
@@ -2749,7 +2799,8 @@ class SellYourSaasUtils
 		include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
-		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract, check install.lock file
+		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract
+		// No need for 'refreshmetrics' here.
 		if (in_array($remoteaction, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat') {
 			// SFTP refresh
 			if (function_exists("ssh2_connect")) {
@@ -2779,9 +2830,7 @@ class SellYourSaasUtils
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
 								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
 								$error++;
-							}
-
-							if (! $error) {
+							} else {
 								// Check if install.lock exists
 								$dir = $object->array_options['options_database_db'];
 								$fileinstalllock="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
@@ -2790,7 +2839,7 @@ class SellYourSaasUtils
 								$datelockfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
 								// Check if authorized_keys_support exists (created during os account creation, into skel dir)
-								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fstatlock=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
 								$dateauthorizedkeysfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
@@ -2809,49 +2858,50 @@ class SellYourSaasUtils
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
 								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
 								$error++;
-							}
-
-							// Update ssl certificate
-							// Dir .ssh must have rwx------ permissions
-							// File authorized_keys_support must have rw------- permissions
-							$dircreated=0;
-							$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh');
-							if ($result) {
-								$dircreated=1;
-							}	// Created
-							else {
-								$dircreated=0;
-							}	// Creation fails or already exists
-
-							// Check if authorized_key exists
-							//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
-							$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
-							$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
-
-							// Create authorized_keys_support file
-							if (empty($fstat['atime'])) {		// Failed to connect or file does not exists
-								$stream = fopen($filecert, 'w');
-								if ($stream === false) {
-									$error++;
-									$this->errors[] =$langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile");
-								} else {
-									$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
-									// Add public keys
-									fwrite($stream, $publickeystodeploy);
-
-									fclose($stream);
-									// File authorized_keys_support must have rw------- permissions
-									ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support', 0600);
-									$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
-								}
 							} else {
-								$error++;
-								$this->errors[] = $langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
+								// Update ssl certificate
+								// Dir .ssh must have rwx------ permissions
+								// File authorized_keys_support must have rw------- permissions
+								$dircreated=0;
+								$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh');
+								if ($result) {
+									// Created
+									$dircreated=1;
+								} else {
+									// Creation fails or already exists
+									$dircreated=0;
+								}
+
+								// Check if authorized_key exists
+								//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
+								$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
+								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
+
+								// Create authorized_keys_support file
+								if (empty($fstat['atime'])) {		// Failed to connect or file does not exists
+									$stream = fopen($filecert, 'w');
+									if ($stream === false) {
+										$error++;
+										$this->errors[] =$langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile");
+									} else {
+										$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
+										// Add public keys
+										fwrite($stream, $publickeystodeploy);
+
+										fclose($stream);
+										// File authorized_keys_support must have rw------- permissions
+										ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support', 0600);
+										$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
+									}
+								} else {
+									$error++;
+									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
+								}
+
+								$object->array_options['options_fileauthorizekey']=(empty($fstat['atime'])?'':$fstat['atime']);
+
+								if (! empty($fstat['atime'])) $result = $object->update($user);
 							}
-
-							$object->array_options['options_fileauthorizekey']=(empty($fstat['atime'])?'':$fstat['atime']);
-
-							if (! empty($fstat['atime'])) $result = $object->update($user);
 						}
 
 						if ($remoteaction == 'deletelock') {
@@ -2860,21 +2910,21 @@ class SellYourSaasUtils
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
 								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
 								$error++;
-							}
-
-							// Check if install.lock exists
-							$dir = $object->array_options['options_database_db'];
-							$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-							$result=ssh2_sftp_unlink($sftp, $filetodelete);
-
-							if (! $result) {
-								$error++;
-								$this->errors[] = $langs->transnoentitiesnoconv("DeleteFails");
 							} else {
-								$object->array_options['options_filelock'] = '';
-							}
-							if ($result) {
-								$result = $object->update($user, 1);
+								// Check if install.lock exists
+								$dir = $object->array_options['options_database_db'];
+								$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$result=ssh2_sftp_unlink($sftp, $filetodelete);
+
+								if (! $result) {
+									$error++;
+									$this->errors[] = $langs->transnoentitiesnoconv("DeleteFails");
+								} else {
+									$object->array_options['options_filelock'] = '';
+								}
+								if ($result) {
+									$result = $object->update($user, 1);
+								}
 							}
 						}
 
@@ -2884,35 +2934,36 @@ class SellYourSaasUtils
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
 								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
 								$error++;
-							}
-
-							// Check if install.lock exists
-							$dir = $object->array_options['options_database_db'];
-							//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-							$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-							$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
-							if (empty($fstat['atime'])) {
-								$stream = fopen($fileinstalllock, 'w');
-								//var_dump($stream);exit;
-								fwrite($stream, "// File to protect from install/upgrade.\n");
-								fclose($stream);
-								$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
 							} else {
-								$error++;
-								$this->errors[]=$langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
-							}
+								// Check if install.lock exists
+								$dir = $object->array_options['options_database_db'];
+								//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
+								if (empty($fstat['atime'])) {
+									$stream = fopen($fileinstalllock, 'w');
+									//var_dump($stream);exit;
+									fwrite($stream, "// File to protect from install/upgrade.\n");
+									fclose($stream);
+									$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
+								} else {
+									$error++;
+									$this->errors[]=$langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
+								}
 
-							$object->array_options['options_filelock']=(empty($fstat['atime'])?'':$fstat['atime']);
+								$object->array_options['options_filelock']=(empty($fstat['atime'])?'':$fstat['atime']);
 
-							if (! empty($fstat['atime'])) {
-								$result = $object->update($user, 1);
+								if (! empty($fstat['atime'])) {
+									$result = $object->update($user, 1);
+								}
 							}
 						}
 					}
 
 					if (function_exists('ssh2_disconnect')) {
 						if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
-							//ssh2_disconnect($connection);     // Hang on some config
+							dol_syslog("If it hangs or core dump due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
+							ssh2_disconnect($connection);     // Hang on some config
 						}
 						$connection = null;
 						unset($connection);
@@ -2921,8 +2972,8 @@ class SellYourSaasUtils
 						unset($connection);
 					}
 				} else {
-					dol_syslog('Failed to connect with ssh2_connect to '.$server, LOG_ERR);
-					$this->errors[]='Failed to connect with ssh2_connect to '.$server;
+					dol_syslog('Failed to connect with ssh2_connect to server '.$server.', server_port '.$server_port, LOG_ERR);
+					$this->errors[]='Failed to connect with ssh2_connect to '.$server.', server_port '.$server_port;
 					$error++;
 					$errorforsshconnect++;
 				}
@@ -2943,7 +2994,7 @@ class SellYourSaasUtils
 			}
 
 			$producttmp = new Product($this->db);
-			$producttmp->fetch($tmpobject->fk_product);
+			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
 
 			// Is it a product linked to a package ?
 			dol_include_once('/sellyoursaas/class/packages.class.php');
@@ -3019,20 +3070,20 @@ class SellYourSaasUtils
 					$archivedir = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH;
 				}
 
-				$generatedunixlogin    =$contract->array_options['options_username_os'];
-				$generatedunixpassword =$contract->array_options['options_password_os'];
-				$generateddbname       =$contract->array_options['options_database_db'];
-				$generateddbport       =($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
-				$generateddbusername   =$contract->array_options['options_username_db'];
-				$generateddbpassword   =$contract->array_options['options_password_db'];
-				$generateddbprefix     =($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
-				$generatedunixhostname =$contract->array_options['options_hostname_os'];
-				$generateddbhostname   =$contract->array_options['options_hostname_db'];
-				$generateduniquekey    =getRandomPassword(true);
+				$generatedunixlogin    = $contract->array_options['options_username_os'];
+				$generatedunixpassword = $contract->array_options['options_password_os'];
+				$generateddbname       = $contract->array_options['options_database_db'];
+				$generateddbport       = ($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
+				$generateddbusername   = $contract->array_options['options_username_db'];
+				$generateddbpassword   = $contract->array_options['options_password_db'];
+				$generateddbprefix     = ($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
+				$generatedunixhostname = $contract->array_options['options_hostname_os'];
+				$generateddbhostname   = $contract->array_options['options_hostname_db'];
+				$generateduniquekey    = getRandomPassword(true);
 
-				$sshaccesstype         =(empty($contract->array_options['options_sshaccesstype'])?0:$contract->array_options['options_sshaccesstype']);
-				$customurl             =$contract->array_options['options_custom_url'];
-				$customvirtualhostline =$contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
+				$sshaccesstype         = (empty($contract->array_options['options_sshaccesstype'])?0:$contract->array_options['options_sshaccesstype']);
+				$customurl             = $contract->array_options['options_custom_url'];
+				$customvirtualhostline = $contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
 				$SSLON='On';
 				$CERTIFFORCUSTOMDOMAIN =$customurl;
 				if ($CERTIFFORCUSTOMDOMAIN) {
@@ -3064,9 +3115,10 @@ class SellYourSaasUtils
 
 				$conf->global->MAIN_SECURITY_SALT = '';
 				dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
-				$password0 = dol_hash($password);
+				$password0 = dol_hash($password);	// deprecated. Depend on master setup.
 				$passwordmd5 = dol_hash($password, 'md5');
 				$passwordsha256 = dol_hash($password, 'sha256');
+				$passwordpassword_hash = dol_hash($password, 'password_hash');
 				dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = $savsalt;
@@ -3097,10 +3149,11 @@ class SellYourSaasUtils
 					'__APPEMAIL__'=>$email,
 					'__APPUSERNAME__'=>$appusername,
 					'__APPPASSWORD__'=>$password,
-					'__APPPASSWORD0__'=>$password0,
+					'__APPPASSWORD0__'=>$password0,		// deprecated
 					'__APPPASSWORDMD5__'=>$passwordmd5,
 					'__APPPASSWORDSHA256__'=>$passwordsha256,
-					'__APPPASSWORD0SALTED__'=>$password0salted,
+					'__APPPASSWORDPASSWORD_HASH__'=>$passwordpassword_hash,
+					'__APPPASSWORD0SALTED__'=>$password0salted,		// deprecated
 					'__APPPASSWORDMD5SALTED__'=>$passwordmd5salted,
 					'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,
 					'__APPUNIQUEKEY__'=>$generateduniquekey,
@@ -3254,8 +3307,8 @@ class SellYourSaasUtils
 				}
 			}
 
-			// remoteaction = refresh => update the qty for this line if it is a line that is a metric
-			if ($remoteaction == 'refresh') {
+			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
+			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				dol_syslog("Start refresh of nb of resources for a customer");
 
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
@@ -3326,6 +3379,7 @@ class SellYourSaasUtils
 					$password0 = dol_hash($password);
 					$passwordmd5 = dol_hash($password, 'md5');
 					$passwordsha256 = dol_hash($password, 'sha256');
+					$passwordpassword_hash = dol_hash($password, 'password_hash');
 					dol_syslog("passwordmd5=".$passwordmd5);
 
 					$conf->global->MAIN_SECURITY_SALT = $savsalt;
@@ -3351,10 +3405,11 @@ class SellYourSaasUtils
 						'__APPUSERNAME__'=>$appusername,
 						'__APPEMAIL__'=>$email,
 						'__APPPASSWORD__'=>$password,
-						'__APPPASSWORD0__'=>$password0,
+						'__APPPASSWORD0__'=>$password0,	// deprecated
 						'__APPPASSWORDMD5__'=>$passwordmd5,
 						'__APPPASSWORDSHA256__'=>$passwordsha256,
-						'__APPPASSWORD0SALTED__'=>$password0salted,
+						'__APPPASSWORDPASSWORD_HASH__'=>$passwordpassword_hash,
+						'__APPPASSWORD0SALTED__'=>$password0salted,	// deprecated
 						'__APPPASSWORDMD5SALTED__'=>$passwordmd5salted,
 						'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,
 						'__APPUNIQUEKEY__'=>$generateduniquekey,
@@ -3370,7 +3425,7 @@ class SellYourSaasUtils
 					$currentqty = $tmpobject->qty;
 					$newqty = null;
 
-					$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
+					$tmparray = explode(':', $producttmp->array_options['options_resource_formula'], 2);
 					if ($tmparray[0] === 'SQL') {
 						$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
@@ -3432,7 +3487,7 @@ class SellYourSaasUtils
 
 						// SFTP refresh
 						if (function_exists("ssh2_connect")) {
-							$server=$object->array_options['options_hostname_os'];
+							$server=$contract->array_options['options_hostname_os'];
 
 							$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 							$connection = @ssh2_connect($server, $server_port);
@@ -3441,7 +3496,7 @@ class SellYourSaasUtils
 
 								$newqty = 0;
 
-								$respass = @ssh2_auth_password($connection, $object->array_options['options_username_os'], $object->array_options['options_password_os']);
+								$respass = @ssh2_auth_password($connection, $contract->array_options['options_username_os'], $contract->array_options['options_password_os']);
 								if ($respass) {
 									$stream = @ssh2_exec($connection, $bashformula);
 									if ($stream) {
@@ -3457,7 +3512,7 @@ class SellYourSaasUtils
 											$resultstring .= stream_get_contents($errorStream);
 										}
 									} else {
-										dol_syslog("Get resource BASH failed to ssh2_exec");
+										dol_syslog("Get resource BASH failed to ssh2_exec", LOG_ERR);
 									}
 								} else {
 									dol_syslog("Get resource BASH failed to ssh2_auth_password");
@@ -3465,6 +3520,7 @@ class SellYourSaasUtils
 
 								if (function_exists('ssh2_disconnect')) {
 									if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+										dol_syslog("If it hangs or core dump due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
 										ssh2_disconnect($connection);     // Hang on some config
 									}
 									$connection = null;
@@ -3477,8 +3533,13 @@ class SellYourSaasUtils
 								dol_syslog("newqty = ".$newqty." resultstring = ".$resultstring);
 							} else {
 								$error++;
-								$this->error = 'ssh2_connect function not supported by your PHP';
+								$this->error = 'ssh2_connect failed to connect to server '.$server.', port '.$server_port;
+								dol_syslog($this->error, LOG_WARNING);
 							}
+						} else {
+							$error++;
+							$this->error = 'ssh2_connect function not supported by your PHP';
+							dol_syslog($this->error, LOG_ERR);
 						}
 					} elseif ($tmparray[0] === 'PHPMETHOD') {
 						// keyword : PHPMETHOD then function name to call, then args (use ':' as sep.)
@@ -3522,7 +3583,7 @@ class SellYourSaasUtils
 									}
 									if ($sometemplateinvoice > 1) {
 										$error++;
-										$this->error = 'Contract '.$object->ref.' has too many template invoice ('.$sometemplateinvoice.') so we dont know which one to update';
+										$this->error = 'Contract '.$contract->ref.' has too many template invoice ('.$sometemplateinvoice.') so we dont know which one to update';
 									} elseif (is_object($lasttemplateinvoice)) {
 										$sqlsearchline = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'facturedet_rec WHERE fk_facture = '.$lasttemplateinvoice->id.' AND fk_product = '.$tmpobject->fk_product;
 										$resqlsearchline = $this->db->query($sqlsearchline);
@@ -3530,7 +3591,7 @@ class SellYourSaasUtils
 											$num_search_line = $this->db->num_rows($resqlsearchline);
 											if ($num_search_line > 1) {
 												$error++;
-												$this->error = 'Contract '.$object->ref.' has a template invoice with id ('.$lasttemplateinvoice->id.') that has several lines for product id '.$tmpobject->fk_product.' so we don t know wich line to update qty';
+												$this->error = 'Contract '.$contract->ref.' has a template invoice with id ('.$lasttemplateinvoice->id.') that has several lines for product id '.$tmpobject->fk_product.' so we don t know on which line to update qty';
 											} else {
 												$objsearchline = $this->db->fetch_object($resqlsearchline);
 												if ($objsearchline) {	// If empty, it means, template invoice has no line corresponding to contract line
@@ -3687,7 +3748,7 @@ class SellYourSaasUtils
 	 * @param	string		$domainname		Domain name to select remote ip to deploy to (example: 'home.lan', 'dolicloud.com', ...)
 	 * @return	string						'' if KO, IP if OK
 	 */
-	function getRemoveServerDeploymentIp($domainname)
+	public function getRemoveServerDeploymentIp($domainname)
 	{
 		global $conf;
 

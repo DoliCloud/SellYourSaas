@@ -13,6 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
  * Call can be done with
  * reusecontractid=id of contract
  */
@@ -30,6 +31,7 @@
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 $sapi_type = php_sapi_name();
@@ -117,11 +119,11 @@ if (empty($user->id)) {
 }
 
 $action = GETPOST('action', 'alpha');
-$orgname = ucfirst(trim(GETPOST('orgName', 'alpha')));
-$email = trim(GETPOST('username', 'alpha'));
+$orgname = dol_trunc(ucfirst(trim(GETPOST('orgName', 'alpha'))), 250, 'right', 'UTF-8', 1);
+$email = dol_trunc(trim(GETPOST('username', 'alpha')), 255, 'right', 'UTF-8', 1);
 $domainemail = preg_replace('/^.*@/', '', $email);
-$password = trim(GETPOST('password', 'alpha'));
-$password2 = trim(GETPOST('password2', 'alpha'));
+$password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
+$password2 = dol_trunc(trim(GETPOST('password2', 'alpha')), 128, 'right', 'UTF-8', 1);
 $country_code = trim(GETPOST('address_country', 'alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
@@ -158,7 +160,7 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 		print "***** ".$script_file." *****\n";
 		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
 		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.sellyoursaasdomain password CustomerID [custom_domain]\n";
-		print "Example: ".$script_file." SERVICETODEPLOY myinstance.with.mysellyoursaasdomain.com mypassword 123 [myinstance.withold.mysellyoursaasdomain.com]\n";
+		print "Example: ".$script_file." SERVICETODEPLOY myinstance.withX.mysellyoursaasdomain.com mypassword 123 [myinstance.withold.mysellyoursaasdomain.com]\n";
 		exit(-1);
 	}
 	$CERTIFFORCUSTOMDOMAIN = $custmourl;
@@ -166,8 +168,8 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 		(! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt') || ! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.key') || ! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'-intermediate.crt'))) {
 		print "***** ".$script_file." *****\n";
 		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
-		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.sellyoursaasdomain password CustomerID [custom_domain]\n";
-		print 'Error:   A certificat file '.$conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'(.crt|.key|-intermediate.crt) not found.'."\n";
+		print "Usage:   ".$script_file." SERVICETODEPLOY shortnameinstance.mysellyoursaasdomain.com password CustomerID [custom_domain]\n";
+		print 'Error:   A certificate file '.$conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'(.crt|.key|-intermediate.crt) not found.'."\n";
 		exit(-1);
 	}
 	$password2 = $password;
@@ -175,7 +177,12 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 }
 
 
-$remoteip = getUserRemoteIP();
+if (substr($sapi_type, 0, 3) != 'cli') {
+	$remoteip = getUserRemoteIP();
+} else {
+	$remoteip = '127.0.0.1';
+}
+
 $domainname = preg_replace('/^\./', '', $tldid);
 
 // Sanitize $sldAndSubdomain. Remove start and end -
@@ -197,18 +204,18 @@ if (empty($reusecontractid) && $productref != 'none') {
 	// We have the main product, we are searching the package
 	if (empty($tmpproduct->array_options['options_package'])) {
 		print 'Service/Plan (Product id / ref) '.$tmpproduct->id.' / '.$productref.' has no package defined on it.'."\n";
-		exit(-1);
+		exit(-2);
 	}
 	// We have the main product, we are searching the duration
 	if (empty($tmpproduct->duration_value) || empty($tmpproduct->duration_unit)) {
 		print 'Service/Plan name (Product ref) '.$productref.' has no default duration'."\n";
-		exit(-1);
+		exit(-3);
 	}
 
 	$tmppackage->fetch($tmpproduct->array_options['options_package']);
 	if (empty($tmppackage->id)) {
 		print 'Package with id '.$tmpproduct->array_options['options_package'].' was not found.'."\n";
-		exit(-1);
+		exit(-4);
 	}
 }
 
@@ -253,38 +260,61 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if ($reusesocid < 0) { // -1, the thirdparty was not selected
 		// Return to dashboard, the only page where the customer is requested.
 		$newurl=preg_replace('/register/', 'index', $newurl);
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer")), null, 'errors');
-		header("Location: ".$newurl.'#addanotherinstance');
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer")), null, 'errors');
+			header("Location: ".$newurl.'#addanotherinstance');
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer"))."\n";
+		}
+		exit(-10);
 	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain)) {
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
+		}
+		exit(-11);
 	}
 	if ($productref != 'none' && strlen($sldAndSubdomain) >= 29) {
-		setEventMessages($langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
+		}
+		exit(-12);
 	}
 	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain)) {		// Only a-z A-Z 0-9 and - . Note: - is removed by javascript part of register page.
-		setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
+		}
+		exit(-13);
 	}
 	if (empty($password) || empty($password2)) {
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password"))."\n";
+		}
+		exit(-14);
 	}
 	if ($password != $password2) {
-		setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorPasswordMismatch")."\n";
+		}
+		exit(-15);
 	}
-} else // When we deploy from the register.php page
-{
+} else { // When we deploy from the register.php page
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
 
@@ -304,44 +334,49 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if ($reshook < 0) {
 		setEventMessages($hookmanager->error, null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-20);
 	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-21);
 	}
 	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain)) {
 		setEventMessages($langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication")), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-22);
 	}
 	if (empty($orgname)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameOfCompany")), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-23);
+	}
+	if (empty($tldid)) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Domain")), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-24);
 	}
 	if (! preg_match('/[a-zA-Z0-9][a-zA-Z0-9]/', $orgname)) {
 		setEventMessages($langs->trans("ErrorFieldMustHaveXChar", $langs->transnoentitiesnoconv("NameOfCompany"), 2), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-25);
 	}
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-26);
 	}
 	if (! isValidEmail($email)) {
 		setEventMessages($langs->trans("ErrorBadEMail"), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-27);
 	}
 	if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
 		dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
 		setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, $conf->global->SELLYOURSAAS_MAIN_EMAIL), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-28);
 	}
 	if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
 		$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
@@ -350,7 +385,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 				if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
 					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
 					header("Location: ".$newurl);
-					exit(-1);
+					exit(-29);
 				}
 			}
 		}
@@ -412,38 +447,38 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 							dolibarr_set_const($db, 'SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED', json_encode($bannedemail), 'chaine', 0, '', $conf->entity);
 							setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
 							header("Location: ".$newurl);
-							exit(-1);
+							exit(-40);
 						} else {
 							setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
 							header("Location: ".$newurl);
-							exit(-1);
+							exit(-41);
 						}
 					} else {
 						setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
 						header("Location: ".$newurl);
-						exit(-1);
+						exit(-42);
 					}
 				} else {
 					setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
 					header("Location: ".$newurl);
-					exit(-1);
+					exit(-43);
 				}
 			} else {
 				setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
 				header("Location: ".$newurl);
-				exit(-1);
+				exit(-44);
 			}
 		}
 	}
 	if (empty($password) || empty($password2)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-50);
 	}
 	if ($password != $password2) {
 		setEventMessages($langs->trans("ErrorPasswordMismatch"), null, 'errors');
 		header("Location: ".$newurl);
-		exit(-1);
+		exit(-55);
 	}
 }
 
@@ -466,9 +501,13 @@ dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontracti
 if (empty($remoteip)) {
 	dol_syslog("InstanceCreationBlockedForSecurityPurpose empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
 	$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
-	setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
-	header("Location: ".$newurl);
-	exit(-1);
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
+		header("Location: ".$newurl);
+	} else {
+		print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP')."\n";
+	}
+	exit(-60);
 }
 
 // TODO Move other check on abuse here
@@ -482,9 +521,13 @@ if ($reusecontractid) {
 	// Get contract
 	$result = $contract->fetch($reusecontractid);
 	if ($result < 0) {
-		setEventMessages($langs->trans("NotFound"), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("NotFound"), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("NotFound")."\n";
+		}
+		exit(-65);
 	}
 
 	// Get tmppackage
@@ -509,12 +552,18 @@ if ($reusecontractid) {
 	$tmpthirdparty = $contract->thirdparty;
 
 	// Check thirdparty is same than the one in session
-	$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
-	if ($thirdpartyidinsession != $tmpthirdparty->id) {
-		dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$tmpthirdparty->id." when id in session is ".$thirdpartyidinsession);
-		setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-		header("Location: index.php");
-		exit(-1);
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
+		if ($thirdpartyidinsession != $tmpthirdparty->id) {
+			dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$tmpthirdparty->id." when id in session is ".$thirdpartyidinsession);
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+				header("Location: index.php");
+			} else {
+				print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
+			}
+			exit(-66);
+		}
 	}
 
 	$email = $tmpthirdparty->email;
@@ -548,9 +597,13 @@ if ($reusecontractid) {
 	}
 	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
-		setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("TooManyInstancesForSameIp")."\n";
+		}
+		exit(-70);
 	}
 
 	// Check number of instance with same IP on same hour
@@ -566,9 +619,13 @@ if ($reusecontractid) {
 	}
 	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
-		setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour"), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour"), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("TooManyInstancesForSameIpThisHour")."\n";
+		}
+		exit(-71);
 	}
 
 	// Check if some deployment are already in process and ask to wait
@@ -583,9 +640,13 @@ if ($reusecontractid) {
 	}
 	dol_syslog("nbofinstanceindeployment = ".$nbofinstanceindeployment." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPARALLEL." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstanceindeployment < 0) || ($nbofinstanceindeployment > $MAXDEPLOYMENTPARALLEL))) {
-		setEventMessages($langs->trans("TooManyRequestPleaseTryLater"), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("TooManyRequestPleaseTryLater"), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("TooManyRequestPleaseTryLater")."\n";
+		}
+		exit(-72);
 	}
 
 	$tmpthirdparty=new Societe($db);
@@ -593,30 +654,44 @@ if ($reusecontractid) {
 		$result = $tmpthirdparty->fetch($reusesocid);
 		if ($result < 0) {
 			dol_print_error_email('FETCHTP'.$reusesocid, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
-			exit(-1);
+			exit(-73);
 		}
 
 		// Check that thirdparty is ok
-		$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
-		if ($fromsocid > 0) {
-			if ($thirdpartyidinsession != $fromsocid) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
-				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-				header("Location: index.php");
-				exit(-1);
-			}
-			if ($tmpthirdparty->parent != $thirdpartyidinsession) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
-				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-				header("Location: index.php");
-				exit(-1);
-			}
-		} else {
-			if ($thirdpartyidinsession != $reusesocid) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
-				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
-				header("Location: index.php");
-				exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
+			if ($fromsocid > 0) {
+				if ($thirdpartyidinsession != $fromsocid) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
+					if (substr($sapi_type, 0, 3) != 'cli') {
+						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+						header("Location: index.php");
+					} else {
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
+					}
+					exit(-74);
+				}
+				if ($tmpthirdparty->parent != $thirdpartyidinsession) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
+					if (substr($sapi_type, 0, 3) != 'cli') {
+						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+						header("Location: index.php");
+					} else {
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
+					}
+					exit(-75);
+				}
+			} else {
+				if ($thirdpartyidinsession != $reusesocid) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
+					if (substr($sapi_type, 0, 3) != 'cli') {
+						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
+						header("Location: index.php");
+					} else {
+						print $langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt")."\n";
+					}
+					exit(-76);
+				}
 			}
 		}
 
@@ -653,9 +728,13 @@ if ($reusecontractid) {
 				if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
 			}
 
-			setEventMessages($langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail), null, 'errors');
-			header("Location: index.php");
-			exit(-1);
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail), null, 'errors');
+				header("Location: index.php");
+			} else {
+				print $langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail)."\n";
+			}
+			exit(-77);
 		}
 	} else {
 		// Create thirdparty (if it already exists, do nothing and return a warning to user)
@@ -665,9 +744,20 @@ if ($reusecontractid) {
 			dol_print_error_email('FETCHTP'.$email, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
 			exit(-1);
 		} elseif ($result > 0) {	// Found one record
-			setEventMessages($langs->trans("AccountAlreadyExistsForEmail", $conf->global->SELLYOURSAAS_ACCOUNT_URL), null, 'errors');
-			header("Location: ".$newurl);
-			exit(-1);
+			$myaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
+				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
+				if (! empty($conf->global->$newnamekey)) $myaccounturl = $conf->global->$newnamekey;
+			}
+
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("AccountAlreadyExistsForEmail", $myaccounturl), null, 'errors');
+				header("Location: ".$newurl);
+			} else {
+				print $langs->trans("AccountAlreadyExistsForEmail", $myaccounturl)."\n";
+			}
+			exit(-78);
 		} else dol_syslog("Email not already used. Good.");
 	}
 
@@ -680,21 +770,26 @@ if ($reusecontractid) {
 				// Instance ref already exists, we redirect to register page with appropriate error message
 				setEventMessages($langs->trans("InstanceNameAlreadyExists", $fqdninstance), null, 'errors');
 				header("Location: ".$newurl);
-				exit(-1);
 			} else {
 				print $langs->trans("InstanceNameAlreadyExists", $fqdninstance)."\n";
-				exit(-1);
 			}
-		} else dol_syslog("Contract name not already used. Good.");
+			exit(-80);
+		} else {
+			dol_syslog("Contract name not already used. Good.");
+		}
 	}
 
 	if (! empty($conf->global->SELLYOURSAAS_NAME_RESERVED) && preg_match('/'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'/', $fqdninstance)) {
 		// @TODO Exclude some thirdparties
 
 
-		setEventMessages($langs->trans("InstanceNameReseved", $fqdninstance), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-1);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("InstanceNameReseved", $fqdninstance), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("InstanceNameReseved", $fqdninstance)."\n";
+		}
+		exit(-81);
 	}
 
 	// Generate credentials
@@ -720,7 +815,6 @@ if ($reusecontractid) {
 	$tmpthirdparty->email = $email;
 	$tmpthirdparty->client = 2;
 	$tmpthirdparty->tva_assuj = 1;
-	$tmpthirdparty->default_lang = $langs->defaultlang;
 	$tmpthirdparty->array_options['options_dolicloud'] = 'yesv2';
 	$tmpthirdparty->array_options['options_date_registration'] = dol_now();
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
@@ -735,6 +829,11 @@ if ($reusecontractid) {
 
 	if ($country_code) {
 		$tmpthirdparty->country_id = getCountry($country_code, 3, $db);
+		$tmpthirdparty->default_lang = getLanguageCodeFromCountryCode($country_code);	// $langs->defaultlang;
+		$tmparray = explode('_', $tmpthirdparty->default_lang);
+		/*if (! in_array($tmparray[0], array('fr', 'es', 'en'))) {
+			$tmpthirdparty->default_lang = 'en_US';
+		}*/
 	}
 
 
@@ -746,9 +845,14 @@ if ($reusecontractid) {
 			$result = $tmpthirdparty->update(0, $user);
 			if ($result <= 0) {
 				$db->rollback();
-				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
-				header("Location: ".$newurl);
-				exit(-1);
+
+				if (substr($sapi_type, 0, 3) != 'cli') {
+					setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
+					header("Location: ".$newurl);
+				} else {
+					print $tmpthirdparty->error."\n";
+				}
+				exit(-90);
 			}
 		}
 	} else {
@@ -760,14 +864,21 @@ if ($reusecontractid) {
 		if ($productref == 'none') {	// If reseller
 			$tmpthirdparty->code_fournisseur = -1;
 		}
-		if ($partner > 0) $tmpthirdparty->parent = $partner;		// Add link to parent/reseller
+		if ($partner > 0) {
+			$tmpthirdparty->parent = $partner;		// Add link to parent/reseller
+		}
 
 		$result = $tmpthirdparty->create($user);
 		if ($result <= 0) {
 			$db->rollback();
-			setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
-			header("Location: ".$newurl);
-			exit(-1);
+
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
+				header("Location: ".$newurl);
+			} else {
+				print $tmpthirdparty->error."\n";
+			}
+			exit(-91);
 		}
 
 		// Restore lang to user/visitor language
@@ -778,12 +889,18 @@ if ($reusecontractid) {
 		$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG), 'customer');
 		if ($result < 0) {
 			$db->rollback();
-			setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
-			header("Location: ".$newurl);
-			exit(-1);
+
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
+				header("Location: ".$newurl);
+			} else {
+				print $tmpthirdparty->error."\n";
+			}
+			exit(-92);
 		}
 	} else {
 		$db->rollback();
+
 		dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default customer tag is not defined.', null, 'alert alert-error');
 		exit(-1);
 	}
@@ -794,12 +911,18 @@ if ($reusecontractid) {
 			$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG), 'supplier');
 			if ($result < 0) {
 				$db->rollback();
-				setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
-				header("Location: ".$newurl);
-				exit(-1);
+
+				if (substr($sapi_type, 0, 3) != 'cli') {
+					setEventMessages($tmpthirdparty->error, $tmpthirdparty->errors, 'errors');
+					header("Location: ".$newurl);
+				} else {
+					print $tmpthirdparty->error."\n";
+				}
+				exit(-93);
 			}
 		} else {
 			$db->rollback();
+
 			dol_print_error_email('SETUPTAG', 'Setup of module not complete. The default reseller tag is not defined.', null, 'alert alert-error');
 			exit(-1);
 		}
@@ -1021,22 +1144,27 @@ if ($reusecontractid) {
 
 		if ($abusetest) {
 			$db->rollback();
+
 			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 			dol_syslog("InstanceCreationBlockedForSecurityPurpose ip ".$remoteip." is refused with value abusetest=".$abusetest, LOG_DEBUG);
-			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip), null, 'errors');
-			//http_response_code(403);
-			header("Location: ".$newurl);
-			exit(-1);
+
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip), null, 'errors');
+				//http_response_code(403);
+				header("Location: ".$newurl);
+			} else {
+				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip)."\n";
+			}
+			exit(-95);
 		}
-
-
 
 
 		$result = $contract->create($user);
 		if ($result <= 0) {
 			$db->rollback();
+
 			dol_print_error_email('CREATECONTRACT', $contract->error, $contract->errors, 'alert alert-error');
-			exit(-1);
+			exit(-96);
 		}
 	}
 
@@ -1071,7 +1199,7 @@ if ($reusecontractid) {
 		$contractlineid = $contract->addline($desc, $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $productidtocreate, $discount, $date_start, $date_end, 'HT', 0);
 		if ($contractlineid < 0) {
 			dol_print_error_email('CREATECONTRACTLINE1', $contract->error, $contract->errors, 'alert alert-error');
-			exit(-1);
+			exit(-97);
 		}
 	}
 
@@ -1109,7 +1237,7 @@ if ($reusecontractid) {
 				$contractlineid = $contract->addline($desc, $price, $qty, $vat, $localtax1_tx, $localtax2_tx, $prodid, $discount, $date_start, $date_end, 'HT', 0);
 				if ($contractlineid < 0) {
 					dol_print_error_email('CREATECONTRACTLINE'.$j, $contract->error, $contract->errors, 'alert alert-error');
-					exit(-1);
+					exit(-98);
 				}
 			}
 		}
@@ -1279,16 +1407,19 @@ if (! $error) {
 			$error++;
 			setEventMessages($cmail->error, $cmail->errors, 'warnings');
 		}
-	} else // In rare cases, we are here
-	{
-		setEventMessages('NoEmailSent', null, 'warnings');
+	} else { // In rare cases, we are here
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages('NoEmailSent', null, 'warnings');
+		} else {
+			print 'NoEmailSent'."\n";
+		}
 	}
 
 	if (substr($sapi_type, 0, 3) != 'cli') {
-		dol_syslog("Deployment successful");
+		dol_syslog("Deployment successful with contract ID = ".$contract->id);
 		header("Location: ".$newurl);
 	} else {
-		print "Instance created\n";
+		print "Instance created with ID = ".$contract->id."\n";
 	}
 	exit(0);
 }

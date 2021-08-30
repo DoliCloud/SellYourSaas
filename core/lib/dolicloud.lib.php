@@ -124,7 +124,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	dol_include_once('sellyoursaas/class/packages.class.php');
 	dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
 
-	$dataofcontract = sellyoursaasGetExpirationDate($object);
+	$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
 	$tmpproduct = new Product($db);
 	$tmppackage = new Packages($db);
 

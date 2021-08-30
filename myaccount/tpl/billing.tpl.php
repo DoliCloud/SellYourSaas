@@ -92,7 +92,8 @@ if (count($listofcontractid) > 0) {
 		            <div class="row" style="border-bottom: 1px solid #ddd;">
 
 		              <div class="col-md-6">
-				          <a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">'.$instancename.'</a>
+				          <a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">'.$instancename.img_picto('', 'globe', 'class="paddingleft"').'</a><br>
+						  <span class="opacitymedium small">'.$langs->trans("ID").' : </span><span class="font-green-sharp small">'.$contract->ref.'</span>
 				          <span class="caption-helper"><!-- - '.$planlabel.'--></span>	<!-- This is service -->
 		              </div><!-- END COL -->
 		              <div class="col-md-2 hideonsmartphone">
@@ -165,18 +166,24 @@ if (count($listofcontractid) > 0) {
 						// There is at least one payment error
 						$lasttrystring = $langs->trans("LastTry").': '.dol_print_date($db->jdate($obj->datep));
 						if ($obj->label == 'Cancellation of payment by the bank') {
-							print '<span title="'.$langs->trans("PaymentChargedButReversedByBank").' - '.$lasttrystring.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
+							print '<span title="'.dol_escape_htmltag($langs->trans("PaymentChargedButReversedByBank").' - '.$lasttrystring).'">';
+							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 						} elseif ($obj->extraparams == 'PAYMENT_ERROR_INSUFICIENT_FUNDS') {
-							print '<span title="'.$obj->extraparams.' - '.$lasttrystring.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png" alt="Insuficient funds"> '.$langs->trans("PaymentError").'</span>';
+							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
+							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError").' Insuficient funds', $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png" alt="Insuficient funds"> '.$langs->trans("PaymentError").'</span>';
 						} else {
-							print '<span title="'.$obj->extraparams.' - '.$lasttrystring.'"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
+							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
+							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 						}
 					}
 				}
 				if (! $paymentinerroronthisinvoice) {
 					$s = $invoice->getLibStatut(2, $alreadypayed + $amount_credit_notes_included);
-					$s = preg_replace('/'.$langs->trans("BillStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
-					$s = preg_replace('/'.$langs->trans("BillShortStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
+					$s = preg_replace('/'.$langs->transnoentitiesnoconv("BillStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
+					$s = preg_replace('/'.$langs->transnoentitiesnoconv("BillShortStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
 					print $s;
 					// TODO Add details of payments
 					//$htmltext = 'Soon here: Details of payment...';
@@ -193,7 +200,7 @@ if (count($listofcontractid) > 0) {
 					            <div class="row" style="margin-top:20px">
 
 					              <div class="col-md-12">
-								<span class="opacitymedium">'.$langs->trans("NoneF").'</span>
+								<span class="opacitymedium">'.$langs->trans("NoInvoice").'</span>
 								  </div>
 								</div>
 						';
@@ -209,7 +216,7 @@ if (count($listofcontractid) > 0) {
 					            <div class="row" style="margin-top:20px">
 
 					              <div class="col-md-12">
-								<span class="opacitymedium">'.$langs->trans("NoneF").'</span>
+								<span class="opacitymedium">'.$langs->trans("NoInvoice").'</span>
 								  </div>
 								</div>
 						';
@@ -347,10 +354,10 @@ if ($nbpaymentmodeok > 0) {
 
 print '
 	                <br><br>
-	                <a href="'.$urltoenterpaymentmode.'" class="btn default btn-xs green-stripe">';
+	                <center><a href="'.$urltoenterpaymentmode.'" class="wordbreak btn default green-stripe">';
 if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode").'...';
 else print $langs->trans("AddAPaymentMode").'...';
-print '</a>
+print '</a></center>
 
 	            </p>
 	          </div> <!-- END PORTLET-BODY -->

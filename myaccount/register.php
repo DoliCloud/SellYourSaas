@@ -28,6 +28,7 @@
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 
 // Add specific definition to allow a dedicated session management
@@ -362,8 +363,17 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 			<?php
 			if (! empty($tmpproduct->array_options['options_register_text'])) {
-				print '<!-- show custom registration text of service -->';
-				print '<div class="register_text">'.$langs->trans($tmpproduct->array_options['options_register_text']).'</div>';
+				$keytouse = $tmpproduct->array_options['options_register_text'];
+				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
+				print '<div class="register_text">'."\n";
+				if ($langs->trans($keytouse) != $keytouse) {
+					print $langs->trans($keytouse);
+				} else {	// We try english version
+					if ($langsen->trans($keytouse) != $keytouse) {
+						print $langsen->trans($keytouse);
+					}
+				}
+				print '</div>'."\n";
 			}
 			?>
 
@@ -390,7 +400,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 			<?php
 			$disabled='';
-			if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+			if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 				$disabled=' disabled';
 				print '<div class="alert alert-warning">';
 				print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
@@ -416,7 +426,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<div class="control-group  required">
 				<label class="control-label" for="username" trans="1"><?php echo $langs->trans("Email") ?></label>
 				<div class="controls">
-					<input type="text"<?php echo $disabled; ?> name="username" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="" id="username" />
+					<input type="text"<?php echo $disabled; ?> name="username" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="" id="username" />
 
 				</div>
 			</div>
@@ -424,7 +434,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<div class="control-group  required">
 				<label class="control-label" for="orgName" trans="1"><?php echo $langs->trans("NameOfCompany") ?></label>
 				<div class="controls">
-					<input type="text"<?php echo $disabled; ?> name="orgName" value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" maxlength="250" id="orgName" />
+					<input type="text"<?php echo $disabled; ?> name="orgName" maxlength="250" value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" id="orgName" />
 				</div>
 			</div>
 				<?php
@@ -438,7 +448,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					<label class="control-label" for="password" trans="1"><?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
-						<input<?php echo $disabled; ?> name="password" type="password" required />
+						<input<?php echo $disabled; ?> name="password" type="password" maxlength="128" required />
 
 					</div>
 				</div>
@@ -448,7 +458,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				  <div class="control-group required">
 					<label class="control-label" for="password2" trans="1"><?php echo $langs->trans("ConfirmPassword") ?></label>
 					<div class="controls">
-					  <input<?php echo $disabled; ?> name="password2" type="password" required />
+					  <input<?php echo $disabled; ?> name="password2" type="password" maxlength="128" required />
 					</div>
 				  </div>
 				</div>

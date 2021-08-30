@@ -60,7 +60,7 @@ class modSellYourSaas extends DolibarrModules
 		// Data directories to create when module is enabled
 		// Note: Directory "/sellyoursaas" is shared between servers, "/sellyoursaas_local" is unique for each server
 		// The directory crt is shared but a copy is done locally to avoid dependency on master and avoid interuption of service if NFS is out.
-		$this->dirs = array('/sellyoursaas/temp','/sellyoursaas/packages','/sellyoursaas/git','/sellyoursaas/spam', '/sellyoursaas/crt', '/sellyoursaas_local/crt');
+		$this->dirs = array('/sellyoursaas/temp','/sellyoursaas/packages','/sellyoursaas/git','/sellyoursaas/spam', '/sellyoursaas/crt', '/sellyoursaas_local/crt', '/sellyoursaas_local/spam');
 
 		// Config pages. Put here list of php page names stored in admmin directory used to setup module
 		$this->config_page_url = array("setup.php@sellyoursaas");
@@ -252,7 +252,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->menu[$r]=array(	'fk_menu'=>0,
 								'type'=>'top',
 								'titre'=>'__[SELLYOURSAAS_NAME]__',
-								'prefix' => img_picto('', 'object_'.$this->picto, 'class="paddingright2imp pictofixedwidth"'),
+								'prefix' => img_picto('', 'object_'.$this->picto, 'class="paddingright2imp pictofixedwidth valignmiddle"'),
 								'mainmenu'=>'sellyoursaas',
 								'url'=>'/sellyoursaas/backoffice/index.php',
 								'langs'=>'',

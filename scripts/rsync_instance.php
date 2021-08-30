@@ -27,6 +27,7 @@
 
 if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
 if (!defined('NOSESSION')) define('NOSESSION', '1');
+if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -125,7 +126,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	exit(-1);
 }
 
-if (0 == posix_getuid()) {
+if (0 == posix_getuid() && empty($conf->global->SELLYOURSAAS_SCRIPT_BYPASS_ROOT_RESTRICTION)) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
 	exit(-1);
 }
@@ -164,12 +165,13 @@ if (! is_file($dirroot.'/README.md')) {
 	exit(-4);
 }
 
-$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-$login=$object->username_web;
-$password=$object->password_web;
+$dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
+$login = $object->username_web;
+$password = $object->password_web;
 
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
-$server=$object->array_options['options_hostname_os'];
+$targetdir = $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
+$server = $object->array_options['options_hostname_os'];
+$server_port = (empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? 22 : $conf->global->SELLYOURSAAS_SSH_SERVER_PORT);
 
 if (empty($login) || empty($dirdb)) {
 	print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
@@ -215,7 +217,7 @@ $param[]="--exclude htdocs/conf/conf.php*";
 $param[]="--exclude htdocs/custom";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
-$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
+$param[]="-e 'ssh -p ".$server_port." -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 $param[]=$dirroot.'/';
 $param[]=$login.'@'.$server.":".$targetdir;
@@ -237,7 +239,6 @@ if ($mode == 'confirmunlock') {
 	// SFTP connect
 	if (! function_exists("ssh2_connect")) { dol_print_error('', 'ssh2_connect function does not exists'); exit(1); }
 
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 	$connection = ssh2_connect($server, $server_port);
 	if ($connection) {
 		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";

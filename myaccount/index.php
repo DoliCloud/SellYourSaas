@@ -32,7 +32,7 @@ if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');			// If there is 
 //if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 //if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    	// If this page is public (can be called outside logged session)
-if (! defined("MAIN_LANG_DEFAULT")) define('MAIN_LANG_DEFAULT', 'auto');
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined("MAIN_AUTHENTICATION_MODE")) define('MAIN_AUTHENTICATION_MODE', 'sellyoursaas');
 if (! defined("MAIN_AUTHENTICATION_POST_METHOD")) define('MAIN_AUTHENTICATION_POST_METHOD', '0');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
@@ -357,10 +357,8 @@ if ($action == 'updateurl') {
 
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 	$action = '';
-}
-
-// Send support ticket
-elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
+} elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
+	// Send support ticket
 	$error = 0;
 
 	$emailfrom = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
@@ -375,7 +373,7 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 	$replyto = GETPOST('from', 'alpha');
 	$topic = GETPOST('subject', 'restricthtml');
 	$content = GETPOST('content', 'restricthtml');
-	$groupticket=GETPOST('groupticket', 'aZ09');
+	$groupticket=GETPOST('ticketcategory', 'aZ09');
 
 	if (empty($replyto)) {
 		$error++;
@@ -385,7 +383,7 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 		$error++;
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("MailTopic")), null, 'errors');
 	}
-	if (GETPOSTISSET('groupticket') && ! GETPOST('groupticket')) {
+	if (GETPOSTISSET('ticketcategory') && !GETPOST('ticketcategory', 'aZ09')) {
 		$error++;
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("GroupOfTicket")), null, 'errors');
 	}
@@ -396,25 +394,59 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 
 	if (!$error) {
 		$channel = GETPOST('supportchannel', 'alpha');
-		$contractid = GETPOST('contractid', 'int');
+		$tmparray = explode('_', $channel, 2);
+		$priority = 'low';
+		if (!empty($tmparray[1])) {
+			$priority = $tmparray[0];
+			$contractid = $tmparray[1];
+		}
+		$tmpcontract = null;
 		if ($contractid > 0) {
 			$tmpcontract = $listofcontractid[$contractid];
+		}
+
+		// Set $topic + check thirdparty validity
+		if (is_object($tmpcontract)) {
 			$topic = '[Ticket - '.$tmpcontract->ref_customer.'] '.$topic;
-			$content .= "<br><br>\n";
-			$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
-			if ($groupticket) {
-				$content .= 'Group: '.dol_escape_htmltag($groupticket)."<br>\n";
+
+			$tmpcontract->fetch_thirdparty();	// Note: It should match $mythirdpartyaccount
+			if (!is_object($tmpcontract->thirdparty) || $tmpcontract->thirdparty->id != $mythirdpartyaccount->id) {
+				// Error, we try to post a ticket using a contract id of another thirdparty
+				$action = 'presend';
+				$error++;
 			}
+		} else {
+			$topic = '[Ticket - '.$mythirdpartyaccount->name.'] '.$topic;
+		}
+
+		// Set $content
+		$content .= "<br><br>\n";
+		$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
+		if ($groupticket) {
+			$content .= 'Group: '.dol_escape_htmltag($groupticket)."<br>\n";
+		}
+		$content .= 'Priority: '.$priority."<br>\n";
+		if (is_object($tmpcontract)) {
 			$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
 			//$content .= 'Ref contract: <a href="xxx/contrat/card.php?id='.$tmpcontract->ref.">".$tmpcontract->ref."</a><br>\n"; 	// No link to backoffice as the mail is used with answer to.
 			$content .= 'Ref contract: '.$tmpcontract->ref."<br>\n";
-			$tmpcontract->fetch_thirdparty();
-			if (is_object($tmpcontract->thirdparty)) {
-				$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
-				$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
-				$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
-			}
-			// Add the support type
+		} else {
+			$content .= "Instance: None<br>\n";
+			$content .= "Ref contract: None<br>\n";
+		}
+
+		// Sender
+		if (is_object($tmpcontract) && is_object($tmpcontract->thirdparty)) {
+			$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
+			$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
+			$content .= $tmpcontract->thirdparty->array_options['options_lastname'].' '.$tmpcontract->thirdparty->array_options['options_firstname']."<br>\n";
+		} else {
+			$content .= 'Organization: '.$mythirdpartyaccount->name."<br>\n";
+			$content .= 'Email: '.$mythirdpartyaccount->email."<br>\n";
+		}
+
+		// Add the services and support of contract
+		if (is_object($tmpcontract)) {
 			foreach ($tmpcontract->lines as $key => $val) {
 				if ($val->fk_product > 0) {
 					$product = new Product($db);
@@ -430,6 +462,7 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 				$content .= "<br>\n";;
 			}
 		}
+
 		$arr_file = array();
 		$arr_mime = array();
 		$arr_name = array();
@@ -443,8 +476,12 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 			}
 		}
 
-		$trackid = 'sellyoursaas'.$contractid;
+		$trackid = 'thi'.$mythirdpartyaccount->id;
+		if (is_object($tmpcontract)) {
+			$trackid = 'con'.$tmpcontract->id;
+		}
 
+		// Send email
 		$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, $arr_file, $arr_mime, $arr_name, '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
 		$result = $cmailfile->sendfile();
 
@@ -458,10 +495,8 @@ elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 	} else {
 		$action = 'presend';
 	}
-}
-
-// Send reseller request
-elseif ($action == 'sendbecomereseller') {
+} elseif ($action == 'sendbecomereseller') {
+	// Send reseller request
 	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 	$sellyoursaasnoreplyemail = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
@@ -562,6 +597,8 @@ elseif ($action == 'sendbecomereseller') {
 	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
 	$firstname = trim(GETPOST('firstName', 'nohtml'));
 	$lastname = trim(GETPOST('lastName', 'nohtml'));
+	$phone = trim(GETPOST('phone', 'nohtml'));
+	$oldphone = trim(GETPOST('oldphone', 'nohtml'));
 
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
@@ -583,11 +620,17 @@ elseif ($action == 'sendbecomereseller') {
 			exit;
 		}
 	}
+	if (!empty($phone) && !isValidPhone($phone)) {
+		setEventMessages($langs->trans("ErrorBadValueForPhone"), null, 'errors');
+		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
+		exit;
+	}
 
 	$db->begin();	// Start transaction
 
 	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
 	$mythirdpartyaccount->email = $email;
+	$mythirdpartyaccount->phone = $phone;
 	$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
 	$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
 	$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
@@ -978,7 +1021,7 @@ elseif ($action == 'sendbecomereseller') {
 							$now = dol_now();
 							if ($date_start < $now) {
 								dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-								$tmparray = sellyoursaasGetExpirationDate($srcobject);
+								$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 								$duration_value = $tmparray['duration_value'];
 								$duration_unit = $tmparray['duration_unit'];
 
@@ -1646,7 +1689,7 @@ elseif ($action == 'sendbecomereseller') {
 							$now = dol_now();
 							if ($date_start < $now) {
 								dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-								$tmparray = sellyoursaasGetExpirationDate($srcobject);
+								$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 								$duration_value = $tmparray['duration_value'];
 								$duration_unit = $tmparray['duration_unit'];
 
@@ -2749,7 +2792,7 @@ if (empty($welcomecid)) {
 
 		$isAPayingContract = sellyoursaasIsPaidInstance($contract);		// At least one template or final invoice
 		$isASuspendedContract = sellyoursaasIsSuspended($contract);		// Is suspended or not ?
-		$tmparray = sellyoursaasGetExpirationDate($contract);
+		$tmparray = sellyoursaasGetExpirationDate($contract, 1);
 		$expirationdate = $tmparray['expirationdate'];					// End of date of service
 
 		$messageforinstance=array();

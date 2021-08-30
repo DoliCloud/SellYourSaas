@@ -123,6 +123,10 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_MYACCOUNT_FOOTER", GETPOST("SELLYOURSAAS_MYACCOUNT_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_CONVERSION_FOOTER", GETPOST("SELLYOURSAAS_CONVERSION_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
+
+		dolibarr_set_const($db, "SELLYOURSAAS_CSS", GETPOST("SELLYOURSAAS_CSS", 'none'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_SECURITY_KEY", GETPOST("SELLYOURSAAS_SECURITY_KEY", 'none'), 'chaine', 0, '', $conf->entity);
+
 		dolibarr_set_const($db, "SELLYOURSAAS_PUBLIC_KEY", GETPOST("SELLYOURSAAS_PUBLIC_KEY", 'none'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT", GETPOST("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT", 'int'), 'chaine', 0, '', $conf->entity);
@@ -291,6 +295,22 @@ llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 $linkback='<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
+print '<span class="opacitymedium">'.$langs->trans("Prerequisites")."</span><br>\n";
+print '<br>';
+
+print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+$arrayoffunctionsdisabled = explode(',', ini_get('disable_functions'));
+if (in_array('exec', $arrayoffunctionsdisabled)) {
+	print 'Parameter <b>disable_functions</b>: must not contains: exec<br>';
+} elseif (in_array('shell_exec', $arrayoffunctionsdisabled)) {
+	print 'Parameter <b>disable_functions</b>: must not contains: shell_exec<br>';
+} else {
+	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec,shell_exec<br>';
+}
+print "<br>\n";
+
 //$head=array();
 //dol_fiche_head($head, 'serversetup', $langs->trans("SellYourSaas"), -1);
 
@@ -315,14 +335,6 @@ print '<td>';
 print ajax_constantonoff('SELLYOURSAAS_FORCE_STRIPE_TEST', array(), $conf->entity, 0, 0, 1);
 print '</td>';
 print '<td><span class="opacitymedium">1</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
-print '</td>';
-print '<td colspan="2">';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.$conf->global->SELLYOURSAAS_MAIN_FAQ_URL.'">';
-print '</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasName").'</td>';
@@ -498,6 +510,14 @@ print '</td>';
 print '<td><span class="opacitymedium">https://status.mysaasdomainname.com</span></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
+print '</td>';
+print '<td colspan="2">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.$conf->global->SELLYOURSAAS_MAIN_FAQ_URL.'">';
+print '</td>';
+print '</tr>';
+
 print '<tr class="oddeven"><td>'.$langs->trans("FooterContent").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_MYACCOUNT_FOOTER" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER.'</textarea>';
@@ -511,6 +531,22 @@ print '<textarea name="SELLYOURSAAS_CONVERSION_FOOTER" class="quatrevingtpercent
 print '</td>';
 print '<td><span class="opacitymedium">&lt;script&gt;Your conversion trackers&lt;/script&gt;</span></td>';
 print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("CSSForCustomerAndRegisterPages").'</td>';
+print '<td>';
+print '<textarea name="SELLYOURSAAS_CSS" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_CSS.'</textarea>';
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").' <span class="opacitymedium">(To protect the URL for Spam reporting webhooks)</spam></td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" value="'.$conf->global->SELLYOURSAAS_SECURITY_KEY.'">';
+print '</td>';
+print '<td><span class="opacitymedium">123456abcdef</span></td>';
+print '</tr>';
+
+
 
 // Other
 
@@ -532,7 +568,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.$conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD.'">';
 print '</td>';
-print '<td><span class="opacitymedium">Algorithm used to build substitution keys __APPPASSWORD0xxx__ (\'sha1md5\', \'sha256\', \'password_hash\', ...)</span></td>';
+print '<td><span class="opacitymedium">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
 print '</tr>';
 
 if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
@@ -540,7 +576,7 @@ if ($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION.'">';
 	print '</td>';
-	print '<td><span class="opacitymedium">Salt use to build substitution keys __APPPASSWORDxxxSALTED__</span></td>';
+	print '<td><span class="opacitymedium"></span></td>';
 	print '</tr>';
 }
 
@@ -780,23 +816,23 @@ print '<br>';
 
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder" width="100%">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td class="titlefield">'.$langs->trans("ParametersOnDeploymentServers").'</td><td class="titlefield">'.$langs->trans("Value").'</td>';
 print '<td class="titlefield"><div class="float valignmiddle">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
-print '<tr class="oddeven"><td>'.$langs->trans("DirForDoliCloudInstances").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("DirForDoliCloudInstances").'</td>';
 print '<td>';
-print '<input size="40" type="text" name="DOLICLOUD_INSTANCES_PATH" value="'.$conf->global->DOLICLOUD_INSTANCES_PATH.'">';
+print '<input class="minwidth200" type="text" name="DOLICLOUD_INSTANCES_PATH" value="'.$conf->global->DOLICLOUD_INSTANCES_PATH.'">';
 print '</td>';
 print '<td><span class="opacitymedium">/home/jail/home</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>';
+print '<tr class="oddeven"><td class="fieldrequired">';
 print $form->textwithpicto($langs->trans("DirForBackupTestInstances"), '').'</td>';
 print '<td>';
-//print '<input size="40" type="text" name="DOLICLOUD_TEST_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_TEST_BACKUP_PATH.'">';
+//print '<input class="minwidth200" type="text" name="DOLICLOUD_TEST_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_TEST_BACKUP_PATH.'">';
 print '<span class="opacitymedium">'.$langs->trans("FeatureNotYetAvailable").'</span>';
 print '</td>';
 print '<td>';
@@ -804,30 +840,31 @@ print '<td>';
 print '</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>';
+print '<tr class="oddeven"><td class="fieldrequired">';
 print $form->textwithpicto($langs->trans("DirForBackupInstances"), '').'</td>';
 print '<td>';
-print '<input size="40" type="text" name="DOLICLOUD_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_BACKUP_PATH.'">';
+print '<input class="minwidth200" type="text" name="DOLICLOUD_BACKUP_PATH" value="'.$conf->global->DOLICLOUD_BACKUP_PATH.'">';
 print '</td>';
 print '<td><span class="opacitymedium">/home/jail/backup, /mnt/diskbackup/backup</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>';
+print '<tr class="oddeven"><td class="fieldrequired">';
 print $form->textwithpicto($langs->trans("SELLYOURSAAS_TEST_ARCHIVES_PATH"), $langs->trans("ArchiveInstanceDesc").'<br><br>'.$langs->trans("ArchiveTestInstanceDesc")).'</td>';
 print '<td>';
-print '<input size="40" type="text" name="SELLYOURSAAS_TEST_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'">';
+print '<input class="minwidth200" type="text" name="SELLYOURSAAS_TEST_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'">';
 print '</td>';
 print '<td><span class="opacitymedium">/home/jail/archives-test, /mnt/diskbackup/archives-test</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>';
+print '<tr class="oddeven"><td class="fieldrequired">';
 print $form->textwithpicto($langs->trans("SELLYOURSAAS_PAID_ARCHIVES_PATH"), $langs->trans("ArchiveInstanceDesc")).'</td>';
 print '<td>';
-print '<input size="40" type="text" name="SELLYOURSAAS_PAID_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'">';
+print '<input class="minwidth200" type="text" name="SELLYOURSAAS_PAID_ARCHIVES_PATH" value="'.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'">';
 print '</td>';
 print '<td><span class="opacitymedium">/home/jail/archives-paid, /mnt/diskbackup/archives-paid</span></td>';
 print '</tr>';
 
+// SSH public keys to deploy on authized_public file.
 print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_PUBLIC_KEY" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_PUBLIC_KEY.'</textarea>';
@@ -869,14 +906,15 @@ var_dump(dol_buildpath('/sellyoursaas/public/spamreport.php', 1));
 var_dump(DOL_MAIN_URL_ROOT);
 */
 
-$message='';
-$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
-$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
+$message = '';
+$url = '<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'&mode=test" target="_blank" rel="noopener">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'[&mode=test]</a>';
+$message .= img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
 $message = str_replace('{s1}', $url, $message);
 print $message;
 
 print '<br>';
 
+/*
 $message='';
 $url='<a href="'.dol_buildpath('/sellyoursaas/myaccount/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
 $message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "Test", '{s1}');
@@ -884,13 +922,7 @@ $message = str_replace('{s1}', $url, $message);
 print $message;
 
 print "<br>";
-print '<br>';
-
-
-print 'idn_to_ascii function: '.yn(function_exists('idn_to_ascii')).'<br>';
-print 'checkdnsrr function: '.yn(function_exists('checkdnsrr')).'<br>';
-print "<br>\n";
-
+*/
 
 //dol_fiche_end();
 

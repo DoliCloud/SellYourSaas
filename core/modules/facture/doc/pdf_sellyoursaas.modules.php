@@ -25,7 +25,7 @@
  */
 
 /**
- *	\file       htdocs/core/modules/facture/doc/pdf_crabe.modules.php
+ *	\file       htdocs/core/modules/facture/doc/pdf_sellyoursaas.modules.php
  *	\ingroup    facture
  *	\brief      File of class to generate customers invoices from crabe model
  */
@@ -72,14 +72,16 @@ class pdf_sellyoursaas extends pdf_crabe
 	 *  @param  Translate	$outputlangs	Object lang for output
 	 *  @return	void
 	 */
-	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
+	function _pagehead(&$pdf, $object, $showaddress, $outputlangs, $outputlangsbis = null)
 	{
 		global $conf;
 
 		$savname = $this->emetteur->name;
 		$savlogo = $this->emetteur->logo;
 
-		$this->emetteur->name = $this->emetteur->name.' - '.$conf->global->SELLYOURSAAS_NAME;
+		if (!empty($conf->global->SELLYOURSAAS_NAME) && $conf->global->SELLYOURSAAS_NAME != $this->emetteur->name) {
+			$this->emetteur->name = $this->emetteur->name.' - '.$conf->global->SELLYOURSAAS_NAME;
+		}
 		$this->emetteur->logo = $conf->global->SELLYOURSAAS_LOGO;
 
 		parent::_pagehead($pdf, $object, $showaddress, $outputlangs);

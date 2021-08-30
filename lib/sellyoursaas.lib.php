@@ -193,22 +193,24 @@ function sellyoursaasHasOpenInvoices($contract)
 
 
 /**
- * Return date of expiration
- * Take lowest planed end date for services (whatever is service status)
+ * Return date of expiration. Can also return other information on instance (status, nb of users, id of product of application, ...)
+ * For expiration date, it takes the lowest planed end date for services (whatever is service status)
  *
- * @param 	Contrat $contract		Object contract
- * @return	array					Array of data array('expirationdate'=>Timestamp of expiration date, or 0 if error or not found)
+ * @param 	Contrat $contract				Object contract
+ * @param	int		$onlyexpirationdate		1=Return only expiration date (no need to load each product line properties)
+ * @return	array							Array of data array('expirationdate'=>Timestamp of expiration date, or 0 if error or not found)
  */
-function sellyoursaasGetExpirationDate($contract)
+function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 {
 	global $db;
 
 	$expirationdate = 0;
+	$status = 0;
 	$duration_value = 0;
 	$duration_unit = '';
-	$appproductid = 0;
-	$status = 0;
 	$nbofusers = 0;
+	$nbofgbs = 0;
+	$appproductid = 0;
 
 	include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 
@@ -222,10 +224,10 @@ function sellyoursaasGetExpirationDate($contract)
 			else $expirationdate = $line->date_end;
 		}
 
-		if ($line->fk_product > 0) {
+		if (empty($onlyexpirationdate) && $line->fk_product > 0) {
 			if (empty($cachefortmpprod[$line->fk_product])) {
 				$tmpprod = new Product($db);
-				$result = $tmpprod->fetch($line->fk_product);
+				$result = $tmpprod->fetch($line->fk_product, '', '', '', 1, 1, 1);
 				if ($result > 0) {
 					$cachefortmpprod[$line->fk_product] = $tmpprod;
 				} else {
@@ -258,7 +260,7 @@ function sellyoursaasGetExpirationDate($contract)
 		}
 	}
 
-	return array('status'=>$status, 'expirationdate'=>$expirationdate, 'duration_value'=>$duration_value, 'duration_unit'=>$duration_unit, 'nbusers'=>$nbofusers, 'nbofgbs'=>$nbofgbs, 'appproductid'=>$appproductid);
+	return array('expirationdate'=>$expirationdate, 'status'=>$status, 'duration_value'=>$duration_value, 'duration_unit'=>$duration_unit, 'nbusers'=>$nbofusers, 'nbofgbs'=>$nbofgbs, 'appproductid'=>$appproductid);
 }
 
 

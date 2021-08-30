@@ -40,6 +40,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php";
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
+dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 
 
@@ -103,24 +104,7 @@ llxHeader('', $langs->transnoentitiesnoconv('DoliCloudCustomers'), '');
 
 //print_fiche_titre($langs->trans("DoliCloudArea"));
 
-
-$h = 0;
-$head = array();
-
-$head[$h][0] = 'index.php';
-$head[$h][1] = $langs->trans("Home");
-$head[$h][2] = 'home';
-$h++;
-
-$head[$h][0] = DOL_URL_ROOT.'/core/customreports.php?objecttype=contract&tabfamily=sellyoursaas';
-$head[$h][1] = $langs->trans("CustomReports");
-$head[$h][2] = 'customreports';
-$h++;
-
-$head[$h][0] = 'notes.php';
-$head[$h][1] = $langs->trans("Notes");
-$head[$h][2] = 'notes';
-$h++;
+$head = sellYourSaasBackofficePrepareHead();
 
 
 //$head = commande_prepare_head(null);

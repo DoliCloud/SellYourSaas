@@ -45,7 +45,7 @@ fi
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
-	exit 1
+	exit 100
 fi
 
 if [ "x$1" == "x" ]; then
@@ -54,43 +54,43 @@ if [ "x$1" == "x" ]; then
 fi
 if [ "x$2" == "x" ]; then
 	echo "Missing parameter 2 - osusername" 1>&2
-	exit 1
+	exit 2
 fi
 if [ "x$3" == "x" ]; then
 	echo "Missing parameter 3 - ospassword" 1>&2
-	exit 1
+	exit 3
 fi
 if [ "x$4" == "x" ]; then
 	echo "Missing parameter 4 - instancename" 1>&2
-	exit 1
+	exit 4
 fi
 if [ "x$5" == "x" ]; then
 	echo "Missing parameter 5 - domainname" 1>&2
-	exit 1
+	exit 5
 fi
 if [ "x$6" == "x" ]; then
 	echo "Missing parameter 6 - dbname" 1>&2
-	exit 1
+	exit 6
 fi
 if [ "x$7" == "x" ]; then
 	echo "Missing parameter 7 - dbport" 1>&2
-	exit 1
+	exit 7
 fi
 if [ "x$8" == "x" ]; then
 	echo "Missing parameter 8 - dbusername" 1>&2
-	exit 1
+	exit 8
 fi
 if [ "x$9" == "x" ]; then
 	echo "Missing parameter 9 - dbpassword" 1>&2
-	exit 1
+	exit 9
 fi
 if [ "x${22}" == "x" ]; then
 	echo "Missing parameter 22 - EMAILFROM" 1>&2
-	exit 1
+	exit 22
 fi
 if [ "x${23}" == "x" ]; then
 	echo "Missing parameter 23 - REMOTEIP" 1>&2
-	exit 1
+	exit 23
 fi
 
 
@@ -226,8 +226,12 @@ echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +%Y%m%d%H%M%S`" calculated params:"
+echo "templatesdir (from /etc/sellyoursaas.conf) = $templatesdir"
+echo "instancedir (from /etc/sellyoursaas.conf) = $instancedir"
+echo "webSSLCertificateCRT = $webSSLCertificateCRT"
+echo "webSSLCertificateKEY = $webSSLCertificateKEY"
+echo "webSSLCertificateIntermediate = $webSSLCertificateIntermediate"
 echo "vhostfile = $vhostfile"
-echo "instancedir = $instancedir"
 echo "fqn = $fqn"
 echo "fqnold = $fqnold"
 echo "CRONHEAD = $CRONHEAD"
@@ -256,7 +260,7 @@ if [[ "x$dbadminpass" == "x" ]]; then
 	dbadminpass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 	if [[ "x$dbadminpass" == "x" ]]; then
 		echo Failed to get password for mysql admin user 
-		exit 1
+		exit 10
 	fi
 fi 
 dbforcesetpassword=`grep 'dbforcesetpassword=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -266,13 +270,13 @@ fi
 dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
-	exit 1
+	exit 11
 fi
 
 if [[ ! -d $archivedir ]]; then
 	echo Failed to find archive directory $archivedir
 	echo "Failed to $mode instance $instancename.$domainname with: Failed to find archive directory $archivedir" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deploy/undeploy" $EMAILTO
-	exit 1
+	exit 12
 fi
 
 archivetestinstances=`grep 'archivetestinstances=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -302,7 +306,7 @@ if [[ "$mode" == "deployall" ]]; then
 		if [[ "$?x" != "0x" ]]; then
 			echo Error failed to create user $osusername 
 			echo "Failed to deployall instance $instancename.$domainname with: useradd -m -d $targetdir/$osusername -p $ospassword -s '/bin/secureBash' $osusername" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-			exit 1
+			exit 13
 		fi
 		chmod -R go-rwx $targetdir/$osusername
 	fi
@@ -352,7 +356,7 @@ if [[ "$mode" == "deployall" ]]; then
 									tar -xzf $templatesdir/$commonjailtemplatename.tgz --directory $chrootdir/
 								else
 									echo "Failed to get jailkit common template $templatesdir/$commonjailtemplatename.[tgz|tar.zst]"
-									exit 1
+									exit 14
 								fi
 							fi
 						fi
@@ -551,7 +555,7 @@ if [[ "$dnsserver" == "1" ]]; then
 			if [ "x$curr" == "x" ]; then
 				echo Error when editing the DNS file during a deployment. Failed to find bind counter in file /tmp/${ZONE}.$PID. Sending email to $EMAILTO
 				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. Failed to find bind counter in file /tmp/${ZONE}.$PID" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-				exit 1
+				exit 15
 			fi
 			if [ ${#curr} -lt ${#DATE} ]; then
 			  serial="${DATE}00"
@@ -574,7 +578,7 @@ if [[ "$dnsserver" == "1" ]]; then
 			if [[ "$?x" != "0x" ]]; then
 				echo Error when editing the DNS file during a deployment. File /tmp/${ZONE}.$PID is not valid. Sending email to $EMAILFROM
 				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
-				exit 1
+				exit 16
 			fi
 			
 			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
@@ -596,7 +600,7 @@ if [[ "$dnsserver" == "1" ]]; then
 				if [[ "$?x" != "0x" ]]; then
 					echo Error after reloading DNS. nslookup of $fqn fails on second try too.
 					echo "Failed to deployall instance $instancename.$domainname with: Error after reloading DNS. nslookup of $fqn fails of 2 tries." | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO 
-					exit 1
+					exit 17
 				fi
 			fi 
 		fi
@@ -649,7 +653,7 @@ if [[ "$dnsserver" == "1" ]]; then
 			if [[ "$?x" != "0x" ]]; then
 				echo Error when editing the DNS file un undeployment. File /tmp/${ZONE}.$PID is not valid 
 				echo "Failed to deployall instance $instancename.$domainname with: Error when editing the DNS file. File /tmp/${ZONE}.$PID is not valid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-				exit 1
+				exit 18
 			fi
 			
 			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
@@ -802,10 +806,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
 					echo `date +%Y%m%d%H%M%S`
-					echo chown -R root $archivedir/$osusername/$dbname
-					chown -R root $archivedir/$osusername/$dbname
-					echo chmod -R o-rwcd x $archivedir/$osusername/$dbname
-					chmod -R o-rwx $archivedir/$osusername/$dbname
+					echo chown -R root $archivedir/$osusername
+					chown -R root $archivedir/$osusername
+					echo chmod -R o-rwx $archivedir/$osusername
+					chmod -R o-rwx $archivedir/$osusername
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -826,10 +830,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
 					echo `date +%Y%m%d%H%M%S`
-					echo chown -R root $archivedir/$osusername/$dbname
-					chown -R root $archivedir/$osusername/$dbname
-					echo chmod -R o-rwx $archivedir/$osusername/$dbname
-					chmod -R o-rwx $archivedir/$osusername/$dbname
+					echo chown -R root $archivedir/$osusername
+					chown -R root $archivedir/$osusername
+					echo chmod -R o-rwx $archivedir/$osusername
+					chmod -R o-rwx $archivedir/$osusername
 				fi
 			fi
 		fi
@@ -837,7 +841,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo The dir $targetdir/$osusername/$dbname seems already removed/archived
 	fi
 
-	# Note, we archive the dir for instance but the dir for user and the user is still here. Will be removed by clean.sh or at end if mode = undeployall
+	# Note, we have archived the dir for instance but the dir for user and the user is still here. Will be removed by clean.sh or at end if mode = undeployall
 fi
 
 
@@ -1037,7 +1041,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.conf
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 		echo "Failed to deployall instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-		exit 1
+		exit 19
 	fi
 	
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
@@ -1046,7 +1050,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload to deploy instance $instancename.$domainname
 			echo "Failed to deployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
-			exit 2
+			exit 20
 		fi
 	else
 		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
@@ -1073,7 +1077,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running apache2ctl configtest 
 			echo "Failed to undeploy or undeployall instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
-			exit 1
+			exit 21
 		fi 
 		
 		if [[ "x$apachereload" != "xnoapachereload" ]]; then
@@ -1082,7 +1086,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running service apache2 reload to undeploy instance $instancename.$domainname
 				echo "Failed to undeploy or undeployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
-				exit 2
+				exit 24
 			fi
 		else
 			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
@@ -1201,7 +1205,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		if [[ "x$result" != "x0" ]]; then
 			echo Failed to load dump file $dumpfile
 			echo "Failed to $mode instance $instancename.$domainname with: Failed to load dump file $dumpfile" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deploy/undeploy" $EMAILTO
-			exit 1
+			exit 25
 		fi
 	done
 
@@ -1276,7 +1280,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running the CLI script $cliafter 
 				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
-				exit 1
+				exit 26
 			fi
 		fi
 	fi

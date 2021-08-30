@@ -25,19 +25,19 @@ Ce document décrit la mise en oeuvre technique et fonctionelle de SellYourSaas 
 
 == Introduction ==
 
-SellYourSaas est un projet Open Source, né suite au besoin de fournir, en temps réel, des instances d'application Web (comme Dolibarr ERP CRM) à des utilisateurs, à des fins d'utilisation immédiate, avec les impératifs suivants:
+SellYourSaas est un projet Open Source, né suite au besoin de fournir, en temps réel, des instances d'application Web (comme Dolibarr ERP CRM, GLPI, MediaWiki, ...) à des utilisateurs, à des fins d'utilisation immédiate, avec les impératifs suivants:
 
 	* Capable de gérer un nombre très élevé d'instances et d'utilisateurs.
 	* Cout très faibles (devant être au moins 10x inférieurs aux solutions Cloud par containers).
 	* Déploiement en temps réel.
 	* Offrir un accès complet et privé à l'application proposée, y compris à l'administration, avec accès complet sans bridage de fonctionnalités ou paramétrage.
-	* Offrir un SaaS ouvert, avec accès SSH, SFTP et base de donnée direct possible aux utilisateurs. 
+	* Offrir en option du SaaS 100% ouvert, donc avec accès SSH, SFTP et base de donnée direct possible aux utilisateurs. 
 
 Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser leur instance via une souscription, la plateforme évolua pour ajouter d'autres objectifs :
 
-	* Prendre en compte la souscription à l'application proposée sous forme d'abonnements payants.
-	* Espace client dédié pour gestion de ces factures, comptes et support.
-	* Système 100% automatisé (de l'arrivée du prospect à la résiliation de son abonnement en passant par la délivrance du service, sauvegardes, supervision et alimentation de la comptabilité: pas d'intervention humaine).
+	* Prendre en compte la souscription au applications édployées sous forme d'abonnements payants.
+	* Offrir un espace client dédié pour gestion de ces factures, comptes et support.
+	* Système 100% automatisé (de l'arrivée du prospect à la résiliation de son abonnement, en passant par la délivrance du service, sauvegardes, supervision et alimentation de la comptabilité: pas d'intervention humaine).
 	* Une souplesse dans le mode d'abonnement (fréquence, tarifs, service complémentaires, options, ...)
 	* Compatible (ou à minima adaptable) pour toute application Web.
 	* Gestion d'un réseau de revendeur.
@@ -46,7 +46,7 @@ Suite au déploiement de la v1 et à la demande d'utilisateurs pour pérenniser 
 Financé par les sociétés Open Source https://www.dolicloud.com[DoliCloud] et https://www.teclib.com[TecLib], SellYourSaas v2 a atteint ces objectifs et est aujourd'hui en production chez plusieurs sociétés proposants des services Saas (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], ...). Voici une synthèse de ses capacités:
 
     * Déploiement de n'importe quelle application WAMP. Gestion de multiples solutions/applications différentes en même temps.
-    * Diffusion d'instances gratuites sans demande d'informations confidentiels ni cartes bancaires.
+    * Diffusion d'instances gratuites ou de tests sans demande d'informations confidentiels ni cartes bancaires.
     * Diffusion d'instances payantes avec différents niveaux de tarifications.
     * Site web vitrine (optionnel) prêt à l'emploi pour vendre votre application.
     * Espace client dédié (facturation, ticket, compte client).
@@ -157,9 +157,9 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (ne
 ---------------
 mkdir /mnt/diskhome
 mount /dev/vdxY /mnt/diskhome
+mkdir /mnt/diskbackup
 
 And if a disk was created for backup:
-mkdir /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -189,7 +189,7 @@ Pour prendre en compte le changement:
 
 [source,bash]
 ---------------
-mount -oremount /dev/diskX/
+mount -o remount /dev/diskX/
 ---------------
 
 Pour vérifier:
@@ -199,13 +199,14 @@ Pour vérifier:
 cat /proc/mounts | grep diskX
 ---------------
 
-Rem: Pour information, si il faut récupérer les fichiers de données d'un autre disque après avoir créé le disque, utilisez:
+Rem: Pour information, si il faut récupérer les fichiers de données d'un autre disque source, utilisez:
 
 [source,bash]
 ---------------
 rsync --info=progress2 -au serveursource:/mnt/diskSource /mnt/diskTarget
 
 Example:
+cd /mnt/diskSource
 rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
 chown -R mysql.mysql /var/lib/mysql
 Après avoir lancé mysql, il est possible de tester les bases par
@@ -308,7 +309,7 @@ Et positionner le owner *root.root* et les permissions *r--r-----*
 [source, conf]
 ---------------
 chmod a-w /etc/sudoers.d/myunixlogin
-chmod a-r /etc/sudoers.d/myunixlogin
+chmod o-r /etc/sudoers.d/myunixlogin
 ---------------
 
 
@@ -371,27 +372,6 @@ Ajouter à la fin de */etc/bash.bashrc*:
 alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,cmd'
 ---------------
 
-
-=== Augmentation taille max UID
-
-Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le 
-
-[source,conf]
----------------
-	UID_MIN                  1000
-	UID_MAX                 500000
-
-	GID_MIN                  1000
-	GID_MAX                 500000
----------------
-
-Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* (sinon) pour mettre 
-
-[source,conf]
----------------
-LimitUIDRange 1 500000
-LimitGIDRange 1 500000
----------------
 
 
 === Configuration hostname et IP
@@ -569,6 +549,35 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
 
+=== Getting files of Dolibarr and SellYourSaas application
+
+On all servers (*Master and Deploiement*):
+
+* Under the *root* login, install git tool:
+
+[source,bash]
+---------------
+apt install git
+---------------
+
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr
+chown -R admin.admin /home/admin/wwwroot/dolibarr
+---------------
+
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+---------------
+
+
 === Creation of sellyoursaas.conf with credentials
 
 * Créer un fichier */etc/sellyoursaas.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
@@ -722,6 +731,13 @@ Ajouter la ligne au fichier */etc/fstab* pour avoir le montage automatique au re
 i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas  nfs  defaults 0 0
 ---------------
 
+et tester que ce montage se fait bien
+ 
+[source, bash]
+---------------
+mount -a
+---------------
+
 
 === Déploiement de la clé publique ssh du compte admin
 
@@ -786,36 +802,6 @@ sudo apt install libreoffice-common libreoffice-writer
 sudo apt install mailutils postfix
 ---------------
 
-Il faut aussi à présent installer *php-mcrypt* pour Ubuntu 20.04+
-
-[source,bash]
----------------
-sudo apt install -y build-essential
-sudo pecl install mcrypt
----------------
-
-Quand vous voyez :
-
-[source,bash]
----------------
-libmcrypt prefix? [autodetect] :
----------------
-
-Appuyez sur *Entrer*
-
-Écrire la ligne suivante dans /etc/php/7.4/cli/php.ini et /etc/php/7.4/apache2/php.ini
-
-[source,bash]
----------------
-extension=mcrypt.so
----------------
-
-Puis *redémarrer* le serveur *Apache*
-
-[source,bash]
----------------
-sudo systemctl restart apache2
----------------
 
 === Désactivation de la mise a jour automatique
 
@@ -824,6 +810,28 @@ Désinstaller le package *unattended-upgrades* au cas où il aurait été instal
 [source,bash]
 ---------------
 apt remove unattended-upgrades
+---------------
+
+
+=== Augmentation taille max UID
+
+Sur les serveurs de déploiement, modifier */etc/login.defs* pour mettre le 
+
+[source,conf]
+---------------
+UID_MIN                  1000
+UID_MAX                 500000
+
+GID_MIN                  1000
+GID_MAX                 500000
+---------------
+
+Modifier le fichier */etc/apache2/mods-enabled/mpm_itk.conf* (si il existe) ou */etc/apache2/conf-enabled/security.conf* (sinon) pour mettre 
+
+[source,conf]
+---------------
+LimitUIDRange 1 500000
+LimitGIDRange 1 500000
 ---------------
 
 
@@ -845,7 +853,7 @@ On active les *configurations* apache pour fonctionner en MPM_PREFORK and MPM_IT
 
 [source,bash]
 ---------------
-a2enconf charset indexignore localized-error-pages other-vhosts-access-log security
+a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 
@@ -1002,6 +1010,9 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
 	    ExpiresByType application/x-javascript A2592000
 	    ExpiresByType application/javascript A2592000
 
+#RewriteEngine On
+#RewriteRule !^/maintenance.php https://%{SERVER_NAME}/maintenance.php?instance=myaccount [R,L]
+
 RewriteEngine on
 RewriteCond %{SERVER_NAME} =myaccount.mysaasdomainname.com
 RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
@@ -1040,10 +1051,12 @@ systemctl reload nom_du_service.service
 TODO Graphic avec les flux et les ports.
 
 
-* Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
+* Créer un firewall. La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
 
 
-==== Avec iptables ====
+==== Avec iptables (déprécié) ====
+
+Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
 
 [source, bash]
 ---------------
@@ -1054,7 +1067,7 @@ systemctl is-enabled firewallsellyoursaas
 systemctl status firewallsellyoursaas
 ---------------
 
-==== Avec ufw
+==== Avec ufw (recommandé) ====
 
 Editer le fichier */etc/ufw/before.rules* pour permettre les ping sortant, en ajoutant ceci:
 
@@ -1136,7 +1149,7 @@ systemctl is-enabled remote_server_launcher
 systemctl status remote_server_launcher
 ---------------
 
-Remarque: L'agent se lance sur le port 8080
+Remarque: L'agent se lance sur le port 8080 et est en attente d'instructions du master.
 
 
 Pour utiliser systemd créer un fichier /etc/systemd/system/remote-server-launcher.service :
@@ -1437,15 +1450,15 @@ maxretry = 10
 [web-dol-registerinstance]
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enable to false on deployment servers
-;enabled = true
-;port    = http,https
-;filter  = web-dolibarr-rulesregisterinstance
-;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXXX.log
-;action  = %(action_mw)s
-;bantime  = 4320000   ; 50 days
-;findtime = 86400     ; 1 day
-;maxretry = 10
+; disable this rule by setting enabled to false on non master servers
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulesregisterinstance
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 10
 
 ---------------
 
@@ -1464,6 +1477,11 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ---------------
 
 Relancer fail2ban et vérifier les erreurs dans */var/log/fail2ban.log*
+
+Note: If you need to have the existing log files re-parsed fully again, you must change a char at begin of file to checksum for recovery point will fails. If it fails, delete file /var/lib/fail2ban/fail2ban.sqlite3
+
+Note: To test rule file on an existing log file:
+fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
 
 === Test spamassassin ===
@@ -1508,7 +1526,7 @@ echo $?
 ---------------
 
 
-=== Installation de ClamAV
+=== Test et paramétrage de ClamAV
 
 Le process *freshclam* et *clamd* doit tourner. Lancer les manuellement la première fois si ce n'est pas le cas.
 
@@ -1523,7 +1541,6 @@ Et pour tester *clamav* en ligne de commande et le démon:
 
 [source,bash]
 ---------------
-clamscan /tmp/testvirus
 clamdscan /tmp/testvirus --fdpass
 ---------------
 
@@ -1540,7 +1557,7 @@ service apache2 start
 ---------------
 
 Vous devez voir dans le statut apparmor une ligne disant que le profil *usr/sbin/clamd* est désactivée.
-Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans apache.
+Rem: Il semble que l'on doit aussi redémarrer apache pour que cela s'applique dans apache.
 
 
 === Installation de Afick
@@ -1553,7 +1570,7 @@ wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick
 dpkg -i afick.deb
 ---------------
 
-* Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+* Commenter les ligne qui exclut les extension que l'on veut voir incluse dans l'analyse dans */etc/afick.conf* et ne garder décommenter que ces lignes ci (on veut uniquement exclure les log et backup):
 
 [source,bash]
 ---------------
@@ -1725,7 +1742,7 @@ myorigin = /etc/mailname
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
 recipient_delimiter = +
-inet_interfaces = ip.public.du.serveur
+inet_interfaces = ip.publique.serveur.associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
 inet_protocols = ipv4
 smtp_generic_maps = hash:/etc/postfix/generic
 
@@ -1778,7 +1795,7 @@ Pensez à modifier dans */etc/postfix/main.cf*, les entrées :
  
 [source,bash]
 ---------------
-inet_interfaces = ip_publique_associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
+inet_interfaces = ip.publique.serveur.associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
 inet_protocols = ipv4
 ---------------
 
@@ -1855,7 +1872,7 @@ broken_sasl_auth_clients = yes
 
 === Configuration de Mysql ou Mariadb
 
-On *Deployment servers*, use a dedicated setup of the database.
+Sur les *Serveurs de déploiement*:
 
 ==== Configuration
 
@@ -2226,6 +2243,14 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /etc/mailname r,
   /etc/mysql/conf.d/ r,
   /etc/mysql/conf.d/mysqld_safe_syslog.cnf r,
+  /etc/mysql/conf.d/mysql.cnf r,
+  /etc/mysql/conf.d/mysqldump.cnf r,
+  /etc/mysql/mariadb.cnf r,
+  /etc/mysql/mariadb.conf.d/ r,
+  /etc/mysql/mariadb.conf.d/50-client.cnf r,
+  /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf r,
+  /etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf r,
+  /etc/mysql/mariadb.conf.d/50-server.cnf r,
   /etc/mysql/my.cnf r,
   /etc/pam.d/* r,
   /etc/papersize r,
@@ -2393,6 +2418,8 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /mnt/diskhome/home/osu*/dbn*/*_error.log r,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
+  /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+  /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
 }
 ---------------
 
@@ -2479,9 +2506,9 @@ mkdir /home/jail/chroot
 [source,bash]
 ---------------
 # /home/jail/home
-/mnt/diskhome/home /home/jail/home bind defaults,bind 0
+/mnt/diskhome/home /home/jail/home bind defaults,bind 0 0
 # /home/jail/chroot
-/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0
+/mnt/diskhome/chroot /home/jail/chroot bind defaults,bind 0 0
 ---------------
 
 * Monter les répertoires
@@ -2622,14 +2649,16 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
 
 Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdomainname.com* pour ajouter un enregistrement *A* pour 
 
-    *with1.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
-    *ns1with1.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
-    *ns2with1.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *withX.mysaasdomainname.com*          Sous domaine des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *ns1withX.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
+    *ns2withX.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
 
 Ajouter les enregistrements *GLUE record* auprès du registar pour (optionnel)
 
-    *ns1with1.mysaasdomainname.com*
-    *ns2with1.mysaasdomainname.com*
+    *ns1withX.mysaasdomainname.com*
+    *ns2withX.mysaasdomainname.com*
+
+Note: X est le numéro du serveur de déploiement.
 
 ==== Sur le serveur de déploiement
 
@@ -2739,7 +2768,8 @@ Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/
 
 [source,bash]
 ---------------
-TODO
+chmod -Rv 733 /dev/shm /var/lib/php/sessions
+chmod +t /dev/shm /var/lib/php/sessions
 ---------------
 
 ==== Définition taille upload et durée sessions
@@ -2756,10 +2786,28 @@ max_input_vars = 4000
 memory_limit = 256M
 
 session.gc_maxlifetime = 3600
+session.use_strict_mode = 1 
+session.use_only_cookies = 1
+session.cookie_httponly = 1
+session.cookie_samesite = Strict
 ---------------
 
 
 ==== Ajout du wrapper PHP pour la fonction PHP mail
+
+Sur le *Serveur Master*:
+
+Créer les fichiers examples références qui seront utiliser pour les fonctions antispam internes à SellYourSaas.
+
+[source,bash]
+---------------
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail;
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip;
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom;
+echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent;
+---------------
+
+
 
 Sur les *Serveurs de déploiement*:
 
@@ -2798,6 +2846,33 @@ echo >> /var/log/phpmail.log
 echo >> /var/log/phpsendmail.log
 chown syslog.adm phpmail.log phpsendmail.log
 chmod a+rw phpmail.log phpsendmail.log
+---------------
+
+Create a directory for blacklist files used by *phpsendmail.php*
+
+[source,bash]
+---------------
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+chown admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+---------------
+
+Et copier les dans le répertoire local:
+
+[source,bash]
+---------------
+mkdir /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp/spam;
+chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
+
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent;
+chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
 ---------------
 
 === Configuration de logrotate
@@ -2961,6 +3036,15 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 #apt install certbot
 ---------------
 
+And to list certbot cron job:
+
+[source,bash]
+---------------
+systemctl list-timers
+systemctl status snap.certbot.renew.timer
+---------------
+
+
 [[creation_certificat_ssl]]
 === Création d'un certificat SSL wildcard pour les instances utilisateurs
 
@@ -3020,6 +3104,21 @@ openssl x509 -in fullchain.pem -text
 ---------------
 
 
+Or if there is a wildcard certificate on a deployment server, run:
+
+[source,bash]
+---------------
+certbot --manual -d '*.withX.mysaasdomainname.com' --preferred-challenges=dns certonly
+Complete the DNS file /etc/bind/withX.mysaasdomainname.com.hosts with the TXT key suggested (Keep old one but remove very old one)
+rndc reload withX.mysaasdomainname.com
+/etc/init.d/apache2 reload
+---------------
+
+You can check that DNS update is ok with this URL
+https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
+or host -t txt _acme-challenge.withX.mysaasdomainname.com
+
+
 ==== Installer les fichiers certificats
 
 * Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
@@ -3028,9 +3127,12 @@ openssl x509 -in fullchain.pem -text
 
 ---------------
 cd /etc/apache2
+ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.key
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
 ---------------
+
+NOTE: Il s'agit ici du certificat qui sera utilisé pour les instances clients. Les certificats custom des instances seront dans */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
 * Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* avec ce contenu:
 
@@ -3115,7 +3217,6 @@ Avoir dans le cron du user *root*
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
-Note: certbot-auto may be certbot
 
 Mettre dans le cron du user *admin*:
 
@@ -3123,7 +3224,7 @@ Mettre dans le cron du user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 # cron master and deployment root
@@ -3170,17 +3271,6 @@ cd / && run-parts --report /etc/cron.daily
 
 
 == Installation de Dolibarr
-
-Sur tous les serveurs (Master et Déploiement):
-
-* Sous le compte *admin*, récupérer les sources de *Dolibarr* (v13 ou +) à placer dans */home/admin/wwwroot/dolibarr*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
----------------
-
 
 Sur le *Serveur Master*:
 
@@ -3229,15 +3319,7 @@ Sur le *Serveur maitre* Dolibarr, activer et configurer le module GeoIP de Dolib
 
 == Installation du plugin SellYourSaas
 
-Sur tous les serveurs (Master et Déploiement):
-
-* Sous le compte *admin*, installer les sources de *SellYourSaas* : Récupérer les sources du projet à placer dans */home/admin/wwwroot/dolibarr_sellyoursaas*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
----------------
+Sur tous les serveurs (*Master et Déploiement*):
 
 * Créer un lien symbolique appelé *sellyoursaas* dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas* :
 
@@ -3257,9 +3339,9 @@ Sur le *Master*:
 
 Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainname.com):
 
-* Activer le module SellYourSaas
+* Activer le module *SellYourSaas* et *Fournisseur*
 
-* Créer un compte utilisateur générique Dolibarr pour les accès à l'espace client (Exemple: "Utilisateur client"). Lui donner les accès suivants:
+* Créer un *Compte utilisateur générique Dolibarr* nommé "Service account for Saas anonymous" qui sera utilisé pour les accès aux données et services Dolibarr par l'espace client publique ou privée. Donner à cet utilisateur les accès suivants et uniquement les accès suivant:
 
 ** Module Agenda
 *** Lires les actions
@@ -3297,6 +3379,12 @@ Se connecter à l'interface utilisateur de Dolibarr (https://admin.mysaasdomainn
 ** Module Utilisateurs et Groupes
 *** Créer/modifier ses propres informations utilisateur
 
+* Créer un *Product tag* appelé "SaaS products"
+
+* Créer un *Third-party tag* appelé "SaaS customers" and "Saas resellers"
+
+* Configurer le module *SellYourSaas*, à minima, les champs obligatoires (en gras).
+
 * Créer un *Package* pour définir les applications à déployer (fichiers, config, dump de base...)
 
 Voir le chapitre "Configuration des packages" plus loin.
@@ -3325,26 +3413,6 @@ Remarque: Les URL pour réaliser les déploiements des packages de type *Applica
 <<<<
 
 == Installation d'outils externes
-
-=== Installation de webmin (optionnel pour supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-* Si la fonction sauvegarde de toutes les bases de Webmin est active, modifier les fichiers */usr/share/webmin/mysql/backup.pl*  et  */usr/share/webmin/mysql/backup_db.cgi*
-
-[source,perl]
----------------
-foreach $db (@dbs) {
----------------
-
-en
-
-[source,perl]
----------------
-foreach $db (@dbs) {
-    # @CHANGE LDR
-    if ($db =~ /^dbn/) { next; }
----------------
 
 === Installation de DataDog (optionnel pour supervision)
 
@@ -3435,7 +3503,7 @@ instances:
     search_string: ['apache2']
     exact_match: False
     thresholds:
-      critical: [5, 5000]
+      critical: [4, 5000]
 
   - name: fail2ban
     search_string: ['fail2ban-server']
@@ -4015,17 +4083,20 @@ select @@datadir;
 This output confirms that MySQL is configured to use the default data directory, /var/lib/mysql/, so that’s the directory we need to move. Once you’ve confirmed this, type exit and press “ENTER” to leave the monitor:
 
 exit
+
 To ensure the integrity of the data, we’ll shut down MySQL before we actually make changes to the data directory:
 
 sudo systemctl stop mysqld
+
 systemctl doesn’t display the outcome of all service management commands, so if you want to be sure you’ve succeeded, use the following command:
 
 sudo systemctl status mysqld
-You can be sure it’s shut down if the final line of the output tells you the server is stopped:
 
-Output
-. . .
+You can be sure it’s shut down if the final line of the output tells you the server is stopped like in this example:
+
+...
 Jul 18 11:24:20 ubuntu-512mb-nyc1-01 systemd[1]: Stopped MySQL Community Server.
+
 Now that the server is shut down, we’ll copy the existing database directory to the new location with rsync. Using the -a flag preserves the permissions and other directory properties, while-v provides verbose output so you can follow the progress.
 
 Note: Be sure there is no trailing slash on the directory, which may be added if you use tab completion. When there’s a trailing slash, rsync will dump the contents of the directory into the mount point instead of transferring it into a containing mysql directory:
@@ -4172,7 +4243,7 @@ Lancer le script:
 
 Aller dans le menu *SellYourSaas - Packages* et créer un nouveau package.
 
-Par exemple, pour déployer une application comme *Dolibarr* dont les sources ont été placées dans le répertoire *documents/sellyoursaas/git*, saisissez les valeurs de champs suivants:
+Par exemple, pour déployer une application comme *Dolibarr* dont les sources ont été placées dans le répertoire *documents/sellyoursaas/git*, saisissez les valeurs de champs suivants (Note: Les variables __XXX__ sont des mots réservés qui seront remplacés par les process de SellYourSaas qui exploitent ces champs):
 
 
 Dans le champ *Dir with sources 1*
@@ -4233,7 +4304,7 @@ $dolibarr_main_document_root='__INSTANCEDIR__/htdocs';
 $dolibarr_main_url_root_alt='/custom';
 $dolibarr_main_document_root_alt='__INSTANCEDIR__/htdocs/custom';
 $dolibarr_main_data_root='__INSTANCEDIR__/documents';
-$dolibarr_main_db_host='localhost';
+$dolibarr_main_db_host='127.0.0.1';
 $dolibarr_main_db_port='3306';
 $dolibarr_main_db_name='__DBNAME__';
 $dolibarr_main_db_user='__DBUSER__';
@@ -4302,23 +4373,19 @@ Dans *sql after*
 
 [source,bash]
 ---------------
-UPDATE llx_user set pass_crypted = '__APPPASSWORD0SALTED__', email = '__APPEMAIL__' where login = 'admin' AND (pass = 'admin' OR pass_crypted = 'valeur_du_hash_dans_image');
+UPDATE llx_user set pass_crypted = '__APPPASSWORD0__', email = '__APPEMAIL__' where login = 'admin' AND (pass = 'admin' OR pass_crypted = 'value_of_hashed_password_encrypted_with_password_hash');
 REPLACE INTO llx_const (name, entity, value, type, visible) values('CRON_KEY', 0, '__OSUSERNAME__', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SOCIETE_NOM', 1, '__APPORGNAME__', 'chaine', 0);
 --REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SOCIETE_COUNTRY', 1, '__APPCOUNTRYIDCODELABEL__', 'chaine', 0);
 REPLACE INTO llx_const set value = '__APPEMAIL__' where name = 'MAIN_MAIL_EMAIL_FROM';
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAILING_EMAIL_FROM';
 UPDATE llx_const set value = '10.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
-REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'ip.server.deployment1, ip.servr.deployment23', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'ip.server.deployment1, ip.server.deployment2', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_USING_PHPMAIL', 0, '1', 'chaine', 1);
---REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, '1', 'password_hash', 1);
---REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_SALT', 0, '1', '123456', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, '1', 'password_hash', 1);
 ---------------
 
 Changer la valeur de 10.0.0 avec la version de l'image de Dolibarr que vous aller déployer
-
-Enable also request to set MAIN_SECURITY_HASH_ALGO and MAIN_SECURITY_SALT to the same values than the one set into setup of SellYourSaas.
-Also, if you use the MAIN_SECURITY_HASH_ALGO to 'password_hash', you must use the key __APPPASSWORD0__ for password encrypted instead of __APPPASSWORD0SALTED__ (because salt is included inside the encrypted value of password).
 
 
 === Configuration des services
@@ -4638,11 +4705,45 @@ If you find into */var/log/auth.log* an error like:
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
 
-The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the sshd_config of the server by adding:
+The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the */etc/ssh/sshd_config* of the server by adding:
 
+[source,bash]
+---------------
 # Legacy changes - To allow an old client to connect to
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
+---------------
 
-Then reload ssh with /etc/init.d/ssh reload
+Then reload ssh with 
+
+[source,bash]
+---------------
+/etc/init.d/ssh reload
+---------------
+
+==== Some remoteaction generates a PHP coredump
+
+This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
+You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1
+
+
+==== On a deployment server, the user root can read files into /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+
+Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
+
+
+==== Error when doing mysqldump
+
+mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
+
+Try to add the parameter -not-tablespace into the mysqldump command.
+
+
+==== Error mysql when connecting to database
+
+When logged with a customer linux account osu..., you get this error:
+mysql -A -C -u dbu... -p'...' -h localhost -D dbn...
+ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (13)
+
+Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter --protocol tcp.
 

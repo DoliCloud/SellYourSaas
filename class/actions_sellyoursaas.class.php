@@ -18,7 +18,7 @@
 
 /**
  *	\file       htdocs/sellyoursaas/class/actions_sellyoursaas.class.php
- *	\ingroup    cabinetmed
+ *	\ingroup    sellyoursaas
  *	\brief      File to control actions
  */
 require_once DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php";
@@ -63,7 +63,7 @@ class ActionsSellyoursaas
 	 *
 	 *  @param		DoliDB		$db      Database handler
 	 */
-	function __construct($db)
+	public function __construct($db)
 	{
 		$this->db = $db;
 	}
@@ -79,7 +79,7 @@ class ActionsSellyoursaas
 	 *                              				=0 if OK but we want to process standard actions too,
 	 *                              				>0 if OK and we want to replace standard actions.
 	 */
-	function getNomUrl($parameters, &$object, &$action)
+	public function getNomUrl($parameters, &$object, &$action)
 	{
 		global $db,$langs,$conf,$user;
 
@@ -141,7 +141,7 @@ class ActionsSellyoursaas
 	 *                              				=0 if OK but we want to process standard actions too,
 	 *                              				>0 if OK and we want to replace standard actions.
 	 */
-	function getFormatedCustomerRef($parameters, &$object, &$action)
+	public function getFormatedCustomerRef($parameters, &$object, &$action)
 	{
 		global $conf, $langs;
 
@@ -192,9 +192,9 @@ class ActionsSellyoursaas
 	 *                              				=0 if OK but we want to process standard actions too,
 	 *                              				>0 if OK and we want to replace standard actions.
 	 */
-	function addMoreActionsButtons($parameters, &$object, &$action)
+	public function addMoreActionsButtons($parameters, &$object, &$action)
 	{
-		global $db,$langs,$conf,$user;
+		global $langs,$conf,$user;
 
 		dol_syslog(get_class($this).'::addMoreActionsButtons action='.$action);
 		$langs->load("sellyoursaas@sellyoursaas");
@@ -263,7 +263,7 @@ class ActionsSellyoursaas
 	 *                              				=0 if OK but we want to process standard actions too,
 	 *                              				>0 if OK and we want to replace standard actions.
 	 */
-	function doActions($parameters, &$object, &$action)
+	public function doActions($parameters, &$object, &$action)
 	{
 		global $db,$langs,$conf,$user;
 
@@ -551,7 +551,9 @@ class ActionsSellyoursaas
 				} else {
 					if ($action == 'suspendmaintenance') {
 						setEventMessages($langs->trans('InstanceInMaintenanceMode', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), null, 'warnings');
-					} else setEventMessages('InstanceUnsuspended', null, 'mesgs');
+					} else {
+						setEventMessages('InstanceUnsuspended', null, 'mesgs');
+					}
 				}
 			}
 		}
@@ -610,7 +612,7 @@ class ActionsSellyoursaas
 	 *                              				=0 if OK but we want to process standard actions too,
 	 *                              				>0 if OK and we want to replace standard actions.
 	 */
-	function formConfirm($parameters, &$object, &$action)
+	public function formConfirm($parameters, &$object, &$action)
 	{
 		global $db, $langs, $conf, $user, $form;
 
@@ -644,9 +646,9 @@ class ActionsSellyoursaas
 	 *                              				=0 if OK but we want to process standard actions too,
 	 *                              				>0 if OK and we want to replace standard actions.
 	 */
-	function formObjectOptions($parameters, &$object, &$action)
+	public function formObjectOptions($parameters, &$object, &$action)
 	{
-		if ($parameters['currentcontext'] == 'crontactcard') {
+		if ($parameters['currentcontext'] == 'contractcard') {
 			//print '<tr><td>aaa</td><td></td></tr>';
 		}
 	}
@@ -657,7 +659,7 @@ class ActionsSellyoursaas
 	 * @param	array	$parameters		Array of parameters
 	 * @return	int						1=Replace standard code, 0=Continue standard code
 	 */
-	function addSearchEntry($parameters)
+	public function addSearchEntry($parameters)
 	{
 		global $conf, $langs, $user;
 
@@ -681,9 +683,10 @@ class ActionsSellyoursaas
 	 *
 	 * @param	array			$parameters		Array of parameters
 	 * @param	CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 * @param   string			$action      	'add', 'update', 'view'
 	 * @return	int								1=Replace standard code, 0=Continue standard code
 	 */
-	function moreHtmlStatus($parameters, $object = null, $action = '')
+	public function moreHtmlStatus($parameters, $object = null, $action = '')
 	{
 		global $conf, $langs, $user;
 		global $object;
@@ -739,7 +742,7 @@ class ActionsSellyoursaas
 	 * @param	array			$parameters		Array of parameters
 	 * @return	int								1=Replace standard code, 0=Continue standard code
 	 */
-	function printEmail($parameters)
+	public function printEmail($parameters)
 	{
 		global $conf, $langs, $user;
 		global $object, $action;
@@ -761,7 +764,7 @@ class ActionsSellyoursaas
 	 * @param	array	$parameters		Array of parameters
 	 * @return	int						1=Replace standard code, 0=Continue standard code
 	 */
-	function getDefaultFromEmail($parameters)
+	public function getDefaultFromEmail($parameters)
 	{
 		global $conf, $langs, $user;
 		global $object;
@@ -805,7 +808,7 @@ class ActionsSellyoursaas
 	 * @param	array	$parameters		Array of parameters
 	 * @return	int						1=Replace standard code, 0=Continue standard code
 	 */
-	function ODTSubstitution($parameters)
+	public function ODTSubstitution($parameters)
 	{
 		global $conf, $langs;
 		global $object;
@@ -860,7 +863,7 @@ class ActionsSellyoursaas
 	 * @param	object	$object			Object
 	 * @return	string					HTML content to add by hook
 	 */
-	function printFieldListTitle($parameters, &$object)
+	public function printFieldListTitle($parameters, &$object)
 	{
 		global $conf, $langs;
 		global $param, $sortfield, $sortorder;
@@ -888,7 +891,7 @@ class ActionsSellyoursaas
 	 * @param	object	$object			Object
 	 * @return	string					HTML content to add by hook
 	 */
-	function printFieldListOption($parameters, &$object)
+	public function printFieldListOption($parameters, &$object)
 	{
 		global $conf, $langs;
 		global $contextpage;
@@ -913,7 +916,7 @@ class ActionsSellyoursaas
 	 * @param	object	$object			Object
 	 * @return	string					HTML content to add by hook
 	 */
-	function printFieldListValue($parameters, &$object)
+	public function printFieldListValue($parameters, &$object)
 	{
 		global $conf, $langs;
 		global $db;
@@ -980,7 +983,7 @@ class ActionsSellyoursaas
 	 *                          		=0 if OK but we want to process standard actions too,
 	 *  	                            >0 if OK and we want to replace standard actions.
 	 */
-	function afterPDFCreation($parameters, &$pdfhandler, &$action)
+	public function afterPDFCreation($parameters, &$pdfhandler, &$action)
 	{
 		global $conf,$langs;
 		global $hookmanager;
@@ -1111,6 +1114,16 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'home';
 			$h++;
 
+			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php',1);
+			$head[$h][1] = $langs->trans("DeploymentServers");
+			$head[$h][2] = 'deploymentservers';
+			$h++;
+
+			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php',1);
+			$head[$h][1] = $langs->trans("AntiSpam");
+			$head[$h][2] = 'antispam';
+			$h++;
+
 			$this->results['title'] = $langs->trans("DoliCloudArea");
 			$this->results['picto'] = 'sellyoursaas@sellyoursaas';
 		}
@@ -1122,10 +1135,12 @@ class ActionsSellyoursaas
 			$h++;
 		//}
 
+		if ($parameters['tabfamily'] == 'sellyoursaas') {
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
 			$head[$h][1] = $langs->trans("Notes");
 			$head[$h][2] = 'notes';
 			$h++;
+		}
 
 		$this->results['head'] = $head;
 

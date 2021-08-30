@@ -37,7 +37,7 @@ export archivedircron="/var/spool/cron/crontabs.disabled"
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
-   exit 1
+   exit 100
 fi
 
 # possibility to change the directory of instances are stored
@@ -46,6 +46,8 @@ if [[ "x$targetdir" == "x" ]]; then
 	export targetdir="/home/jail/home"
 fi
 
+export masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export IPSERVERDEPLOYMENT=`grep '^ipserverdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export databasehost=`grep '^databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export database=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -55,7 +57,7 @@ if [[ "x$databaseport" == "x" ]]; then
 	databaseport="3306"
 fi
 
-if [ "x$IPSERVERDEPLOYMENT" == "x" ]; then
+if [ "x$instanceserver" == "x1" && "x$IPSERVERDEPLOYMENT" == "x" ]; then
    echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
    exit 1
 fi
@@ -63,29 +65,29 @@ fi
 if [ "x$database" == "x" ]; then
     echo "Failed to find the DATABASE by reading entry 'database=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
-	exit 1
+	exit 29
 fi
 if [ "x$databasehost" == "x" ]; then
     echo "Failed to find the DATABASEHOST by reading entry 'databasehost=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
-	exit 1
+	exit 30
 fi
 if [ "x$databaseuser" == "x" ]; then
     echo "Failed to find the DATABASEUSER by reading entry 'databaseuser=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
-	exit 1
+	exit 4
 fi
 echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
 databasepass=`grep 'databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepass" == "x" ]]; then
 	echo Failed to get password for mysql user sellyoursaas 
-	exit 1
+	exit 5
 fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
 	echo "Usage: ${0} [test|confirm] (tempdirs)"
-	exit 1
+	exit 6
 fi
 
 echo "Search database server name and port for deployment server in /etc/sellyoursaas.conf"
@@ -110,7 +112,7 @@ fi
 dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
 	echo Failed to get dns server parameters 
-	exit 1
+	exit 7
 fi
 
 export usecompressformatforarchive=`grep 'usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -127,11 +129,11 @@ MYSQLDUMP=`which mysqldump`
 
 if [[ ! -d $archivedirtest ]]; then
 	echo Failed to find archive directory $archivedirtest
-	exit 1
+	exit 8
 fi
 if [[ ! -d $archivedirpaid ]]; then
 	echo Failed to find archive directory $archivedirpaid
-	exit 1
+	exit 9
 fi
 
 echo "***** Clean temporary files"
@@ -139,31 +141,31 @@ echo rm -f /tmp/instancefound*
 rm -f /tmp/instancefound*
 if [ -f /tmp/instancefound-dbinsellyoursaas ]; then
 	echo Failed to delete file /tmp/instancefound-dbinsellyoursaas
-	exit 1
+	exit 21
 fi
 if [ -f /tmp/instancefound-activedbinsellyoursaas ]; then
 	echo Failed to delete file /tmp/instancefound-activedbinsellyoursaas
-	exit 1
+	exit 20
 fi
 if [ -f /tmp/instancefound-dbinmysqldic ]; then
 	echo Failed to delete file /tmp/instancefound-dbinmysqldic
-	exit 1
+	exit 19
 fi
 echo rm -f /tmp/osutoclean*
 rm -f /tmp/osutoclean*
 if [ -f /tmp/osutoclean ]; then
 	echo Failed to delete file /tmp/osutoclean
-	exit 1
+	exit 13
 fi
 if [ -f /tmp/osutoclean-oldundeployed ]; then
 	echo Failed to delete file /tmp/osutoclean-oldundeployed
-	exit 1
+	exit 14
 fi
 echo rm -f /tmp/osusernamefound*
 rm -f /tmp/osusernamefound*
 if [ -f /tmp/osusernamefound ]; then
 	echo Failed to delete file /tmp/osusernamefound
-	exit 1
+	exit 15
 fi
 
 
@@ -195,7 +197,7 @@ echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL
 $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-dbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make first SQL request to get instances. Exit 1."
-	exit 1
+	exit 16
 fi
 
 
@@ -211,7 +213,7 @@ echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e '$SQL
 $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep -v 'ref_customer' >> /tmp/instancefound-activedbinsellyoursaas
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make second SQL request to get instances. Exit 1."
-	exit 1
+	exit 17
 fi
 
 
@@ -225,7 +227,7 @@ echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseus
 $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL" | grep 'dbn' | awk ' { print $1 } ' >> /tmp/instancefound-dbinmysqldic
 if [ "x$?" != "x0" ]; then
 	echo "Failed to make third SQL request to get instances. Exit 1."
-	exit 1
+	exit 18
 fi
 
 
@@ -251,24 +253,25 @@ do
 	fi
 done
 
-echo "***** Search from /tmp/instancefound-activedbinsellyoursaas of active databases (with known osusername) with a non existing unix user (should never happen)" 
-while read bidon osusername dbname deploymentstatus ipserverdeployment; do 
-	if [[ "x$osusername" != "xusername_os" && "x$osusername" != "xunknown" && "x$osusername" != "xNULL" && "x$dbname" != "xNULL" ]]; then
-		echo $ipserverdeployment | grep "$IPSERVERDEPLOYMENT" > /dev/null 2>&1
-		notfoundip=$?
-		#echo notfoundip=$notfoundip
-
-		if [[ $notfoundip == 0 ]]; then
-		    # The current line of instancefound-activedbinsellyoursaas is for an instance with files deployed on this server
-	    	id $osusername >/dev/null 2>/dev/null
-	    	if [[ "x$?" == "x1" ]]; then
-				echo Line $bidon $osusername $dbname $deploymentstatus $ipserverdeployment is for a user on this server that does not exists. Should not happen.
-				exit 10
-	    	fi
+if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
+	echo "***** Search from /tmp/instancefound-activedbinsellyoursaas of active databases (with known osusername) with a non existing unix user (should never happen)" 
+	while read bidon osusername dbname deploymentstatus ipserverdeployment; do 
+		if [[ "x$osusername" != "xusername_os" && "x$osusername" != "xunknown" && "x$osusername" != "xNULL" && "x$dbname" != "xNULL" ]]; then
+			echo $ipserverdeployment | grep "$IPSERVERDEPLOYMENT" > /dev/null 2>&1
+			notfoundip=$?
+			#echo notfoundip=$notfoundip
+	
+			if [[ $notfoundip == 0 ]]; then
+			    # The current line of instancefound-activedbinsellyoursaas is for an instance with files deployed on this server
+		    	id $osusername >/dev/null 2>/dev/null
+		    	if [[ "x$?" == "x1" ]]; then
+					echo Line $bidon $osusername $dbname $deploymentstatus $ipserverdeployment is for a user on this server that does not exists. Should not happen.
+					exit 10
+		    	fi
+		    fi
 	    fi
-    fi
-done < /tmp/instancefound-activedbinsellyoursaas
-
+	done < /tmp/instancefound-activedbinsellyoursaas
+fi
 
 # We disable this because when we undeploy, user is kept and we want to remove it only 1 month after undeployment date (processed by next point)
 # TODO For contracts deleted from database, we must found something else: 
@@ -284,29 +287,29 @@ done < /tmp/instancefound-activedbinsellyoursaas
 #fi
 
 
-
-echo "***** Save osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
-Q1="use $database; "
-Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.deployment_host = '$IPSERVERDEPLOYMENT' AND c.rowid IN ";
-Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";
-SQL="${Q1}${Q2}${Q3}"
-
-echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e $SQL"
-$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
-if [ -s /tmp/osutoclean-oldundeployed ]; then
-	for osusername in `cat /tmp/osutoclean-oldundeployed`
-	do
-		tmpvar1=`echo $osusername | awk -F ":" ' { print $1 } '`
-		if [ -d $targetdir/$osusername ]; then
-			nbdbn=`ls $targetdir/$osusername/ | grep ^dbn | wc -w`
-			if [[ "x$nbdbn" == "x0" ]]; then
-				echo "User $tmpvar1 is an ^osu user in /tmp/osutoclean-oldundeployed but has still a home dir with no more dbn... into, so we will remove it"
-				echo $tmpvar1 >> /tmp/osutoclean
+if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
+	echo "***** Save osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
+	Q1="use $database; "
+	Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.deployment_host = '$IPSERVERDEPLOYMENT' AND c.rowid IN ";
+	Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";
+	SQL="${Q1}${Q2}${Q3}"
+	
+	echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e $SQL"
+	$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
+	if [ -s /tmp/osutoclean-oldundeployed ]; then
+		for osusername in `cat /tmp/osutoclean-oldundeployed`
+		do
+			tmpvar1=`echo $osusername | awk -F ":" ' { print $1 } '`
+			if [ -d $targetdir/$osusername ]; then
+				nbdbn=`ls $targetdir/$osusername/ | grep ^dbn | wc -w`
+				if [[ "x$nbdbn" == "x0" ]]; then
+					echo "User $tmpvar1 is an ^osu user in /tmp/osutoclean-oldundeployed but has still a home dir with no more dbn... into, so we will remove it"
+					echo $tmpvar1 >> /tmp/osutoclean
+				fi
 			fi
-		fi
-	done
+		done
+	fi
 fi
-
 
 
 echo "***** Loop on each user in /tmp/osutoclean to make a clean"
@@ -432,7 +435,7 @@ if [ -s /tmp/osutoclean ]; then
 							named-checkzone ${ZONENOHOST} /tmp/${ZONE}.$PID
 							if [[ "$?x" != "0x" ]]; then
 								echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid 
-								exit 1
+								exit 22
 							fi 
 							
 							echo "   ** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
@@ -579,8 +582,9 @@ echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseus
 #$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment -e "$SQL"
 
 if [[ $testorconfirm == "test" ]]; then
-	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so they we can force to undeployed them correctly again"
-	rm -fr /tmp/idlistofdb 
+	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so we can force to undeployed them correctly again"
+	rm -fr /tmp/idlistofdb
+	>> /tmp/idlistofdb
 	for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`; 
 	do 
 		echo -n " '"$fic"'," >> /tmp/idlistofdb
@@ -609,15 +613,15 @@ do
 	done
 	if [[ "x$noyoungfile" == "x1" ]]; then
 		if [ -d "$archivedirpaid/$osusername" ]; then
-			echo "# $fic - $noyoungfile - archive dir $archivedirpaid/$osusername exists, we can remove backup" >> /tmp/deletedirs.sh
+			echo "# ----- $fic - $noyoungfile - archive dir $archivedirpaid/$osusername exists, we can remove backup" >> /tmp/deletedirs.sh
 			echo "rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 		else
-			echo "# $fic - $noyoungfile" >> /tmp/deletedirs.sh
+			echo "# ----- $fic - $noyoungfile" >> /tmp/deletedirs.sh
 			echo "# ALERT Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with:" >> /tmp/deletedirs.sh
 			echo "# mv $backupdir/$osusername $archivedirpaid/$osusername; chown -R root.root $archivedirpaid/$osusername" >> /tmp/deletedirs.sh
 		fi
 	else
-        echo "# $fic - $noyoungfile - backup dir $dirtoscan exists with a very old last_mysqldump* file but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
+        echo "# ----- $fic - $noyoungfile - backup dir $dirtoscan exists with a very old last_mysqldump* file but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
         echo "#rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 	fi
 done

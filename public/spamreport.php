@@ -23,9 +23,23 @@
  *		\brief      Page to report SPAM
  */
 
-if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
-if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK', '1');
-if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+if (!defined('NOCSRFCHECK')) {
+	define('NOCSRFCHECK', '1');
+}
+// Do not check anti CSRF attack test
+if (!defined('NOREQUIREMENU')) {
+	define('NOREQUIREMENU', '1');
+}
+// If there is no need to load and show top and left menu
+if (!defined("NOLOGIN")) {
+	define("NOLOGIN", '1');
+}
+if (!defined('NOIPCHECK')) {
+	define('NOIPCHECK', '1'); // Do not check IP defined into conf $dolibarr_main_restrict_ip
+}
+if (!defined('NOBROWSERNOTIF')) {
+	define('NOBROWSERNOTIF', '1');
+}
 
 // For MultiCompany module.
 // Do not use GETPOST here, function is not defined and get of entity must be done before including main.inc.php
@@ -53,8 +67,21 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 
+$mode = GETPOST('mode', 'aZ09');
+$key = GETPOST('key', 'aZ09');
 
-$tmpfile = '/var/log/sellyoursaas_spamreport.log';
+if ($key != $conf->global->SELLYOURSAAS_SECURITY_KEY) {
+	print 'Bad value for securitykey';
+	http_response_code(400);
+	exit(0);
+}
+
+
+/*
+ * View
+ */
+
+$tmpfile = DOL_DATA_ROOT.'/dolibarr_sellyoursaas_spamreport.log';
 $date = strftime("%Y-%m-%d %H:%M:%S", time());
 $body = file_get_contents('php://input');
 
@@ -74,54 +101,81 @@ echo "<br>\n";
 file_put_contents($tmpfile, "Now we send an email to supervisor ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n", FILE_APPEND);
 
 $headers = 'From: <'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.">\r\n";
-$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from external SMTP service', 'Spam was reported by external SMTP service:'."\r\n".($body ? $body : 'Body empty'), $headers);
-if (!$success) {
-	$errorMessage = error_get_last()['message'];
-	print dol_escape_htmltag($errorMessage);
+if ($mode != 'test' && $mode != 'nomail') {
+	if (empty($conf->global->SELLYOURSAAS_SPAMREPORT_EMAIL_DISABLED)) {
+		$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from external SMTP service', 'Spam was reported by external SMTP service:'."\r\n".($body ? $body : 'Body empty'), $headers);
+		if (!$success) {
+			$errorMessage = error_get_last()['message'];
+			print dol_escape_htmltag($errorMessage);
+		} else {
+			file_put_contents($tmpfile, "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."\n", FILE_APPEND);
+			print "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
+		}
+	} else {
+		file_put_contents($tmpfile, "Email not sent (email on spamreport disabled)\n", FILE_APPEND);
+		print "Email not sent (email on spamreport disabled)<br>\n";
+	}
 } else {
-	echo "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
+	file_put_contents($tmpfile, "Email not sent (test mode)\n", FILE_APPEND);
+	print "Email not sent (test mode)<br>\n";
 }
 
 // Send to DataDog (metric + event)
 if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
-	try {
-		file_put_contents($tmpfile, "Now we send ping to DataDog\n", FILE_APPEND);
-		echo "Now we send ping to DataDog<br>\n";
+	if (empty($conf->global->SELLYOURSAAS_SPAMREPORT_DATADOG_DISABLED)) {
+		try {
+			file_put_contents($tmpfile, "Now we send ping to DataDog\n", FILE_APPEND);
+			echo "Now we send ping to DataDog<br>\n";
 
-		dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+			dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
-		$arrayconfig=array();
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-			$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+			$arrayconfig=array();
+			if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+				$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+			}
+
+			$statsd = new DataDog\DogStatsd($arrayconfig);
+
+			$arraytags=null;
+
+			// Add metric in Datadog
+			if ($mode != 'test' && $mode != 'nodatadog') {
+				$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
+			}
+
+			// Add event in Datadog
+			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+			$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
+
+			$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);          // exemple 'DoliCloud'
+			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;     // exemple 'dolicloud.com'
+			if (! empty($conf->global->$constforaltname)) {
+				$sellyoursaasdomain = $domainname;
+				$sellyoursaasname = $conf->global->$constforaltname;
+			}
+
+			$titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
+
+			if ($mode != 'test' && $mode != 'nodatadog') {
+				$body = file_get_contents('php://input');
+
+				$statsd->event($titleofevent,
+					array(
+						'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true)."\n".$body,
+						'alert_type' => 'warning',
+						'source_type_name' => 'API',
+						'host'       => gethostname()
+					)
+				);
+			}
+
+			file_put_contents($tmpfile, "Ping ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog\n", FILE_APPEND);
+			echo "Ping ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog<br>\n";
+		} catch (Exception $e) {
+
 		}
-
-		$statsd = new DataDog\DogStatsd($arrayconfig);
-
-		$arraytags=null;
-
-		$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
-
-		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-		$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
-
-		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);          // exemple 'DoliCloud'
-		$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;     // exemple 'dolicloud.com'
-		if (! empty($conf->global->$constforaltname)) {
-			$sellyoursaasdomain = $domainname;
-			$sellyoursaasname = $conf->global->$constforaltname;
-		}
-
-		$titleofevent =  dol_trunc('[Alert] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
-		$statsd->event($titleofevent,
-			array(
-				'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
-				'alert_type' => 'warning',
-				'source_type_name' => 'API',
-				'host'       => gethostname()
-			)
-		);
-
-		echo "Ping sent to DataDog<br>\n";
-	} catch (Exception $e) {
+	} else {
+		file_put_contents($tmpfile, "Datadog ping not sent (datadog ping on spamreport disabled)\n", FILE_APPEND);
+		print "Datadog ping not sent (datadog ping on spamreport disabled)<br>\n";
 	}
 }

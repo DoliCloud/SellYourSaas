@@ -25,6 +25,8 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticket.class.php';
 
 	$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
 
@@ -177,7 +179,9 @@ if ($sellyoursaassupporturl) {
 						}
 					}
 				}
+
 				$optionid = $priority.'_'.$id;
+				$labeltoshow = '';
 				$labeltoshow .= $langs->trans("Instance").' <strong>'.$contract->ref_customer.'</strong> ';
 				//$labeltoshow = $tmpproduct->label.' - '.$contract->ref_customer.' ';
 				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
@@ -185,6 +189,7 @@ if ($sellyoursaassupporturl) {
 				$labeltoshow .= ' <span class="opacitymedium">('.$langs->trans("Priority").': ';
 				$labeltoshow .= $prioritylabel;
 				$labeltoshow .= ')</span>';
+
 				print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
 				print '</option>';
@@ -211,7 +216,6 @@ if ($sellyoursaassupporturl) {
 				print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
 
 				print '</form>';
-
 
 	if ($action == 'presend' && GETPOST('supportchannel', 'alpha')) {
 		print '<br><br>';
@@ -302,39 +306,80 @@ if ($sellyoursaassupporturl) {
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
-		//Combobox for Group of ticket
-		$stringtoprint = '<span class="supportemailfield bold">'.$langs->trans("GroupOfTicket").'</span> ';
-		$stringtoprint .= '<select name="groupticket" id ="groupticket"class="maxwidth500 minwidth400">';
-		$stringtoprint .= '<option value="">&nbsp;</option>';
+		// Combobox for Group of ticket
+		$formticket = new FormTicket($db);
 
-		$sql = "SELECT ctc.code, ctc.label";
-		$sql .= " FROM ".MAIN_DB_PREFIX."c_ticket_category as ctc";
-		$sql .= " WHERE ctc.public = 1";
-		$sql .= " AND ctc.active = 1";
-		$sql .= $db->order('ctc.pos', 'ASC');
-		$resql = $db->query($sql);
-		if ($resql) {
-			$num_rows = $db->num_rows($resql);
-			$i = 0;
-			while ($i < $num_rows) {
-				$obj = $db->fetch_object($resql);
-				if ($obj) {
-					$groupvalue = $obj->code;
-					$grouplabel = $obj->label;
-					$stringtoprint .= '<option value="'.dol_escape_htmltag($groupvalue).'" data-html="'.dol_escape_htmltag($grouplabel).'">'.dol_escape_htmltag($grouplabel).'</option>';
+		$atleastonepublicgroup = 0;
+		$ticketstat = new Ticket($db);
+		$ticketstat->loadCacheCategoriesTickets();
+		if (is_array($ticketstat->cache_category_tickets) && count($ticketstat->cache_category_tickets)) {
+			foreach($ticketstat->cache_category_tickets as $tg) {
+				if (!empty($tg['public'])) {
+					$atleastonepublicgroup++;
 				}
-				$i++;
 			}
 		}
 
-		$stringtoprint .= '</select>';
-		$stringtoprint .= ajax_combobox("groupticket");
-		$stringtoprint .= '<br><br>';
-		if ($num_rows > 1) {
-			print $stringtoprint;
-		} elseif ($num_rows == 1) {
-			print '<input type="hidden" name="groupticket" id="groupticket" value="'.dol_escape_htmltag($groupvalue).'">';
+		if ($atleastonepublicgroup) {
+			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1);
+			//$stringtoprint .= ajax_combobox('groupticket');
+			$stringtoprint .= '<br>';
 		}
+
+		$stringtoprint .= '<!-- Script to manage change of ticket group -->
+		<script>
+		jQuery(document).ready(function() {
+			function groupticketchange(){
+				console.log("We called groupticketchange, so we try to load list KM linked to event");
+				$("#KWwithajax").html("");
+
+				idgroupticket = $("#ticketcategory_select").val();
+
+				console.log("We have selected id="+idgroupticket);
+
+				if (idgroupticket != "") {
+					$.ajax({ url: \'/ajax/fetchKnowledgeRecord.php\',
+						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\' },
+						 type: \'GET\',
+						 success: function(response) {
+							var urllist = \'\';
+							console.log("We received response "+response);
+							response = JSON.parse(response)
+							for (key in response) {
+								console.log(response[key])
+								urllist += "<li>" + response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
+							}
+							if (urllist != "") {
+								console.log(urllist)
+								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.$langs->trans("KMFoundForTicketGroup").':</div><ul class="kmlist">\'+urllist+\'<ul>\');
+								$("#KWwithajax").show();
+							}
+						 },
+						 error : function(output) {
+							console.log("error");
+						 },
+					});
+				}
+			};
+			$("#ticketcategory_select").bind("change",function() { groupticketchange(); });
+			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+			var trackChange = function(element) {
+			var observer = new MutationObserver(function(mutations, observer) {
+				if (mutations[0].attributeName == "value") {
+				$(element).trigger("change");
+				}
+			});
+			observer.observe(element, {
+				attributes: true
+			});
+			}
+
+			trackChange($("#ticketcategory_select")[0]);
+		});
+		</script>'."\n";
+		$stringtoprint .= '<div class="supportemailfield " id="KWwithajax"></div>';
+		$stringtoprint .= '<br>';
+		print $stringtoprint;
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
@@ -372,7 +417,7 @@ if ($sellyoursaassupporturl) {
 			';
 }
 
-if (empty($sellyoursaassupporturl) && $action != 'presend') {
+if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
 	print '
     				<!-- BEGIN PAGE HEADER-->
     				<!-- BEGIN PAGE HEAD -->
@@ -401,12 +446,69 @@ if (empty($sellyoursaassupporturl) && $action != 'presend') {
     		</div>';
 
 	print '
-    					<div class="row" id="contractid'.$contract->id.'" data-contractref="'.$contract->ref.'">
+    					<!-- <div class="row" id="contractid'.$contract->id.'" data-contractref="'.$contract->ref.'"> -->
     					<div class="col-md-12">';
 
 
-	print $langs->trans("SoonAvailable");
 
+	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticketstats.class.php';
+	$staticticket = new Ticket($db);
+
+	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut";
+	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
+	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";		// $socid is id of third party account
+	$sql .= $db->order('t.fk_statut','ASC');
+
+	$resql=$db->query($sql);
+	if ($resql) {
+		print '<div class="div-table-responsive-no-min">';
+		$num_rows = $db->num_rows($resql);
+		if ($num_rows) {
+			print '<table class="noborder centpercent">';
+			$i = 0;
+			while ($i < $num_rows) {
+				$obj = $db->fetch_object($resql);
+
+				$staticticket->id = $obj->rowid;
+				$staticticket->ref = $obj->ref;
+				$staticticket->track_id = $obj->track_id;
+				$staticticket->fk_statut = $obj->fk_statut;
+				$staticticket->progress = $obj->progress;
+				$staticticket->subject = $obj->subject;
+
+				print '<tr class="oddeven">';
+
+				// Ref
+				print '<td class="nowraponall">';
+				print $staticticket->getNomUrl(1);
+				print "</td>\n";
+
+				// Creation date
+				print '<td class="left">';
+				print dol_print_date($db->jdate($obj->datec), 'dayhour');
+				print "</td>";
+
+				// Subject
+				print '<td class="nowrap">';
+				print $obj->subject;
+				print "</td>\n";
+
+				print '<td class="nowraponall right">';
+				print $staticticket->getLibStatut(5);
+				print "</td>";
+
+				print "</tr>\n";
+				$i++;
+			}
+			print "</table>";
+		} else {
+			print $langs->trans("SoonAvailable");
+		}
+		print '</div>';
+	}else {
+		dol_print_error($db);
+	}
 	print '</div></div>';
 
 

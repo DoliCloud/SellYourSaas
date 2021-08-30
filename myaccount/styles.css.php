@@ -278,6 +278,9 @@ margin-top: 20px;
     padding-top: 0px;
 }
 
+.paddingleft {
+    padding-left: 5px;
+}
 .paddingright {
     padding-right: 5px;
 }
@@ -365,6 +368,10 @@ border-radius: 0 4px 4px 0;
 	padding-right: 12px;
 }
 
+.badge-myaccount-status {
+	box-shadow: 0px 0px 10px #ccc;
+}
+
 /* For smartphones */
 
 @media (max-width: 760px) {
@@ -395,6 +402,10 @@ border-radius: 0 4px 4px 0;
 
 	.boxresource {
 		width: 155px !important;
+	}
+
+	.register_text {
+		font-size: 0.85em;
 	}
 }
 

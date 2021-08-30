@@ -161,35 +161,39 @@ if (count($listofcontractidreseller) == 0) {
     				      <div class="portlet-title">
     				        <div class="caption">';
 
-		print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-
 		// Customer
 		$tmpcustomer = new Societe($db);
 		$tmpcustomer->fetch($contract->socid);
 
-		// Instance name
-		print '<a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'">'.$instancename.'</a>
-    				          <span class="caption-helper"> - '.$planlabel.'</span>	<!-- This is service -->';
+		print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
 
 		// Instance status
 		print '<span class="caption-helper floatright clearboth">';
 		print '<!-- status = '.dol_escape_htmltag($statuslabel).' -->';
-
 		print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
 		if ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
 		elseif ($statuslabel == 'done') print $langs->trans("Alive");
 		elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
 		elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");
 		else print $statuslabel;
-		print '</span></span><br>';
+		print '</span></span>';
 
-		print '<p style="padding-top: 8px;" class="clearboth">';
+		// Instance name
+		print '<span class="bold uppercase">'.$instancename.'</span>';
+		print '<span class="caption-helper"> - '.$planlabel.'</span>	<!-- This is service -->';
+
+		print '<br>';
+
+		print '<p style="padding-top: 8px;'.($statuslabel == 'undeployed'?' margin-bottom: 0px':'').'" class="clearboth">';
+
+		// ID
+		print '<span class="caption-helper small"><span class="opacitymedium">'.$langs->trans("ID").' : </span><span class="font-green-sharp">'.$contract->ref.'</span></span><br>';
 
 		// Customer (link to login on customer dashboard)
 		print '<span class="opacitymedium">'.$langs->trans("Customer").' : </span>'.$tmpcustomer->name;
 		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$tmpcustomer->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
-		print ' &nbsp;-&nbsp;  <a target="_blankcustomer" href="'.$_SERVER["PHP_SELF"].'?mode=logout_dashboard&username='.$tmpcustomer->email.'&password=&login_hash='.$dol_login_hash.'"><span class="fa fa-desktop"></span> '.$langs->trans("LoginWithCustomerAccount").'</a>';
+		print ' &nbsp;-&nbsp;  <a target="_blankcustomer" href="'.$_SERVER["PHP_SELF"].'?mode=logout_dashboard&username='.$tmpcustomer->email.'&password=&login_hash='.$dol_login_hash.'"><span class="fa fa-desktop"></span><span class="hideonsmartphone"> '.$langs->trans("LoginWithCustomerAccount").'</span></a>';
 		print '<br>';
 
 		// URL
@@ -197,7 +201,11 @@ if (count($listofcontractidreseller) == 0) {
 			print '<span class="caption-helper"><span class="opacitymedium">';
 			if ($conf->dol_optimize_smallscreen) print $langs->trans("URL");
 			else print $langs->trans("YourURLToGoOnYourAppInstance");
-			print ' : </span><a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">'.$contract->ref_customer.'</a>';
+			print ' : </span>';
+			print '<a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">';
+			print 'https://'.$contract->ref_customer;
+			print img_picto($langs->trans("YourURLToGoOnYourAppInstance"), 'globe', 'class="paddingleft"');
+			print '</a>';
 			print '</span><br>';
 		}
 
@@ -625,7 +633,7 @@ if ($form->result['nbofthirdparties'] == 0) {
 	print $langs->trans("YouDontHaveCustomersYet").'...<br>';
 } else {
 	print '<a href="#addanotherinstance" id="addanotherinstance">';
-	print $langs->trans("AddAnotherInstance").'...<br>';
+	print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
 	print '</a>';
 }
 
@@ -692,12 +700,12 @@ if ($form->result['nbofthirdparties'] == 0) {
 
     		<div class="horizontal-fld clearboth">
     		<div class="control-group required">
-    		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" required />
+    		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128" required />
     		</div>
     		</div>
     		<div class="horizontal-fld ">
     		<div class="control-group required">
-    		<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" required />
+    		<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
     		</div>
     		</div>
     		</div> <!-- end group -->

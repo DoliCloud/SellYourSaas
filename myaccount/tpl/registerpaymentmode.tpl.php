@@ -60,6 +60,7 @@ print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
 
 $tmp = $mythirdpartyaccount->getOutstandingBills();
 $outstandingTotalIncTax = $tmp['total_ttc'];
+$outstandingRefs = $tmp['refs'];
 
 // If thirdparty is not yet a customer (no payment never done), we show him the amount to pay in its first invoice.
 if ($outstandingTotalIncTax == 0) {
@@ -168,6 +169,10 @@ if ($outstandingTotalIncTax == 0) {
 		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
 		print '<br><br>';
 	}
+} else {
+	print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("ThePaymentModeWillBeUseToPayYourDueAmount", join(', ', $outstandingRefs), price($outstandingTotalIncTax, 0, $langs, 1, -1, -1, $conf->currency));
+	print '</small></div>';
+	print '<br>';
 }
 
 print '

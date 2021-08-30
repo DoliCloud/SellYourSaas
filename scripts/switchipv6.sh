@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#----------------------------------------------------------------
+# This script allows you to enable/disable IP v6 on your desktop
+#----------------------------------------------------------------
 
 if [ "x$1" = "xdisable" ] ;
 then

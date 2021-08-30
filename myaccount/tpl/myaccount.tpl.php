@@ -195,7 +195,12 @@ print '
 	                  <label>'.$langs->trans("Email").'</label>
 	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->email.'" name="email">
 	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->email.'" name="oldemail">
-	                </div>
+					</div>
+					<div class="form-group">
+					  <label>'.$langs->trans("PhoneNumber").'</label>
+	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->phone.'" name="phone">
+	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->phone.'" name="oldphone">
+					</div>
 	                <div class="row">
 	                  <div class="col-md-6">
 	                    <div class="form-group">
@@ -250,11 +255,11 @@ if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
 	              <div class="form-body">
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Password").'</label>
-	                  <input type="password" class="form-control" name="password">
+	                  <input type="password" class="form-control" name="password" maxlength="128">
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("RepeatPassword").'</label>
-	                  <input type="password" class="form-control" name="password2">
+	                  <input type="password" class="form-control" name="password2" maxlength="128">
 	                </div>
 	              </div>
 	              <div>
@@ -304,6 +309,9 @@ if (($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstan
 	print $langs->trans("ClosingAccountResellerNotPossible", ($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstancessuspendedreseller), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
 } elseif (($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended) > 0) {
 	print $langs->trans("ClosingAccountNotPossible", ($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
+} elseif (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+	print '<!-- ClosingAccountIsTemporarlyDisabledTryLater -->'."\n";
+	print $langs->trans("ClosingAccountIsTemporarlyDisabledTryLater").'<br>';
 } else {
 	print $langs->trans("PleaseBeSureCustomerAccount", $contract->ref_customer);
 	print '

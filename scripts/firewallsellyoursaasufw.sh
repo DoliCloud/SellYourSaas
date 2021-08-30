@@ -2,6 +2,26 @@
 
 IPTABLES=iptables
 
+masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$masterserver" == "x" ]]; then
+	echo Failed to get masterserver parameter
+	exit 1
+fi
+
+dnsserver=`grep 'dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dnsserver" == "x" ]]; then
+	echo Failed to get dnsserver parameter 
+	exit 2
+fi
+
+instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$instanceserver" == "x" ]]; then
+	echo Failed to get instanceserver parameter
+	exit 3
+fi
+
+
+
 
 case $1 in
   start)
@@ -29,9 +49,9 @@ ufw allow out 636/tcp
 # IMAP
 ufw allow out 143/tcp
 ufw allow out 993/tcp
-# DCC
-ufw allow out 6227/tcp
-ufw allow out 6227/udp
+# DCC (anti spam public services)
+#ufw allow out 6277/tcp
+#ufw allow out 6277/udp
 # Rdate
 ufw allow out 37/tcp
 ufw allow out 123/udp
@@ -96,5 +116,5 @@ ufw disable
     ;;
   *)
     echo "Usage: $0 {start|stop|restart|status}"
-    exit 1
+    exit 4
 esac

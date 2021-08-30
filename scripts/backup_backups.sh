@@ -2,7 +2,7 @@
 # Copy all backups on other locations (on a remote backup server)
 #
 # Put the following entry into your root cron
-#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm
+#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm [m|w] [osu...]
 
 #set -e
 
@@ -30,6 +30,12 @@ export scriptdir=$(dirname $(realpath ${0}))
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+export testorconfirm=$1
+export HISTODIR=`date +%d`
+if [ "x$2" == "xw" ]; then
+	HISTODIR=`date +%u`
+fi
 
 if [ "x$remotebackupdir" == "x" ]; then
 	export remotebackupdir=/mnt/diskbackup
@@ -60,7 +66,7 @@ fi
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS="-v -4 --stats -rlt --chmod=u=rwX --backup --suffix=.old";
+export OPTIONS="-4 --stats -rlt --chmod=u=rwX";
 if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 	# Version must be 20.10+ on both side !
 	#export OPTIONS="$OPTIONS --open-noatime" 
@@ -73,6 +79,13 @@ if [ "x$USER" == "x" ]; then
 	export USER="admin"
 fi
 
+instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+export TESTN=""
+if [ "x$testorconfirm" != "xconfirm" ]; then
+	TESTN="-n"
+fi
+
 echo "DOMAIN=$DOMAIN"
 echo "DIRSOURCE1=$DIRSOURCE1"
 echo "DIRSOURCE2=$DIRSOURCE2"
@@ -81,21 +94,24 @@ echo "SERVPORTDESTI=$SERVPORTDESTI"
 echo "EMAILFROM=$EMAILFROM"
 echo "EMAILTO=$EMAILTO"
 echo "PID=$PID"
+echo "instanceserver=$instanceserver"
 echo "backupdir=$backupdir"
 echo "remotebackupdir=$remotebackupdir"
-
+echo "HISTODIR=$HISTODIR"
+echo "OPTIONS=$OPTIONS"
+echo "TESTN=$TESTN"
 
 echo "**** ${0} started"
 echo `date +%Y%m%d%H%M%S`" Start to copy backups on a remote server" 
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
-   exit 1
+   exit 100
 fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter 1 - test|confirm" 1>&2
-	echo "Usage: ${0} (test|confirm)"
+	echo "Usage: ${0} (test|confirm) [m|w] [osu...]"
 fi
 if [[ "x$1" == "x" ]]; then
 	exit 1
@@ -112,84 +128,133 @@ if [ "x$DOMAIN" == "x" ]; then
 fi
 
 
-export testorconfirm=$1
 
 # For debug
 echo "testorconfirm = $testorconfirm"
 
 export errstring=""
 export ret=0
-export ret1=0
-export ret2=0
+declare -A ret1
+declare -A ret2
+
+
+# the following line clears the last weeks incremental directory
+[ -d $HOME/emptydir ] || mkdir $HOME/emptydir
+
 
 # Loop on each target server
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
-	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
+	ret1[$SERVDESTICURSOR]=0
+	ret2[$SERVDESTICURSOR]=0
+done
+
+# Loop on each target server to make backup of SOURCE1
+for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
+do
+	#echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/..."
+	#rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/
+
+	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-	export command="rsync -x --delete --delete-excluded --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
+	export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
 	echo "$command";
 	
+	
 	$command 2>&1
-	export ret1=$?
+    if [ "x$?" != "x0" ]; then
+    	echo "ERROR Failed to make rsync for $DIRSOURCE1 to $SERVDESTICURSOR"
+    	echo "Command was: $command"
+		ret1[$SERVDESTICURSOR]=$?
+    	export errstring="$errstring\nDir $DIRSOURCE1 to $SERVDESTICURSOR "`date '+%Y-%m-%d %H:%M:%S'`
+    fi
+done
+
 	
-	export ret2=0
-	if [ "x$ret1" == "x0" ]; then
+# Loop on each target server to make backup of SOURCE2 (if no error during backup of SOURCE1)
+if [[ "x$instanceserver" == "x1" ]]; then
+	echo
+	echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories $DIRSOURCE2/osu to $SERVDESTI..."
+
+	#for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
+	#do
+	#	echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/..."
+	#	rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
+	#done
+
+	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 		echo
-		echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories to $SERVDESTICURSOR..."
-	
-		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-				echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
-				nbofdir=`ls -d $backupdir/osu$i* | wc -l`
-				if [ "x$nbofdir" != "x0" ]; then
-					# Test if we force backup on a given dir
-					if [ "x$2" != "x" ]; then
-						if [ "x$2" != "xosu$i" ]; then
-							break
-						fi
-					fi
-					
+		echo `date +%Y%m%d%H%M%S`" ----- Process directory $backupdir/osu$i"
+		nbofdir=`ls -d $backupdir/osu$i* | wc -l`
+		if [ "x$nbofdir" != "x0" ]; then
+			# Test if we force backup on a given dir
+			if [ "x$3" != "x" ]; then
+				if [ "x$3" != "xosu$i" ]; then
+					echo "Ignored."
+					continue
+				fi
+			fi
+
+			for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
+			do
+				if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
 					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-			        export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
-		        	echo "$command";
-		        	
+			        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+		        	echo `date +%Y%m%d%H%M%S`" $command";
+
 			        $command 2>&1
 			        if [ "x$?" != "x0" ]; then
-			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i"
-			        	export ret2=$(($ret2 + 1));
-			        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
+			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR"
+					   	echo "Command was: $command"
+			        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
+			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. Command was: $command\n"
 			        fi
-			    else
-			    	echo No directory found starting with name $backupdir/osu$i
-			    fi
-				echo
-		done
-	else
-		export errstring="ERROR Failed to make $command"
-	fi
-	
-	echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
-	
-	if [ "x$ret1" != "x0" ]; then
-		echo "Send email to $EMAILTO to warn about backup error"
-		echo "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-		ret=$ret1
-	elif [ "x$ret2" != "x0" ]; then
-		echo "Send email to $EMAILTO to warn about backup error"
-		echo "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-		ret=$ret2
-	else
-		echo "Send email to $EMAILTO to inform about backup success"
-		echo "The backup of backup for "`hostname`" to remote backup server $SERVDESTICURSOR succeed - End ret1=$ret1 ret2=$ret2 errstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
-	fi
+				else
+					echo "Canceled. An error occured in backup of DIRSOURCE1"
+					export errstring="$errstring\nCanceled. An error occured in backup of DIRSOURCE1"
+				fi
+			done
+	    else
+	    	echo No directory found starting with name $backupdir/osu$i
+			export errstring="$errstring\nNo directory found starting with name $backupdir/osu$i"
+	    fi
+	done
+fi
 
 echo
+echo `date +%Y%m%d%H%M%S`" End with errstring=$errstring"
+echo
 
+
+# Loop on each target server
+for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
+do
+	echo `date +%Y%m%d%H%M%S`" End for $SERVDESTICURSOR ret1[$SERVDESTICURSOR]=${ret1[$SERVDESTICURSOR]} ret2[$SERVDESTICURSOR]=${ret2[$SERVDESTICURSOR]}"
+	
+	if [ "x${ret1[$SERVDESTICURSOR]}" != "x0" ]; then
+		echo "Send email to $EMAILTO to warn about backup error"
+		echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=${ret1[$SERVDESTICURSOR]} ret2=${ret2[$SERVDESTICURSOR]} errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
+		ret=${ret1[$SERVDESTICURSOR]}
+	elif [ "x${ret2[$SERVDESTICURSOR]}" != "x0" ]; then
+		echo "Send email to $EMAILTO to warn about backup error"
+		echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=${ret1[$SERVDESTICURSOR]} ret2=${ret2[$SERVDESTICURSOR]} errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
+		ret=${ret2[$SERVDESTICURSOR]}
+	fi
+
+	echo
 done
+
+
+# Delete temporary emptydir
+rmdir $HOME/emptydir
 
 
 if [ "x$ret" != "x0" ]; then
 	exit $ret
 fi
+
+echo "Send email to $EMAILTO to inform about backup success"
+echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+echo
 
 exit 0

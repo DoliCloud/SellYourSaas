@@ -29,6 +29,7 @@
 
 if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
 if (!defined('NOSESSION')) define('NOSESSION', '1');
+if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -392,19 +393,27 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 
+	$prefixdumptemp = 'temp';
+
 	$fullcommand=$command." ".join(" ", $param);
 	if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
-		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > /dev/null';
-		else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst';
+		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > /dev/null';
+		else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst';
 		// Delete file with same name and other extensions (if other option was enabled in past)
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.bz2');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.gz');
 	} else {
-		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
-		else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz';
+		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
+		else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz';
 		// Delete file with same name and other extensions (if other option was enabled in past)
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.bz2');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.bz2');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.zst');
 	}
 	$output=array();
 	$return_outputmysql=0;
@@ -413,24 +422,45 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	exec($fullcommand, $output, $return_varmysql);
 	$dateaftermysqldump = strftime("%Y%m%d-%H%M%S");
 
-	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
+	$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
 	print $outputerr;
 
-	//$return_outputmysql = strpos($outputerr, 'Error 1412: Table definition has changed');
-	//$return_outputmysql = strpos($outputerr, ' Error ');
-	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
+	$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
+	if (empty($return_outputmysql)) {	// If no error detected with the number of lines, we try also to detect by searching ' Error ' into .err content
+		$return_outputmysql = strpos($outputerr, ' Error ');
+	}
+	if (empty($return_outputmysql)) {	// If no error detected previously, we try also to detect by getting size file
+		if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
+			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
+		} else {
+			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz');
+		}
+		if ($filesizeofsql < 100) {
+			$return_outputmysql = 1;
+		}
+	}
+
 	if ($return_outputmysql > 0) {
-		print $dateaftermysqldump.' mysqldump found string error in output err file.'."\n";
+		print $dateaftermysqldump.' mysqldump found string error in output err file or into dump filesize.'."\n";
 	} else {
 		$return_outputmysql = 0;
+
 		// Delete temporary file once backup is done when file is empty
-		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.err');
+		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
+
+		// Rename dump file with a constant name file
+		if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
+			dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.zst');
+			// Delete file with same extensions but using old version name
+			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst');
+		} else {
+			dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.gz');
+			// Delete file with same extensions but using old version name
+			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
+		}
 	}
 
 	print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
-
-	// Delete file with same name and bzip2 extension (to clean rest of old behaviour)
-	dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
 
 	// Output result
 	foreach ($output as $outputline) {

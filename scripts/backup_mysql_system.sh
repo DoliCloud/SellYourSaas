@@ -33,7 +33,7 @@ export targetdir2="/home/admin/backup/conf"
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
-   exit 1
+   exit 100
 fi
 
 export DATABASE=`grep 'database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -58,11 +58,11 @@ MYSQLDUMP=`which mysqldump`
 
 if [[ ! -d $targetdir ]]; then
 	echo Failed to find archive directory $targetdir
-	exit 1
+	exit 2
 fi
 if [[ ! -d $targetdir2 ]]; then
 	echo Failed to find archive directory $targetdir2
-	exit 1
+	exit 3
 fi
 
 if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -93,7 +93,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas master database found to backup."
 	fi
 else
 	echo "Do a tar of config files"
@@ -120,7 +120,7 @@ else
 		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas master database found to backup."
 	fi
 fi
 

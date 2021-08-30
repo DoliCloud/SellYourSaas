@@ -464,18 +464,16 @@ apt remove unattended-upgrades
 
 === Installation of the firewall ===
 
-* Create a firewall launch file (for example in */home/admin/tools/firewall*). Configuring a firewall is not part of the SellYourSaas project. Make sure it starts when the server starts by:
+* Create a firewall to accept input of SSH only and allow output for NTP and DNS
 
 [source, bash]
 ---------------
-ln -fs /home/admin/tools/firewall /etc/init.d/firewallsellyoursaas
-systemctl daemon-reload
-systemctl enable firewallsellyoursaas
-systemctl is-enabled firewallsellyoursaas
-systemctl status firewallsellyoursaas
+ufw allow 22
+ufw allow out ntp
+ufw allow out 53
+ufw status
+ufw enable
 ---------------
-
-TODO Graphic with flux and ports
 
 
 

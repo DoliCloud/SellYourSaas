@@ -3,7 +3,7 @@
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
-	exit 1
+	exit 100
 fi
 
 # possibility to change the directory of instances are stored
@@ -14,6 +14,7 @@ fi
 
 echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep 'masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+instanceserver=`grep 'instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 cd /home
 
@@ -64,12 +65,23 @@ if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
 	chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 fi
 
-echo "Nettoyage fichier logs error"
-for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done
-echo "Nettoyage fichier logs"
-for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
-for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
- 
+echo Set owner and permission on SSL certificates /etc/apache2/*.key
+for fic in `ls /etc/apache2/ | grep '.key$'`; 
+do 
+	chown root.www-data /etc/apache2/$fic
+	chmod ug+r /etc/apache2/$fic
+	chmod o-rwx /etc/apache2/$fic
+done
+
+if [[ "x$instanceserver" == "x1" ]]; then
+	echo We are on a deployment server, so we clean log files 
+	echo "Clean web server _error logs"
+	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done
+	echo "Clean applicative log files"
+	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
+	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+fi
+
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 
 	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -exec rm {} \;

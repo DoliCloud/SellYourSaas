@@ -89,7 +89,7 @@ if (empty($reshook)) {
 	}
 
 	// Add action to create file, etc...
-	include 'refresh_action.inc.php';
+	require 'refresh_action.inc.php';
 
 	if ($action == 'markasspamandclose') {
 		$idtoclose = GETPOST('idtoclose', 'int');
@@ -422,7 +422,7 @@ if ($id > 0) {
 }
 
 
-if ($object->nbofusers == 0) {    // If value not already loaded
+if (empty($object->nbofusers)) {    // If value not already loaded
 	// Try to get data
 	if (is_object($newdb) && $newdb->connected) {
 		$contract = $object;
@@ -431,11 +431,12 @@ if ($object->nbofusers == 0) {    // If value not already loaded
 		foreach ($object->lines as $contractline) {
 			if (empty($contractline->fk_product)) continue;
 			$producttmp = new Product($db);
-			$producttmp->fetch($contractline->fk_product);
+			$producttmp->fetch($contractline->fk_product, '', '', '', 1, 1, 1);
 
 			// If this is a line for a metric
 			if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
 				&& ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref))) {
+
 				$generatedunixlogin=$contract->array_options['options_username_os'];
 				$generatedunixpassword=$contract->array_options['options_password_os'];
 				$tmp=explode('.', $object->ref_customer, 2);
@@ -473,6 +474,7 @@ if ($object->nbofusers == 0) {    // If value not already loaded
 					'__APPPASSWORD0__'=>$password0,
 					'__APPPASSWORDMD5__'=>$passwordmd5,
 					'__APPPASSWORDSHA256__'=>$passwordsha256,
+					'__APPPASSWORDPASSWORD_HASH__'=>$passwordpassword_hash,
 					'__APPPASSWORD0SALTED__'=>$password0salted,
 					'__APPPASSWORDMD5SALTED__'=>$passwordmd5salted,
 					'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,*/

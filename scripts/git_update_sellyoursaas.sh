@@ -31,11 +31,12 @@ do
 		export gitdir=`basename $dir`
 		
 	    if [ -d ".git" ]; then
+	    	echo chmod -R u+w $dir
 	    	chmod -R u+w $dir
 	    	git pull
 	    	if [ $? -ne 0 ]; then
 	    		# If git pull fail, we force a git reset before and try again.
-	        	echo Execut a git reset --hard HEAD
+	        	echo Execute a git reset --hard HEAD
 	        	git reset --hard HEAD
 	        	# Do not use git pull --depth=1 here, this will make merge errors.
 	        	git pull

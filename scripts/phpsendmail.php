@@ -14,6 +14,11 @@
 $sendmail_bin = '/usr/sbin/sendmail';
 $logfile = '/var/log/phpsendmail.log';
 
+// The directory $pathtospamdir must have permission rwxrwxrwx and not rwxrwxrwt
+//$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
+$pathtospamdir = '/tmp/spam';
+
+
 //* Get the email content
 $mail='';
 $toline = ''; $ccline = ''; $bccline = '';
@@ -98,8 +103,10 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APP
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - ".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
 
-$blacklistofips = @file_get_contents('/var/lib/sellyoursaas/blacklistip');
-if (! empty($ip) && $blacklistofips) {
+$blacklistofips = @file_get_contents($pathtospamdir.'/blacklistip');
+if ($blacklistofips === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofips can't be read.\n", FILE_APPEND);
+} elseif (! empty($ip)) {
 	$blacklistofipsarray = explode("\n", $blacklistofips);
 	if (is_array($blacklistofipsarray) && in_array($ip, $blacklistofipsarray)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 2. Blacklisted ip '.$ip." found into file blacklistip\n", FILE_APPEND);
@@ -107,8 +114,10 @@ if (! empty($ip) && $blacklistofips) {
 	}
 }
 
-$blacklistoffroms = @file_get_contents('/var/lib/sellyoursaas/blacklistfrom');
-if (! empty($emailfrom) && $blacklistoffroms) {
+$blacklistoffroms = @file_get_contents($pathtospamdir.'/blacklistfrom');
+if ($blacklistoffroms === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistoffroms can't be read.\n", FILE_APPEND);
+} elseif (! empty($emailfrom)) {
 	$blacklistoffromsarray = explode("\n", $blacklistoffroms);
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 3. Blacklisted from '.$emailfrom." found into file blacklistfrom\n", FILE_APPEND);
@@ -116,18 +125,21 @@ if (! empty($emailfrom) && $blacklistoffroms) {
 	}
 }
 
-$blacklistofcontents = @file_get_contents('/var/lib/sellyoursaas/blacklistcontent');
-if (! empty($mail) && $blacklistofcontents) {
+$blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
+if ($blacklistofcontents === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofcontents can't be read.\n", FILE_APPEND);
+} elseif (! empty($mail)) {
+	//file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents = ".$blacklistofcontents."\n", FILE_APPEND);
 	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);
 	foreach ($blacklistofcontentsarray as $blackcontent) {
 		if (trim($blackcontent) && preg_match('/'.preg_quote(trim($blackcontent), '/').'/ims', $mail)) {
 			file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 4. Blacklisted content has the key '.trim($blackcontent)." found into file blacklistcontent\n", FILE_APPEND);
 			// Save spam mail content and ip
-			file_put_contents('/var/lib/sellyoursaas/blacklistmail', $mail."\n", FILE_APPEND);
-			chmod("/var/lib/sellyoursaas/blacklistmail", 0666);
+			file_put_contents($pathtospamdir.'/blacklistmail', $mail."\n", FILE_APPEND);
+			chmod($pathtospamdir."/blacklistmail", 0666);
 			if (! empty($ip)) {
-				file_put_contents('/var/lib/sellyoursaas/blacklistip', $ip."\n", FILE_APPEND);
-				chmod("/var/lib/sellyoursaas/blacklistip", 0666);
+				file_put_contents($pathtospamdir.'/blacklistip', $ip."\n", FILE_APPEND);
+				chmod($pathtospamdir."/blacklistip", 0666);
 			}
 			exit(5);
 		}
@@ -148,7 +160,7 @@ if (empty($fromline) && empty($emailfrom)) {
 
 file_put_contents($logfile, $command."\n", FILE_APPEND);
 
-//* Execute the command
+// Execute the command
 $resexec =  shell_exec($command);
 
 if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);

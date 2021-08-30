@@ -98,33 +98,6 @@ class Cancellation extends CommonObject
 	public $url;
 	// END MODULEBUILDER PROPERTIES
 
-
-
-	// If this object has a subtable with lines
-
-	/**
-	 * @var int    Name of subtable line
-	 */
-	//public $table_element_line = 'cancellationdet';
-	/**
-	 * @var int    Field with ID of parent key if this field has a parent
-	 */
-	//public $fk_element = 'fk_cancellation';
-	/**
-	 * @var int    Name of subtable class that manage subtable lines
-	 */
-	//public $class_element_line = 'Cancellationline';
-	/**
-	 * @var array  Array of child tables (child tables to delete before deleting a record)
-	 */
-	//protected $childtables=array('cancellationdet');
-	/**
-	 * @var CancellationLine[]     Array of subtable lines
-	 */
-	//public $lines = array();
-
-
-
 	/**
 	 * Constructor
 	 *
@@ -211,23 +184,8 @@ class Cancellation extends CommonObject
 	public function fetch($id, $ref = null)
 	{
 		$result = $this->fetchCommon($id, $ref);
-		if ($result > 0 && ! empty($this->table_element_line)) $this->fetchLines();
 		return $result;
 	}
-
-	/**
-	 * Load object lines in memory from the database
-	 *
-	 * @return int         <0 if KO, 0 if not found, >0 if OK
-	 */
-	/*public function fetchLines()
-	{
-		$this->lines=array();
-
-		// Load lines with object CancellationLine
-
-		return count($this->lines)?1:0;
-	}*/
 
 	/**
 	 * Update object into database
@@ -263,7 +221,7 @@ class Cancellation extends CommonObject
 	 *  @param  int     $save_lastsearch_value    	-1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
 	 *	@return	string								String with URL
 	 */
-	function getNomUrl($withpicto = 0, $option = '', $notooltip = 0, $morecss = '', $save_lastsearch_value = -1)
+	public function getNomUrl($withpicto = 0, $option = '', $notooltip = 0, $morecss = '', $save_lastsearch_value = -1)
 	{
 		global $db, $conf, $langs;
 		global $dolibarr_main_authentication, $dolibarr_main_demo;
@@ -316,7 +274,7 @@ class Cancellation extends CommonObject
 	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
 	 *  @return	string 			       Label of status
 	 */
-	function getLibStatut($mode = 0)
+	public function getLibStatut($mode = 0)
 	{
 		return $this->LibStatut($this->status, $mode);
 	}
@@ -328,7 +286,7 @@ class Cancellation extends CommonObject
 	 *  @param  int		$mode          	0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
 	 *  @return string 			       	Label of status
 	 */
-	static function LibStatut($status, $mode = 0)
+	public static function LibStatut($status, $mode = 0)
 	{
 		global $langs;
 
@@ -369,7 +327,7 @@ class Cancellation extends CommonObject
 	 *	@param  int		$id       Id of order
 	 *	@return	void
 	 */
-	function info($id)
+	public function info($id)
 	{
 		$sql = 'SELECT rowid, date_creation as datec, tms as datem,';
 		$sql.= ' fk_user_creat, fk_user_modif';
@@ -441,18 +399,3 @@ class Cancellation extends CommonObject
 		return 0;
 	}
 }
-
-/**
- * Class CancellationLine. You can also remove this and generate a CRUD class for lines objects.
- */
-/*
-class CancellationLine
-{
-	// @var int ID
-	public $id;
-	// @var mixed Sample line property 1
-	public $prop1;
-	// @var mixed Sample line property 2
-	public $prop2;
-}
-*/
