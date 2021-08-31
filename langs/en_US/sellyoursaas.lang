@@ -569,3 +569,4 @@ SELLYOURSAAS_HASHALGOFORPASSWORD=Algorithm used to build the substitution key __
 SELLYOURSAAS_SALTFORPASSWORDENCRYPTION=Salt use to build the substitution key __APPPASSWORD0SALTED__
 KMFoundForTicketGroup=We found topics and FAQs that may answers your question, thanks to check them before submitting the ticket
 InstanceMoveInProgress=Your instance is currently in a process of hardware upgrade. If you didn't retreive access after 1 hour, please contact the support from your customer dashboard.
+ActiveInstanceOfASpammer=Instance of an evil user (hacker, spammer). Not yet undeployed.
