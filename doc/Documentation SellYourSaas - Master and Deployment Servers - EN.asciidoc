@@ -965,6 +965,15 @@ ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
 
 On the *Master server*:
 
+Create the file */etc/apache2/.htpasswd* with 
+
+[source, bash]
+---------------
+htpasswd -cm /etc/apache2/.htpasswd <wanted username>
+---------------
+Choose a password. You will need to give this user and password to anyone who wants to access the backoffice *admin.mysaasdomainname.com* .
+
+
 * Create a virtual host *admin.mysaasdomainname.com* on the Dolibarr *Master* for the administration of SellyourSaas
 
 [source, bash]
@@ -1040,12 +1049,6 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
-Create the file */etc/apache2/.htpasswd* with 
-[source, bash]
----------------
-htpasswd -cm /etc/apache2/.htpasswd <wanted username>
----------------
-Choose a password. You will need to give this user and password to anyone who wants to access the backoffice *admin.mysaasdomainname.com* .
 
 You can create another virtual host for the HTTPS on port 443
 
