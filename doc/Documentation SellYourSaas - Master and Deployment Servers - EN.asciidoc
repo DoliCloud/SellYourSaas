@@ -1003,18 +1003,28 @@ Choose a password. You will need to give this user and password to anyone who wa
 
         <Directory /home/admin/wwwroot/dolibarr/htdocs/>
         AuthType Basic
-        AuthName "Authenticate to DoliAsso backoffice"
+        AuthName "Authenticate to backoffice"
         AuthUserFile /etc/apache2/.htpasswd
         require valid-user
         </Directory>
 
-        #leaving /public accessible to everyone
+        #leaving /public and /api accessible to everyone
         <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
         AuthType None
         Require all granted
         Satisfy any
         </Directory>
-
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/api/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/dav/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>
+        
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks

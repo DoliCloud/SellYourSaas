@@ -927,6 +927,30 @@ Sur le *Serveur Master*:
         KeepAliveTimeout 5
         MaxKeepAliveRequests 20
 
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/>
+        AuthType Basic
+        AuthName "Authenticate to backoffice"
+        AuthUserFile /etc/apache2/.htpasswd
+        require valid-user
+        </Directory>
+
+        #leaving /public and /api accessible to everyone
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/api/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/dav/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>
+        
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks
