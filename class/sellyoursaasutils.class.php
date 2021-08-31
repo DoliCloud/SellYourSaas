@@ -740,7 +740,9 @@ class SellYourSaasUtils
 			while ($i < $num) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj) {
-					if (! empty($invoiceprocessed[$obj->rowid])) continue;		// Invoice already processed
+					if (! empty($invoiceprocessed[$obj->rowid])) {	// Invoice already processed
+						continue;
+					}
 
 					$invoice = new Facture($this->db);
 					$result1 = $invoice->fetch($obj->rowid);
@@ -796,7 +798,7 @@ class SellYourSaasUtils
 	 * @param	int		             $servicestatus				Service 0 or 1
 	 * @param	int		             $thirdparty_id				Thirdparty id
 	 * @param	CompanyPaymentMode	 $companypaymentmode		Company payment mode id
-	 * @param	int		             $invoice					null=All invoices of thirdparty, Invoice=Only this invoice
+	 * @param	null|Facture         $invoice					null=All invoices of thirdparty, Invoice=Only this invoice
 	 * @param	int		             $includedraft				Include draft invoices
 	 * @param	int		             $noemailtocustomeriferror	1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
 	 * @param	int		             $nocancelifpaymenterror	1=Do not cancel payment if there is a recent payment error AC_PAYMENT_STRIPE_KO (used to charge from user console)
@@ -837,7 +839,7 @@ class SellYourSaasUtils
 			} else {
 				$sql.= " AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 			}
-			$sql.= " AND s.rowid = ".$thirdparty_id;
+			$sql.= " AND s.rowid = ".((int) $thirdparty_id);
 			$sql.= " ORDER BY f.datef ASC, f.rowid ASC";
 			//print $sql;
 
