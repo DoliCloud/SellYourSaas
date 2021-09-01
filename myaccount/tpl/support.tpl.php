@@ -347,7 +347,7 @@ if ($sellyoursaassupporturl) {
 							response = JSON.parse(response)
 							for (key in response) {
 								console.log(response[key])
-								urllist += "<li>" + response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
+								urllist += "<li>" + response[key].title + ": " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
 							}
 							if (urllist != "") {
 								console.log(urllist)
