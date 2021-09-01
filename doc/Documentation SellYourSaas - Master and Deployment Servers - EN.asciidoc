@@ -2763,7 +2763,9 @@ In the registrar, update the DNS of the main domain *mysaasdomainname.com* with 
     *ns1withX.mysaasdomainname.com*       DNS server 1 of the user instances, points to the deployment server's IP
     *ns2withX.mysaasdomainname.com*       DNS server 2 of the user instances, points to the deployment server's IP
 
-You can also add record *GLUE record* on your register side for (optional)
+*Optional*:
+
+You can also add record *GLUE record* on your register side for:
 
     *ns1withX.mysaasdomainname.com*
     *ns2withX.mysaasdomainname.com*
@@ -2796,7 +2798,13 @@ $ORIGIN withX.mysaasdomainname.com.
 
 $ORIGIN withX.mysaasdomainname.com.
 
+; entry for letsencrypt.
 _acme-challenge IN	  TXT      "a-value-that-will-be-filled-later-for-lets-encrypt"
+
+
+; this entry must always exists.
+supervision A ip.of.deployment.server
+
 
 ; other sub-domain records
 ; here will be added entry like this one

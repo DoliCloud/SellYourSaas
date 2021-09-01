@@ -2706,11 +2706,18 @@ $ORIGIN withX.mysaasdomainname.com.
                 NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       1.2.3.4		; mettre ip du serveur de déploiement qui héberge les applications dépoyés
+@               IN      A       1.2.3.4		; mettre ip du serveur de déploiement qui héberge les applications déployées
 
 $ORIGIN withX.mysaasdomainname.com.
 
+
+; entry for letsencrypt.
 _acme-challenge IN	  TXT      "a-value-that-will-be-filled-later-for-lets-encrypt"
+
+
+; this entry must always exists.
+supervision A ip.of.server.deployment
+
 
 ; other sub-domain records
 ; here will be added entry like this one
