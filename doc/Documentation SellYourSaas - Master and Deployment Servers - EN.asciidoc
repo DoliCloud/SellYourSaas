@@ -3643,12 +3643,41 @@ instances:
 ---------------
 
 
-Restart datadog
+* On *deployment servers* only, copy the datadog config file to supervize *SSL certificates*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/http_check.d/conf.yaml.example /etc/datadog-agent/conf.d/http_check.d/conf.yaml
+---------------
+
+Edit it to supervise the URL below:
+
+[source,bash]
+---------------
+init_config:
+  ## @param ca_certs - string - optional
+  ## Change default path of trusted certificates
+  #
+  ## ca_certs: /etc/ssl/certs/ca-certificates.crt
+
+instances:
+
+  - name: DoliAsso customers instances (withX)
+    url: https://supervision.withX.mysellyoursaasdomain.org
+    disable_ssl_validation: false
+    min_collection_interval: 86400
+---------------
+
+Note: Replace withX by correct prefix of the deployment server.
+
+
+* Restart datadog
 
 [source,bash]
 ---------------
 sudo service datadog-agent stop
 sudo service datadog-agent start
+vi /var/log/datadog/agent.log
 ---------------
 
 
