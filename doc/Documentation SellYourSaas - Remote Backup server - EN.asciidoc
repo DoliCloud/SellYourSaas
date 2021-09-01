@@ -451,6 +451,17 @@ sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
 ---------------
 
+* Installation of the 20.04+ Ubuntu packages
+
+[source,bash]
+---------------
+sudo apt update
+sudo apt install systemd-timesyncd git gzip zip zstd ncdu
+sudo apt install rkhunter chkrootkit
+sudo apt install spamc spamassassin clamav clamav-daemon
+sudo apt install fail2ban
+---------------
+
 
 === Disabling automatic update
 
