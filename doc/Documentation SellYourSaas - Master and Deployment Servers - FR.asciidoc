@@ -3165,7 +3165,14 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sel
 
 NOTE: Il s'agit ici du certificat qui sera utilisé pour les instances clients. Les certificats custom des instances seront dans */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
-* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* avec ce contenu:
+* If the file */etc/apache2/sites-available/default-ssl.conf* exists, rename it into */etc/apache2/sites-available/000-default-ssl.conf*
+
+[source,bash]
+---------------
+mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/000-default-ssl.conf
+---------------
+
+* Editer le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* avec ce contenu:
 
 ---------------
 <IfModule mod_ssl.c>

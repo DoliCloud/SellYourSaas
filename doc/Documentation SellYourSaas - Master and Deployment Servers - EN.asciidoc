@@ -3244,6 +3244,7 @@ or host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 * Créer un lien symbolique vers ces certificats avec le nom générique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
+[source,bash]
 ---------------
 cd /etc/apache2
 ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.key
@@ -3253,8 +3254,16 @@ ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sel
 
 NOTE: This is the certificate that will be used for the client instances. Custom certificates for instances will be in */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
-* Edit the default apache file */etc/apache2/sites-available/000-default-ssl.conf* or */etc/apache2/sites-available/default-ssl.conf* with this content:
+* If the file */etc/apache2/sites-available/default-ssl.conf* exists, rename it into */etc/apache2/sites-available/000-default-ssl.conf*
 
+[source,bash]
+---------------
+mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/000-default-ssl.conf
+---------------
+
+* Edit this file */etc/apache2/sites-available/000-default-ssl.conf* with this content:
+
+[source,bash]
 ---------------
 <IfModule mod_ssl.c>
         <VirtualHost _default_:443>
@@ -3303,6 +3312,7 @@ So if a user is using an old URL with a delete virtual host, he will reach the d
 
 * Edit the page */var/www/html/index.html* with the content
 
+[source,bash]
 ---------------
 <html>
 <body>
@@ -3314,6 +3324,14 @@ You may try later or create a new instance from scratch from page <a href="https
 </center>
 </body>
 </html>
+---------------
+
+Enable the virtual host:
+
+[source,bash]
+---------------
+a2ensite 000-default-ssl.conf
+/etc/init.d/apache2 reload
 ---------------
 
 
