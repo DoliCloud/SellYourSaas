@@ -359,7 +359,7 @@ while ($i < min($num, $limit2)) {
 if ($nbtotalofrecords > $limit2) {
 	// Show navigation previous - next
 	print '<tr><td colspan="6" class="center">';
-	if ($page2 > 0) print '<a href="'.$_SERVER["PHP_SEFL"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2-1).'">'.$langs->trans("Previous").'</a>';
+	if ($page2 > 0) print '<a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2-1).'">'.$langs->trans("Previous").'</a>';
 	if ($page2 > 0 && (($page2 + 1) * $limit2) <= $nbtotalofrecords) print ' &nbsp; ... &nbsp; ';
 	if ((($page2 + 1) * $limit2) <= $nbtotalofrecords) print '<a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2+1).'">'.$langs->trans("Next").'</a>';
 	print '<br><br>';
