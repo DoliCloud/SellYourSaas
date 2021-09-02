@@ -105,8 +105,12 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
 	}
 
 	// Security options
-	header("X-Content-Type-Options: nosniff"); // With the nosniff option, if the server says the content is text/html, the browser will render it as text/html (note that most browsers now force this option to on)
-	header("X-Frame-Options: ALLOWALL");           // So we can include page into an IFRAME
+	header("X-Content-Type-Options: nosniff"); 	// With the nosniff option, if the server says the content is text/html, the browser will render it as text/html (note that most browsers now force this option to on)
+	if (!defined('XFRAMEOPTIONS_ALLOWALL')) {
+		header("X-Frame-Options: SAMEORIGIN"); 	// Frames allowed only if on same domain (stop some XSS attacks)
+	} else {
+		header("X-Frame-Options: ALLOWALL");	// So we can include page into an iframe
+	}
 	if (!defined('FORCECSP')) {
 		$contentsecuritypolicy = empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY) ? '' : $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
 
