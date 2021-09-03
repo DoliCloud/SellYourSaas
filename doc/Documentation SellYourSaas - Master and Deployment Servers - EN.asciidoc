@@ -157,7 +157,7 @@ mkdir /mnt/diskhome
 mount /dev/vdxY /mnt/diskhome
 mkdir /mnt/diskbackup
 
-And if a disk was created for the backup:
+And only if a disk was created (optionnel) for the backup:
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -385,7 +385,7 @@ Ignore error on missing files.
 === Modification of /etc/skel
 
 Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys_support* with
-* the ssh public key of the user (s) *myunixlogin*
+* the ssh public key of the user(s) *myunixlogin*
 * the ssh public key of the user *admin* of the master server
 
 [source, bash]
@@ -397,7 +397,6 @@ sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
 Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
-
 
 
 === Add alias
@@ -413,6 +412,14 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 === Hostname and IP configuration
 
 Add an entry from the new server to the DNS provided by the domain provider.
+This is done by adding an entry into the DNZ zone of domain *mysaasdomainname.com*
+
+[source,bash]
+---------------
+type=A
+name=myserver.mysaasdomainname.com
+---------------
+
 
 Go to the OVH IP management interface, to add the reverse on the server IP.
 
@@ -596,7 +603,7 @@ On all servers (*Master and Deploiement*):
 apt install git
 ---------------
 
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v14 or +) to be placed in */home/admin/wwwroot/dolibarr*
 
 [source,bash]
 ---------------
@@ -650,7 +657,7 @@ instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
 # Set to its own IP if it is a deployment server. Keep empty for master only server.
-ipserverdeployment=ipOfDeploymentServer
+ipserverdeployment=ip.of.deployment.server
 
 # Set location of the master database
 databasehost=ipOfMasterServer or localhost if on master server

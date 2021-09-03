@@ -150,7 +150,7 @@ mkdir /mnt/diskhome
 mount /dev/vdxY /mnt/diskhome
 mkdir /mnt/diskbackup
 
-And if a disk was created for backup:
+Et seulement si un disque dédié (optionnel) a été créé pour le backup:
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -217,6 +217,7 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
 Vérifiez que le id de ce user *admin* est bien supérieur ou égale à 1000.
@@ -363,14 +364,14 @@ rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-availab
 ---------------
 
 Ignorer les erreurs de fichiers absents.
-    
 
 
-=== Modification of /etc/skel
 
-Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys_support* with
-* the ssh public key of the user (s) *myunixlogin*
-* the ssh public key of the user *admin* of the master server
+=== Modification de /etc/skel
+
+Editer le contenu de */etc/skel* sur le serveur de déploiement afin de remplir le fichier *.ssh/authorized_keys_support* avec
+* la clé ssh public key de l'utilisateur *myunixlogin*
+* la clé ssh public key de l'utilisateur *admin* du serveur master
 
 [source, bash]
 ---------------
@@ -380,7 +381,7 @@ sudo chmod -R go-rwx /etc/skel/.ssh
 sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
-Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
+Ainsi tout nouveau compte account created (those of customer instances) will be accessible by the administrator(s).
 
 
 
@@ -397,7 +398,14 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 
 === Configuration hostname et IP
 
-Ajouter une entrée du nouveau serveur dans le DNS fourni par le provider du domaine.
+Ajouter une entrée du nouveau serveur dans le DNS fourni par le provider du domaine. Ceci revient à ajouter une entrée dans la zone DNS de *mysaasdomainname.com*
+
+[source,bash]
+---------------
+type=A
+name=nomduserveur.mysaasdomainname.com
+---------------
+
 
 Aller dans l'interface de gestion des IP OVH, pour ajouter le reverse sur l'IP du serveur.
 
@@ -581,7 +589,7 @@ On all servers (*Master and Deploiement*):
 apt install git
 ---------------
 
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v14 or +) to be placed in */home/admin/wwwroot/dolibarr*
 
 [source,bash]
 ---------------
@@ -630,10 +638,10 @@ instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
 # Set to its own IP if it is a deployment server. Keep empty for master only server.
-ipserverdeployment=ipduserverdeployment
+ipserverdeployment=ip.du.server.deployment
 
 # Set location of the master database
-databasehost=ipduserveurmaster ou localhost si serveur master
+databasehost=ip.du.serveur.master ou localhost si serveur master
 # Set port of the master database (default is 3306)
 databaseport=3306
 # Set database name of the master server
