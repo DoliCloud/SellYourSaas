@@ -239,6 +239,22 @@ Create a user account for yourself (or other administrators), for example: *myun
 adduser myunixlogin
 ---------------
 
+==== Default shell
+
+Modify the default shell to use bash (instead of dh sh or dash)
+
+[source, bash]
+---------------
+ln -fs /bin/bash /usr/bin/sh
+---------------
+
+Or for Ubuntu 18.04
+
+[source, bash]
+---------------
+ln -fs /bin/bash /bin/sh
+---------------
+
 
 ==== SSH setup
 
@@ -353,16 +369,6 @@ passwd admin
 Run *ssh-keygen* for all these acounts : *root*, *admin* and *myunixlogin*
 
 
-==== Default shell
-
-Modify the default shell to use bash (instead of dh sh or dash)
-
-[source, bash]
----------------
-ln -fs /bin/bash /usr/bin/sh
----------------
-
-
 === Deletion of information files at login
 
 In order not to give information to users doing SSH, on the deployment servers:
@@ -372,6 +378,8 @@ In order not to give information to users doing SSH, on the deployment servers:
 rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
 rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
+
+Ignore error on missing files.
 
 
 === Modification of /etc/skel

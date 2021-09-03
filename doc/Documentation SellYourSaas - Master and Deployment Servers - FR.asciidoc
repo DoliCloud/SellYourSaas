@@ -230,6 +230,23 @@ adduser myunixlogin
 ---------------
 
 
+==== Shell par défaut
+
+Modifier le shell par défaut pour utiliser bash (au lieu dh sh ou dash)
+
+[source,bash]
+---------------
+ln -fs /bin/bash /usr/bin/sh
+---------------
+
+Ou pour Ubuntu 18.04
+
+[source,bash]
+---------------
+ln -fs /bin/bash /bin/sh
+---------------
+
+
 ==== Configuration SSH
 
 Corriger les permissions du fichier */etc/ssh/sshd_config* pour etre en lecture/écriture pour root uniquement.
@@ -334,15 +351,6 @@ passwd admin
 Lancer *ssh-keygen* sur les 3 comptes *root*, *admin* et *myunixlogin*
 
 
-==== Shell par défaut
-
-Modifier le shell par défaut pour utiliser bash (au lieu dh sh ou dash)
-
-[source,bash]
----------------
-ln -fs /bin/bash /usr/bin/sh
----------------
-
 
 === Suppression des fichiers d'information au login
 
@@ -354,7 +362,27 @@ rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove
 rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
+Ignorer les erreurs de fichiers absents.
     
+
+
+=== Modification of /etc/skel
+
+Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys_support* with
+* the ssh public key of the user (s) *myunixlogin*
+* the ssh public key of the user *admin* of the master server
+
+[source, bash]
+---------------
+sudo mkdir /etc/skel/.ssh
+sudo touch /etc/skel/.ssh/authorized_keys_support
+sudo chmod -R go-rwx /etc/skel/.ssh
+sudo vi /etc/skel/.ssh/authorized_keys_support
+---------------
+
+Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
+
+
 
 === Ajout alias
 
