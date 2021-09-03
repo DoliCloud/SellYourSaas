@@ -106,15 +106,6 @@ For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server
 [[adding_disk]]
 === Adding the hard disk for data (home of user instances and home of backups)
 
-On *Master server*:
-
-We will just use the same disk for local backup. So we just do:
-
-[source, bash]
----------------
-mkdir /mnt/diskhome
----------------
-
 On *Deployment server* :
 
 We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
@@ -260,6 +251,8 @@ chmod go-rw /etc/ssh/sshd_config
 
 Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
 
+For Ubuntu 18.04: you can concat the content into file *sshd_config* but be sure to not have duplicate values.
+
 [source, conf]
 ---------------
 # Privilege Separation is turned on for security
@@ -276,7 +269,7 @@ PermitRootLogin no
 PermitEmptyPasswords no
 # Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
 ChallengeResponseAuthentication no
- 
+
 # Define list of allowed method to authenticate
 PasswordAuthentication yes
 PubkeyAuthentication yes
