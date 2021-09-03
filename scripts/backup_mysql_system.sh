@@ -2,7 +2,7 @@
 # Purge data
 #
 # Put the following entry into your root cron
-#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh databasename confirm
+#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_mysql_system.sh databasename confirm
 
 #set -e
 
