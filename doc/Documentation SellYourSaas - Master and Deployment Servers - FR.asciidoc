@@ -422,6 +422,7 @@ Se connecter et modifier le fichier */etc/hosts* avec l'entrée du nouveau serve
 [source,bash]
 ---------------
 ip.principale.du.serveur   nomduserveur.mysaasdomainname.com
+127.0.0.1  nomduserveur
 ---------------
 
 
@@ -2212,6 +2213,8 @@ Mais à enlever pour avoir les tables en écritures à nouveau après avoir rés
 
 === Configuration de AppArmor
 
+Sur les *serveurs de déploiement*
+
 Copy */bin/bash* or */bin/dash* into */bin/secureBash*  (Ce fichier shell sera positionné comme le shell pour les nouveaux utilisateur par le processus de déploiment)
 
 [source,bash]
@@ -2476,7 +2479,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
 }
 ---------------
 
-!!! Mettre /usr/bin/secureBash avec Ubuntu 20.04+
+!!! Créer aussi un fichier pour /usr/bin/secureBash avec Ubuntu 20.04+
 
 
 * Activer la règle apparmor en mode *enforce* (ou *complain*)
@@ -2735,7 +2738,7 @@ $ORIGIN withX.mysaasdomainname.com.
                 NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       1.2.3.4		; mettre ip du serveur de déploiement qui héberge les applications déployées
+@               IN      A       ip.of.deployment.server		; mettre ip du serveur de déploiement qui héberge les applications déployées
 
 $ORIGIN withX.mysaasdomainname.com.
 
@@ -2751,7 +2754,6 @@ supervision A ip.of.server.deployment
 ; other sub-domain records
 ; here will be added entry like this one
 ; client1  A   ip.of.server.deployment
-test	A	ip.of.server.deployment
 
 ---------------
 
@@ -2780,18 +2782,11 @@ Vérifier que la résolution DNS se fait bien par défaut sur 127.0.0.1 en faisa
 
 [source,bash]
 ---------------
-nslookup test.withX.mysaasdomainname.com
----------------
-
-Essayez ensuite en passant par un DNS exterieur comme celui de Google:
-
-[source,bash]
----------------
-nslookup test.withX.mysaasdomainname.com 8.8.8.8
+nslookup supervision.withX.mysaasdomainname.com
 ---------------
 
 
-Si non désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
+Si cela ne renvoie pas ko, désactiver *systemd-resolver* (voir point suivant) et créer un fichier */etc/resolv.conf* manuellement.
 Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind inopérent en local:
 
 [source,bash]
@@ -2807,16 +2802,17 @@ Do a test of DNS resolution using the local DNS server with
 
 [source,bash]
 ---------------
-host -a test.withX.mysaasdomainname.com 127.0.0.1
+host -a supervision.withX.mysaasdomainname.com 127.0.0.1
 ---------------
 
 Cela doit renvoyer l'ip du serveur de déploiement.
+
 
 Essayez ensuite en passant par un DNS exterieur comme celui de Google:
 
 [source,bash]
 ---------------
-nslookup test.withX.mysaasdomainname.com 8.8.8.8
+nslookup supervision.withX.mysaasdomainname.com 8.8.8.8
 ---------------
 
 
@@ -2849,7 +2845,7 @@ session.gc_maxlifetime = 3600
 session.use_strict_mode = 1 
 session.use_only_cookies = 1
 session.cookie_httponly = 1
-session.cookie_samesite = Strict
+session.cookie_samesite = Lax
 ---------------
 
 
@@ -4005,6 +4001,8 @@ GROUP BY table_schema, table_name;
 
 or old request:
 
+[source,sql]
+---------------
 SELECT IFNULL(B.engine,'Total') "Storage Engine",
 CONCAT(LPAD(REPLACE(FORMAT(B.DSize/POWER(1024,pw),3),',',''),17,' '),' ',
 SUBSTR(' KMGTP',pw+1,1),'B') "Data Size", CONCAT(LPAD(REPLACE(
@@ -4017,6 +4015,7 @@ SUM(data_length+index_length) TSize FROM information_schema.tables
 WHERE table_schema NOT IN ('mysql','information_schema','performance_schema')
 AND engine IS NOT NULL GROUP BY engine WITH ROLLUP) B,
 (SELECT 3 pw) A ORDER BY TSize;
+---------------
 
 
 === Consultation des deadlocks de la base de données

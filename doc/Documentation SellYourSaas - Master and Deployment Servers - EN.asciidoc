@@ -436,7 +436,9 @@ Connect and modify the file */etc/hosts* with the entry of the new server
 [source, bash]
 ---------------
 main.ip.of.server nameofserver.mysaasdomainname.com
+127.0.0.1  nameofserver
 ---------------
+
 
 
 === Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
@@ -1676,6 +1678,8 @@ Note: It seems we must also restart apache to have this effective inside apache.
 [source,bash]
 ---------------
 wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
+ou pour Ubuntu 18.04
+wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
 dpkg -i afick.deb
 ---------------
 
@@ -1828,7 +1832,7 @@ echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
-Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
+Edit/Create the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
 
 [source,bash]
 ---------------
@@ -2044,7 +2048,7 @@ innodb_log_buffer_size=32M
 log_warnings = 2
 ---------------
 
-On the master, change only the address :
+On a master only server, change only the listened address :
 
 [source,bash]
 --------------
@@ -2136,7 +2140,7 @@ GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT
 FLUSH PRIVILEGES;
 ---------------
 
-Give permission, on the *Master server*, to the account *sellyoursaas* of each deployment server, on the database *dolibarr*:
+Give permission, on the *Master server*, to the account *sellyoursaas* of each deployment server, on the database *dolibarr* (so the mysql client on deployment server can connect to the database):
 
 [source,sql]
 ---------------
@@ -2274,6 +2278,8 @@ But remove it after you solve the problem, to have the tables writable again.
 
 
 === Setup of AppArmor
+
+On *deployment servers*:
 
 Copy */bin/bash* or */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
@@ -2539,7 +2545,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 }
 ---------------
 
-!!! Set */usr/bin/secureBash* with Ubuntu 20.04+
+!!! Warning, create also a file for */usr/bin/secureBash* with Ubuntu 20.04+
 
 
 * Activate the rule apparmor in mode *enforce* (or *complain*)
@@ -2553,7 +2559,7 @@ aa-status
 ---------------
 
 
-* To reload an apparmor profile of rules:
+* Note: To reload an apparmor profile of rules:
 
 [source,bash]
 ---------------
@@ -2561,7 +2567,7 @@ aa-enforce bin.secureBash
 ---------------
 
 
-* To disable a profile of rules
+* Note: To disable a profile of rules
 
 [source,bash]
 ---------------
@@ -2575,7 +2581,7 @@ A reboot of server may be required to take into account any change on profile fi
 All the disabled profiles are visible into */etc/apparmor.d/disable*
 
 
-* To remove: To avoid to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no*
+* To avoid to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no* (Still require ????)
 
 [source,bash]
 ---------------
@@ -2754,7 +2760,7 @@ Comment
 
 ==== On registrar side
 
-In the registrar, update the DNS of the main domain *mysaasdomainname.com* with *A* records 
+In the registrar, update the DNS of the main domain *mysaasdomainname.com* with the following 2 *A* records:
 
     *admin.mysaasdomainname.com*         Domain of the admin tool, points to the master server's IP
     *myaccount.mysaasdomainname.com*     Domain of the user account tools, points to the master server's IP
@@ -2802,7 +2808,7 @@ $ORIGIN withX.mysaasdomainname.com.
                 NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       1.2.3.4		; set here the ip of deployment server that hosts the deployed applications
+@               IN      A       ip.of.deployment.server		; set here the ip of deployment server that hosts the deployed applications
 
 $ORIGIN withX.mysaasdomainname.com.
 
@@ -2817,7 +2823,7 @@ supervision A ip.of.deployment.server
 ; other sub-domain records
 ; here will be added entry like this one
 ; client1  A   ip.of.deployment.server
-test	A	ip.of.deployment.server
+
 
 ---------------
 
@@ -2845,10 +2851,10 @@ Check that the default DNS resolver is indeed 127.0.0.1 with:
 
 [source,bash]
 ---------------
-nslookup test.withX.mysaasdomainname.com
+nslookup supervision.withX.mysaasdomainname.com
 ---------------
 
-If not deactivate *systemd-resolver* (see below) and create the file */etc/resolv.conf* manually.
+If it is not 127.0.0.1 (but 127.0.0.53), deactivate *systemd-resolver* (see below) and create the file */etc/resolv.conf* manually.
 Deactivate *systemd-resolver* that adds 127.0.0.53 as resolver and bypasses bind locally:
 
 [source,bash]
@@ -2864,16 +2870,17 @@ Do a test of DNS resolution using the local DNS server with
 
 [source,bash]
 ---------------
-host -a test.withX.mysaasdomainname.com 127.0.0.1
+host -a supervision.withX.mysaasdomainname.com 127.0.0.1
 ---------------
 
 This must return the deployment server's IP.
+
 
 Then double check with an external DNS, like Google's:
 
 [source,bash]
 ---------------
-nslookup test.withX.mysaasdomainname.com 8.8.8.8
+nslookup supervision.withX.mysaasdomainname.com 8.8.8.8
 ---------------
 
 
@@ -2908,7 +2915,7 @@ session.gc_maxlifetime = 3600
 session.use_strict_mode = 1 
 session.use_only_cookies = 1
 session.cookie_httponly = 1
-session.cookie_samesite = Strict
+session.cookie_samesite = Lax
 ---------------
 
 
@@ -4100,7 +4107,7 @@ SUM(data_length+index_length) TSize FROM information_schema.tables
 WHERE table_schema NOT IN ('mysql','information_schema','performance_schema')
 AND engine IS NOT NULL GROUP BY engine WITH ROLLUP) B,
 (SELECT 3 pw) A ORDER BY TSize;
---------------
+---------------
 
 
 === Read or find deadlocks on the database
