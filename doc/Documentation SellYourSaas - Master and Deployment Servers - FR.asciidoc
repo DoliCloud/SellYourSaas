@@ -572,6 +572,7 @@ mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail
 
 mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup; ln -fs /mnt/diskhome/backup /mnt/diskbackup/
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
@@ -1997,6 +1998,9 @@ Remarque: Cela peut être "listen = 0.0.0.0" au lieu de "bind-address = 0.0.0.0"
 [source,bash]
 ---------------
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
+-- For newer versions of mariadb, you must also do:
+UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE User='root';
+
 FLUSH PRIVILEGES;
 ---------------
 
@@ -2793,7 +2797,7 @@ Désactiver *systemd-resolver* qui ajoute 127.0.0.53 comme resolver et rend bind
 ---------------
 sudo systemctl disable systemd-resolved.service
 sudo systemctl stop systemd-resolved
-cat "nameserver 127.0.0.1" > /etc/resolv.conf
+echo "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
 ---------------
 
@@ -2900,8 +2904,8 @@ Créer les fichier *phpmail.log* et *phpsendmail.log*:
 ---------------
 echo >> /var/log/phpmail.log
 echo >> /var/log/phpsendmail.log
-chown syslog.adm phpmail.log phpsendmail.log
-chmod a+rw phpmail.log phpsendmail.log
+chown syslog.adm /var/log/phpmail.log /var/log/phpsendmail.log
+chmod a+rw /var/log/phpmail.log /var/log/phpsendmail.log
 ---------------
 
 Create a directory for blacklist files used by *phpsendmail.php*
@@ -3025,7 +3029,7 @@ SystemMaxFileSize=5M
 ...
 ---------------
 
-Prendre en compte la modification
+Prendre en compte la modification:
 
 [source,bash]
 ---------------
@@ -3080,7 +3084,7 @@ Note: Les rapports sont dans */var/crash*
 
 [source,bash]
 ---------------
-apt remove cerbot
+sudo apt remove cerbot
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 

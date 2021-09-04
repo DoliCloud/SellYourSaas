@@ -587,6 +587,7 @@ mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail
 
 mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup; ln -fs /mnt/diskhome/backup /mnt/diskbackup/
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
@@ -1128,7 +1129,7 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
-You can create another virtual host for the HTTPS on port 443
+Later, we will enabled the virtual host and we will create also the virtual host for the HTTPS on port 443 by using letsencrypt.
 
 
 === Timeout of server launches
@@ -2065,6 +2066,9 @@ On *all servers*:
 [source,bash]
 ---------------
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
+-- For newer versions of mariadb, you must also do:
+UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE User='root';
+
 FLUSH PRIVILEGES;
 ---------------
 
@@ -2861,7 +2865,7 @@ Deactivate *systemd-resolver* that adds 127.0.0.53 as resolver and bypasses bind
 ---------------
 sudo systemctl disable systemd-resolved.service
 sudo systemctl stop systemd-resolved
-cat "nameserver 127.0.0.1" > /etc/resolv.conf
+echo "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
 ---------------
 
@@ -2937,7 +2941,7 @@ On *Deployment servers*:
 
 The PHP wrapper to send mail allows to intercept any mail sent via PHP before actually sending it (to do an antispam analysis and log it in a file that can be used by fail2ban)
 
-Create the links to the 2 tools for preprocessing PHP
+Create a symlink to the 2 tools used for preprocessing PHP
 
 [source,bash]
 ---------------
@@ -2968,8 +2972,8 @@ Create the files *phpmail.log* and *phpsendmail.log*:
 ---------------
 echo >> /var/log/phpmail.log
 echo >> /var/log/phpsendmail.log
-chown syslog.adm phpmail.log phpsendmail.log
-chmod a+rw phpmail.log phpsendmail.log
+chown syslog.adm /var/log/phpmail.log /var/log/phpsendmail.log
+chmod a+rw /var/log/phpmail.log /var/log/phpsendmail.log
 ---------------
 
 Create a directory for blacklist files used by *phpsendmail.php*
@@ -3069,6 +3073,7 @@ su root syslog
 }
 ---------------
 
+
 * To test rotation immediately:
 
 [source,bash]
@@ -3083,7 +3088,7 @@ logrotate -f logrotate_sellyoursaas_log
 
 Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
-* Edit the file */etc/systemd/journald.conf* to define the max size for systemd journals
+* Edit the file */etc/systemd/journald.conf* to define the max size for systemd journals.
 
 [source,conf]
 ---------------
@@ -3094,7 +3099,7 @@ SystemMaxFileSize=5M
 ...
 ---------------
 
-Take into account the change with
+Take into account the change with:
 
 [source,bash]
 ---------------
@@ -3131,7 +3136,7 @@ sudo systemctl start apport.service
 sudo systemctl status apport.service
 ---------------
 
-To disable:
+Note: To disable:
 
 [source,bash]
 ---------------
@@ -3147,7 +3152,7 @@ Note: Reports are into */var/crash*
 
 [source,bash]
 ---------------
-apt remove cerbot
+sudo apt remove cerbot
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
@@ -3424,7 +3429,15 @@ cd / && run-parts --report /etc/cron.daily
 
 On *Master server*:
 
-* Create an Apache virtual for the Dolibarr Master, for example: https://admin.mysaasdomainname.com, therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*
+Enable the virtual host for admin and myaccount (wehave created the virtual host file before):
+
+[source,ini]
+---------------
+a2ensite admin.mysellyoursaasdomain.com
+a2ensite myaccount.mysellyoursaasdomain.com
+/etc/init.d/apache2 restart
+---------------
+
 
 * Call the URL to install Dolibarr. Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than */home/admin/wwwroot/dolibarr/documents*
 
