@@ -109,7 +109,7 @@ This is done by adding an entry into the DNS zone of domain *mysaasdomainname.co
 ---------------
 type=A
 name=nameofserver.mysaasdomainname.com
-ip=ip.of.the.server
+ip=ipv4.of.the.server
 
 type=AAAA
 name=nameofserver.mysaasdomainname.com
@@ -2802,11 +2802,17 @@ In the registrar, update the DNS of the main domain *mysaasdomainname.com* with 
 
 In the registrar, update the DNS of the main domain *mysaasdomainname.com* with *A* records 
 
-    *withX.mysaasdomainname.com*          Subdomain of the actual user instances, points to the deployment server's IP
-    *ns1withX.mysaasdomainname.com*       DNS server 1 of the user instances, points to the deployment server's IP
-    *ns2withX.mysaasdomainname.com*       DNS server 2 of the user instances, points to the deployment server's IP
+    *withX.mysaasdomainname.com*          Type A		Subdomain of the actual user instances, points to the deployment server's IP
+    *ns1withX.mysaasdomainname.com*       Type A		DNS server 1 of the user instances, points to the deployment server's IP
+    *ns2withX.mysaasdomainname.com*       Type A		DNS server 2 of the user instances, points to the deployment server's IP
 
-*Optional*:
+In the registrar, add also the DNS of the DNS servers of the main domain *withX.mysaasdomainname.com* with *NS* records 
+
+    *withX.mysaasdomainname.com*       Type NS		DNS server 1 of the user instances, points to value *ns1withX.mysaasdomainname.com*
+    *withX.mysaasdomainname.com*       Type NS		DNS server 2 of the user instances, points to value *ns2withX.mysaasdomainname.com*
+
+
+*Optional (not available on most registrars)*:
 
 You can also add record *GLUE record* on your register side for:
 

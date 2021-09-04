@@ -2736,12 +2736,20 @@ Chez le registrar, mettre à jour le DNS du nom de domaine principal *mysaasdoma
     *ns1withX.mysaasdomainname.com*       Serveur DNS 1 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
     *ns2withX.mysaasdomainname.com*       Serveur DNS 2 des instances utilisateurs pointant sur l'ip du serveur de Déploiement
 
+Chez le registrar, ajouter aussi les entrées DNS des serveurs DNS de chaque domain de déploiement *withX.mysaasdomainname.com* avec les enregistrements *NS*:
+
+    *withX.mysaasdomainname.com*       Type NS		DNS server 1 des instances clients, pointant sur la valeur *ns1withX.mysaasdomainname.com*
+    *withX.mysaasdomainname.com*       Type NS		DNS server 2 des instances clients, pointant sur la valeur *ns2withX.mysaasdomainname.com*
+
+Note: X est le numéro du serveur de déploiement.
+
+*Optionnel (non disponible chez la plupart des registrars)*:
+
 Ajouter les enregistrements *GLUE record* auprès du registar pour (optionnel)
 
     *ns1withX.mysaasdomainname.com*
     *ns2withX.mysaasdomainname.com*
 
-Note: X est le numéro du serveur de déploiement.
 
 ==== Sur le serveur de déploiement
 
