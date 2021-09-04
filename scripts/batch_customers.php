@@ -552,7 +552,7 @@ print $out;
 if ($action == 'updatestatsonly') {
 	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 		try {
-			print 'Send data to DataDog (sellyoursaas.instancedeployed='.((float) $nbofinstancedeployed).', sellyoursaas.instancepaymentko='.((float) ($nbofactivesusp + $nbofactivepaymentko)).', sellyoursaas.instancepaymentok='.((float) ($nbofactive - ($nbofactivesusp + $nbofactivepaymentko)))."\n";
+			print 'Send data to DataDog (sellyoursaas.instancedeployed='.((float) $nbofinstancedeployed).', sellyoursaas.instancepaymentko='.((float) ($nbofactivesusp + $nbofactivepaymentko)).', sellyoursaas.instancepaymentok='.((float) ($nbofactive - ($nbofactivesusp + $nbofactivepaymentko))).")\n";
 			dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 			$arrayconfig=array();
