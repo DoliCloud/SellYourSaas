@@ -2102,7 +2102,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
 # Identification by unix socket
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
-You must stop/start database server to validate this change.
+You must stop/start database server to validate this change !
 
 For MariaDb:
 
@@ -2113,7 +2113,7 @@ update mysql.user set plugin='' where user='root' and host='localhost';
 # Identification by unix socket
 update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
-You must stop/start database server to validate this change.
+You must stop/start database server to validate this change !
 
 
 Note: The show specific parameters that are not the default values, you can launch:

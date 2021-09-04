@@ -146,7 +146,15 @@ done
 
 
 if [ "x$ret" != "x0" ]; then
+	#echo "Send email to $EMAILTO to inform about backup error"
+	#echo -e "The backup of backup of backup for "`hostname`" failed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server failed" $EMAILTO
+	#echo
+
 	exit $ret
 fi
+
+#echo "Send email to $EMAILTO to inform about backup success"
+#echo -e "The backup of backup of backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+#echo
 
 exit 0
