@@ -95,7 +95,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
 	$MYSQLDUMP --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.zst")
-	if [[ ( "$FILESIZE" < 50 ) ]]; then
+	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
 	fi
 	chown root.admin $targetdir/${dbname}_`date +%d`.sql.zst
@@ -130,7 +130,7 @@ else
 	echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
 	$MYSQLDUMP --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.gz")
-	if [[ ( "$FILESIZE" < 50 ) ]]; then
+	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
 	fi
 	chown root.admin $targetdir/${dbname}_`date +%d`.sql.gz
