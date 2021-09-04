@@ -411,19 +411,22 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 
 === Hostname and IP configuration
 
-Add an entry from the new server to the DNS provided by the domain provider.
-This is done by adding an entry into the DNZ zone of domain *mysaasdomainname.com*
+* Add an entry from the new server to the DNS provided by the domain provider.
+This is done by adding an entry into the DNS zone of domain *mysaasdomainname.com*
 
 [source,bash]
 ---------------
 type=A
-name=myserver.mysaasdomainname.com
+name=nameofserver.mysaasdomainname.com
 ---------------
 
+Where nameofserver can be "admin" for a master server, "withX" for a deployment server but can also be a name of you choice.
 
-Go to the OVH IP management interface, to add the reverse on the server IP.
 
-Go to the management interface of OVH servers, to modify their short name. This will modify the */etc/hostname* file automatically (if not manually modify) with the short name. The file will then have as sole content:
+* Go to the server provider management interface, to add this name as the reverse name of the server IP.
+
+
+* Go to the server prodivder management interface, to modify their short name. This may modify the */etc/hostname* file automatically (if not manually modified) with this short name. The file will then have as sole content:
 
 [source, bash]
 ---------------
@@ -431,7 +434,7 @@ nameofserver
 ---------------
 
 
-Connect and modify the file */etc/hosts* with the entry of the new server
+Connect and modify the file */etc/hosts* with the entry of the new server:
 
 [source, bash]
 ---------------
@@ -579,16 +582,35 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 On the *Master* server and the *Deployment* servers, create the directories to store backups and archives.
 
-Create directories required to store data and backups:
+Create directories required to store data, backups and archives:
+
+* Create directory */mnt/diskbackup/backup*:
+
+If you have created a dedicated disk for the backup:
 
 [source, bash]
 ---------------
-mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail/home
+mkdir /mnt/diskbackup/backup
+---------------
 
-mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup; ln -fs /mnt/diskhome/backup /mnt/diskbackup/
+If not:
+
+[source, bash]
+---------------
+mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
+ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
+---------------
+
+* Create the other directories:
+
+[source, bash]
+---------------
+mkdir /home/jail; mkdir /mnt/diskhome/home;
+
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
+ln -fs /mnt/diskhome/home /home/jail/home
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
 ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid

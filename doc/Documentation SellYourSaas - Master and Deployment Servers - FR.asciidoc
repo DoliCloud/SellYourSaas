@@ -564,16 +564,35 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 Sur le serveur *Master* et les serveurs de *Déploiement*, créer les répertoires pour stocker les instances, les sauvegardes et les archives.
 
-Create directories required to store data and backups:
+Créer les répertoires requis pour stocker les données, sauvegardes et archives:
+
+* Créer le répertoire */mnt/diskbackup/backup*:
+
+Si vous avez créé précedemment un disk dédié pour le backup:
+
+[source, bash]
+---------------
+mkdir /mnt/diskbackup/backup
+---------------
+
+Si non:
+
+[source, bash]
+---------------
+mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
+ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
+---------------
+
+* Créer les autres répertoires:
 
 [source,bash]
 ---------------
-mkdir /home/jail; mkdir /mnt/diskhome/home; ln -fs /mnt/diskhome/home /home/jail/home
+mkdir /home/jail; mkdir /mnt/diskhome/home;
 
-mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup; ln -fs /mnt/diskhome/backup /mnt/diskbackup/
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
+ln -fs /mnt/diskhome/home /home/jail/home
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
 ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
