@@ -78,7 +78,7 @@ This document presents the steps for implementing your own SaaS business platfor
 
 == Choice and acquisition of a domain name
 
-The entire service will run on a domain name. In the rest of the document, we will use the value *mydomain.com*
+The entire service will run on a domain name. In the rest of the document, we will use the value *mysaasdomain.com*
 You need to acquire this domain name from a registrar.
 
 == Installation of the machine and OS
@@ -100,7 +100,44 @@ _Example with OVH Public Cloud: _
 For the master server: VPS or B2-15 or more
 For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
 
-* Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
+=== Choice a Hostname for the server(s) and set it
+
+* Add an entry for the new server to the DNS provided by the domain provider.
+This is done by adding an entry into the DNS zone of domain *mysaasdomainname.com*
+
+[source,bash]
+---------------
+type=A
+name=nameofserver.mysaasdomainname.com
+ip=ip.of.the.server
+
+type=AAAA
+name=nameofserver.mysaasdomainname.com
+ip=ipv6:of:the:server
+---------------
+
+Where nameofserver can be "admin" for a master server, "withX" for a deployment server but can also be any name of your choice.
+
+
+* Go to the server provider management interface, to add this name as the reverse name of the server IP.
+
+
+* Go to the server provider management interface, to modify the short name of the server. This may modify the */etc/hostname* file automatically (if not manually modified) with this short name. The file will then have as sole content:
+
+[source, bash]
+---------------
+nameofserver
+---------------
+
+
+Connect and modify the file */etc/hosts* with the entry of the new server:
+
+[source, bash]
+---------------
+main.ip.of.server nameofserver.mysaasdomainname.com
+127.0.0.1  nameofserver
+---------------
+
 
 
 [[adding_disk]]
@@ -406,40 +443,6 @@ Add at the end of */etc/bash.bashrc*:
 [source, bash]
 ---------------
 alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,cmd'
----------------
-
-
-=== Hostname and IP configuration
-
-* Add an entry from the new server to the DNS provided by the domain provider.
-This is done by adding an entry into the DNS zone of domain *mysaasdomainname.com*
-
-[source,bash]
----------------
-type=A
-name=nameofserver.mysaasdomainname.com
----------------
-
-Where nameofserver can be "admin" for a master server, "withX" for a deployment server but can also be a name of you choice.
-
-
-* Go to the server provider management interface, to add this name as the reverse name of the server IP.
-
-
-* Go to the server prodivder management interface, to modify their short name. This may modify the */etc/hostname* file automatically (if not manually modified) with this short name. The file will then have as sole content:
-
-[source, bash]
----------------
-nameofserver
----------------
-
-
-Connect and modify the file */etc/hosts* with the entry of the new server:
-
-[source, bash]
----------------
-main.ip.of.server nameofserver.mysaasdomainname.com
-127.0.0.1  nameofserver
 ---------------
 
 

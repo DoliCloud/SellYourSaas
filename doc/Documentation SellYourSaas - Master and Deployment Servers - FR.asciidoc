@@ -100,7 +100,41 @@ _Exemple avec OVH Public Cloud:_
 Pour le serveur master: VPS ou B2-15 ou +
 Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit server 2 core minimum - Mémoire 8 Go minimum - Coût en 2020: 22 euros / mois). Doublez les caractéristiques si vous visez 1 000 instances client par serveur.
 
-* Ajouter les entrées DNS entry du ou des serveurs (Entrée A pour IP4 et AAAA pour IP6)
+
+=== Choix du Hostname pour le(s) server(s) and configuration
+
+Ajouter une entrée du nouveau serveur dans le DNS fourni par le provider du domaine. Ceci revient à ajouter une entrée dans la zone DNS de *mysaasdomainname.com*
+
+[source,bash]
+---------------
+type=A
+name=nomduserveur.mysaasdomainname.com
+ip=ipv4.of.the.server
+
+type=AAAA
+name=nomduserveur.mysaasdomainname.com
+ip=ipv6:of:the:server
+---------------
+
+
+Aller dans l'interface de gestion des IP OVH, pour ajouter le reverse sur l'IP du serveur.
+
+Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement) avec le nom court. Le fichier aura alors comme seul contenu: 
+
+[source,bash]
+---------------
+nomduserveur
+---------------
+
+
+Se connecter et modifier le fichier */etc/hosts* avec l'entrée du nouveau serveur 
+
+[source,bash]
+---------------
+ip.principale.du.serveur   nomduserveur.mysaasdomainname.com
+127.0.0.1  nomduserveur
+---------------
+
 
 
 [[ajout_de_disque]]
@@ -394,36 +428,6 @@ Ajouter à la fin de */etc/bash.bashrc*:
 alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,cmd'
 ---------------
 
-
-
-=== Configuration hostname et IP
-
-Ajouter une entrée du nouveau serveur dans le DNS fourni par le provider du domaine. Ceci revient à ajouter une entrée dans la zone DNS de *mysaasdomainname.com*
-
-[source,bash]
----------------
-type=A
-name=nomduserveur.mysaasdomainname.com
----------------
-
-
-Aller dans l'interface de gestion des IP OVH, pour ajouter le reverse sur l'IP du serveur.
-
-Aller dans l'interface de gestion des serveurs OVH, pour modifier leur nom court. Ceci modifiera le fichier */etc/hostname* automatiquement (sinon modifier manuellement) avec le nom court. Le fichier aura alors comme seul contenu: 
-
-[source,bash]
----------------
-nomduserveur
----------------
-
-
-Se connecter et modifier le fichier */etc/hosts* avec l'entrée du nouveau serveur 
-
-[source,bash]
----------------
-ip.principale.du.serveur   nomduserveur.mysaasdomainname.com
-127.0.0.1  nomduserveur
----------------
 
 
 === Ajout du support de l'IP v6 (optionnel, si ipv6 désiré et pas encore paramétré)
