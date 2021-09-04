@@ -552,7 +552,7 @@ print $out;
 if ($action == 'updatestatsonly') {
 	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 		try {
-			print 'Send data to DataDog'."\n";
+			print 'Send data to DataDog (sellyoursaas.instancedeployed='.((float) $nbofinstancedeployed).', sellyoursaas.instancepaymentko='.((float) ($nbofactivesusp + $nbofactivepaymentko)).', sellyoursaas.instancepaymentok='.((float) ($nbofactive - ($nbofactivesusp + $nbofactivepaymentko)))."\n";
 			dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 			$arrayconfig=array();
@@ -563,9 +563,9 @@ if ($action == 'updatestatsonly') {
 			$statsd = new DataDog\DogStatsd($arrayconfig);
 
 			$arraytags=null;
-			$statsd->gauge('sellyoursaas.instancedeployed', (float) $nbofinstancedeployed, 1.0, $arraytags);
-			$statsd->gauge('sellyoursaas.instancepaymentko', (float) $nbofactivesusp+$nbofactivepaymentko, 1.0, $arraytags);
-			$statsd->gauge('sellyoursaas.instancepaymentok', (float) $nbofactive-($nbofactivesusp+$nbofactivepaymentko), 1.0, $arraytags);
+			$statsd->gauge('sellyoursaas.instancedeployed', (float) ($nbofinstancedeployed), 1.0, $arraytags);
+			$statsd->gauge('sellyoursaas.instancepaymentko', (float) ($nbofactivesusp + $nbofactivepaymentko), 1.0, $arraytags);
+			$statsd->gauge('sellyoursaas.instancepaymentok', (float) ($nbofactive - ($nbofactivesusp + $nbofactivepaymentko)), 1.0, $arraytags);
 		} catch (Exception $e) {
 		}
 	}
