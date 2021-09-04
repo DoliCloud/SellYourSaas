@@ -869,7 +869,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_PUBLIC_KEY" class="quatrevingtpercent" rows="3">'.$conf->global->SELLYOURSAAS_PUBLIC_KEY.'</textarea>';
 print '</td>';
-print '<td><span class="opacitymedium">Your SSH public key(s) deployed into each new instance</span></td>';
+print '<td><span class="opacitymedium">'.$langs->trans("SSHPublicKeyDesc").'</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("LoginForSupport").'</td>';
