@@ -575,7 +575,7 @@ Si vous avez créé précedemment un disk dédié pour le backup:
 mkdir /mnt/diskbackup/backup
 ---------------
 
-Si non:
+Si vous n'avez pas de disk dédié pour le backup:
 
 [source, bash]
 ---------------

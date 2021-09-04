@@ -593,7 +593,7 @@ If you have created a dedicated disk for the backup:
 mkdir /mnt/diskbackup/backup
 ---------------
 
-If not:
+If you haven't:
 
 [source, bash]
 ---------------
