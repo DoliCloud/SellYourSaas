@@ -29,7 +29,7 @@ if (! $res) die("Include of main fails");
 $action = GETPOST('action', 'aZ09');
 $idticketgroup = GETPOST('idticketgroup', 'aZ09');
 $idticketgroup = GETPOST('idticketgroup', 'aZ09');
-$lang = GETPOST('lang');
+$lang = GETPOST('lang', 'aZ09');
 
 /*
  * Actions
