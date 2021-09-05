@@ -1,4 +1,3 @@
-
 #!/usr/bin/php
 <?php
 /* Copyright (C) 2012-2019 Laurent Destailleur	<eldy@users.sourceforge.net>
