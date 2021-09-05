@@ -232,7 +232,7 @@ class ActionsSellyoursaas
 
 				if (in_array($object->array_options['options_deployment_status'], array('done'))) {
 					if (empty($object->array_options['options_suspendmaintenance_message'])) {
-						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance&token='.urlencode(newToken()).'">' . $langs->trans('Maintenance') . '</a>';
+						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenancetoconfirm&token='.urlencode(newToken()).'">' . $langs->trans('Maintenance') . '</a>';
 					} else {
 						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unsuspend&token='.urlencode(newToken()).'">' . $langs->trans('StopMaintenance') . '</a>';
 					}
@@ -543,14 +543,14 @@ class ActionsSellyoursaas
 
 			// End of deployment is now OK / Complete
 			if (! $error && in_array($action, array('unsuspend', 'suspendmaintenance'))) {
-				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenance' ? 'nomessage' : '');
+				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenance' ? GETPOST('suspendmaintenancemessage') : '');
 
 				$result = $object->update($user);
 				if ($result < 0) {
 					// We ignore errors. This should not happen in real life.
 					//setEventMessages($contract->error, $contract->errors, 'errors');
 				} else {
-					if ($action == 'suspendmaintenanceconfirmed') {
+					if ($action == 'suspendmaintenance') {
 						setEventMessages($langs->trans('InstanceInMaintenanceMode', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), null, 'warnings');
 					} else {
 						setEventMessages('InstanceUnsuspended', null, 'mesgs');
@@ -621,16 +621,23 @@ class ActionsSellyoursaas
 		$langs->load("sellyoursaas@sellyoursaas");
 
 		if ($action == 'changecustomer') {
-			// Clone confirmation
+			// Change customer confirmation
 			$formquestion = array(array('type' => 'other','name' => 'socid','label' => $langs->trans("SelectThirdParty"),'value' => $form->select_company($object->thirdparty->id, 'socid', '(s.client=1 OR s.client=2 OR s.client=3)')));
 			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ChangeCustomer'), '', 'confirm_changecustomer', $formquestion, 'yes', 1);
 			$this->resprints = $formconfirm;
 		}
 
 		if ($action == 'undeploy') {
-			// Clone confirmation
+			// Undeploy confirmation
 			$formquestion = array();
 			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Undeploy'), $langs->trans("ConfirmUndeploy"), 'confirm_undeploy', $formquestion, 'no', 1);
+			$this->resprints = $formconfirm;
+		}
+
+		if ($action == 'suspendmaintenancetoconfirm') {
+			// Switch to maintenance mode confirmation
+			$formquestion = array(array('type' => 'textarea', 'name' => 'suspendmaintenancemessage', 'label' => $langs->trans("MaintenanceMessage"), 'value' =>'', 'morecss'=>'centpercent'));
+			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Confirmation'), $langs->trans("ConfirmMaintenance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), 'suspendmaintenance', $formquestion, 'no', 1, 300);
 			$this->resprints = $formconfirm;
 		}
 
