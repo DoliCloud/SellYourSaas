@@ -3269,7 +3269,7 @@ On the *deployment servers*, to get automatically renewable wildcard certificate
 * Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /etc/letsencrypt/scripts/authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
 ---------------
 
 This enables the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
