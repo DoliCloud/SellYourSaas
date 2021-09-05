@@ -339,7 +339,7 @@ if ($sellyoursaassupporturl) {
 
 				if (idgroupticket != "") {
 					$.ajax({ url: \'/ajax/fetchKnowledgeRecord.php\',
-						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\' },
+						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\', lang:\''.$mythirdpartyaccount->default_lang.'\'},
 						 type: \'GET\',
 						 success: function(response) {
 							var urllist = \'\';
@@ -347,7 +347,7 @@ if ($sellyoursaassupporturl) {
 							response = JSON.parse(response)
 							for (key in response) {
 								console.log(response[key])
-								urllist += "<li>" + response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
+								urllist += "<li>" + response[key].title + ": " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
 							}
 							if (urllist != "") {
 								console.log(urllist)
