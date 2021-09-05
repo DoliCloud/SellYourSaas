@@ -2081,7 +2081,7 @@ innodb_log_buffer_size=32M
 log_warnings = 2
 ---------------
 
-On a master only server, change only the listened address :
+On a *Master* only server, change only the listened address :
 
 [source,bash]
 --------------
@@ -2089,6 +2089,12 @@ bind-address = 0.0.0.0
 --------------
 
 Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
+
+Restart the database server
+[source,bash]
+--------------
+/etc/init.d/mysql restart
+--------------
 
 
 ==== Set mysql root password

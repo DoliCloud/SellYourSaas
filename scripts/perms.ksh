@@ -44,6 +44,10 @@ fi
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/packages
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt
 fi
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr
