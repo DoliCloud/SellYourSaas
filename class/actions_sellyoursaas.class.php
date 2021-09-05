@@ -232,7 +232,7 @@ class ActionsSellyoursaas
 
 				if (in_array($object->array_options['options_deployment_status'], array('done'))) {
 					if (empty($object->array_options['options_suspendmaintenance_message'])) {
-						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenanceconfirmed&token='.urlencode(newToken()).'">' . $langs->trans('Maintenance') . '</a>';
+						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance&token='.urlencode(newToken()).'">' . $langs->trans('Maintenance') . '</a>';
 					} else {
 						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unsuspend&token='.urlencode(newToken()).'">' . $langs->trans('StopMaintenance') . '</a>';
 					}
@@ -524,7 +524,7 @@ class ActionsSellyoursaas
 				}
 			}
 
-			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenanceconfirmed'))) {
+			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenance'))) {
 				dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($db);
 				$result = $sellyoursaasutils->sellyoursaasRemoteAction($action, $object);
@@ -542,8 +542,8 @@ class ActionsSellyoursaas
 			}
 
 			// End of deployment is now OK / Complete
-			if (! $error && in_array($action, array('unsuspend', 'suspendmaintenanceconfirmed'))) {
-				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenanceconfirmed' ? 'nomessage' : '');
+			if (! $error && in_array($action, array('unsuspend', 'suspendmaintenance'))) {
+				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenance' ? 'nomessage' : '');
 
 				$result = $object->update($user);
 				if ($result < 0) {
