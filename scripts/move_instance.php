@@ -226,7 +226,7 @@ if (empty($instanceserver))
 //$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 $dbmaster = $db;
 if ($dbmaster->error) {
-	dol_print_error($dbmaster, "host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
 	exit;
 }
 if ($dbmaster) {
