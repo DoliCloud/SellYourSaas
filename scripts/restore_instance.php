@@ -1,3 +1,4 @@
+
 #!/usr/bin/php
 <?php
 /* Copyright (C) 2012-2019 Laurent Destailleur	<eldy@users.sourceforge.net>
@@ -18,12 +19,12 @@
  *
  * FEATURE
  *
- * Make a backup of files (rsync) or database (mysqdump) of a deployed instance.
+ * Restore a backup of files (rsync) or database (mysqdump) of a deployed instance.
  * There is no report/tracking done into any database. This must be done by a parent script.
  * This script is run from the deployment servers.
  *
  * Note:
- * ssh keys must be authorized to have testrsync and confirmrsync working.
+ * ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted user to have testrsync and confirmrsync working.
  * remote access to database must be granted for option 'testdatabase' or 'confirmdatabase'.
  */
 
@@ -186,7 +187,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
 	print "Usage:   $script_file backup_dir  instance  autoscan|mysqldump_dbn...sql.zst|dayofmysqldump  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
 	print "Example: $script_file ".$conf->global->DOLICLOUD_BACKUP_PATH."/osu123456/dbn789012  myinstance  31  testrsync\n";
-	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
+	print "Note:    ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted user to have testrsync and confirmrsync working.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
