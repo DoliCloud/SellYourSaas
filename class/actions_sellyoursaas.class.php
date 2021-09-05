@@ -232,7 +232,7 @@ class ActionsSellyoursaas
 
 				if (in_array($object->array_options['options_deployment_status'], array('done'))) {
 					if (empty($object->array_options['options_suspendmaintenance_message'])) {
-						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenance&token='.urlencode(newToken()).'">' . $langs->trans('Maintenance') . '</a>';
+						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=suspendmaintenanceconfirmed&token='.urlencode(newToken()).'">' . $langs->trans('Maintenance') . '</a>';
 					} else {
 						print '<a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=unsuspend&token='.urlencode(newToken()).'">' . $langs->trans('StopMaintenance') . '</a>';
 					}
@@ -368,8 +368,9 @@ class ActionsSellyoursaas
 					$db->rollback();
 				}
 
-
-				$urlto=preg_replace('/action=[a-z]+/', '', $_SERVER['REQUEST_URI']);
+				$urlto=preg_replace('/action=[a-z_]+/', '', $_SERVER['REQUEST_URI']);
+				$urlto=preg_replace('/&confirm=yes/', '', $urlto);
+				$urlto=preg_replace('/&token=/', '&tokendisabled=', $urlto);
 				if ($urlto) {
 					dol_syslog("Redirect to page urlto=".$urlto." to avoid to do action twice if we do back");
 					header("Location: ".$urlto);
@@ -523,7 +524,7 @@ class ActionsSellyoursaas
 				}
 			}
 
-			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenance'))) {
+			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenanceconfirmed'))) {
 				dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($db);
 				$result = $sellyoursaasutils->sellyoursaasRemoteAction($action, $object);
@@ -541,15 +542,15 @@ class ActionsSellyoursaas
 			}
 
 			// End of deployment is now OK / Complete
-			if (! $error && in_array($action, array('unsuspend', 'suspendmaintenance'))) {
-				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenance' ? 'nomessage' : '');
+			if (! $error && in_array($action, array('unsuspend', 'suspendmaintenanceconfirmed'))) {
+				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenanceconfirmed' ? 'nomessage' : '');
 
 				$result = $object->update($user);
 				if ($result < 0) {
 					// We ignore errors. This should not happen in real life.
 					//setEventMessages($contract->error, $contract->errors, 'errors');
 				} else {
-					if ($action == 'suspendmaintenance') {
+					if ($action == 'suspendmaintenanceconfirmed') {
 						setEventMessages($langs->trans('InstanceInMaintenanceMode', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), null, 'warnings');
 					} else {
 						setEventMessages('InstanceUnsuspended', null, 'mesgs');
