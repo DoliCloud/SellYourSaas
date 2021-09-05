@@ -1010,7 +1010,7 @@ htpasswd -cm /etc/apache2/.htpasswd <wanted username>
 Choose a password. You will need to give this user and password to anyone who wants to access the backoffice *admin.mysaasdomainname.com* .
 
 
-* Create a virtual host *admin.mysaasdomainname.com* on the Dolibarr *Master* for the administration of SellyourSaas
+* Create a virtual host file */etc/apache2/sites-available/admin.mysaasdomainname.com.conf* for *admin.mysaasdomainname.com* on the Dolibarr *Master* for the administration of SellyourSaas
 
 [source, bash]
 ---------------
@@ -1099,7 +1099,7 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 You can create another virtual host for the HTTPS on port 443
 
 
-* Create a virtual host for the client area *myaccount.mysaasdomainname.com*
+* Create a virtual host file */etc/apache2/sites-available/myaccount.mysaasdomainname.com.conf* of the domain *myaccount.mysaasdomainname.com* on the *Master* server for the customer dashboard.
 
 [source, bash]
 ---------------
@@ -1154,7 +1154,7 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 ---------------
 
-Later, we will enabled the virtual host and we will create also the virtual host for the HTTPS on port 443 by using letsencrypt.
+Later, we will enable the virtual host and we will create also the virtual host for the HTTPS on port 443 by using letsencrypt.
 
 
 === Timeout of server launches
@@ -1864,7 +1864,6 @@ Edit/Create the file */etc/mailname* to set the long FQDN of the server *myshort
 ---------------
 vi /etc/mailname
 ---------------
-
 
 
 Complete the file */etc/postfix/main.cf* with:
@@ -2785,7 +2784,7 @@ Comment
 
 
 
-=== Setup of DNS server for domains served by Master server
+=== Setup of DNS server for domains served by the Master server
 
 ==== On registrar side
 
@@ -2796,7 +2795,7 @@ In the registrar, update the DNS of the main domain *mysaasdomainname.com* with 
 
 
 
-=== Setup of DNS server for deployment servers
+=== Setup of DNS server for domains served by the Deployment servers
 
 ==== On registrar side
 
@@ -3456,11 +3455,36 @@ cd / && run-parts --report /etc/cron.daily
 ---------------
 
 
+
 == Installation of Dolibarr
+
+On all servers (*Master and Deployment*):
+
+* Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
+---------------
+
+* Create a symbolic link called *source* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
+---------------
+
+* Create a symbolic link called *main.inc.php* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs/main.inc.php* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr/htdocs/main.inc.php /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
+---------------
+
 
 On *Master server*:
 
-Enable the virtual host for admin and myaccount (wehave created the virtual host file before):
+* Enable the virtual host for admin and myaccount (we have created the virtual host file before):
 
 [source,ini]
 ---------------
@@ -3469,6 +3493,12 @@ a2ensite myaccount.mysellyoursaasdomain.com
 /etc/init.d/apache2 restart
 ---------------
 
+* Generate the virtual host and the SSL certificate for this 2 sites using letsencrypt:
+
+[source,ini]
+---------------
+certbot
+---------------
 
 * Call the URL to install Dolibarr. Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than */home/admin/wwwroot/dolibarr/documents*
 
@@ -3486,7 +3516,7 @@ On *Deployment servers*:
 sudo vi /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 ---------------
 
-to add the following content:
+and add the following content:
 
 [source,ini]
 ---------------
@@ -3494,7 +3524,6 @@ to add the following content:
 $dolibarr_main_document_root='/home/admin/wwwroot/dolibarr/htdocs';
 $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
 ---------------
-
 
 
 === Installation of Geoip2
@@ -3511,20 +3540,6 @@ On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr
 
 
 == Installation of plugin SellYourSaas
-
-* Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
-
-[source,bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
----------------
-
-* Create a symbolic link called *source* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs* :
-
-[source,bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
----------------
 
 On the *Master*:
 

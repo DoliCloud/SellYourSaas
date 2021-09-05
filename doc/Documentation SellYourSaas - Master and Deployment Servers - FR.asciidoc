@@ -954,7 +954,7 @@ ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
 
 Sur le *Serveur Master*:
 
-* Créer un virtual host *admin.mysaasdomainname.com* sur le Dolibarr *Master* pour l'administration de SellyourSaas
+* Créer un fichier virtual host */etc/apache2/sites-available/admin.mysaasdomainname.com.conf* pour *admin.mysaasdomainname.com* sur le Dolibarr *Master* pour l'administration de SellyourSaas
 
 [source,bash]
 ---------------
@@ -1042,7 +1042,7 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 Vous pouvez créer un autre virtual host pour le HTTPS port 443
 
 
-* Créer un virtual host pour l'espace client *myaccount.mysaasdomainname.com*
+* Créer un fichier virtual host */etc/apache2/sites-available/myaccount.mysaasdomainname.com.conf* du domaine *myaccount.mysaasdomainname.com* sur le server *Master* pour l'espace client.
 
 [source,bash]
 ---------------
@@ -3368,12 +3368,50 @@ cd / && run-parts --report /etc/cron.daily
 ---------------
 
 
+
 == Installation de Dolibarr
+
+Sur tous les serveurs (*Master et Déploiement*):
+
+* Créer un lien symbolique appelé *sellyoursaas* dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
+---------------
+
+* Créer un lien symoblique appelé *source* dans *myaccounts* vers */home/admin/wwwroot/dolibarr/htdocs* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
+---------------
+
+* Créer un lien symbolique appelé *main.inc.php* dans *myaccount* vers */home/admin/wwwroot/dolibarr/htdocs/main.inc.php* :
+
+[source,bash]
+---------------
+ln -fs /home/admin/wwwroot/dolibarr/htdocs/main.inc.php /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
+---------------
+
 
 Sur le *Serveur Master*:
 
-* Installer un virtual host Apache, par exemple: https://admin.mysaasdomainname.com, pointant donc sur */home/admin/wwwroot/dolibarr/htdocs*
+* Activer le virtual host for admin and myaccount (nous avons créé les fichiers virtual host plus tôt):
 
+[source,ini]
+---------------
+a2ensite admin.mysellyoursaasdomain.com
+a2ensite myaccount.mysellyoursaasdomain.com
+/etc/init.d/apache2 restart
+---------------
+
+* Générer le virtual host et le certificat SSL pour ces 2 sites avec letsencrypt:
+
+[source,ini]
+---------------
+certbot
+---------------
 
 * Appeler l'URL pour lancer l'installation de Dolibarr. Attention: Choisissez lors de l'assistant d'installation, comme nom de répertoire document */home/admin/wwwroot/dolibarr_documents* plutôt que */home/admin/wwwroot/dolibarr/documents*
 
@@ -3391,7 +3429,7 @@ Sur les *Serveurs de déploiement*:
 sudo vi /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 ---------------
 
-pour ajouter le contenu suivant:
+et y ajouter le contenu suivant:
 
 [source,ini]
 ---------------
@@ -3416,22 +3454,6 @@ Sur le *Serveur maitre* Dolibarr, activer et configurer le module GeoIP de Dolib
 
 
 == Installation du plugin SellYourSaas
-
-Sur tous les serveurs (*Master et Déploiement*):
-
-* Créer un lien symbolique appelé *sellyoursaas* dans */home/admin/wwwroot/dolibarr/htdocs/custom* vers */home/admin/wwwroot/dolibarr_sellyoursaas* :
-
-[source,bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
----------------
-
-* Créer un lien symoblique appelé *source* dans *myaccounts* vers */home/admin/wwwroot/dolibarr/htdocs* :
-
-[source,bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
----------------
 
 Sur le *Master*:
 
