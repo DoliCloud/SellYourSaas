@@ -3255,14 +3255,24 @@ Choose:
 
 ===== From LetsEncrypt
 
-* Run cerbot or certbot-auto
+* Run cerbot with the following command line *on the master* :
 
 [source,bash]
 ---------------
-certbot certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
+certbot certonly --manual --preferred-challenges=dns -d "admin.<your_domain>"
 ---------------
 
-Follow instructions to add DNS entries and validate generation.
+On the *deployment servers*, to get automatically renewable wildcard certificates :
+
+* Edit */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh* and set your own zone file path.
+
+* Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
+[source,bash]
+---------------
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /etc/letsencrypt/scripts/authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+---------------
+
+This enables the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
 
 To read generated .pem files, you can run
 
@@ -3272,7 +3282,7 @@ openssl x509 -in fullchain.pem -text
 ---------------
 
 
-* To renew a certificate, run
+* To renew a certificate *on the master*, run
 
 [source,bash]
 ---------------
@@ -3281,15 +3291,7 @@ ou
 certbot renew --manual --force-renewal
 ---------------
 
-Or if there is a wildcard certificate on a deployment server, run:
-
-[source,bash]
----------------
-certbot --manual -d '*.withX.mysaasdomainname.com' --preferred-challenges=dns certonly
-Complete the DNS file /etc/bind/withX.mysaasdomainname.com.hosts with the TXT key suggested (Keep old one but remove very old one)
-rndc reload withX.mysaasdomainname.com
-/etc/init.d/apache2 reload
----------------
+For wildcard certificates on *deployment servers*, you have nothing to do.
 
 You can check that DNS update is ok with this URL
 https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
