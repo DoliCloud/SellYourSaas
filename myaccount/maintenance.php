@@ -94,7 +94,9 @@ if ($instance == 'myaccount') {
 }
 print '<br>';
 if (! empty($contract->array_options['options_suspendmaintenance_message']) && $contract->array_options['options_suspendmaintenance_message'] != 'nomessage') {
+	print '<br><div class="opacitymedium">';
 	print $langs->trans($contract->array_options['options_suspendmaintenance_message']).'<br>';
+	print '</div>';
 }
 print '<br>';
 if ($instance && $instance != 'myaccount') {
