@@ -573,3 +573,4 @@ InstanceMoveInProgress=Your instance is currently in a process of hardware upgra
 ActiveInstanceOfASpammer=Instance of an evil user (hacker, spammer). Not yet undeployed.
 MaintenanceMessage=Message to show
 ConfirmMaintenance=Are you sure you want to switch this instance into maintenance mode ? Access will not be possible for common users.<br>Note: If a browser include the string <b>%s</b> into its User-Agent, it will be able to bypass the maintenance message lock. 
+Assistance=Assistance
