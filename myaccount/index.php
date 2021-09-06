@@ -2426,8 +2426,7 @@ if ($mythirdpartyaccount->isareseller) {
           <li class="nav-item'.($mode == 'myaccount'?' active':'').' dropdown">
              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#socid='.$mythirdpartyaccount->id.'"><i class="fa fa-user"></i> '.$langs->trans("MyAccount").' ('.$mythirdpartyaccount->email.')</a>
              <ul class="dropdown-menu">
-                 <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>
-                 <li class="dropdown-divider"></li>';
+                 <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>';
 		// Reseler request
 		if (! $mythirdpartyaccount->isareseller) {
 			$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
@@ -2444,7 +2443,8 @@ if ($mythirdpartyaccount->isareseller) {
 				}
 		}
 		print '
-                 <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=logout"><i class="fa fa-sign-out pictofixedwidth"></i> '.$langs->trans("Logout").'</a></li>
+			<li class="dropdown-divider"></li>
+			<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=logout"><i class="fa fa-sign-out pictofixedwidth"></i> '.$langs->trans("Logout").'</a></li>
              </ul>
            </li>
 
