@@ -544,7 +544,7 @@ class ActionsSellyoursaas
 			// End of deployment is now OK / Complete
 			if (! $error && in_array($action, array('unsuspend', 'suspendmaintenance'))) {
 				$suspendmaintenancemessage = GETPOST('suspendmaintenancemessage');
-				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenance' ? $suspendmaintenancemessage ? $suspendmaintenancemessage : 'nomessage' : '');
+				$object->array_options['options_suspendmaintenance_message'] = ($action == 'suspendmaintenance' ? ($suspendmaintenancemessage ? $suspendmaintenancemessage : 'nomessage') : '');
 
 				$result = $object->update($user);
 				if ($result < 0) {
