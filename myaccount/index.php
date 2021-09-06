@@ -2411,28 +2411,14 @@ if ($mythirdpartyaccount->isareseller) {
 }
 
 		print '<li class="nav-item'.($mode == 'support'?' active':'').' dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-gear"></i> '.$langs->trans("Other").'</a>
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-gear"></i> '.$langs->trans("Support").'</a>
             <ul class="dropdown-menu">';
 		// FAQ
 		print '<li><a class="dropdown-item" href="'.$urlfaq.'" target="_newfaq"><i class="fa fa-question pictofixedwidth"></i> '.$langs->trans("FAQs").'</a></li>';
 		// Support
 		print '<li class="dropdown-divider"></li>';
-		print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=support"><i class="fa fa-hands-helping pictofixedwidth"></i> '.$langs->trans("Support").'</a></li>';
-		// Reseler request
-if (! $mythirdpartyaccount->isareseller) {
-	$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
-	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-		$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (isset($conf->global->$newnamekey)) $allowresellerprogram = $conf->global->$newnamekey;
-	}
+		print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=support"><i class="fa fa-hands-helping pictofixedwidth"></i> '.$langs->trans("ContactUs").'</a></li>';
 
-	// Check if there is at least one package with status resale ok
-	if ($allowresellerprogram) {
-		print '<li class="dropdown-divider"></li>';
-		print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=becomereseller"><i class="fa fa-briefcase pictofixedwidth"></i> '.$langs->trans("BecomeReseller").'</a></li>';
-	}
-}
 		print '
             </ul>
           </li>
@@ -2441,7 +2427,23 @@ if (! $mythirdpartyaccount->isareseller) {
              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#socid='.$mythirdpartyaccount->id.'"><i class="fa fa-user"></i> '.$langs->trans("MyAccount").' ('.$mythirdpartyaccount->email.')</a>
              <ul class="dropdown-menu">
                  <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>
-                 <li class="dropdown-divider"></li>
+                 <li class="dropdown-divider"></li>';
+		// Reseler request
+		if (! $mythirdpartyaccount->isareseller) {
+			$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
+			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+					$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+					if (isset($conf->global->$newnamekey)) $allowresellerprogram = $conf->global->$newnamekey;
+				}
+
+				// Check if there is at least one package with status resale ok
+				if ($allowresellerprogram) {
+					print '<li class="dropdown-divider"></li>';
+					print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=becomereseller"><i class="fa fa-briefcase pictofixedwidth"></i> '.$langs->trans("BecomeReseller").'</a></li>';
+				}
+		}
+		print '
                  <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=logout"><i class="fa fa-sign-out pictofixedwidth"></i> '.$langs->trans("Logout").'</a></li>
              </ul>
            </li>
