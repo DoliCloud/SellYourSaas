@@ -41,6 +41,7 @@ export DIRSOURCE2="$remotebackupdir/backup_";
 export DIRDESTI1="/home_";
 export DIRDESTI2="/backup_";
 
+export DISTRIB_RELEASE=`lsb_release -r -s`
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";

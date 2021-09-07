@@ -286,7 +286,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="-rlt";
 	//$param[]="-vv";
 	$param[]="-v";
-	$param[]="--noatime";
+	//$param[]="--noatime";				// launching server must be lower then 20.10
+	//$param[]="--open-noatime";		// version must be 20.10 on both side
 	//$param[]="--exclude-from --exclude-from=$scriptdir/backup_backups.exclude";
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";

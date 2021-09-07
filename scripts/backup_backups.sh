@@ -64,6 +64,8 @@ if [ "x$EMAILTO" == "x" ]; then
 	export EMAILTO=supervision@$DOMAIN
 fi
 
+export DISTRIB_RELEASE=`lsb_release -r -s`
+
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
 export OPTIONS="-4 --stats -rlt --chmod=u=rwX";

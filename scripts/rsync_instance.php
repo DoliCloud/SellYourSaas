@@ -191,7 +191,8 @@ if (! in_array($mode, array('confirm','confirmunlock','confirmclean'))) $param[]
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
 $param[]="-v";
-$param[]="--noatime";
+//$param[]="--noatime";				// launching server must be lower then 20.10
+//$param[]="--open-noatime";		// version must be 20.10 on both side
 $param[]="--exclude .buildpath";
 $param[]="--exclude .codeclimate.yml";
 $param[]="--exclude .editorconfig";
