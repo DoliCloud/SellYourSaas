@@ -1435,10 +1435,11 @@ if ($reusecontractid > 0) {
 	exit(-1);
 }
 
+$errormessages[] = '<br>';
 
 // If we are here, there was an error
 if ($productref != 'none') {
-	$errormessages[] = 'Deployement of instance '.$sldAndSubdomain.$tldid.' from '.($remoteip?$remoteip:'localhost').' started but failed.';
+	$errormessages[] = 'Deployment of instance '.$sldAndSubdomain.$tldid.' from '.($remoteip?$remoteip:'localhost').' started but failed.';
 } else {
 	$errormessages[] = 'Creation of account '.$email.' from '.($remoteip?$remoteip:'localhost').' has failed.';
 }
@@ -1472,7 +1473,7 @@ if (is_object($contract->thirdparty)) {
 		// We send email but only if not in Command Line mode
 		dol_syslog("Error in deployment, send email to customer (copy supervision)", LOG_ERR);
 
-		$email = new CMailFile('['.$sellyoursaasname.'] Registration/deployment temporary error - '.dol_print_date(dol_now(), 'dayhourrfc'), $to, $sellyoursaasemailnoreply, $langs->trans("AnErrorOccuredDuringDeployment")."<br>\n".join("<br>\n", $errormessages)."<br>\n", array(), array(), array(), $sellyoursaasemailsupervision, '', 0, -1, '', '', '', '', 'emailing');
+		$email = new CMailFile('['.$sellyoursaasname.'] Registration/deployment temporary error - '.dol_print_date(dol_now(), 'dayhourrfc'), $to, $sellyoursaasemailnoreply, $langs->trans("AnErrorOccuredDuringDeployment")."<br><br>\n".join("<br>\n", $errormessages)."<br><br>\n", array(), array(), array(), $sellyoursaasemailsupervision, '', 0, -1, '', '', '', '', 'emailing');
 		$email->sendfile();
 	} else {
 		dol_syslog("Error in deployment, no email sent because we are in CLI mode", LOG_ERR);

@@ -2205,7 +2205,7 @@ update mysql.user SET authentication_string = PASSWORD('...') where user  = 'sel
 FLUSH PRIVILEGES;
 ---------------
 
-==== Create a user to login for remote administration (optional)
+==== Create a user to login, for remote administration (optional)
 
 Give access rights on the database server to allow remote administration on all databases from your desktop:
 
@@ -2215,6 +2215,19 @@ CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwor
 GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
+
+Note: If the user already exists, to set only the password:
+
+[source,sql]
+---------------
+ALTER USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
+or
+SET PASSWORD FOR 'yourremotelogin'@'ip.poste.admin.distant' = PASSWORD('...');
+or
+update mysql.user SET authentication_string = PASSWORD('...') where user  = 'yourremotelogin' and host =  'ip.poste.admin.distant';
+FLUSH PRIVILEGES;
+---------------
+
 
 ==== Create a user for supervision (optional)
 
