@@ -3264,8 +3264,6 @@ certbot certonly --manual --preferred-challenges=dns -d "admin.<your_domain>"
 
 On the *deployment servers*, to get automatically renewable wildcard certificates :
 
-* Edit */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh* and set your own zone file path.
-
 * Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
 [source,bash]
 ---------------
