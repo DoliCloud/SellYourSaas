@@ -3291,7 +3291,11 @@ ou
 certbot renew --manual --force-renewal
 ---------------
 
-For wildcard certificates on *deployment servers*, you have nothing to do.
+For wildcard certificates on *deployment servers*, you can use the same command as used originally (with --dry-run option first if you want to check)
+[source,bash]
+---------------
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+---------------
 
 You can check that DNS update is ok with this URL
 https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
