@@ -196,7 +196,7 @@ $tmppackage = new Packages($db);
 
 // Load main product
 if (empty($reusecontractid) && $productref != 'none') {
-	$result = $tmpproduct->fetch($productid, $productref);
+	$result = $tmpproduct->fetch($productid, $productref, '', '', 1, 1, 1);
 	if (empty($tmpproduct->id)) {
 		print 'Service/Plan (Product id / ref) '.$productid.' / '.$productref.' was not found.'."\n";
 		exit(-1);
@@ -239,9 +239,9 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.$reusecontractid;
 } elseif ($reusesocid) {		// When we use the "Add another instance" from myaccount dashboard
-	if (empty($productref) && ! empty($service)) {
+	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we already load the $tmpproduct
 		$tmpproduct = new Product($db);
-		$tmpproduct->fetch($service);
+		$tmpproduct->fetch($service, '', '', '', 1, 1, 1);
 		$productref = $tmpproduct->ref;
 	}
 
@@ -534,7 +534,7 @@ if ($reusecontractid) {
 	foreach ($contract->lines as $keyline => $line) {
 		$tmpproduct = new Product($db);
 		if ($line->fk_product > 0) {
-			$tmpproduct->fetch($line->fk_product);
+			$tmpproduct->fetch($line->fk_product, '', '', '', 1, 1, 1);
 			if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
 				if ($tmpproduct->array_options['options_package'] > 0) {
 					$tmppackage->fetch($tmpproduct->array_options['options_package']);
@@ -585,7 +585,7 @@ if ($reusecontractid) {
 	$fqdninstance = $sldAndSubdomain.'.'.$domainname;
 } else {
 	// Check number of instance with same IP deployed (Rem: for partners, ip are the one of their customer)
-	$MAXDEPLOYMENTPERIP = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP)?20:$conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP);
+	$MAXDEPLOYMENTPERIP = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP) ? 20 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP);
 
 	$nbofinstancewithsameip=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
@@ -607,7 +607,7 @@ if ($reusecontractid) {
 	}
 
 	// Check number of instance with same IP on same hour
-	$MAXDEPLOYMENTPERIPPERHOUR = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR)?5:$conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR);
+	$MAXDEPLOYMENTPERIPPERHOUR = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR) ? 5 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR);
 
 	$nbofinstancewithsameip=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
@@ -629,7 +629,8 @@ if ($reusecontractid) {
 	}
 
 	// Check if some deployment are already in process and ask to wait
-	$MAXDEPLOYMENTPARALLEL = 2;
+	$MAXDEPLOYMENTPARALLEL = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL);
+
 	$nbofinstanceindeployment=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
 	$select.= " AND deployment_status IN ('processing')";
@@ -698,14 +699,14 @@ if ($reusecontractid) {
 		$email = $tmpthirdparty->email;
 
 		// Check number of instances
-		$MAXINSTANCES = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
+		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
 
 		$listofcontractid = array();
 		$sql = 'SELECT c.rowid as rowid';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid, '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
-		$sql.= " WHERE c.fk_soc = s.rowid AND s.rowid = ".$tmpthirdparty->id;
+		$sql.= " WHERE c.fk_soc = s.rowid AND s.rowid = ".((int) $tmpthirdparty->id);
 		$sql.= " AND d.fk_contrat = c.rowid";
-		$sql.= " AND c.entity = ".$conf->entity;
+		$sql.= " AND c.entity = ".((int) $conf->entity);
 		$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 		$resql=$db->query($sql);
 		if ($resql) {
@@ -720,7 +721,7 @@ if ($reusecontractid) {
 			}
 		}
 
-		if (count($listofcontractid) >= $MAXINSTANCES) {
+		if (count($listofcontractid) >= $MAXINSTANCESPERACCOUNT) {
 			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
@@ -729,10 +730,10 @@ if ($reusecontractid) {
 			}
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
-				setEventMessages($langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail), null, 'errors');
+				setEventMessages($langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCESPERACCOUNT, $sellyoursaasemail), null, 'errors');
 				header("Location: index.php");
 			} else {
-				print $langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail)."\n";
+				print $langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCESPERACCOUNT, $sellyoursaasemail)."\n";
 			}
 			exit(-77);
 		}
