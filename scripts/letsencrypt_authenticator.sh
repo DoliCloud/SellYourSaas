@@ -1,7 +1,8 @@
 #!/bin/bash
 
 verbose=true
-zone_file="/etc/bind/with1.doliasso.org.hosts"
+export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+zone_file="/etc/bind/${subdomain}.hosts"
 #current_certificates="/etc/letsencrypt/live/with1.doliasso.org/*pem"
 
 #LET'S ENCRYPT VARIABLES
