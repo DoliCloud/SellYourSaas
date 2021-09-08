@@ -1045,13 +1045,15 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	fi
 	
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. We can launch service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload to deploy instance $instancename.$domainname
 			echo "Failed to deployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+			sleep 1		# add a delay after an apache reload
 			exit 20
 		fi
+		sleep 1			# add a delay after an apache reload
 	else
 		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 	fi
@@ -1086,8 +1088,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running service apache2 reload to undeploy instance $instancename.$domainname
 				echo "Failed to undeploy or undeployall instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
+				#sleep 1   	# no delay added for undeployment
 				exit 24
 			fi
+			#sleep 1		# no delay added for undeployment
 		else
 			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 		fi
