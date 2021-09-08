@@ -9,7 +9,7 @@
 #www-data        ALL=(ALL) NOPASSWD: /usr/bin/action_suspend_unsuspend.sh
 
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo
@@ -170,7 +170,7 @@ if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 fi
 
 # For debug
-echo `date +%Y%m%d%H%M%S`" input params for $0:"
+echo `date +'%Y-%m-%d %H:%M:%S'`" input params for $0:"
 echo "mode = $mode"
 echo "osusername = $osusername"
 echo "ospassword = XXXXXX"
@@ -198,7 +198,7 @@ echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
-echo `date +%Y%m%d%H%M%S`" calculated params:"
+echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
 echo "instancedir = $instancedir"
 echo "fqn = $fqn"
 echo "fqnold = $fqnold"
@@ -214,7 +214,7 @@ testorconfirm="confirm"
 if [[ "$mode" == "rename" ]]; then
 
 	if [[ "$fqn" != "$fqnold" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, check if new virtual host $fqn exists"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, check if new virtual host $fqn exists"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
 		if [ -f $apacheconf ]; then
@@ -227,10 +227,10 @@ if [[ "$mode" == "rename" ]]; then
 	# Add DNS entry for $fqn
 
 
-	echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, create a new virtual name $fqn"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, create a new virtual name $fqn"
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
-	echo `date +%Y%m%d%H%M%S`" ***** Create a new apache conf $apacheconf from $vhostfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfile"
 
 	if [[ -s $apacheconf ]]
 	then
@@ -284,7 +284,7 @@ if [[ "$mode" == "rename" ]]; then
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 	if [[ "x$customurl" != "x" ]]; then
 	
-		echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, create a new custom virtual name $fqn.custom"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, create a new custom virtual name $fqn.custom"
 	
 		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
@@ -327,7 +327,7 @@ if [[ "$mode" == "rename" ]]; then
 		fi
 		
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
-		echo `date +%Y%m%d%H%M%S`" ***** Create a new apache conf $apacheconf from $vhostfile"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfile"
 	
 		if [[ -s $apacheconf ]]
 		then
@@ -397,7 +397,7 @@ if [[ "$mode" == "rename" ]]; then
 	fi 
 
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload
@@ -406,14 +406,14 @@ if [[ "$mode" == "rename" ]]; then
 			exit 20
 		fi
 	else
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 	fi
 
 	if [[ "$fqn" != "$fqnold" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqnold.conf"
-		echo `date +%Y%m%d%H%M%S`" ***** Remove apache conf $apacheconf"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove apache conf $apacheconf"
 
 		if [ -f $apacheconf ]; then
 		
@@ -430,7 +430,7 @@ if [[ "$mode" == "rename" ]]; then
 				exit 3
 			fi
 			
-			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload"
 			service apache2 reload
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running service apache2 reload 
@@ -451,7 +451,7 @@ fi
 # Suspend
 
 if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
-	echo `date +%Y%m%d%H%M%S`" ***** Suspend instance in $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Suspend instance in $targetdir/$osusername/$dbname"
 
 	export vhostfiletouse=$vhostfilesuspended;
 	if [[ $mode == "suspendmaintenance" ]]; then
@@ -579,7 +579,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 	fi 
 	
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload
@@ -588,7 +588,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 			exit 6
 		fi
 	else
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 	fi
 fi
 
@@ -596,7 +596,7 @@ fi
 # Unsuspend. Can also be used to force recreation of Virtual host.
 
 if [[ "$mode" == "unsuspend" ]]; then
-	echo `date +%Y%m%d%H%M%S`" ***** Unsuspend instance in $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Unsuspend instance in $targetdir/$osusername/$dbname"
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
 	echo "Create a new apache conf $apacheconf from $vhostfile"
@@ -712,7 +712,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 		exit 7
 	fi 
 
-	echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload"
 	service apache2 reload
 	if [[ "x$?" != "x0" ]]; then
 		echo Error when running service apache2 reload
@@ -728,7 +728,7 @@ fi
 
 if [[ "$mode" == "unsuspend" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Reinstall cron file $cronfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Reinstall cron file $cronfile"
 	if [[ -f /var/spool/cron/crontabs/$osusername ]]; then
 		echo merge existing $cronfile with existing /var/spool/cron/crontabs/$osusername
 		echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
@@ -749,7 +749,7 @@ fi
 
 if [[ "$mode" == "suspend" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
 	if [ -s /var/spool/cron/crontabs/$osusername ]; then
 		mkdir -p /var/spool/cron/crontabs.disabled
 		rm -f /var/spool/cron/crontabs.disabled/$osusername
@@ -767,7 +767,7 @@ if [[ "$mode" == "suspend" ]]; then
 fi
 
 
-echo `date +%Y%m%d%H%M%S`" Process of action $mode of $instancename.$domainname for user $osusername finished"
+echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"
 echo
 
 sleep 1

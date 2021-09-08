@@ -8,7 +8,7 @@
 
 #source /etc/lsb-release
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo "**** ${0}"
@@ -69,7 +69,7 @@ echo "PID=$PID"
 
 
 echo "**** ${0} started"
-echo `date +%Y%m%d%H%M%S`" Start to copy backups of backup on local server" 
+echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups of backup on local server" 
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
@@ -99,7 +99,7 @@ export ret2=0
 # Loop on each target server
 for SERVSOURCECURSOR in `echo $SERVSOURCE | sed -e 's/,/ /g'`
 do
-	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of $DIRSOURCE1 to $SERVDESTICURSOR..."
 	export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
 	export command="rsync -x --delete --delete-excluded --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE1/* $DIRDESTI1";
 	echo "$command";
@@ -110,10 +110,10 @@ do
 	export ret2=0
 	if [ "x$ret1" == "x0" ]; then
 		echo
-		echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories to $DIRDESTI2..."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories to $DIRDESTI2..."
 	
 		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-				echo `date +%Y%m%d%H%M%S`" Process directory $backupdir/osu$i"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $backupdir/osu$i"
 				nbofdir=`ls -d $backupdir/osu$i* | wc -l`
 				if [ "x$nbofdir" != "x0" ]; then
 					# Test if we force backup on a given dir
@@ -140,7 +140,7 @@ do
 		done
 	fi
 	
-	echo `date +%Y%m%d%H%M%S`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
 	echo
 
 done

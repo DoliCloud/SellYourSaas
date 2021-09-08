@@ -8,7 +8,7 @@
 
 source /etc/lsb-release
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo "**** ${0}"
@@ -104,7 +104,7 @@ echo "OPTIONS=$OPTIONS"
 echo "TESTN=$TESTN"
 
 echo "**** ${0} started"
-echo `date +%Y%m%d%H%M%S`" Start to copy backups on a remote server" 
+echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups on a remote server" 
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
@@ -154,10 +154,10 @@ done
 # Loop on each target server to make backup of SOURCE1
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
-	#echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/..."
+	#echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/..."
 	#rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/
 
-	echo `date +%Y%m%d%H%M%S`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
 	export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
 	echo "$command";
@@ -176,17 +176,17 @@ done
 # Loop on each target server to make backup of SOURCE2 (if no error during backup of SOURCE1)
 if [[ "x$instanceserver" == "x1" ]]; then
 	echo
-	echo `date +%Y%m%d%H%M%S`" Do rsync of customer directories $DIRSOURCE2/osu to $SERVDESTI..."
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories $DIRSOURCE2/osu to $SERVDESTI..."
 
 	#for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 	#do
-	#	echo `date +%Y%m%d%H%M%S`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/..."
+	#	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/..."
 	#	rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
 	#done
 
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 		echo
-		echo `date +%Y%m%d%H%M%S`" ----- Process directory $backupdir/osu$i"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ----- Process directory $backupdir/osu$i"
 		nbofdir=`ls -d $backupdir/osu$i* | wc -l`
 		if [ "x$nbofdir" != "x0" ]; then
 			# Test if we force backup on a given dir
@@ -202,7 +202,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 				if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
 					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
 			        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
-		        	echo `date +%Y%m%d%H%M%S`" $command";
+		        	echo `date +'%Y-%m-%d %H:%M:%S'`" $command";
 
 			        $command 2>&1
 			        if [ "x$?" != "x0" ]; then
@@ -224,14 +224,14 @@ if [[ "x$instanceserver" == "x1" ]]; then
 fi
 
 echo
-echo `date +%Y%m%d%H%M%S`" End with errstring=$errstring"
+echo `date +'%Y-%m-%d %H:%M:%S'`" End with errstring=$errstring"
 echo
 
 
 # Loop on each target server
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
-	echo `date +%Y%m%d%H%M%S`" End for $SERVDESTICURSOR ret1[$SERVDESTICURSOR]=${ret1[$SERVDESTICURSOR]} ret2[$SERVDESTICURSOR]=${ret2[$SERVDESTICURSOR]}"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" End for $SERVDESTICURSOR ret1[$SERVDESTICURSOR]=${ret1[$SERVDESTICURSOR]} ret2[$SERVDESTICURSOR]=${ret2[$SERVDESTICURSOR]}"
 	
 	if [ "x${ret1[$SERVDESTICURSOR]}" != "x0" ]; then
 		echo "Send email to $EMAILTO to warn about backup error"

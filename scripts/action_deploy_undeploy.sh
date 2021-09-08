@@ -13,7 +13,7 @@
 # undeployall remove user and instance
 # undeploy    remove only instance (must be easy to restore) - rest can be done later with clean.sh
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo
@@ -183,7 +183,7 @@ if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 fi
 
 # For debug
-echo `date +%Y%m%d%H%M%S`" input params for $0:"
+echo `date +'%Y-%m-%d %H:%M:%S'`" input params for $0:"
 echo "mode = $mode"
 echo "osusername = $osusername"
 echo "ospassword = XXXXXX"
@@ -225,7 +225,7 @@ echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
-echo `date +%Y%m%d%H%M%S`" calculated params:"
+echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
 echo "templatesdir (from /etc/sellyoursaas.conf) = $templatesdir"
 echo "instancedir (from /etc/sellyoursaas.conf) = $instancedir"
 echo "webSSLCertificateCRT = $webSSLCertificateCRT"
@@ -289,7 +289,7 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "deployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Create user $osusername with home into $targetdir/$osusername"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create user $osusername with home into $targetdir/$osusername"
 	
 	id -u $osusername
 	notfound=$?
@@ -335,7 +335,7 @@ if [[ "$mode" == "deployall" ]]; then
 				privatejailtemplatename=`grep '^privatejailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 				commonjailtemplatename=`grep '^commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 				
-				echo `date +%Y%m%d%H%M%S`" ***** Create jailkit chroot directory for user $osusername"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create jailkit chroot directory for user $osusername"
 				echo "chrootdir = $chrootdir"
 				echo "privatejailtemplatename = $privatejailtemplatename"
 				echo "commonjailtemplatename = $commonjailtemplatename"
@@ -451,7 +451,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				
 					commonjailtemplatename=`grep '^commonjailtemplatename=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 					
-					echo `date +%Y%m%d%H%M%S`" ***** Remove jailkit chroot directory for user $osusername"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove jailkit chroot directory for user $osusername"
 					echo "chrootdir = $chrootdir"
 					echo "commonjailtemplatename = $commonjailtemplatename"
 					
@@ -530,7 +530,7 @@ if [[ "$dnsserver" == "1" ]]; then
 		#
 		#; other sub-domain records
 	
-		echo `date +%Y%m%d%H%M%S`" ***** Add DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename ' 2>&1"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Add DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename ' 2>&1"
 	
 		cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
 		notfound=$?
@@ -542,7 +542,7 @@ if [[ "$dnsserver" == "1" ]]; then
 			echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
 			cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
 	
-			echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Add $instancename A $REMOTEIP into tmp host file"
 			echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
 	
 			# we're looking line containing this comment
@@ -572,7 +572,7 @@ if [[ "$dnsserver" == "1" ]]; then
 			echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
 			/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
 			
-			echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
 			
 			named-checkzone $domainname /tmp/${ZONE}.$PID
 			if [[ "$?x" != "0x" ]]; then
@@ -581,17 +581,17 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 16
 			fi
 			
-			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
 			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
 			
-			echo `date +%Y%m%d%H%M%S`" **** Move new host file"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
 			
-			echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Reload dns with rndc reload $domainname"
 			rndc reload $domainname
 			#/etc/init.d/bind9 reload
 			
-			echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** nslookup $fqn 127.0.0.1"
 			nslookup $fqn 127.0.0.1
 			if [[ "$?x" != "0x" ]]; then
 				echo Error after reloading DNS. nslookup of $fqn fails on first try. We wait a little bit to make another try.
@@ -610,19 +610,19 @@ if [[ "$dnsserver" == "1" ]]; then
 	
 		export ZONE="$domainname.hosts" 
 	
-		echo `date +%Y%m%d%H%M%S`" ***** Remove DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename '"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove DNS entry for $instancename in $domainname - Test with cat /etc/bind/${ZONE} | grep '^$instancename '"
 	
 		cat /etc/bind/${ZONE} | grep "^$instancename " 2>&1
 		notfound=$?
 		echo notfound=$notfound
 	
 		if [[ $notfound == 1 ]]; then
-			echo `date +%Y%m%d%H%M%S`" entry $instancename already not found into host /etc/bind/${ZONE}"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" entry $instancename already not found into host /etc/bind/${ZONE}"
 		else
 			echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
 			cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
 	
-			#echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file"
+			#echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Add $instancename A $REMOTEIP into tmp host file"
 			#echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
 	
 			# we're looking line containing this comment
@@ -647,7 +647,7 @@ if [[ "$dnsserver" == "1" ]]; then
 			echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
 			/bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
 			
-			echo `date +%Y%m%d%H%M%S`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Test temporary file with named-checkzone $domainname /tmp/${ZONE}.$PID"
 			
 			named-checkzone $domainname /tmp/${ZONE}.$PID
 			if [[ "$?x" != "0x" ]]; then
@@ -656,17 +656,17 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 18
 			fi
 			
-			echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
 			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
 			
-			echo `date +%Y%m%d%H%M%S`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
 			
-			echo `date +%Y%m%d%H%M%S`" **** Reload dns with rndc reload $domainname"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Reload dns with rndc reload $domainname"
 			rndc reload $domainname
 			#/etc/init.d/bind9 reload
 			
-			#echo `date +%Y%m%d%H%M%S`" **** nslookup $fqn 127.0.0.1"
+			#echo `date +'%Y-%m-%d %H:%M:%S'`" **** nslookup $fqn 127.0.0.1"
 			#nslookup $fqn 127.0.0.1
 			#if [[ "$?x" != "0x" ]]; then
 			#	echo Error after reloading DNS. nslookup of $fqn fails. 
@@ -684,7 +684,7 @@ fi
 
 if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Deploy files"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Deploy files"
 	
 	echo "Create dir for instance = $targetdir/$osusername/$dbname"
 	mkdir -p $targetdir/$osusername/$dbname
@@ -754,7 +754,7 @@ fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Undeploy config file $targetfileforconfig1"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Undeploy config file $targetfileforconfig1"
 
 	if [[ -s $targetfileforconfig1 ]]; then
 		echo rm -f $targetfileforconfig1.undeployed 2>/dev/null
@@ -774,7 +774,7 @@ fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Undeploy files that are into $targetdir/$osusername/$dbname ispaidinstance = $ispaidinstance archivedir = $archivedir"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Undeploy files that are into $targetdir/$osusername/$dbname ispaidinstance = $ispaidinstance archivedir = $archivedir"
 			
 	# If the dir where instance was deployed still exists, we move it manually
 	if [ -d $targetdir/$osusername/$dbname ]; then
@@ -789,7 +789,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			fi
 		else														# This is the common case of archiving after an undeploy
 			#echo mv -f $targetdir/$osusername/$dbname $archivedir/$osusername/$dbname
-			echo `date +%Y%m%d%H%M%S`
+			echo `date +'%Y-%m-%d %H:%M:%S'`
 			if [[ $testorconfirm == "confirm" ]]
 			then
 				mkdir $archivedir/$osusername
@@ -802,10 +802,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 					fi
-					echo `date +%Y%m%d%H%M%S`
+					echo `date +'%Y-%m-%d %H:%M:%S'`
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
-					echo `date +%Y%m%d%H%M%S`
+					echo `date +'%Y-%m-%d %H:%M:%S'`
 					echo chown -R root $archivedir/$osusername
 					chown -R root $archivedir/$osusername
 					echo chmod -R o-rwx $archivedir/$osusername
@@ -826,10 +826,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 						fi
 					fi
-					echo `date +%Y%m%d%H%M%S`
+					echo `date +'%Y-%m-%d %H:%M:%S'`
 					echo rm -fr $targetdir/$osusername/$dbname
 					rm -fr $targetdir/$osusername/$dbname
-					echo `date +%Y%m%d%H%M%S`
+					echo `date +'%Y-%m-%d %H:%M:%S'`
 					echo chown -R root $archivedir/$osusername
 					chown -R root $archivedir/$osusername
 					echo chmod -R o-rwx $archivedir/$osusername
@@ -849,7 +849,7 @@ fi
 
 if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
-	echo `date +%Y%m%d%H%M%S`" ***** Deploy config file"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Deploy config file"
 	
 	if [[ $targetfileforconfig1 == "-" ]]
 	then
@@ -897,7 +897,7 @@ fi
 if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
-	echo `date +%Y%m%d%H%M%S`" ***** Create apache conf $apacheconf from $vhostfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
 	if [[ -s $apacheconf ]]
 	then
 		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
@@ -949,7 +949,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [[ "x$customurl" != "x" ]]; then
 	
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
-		echo `date +%Y%m%d%H%M%S`" ***** Create apache conf $apacheconf from $vhostfile"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
 		if [[ -s $apacheconf ]]
 		then
 			echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
@@ -1045,7 +1045,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	fi
 	
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. We can launch service apache2 reload."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. We can launch service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload to deploy instance $instancename.$domainname
@@ -1055,7 +1055,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		fi
 		sleep 1			# add a delay after an apache reload
 	else
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 	fi
 
 fi
@@ -1063,7 +1063,7 @@ fi
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
 	export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
-	echo `date +%Y%m%d%H%M%S`" ***** Remove apache conf $apacheconf"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove apache conf $apacheconf"
 
 	if [ -f $apacheconf ]; then
 	
@@ -1083,7 +1083,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		fi 
 		
 		if [[ "x$apachereload" != "xnoapachereload" ]]; then
-			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+			echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload."
 			service apache2 reload
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running service apache2 reload to undeploy instance $instancename.$domainname
@@ -1093,7 +1093,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			fi
 			#sleep 1		# no delay added for undeployment
 		else
-			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+			echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 		fi
 	else
 		echo "Virtual host $apacheconf seems already disabled"
@@ -1106,7 +1106,7 @@ fi
 
 if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Install cron file $cronfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Install cron file $cronfile"
 	
 	if [[ -s $cronfile ]]
 	then
@@ -1133,7 +1133,7 @@ fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
 	if [ -s /var/spool/cron/crontabs/$osusername ]; then
 		mkdir -p /var/spool/cron/crontabs.disabled
 		rm -f /var/spool/cron/crontabs.disabled/$osusername
@@ -1161,7 +1161,7 @@ fi
 
 if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Create database $dbname for user $dbusername"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create database $dbname for user $dbusername"
 	
 	Q1="CREATE DATABASE IF NOT EXISTS $dbname; "
 	#Q2="CREATE USER IF NOT EXISTS '$dbusername'@'localhost' IDENTIFIED BY '$dbpassword'; "
@@ -1200,7 +1200,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -p$dbpassword"
 
 	# Load dump file
-	echo `date +%Y%m%d%H%M%S`" Search dumpfile into $dirwithdumpfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile into $dirwithdumpfile"
 	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
 	do
 		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
@@ -1220,7 +1220,7 @@ fi
 
 if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Archive and dump database $dbname in $archivedir/$osusername"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Archive and dump database $dbname in $archivedir/$osusername"
 
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
@@ -1252,7 +1252,7 @@ fi
 
 if [[ "$mode" == "undeployall" ]]; then
 	
-	echo `date +%Y%m%d%H%M%S`" ***** Delete user $osusername with home into $targetdir/$osusername and archive it into $archivedir"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Delete user $osusername with home into $targetdir/$osusername and archive it into $archivedir"
 
 	echo crontab -r -u $osusername
 	crontab -r -u $osusername
@@ -1279,7 +1279,7 @@ fi
 if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	if [[ "x$cliafter" != "x" ]]; then
 		if [ -f $cliafter ]; then
-			echo `date +%Y%m%d%H%M%S`" Execute script with . $cliafter"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Execute script with . $cliafter"
 			. $cliafter
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running the CLI script $cliafter 
@@ -1303,7 +1303,7 @@ fi
 #	echo 127.0.0.1 test_$i >> /etc/hosts
 #fi
 
-echo `date +%Y%m%d%H%M%S`" Process of action $mode of $instancename.$domainname for user $osusername finished with no error"
+echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished with no error"
 echo
 
 exit 0

@@ -14,7 +14,7 @@
 # Script to launch SellyourSaas httpd daemon agent.
 #
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo "**** ${0}"
