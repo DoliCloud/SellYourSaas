@@ -61,9 +61,10 @@ print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
 $tmp = $mythirdpartyaccount->getOutstandingBills('customer');
 $outstandingTotalIncTax = $tmp['opened'];
 $outstandingRefs = $tmp['refs'];
+$totalInvoiced = $tmp['total_ttc'];
 
 // If thirdparty is not yet a customer (no payment never done), we show him the amount to pay in its first invoice.
-if ($outstandingTotalIncTax == 0) {
+if ($totalInvoiced == 0) {
 	// Loop on contracts
 	$amounttopayasfirstinvoice = 0;
 	$amounttopayasfirstinvoicetinstances = array();
