@@ -170,10 +170,12 @@ if ($totalInvoiced == 0) {
 		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
 		print '<br><br>';
 	}
-} else {
-	print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("ThePaymentModeWillBeUseToPayYourDueAmount", join(', ', $outstandingRefs), price($outstandingTotalIncTax, 0, $langs, 1, -1, -1, $conf->currency));
-	print '</small></div>';
-	print '<br>';
+} else {	// There is already some invoices. This is already a customer.
+	if ($outstandingTotalIncTax) {
+		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("ThePaymentModeWillBeUseToPayYourDueAmount", join(', ', $outstandingRefs), price($outstandingTotalIncTax, 0, $langs, 1, -1, -1, $conf->currency));
+		print '</small></div>';
+		print '<br>';
+	}
 }
 
 print '
