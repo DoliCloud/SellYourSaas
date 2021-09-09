@@ -60,7 +60,7 @@ print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
 
 $tmp = $mythirdpartyaccount->getOutstandingBills('customer');
 $outstandingTotalIncTax = $tmp['opened'];
-$outstandingRefs = $tmp['refs'];
+$outstandingRefs = $tmp['refsopened'];
 $totalInvoiced = $tmp['total_ttc'];
 
 // If thirdparty is not yet a customer (no payment never done), we show him the amount to pay in its first invoice.
