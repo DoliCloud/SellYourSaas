@@ -58,8 +58,8 @@ print '<input type="hidden" name="action" value="createpaymentmode">'."\n";
 print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
 //print '<input type="hidden" name="thirdparty_id" value="'.$mythirdpartyaccount->id.'">';
 
-$tmp = $mythirdpartyaccount->getOutstandingBills();
-$outstandingTotalIncTax = $tmp['total_ttc'];
+$tmp = $mythirdpartyaccount->getOutstandingBills('customer');
+$outstandingTotalIncTax = $tmp['opened'];
 $outstandingRefs = $tmp['refs'];
 
 // If thirdparty is not yet a customer (no payment never done), we show him the amount to pay in its first invoice.
