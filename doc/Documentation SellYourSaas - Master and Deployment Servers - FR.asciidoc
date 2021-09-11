@@ -996,7 +996,7 @@ Sur le *Serveur Master*:
         require valid-user
         </Directory>
 
-        #leaving /public and /api accessible to everyone
+        #leaving /public, /api and /dav accessible to everyone
         <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
         AuthType None
         Require all granted
