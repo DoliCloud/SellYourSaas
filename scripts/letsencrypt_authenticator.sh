@@ -19,7 +19,7 @@ then
 	exit 2
 fi
 
-if [ !-f "$zone_file" ] || [ ! -w "$zone_file" ]
+if [ ! -f "$zone_file" ] || [ ! -w "$zone_file" ]
 then
 	echo "ZONE FILE DOESN'T EXIST OR ISN'T WRITABLE: $zone_file"
 	exit 3
