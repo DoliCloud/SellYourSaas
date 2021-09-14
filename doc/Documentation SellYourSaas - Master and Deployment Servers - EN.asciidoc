@@ -1878,6 +1878,7 @@ Complete the file */etc/postfix/main.cf* with:
 
 [source,bash]
 ---------------
+#mydestination = $myhostname, myserver, localhost.localdomain, localhost
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
@@ -1930,6 +1931,7 @@ smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
 
 #debug_peer_list = mysaasdomainname.com, mysaasdomainname.com
+#debug_peer_level = 4
 #compatibility_level = 2
 ---------------
 
@@ -1942,6 +1944,32 @@ Remember to change those lines in */etc/postfix/main.cf*:
 ---------------
 inet_interfaces = public.ip.returned.by_server_s_reverse_dns
 inet_protocols = ipv4
+---------------
+
+
+This is a command to send an email from the server to test the Postfix installation:
+
+[source,bash]
+---------------
+mail supervision@mysellyoursaasdomain.com
+---------------
+
+Then check the email box and/or the file */var/log/mail.log* (if file /var/log/mail.log does not exists, check that */var/log/* has group write permission).
+
+For information about the queue or the setup of Postfix:
+---------------
+postqueue -p
+postsuper -r all
+# Diff in master.cf
+postconf -Mf
+# Diff in main.cf
+postconf -f
+---------------
+
+To get more log from Postfix, you must add "-v" into the file */etc/postfix/master.cf* after "smtpd", "local", "qmgr", ...
+---------------
+smtp      inet  n       -       y       -       -       smtpd -v
+...
 ---------------
 
 
@@ -4917,7 +4945,7 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
 
 Error when sending email in */var/log/mail.log*:
 
-	Mar  2 22:41:59 novafirstcloud6 postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
+	Mar  2 22:41:59 myservername.mysellyoursaasdomain.com postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 
 => Check you have a file */etc/resolv.conf* that is linked to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
 

@@ -1871,6 +1871,7 @@ smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
 
 #debug_peer_list = mysaasdomainname.com, mysaasdomainname.com
+#debug_peer_level = 4
 #compatibility_level = 2
 ---------------
 
