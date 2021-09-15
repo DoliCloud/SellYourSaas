@@ -75,6 +75,18 @@ if ($langs->defaultlang == 'en_US') {
 	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
 }
 
+
+if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+	dol_syslog("Maintenance mode is on for ".$contract->ref_customer." with a redirect to ".$contract->array_options['options_suspendmaintenance_message']);
+	header("Location: ".$contract->array_options['options_suspendmaintenance_message']);
+	exit;
+}
+
+
+/*
+ * View
+ */
+
 http_response_code(503);	// 503 Service Unavailable
 
 top_htmlhead('', 'Maintenance Page');
