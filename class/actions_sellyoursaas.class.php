@@ -532,7 +532,7 @@ class ActionsSellyoursaas
 					$error++;
 					$this->error=$sellyoursaasutils->error;
 					$this->errors=$sellyoursaasutils->errors;
-					setEventMessages($this->error, $this->errors, 'errors');
+					//setEventMessages($this->error, $this->errors, 'errors'); // We already return errors with this->errors, no need to seEventMessages()
 				} else {
 					if ($action == 'refresh') setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
 					if ($action == 'recreateauthorizedkeys') setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
