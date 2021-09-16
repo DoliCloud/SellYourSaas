@@ -299,7 +299,7 @@ High=Hoch
 YourText=Bitte geben Sie hier Ihren Text ein...
 TicketSent=Ihr Ticket wurde erhalten. Wir werden es so schnell wie möglich fortführen.
 FailedToSentTicketPleaseTryLater=Fehler beim Senden Ihres Tickets. Bitte versuch es später...
-SupportURLExternal=Um ein Support-Ticket zu öffnen, folgen Sie bitte den Anweisungen auf dieser Seite <a href="%s" target="_support"> </a> .
+SupportURLExternal=Um ein Support-Ticket zu öffnen, <a href="%s" target="_support">folgen Sie bitte den Anweisungen auf dieser Seite</a>.
 FailedToCreateCardRecord=Ihre Karte konnte nicht validiert werden.
 AlreadyHaveAnAccount=Sie haben bereits ein Konto?
 LoginAction=Anmeldung
