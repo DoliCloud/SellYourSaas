@@ -1049,7 +1049,10 @@ Choose a password. You will need to give this user and password to anyone who wa
         AuthType Basic
         AuthName "Authenticate to backoffice"
         AuthUserFile /etc/apache2/.htpasswd
-        require valid-user
+        Require valid-user
+        # Or if you prefer restrict to some ip, comment all directives and use this one instead:
+        #Require ip x.y.z.w
+        #Require ip a.b.c.d
         </Directory>
 
         #leaving /public, /api and /dav accessible to everyone
