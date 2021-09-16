@@ -200,22 +200,26 @@ if ($sellyoursaassupporturl) {
 		}
 	}
 
-				// Add link other or miscellaneous
-				if (! $atleastonefound) $labelother = $langs->trans("Miscellaneous");
-	else $labelother = $langs->trans("Other");
-				$labelother .= ' <span class="opacitymedium">('.$langs->trans("Priority").': <span class="prioritylow">'.$langs->trans("Low").'</span>)</span>';
+	// Add link other or miscellaneous
+	if (! $atleastonefound) {
+		$labelother = $langs->trans("Miscellaneous");
+	} else {
+		$labelother = $langs->trans("Other");
+	}
 
-				print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
+	$labelother .= ' <span class="opacitymedium">('.$langs->trans("Priority").': <span class="prioritylow">'.$langs->trans("Low").'</span>)</span>';
+
+	print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
 	if (empty($atleastonehigh)) {
 		$labeltoshow = $langs->trans("PremiumSupport").' ('.$langs->trans("Priority").': <span class="priorityhigh">'.$langs->trans("High").'</span>) / '.$langs->trans("NoPremiumPlan");
 		print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
 	}
-				print '</select>';
-				print ajax_combobox("supportchannel");
+	print '</select>';
+	print ajax_combobox("supportchannel");
 
-				print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
+	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
 
-				print '</form>';
+	print '</form>';
 
 	if ($action == 'presend' && GETPOST('supportchannel', 'alpha')) {
 		print '<br><br>';
@@ -321,7 +325,7 @@ if ($sellyoursaassupporturl) {
 		}
 
 		if ($atleastonepublicgroup) {
-			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1);
+			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
 			//$stringtoprint .= ajax_combobox('groupticket');
 			$stringtoprint .= '<br>';
 		}
