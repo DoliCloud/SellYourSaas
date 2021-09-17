@@ -3579,7 +3579,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
 ---------------
 
-Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deffered*
+Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deferred*
 
 Ajouter la ligne suivante dans le fichier */etc/sudoers*
 
