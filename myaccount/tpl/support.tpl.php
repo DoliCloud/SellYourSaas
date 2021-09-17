@@ -343,7 +343,7 @@ if ($sellyoursaassupporturl) {
 
 				if (idgroupticket != "") {
 					$.ajax({ url: \'/ajax/fetchKnowledgeRecord.php\',
-						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\', lang:\''.$mythirdpartyaccount->default_lang.'\'},
+						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\', lang:\''.$langs->default_lang.'\'},
 						 type: \'GET\',
 						 success: function(response) {
 							var urllist = \'\';
@@ -355,7 +355,7 @@ if ($sellyoursaassupporturl) {
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.$langs->trans("KMFoundForTicketGroup").':</div><ul class="kmlist">\'+urllist+\'<ul>\');
+								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul>\');
 								$("#KWwithajax").show();
 							}
 						 },
