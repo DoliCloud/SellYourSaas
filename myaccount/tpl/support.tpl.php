@@ -334,12 +334,10 @@ if ($sellyoursaassupporturl) {
 		<script>
 		jQuery(document).ready(function() {
 			function groupticketchange(){
-				console.log("We called groupticketchange, so we try to load list KM linked to event");
-				$("#KWwithajax").html("");
-
 				idgroupticket = $("#ticketcategory_select").val();
+				console.log("We called groupticketchange and have selected id="+idgroupticket+", so we try to load list KM linked to event");
 
-				console.log("We have selected id="+idgroupticket);
+				$("#KWwithajax").html("");
 
 				if (idgroupticket != "") {
 					$.ajax({ url: \'/ajax/fetchKnowledgeRecord.php\',
@@ -365,7 +363,9 @@ if ($sellyoursaassupporturl) {
 					});
 				}
 			};
+
 			$("#ticketcategory_select").bind("change",function() { groupticketchange(); });
+
 			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 			var trackChange = function(element) {
 			var observer = new MutationObserver(function(mutations, observer) {
