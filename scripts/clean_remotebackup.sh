@@ -13,6 +13,7 @@ if [ "x$2" == "x" ]; then
    echo "Usage:   $0  hostgroup  [target]"
    echo "         [target] can be 'master', 'deployment', 'web', 'backup', or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  mygroup  master,deployment"
+   echo "Example: $0  mygroup  withX.mysellyoursaasdomain.com"
    exit 1
 fi
 
