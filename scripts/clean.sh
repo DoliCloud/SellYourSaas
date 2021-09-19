@@ -336,11 +336,11 @@ if [ -s /tmp/osutoclean ]; then
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
 				if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
-					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
+					echo "$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
+					$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
 				else
-					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
-					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+					echo "$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
+					$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
 				fi
 
 				echo "Now drop the database"

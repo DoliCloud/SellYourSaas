@@ -92,8 +92,8 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	export dbname="mysql" 
 	rm "$targetdir/${dbname}_"`date +%d`".sql.zst"
 	echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.zst"
-	echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
-	$MYSQLDUMP --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
+	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
+	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.zst")
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
@@ -107,8 +107,8 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.zst"
 		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.zst"
-		echo "$MYSQLDUMP $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
-		$MYSQLDUMP $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
+		echo "$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
+		$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
 		chown root.admin $targetdir/${dbname}_`date +%d`.sql.zst
 		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.zst
 		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
@@ -127,8 +127,8 @@ else
 	export dbname="mysql"
 	rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
 	echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.gz"
-	echo "$MYSQLDUMP --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
-	$MYSQLDUMP --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
+	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
+	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.gz")
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
@@ -142,8 +142,8 @@ else
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
 		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.gz"
-		echo "$MYSQLDUMP $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
-		$MYSQLDUMP $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
+		echo "$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
+		$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
 		chown root.admin $targetdir/${dbname}_`date +%d`.sql.gz
 		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2

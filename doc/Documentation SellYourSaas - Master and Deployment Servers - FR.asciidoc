@@ -4896,7 +4896,7 @@ Check that on the master server, the option *no_root_squash* is present into the
 
 mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
 
-Try to add the parameter -not-tablespace into the mysqldump command.
+Try to add the parameter --no-tablespaces into the mysqldump command.
 
 
 ==== Error mysql when connecting to database
