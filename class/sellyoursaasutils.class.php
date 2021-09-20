@@ -1717,7 +1717,7 @@ class SellYourSaasUtils
 	 * Action executed by scheduler
 	 * CAN BE A CRON TASK
 	 * Loop on each contract. If it is a paid contract, and there is no unpaid invoice for contract, and lines are not suspended and end date < today + 2 days (so expired or soon expired),
-	 * we make a refresh (update qty of contract + qty of linked template invoice)ss + the running contract service end date to end at next period.
+	 * we make a refresh (update qty of contract + qty of linked template invoice) + we set the running contract service end date to end at next period.
 	 *
 	 * @param	int		$thirdparty_id			Thirdparty id
 	 * @return	int								0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
@@ -2090,13 +2090,17 @@ class SellYourSaasUtils
 							foreach ($listofcontractid as $contract) {
 								dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
+								if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+									dol_syslog("--- Instance is in maintenance mode with an URL redirection, we discard this contract", LOG_DEBUG, 0);
+									continue;	// This may be a contract used as redirection to another one, so we discard this contract to avoid to create template not expected
+								}
 								if ($contract->array_options['options_deployment_status'] != 'done') {
 									dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
-									continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
+									continue;	// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
 								}
 								if ($contract->total_ht == 0) {
 									dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
-									continue;							// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
+									continue;	// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
 								}
 
 								// Make a test to pass loop if there is already a template invoice
