@@ -41,6 +41,7 @@ require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/geturl.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaasutils.class.php");
@@ -164,7 +165,7 @@ if ($ispaid) {
 }
 
 $moveinstancestringtoshow .= "su - admin"."\n";
-$moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/move_instance.php '.$object->ref_customer.' newinstancename.withNEW.mydomain.com (test|confirm)'."\n";
+$moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/move_instance.php '.$object->ref_customer.' newinstancename.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm)'."\n";
 
 
 // Increase limit of time. Works only if we are not in safe mode
