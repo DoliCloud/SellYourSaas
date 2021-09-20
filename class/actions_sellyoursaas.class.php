@@ -639,7 +639,7 @@ class ActionsSellyoursaas
 		if ($action == 'suspendmaintenancetoconfirm') {
 			// Switch to maintenance mode confirmation
 			$formquestion = array(array('type' => 'textarea', 'name' => 'suspendmaintenancemessage', 'label' => $langs->trans("MaintenanceMessage"), 'value' =>'', 'morecss'=>'centpercent'));
-			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Confirmation'), $langs->trans("ConfirmMaintenance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), 'suspendmaintenance', $formquestion, 'no', 1, 300);
+			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Confirmation'), $langs->trans("ConfirmMaintenance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), 'suspendmaintenance', $formquestion, 'no', 1, 350);
 			$this->resprints = $formconfirm;
 		}
 
