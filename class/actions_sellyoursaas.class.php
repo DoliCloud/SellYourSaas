@@ -710,7 +710,7 @@ class ActionsSellyoursaas
 					// Show warning if in maintenance mode
 					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
 						$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
-						$messagetoshow .= '<br>'.$langs->trans("Message").' :<br>';
+						$messagetoshow .= '<br><u>'.$langs->trans("MaintenanceMessage").':</u><br>';
 						$messagetoshow .= $object->array_options['options_suspendmaintenance_message'];
 						$ret .= img_warning($messagetoshow, '', 'classfortooltip marginrightonly');
 					}
