@@ -212,6 +212,12 @@ if (0 == posix_getuid()) {
 	exit(-1);
 }
 
+if (getDomainFromURL($oldinstance, 2) == getDomainFromURL($newinstance, 2)) {
+	echo "The domain of old instance (".getDomainFromURL($oldinstance, 2).") must differs from domain of new instance (".getDomainFromURL($newinstance, 2)."). ";
+	echo "If you need to change the name only staying on same server, just make a rename on instance from interface.\n";
+	exit(-1);
+}
+
 /*if (empty($ipserverdeployment))
 {
 	echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
