@@ -709,7 +709,10 @@ class ActionsSellyoursaas
 				if ($object->array_options['options_deployment_status'] == 'done') {
 					// Show warning if in maintenance mode
 					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
-						$ret .= img_warning($langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), '', 'classfortooltip marginrightonly');
+						$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						$messagetoshow .= '<br>'.$langs->trans("Message").' :<br>';
+						$messagetoshow .= $object->array_options['options_suspendmaintenance_message'];
+						$ret .= img_warning($messagetoshow, '', 'classfortooltip marginrightonly');
 					}
 					// Show payment status
 					if ($ispaid) {
