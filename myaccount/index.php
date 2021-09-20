@@ -2807,7 +2807,8 @@ if (empty($welcomecid)) {
 			$delayindays = round($delaybeforeendoftrial / 3600 / 24);
 
 			if (empty($atleastonepaymentmode)) {
-				if ($delaybeforeendoftrial > 0) {		// Trial not yet expired
+				if ($delaybeforeendoftrial > 0) {
+					// Trial not yet expired
 					if (! $isASuspendedContract) {
 						//$firstline = reset($contract->lines);
 						print '
@@ -2842,8 +2843,8 @@ if (empty($welcomecid)) {
 							</div>
 						';
 					}
-				} else // Trial expired
-				{
+				} else {
+					// Trial expired
 					$atleastonecontractwithtrialended++;
 
 					$messageforinstance[$contract->ref_customer] = 1;
@@ -2866,26 +2867,30 @@ if (empty($welcomecid)) {
 					';
 				}
 			} else {
-				if ($delaybeforeendoftrial > 0) {		// Trial not yet expired
-					if ($contract->array_options['options_deployment_status'] != 'processing') {
-						//$firstline = reset($contract->lines);
+				if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+					// If not switched in maintenance mode
+					if ($delaybeforeendoftrial > 0) {
+						// Trial not yet expired
+						if ($contract->array_options['options_deployment_status'] != 'processing') {
+							//$firstline = reset($contract->lines);
+							print '
+								<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
+								<div class="note note-info">
+								<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
+								</div>
+							';
+						}
+					} else {
+						// Trial expired
+						$atleastonecontractwithtrialended++;
+
 						print '
-							<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
+							<!-- XDaysAfterEndOfTrialPaymentModeSet -->
 							<div class="note note-info">
-							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
+							<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
 							</div>
 						';
 					}
-				} else // Trial expired
-				{
-					$atleastonecontractwithtrialended++;
-
-					print '
-						<!-- XDaysAfterEndOfTrialPaymentModeSet -->
-						<div class="note note-info">
-						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
-						</div>
-					';
 				}
 			}
 		}
