@@ -124,6 +124,7 @@ include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 //include_once(DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
