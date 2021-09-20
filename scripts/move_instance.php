@@ -450,7 +450,7 @@ if (! empty($oldobject->array_options['options_custom_url'])) {
 
 // Set the date of end of period with same value than the source
 $dateendperiod = 0;
-foreach($newobject->lines as $line) {
+foreach($oldobject->lines as $line) {
 	if ($line->date_end && (empty($dateendperiod) || $line->date_end < $dateendperiod)) {
 		$dateendperiod = $line->date_end;
 	}
