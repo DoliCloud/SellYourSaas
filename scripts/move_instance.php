@@ -815,13 +815,14 @@ print $sql."\n";
 
 print "\n";
 
-print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM !!!\n";
+print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
+print "https://".$newobject->ref_customer."\n";
 print "\n";
 // TODO Move old instance in maintenance mode at begin of script
 
 print "NOW YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
 print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
-
+print "THEN RELOAD DNS WITH rndc reload ".$oldwilddomain."\n";
 print "\n";
 print "Finished.\n";
 print "\n";
