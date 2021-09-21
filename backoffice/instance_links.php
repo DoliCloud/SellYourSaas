@@ -543,7 +543,7 @@ print '<table class="noborder centpercent tableforfield">';
 print '<tr><td width="20%">'.$langs->trans("NbOfUsers").'</td><td><font size="+2">'.round($object->nbofusers).'</font></td>';
 print '<td></td><td>';
 if (! $object->user_id && $user->rights->sellyoursaas->write) {
-	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=refresh">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refresh&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
 }
 print '</td>';
 print '</tr>';
@@ -551,8 +551,8 @@ print '</tr>';
 // Authorized key file
 print '<tr>';
 print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey">'.$langs->trans("Create").'</a>)';
-print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey">'.$langs->trans("Delete").'</a>)':'');
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&otken='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
@@ -560,8 +560,8 @@ print '</tr>';
 // Install.lock file
 print '<tr>';
 print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock">'.$langs->trans("Create").'</a>)';
-print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock">'.$langs->trans("Delete").'</a>)':'');
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
@@ -628,12 +628,12 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td>'.$instance->getLibStatut(7).'</td>';
 	print '<td align="right">';
 	if ($user->rights->sellyoursaas->write) {
-		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
+		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
 		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
 			print ' &nbsp; ';
-			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
+			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newtoken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
 			print ' &nbsp; ';
-			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
 		}
 	}
 	print '</td>';
