@@ -330,8 +330,9 @@ class SellYourSaasUtils
 						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 						$to = $object->thirdparty->email;
 						$trackid = 'thi'.$object->thirdparty->id;
+						$moreinheader = 'X-Dolibarr-Info: doAlertSoftEndTrial'."\r\n";
 
-						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid);
+						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 						$result = $cmail->sendfile();
 						if (! $result) {
 							$error++;
@@ -493,10 +494,11 @@ class SellYourSaasUtils
 						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langstouse);
 						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
-
+						$trackid = 'thi'.$thirdparty->id;
 						$to = $thirdparty->email;
+						$moreinheader = 'X-Dolibarr-Info: doAlertCreditCardExpiration'."\r\n";
 
-						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
+						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 						$result = $cmail->sendfile();
 						if (! $result) {
 							$error++;
@@ -638,10 +640,11 @@ class SellYourSaasUtils
 							$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langstouse);
 							$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
-
+							$trackid = 'thi'.$thirdparty->id;
 							$to = $thirdparty->email;
+							$moreinheader = 'X-Dolibarr-Info: doAlertPaypalExpiration'."\r\n";
 
-							$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
+							$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 							$result = $cmail->sendfile();
 							if (! $result) {
 								$error++;
@@ -1418,9 +1421,8 @@ class SellYourSaasUtils
 						}
 						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
-
-						$trackid='inv'.$invoice->id;
-						$moreinheader='X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
+						$trackid = 'inv'.$invoice->id;
+						$moreinheader = 'X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
 
 						// Send email (substitutionarray must be done just before this)
 						include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
@@ -2417,9 +2419,11 @@ class SellYourSaasUtils
 								{ */
 								/* No required, $conf reset by complete_substitutions_array */
 
+								$trackid = 'thi'.$object->thirdparty->id;
 								$to = $object->thirdparty->email;
+								$moreinheader = 'X-Dolibarr-Info: doSuspendInstances'."\r\n";
 
-								$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
+								$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 								$result = $cmail->sendfile();
 								if (! $result || $cmail->error) {
 									$erroremail .= ($erroremail ? ', ' : '').$cmail->error;
