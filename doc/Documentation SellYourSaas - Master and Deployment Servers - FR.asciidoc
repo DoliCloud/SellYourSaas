@@ -3125,6 +3125,7 @@ Note: Les rapports sont dans */var/crash*
 [source,bash]
 ---------------
 sudo apt remove cerbot
+sudo apt install snapd
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 

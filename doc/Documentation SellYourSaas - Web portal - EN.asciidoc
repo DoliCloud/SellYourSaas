@@ -1328,7 +1328,8 @@ Note: Les rapports sont dans */var/crash*
 
 [source,bash]
 ---------------
-apt remove cerbot
+sudo apt remove cerbot
+sudo apt install snapd
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
@@ -1341,100 +1342,13 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 ---------------
 
 [[creation_certificat_ssl]]
-=== Création d'un certificat SSL wildcard pour les instances utilisateurs
+=== Création d'un certificat SSL pour les sites Web
 
-Dans les commandes exemples suivantes, on utilsera X qui vaut '', 2, 3, ... (numéro du pool d'instance = numéro du serveur de déploiement).
-
-==== Obtenir un certiticat SSL wildcard pour *.withX.mysaasdomainname.com
-
-===== Via un fournisseur SSL
-
-* Créer le fichier key *withX.mysaasdomainname.com.key* et csr *withX.mysaasdomainname.com.csr* ainsi:
-
-Pour générer le fichier .key:   
+Lancer certbot et choisir le virtual hot du serveur Web
     
 [source,bash]
 ---------------
-cd /etc/apache2
-openssl genrsa 2048 > withX.mysaasdomainname.com.key
-chmod go-r withX.mysaasdomainname.com.key
----------------
-
-Pour générer le fichier .csr:
-
-[source,bash]
----------------
-openssl req -nodes -newkey rsa:2048 -sha256 -keyout withX.mysaasdomainname.com.key -out withX.mysaasdomainname.com.csr
----------------
-
-Choisir:
-
-	CN	*.withX.mysaasdomainname.com
-	OU	IT
-	O	The company name
-	L	Paris
-	S	IDF
-	C	FR
-	Email				Ne rien mettre !
-	Challenge password		Ne rien mettre !
-
-* Soumettre le fichier *.csr* auprès du fournisseur de certificats.
-
-===== Via LetsEncrypt
-
-* Run certbot or cerbot-auto
-
-[source,bash]
----------------
-certbot certonly --manual --preferred-challenges=dns -d "*.withX.mysaasdomainname.com"
----------------
-
-Follow instructions to add DNS entries and validate generation.
-
-To read generated .pem files, run
-
-[source,bash]
----------------
-openssl x509 -in fullchain.pem -text
----------------
-
-
-==== Installer les fichiers certificats
-
-* Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
-
-* Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
-
----------------
-cd /etc/apache2
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
----------------
-
-* Edite le fichier apache du virtual host par défaut */etc/apache2/sites-available/000-default-ssl.conf* ou */etc/apache2/sites-available/default-ssl.conf* pour remplacer les lignes qui déclarent le certificat SSL par le nouveau:
-
----------------
-SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
-SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
-SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
-SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
----------------
-
-Ainsi, si un utilisateur utilise une vieille URL sans virtual host, il arrivera sur la page par défaut */var/www/html/index.html*. 
-
-* Editer la page */var/www/html/index.html* avec le contenu comme celui la:
-
----------------
-<html>
-<body>
-<center>
-<br>
-<strong>Server (name_of_server_x)<br></strong>Sorry, there is currently no service available to this URL. May be this domain name was used in the past to host a customer instance that was definitely undeployed.<br>
-You may try later or create a new instance from scratch from page <a href="https://www.mysaasdomainname.com">https://www.mysaasdomainname.com</a>.
-<br>
-</center>
-</body>
-</html>
+certbot
 ---------------
 
 
