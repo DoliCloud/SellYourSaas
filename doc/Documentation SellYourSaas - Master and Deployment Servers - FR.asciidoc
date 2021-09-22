@@ -101,7 +101,7 @@ Pour le serveur master: VPS ou B2-15 ou +
 Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit server 2 core minimum - Mémoire 8 Go minimum - Coût en 2020: 22 euros / mois). Doublez les caractéristiques si vous visez 1 000 instances client par serveur.
 
 
-=== Choix du Hostname pour le(s) server(s) and configuration
+=== Choix du Hostname pour le(s) server(s) et configuration
 
 Ajouter une entrée du nouveau serveur dans le DNS fourni par le provider du domaine. Ceci revient à ajouter une entrée dans la zone DNS de *mysaasdomainname.com*
 
