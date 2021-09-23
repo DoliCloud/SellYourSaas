@@ -3306,16 +3306,16 @@ Choose:
 
 ===== From LetsEncrypt
 
-* Run cerbot with the following command line *on the master* :
+* To create a SSL certficate *on the master* :
 
 [source,bash]
 ---------------
 certbot certonly --manual --preferred-challenges=dns -d "admin.<your_domain>"
 ---------------
 
-On the *deployment servers*, to get automatically renewable wildcard certificates :
+* On the *deployment servers*, to create automatically renewable wildcard certificates :
 
-* Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
+Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
 
 [source,bash]
 ---------------
@@ -3332,7 +3332,7 @@ openssl x509 -in fullchain.pem -text
 ---------------
 
 
-* To renew a certificate *on the master*, run
+* To renew a certificate *on the master*:
 
 [source,bash]
 ---------------
@@ -3341,7 +3341,9 @@ ou
 certbot renew --manual --force-renewal
 ---------------
 
-For wildcard certificates on *deployment servers*, you can use the same command as used originally (with --dry-run option first if you want to check)
+* For wildcard certificates on *deployment servers*:
+
+You can use the same command as used originally (with --dry-run option first if you want to check)
 
 [source,bash]
 ---------------
