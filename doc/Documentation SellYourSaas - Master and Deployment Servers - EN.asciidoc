@@ -3349,7 +3349,7 @@ You can use the same command as used originally (with --dry-run option first if 
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
 ---------------
 
 Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
