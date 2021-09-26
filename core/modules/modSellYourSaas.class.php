@@ -21,7 +21,6 @@ include_once DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php";
  */
 class modSellYourSaas extends DolibarrModules
 {
-
 	/**
 	 *   Constructor. Define names, constants, directories, boxes, permissions
 	 *
@@ -94,7 +93,7 @@ class modSellYourSaas extends DolibarrModules
 				'Welcome to SellYourSaas Home page<br><br>
 		        Link to the specification: https://framagit.org/eldy/sell-your-saas<br><br>
 		        ...You can enter content on this page to save any notes/information of your choices.', 'This is another constant to add', 0, 'allentities', 0),
-			1=>array('CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES', 'chaine', 1, 'Sync planned date of services in same contract', 0, 'current', 1),
+			1=>array('CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES', 'chaine', 1, 'Sync the planned date of services to the same value for all lines in the same contract', 0, 'current', 1),
 			2=>array('THIRDPARTY_LOGO_ALLOW_EXTERNAL_DOWNLOAD', 'chaine', 1, 'Allow to access thirdparty logo from external link', 0, 'current', 0),
 			3=>array('PRODUIT_SOUSPRODUITS', 'chaine', 1, 'Enable virtual products', 0, 'current', 0),
 			4=>array('STRIPE_ALLOW_LOCAL_CARD', 'chaine', 1, 'Allow to save stripe credit card locally', 0, 'current', 1),
