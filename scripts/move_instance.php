@@ -409,7 +409,9 @@ if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 
 	echo "Result: ".$return_val."\n";
 	echo "Output: ".$content_grabbed."\n";
-	echo "Error: ".$resultarray['error']."\n";
+	if (!empty($resultarray['error'])) {
+		echo "Error: ".$resultarray['error']."\n";
+	}
 }
 
 if ($return_val != 0) {
