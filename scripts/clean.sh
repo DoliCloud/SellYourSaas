@@ -556,6 +556,15 @@ echo "***** Now clean journal files older than 60 days"
 echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;"
 find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;
 
+# Clean log files
+if [[ "x$instanceserver" == "x1" ]]; then
+	echo "***** We are on a deployment server, so we clean log files" 
+	echo "Clean web server _error logs"
+	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log 2>/dev/null`; do > $fic; done
+	echo "Clean applicative log files"
+	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
+	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+fi
 
 # Clean archives 
 if [ "x$2" == "xtempdirs" ]; then
