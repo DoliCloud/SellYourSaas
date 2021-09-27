@@ -722,6 +722,14 @@ if ($return_var) {
 }
 
 
+$sqla = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
+$sqla .= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
+$sqla .= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
+
+$sqlb = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
+$sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
+
+
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
@@ -771,6 +779,9 @@ if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 
 if ($return_var) {
 	print "-> Error during mysql load of instance ".$newobject->ref_customer."\n";
+	print "FIX LOAD OF DUMP THEN RUN MANUALLY\n";
+	print $sqla."\n";
+	print $sqlb."\n";
 	exit(-1);
 }
 
@@ -787,29 +798,27 @@ if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
 print "\n";
 
 print "Move recurring invoice from old to new instance:\n";
-$sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
-$sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
-$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
-print $sql."\n";
+print $sqla."\n";
 if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
-	$resql = $dbmaster->query($sql);
+	$resql = $dbmaster->query($sqla);
 	if (!$resql) {
 		print 'ERROR '.$dbmaster->lasterror();
 	}
 }
-$sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
-$sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
-print $sql."\n";
+
+print $sqlb."\n";
 if ($mode == 'confirm' || $mode == 'confirmmaintenance') {
-	$resql = $dbmaster->query($sql);
+	$resql = $dbmaster->query($sqlb);
 	if (!$resql) {
 		print 'ERROR '.$dbmaster->lasterror();
 	}
 }
+
 print "Note: To revert the move of the recurring invoice, you can do:\n";
 $sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $oldobject->id);
 $sql.= ' WHERE fk_source = '.((int) $newobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
 print $sql."\n";
+
 $sql = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$oldobject->ref.' '.$oldobject->ref_customer)."'";
 $sql.= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
 $sql.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec'";
