@@ -166,8 +166,8 @@ if ($ispaid) {
 
 $tmparray = explode('.', $object->ref_customer);
 
-$moveinstancestringtoshow .= "su - admin"."\n";
 $moveinstancestringtoshow .= "chmod a+r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
+$moveinstancestringtoshow .= "su - admin"."\n";
 $moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm)';
 
 
