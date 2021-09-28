@@ -58,10 +58,10 @@ if [[ "x$databaseport" == "x" ]]; then
 fi
 
 if [ "x$instanceserver" == "x1" && "x$IPSERVERDEPLOYMENT" == "x" ]; then
-   echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
-   exit 1
+	echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 1
 fi
-
 if [ "x$database" == "x" ]; then
     echo "Failed to find the DATABASE by reading entry 'database=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
@@ -77,6 +77,18 @@ if [ "x$databaseuser" == "x" ]; then
 	echo "Usage: ${0} [test|confirm]"
 	exit 4
 fi
+if [ "x$archivedirtest" == "x" ]; then
+    echo "Failed to find the archivedirtest value by reading entry 'archivedirtest=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 31
+fi
+if [ "x$archivedirpaid" == "x" ]; then
+    echo "Failed to find the archivedirpaid value by reading entry 'archivedirpaid=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 31
+fi
+
+
 echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
 databasepass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepass" == "x" ]]; then
@@ -127,13 +139,15 @@ echo "testorconfirm = $testorconfirm"
 MYSQL=`which mysql`
 MYSQLDUMP=`which mysqldump` 
 
-if [[ ! -d $archivedirtest ]]; then
-	echo Failed to find archive directory $archivedirtest
-	exit 8
-fi
-if [[ ! -d $archivedirpaid ]]; then
-	echo Failed to find archive directory $archivedirpaid
-	exit 9
+if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
+	if [[ ! -d $archivedirtest ]]; then
+		echo Failed to find archive directory $archivedirtest
+		exit 8
+	fi
+	if [[ ! -d $archivedirpaid ]]; then
+		echo Failed to find archive directory $archivedirpaid
+		exit 9
+	fi
 fi
 
 echo "***** Clean temporary files"
