@@ -173,9 +173,10 @@ if ($fp) {
 
 $langs->loadLangs(array("main", "errors"));
 
-$oldinstance=isset($argv[1])?$argv[1]:'';
+$oldinstance=isset($argv[1]) ? $argv[1] : '';
 
-$newinstance=isset($argv[2])?$argv[2]:'';
+$newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
+
 $mode=isset($argv[3])?$argv[3]:'';
 
 $langsen = new Translate('', $conf);
