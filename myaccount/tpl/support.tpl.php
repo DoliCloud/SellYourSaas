@@ -156,12 +156,13 @@ if ($sellyoursaassupporturl) {
 				}
 			}
 
-							$ispaid = sellyoursaasIsPaidInstance($contract);
+			$ispaid = sellyoursaasIsPaidInstance($contract);
 
-							$color = "green";
-							if ($statuslabel == 'processing') $color = 'orange';
-							if ($statuslabel == 'suspended') $color = 'orange';
-							if ($statuslabel == 'undeployed') $color = 'grey';
+			$color = "green";
+			if ($statuslabel == 'processing') { $color = 'orange'; }
+			if ($statuslabel == 'suspended') { $color = 'orange'; }
+			if ($statuslabel == 'undeployed') { $color = 'grey'; }
+			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
 			if ($tmpproduct->array_options['options_typesupport'] != 'none') {
 				if (! $ispaid) {

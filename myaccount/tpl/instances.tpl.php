@@ -196,8 +196,8 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		$color = "green"; $displayforinstance = "";
 		if ($statuslabel == 'processing') { $color = 'orange'; }
 		if ($statuslabel == 'suspended') { $color = 'orange'; }
-		if ($statuslabel == 'undeployed' || preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'grey'; $displayforinstance='display:none;'; }
-
+		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
+		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; $displayforinstance='display:none;'; }
 
 
 		// Update resources of instance
