@@ -201,24 +201,20 @@ if (count($listofcontractid) == 0) {				// Should not happen
 
 
 		// Update resources of instance
-		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan'))) {
+		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 			$comment = 'Refresh contract '.$contract->ref.' after entering dashboard';
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
 			if ($result <= 0) {
 				$error++;
 
 				if ($result == -2) {
-					// We overwrite status suspended and done with unreachable (a status only for screen output)
+					// We overwrite status 'suspended' and status 'done' with 'unreachable' (a status only for screen output)
 					$statuslabel = 'unreachable';
 					$color = 'orange';
 				} else {
 					setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
 				}
 			}
-			/*else
-			 {
-			 setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
-			 }*/
 		}
 
 

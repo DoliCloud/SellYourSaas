@@ -141,15 +141,21 @@ if (count($listofcontractidreseller) == 0) {
 
 		// Update resources of instance
 		/*
-		 if (in_array($statuslabel, array('suspended', 'done')))
-		 {
-		 $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract);
-		 if ($result <= 0)
-		 {
-		 $error++;
-		 setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
-		 }
-		 }*/
+		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract);
+			if ($result <= 0) {
+				$error++;
+
+				if ($result == -2) {
+					// We overwrite status 'suspended' and status 'done' with 'unreachable' (a status only for screen output)
+					$statuslabel = 'unreachable';
+					$color = 'orange';
+				} else {
+					setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
+				}
+			}
+		}
+		 */
 
 		print '
                     <!-- Instance of customer -->
