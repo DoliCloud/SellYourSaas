@@ -353,11 +353,11 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 
 	if ($mode == 'confirmredirect') {
-		print '--- Switch old instance in redirect maintenance mode (redirect to '.$newinstance.")\n";
 		$comment = 'https://'.$newinstance;
+		print '--- Switch old instance in redirect maintenance mode (redirect to '.$comment.")\n";
 	} else {
-		print '--- Switch old instance in maintenance mode'."\n";
 		$comment = 'Suspended from script before moving instance into another server';
+		print '--- Switch old instance in maintenance mode'."\n";
 	}
 
 	$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', $comment, 300);
