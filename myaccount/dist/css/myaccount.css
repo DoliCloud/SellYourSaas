@@ -25,6 +25,9 @@ span.pictowarning {
 div.nowrap {
     white-space: nowrap;
 }
+.nowraponall {
+    white-space: nowrap;
+}
 .right {
 	text-align: right;
 }
