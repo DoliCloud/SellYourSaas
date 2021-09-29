@@ -411,7 +411,7 @@ if ($nbtotalofrecords > $limit2) {
 		print '<td></td>';
 		print '<td></td>';
 		print '<td></td>';
-		print '<td align="right">'.price($commoldystem + $totalamountcommission - $totalpaidht).'</td>';
+		print '<td align="right">'.price(price2num($commoldystem + $totalamountcommission - $totalpaidht, 'MT')).'</td>';
 		print '</tr>';
 
 		print '</table>';
