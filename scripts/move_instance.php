@@ -366,7 +366,7 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 		exit(-1);
 	}
 
-	$oldobject->array_options['options_suspendmaintenance_message'] = 'InstanceMoveInProgress';
+	$oldobject->array_options['options_suspendmaintenance_message'] = $comment;
 	$result = $oldobject->update($user);
 	if ($result < 0) {
 		print "Error: ".$oldobject->error."\n";
