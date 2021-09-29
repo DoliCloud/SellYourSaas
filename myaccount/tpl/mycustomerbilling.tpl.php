@@ -158,7 +158,7 @@ while ($i < min($num, $limit)) {
 
 	$totalpaidht += $obj->total_ht;
 
-	print img_mime('pdf.pdf', $titleinvoice, 'paddingleftonly');
+	print img_mime('pdf.pdf', $titleinvoice, 'paddingleft');
 
 	print '
 			              </td>
@@ -328,7 +328,7 @@ while ($i < min($num, $limit2)) {
 	} else {
 		$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
 		$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-		print '<a href="'.$urltouse.'" target="_download">'.$tmpinvoice->ref.img_mime('pdf.pdf', $titleinvoice, 'paddingleftonly').'</a>';
+		print '<a href="'.$urltouse.'" target="_download">'.$tmpinvoice->ref.img_mime('pdf.pdf', $titleinvoice, 'paddingleft').'</a>';
 	}
 
 	print '
