@@ -742,7 +742,7 @@ $sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
-$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropa."\n";
@@ -756,7 +756,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect') {
 	print $content_grabbed."\n";
 }
 
-$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropb."\n";
@@ -770,7 +770,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect') {
 	print $content_grabbed."\n";
 }
 
-$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
+$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect') {
 	$output=array();
