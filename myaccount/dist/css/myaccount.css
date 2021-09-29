@@ -105,8 +105,8 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
 @media only screen and (max-width: 400px) {	/* reduction 3 */
 	.portlet {
 	    border: 1px solid #aaa;
-	    padding: 15px;
-		margin-bottom: 30px;
+	    padding: 10px;
+		margin-bottom: 20px;
 	}
 }
 
@@ -317,10 +317,10 @@ div.tab-content {
     .minwidth75  { min-width: 75px !important; }
     .minwidth100 { min-width: 100px !important; }
     .minwidth200 { min-width: 200px !important; }
-    .minwidth300 { min-width: 280px !important; }
-    .minwidth400 { min-width: 280px !important; }
-    .minwidth500 { min-width: 280px !important; }
-    .minwidth600 { min-width: 280px !important; }
+    .minwidth300 { min-width: 260px !important; }
+    .minwidth400 { min-width: 260px !important; }
+    .minwidth500 { min-width: 260px !important; }
+    .minwidth600 { min-width: 260px !important; }
 	.maxwidth25  { max-width: 25px; }
 	.maxwidth50  { max-width: 50px; }
 	.maxwidth75  { max-width: 75px; }
@@ -338,6 +338,10 @@ div.tab-content {
 	
 	.badge-myaccount-status {
 		display: inline-block;
+	}
+	
+	input[type='file'] {
+		width: inherit;
 	}
 }
 

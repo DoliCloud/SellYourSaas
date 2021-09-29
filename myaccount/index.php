@@ -2527,7 +2527,7 @@ if ($welcomecid > 0) {
 		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
 		</p>
 		<p>
-		<a class="btn btn-primary" target="_blank" href="https://'.$contract->ref_customer.'?username='.$_SESSION['initialapplogin'].'">
+		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">
 		'.$langs->trans("TakeMeTo", $productlabel).'
 		</a>
 		</p>
@@ -2817,7 +2817,7 @@ if (empty($welcomecid)) {
 							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), $contract->ref_customer).' !</h4>';
 						if ($mode != 'registerpaymentmode') {
 							print '<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentMode");
 							print '</a>
 								</p>';
@@ -2834,7 +2834,7 @@ if (empty($welcomecid)) {
 						if ($mode != 'registerpaymentmode') {
 							print '
 								<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentModeToRestoreInstance");
 							print '</a>
 								</p>';
@@ -2857,7 +2857,7 @@ if (empty($welcomecid)) {
 					if ($mode != 'registerpaymentmode') {
 						print '
 							<p>
-							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 						print $langs->trans("AddAPaymentModeToRestoreInstance");
 						print '</a>
 							</p>';

@@ -289,7 +289,7 @@ TypeOfSupport=Level of support
 PleaseReadFAQFirst=Before submitting any support ticket, please check if the answer is not already available here :<br><br><center><a href="%s" target="_faq">FAQs (Frequently Asked Questions)</a></center>
 CurrentServiceStatus=The status of our service is visible in real time on <a href="%s" target="_status">this page</a>. If a service appears not active, we are probably already aware of this, and are working on the issue. Thanks for your patience...
 NewTicket=New ticket/issue
-SupportDesc=Send a new support ticket
+SupportDesc=Send a new support ticket (question/issue)
 SelectYourSupportChannel=Select your support channel
 PremiumSupport=Premium support
 NoPremiumPlan=No active subscription to such a plan
