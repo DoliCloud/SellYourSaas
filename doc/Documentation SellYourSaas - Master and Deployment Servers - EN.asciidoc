@@ -3834,7 +3834,7 @@ init_config:
 
 instances:
 
-  - name: DoliAsso customers instances (withX)
+  - name: SellYourSaas customers instances (withX)
     url: https://supervision.withX.mysellyoursaasdomain.org
     disable_ssl_validation: false
     min_collection_interval: 86400
@@ -3849,6 +3849,7 @@ Note: Replace withX by correct prefix of the deployment server.
 ---------------
 sudo service datadog-agent stop
 sudo service datadog-agent start
+sudo service datadog-agent status
 vi /var/log/datadog/agent.log
 ---------------
 
