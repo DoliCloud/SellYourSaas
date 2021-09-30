@@ -1071,7 +1071,7 @@ Choose a password. You will need to give this user and password to anyone who wa
         Require all granted
         Satisfy any
         </Directory>
-        <Files ~ "(document\.php|viewimage\.php|\.js\.php|\.js|\.css\.php|\.css|\.gif|\.svg|\.woff2|favicon\.ico)$">
+        <Files ~ "(document\.php|viewimage\.php|\.js\.php|\.js|\.css\.php|\.css|\.gif|\.png|\.svg|\.woff2|favicon\.ico)$">
         AuthType None
         Require all granted
         Satisfy any
