@@ -575,3 +575,4 @@ MaintenanceMessage=Message to show, or URL to redirect to (starting with http...
 ConfirmMaintenance=Are you sure you want to switch this instance into maintenance mode ? Access will not be possible for common users.<br>Note: If a browser include the string <b>%s</b> into its User-Agent, it will be able to bypass the maintenance message lock. 
 Assistance=Assistance
 ContactUs=Contact us
+ToDisableEmailThatConfirmsRegistration=To disable the email that confirms the registration

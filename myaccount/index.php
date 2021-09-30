@@ -1357,8 +1357,7 @@ if ($action == 'updateurl') {
 				$mode='registerpaymentmode';
 			}
 		}
-	} else // createpayment with old method
-	{
+	} else { // createpayment with old method
 		$stripeToken = GETPOST("stripeToken", 'alpha');
 		$label = 'Card '.dol_print_date($now, 'dayhourrfc');
 
@@ -2682,6 +2681,7 @@ if ($mythirdpartyaccount->isareseller) {
 	print '<a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
 	print '<div id="divmorereselleroptions" style="display: hidden">';
 	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span>';
+	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
 		print '<br>&plan=XXX : ';
 		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span>';
