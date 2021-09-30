@@ -1012,7 +1012,12 @@ Sur le *Serveur Master*:
         Require all granted
         Satisfy any
         </Directory>
-        
+        <Files ~ "(document\.php|viewimage\.php|\.js\.php|\.js|\.css\.php|\.css|\.gif|\.svg|\.woff2|favicon\.ico)$">
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Files>
+
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks
