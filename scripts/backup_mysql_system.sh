@@ -33,6 +33,8 @@ export targetdir2="/home/admin/backup/conf"
 
 export DATABASE=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databaseuser=`grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export databasepass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -92,8 +94,8 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	export dbname="mysql" 
 	rm "$targetdir/${dbname}_"`date +%d`".sql.zst"
 	echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.zst"
-	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
-	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
+	echo "$MYSQLDUMP -u $databaseuser -pXXXXXXX --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
+	$MYSQLDUMP -u $databaseuser -p$databasepass --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.zst")
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
@@ -107,8 +109,8 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.zst"
 		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.zst"
-		echo "$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
-		$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
+		echo "$MYSQLDUMP -u $databaseuser -pXXXXXXX --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
+		$MYSQLDUMP -u $databaseuser -p$databasepass --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
 		chown root.admin $targetdir/${dbname}_`date +%d`.sql.zst
 		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.zst
 		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
@@ -127,8 +129,8 @@ else
 	export dbname="mysql"
 	rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
 	echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.gz"
-	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
-	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
+	echo "$MYSQLDUMP -u $databaseuser -pXXXXXX --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
+	$MYSQLDUMP -u $databaseuser -p$databasepass --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.gz")
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
@@ -142,8 +144,8 @@ else
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
 		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.gz"
-		echo "$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
-		$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
+		echo "$MYSQLDUMP -u $databaseuser -pXXXXXXX --no-tablespaces $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
+		$MYSQLDUMP -u $databaseuser -p$databasepass --no-tablespaces $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
 		chown root.admin $targetdir/${dbname}_`date +%d`.sql.gz
 		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
