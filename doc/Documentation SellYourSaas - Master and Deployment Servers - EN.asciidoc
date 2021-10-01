@@ -4146,7 +4146,7 @@ Nothing to do.
 - Modify Apache virtualhosts in */etc/apache2/sites-enabled* to set the new IP and name.
 
 - Declare the IP for mail sending:
-    - If a remote SMTP server is used (SendGrid, ...) and you enabled restrictions on IPs, authorize the new server's IP for this new server.
+    - If a remote SMTP server is used (Google, SendGrid, ...) and you enabled restrictions on IPs, authorize the new server's IP for this new server.
     - Add the new server IPs in the DNS SPF entries (SPF may requires one entry for the domain *@mydomain.com* but also one for each subdomains).
 
 - Create a user *sellyoursaas* on the *master* server's DB, with permissions to access from the deployment server.
@@ -4220,7 +4220,6 @@ chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskb
 
 - Acquire or generate the SSL certificates of the new subdomain *withX.mydomain.com*, upload them to the server and create the symbolic links. (see <<ssl_certificate_creation>>).
 
-- If you configured sending emails from Dolibarr's backoffice via a SMTP relay like Google and/or Sendgrid, remember to update the authorized IPs (v4 and v6) in the relay console.
 
 In addition, if other applications were active on the cloned server:
 
@@ -4241,6 +4240,7 @@ To update Ubuntu to a higher LTS version on a SellYourSaas server:
 ---------------
 apt dist-upgrade
 
+# if you move from 16.04 to 18.04, you must also run
 apt install php-mysql
 a2enmode php7.2
 apt remove php-fpm php7-fpm

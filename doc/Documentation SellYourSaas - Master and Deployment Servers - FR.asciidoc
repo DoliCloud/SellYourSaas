@@ -3688,7 +3688,7 @@ init_config:
 
 instances:
 
-  - name: DoliAsso customers instances (withX)
+  - name: SellYourSaas customers instances (withX)
     url: https://supervision.withX.mysaasdomain.org
     disable_ssl_validation: false
     min_collection_interval: 86400

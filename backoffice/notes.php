@@ -123,7 +123,7 @@ if ($action != 'edit') {
 
 	print '<div class="tabsAction">';
 
-	print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=edit">'.$langs->trans("Edit").'</a></div>';
+	print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=edit&token='.newToken().'">'.$langs->trans("Edit").'</a></div>';
 
 	print '</div>';
 } else {
