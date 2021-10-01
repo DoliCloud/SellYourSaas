@@ -2526,9 +2526,7 @@ if ($welcomecid > 0) {
 		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
 		</p>
 		<p>
-		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">
-		'.$langs->trans("TakeMeTo", $productlabel).'
-		</a>
+		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).'</a>
 		</p>
 
 		</div>';

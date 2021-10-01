@@ -150,9 +150,14 @@ if ($productref != 'none') {
 	}
 	$productref = $tmpproduct->ref;
 
+	if (empty($tmpproduct->status)) {
+		print "Product '".$productref."' is not on sale.";
+		exit;
+	}
+
 	$tmppackage->fetch($tmpproduct->array_options['options_package']);
 	if (empty($tmppackage->id)) {
-		print "Package with id '".$tmpproduct->array_options['options_package']." was not found.";
+		print "Package with id '".$tmpproduct->array_options['options_package']."' was not found.";
 		exit;
 	}
 }
