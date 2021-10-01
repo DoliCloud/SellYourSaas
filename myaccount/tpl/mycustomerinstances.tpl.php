@@ -142,7 +142,7 @@ if (count($listofcontractidreseller) == 0) {
 		// Update resources of instance
 		/*
 		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract);
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract);	// We do not do 'refresh', too heavy (due to ssh file check) for a long list of contracts
 			if ($result <= 0) {
 				$error++;
 

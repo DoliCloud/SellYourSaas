@@ -361,7 +361,7 @@ $today=dol_now();
 $error=''; $errors=array();
 $servicetouse=strtolower($conf->global->SELLYOURSAAS_NAME);
 
-if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'updatecountsonly') {
+if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'updatecountsonly') {	// updatedatabase = updatestatsonly + updatecountsonly
 	print "----- Start updatedatabase\n";
 
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
@@ -383,7 +383,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 			$object->oldcopy=dol_clone($object, 1);
 
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $object);
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $object);
 			if ($result <= 0) {
 				$errors[] = 'Failed to do sellyoursaasRemoteAction(refresh) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors)?' '.join(',', $sellyoursaasutils->errors):'');
 			}

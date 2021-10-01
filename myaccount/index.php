@@ -927,9 +927,10 @@ if ($action == 'updateurl') {
 
 					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (case of STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set)';
+					// First launch update of resources:
+					// This update qty of contract lines + qty into linked template invoice.
+					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 
 					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
@@ -1357,7 +1358,7 @@ if ($action == 'updateurl') {
 				$mode='registerpaymentmode';
 			}
 		}
-	} else { // createpayment with old method
+	} else { // createpayment with old method (STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is empty)
 		$stripeToken = GETPOST("stripeToken", 'alpha');
 		$label = 'Card '.dol_print_date($now, 'dayhourrfc');
 
@@ -1597,13 +1598,14 @@ if ($action == 'updateurl') {
 						}
 					}
 
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id." that is not null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
+					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (old case when STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is not set)';
+					// First launch update of resources:
+					// This update qty of contract lines + qty into linked template invoice.
+					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id.", so we create it then create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
+					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
 					// Now create invoice draft
 					$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
