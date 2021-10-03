@@ -1928,7 +1928,8 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Suspend expired services of test instances if we are after planned end date (+ grace offset SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND)
+	 * Suspend expired services of test instances if it is not a redirect instance and if we are
+	 * after the planned end date (+ grace offset SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND)
 	 * CAN BE A CRON TASK
 	 *
 	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
