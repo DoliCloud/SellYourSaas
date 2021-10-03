@@ -135,21 +135,27 @@ if (count($listofcontractidreseller) == 0) {
 		$color = "green"; $displayforinstance = "";
 		if ($statuslabel == 'processing') { $color = 'orange'; }
 		if ($statuslabel == 'suspended') { $color = 'orange'; }
-		if ($statuslabel == 'undeployed' || preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'grey'; $displayforinstance='display:none;'; }
-
+		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
+		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; $displayforinstance='display:none;'; }
 
 
 		// Update resources of instance
 		/*
-		 if (in_array($statuslabel, array('suspended', 'done')))
-		 {
-		 $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract);
-		 if ($result <= 0)
-		 {
-		 $error++;
-		 setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
-		 }
-		 }*/
+		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract);	// We do not do 'refresh', too heavy (due to ssh file check) for a long list of contracts
+			if ($result <= 0) {
+				$error++;
+
+				if ($result == -2) {
+					// We overwrite status 'suspended' and status 'done' with 'unreachable' (a status only for screen output)
+					$statuslabel = 'unreachable';
+					$color = 'orange';
+				} else {
+					setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
+				}
+			}
+		}
+		 */
 
 		print '
                     <!-- Instance of customer -->

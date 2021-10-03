@@ -197,7 +197,7 @@ function sellyoursaasHasOpenInvoices($contract)
  * For expiration date, it takes the lowest planed end date for services (whatever is service status)
  *
  * @param 	Contrat $contract				Object contract
- * @param	int		$onlyexpirationdate		1=Return only expiration date (no need to load each product line properties)
+ * @param	int		$onlyexpirationdate		1=Return only property 'expiration_date' (no need to load each product line properties to also set the 'nbofgbs', 'status', 'duration_value', ...)
  * @return	array							Array of data array('expirationdate'=>Timestamp of expiration date, or 0 if error or not found)
  */
 function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
@@ -236,6 +236,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 			}
 			$prodforline = $cachefortmpprod[$line->fk_product];
 
+			// Get data depending on type of line (status, duration_xxx, appproductid, nbofusers, nbofgbs)
 			if ($prodforline->array_options['options_app_or_option'] == 'app') {
 				$duration_value = $prodforline->duration_value;
 				$duration_unit = $prodforline->duration_unit;

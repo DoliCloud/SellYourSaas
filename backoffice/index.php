@@ -135,12 +135,12 @@ print '<tr class="oddeven"><td>';
 $enabledisablehtml='';
 if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 	// Button off, click to enable
-	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=0'.$param.'">';
+	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=0'.$param.'">';
 	$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
 	$enabledisablehtml.='</a>';
 } else {
 	// Button on, click to disable
-	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=1'.$param.'">';
+	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=1'.$param.'">';
 	$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
 	$enabledisablehtml.='</a>';
 }
@@ -151,12 +151,12 @@ print '<tr class="oddeven"><td>';
 $enabledisableannounce='';
 if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON)) {
 	// Button off, click to enable
-	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1'.$param.'">';
+	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&token='.newToken().'&value=1'.$param.'">';
 	$enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
 	$enabledisableannounce.='</a>';
 } else {
 	// Button on, click to disable
-	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0'.$param.'">';
+	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&token='.newToken().'&value=0'.$param.'">';
 	$enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
 	$enabledisableannounce.='</a>';
 }
@@ -240,9 +240,9 @@ print $langs->trans("CommandToPutInstancesOnOffline").'<br>';
 print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
 print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
 print '</textarea>';
-print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline">'.$langs->trans("PutAllInstancesOffLine").'</a>';
+print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline&token='.newToken().'">'.$langs->trans("PutAllInstancesOffLine").'</a>';
 print ' &nbsp; - &nbsp; ';
-print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeonline">'.$langs->trans("PutAllInstancesOnLine").'</a>';
+print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeonline&token='.newToken().'">'.$langs->trans("PutAllInstancesOnLine").'</a>';
 print '</td></tr>';
 
 print "</table>";

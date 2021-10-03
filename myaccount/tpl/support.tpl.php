@@ -156,26 +156,28 @@ if ($sellyoursaassupporturl) {
 				}
 			}
 
-							$ispaid = sellyoursaasIsPaidInstance($contract);
+			$ispaid = sellyoursaasIsPaidInstance($contract);
 
-							$color = "green";
-							if ($statuslabel == 'processing') $color = 'orange';
-							if ($statuslabel == 'suspended') $color = 'orange';
-							if ($statuslabel == 'undeployed') $color = 'grey';
+			$color = "green";
+			if ($statuslabel == 'processing') { $color = 'orange'; }
+			if ($statuslabel == 'suspended') { $color = 'orange'; }
+			if ($statuslabel == 'undeployed') { $color = 'grey'; }
+			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
-			if ($tmpproduct->array_options['options_typesupport'] != 'none') {
+			if ($tmpproduct->array_options['options_typesupport'] != 'none'
+				&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				if (! $ispaid) {
 					$priority = 'low';
-					$prioritylabel = $langs->trans("Trial").' = <span class="prioritylow">'.$langs->trans("Low").'</span>';
+					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
 				} else {
 					if ($ispaid) {
 						if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
 							$priority = 'high';
-							$prioritylabel = '<span class="priorityhigh">'.$langs->trans("High").'</span>';
+							$prioritylabel = '<span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span>';
 							$atleastonehigh++;
 						} else {
 							$priority = 'medium';
-							$prioritylabel = '<span class="prioritymedium">'.$langs->trans("Medium").'</span>';
+							$prioritylabel = '<span class="prioritymedium">'.$langs->trans("Priority").' '.$langs->trans("Medium").'</span>';
 						}
 					}
 				}
@@ -186,9 +188,8 @@ if ($sellyoursaassupporturl) {
 				//$labeltoshow = $tmpproduct->label.' - '.$contract->ref_customer.' ';
 				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
 				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
-				$labeltoshow .= ' <span class="opacitymedium">('.$langs->trans("Priority").': ';
+				$labeltoshow .= ' - ';
 				$labeltoshow .= $prioritylabel;
-				$labeltoshow .= ')</span>';
 
 				print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
@@ -207,11 +208,11 @@ if ($sellyoursaassupporturl) {
 		$labelother = $langs->trans("Other");
 	}
 
-	$labelother .= ' <span class="opacitymedium">('.$langs->trans("Priority").': <span class="prioritylow">'.$langs->trans("Low").'</span>)</span>';
+	$labelother .= ' &nbsp; <span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span>';
 
 	print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
 	if (empty($atleastonehigh)) {
-		$labeltoshow = $langs->trans("PremiumSupport").' ('.$langs->trans("Priority").': <span class="priorityhigh">'.$langs->trans("High").'</span>) / '.$langs->trans("NoPremiumPlan");
+		$labeltoshow = $langs->trans("PremiumSupport").' <span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span> ('.$langs->trans("NoPremiumPlan").')';
 		print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
 	}
 	print '</select>';

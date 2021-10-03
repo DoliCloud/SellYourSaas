@@ -74,3 +74,31 @@ INSERT INTO llx_c_email_templates (module,type_template,label,lang,position,topi
 INSERT INTO llx_c_email_templates (module,type_template,label,lang,position,topic,joinfiles,content) VALUES ('sellyoursaas', 'facture_send',                    'YourLinkForYourPayment',          'es_ES',100, '[__[SELLYOURSAAS_NAME]__] - Solicitud de pago de su suscripción __[SELLYOURSAAS_NAME]__',              0, '<body>\n <p>Estimado usuario de __[SELLYOURSAAS_NAME]__,<br><br>\nComienza un nuevo período para su suscripción al servicio __[SELLYOURSAAS_NAME]__. Aquí está el enlace para descargar su factura y realizar el pago en línea (el período cubierto aparece en la factura). Le recomendamos que pague dentro de los 15 días para evitar la suspensión del servicio.<br>__ONLINE_PAYMENT_URL__&suffix=__[SELLYOURSAAS_NAME]__<br><br>\nEl equipo __[SELLYOURSAAS_NAME]__<br />\n            ----------------------------------------- <br />\n            EMail: __[SELLYOURSAAS_MAIN_EMAIL]__<br />\n</body>\n        ');
 INSERT INTO llx_c_email_templates (module,type_template,label,lang,position,topic,joinfiles,content) VALUES ('sellyoursaas', 'thirdparty',                      '(AlertCreditCardExpiration)',     'es_ES',100, '[__[SELLYOURSAAS_NAME]__] - Caducidad de su tarjeta bancaria',                       0, '<body>\n <p>Estimado usuario de __[SELLYOURSAAS_NAME]__,<br><br>\nQueríamos informarle que su método de pago (tarjeta bancaria ....__CARD_LAST4__) caducará pronto.<br />\n              \nInicie sesión en su <a href="__[SELLYOURSAAS_ACCOUNT_URL]__?username=__THIRDPARTY_EMAIL__">área de cliente __[SELLYOURSAAS_NAME]__</a> para actualizar su información de pago lo antes posible a fin de evitar cualquier interrupción del servicio.<br />\nRappel: Le login de votre espace client est <strong>__THIRDPARTY_EMAIL__</strong>Recordatorio: el inicio de sesión de su área de cliente es <strong>__THIRDPARTY_EMAIL__</strong><br />\n            </p>\n            <p>Si tiene alguna pregunta sobre este punto, no dude en ponerse en contacto con nosotros.</p>\n<br />\n            El equipo __[SELLYOURSAAS_NAME]__<br />\n            ----------------------------------------- <br />\n            EMail: __[SELLYOURSAAS_MAIN_EMAIL]__<br />\n</body>\n        ');
 
+
+
+-- Example of groups of tickets
+
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-COMMERCIAL',5,'Commercial question or Billing problem',1,0,NULL,0,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-MIGRATION',10,'Migration of my local instance into DoliCloud',1,0,NULL,0,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-UPGRADE',12,'Update my instance to a higher version',1,0,NULL,0,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-LOGINPASS',15,'Problem of login or password lost',1,0,NULL,0,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-HELP',20,'Question on application usage - How to',1,0,NULL,0,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE',40,'Technical issue (application crash, service interruption or bug)',1,0,NULL,0,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE-EMAIL',41,'The emails I send from application goes into SPAM',1,0,NULL,4,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE-SLOW',45,'The application responds slowly',1,0,NULL,4,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE-OTHER',46,'Other (bug, error, access broken, ...)',1,0,NULL,4,NULL,1);
+
+
+-- Translations keys for group of tickets
+
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-COMMERCIAL',      'Question commerciale ou problème de facturation');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-MIGRATION',       'Migration de mon instance locale sur l''offre Saas');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-UPGRADE',         'Mise à jour de mon instance dans une version supérieure');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-LOGINPASS',       'Problème de login ou mot de passe');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-HELP',            'Question sur l''utilisation de l'application - How to');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE',       'Problème technique (crash de l'application, interruption de service ou bug)');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE-EMAIL', 'Les e-mails que j''envoie depuis l''application ne sont pas reçus ou reçus en SPAM');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE-SLOW',  'L''application répond lentement');
+--INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE-OTHER', 'Autre (bug, erreur, instance inaccessible)');
+
+
