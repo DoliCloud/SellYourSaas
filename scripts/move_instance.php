@@ -362,14 +362,14 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 
 	$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', $comment, 300);
 	if ($result <= 0) {
-		print "Error: ".$sellyoursaasutils->error."\n";
+		print "Error calling sellyoursaasRemoteAction: ".$sellyoursaasutils->error."\n";
 		exit(-1);
 	}
 
 	$oldobject->array_options['options_suspendmaintenance_message'] = $comment;
 	$result = $oldobject->update($user);
 	if ($result < 0) {
-		print "Error: ".$oldobject->error."\n";
+		print "Error updating contract with redirect url: ".$oldobject->error."\n";
 		exit(-1);
 	}
 }
