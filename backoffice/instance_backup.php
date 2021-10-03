@@ -311,7 +311,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
 			if ($action != 'classify')
-				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&amp;id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
+				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&token='.newToken().'&id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
 			if ($action == 'classify') {
 				//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
 				$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
@@ -426,7 +426,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		print '<div class="tabsAction">';
 
 		if ($user->rights->sellyoursaas->write) {
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=backupinstance">'.$langs->trans('BackupNow').'</a>';
+			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=backupinstance&token='.newToken().'">'.$langs->trans('BackupNow').'</a>';
 		}
 
 		print "</div>";
