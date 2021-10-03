@@ -507,7 +507,7 @@ PaymentChargedButReversedByBank=Payment was charged but was then canceled illegi
 StripeAccount=Stripe Account
 StripeAccountForCustomerHelp=The Stripe account to use to collect the customer invoices. Fill something here only if you need to collect money using another Stripe account than the default value.<br>Example: cus_ABCD@pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Max number of instances
-ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>&disablecustomeremail=1 To disable the registration confirmation email to the customer
+ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>&disablecustomeremail=1 To disable the email ro customer for confirmation of registration
 AFirstInvoiceOfWillBeDone=Taking into account the chosen plan and data of your existing instance(s), your subscription will start with a first invoice of <span class="nowrap bold">%s tax included</span>, discounts excluded
 SeeOurPrices=See prices for each plan <a href="%s" target="_blank">here</a>
 NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.
@@ -575,4 +575,4 @@ MaintenanceMessage=Message to show, or URL to redirect to (starting with http...
 ConfirmMaintenance=Are you sure you want to switch this instance into maintenance mode ? Access will not be possible for common users.<br>Note: If a browser include the string <b>%s</b> into its User-Agent, it will be able to bypass the maintenance message lock. 
 Assistance=Assistance
 ContactUs=Contact us
-ToDisableEmailThatConfirmsRegistration=To disable the email that confirms the registration
+ToDisableEmailThatConfirmsRegistration=To disable the email ro customer for confirmation of registrations
