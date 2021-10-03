@@ -54,13 +54,14 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance = GETPOST('instance');	// example: testldr3.with.dolicloud.com
+$instance = GETPOST('instance');	// example: testldr3.with.mysaasdomainname.com
 
 // SEarch instance
 $contract = new Contrat($db);
-$contract->fetch(0, '', $instance);
-$contract->fetch_thirdparty();
-
+if ($instance) {
+	$contract->fetch(0, '', $instance);
+	$contract->fetch_thirdparty();
+}
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
@@ -73,6 +74,17 @@ if ($langs->defaultlang == 'en_US') {
 	$langsen->setDefaultLang('en_US');
 	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
 }
+
+
+if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+	dol_syslog("Maintenance mode is on for ".$contract->ref_customer." with a redirect to ".$contract->array_options['options_suspendmaintenance_message']);
+	header("Location: ".$contract->array_options['options_suspendmaintenance_message']);
+	exit;
+}
+
+/*
+ * View
+ */
 
 http_response_code(402);	// 402 Payment required
 
