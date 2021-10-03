@@ -1752,7 +1752,7 @@ class SellYourSaasUtils
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
 
-		$sql = 'SELECT c.rowid, c.ref_customer, cd.rowid as lid, cd.date_fin_validite, cd.suspendmaintenance_message';
+		$sql = 'SELECT c.rowid, c.ref_customer, ce.suspendmaintenance_message, cd.rowid as lid, cd.date_fin_validite';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce,';
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
@@ -2019,7 +2019,7 @@ class SellYourSaasUtils
 
 		$this->db->begin();
 
-		$sql = 'SELECT c.rowid, c.ref_customer, cd.rowid as lid, cd.suspendmaintenance_message';
+		$sql = 'SELECT c.rowid, c.ref_customer, ce.suspendmaintenance_message, cd.rowid as lid';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce,';
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
