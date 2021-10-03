@@ -352,7 +352,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
 			if ($action != 'classify')
-				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&amp;id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
+				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&token='.newToken().'&id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
 			if ($action == 'classify') {
 				//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
 				$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
@@ -406,7 +406,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 		if ($user->rights->sellyoursaas->write)
 		{
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=upgrade">'.$langs->trans('Upgrade').'</a>';
+			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=upgrade&token='.newToken().'">'.$langs->trans('Upgrade').'</a>';
 		}
 
 		print "</div><br>";
@@ -551,7 +551,7 @@ print '</tr>';
 // Authorized key file
 print '<tr>';
 print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&otken='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
@@ -614,38 +614,38 @@ print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 	$arrayofips=array();
 
-foreach ($arraylistofinstances as $instance) {
-	$arrayofips[] = $instance->array_options['options_deployment_ip'];
+	foreach ($arraylistofinstances as $instance) {
+		$arrayofips[] = $instance->array_options['options_deployment_ip'];
 
-	// Nb of users
-	print '<tr>';
-	print '<td>'.$instance->getNomUrl(1).'</td>';
-	print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
-	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
-	print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
-	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
-	print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
-	print '<td>'.$instance->getLibStatut(7).'</td>';
-	print '<td align="right">';
-	if ($user->rights->sellyoursaas->write) {
-		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
-		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
-			print ' &nbsp; ';
-			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newtoken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
-			print ' &nbsp; ';
-			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+		// Nb of users
+		print '<tr>';
+		print '<td>'.$instance->getNomUrl(1).'</td>';
+		print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
+		print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
+		print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
+		print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
+		print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
+		print '<td>'.$instance->getLibStatut(7).'</td>';
+		print '<td align="right">';
+		if ($user->rights->sellyoursaas->write) {
+			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
+			if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
+				print ' &nbsp; ';
+				print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
+				print ' &nbsp; ';
+				print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+			}
 		}
+		print '</td>';
+		print '</tr>';
 	}
-	print '</td>';
-	print '</tr>';
-}
 
 	print '<tr class="liste_total">';
 	print '<td></td>';
 	print '<td></td>';
 	print '<td></td>';
 	print '<td>';
-	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist">'.$langs->trans("GetFileOfIps").'</a>';
+	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
 	print '</td>';
 	print '<td></td>';
 	print '<td></td>';

@@ -993,7 +993,10 @@ Sur le *Serveur Master*:
         AuthType Basic
         AuthName "Authenticate to backoffice"
         AuthUserFile /etc/apache2/.htpasswd
-        require valid-user
+        Require valid-user
+        # Or if you prefer restrict to some ip, comment all directives and use this one instead:
+        #Require ip x.y.z.w
+        #Require ip a.b.c.d
         </Directory>
 
         #leaving /public, /api and /dav accessible to everyone
@@ -1012,7 +1015,12 @@ Sur le *Serveur Master*:
         Require all granted
         Satisfy any
         </Directory>
-        
+        <Files ~ "(document\.php|viewimage\.php|\.js\.php|\.js|\.css\.php|\.css|\.gif|\.png|\.svg|\.woff2|favicon\.ico)$">
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Files>
+
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks
@@ -1275,7 +1283,7 @@ systemctl stop remote-server-launcher.service
 === Installation de fail2ban ===
 
 * Installation de fail2ban et activation des règles fail2ban suivantes:
-  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
   
 * Ainsi que les règles spécifiques à sellyoursaas:
@@ -1393,11 +1401,6 @@ enabled = true
 
 
 [sshd]
-
-enabled = true
-
-
-[webmin-auth]
 
 enabled = true
 
@@ -3411,8 +3414,8 @@ Sur le *Serveur Master*:
 
 [source,ini]
 ---------------
-a2ensite admin.mysellyoursaasdomain.com
-a2ensite myaccount.mysellyoursaasdomain.com
+a2ensite admin.mysaasdomain.com
+a2ensite myaccount.mysaasdomain.com
 /etc/init.d/apache2 restart
 ---------------
 
@@ -3685,8 +3688,8 @@ init_config:
 
 instances:
 
-  - name: DoliAsso customers instances (withX)
-    url: https://supervision.withX.mysellyoursaasdomain.org
+  - name: SellYourSaas customers instances (withX)
+    url: https://supervision.withX.mysaasdomain.org
     disable_ssl_validation: false
     min_collection_interval: 86400
 ---------------
@@ -3947,15 +3950,22 @@ fi
 
 - Vérifier les fichiers */etc/network/interfaces* et */etc/network/interfaces.d/* (pour remettre à la bonne valeur les ip publiques, virtuelles et internes vrack si le vrack OVH est utilisé)
 
-- Si webmin a été installé, se connecter à webmin pour désactiver les actions de supervision en doublons avec celle du serveur cloné.
-
 - Modifier les fichiers de serveurs virtuels Apache dans */etc/apache2/sites-enabled* pour mettre la nouvelle IP/nouveau nom.
 
 - Déclarer l'IP pour l'envoi d'emails:
-  - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
-  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé *@mydomain.com* et pour chaque sous-domaines *@myserverX.mydomain.com*).
+  - Si un serveur SMTP distant est utilisé (SendGrid, ...) et que vous avez restreint son utilisation à certaines IP uniquement, pensez à autoriser l'IP du nouveau serveur à ce service.
+  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparée pour chaque domain utilisé *@mydomain.com* et pour chaque sous-domaines *@myserverX.mydomain.com*).
 
-- Créer un compte *sellyoursaas* avec les permissions d'accès depuis le serveur de déploiement sur la base de donnée du *Master*. Voir <<creer_un_compte_db_sellyoursaas>>.
+- Créer un compte *sellyoursaas* avec les permissions d'accès depuis le serveur de déploiement sur la base de donnée *dolibarr* du serveur *Master*. 
+
+[source,sql]
+---------------
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
+
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
+
+FLUSH PRIVILEGES;
+---------------
 
 - Modifier le fichier */etc/sellyoursaas.conf* avec la nouvelle IP et nom de sous-domaine du nouveau pool et information du compte d'accès base de donnée du master.
 
@@ -3976,7 +3986,7 @@ fi
   */etc/shadow*
   */etc/group*
   
-- Effacer les répertoires */mnt/diskhome/home/osu...*
+- Effacer les répertoires */mnt/diskhome/home/osu...* et */mnt/diskhome/backup/osu...*
   
 - Détruire la base de données 
 
@@ -3997,7 +4007,7 @@ mysql -uroot < /tmp/dbntodelete.sql
 
 - Ajouter l'entrée DNS NS pour *withX* au domain *mydomain.com* pointant sur *ns1withX.mydomain.com*.
 
-- Arrêter, relancer le firewall, fail2ban, bind9, apache, postfix, remote_server et le datadog-agent si utilisé.
+- Relancer le serveur.
 
 - Vérifier que, depuis le serveur Master, l'url *http://ipnouveauserverdeployment:8080/index.php/test* répond par un "404 Not Found".
 
