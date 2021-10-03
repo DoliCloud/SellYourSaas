@@ -59,7 +59,17 @@ $instance = GETPOST('instance');	// example: testldr3.with.mysaasdomainname.com
 // SEarch instance
 $contract = new Contrat($db);
 if ($instance) {
-	$contract->fetch(0, '', $instance);
+	$result = $contract->fetch(0, '', $instance);
+	if ($result == 0) {
+		$sql = "SELECT fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE custom_url = '".$db->escape($instance)."' AND suspendmaintenance_message like 'http%'";
+		$resql = $db->query($sql);
+		if ($resql) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				$contract->fetch($obj->fk_object);
+			}
+		}
+	}
 	$contract->fetch_thirdparty();
 }
 
