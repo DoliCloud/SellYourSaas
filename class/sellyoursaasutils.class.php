@@ -1928,7 +1928,7 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Suspend expired services of test instances if it is not a redirect instance and if we are
+	 * Suspend expired services of test instances (a test instance = instance without template neither standard invoice) if it is not a redirect instance and if we are
 	 * after the planned end date (+ grace offset SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND)
 	 * CAN BE A CRON TASK
 	 *
@@ -1953,7 +1953,7 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Suspend expired services of paid instances if it is not a redirect instance and if we are
+	 * Suspend expired services of paid instances (a paid instance = instance with template or standard invoice) if it is not a redirect instance and if we are
 	 * after the planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND)
 	 * CAN BE A CRON TASK
 	 *
