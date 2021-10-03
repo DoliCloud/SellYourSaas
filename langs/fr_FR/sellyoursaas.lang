@@ -507,7 +507,7 @@ PaymentChargedButReversedByBank=Paiement encaissé puis annulé illégitimement 
 StripeAccount=Compte Stripe
 StripeAccountForCustomerHelp=Le compte Stripe à utiliser pour collecter les factures clients. Remplissez quelque chose ici uniquement si vous devez collecter de l'argent en utilisant un autre compte Stripe que la valeur par défaut. <br> Exemple: cus_ABCD@pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Nb max d'instances
-ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL: <br> &forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une adresse IP<br>&extcss=mycssurl<br>
+ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL: <br> &forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une adresse IP<br>&extcss=mycssurl<br>&disablecustomeremail=1 Pour désactiver l'envoi de l'email client de confirmation d'inscription 
 AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instances existantes, votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span>, hors remises
 SeeOurPrices=Voir les prix de chaque formule <a href="%s" target="_blank">ici</a>
 NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.

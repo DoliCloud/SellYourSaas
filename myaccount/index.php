@@ -2678,14 +2678,14 @@ if ($mythirdpartyaccount->isareseller) {
 	});
 		</script>';
 
-	print '<a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
+	print '<br><a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a>';
 	print '<div id="divmorereselleroptions" style="display: hidden">';
-	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span>';
-	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
-		print '<br>&plan=XXX : ';
-		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span>';
+		print '&plan=XXX : ';
+		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span><br>';
 	}
+	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span><br>';
+	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
 	print '</div>';
 	print '<br>';
 
