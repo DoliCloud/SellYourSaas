@@ -182,12 +182,12 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		print '<td class="center">';
 		if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))){
 			// Button off, click to enable
-			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.$key.'">';
+			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.urlencode($key).'&token='.newToken().'">';
 			$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
 			$enabledisablehtml.='</a>';
 		} else {
 			// Button on, click to disable
-			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.$key.'">';
+			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.urlencode($key).'&token='.newToken().'">';
 			$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
 			$enabledisablehtml.='</a>';
 		}
@@ -218,9 +218,9 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
 	print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
 	print '</textarea>';
-	print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline">'.$langs->trans("PutAllInstancesOffLine").'</a>';
+	print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline&token='.newToken().'">'.$langs->trans("PutAllInstancesOffLine").'</a>';
 	print ' &nbsp; - &nbsp; ';
-	print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeonline">'.$langs->trans("PutAllInstancesOnLine").'</a>';
+	print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeonline&token='.newToken().'">'.$langs->trans("PutAllInstancesOnLine").'</a>';
 	print '</td></tr>';
 	*/
 	print "</table>";

@@ -207,7 +207,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					$nametotest = strtolower($nametotest);
 
 					// Test new name syntax
-					if ($nametotest != $object->ref_customer) {	// Same control than in register_instance but we add . because we test FQDN and not only first part.
+					if ($nametotest != $object->ref_customer) {
 						$this->errors[]="Bad value for the new name of URL (must be lowercase, without spaces, not starting with '-')";
 						return -1;
 					}

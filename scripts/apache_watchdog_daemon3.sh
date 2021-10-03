@@ -56,13 +56,20 @@ while read ; do
 	/etc/init.d/apache2 stop >> /var/log/apache_watchdog3.log 2>&1
 	sleep 5
 	killall -9 apache2 >> /var/log/apache_watchdog3.log 2>&1
-	sleep 10
+	sleep 12
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
 	echo "$now Now restart apache..." >> /var/log/apache_watchdog3.log 2>&1
 	/etc/init.d/apache2 start >> /var/log/apache_watchdog3.log 2>&1
 
 	sleep 2
 	echo "Apache seg fault detected by apache_watchdog_daemon3. Apache was killed and started." | mail -aFrom:$EMAILFROM -s "[Warning] Apache seg fault detected on "`hostname`". Apache was killed and started at $now." $EMAILTO
+
+	sleep 2
+	echo "ps fauxww | grep apache2 | grep start" >> /var/log/apache_watchdog3.log 2>&1
+	ps fauxww | grep apache2 | grep start >> /var/log/apache_watchdog3.log 2>&1
+	
+	echo "/etc/init.d/apache2 status" >> /var/log/apache_watchdog3.log 2>&1
+	/etc/init.d/apache2 status >> /var/log/apache_watchdog3.log 2>&1
 
 	sleep 2
 	export now=`date '+%Y%m%d%H%M%S'`

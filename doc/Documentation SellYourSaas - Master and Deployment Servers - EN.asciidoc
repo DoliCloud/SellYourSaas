@@ -140,7 +140,7 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 
 
 
-[[adding_disk]]
+[[adding_a_disk]]
 === Adding the hard disk for data (home of user instances and home of backups)
 
 On *Deployment server* :
@@ -177,13 +177,21 @@ Whether the disk has just been formatted or whether it is an added disk already 
 blkid
 ---------------
 
+If the disk was created by cloning another one, you msut change the UUID of the new disk to avoid to have twice the same UUID on 2 differents disks.
+
+[source, bash]
+---------------
+tune2fs -U $(uuidgen) /dev/vdxY
+blkid
+---------------
+
 * Declare the mount point for an automatic mounting at each reboot by adding a line in */etc/fstab*
 
 [source, bash]
 ---------------
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 or
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (does not block the server from starting)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0     #does not block the server from starting
 ---------------
 
 * Mount disk
@@ -1071,6 +1079,11 @@ Choose a password. You will need to give this user and password to anyone who wa
         Require all granted
         Satisfy any
         </Directory>
+        <Files ~ "(document\.php|viewimage\.php|\.js\.php|\.js|\.css\.php|\.css|\.gif|\.png|\.svg|\.woff2|favicon\.ico)$">
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Files>
         
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
@@ -1334,7 +1347,7 @@ systemctl stop remote-server-launcher.service
 === Installation of fail2ban ===
 
 * Installation of fail2ban and activation of the following fail2ban rules:
-  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
   
 * As well as the specific rules for sellyoursaas:
@@ -1452,11 +1465,6 @@ enabled = true
 
 
 [sshd]
-
-enabled = true
-
-
-[webmin-auth]
 
 enabled = true
 
@@ -1954,7 +1962,7 @@ This is a command to send an email from the server to test the Postfix installat
 
 [source,bash]
 ---------------
-mail supervision@mysellyoursaasdomain.com
+mail supervision@mysaasdomain.com
 ---------------
 
 Then check the email box and/or the file */var/log/mail.log* (if file /var/log/mail.log does not exists, check that */var/log/* has group write permission).
@@ -3263,7 +3271,7 @@ systemctl status snap.certbot.renew.timer
 
 
 [[creation_certificat_ssl]]
-[[ssl_certificated_creation]]
+[[ssl_certificate_creation]]
 === Create a wildcard SSL certificate for user instances
 
 Into the following instructions, we will use X with value 1, 2, 3, ... (digit of pool of instance = digit of the deployment server).
@@ -3306,20 +3314,23 @@ Choose:
 
 ===== From LetsEncrypt
 
-* Run cerbot with the following command line *on the master* :
+* To create a SSL certficate *on the master* :
 
 [source,bash]
 ---------------
 certbot certonly --manual --preferred-challenges=dns -d "admin.<your_domain>"
 ---------------
 
-On the *deployment servers*, to get automatically renewable wildcard certificates :
+* On the *deployment servers*, to create automatically renewable wildcard *.withX.mysaasdomain.com certificates :
 
-* Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
+Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
+
 [source,bash]
 ---------------
 certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
 ---------------
+
+For example, you can use *supervision@mysaasdomain.com* as the email for letsencrypt account.
 
 This enables the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
 
@@ -3331,7 +3342,7 @@ openssl x509 -in fullchain.pem -text
 ---------------
 
 
-* To renew a certificate *on the master*, run
+* To renew a certificate *on the master*:
 
 [source,bash]
 ---------------
@@ -3340,29 +3351,37 @@ ou
 certbot renew --manual --force-renewal
 ---------------
 
-For wildcard certificates on *deployment servers*, you can use the same command as used originally (with --dry-run option first if you want to check)
+* For wildcard certificates on *deployment servers*:
+
+You can use the same command as used originally (with --dry-run option first if you want to check)
+
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
 ---------------
 
-You can check that DNS update is ok with this URL
-https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
-or host -t txt _acme-challenge.withX.mysaasdomainname.com
+Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
+*/etc/letsencrypt/renewal/withX.mysaasdomain.com.conf*
+
+To check that a DNS update is ok for a challenge, you can use this URL: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
+or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
+
 
 
 ==== Install certificates files
 
 * Get the SSL certificate files (file *.crt* of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
-* Créer un lien symbolique vers ces certificats avec le nom générique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
+* Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt*:
+
+For example, if your certificates files were generated with letsencrypt, you can do:
 
 [source,bash]
 ---------------
 cd /etc/apache2
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com.key with.sellyoursaas.com.key
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com.crt with.sellyoursaas.com.crt
-ln -fs /pathtomycertificate/withX.mysaasdomainname.com-intermediate.crt with.sellyoursaas.com-intermediate.crt
+ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/privkey.pem with.sellyoursaas.com.key
+ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/cert.pem with.sellyoursaas.com.crt
+ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/chain.pem with.sellyoursaas.com-intermediate.crt
 ---------------
 
 NOTE: This is the certificate that will be used for the client instances. Custom certificates for instances will be in */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
@@ -3551,8 +3570,8 @@ On *Master server*:
 
 [source,ini]
 ---------------
-a2ensite admin.mysellyoursaasdomain.com
-a2ensite myaccount.mysellyoursaasdomain.com
+a2ensite admin.mysaasdomain.com
+a2ensite myaccount.mysaasdomain.com
 /etc/init.d/apache2 restart
 ---------------
 
@@ -3825,8 +3844,8 @@ init_config:
 
 instances:
 
-  - name: DoliAsso customers instances (withX)
-    url: https://supervision.withX.mysellyoursaasdomain.org
+  - name: SellYourSaas customers instances (withX)
+    url: https://supervision.withX.mysaasdomain.org
     disable_ssl_validation: false
     min_collection_interval: 86400
 ---------------
@@ -3840,6 +3859,7 @@ Note: Replace withX by correct prefix of the deployment server.
 ---------------
 sudo service datadog-agent stop
 sudo service datadog-agent start
+sudo service datadog-agent status
 vi /var/log/datadog/agent.log
 ---------------
 
@@ -3951,24 +3971,38 @@ resize2fs /dev/vdX9
 
 The following explains the operations to clone a deployment server into another deployment server.
 
+==== Create the server
+
 - Create a snapshot of *Deployment server* to be cloned.
 
 - Create a new server from that snapshot:
 
 *With OVH*:
 
+Choose name of server, for example:  withX.mysaasdomain.com
+
 Choose the snapshot or image to use and copy into area *post installation script* the content of file */scripts/post_inst_script.sh*.
 
 Once the server is created, double check it does have an associated IP. If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field Fixed IP empty so it is set by OVH. Reboot the server.
-It is possible you have to configure /etc/network/interfaces to get your IPv4 via DHCP. To do so :
-Connect to the console. Execute *ip link show* to get the MAC address. Check the file */etc/netplan/50-cloud-init.yaml* to get the right MAC address.
-Correct and reboot if needed. Then correct IPv6 too.
 
+If you can't connect to server, it is possible you have to configure */etc/network/interfaces* to get your IPv4 via DHCP. To do so :
+Connect to the console. Execute *ip link show* to get the MAC address. Check the file */etc/netplan/50-cloud-init.yaml* to get the right MAC address.
+Correct and reboot if needed. 
+
+Then correct IPv6 setup into file */etc/netplan/50-cloud-init.yaml*.
+
+[source,bash]
+---------------
+netplan try
+netplan apply
+---------------
 
 *With ScaleWay*:
 
 TODO
 
+
+==== Disable cron
 
 - Once the server is ready: connect to deactivate the duplicated crons from the cloned server, you can also deactivate the cron process itself with :
 
@@ -3981,16 +4015,41 @@ systemctl status cron
 
 - Edit the crons from *root* and *admin* 
 
+
+==== Set reverse IP name and add a DNS name for IP
+
+* Check the */etc/hostname* file to have short name of server. The file should have as sole content:
+
+[source, bash]
+---------------
+nameofserver
+---------------
+
+Edit the file */etc/hosts* to get the entry of the new server:
+
+[source, bash]
+---------------
+main.ip.of.server nameofserver.mysaasdomainname.com
+127.0.0.1  nameofserver
+---------------
+
+* In your DNS provider dashboard, add the entry of the new server *mynewserverX.mydomain.com* in the DNS of *mydomain.com*, with the IPv4 (A record) and IPv6 (AAAA record) given by your server provider during server creation.
+
+* Once entries are created, you can set the reverse (PTR record) name of the IP v4 and v6 for the new server on your Server provider dashboard to the new server's name : *mynewserverX.mydomain.com*
+
+
+==== Create data disks
+
 - Edit */etc/fstab* to remove the mounting of data disks.
 
 - Create a snapshot of the data disk.
-
+  or
 - Create a new OVH data disk from the snapshot and attach it to the server. After association it must be visible with :
 
 	fdisk -l
 
 - If it is an empty disk, format the new data disk. To do so, see the chapter <<adding_a_disk>>.
-  If the disk was formatted before, see the chapter <<adding_a_disk>> to only mount and add in */etc/fstab*.
+  If the disk was formatted before, see the chapter <<adding_a_disk>> to only mount it and add in */etc/fstab*.
 
 - Add a file at the root of the disk to identify the volume (for instance: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...). 
 
@@ -4080,30 +4139,26 @@ Nothing to do.
   */etc/postfix/generic*
   */etc/mailname*
 
-- Add new entries for *mynewserverX.mydomain.com* in the DNS of *mydomain.com*, with the IPv4 (A record) and IPv6 (AAAA record) given by OVH during server creation.
-
-- Log in OVH servers' management interface to change their hostnames. This will modify */etc/hostname* automatically (If not change it manually. Set a hostname, like *myserverX*).
-
-- Open the OVH IP management interface too, to add
- 
-  - the reverse (PTR record) for the new server's IP : *myserverX.mydomain.com*
-  - the reverse for the virtual IP if you got one : *with.mydomain.com*
-   
-- Connect and modify */etc/hosts* with the IP and name of the new server.
-
 - Edit */var/www/html/index.html* if it exists to set the new server name.
 
 - Check */etc/network/interfaces* and */etc/network/interfaces.d/* to set the right values for vrack public, virtual and internal IPs if OVH vrack is used
 
-- If webmin was installed connect to it to deactivate the supervision actions duplicated from the cloning of the server
-
 - Modify Apache virtualhosts in */etc/apache2/sites-enabled* to set the new IP and name.
 
 - Declare the IP for mail sending:
-    - If a remote SMTP server is used, authorize the new server's IP in that server.
-    - Add the new server IPs in the DNS SPF entries (SPF requires one entry for every domain *@mydomain.com* and subdomain.
+    - If a remote SMTP server is used (Google, SendGrid, ...) and you enabled restrictions on IPs, authorize the new server's IP for this new server.
+    - Add the new server IPs in the DNS SPF entries (SPF may requires one entry for the domain *@mydomain.com* but also one for each subdomains).
 
-- Create a user *sellyoursaas* on the *master* server's DB, with permissions to access from the deployment server. See <<create_a_database_account_sellyoursaas>>.
+- Create a user *sellyoursaas* on the *master* server's DB, with permissions to access from the deployment server.
+
+[source,sql]
+---------------
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
+
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
+
+FLUSH PRIVILEGES;
+---------------
 
 - Modify */etc/sellyoursaas.conf* with the new IP, subdomain of the new pool and master database access information.
 
@@ -4124,7 +4179,13 @@ Nothing to do.
   */etc/shadow*
   */etc/group*
   
-- Remove the folders */mnt/diskhome/home/osu...*
+- Remove the folders */mnt/diskhome/home/osu...* and */mnt/diskhome/backup/osu...*
+
+- Remove the folders 
+
+  /etc/letsencrypt/archive/with*
+  /etc/letsencrypt/live/with*
+  /etc/letsencrypt/renewal/with*
   
 - Destroy the database
 
@@ -4145,7 +4206,7 @@ mysql -uroot < /tmp/dbntodelete.sql
 
 - Add NS record pointing for *withX* to the domain *mydomain.com*, pointing to *ns1withX.mydomain.com*.
 
-- Stop, restart the firewall, fail2ban, bind9, apache, postfix, remote_server and datadog-agent if they are used.
+- Restart the server.
 
 - Check that *http://ipnouveauserverdeployment:8080/index.php/test* returns "404 Not Found" when requested from the *master*.
 
@@ -4157,9 +4218,8 @@ mkdir /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archi
 chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
 ---------------
 
-- Acquire the SSL certificates of the new subdomain *withX.mydomain.com*, upload them to the server and create the symbolic links. (see <<ssl_certificate_creation>>).
+- Acquire or generate the SSL certificates of the new subdomain *withX.mydomain.com*, upload them to the server and create the symbolic links. (see <<ssl_certificate_creation>>).
 
-- If you configured sending emails from Dolibarr's backoffice via a SMTP relay like Google and/or Sendgrid, remember to update the authorized IPs (v4 and v6) in the relay console.
 
 In addition, if other applications were active on the cloned server:
 
@@ -4174,12 +4234,13 @@ In addition, if other applications were active on the cloned server:
 
 === Upgrade OS
 
-To update Ubuntu from 16.04 to 18.04 on a SellYourSaas server:
+To update Ubuntu to a higher LTS version on a SellYourSaas server:
 
 [source,sql]
 ---------------
 apt dist-upgrade
 
+# if you move from 16.04 to 18.04, you must also run
 apt install php-mysql
 a2enmode php7.2
 apt remove php-fpm php7-fpm
@@ -4953,7 +5014,7 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
 
 Error when sending email in */var/log/mail.log*:
 
-	Mar  2 22:41:59 myservername.mysellyoursaasdomain.com postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
+	Mar  2 22:41:59 myservername.mysaasdomain.com postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 
 => Check you have a file */etc/resolv.conf* that is linked to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
 

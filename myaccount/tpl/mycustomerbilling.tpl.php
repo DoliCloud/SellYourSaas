@@ -69,11 +69,11 @@ print '
 				<table class="noborder centpercent tablecommission">
 				<tr class="liste_titre">
 
-	              <td style="min-width: 100px">
-	                '.$langs->trans("Date").'
-	              </td>
 	              <td>
 	                '.$langs->trans("Invoice").'
+	              </td>
+	              <td style="min-width: 100px">
+	                '.$langs->trans("Date").'
 	              </td>
 	              <td align="right">
 	                '.$langs->trans("AmountHT").'
@@ -145,11 +145,8 @@ while ($i < min($num, $limit)) {
 
 	print '
 							<tr>
-			              <td>
-			                '.dol_print_date($obj->datef, 'dayrfc', $langs).'
-			              </td>
-			              <td>
-			                '.img_mime('pdf.pdf', $titleinvoice).' '.($obj->ref_supplier ? $obj->ref_supplier : $obj->ref);
+			              <td class="nowraponall">
+			                '.($obj->ref_supplier ? $obj->ref_supplier : $obj->ref);
 	$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
@@ -161,7 +158,12 @@ while ($i < min($num, $limit)) {
 
 	$totalpaidht += $obj->total_ht;
 
+	print img_mime('pdf.pdf', $titleinvoice, 'paddingleft');
+
 	print '
+			              </td>
+			              <td>
+			                '.dol_print_date($obj->datef, 'dayrfc', $langs).'
 			              </td>
 			              <td align="right">
 			                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
@@ -212,11 +214,11 @@ while ($i < min($num, $limit)) {
 	              <td style="min-width: 150px">
 			         '.$langs->trans("Customer").'
 	              </td>
-	              <td style="min-width: 100px">
-	                '.$langs->trans("Date").'
-	              </td>
 	              <td>
 	                '.$langs->trans("Invoice").'
+	              </td>
+	              <td style="min-width: 100px">
+	                '.$langs->trans("Date").'
 	              </td>
 	              <td align="right">
 	                '.$langs->trans("AmountHT").'
@@ -312,10 +314,8 @@ while ($i < min($num, $limit2)) {
 	//.' '.$form->textwithpicto('', $langs->trans("CurrentCommission").': '.($commissionpercent?$commissionpercent:0).'%', 1).'
 	print '</td>
                       <td>
-                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
-                      </td>
-                      <td>
                         ';
+	$titleinvoice = $tmpinvoice->ref.($tmpinvoice->ref_supplier ? ' ('.$tmpinvoice->ref_supplier.')' : '');
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
@@ -328,11 +328,14 @@ while ($i < min($num, $limit2)) {
 	} else {
 		$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
 		$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-		print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf').$tmpinvoice->ref.'</a>';
+		print '<a href="'.$urltouse.'" target="_download">'.$tmpinvoice->ref.img_mime('pdf.pdf', $titleinvoice, 'paddingleft').'</a>';
 	}
 
 	print '
               </td>
+                      <td>
+                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
+                      </td>
               <td align="right">
                 '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
               </td>
@@ -408,7 +411,7 @@ if ($nbtotalofrecords > $limit2) {
 		print '<td></td>';
 		print '<td></td>';
 		print '<td></td>';
-		print '<td align="right">'.price($commoldystem + $totalamountcommission - $totalpaidht).'</td>';
+		print '<td align="right">'.price(price2num($commoldystem + $totalamountcommission - $totalpaidht, 'MT')).'</td>';
 		print '</tr>';
 
 		print '</table>';

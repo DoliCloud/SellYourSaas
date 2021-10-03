@@ -289,7 +289,7 @@ TypeOfSupport=Niveau d'assistance
 PleaseReadFAQFirst=Avant de soumettre un ticket de support, veuillez vérifier si la réponse n'est pas déjà disponible ici : <br> <br> <center> <a href="%s" target="_faq"> FAQ (Foire Aux Questions) </a> </center>
 CurrentServiceStatus=L'état de nos services peut être consulté en temps réel sur <a href="%s" target="_status">cette page</a>. Si un service apparaît inactif, alors nous sommes probablement déjà au courant et en train d'intervenir. Merci de patienter...
 NewTicket=Nouveau ticket
-SupportDesc=Envoyer un nouveau ticket (demande/question)
+SupportDesc=Envoyer un nouveau ticket (question/problème)
 SelectYourSupportChannel=Sélectionnez votre canal d'assistance
 PremiumSupport=Support Premium
 NoPremiumPlan=Pas de souscription active à une telle offre

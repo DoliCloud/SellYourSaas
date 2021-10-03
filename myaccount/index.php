@@ -927,9 +927,10 @@ if ($action == 'updateurl') {
 
 					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (case of STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set)';
+					// First launch update of resources:
+					// This update qty of contract lines + qty into linked template invoice.
+					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 
 					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
@@ -1357,8 +1358,7 @@ if ($action == 'updateurl') {
 				$mode='registerpaymentmode';
 			}
 		}
-	} else // createpayment with old method
-	{
+	} else { // createpayment with old method (STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is empty)
 		$stripeToken = GETPOST("stripeToken", 'alpha');
 		$label = 'Card '.dol_print_date($now, 'dayhourrfc');
 
@@ -1598,13 +1598,14 @@ if ($action == 'updateurl') {
 						}
 					}
 
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id." that is not null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
+					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (old case when STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is not set)';
+					// First launch update of resources:
+					// This update qty of contract lines + qty into linked template invoice.
+					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id.", so we create it then create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
+					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
 					// Now create invoice draft
 					$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
@@ -2527,9 +2528,7 @@ if ($welcomecid > 0) {
 		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
 		</p>
 		<p>
-		<a class="btn btn-primary" target="_blank" href="https://'.$contract->ref_customer.'?username='.$_SESSION['initialapplogin'].'">
-		'.$langs->trans("TakeMeTo", $productlabel).'
-		</a>
+		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).'</a>
 		</p>
 
 		</div>';
@@ -2682,6 +2681,7 @@ if ($mythirdpartyaccount->isareseller) {
 	print '<a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
 	print '<div id="divmorereselleroptions" style="display: hidden">';
 	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span>';
+	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
 		print '<br>&plan=XXX : ';
 		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span>';
@@ -2817,7 +2817,7 @@ if (empty($welcomecid)) {
 							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), $contract->ref_customer).' !</h4>';
 						if ($mode != 'registerpaymentmode') {
 							print '<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentMode");
 							print '</a>
 								</p>';
@@ -2834,7 +2834,7 @@ if (empty($welcomecid)) {
 						if ($mode != 'registerpaymentmode') {
 							print '
 								<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentModeToRestoreInstance");
 							print '</a>
 								</p>';
@@ -2857,7 +2857,7 @@ if (empty($welcomecid)) {
 					if ($mode != 'registerpaymentmode') {
 						print '
 							<p>
-							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 						print $langs->trans("AddAPaymentModeToRestoreInstance");
 						print '</a>
 							</p>';

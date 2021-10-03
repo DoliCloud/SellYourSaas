@@ -73,7 +73,8 @@ if ($totalInvoiced == 0) {
 			$sellyoursaasutils = new SellYourSaasUtils($db);
 
 			$comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
-			// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
+			// First launch update of resources:
+			// This update status of install.lock+authorized key (but does not recreate them) and update qty of contract lines + qty into linked template invoice
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
 			$contract->fetch($contract->id);   // Reload to get new values after refresh
 
