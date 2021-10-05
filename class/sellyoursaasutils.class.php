@@ -3643,6 +3643,7 @@ class SellYourSaasUtils
 										$error++;
 										$this->error = 'Contract '.$contract->ref.' has too many template invoice ('.$sometemplateinvoice.') so we dont know which one to update';
 									} elseif (is_object($lasttemplateinvoice)) {
+										// We search into template invoice ($lasttemplateinvoice) the line with same product id that the one processed in contract
 										$sqlsearchline = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'facturedet_rec WHERE fk_facture = '.$lasttemplateinvoice->id.' AND fk_product = '.$tmpobject->fk_product;
 										$resqlsearchline = $this->db->query($sqlsearchline);
 										if ($resqlsearchline) {
@@ -3670,6 +3671,10 @@ class SellYourSaasUtils
 													$result = $invoicerecline->update($user);
 
 													$result = $lasttemplateinvoice->update_price();
+												} else {				// Template has no line corresponding to this contract line
+													//$error++;
+													//$this->error = 'Contract '.$contract->ref.' has a template invoice that misses a product line found into contract so we are not able to update qty into contract.';
+													dol_syslog("Warning, contract ".$contract->ref." has a template invoice that misses a product line found into contract so we are not able to update qty into contract. Try to avoid this case.", LOG_WARNING);
 												}
 											}
 										} else {
