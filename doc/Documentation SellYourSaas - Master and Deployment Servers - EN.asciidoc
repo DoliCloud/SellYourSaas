@@ -4186,6 +4186,8 @@ FLUSH PRIVILEGES;
   /etc/letsencrypt/archive/with*
   /etc/letsencrypt/live/with*
   /etc/letsencrypt/renewal/with*
+
+- If datadog is used (optionnal), fix the file */etc/datadog-agent/conf.d/http_check.d/conf.yaml* to use the new name of server.
   
 - Destroy the database
 
