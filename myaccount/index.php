@@ -2748,8 +2748,13 @@ foreach ($listofcontractid as $contractid => $contract) {
 	}
 
 	$nbofinstances++;
-	if ($suspended) $nbofinstancessuspended++;
-	else $nbofinstancesdone++;
+	if ($suspended) {
+		$nbofinstancessuspended++;
+	} else {
+		if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$nbofinstancesdone++;
+		}
+	}
 }
 $nboftickets = $langs->trans("SoonAvailable");
 if ($mythirdpartyaccount->isareseller) {
@@ -2771,8 +2776,13 @@ if ($mythirdpartyaccount->isareseller) {
 		}
 
 		$nbofinstancesreseller++;
-		if ($suspended) $nbofinstancessuspendedreseller++;
-		else $nbofinstancesdonereseller++;
+		if ($suspended) {
+			$nbofinstancessuspendedreseller++;
+		} else {
+			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				$nbofinstancesdonereseller++;
+			}
+		}
 	}
 }
 
