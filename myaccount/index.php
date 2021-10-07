@@ -2908,7 +2908,7 @@ if (empty($welcomecid)) {
 		if ($isASuspendedContract) {
 			if (empty($messageforinstance[$contract->ref_customer])		// If warning for 'expired trial' not already shown
 				&& $delaybeforeendoftrial <= 0) {							// If trial has expired
-				if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 					$delayafterexpiration = ($now - $expirationdate);
 					$delayindays = round($delayafterexpiration / 3600 / 24);
 					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
