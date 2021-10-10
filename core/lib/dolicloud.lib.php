@@ -289,7 +289,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Rsync to Restore Document directory
-	$sftprestorestring='rsync -n -v -a --exclude \'*.cache\' dolibarr_documents/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/documents';
+	$sftprestorestring='rsync -n -v -a --exclude \'*.cache\' documents/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/documents';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite document dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
