@@ -313,7 +313,7 @@ while ($i < min($num, $limit2)) {
 	print $tmpthirdparty->name;
 	//.' '.$form->textwithpicto('', $langs->trans("CurrentCommission").': '.($commissionpercent?$commissionpercent:0).'%', 1).'
 	print '</td>
-                      <td>
+                      <td class="nowraponall">
                         ';
 	$titleinvoice = $tmpinvoice->ref.($tmpinvoice->ref_supplier ? ' ('.$tmpinvoice->ref_supplier.')' : '');
 
@@ -344,6 +344,8 @@ while ($i < min($num, $limit2)) {
 	//$s = $tmpinvoice->getLibStatut(2, $alreadypayed + $amount_credit_notes_included);
 	$s = $tmpinvoice->getLibStatut(2, -1);
 	$s = preg_replace('/'.$langs->trans("BillShortStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
+	$s = preg_replace('/'.$langs->trans("BillStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
+
 	print $s;
 	print '
               </td>
