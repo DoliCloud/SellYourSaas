@@ -97,7 +97,7 @@ foreach ($contractids as $contractid) {
 $discountcodetext = '<span class="discountcodeko">'.$langs->trans("DiscountCodeNotValid").'</span>';
 
 foreach ($listofvalidregisterdiscountcode as $key => $val) {
-	if ($val['code'] == $discountcode) {
+	if (strtoupper(trim($val['code'])) == strtoupper(trim($discountcode))) {
 		$discountvalue = $val['value'];
 		$discountcodetext = '<span class="discountcodeok">'.$langs->trans("DiscountCodeIsValid", $discountvalue).'<span>';
 	}
