@@ -289,7 +289,7 @@ TypeOfSupport=Level of support
 PleaseReadFAQFirst=Before submitting any support ticket, please check if the answer is not already available here :<br><br><center><a href="%s" target="_faq">FAQs (Frequently Asked Questions)</a></center>
 CurrentServiceStatus=The status of our service is visible in real time on <a href="%s" target="_status">this page</a>. If a service appears not active, we are probably already aware of this, and are working on the issue. Thanks for your patience...
 NewTicket=New ticket/issue
-SupportDesc=Send a new support ticket
+SupportDesc=Send a new support ticket (question/issue)
 SelectYourSupportChannel=Select your support channel
 PremiumSupport=Premium support
 NoPremiumPlan=No active subscription to such a plan
@@ -507,7 +507,7 @@ PaymentChargedButReversedByBank=Payment was charged but was then canceled illegi
 StripeAccount=Stripe Account
 StripeAccountForCustomerHelp=The Stripe account to use to collect the customer invoices. Fill something here only if you need to collect money using another Stripe account than the default value.<br>Example: cus_ABCD@pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Max number of instances
-ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>
+ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>&disablecustomeremail=1 To disable the email ro customer for confirmation of registration
 AFirstInvoiceOfWillBeDone=Taking into account the chosen plan and data of your existing instance(s), your subscription will start with a first invoice of <span class="nowrap bold">%s tax included</span>, discounts excluded
 SeeOurPrices=See prices for each plan <a href="%s" target="_blank">here</a>
 NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.
@@ -575,3 +575,6 @@ MaintenanceMessage=Message to show, or URL to redirect to (starting with http...
 ConfirmMaintenance=Are you sure you want to switch this instance into maintenance mode ? Access will not be possible for common users.<br>Note: If a browser include the string <b>%s</b> into its User-Agent, it will be able to bypass the maintenance message lock. 
 Assistance=Assistance
 ContactUs=Contact us
+ToDisableEmailThatConfirmsRegistration=To disable the email ro customer for confirmation of registrations
+NoEmailSentAfterRegistration=No email was sent to customer after this registration
+ 

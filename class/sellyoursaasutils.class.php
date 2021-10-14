@@ -330,8 +330,9 @@ class SellYourSaasUtils
 						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 						$to = $object->thirdparty->email;
 						$trackid = 'thi'.$object->thirdparty->id;
+						$moreinheader = 'X-Dolibarr-Info: doAlertSoftEndTrial'."\r\n";
 
-						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid);
+						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 						$result = $cmail->sendfile();
 						if (! $result) {
 							$error++;
@@ -493,10 +494,11 @@ class SellYourSaasUtils
 						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langstouse);
 						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
-
+						$trackid = 'thi'.$thirdparty->id;
 						$to = $thirdparty->email;
+						$moreinheader = 'X-Dolibarr-Info: doAlertCreditCardExpiration'."\r\n";
 
-						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
+						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 						$result = $cmail->sendfile();
 						if (! $result) {
 							$error++;
@@ -638,10 +640,11 @@ class SellYourSaasUtils
 							$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langstouse);
 							$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
-
+							$trackid = 'thi'.$thirdparty->id;
 							$to = $thirdparty->email;
+							$moreinheader = 'X-Dolibarr-Info: doAlertPaypalExpiration'."\r\n";
 
-							$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
+							$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 							$result = $cmail->sendfile();
 							if (! $result) {
 								$error++;
@@ -1418,9 +1421,8 @@ class SellYourSaasUtils
 						}
 						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
-
-						$trackid='inv'.$invoice->id;
-						$moreinheader='X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
+						$trackid = 'inv'.$invoice->id;
+						$moreinheader = 'X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
 
 						// Send email (substitutionarray must be done just before this)
 						include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
@@ -1542,7 +1544,7 @@ class SellYourSaasUtils
 	/**
 	 * Action executed by scheduler
 	 * CAN BE A CRON TASK
-	 * Loop on each contract. If it is a paid contract, and there is no unpaid invoice for contract, and end date < today + 2 days (so expired or soon expired),
+	 * Loop on each contract. If it is a paid contract, and there is no unpaid invoice for contract, and end date < (today + 2 days) so expired or soon expired,
 	 * we update qty of contract + qty of linked template invoice.
 	 *
 	 * @param	int		$thirdparty_id			Thirdparty id
@@ -1596,12 +1598,13 @@ class SellYourSaasUtils
 			while ($i < $num) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj) {
+					// Check if this contract was already processed (because loop is on lines of contract)
 					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) continue;
 
 					// Test if this is a paid or not instance
 					$object = new Contrat($this->db);
 					$object->fetch($obj->rowid);		// fetch also lines
-					$object->fetch_thirdparty();
+					$object->fetch_thirdparty();		// TODO This may not be used.
 
 					if ($object->id <= 0) {
 						$error++;
@@ -1612,7 +1615,7 @@ class SellYourSaasUtils
 					dol_syslog("* Process contract in doRefreshContracts for contract id=".$object->id." ref=".$object->ref." ref_customer=".$object->ref_customer);
 
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
-					$isAPayingContract = sellyoursaasIsPaidInstance($object);
+					$isAPayingContract = sellyoursaasIsPaidInstance($object, 0, 0);		// This load ->linkedObjectsIds
 					dol_syslog('', 0, -1);
 					if ($mode == 'test' && $isAPayingContract) {
 						$contractignored[$object->id]=$object->ref;
@@ -1625,19 +1628,20 @@ class SellYourSaasUtils
 
 					// Update expiration date of instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object, 0);
+					$tmparray = sellyoursaasGetExpirationDate($object, 0);				// This loop on $object->lines
 					dol_syslog('', 0, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
 					$duration_unit = $tmparray['duration_unit'];
 					//var_dump($expirationdate.' '.$enddatetoscan);
 
-					// Test if there is pending invoice
+					// Load linked ->linkedObjects (objects linked)
 					$object->fetchObjectLinked();
 
+					// Test if there is at least 1 open invoice
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
 					if (is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
-						usort($object->linkedObjects['facture'], "cmp");
+						usort($object->linkedObjects['facture'], "cmp");	// function cmp compare objects on ->date and is defined into sellyoursaas.lib.php.
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
 						$someinvoicenotpaid=0;
@@ -1672,9 +1676,10 @@ class SellYourSaasUtils
 
 							$errorforlocaltransaction = 0;
 
-							$comment = 'Refresh contract '.$object->ref." by doRenewalContracts";
-							// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines + linked template invoice
-							$result = $this->sellyoursaasRemoteAction('refresh', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+							$comment = 'Refresh contract '.$object->ref." by doRefreshContracts";
+							// First launch update of resources:
+							// This update qty of contract lines + qty into linked template invoice
+							$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
 							if ($result <= 0) {
 								$contracterror[$object->id]=$object->ref;
 
@@ -1717,7 +1722,7 @@ class SellYourSaasUtils
 	 * Action executed by scheduler
 	 * CAN BE A CRON TASK
 	 * Loop on each contract. If it is a paid contract, and there is no unpaid invoice for contract, and lines are not suspended and end date < today + 2 days (so expired or soon expired),
-	 * we make a refresh (update qty of contract + qty of linked template invoice)ss + the running contract service end date to end at next period.
+	 * we make a refresh (update qty of contract + qty of linked template invoice) + we set the running contract service end date to end at next period.
 	 *
 	 * @param	int		$thirdparty_id			Thirdparty id
 	 * @return	int								0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
@@ -1747,7 +1752,7 @@ class SellYourSaasUtils
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
 
-		$sql = 'SELECT c.rowid, c.ref_customer, cd.rowid as lid, cd.date_fin_validite';
+		$sql = 'SELECT c.rowid, c.ref_customer, ce.suspendmaintenance_message, cd.rowid as lid, cd.date_fin_validite';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce,';
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
@@ -1770,7 +1775,9 @@ class SellYourSaasUtils
 			while ($i < $num) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj) {
-					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) continue;
+					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) {
+						continue;
+					}
 
 					// Test if this is a paid or not instance
 					$object = new Contrat($this->db);
@@ -1846,8 +1853,9 @@ class SellYourSaasUtils
 							$errorforlocaltransaction = 0;
 
 							$comment = 'Refresh contract '.$object->ref." by doRenewalContracts";
-							// First launch update of resources: This update status of install.lock+authorized key and update qty on contract lines and on linked template invoice. An event is added if qty is changed.
-							$result = $this->sellyoursaasRemoteAction('refresh', $object, 'admin', '', '', '0', $comment);
+							// First launch update of resources:
+							// This update qty of contract lines + qty into linked template invoice.
+							$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
 							if ($result <= 0) {
 								$contracterror[$object->id]=$object->ref;
 
@@ -1920,7 +1928,8 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Suspend expired services of test instances if we are after planned end date (+ grace offset SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND)
+	 * Suspend expired services of test instances (a test instance = instance without template neither standard invoice) if it is not a redirect instance and if we are
+	 * after the planned end date (+ grace offset SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND)
 	 * CAN BE A CRON TASK
 	 *
 	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
@@ -1944,7 +1953,8 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Suspend expired services of paid instances if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND)
+	 * Suspend expired services of paid instances (a paid instance = instance with template or standard invoice) if it is not a redirect instance and if we are
+	 * after the planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND)
 	 * CAN BE A CRON TASK
 	 *
 	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
@@ -2010,7 +2020,7 @@ class SellYourSaasUtils
 
 		$this->db->begin();
 
-		$sql = 'SELECT c.rowid, c.ref_customer, cd.rowid as lid';
+		$sql = 'SELECT c.rowid, c.ref_customer, ce.suspendmaintenance_message, cd.rowid as lid';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce,';
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
@@ -2053,9 +2063,15 @@ class SellYourSaasUtils
 
 					dol_syslog("* Process fetch line nb ".$ifetchservice." - contract id=".$object->id." ref=".$object->ref." ref_customer=".$object->ref_customer);
 
+					if (preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
+						dol_syslog("It is a redirect contract in test mode, it will not be processed by this batch");
+						continue;											// Discard if this is a redirect contract
+					}
+
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
 					$isAPayingContract = sellyoursaasIsPaidInstance($object);
 					dol_syslog('', 0, -1);
+
 					if ($mode == 'test' && $isAPayingContract) {
 						dol_syslog("It is a paying contract, it will not be processed by this batch");
 						continue;											// Discard if this is a paid instance when we are in test mode
@@ -2090,13 +2106,17 @@ class SellYourSaasUtils
 							foreach ($listofcontractid as $contract) {
 								dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
+								if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+									dol_syslog("--- Instance is in maintenance mode with an URL redirection, we discard this contract", LOG_DEBUG, 0);
+									continue;	// This may be a contract used as redirection to another one, so we discard this contract to avoid to create template not expected
+								}
 								if ($contract->array_options['options_deployment_status'] != 'done') {
 									dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
-									continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
+									continue;	// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
 								}
 								if ($contract->total_ht == 0) {
 									dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
-									continue;							// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
+									continue;	// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
 								}
 
 								// Make a test to pass loop if there is already a template invoice
@@ -2115,12 +2135,13 @@ class SellYourSaasUtils
 
 								dol_syslog("--- No template invoice found for this contract contract_id = ".$contract->id.", so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
-								$comment = 'Refresh contract '.$contract->ref." by doSuspendInstances because we need to create a template invoice (test expired but a payment mode exists for customer)";
-								// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-								$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+								$comment = 'Refresh contract '.$contract->ref." by doSuspendInstances because we need to create a template invoice (test period expired but a payment mode exists for customer)";
+								// First launch update of resources:
+								// This update qty of contract lines + qty into linked template invoice.
+								$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 
 
-								dol_syslog("--- No template invoice found for this contract contract_id = ".$contract->id.", so we create it then create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
+								dol_syslog("--- No template invoice found for this contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
 								// Now create invoice draft
 								$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
@@ -2413,9 +2434,11 @@ class SellYourSaasUtils
 								{ */
 								/* No required, $conf reset by complete_substitutions_array */
 
+								$trackid = 'thi'.$object->thirdparty->id;
 								$to = $object->thirdparty->email;
+								$moreinheader = 'X-Dolibarr-Info: doSuspendInstances'."\r\n";
 
-								$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
+								$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
 								$result = $cmail->sendfile();
 								if (! $result || $cmail->error) {
 									$erroremail .= ($erroremail ? ', ' : '').$cmail->error;
@@ -2987,8 +3010,10 @@ class SellYourSaasUtils
 
 		$ispaidinstance = 0;
 
-		// Loop on each line of contract ($tmpobject is a ContractLine)
-		// to set or not $doremoteaction
+		$resultstringforallrefreshcalculation = '';	// Usedwhen $remoteaction == 'refresh' or 'refreshmetrics'
+
+		// Loop on each line of contract ($tmpobject is a ContractLine): It set or not $doremoteaction if an action must be done for the line,
+		// then do it by calling remote agent, or making action for qty calculation (ssh2 connect, sql execution, ...)
 		foreach ($listoflines as $tmpobject) {
 			if (empty($tmpobject)) {
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
@@ -3012,6 +3037,7 @@ class SellYourSaasUtils
 				($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
 			if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
+			// 'refresh' and 'refreshmetrics' are processed later.
 
 			// remoteaction = 'deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
 			if ($doremoteaction) {
@@ -3425,7 +3451,7 @@ class SellYourSaasUtils
 
 					// Now execute the formula to set $newqty
 					$currentqty = $tmpobject->qty;
-					$newqty = null;
+					$newqty = null;	// If $newqty remains null, we won't change/record value.
 
 					$tmparray = explode(':', $producttmp->array_options['options_resource_formula'], 2);
 					if ($tmparray[0] === 'SQL') {
@@ -3453,7 +3479,7 @@ class SellYourSaasUtils
 								$this->errors = $dbinstance->errors;
 							}
 						} else {
-							dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we failed to connect with ssh", LOG_WARNING);
+							dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we failed previously to connect with ssh", LOG_WARNING);
 
 							$dbinstance = null;
 
@@ -3466,16 +3492,48 @@ class SellYourSaasUtils
 							$errorfordb++;
 						} else {
 							dol_syslog("Execute sql=".$sqlformula);
+
 							$resql = $dbinstance->query($sqlformula);
 							if ($resql) {
-								$objsql = $dbinstance->fetch_object($resql);
-								if ($objsql) {
-									$newqty = $objsql->nb;
+								// If request is a simple count
+								if (preg_match('/^select count/i', $sqlformula)) {
+									$objsql = $dbinstance->fetch_object($resql);
+									if ($objsql) {
+										$newqty = $objsql->nb;
+										$resultstringforallrefreshcalculation .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+									} else {
+										$error++;
+										$this->error = 'SQL to get resource return nothing';
+										$this->errors[] = 'SQL to get resource return nothing';
+									}
 								} else {
-									$error++;
-									$this->error = 'SQL to get resource return nothing';
-									$this->errors[] = 'SQL to get resource return nothing';
+									$num = $dbinstance->num_rows($resql);
+									if ($num > 0) {
+										$itmp = 0;
+										$arrayofcomment = array();
+										while ($itmp < $num) {
+											// If request is a list to count
+											$objsql = $dbinstance->fetch_object($resql);
+											if ($objsql) {
+												if (empty($newqty)) {
+													$newqty = 0;	// To have $newqty not null and allow addition just after
+												}
+												$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
+												if (isset($objsql->comment)) {
+													$arrayofcomment[] = $objsql->comment;
+												}
+											}
+											$itmp++;
+										}
+										$resultstringforallrefreshcalculation .= 'Note: '.join(',', $arrayofcomment)."\n";
+									} else {
+										$error++;
+										$this->error = 'SQL to get resource return nothing';
+										$this->errors[] = 'SQL to get resource return nothing';
+									}
 								}
+
+								// TODO Check $newqty is lower than a max defined into service.
 							} else {
 								$error++;
 								$this->error = $dbinstance->lasterror();
@@ -3495,8 +3553,6 @@ class SellYourSaasUtils
 							$connection = @ssh2_connect($server, $server_port);
 							if ($connection) {
 								dol_syslog("Get resource BASH ".$bashformula);
-
-								$newqty = 0;
 
 								$respass = @ssh2_auth_password($connection, $contract->array_options['options_username_os'], $contract->array_options['options_password_os']);
 								if ($respass) {
@@ -3587,6 +3643,7 @@ class SellYourSaasUtils
 										$error++;
 										$this->error = 'Contract '.$contract->ref.' has too many template invoice ('.$sometemplateinvoice.') so we dont know which one to update';
 									} elseif (is_object($lasttemplateinvoice)) {
+										// We search into template invoice ($lasttemplateinvoice) the line with same product id that the one processed in contract
 										$sqlsearchline = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'facturedet_rec WHERE fk_facture = '.$lasttemplateinvoice->id.' AND fk_product = '.$tmpobject->fk_product;
 										$resqlsearchline = $this->db->query($sqlsearchline);
 										if ($resqlsearchline) {
@@ -3614,6 +3671,10 @@ class SellYourSaasUtils
 													$result = $invoicerecline->update($user);
 
 													$result = $lasttemplateinvoice->update_price();
+												} else {				// Template has no line corresponding to this contract line
+													//$error++;
+													//$this->error = 'Contract '.$contract->ref.' has a template invoice that misses a product line found into contract so we are not able to update qty into contract.';
+													dol_syslog("Warning, contract ".$contract->ref." has a template invoice that misses a product line found into contract so we are not able to update qty into contract. Try to avoid this case.", LOG_WARNING);
 												}
 											}
 										} else {

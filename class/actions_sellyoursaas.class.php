@@ -123,6 +123,9 @@ class ActionsSellyoursaas
 				$object->fetch_optionals();
 				$newtitle = $reg[1].'<!-- Added by getNomUrl hook of SellYourSaas --><br>';
 				$newtitle .= '<b>'.$langs->trans("DeploymentStatus").'</b> : '.(empty($object->array_options['options_deployment_status']) ? '' : $object->array_options['options_deployment_status']);
+				if (!empty($object->array_options['options_suspendmaintenance_message']) && preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
+					$newtitle .= '<br><b>'.$langs->trans("Redirection").'</b> : '.(empty($object->array_options['options_suspendmaintenance_message']) ? '' : $object->array_options['options_suspendmaintenance_message']);
+				}
 				$this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
 				return 1;
 			}
@@ -639,7 +642,7 @@ class ActionsSellyoursaas
 		if ($action == 'suspendmaintenancetoconfirm') {
 			// Switch to maintenance mode confirmation
 			$formquestion = array(array('type' => 'textarea', 'name' => 'suspendmaintenancemessage', 'label' => $langs->trans("MaintenanceMessage"), 'value' =>'', 'morecss'=>'centpercent'));
-			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Confirmation'), $langs->trans("ConfirmMaintenance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), 'suspendmaintenance', $formquestion, 'no', 1, 300);
+			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Confirmation'), $langs->trans("ConfirmMaintenance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), 'suspendmaintenance', $formquestion, 'no', 1, 350);
 			$this->resprints = $formconfirm;
 		}
 
@@ -709,7 +712,10 @@ class ActionsSellyoursaas
 				if ($object->array_options['options_deployment_status'] == 'done') {
 					// Show warning if in maintenance mode
 					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
-						$ret .= img_warning($langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), '', 'classfortooltip marginrightonly');
+						$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						$messagetoshow .= '<br><u>'.$langs->trans("MaintenanceMessage").':</u><br>';
+						$messagetoshow .= $object->array_options['options_suspendmaintenance_message'];
+						$ret .= img_warning($messagetoshow, '', 'classfortooltip marginrightonly');
 					}
 					// Show payment status
 					if ($ispaid) {

@@ -1410,9 +1410,9 @@ if (! $error) {
 		}
 	} else { // In rare cases, we are here
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages('NoEmailSent', null, 'warnings');
+			setEventMessages($langs->trans('NoEmailSentAfterRegistration'), null, 'warnings');
 		} else {
-			print 'NoEmailSent'."\n";
+			print $langs->trans('NoEmailSentAfterRegistration')."\n";
 		}
 	}
 

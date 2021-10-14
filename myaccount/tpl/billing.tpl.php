@@ -121,7 +121,7 @@ if (count($listofcontractid) > 0) {
 				print '
 					            <div class="row" style="margin-top:20px">
 
-					              <div class="col-md-6">
+					              <div class="col-md-6 nowraponall">
 									';
 
 				// Execute hook getLastMainDocLink
@@ -131,12 +131,12 @@ if (count($listofcontractid) > 0) {
 					print $hookmanager->resPrint;
 				} else {
 					$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-					print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.' '.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf').'</a>';
+					print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
 				}
 
 				print '</div>
 					              <div class="col-md-2">
-									'.dol_print_date($invoice->date, 'day').'
+									'.dol_print_date($invoice->date, 'dayrfc', $langs).'
 					              </div>
 					              <div class="col-md-2">
 									'.price(price2num($invoice->total_ttc), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
@@ -151,7 +151,7 @@ if (count($listofcontractid) > 0) {
 				$sql = 'SELECT f.rowid, ee.code, ee.label, ee.extraparams, ee.datep  FROM '.MAIN_DB_PREFIX.'facture as f';
 				$sql.= ' INNER JOIN '.MAIN_DB_PREFIX."actioncomm as ee ON ee.fk_element = f.rowid AND ee.elementtype = 'invoice'";
 				$sql.= " AND (ee.code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";
-				$sql.= ' WHERE f.fk_soc = '.$mythirdpartyaccount->id.' AND f.paye = 0 AND f.rowid = '.$invoice->id;
+				$sql.= ' WHERE f.fk_soc = '.((int) $mythirdpartyaccount->id).' AND f.paye = 0 AND f.rowid = '.((int) $invoice->id);
 				$sql.= ' ORDER BY ee.datep DESC';
 				$sql.= ' LIMIT 1';
 

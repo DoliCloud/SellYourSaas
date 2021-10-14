@@ -136,20 +136,26 @@ if (count($listofcontractidreseller) == 0) {
 		if ($statuslabel == 'processing') { $color = 'orange'; }
 		if ($statuslabel == 'suspended') { $color = 'orange'; }
 		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
-
+		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; $displayforinstance='display:none;'; }
 
 
 		// Update resources of instance
 		/*
-		 if (in_array($statuslabel, array('suspended', 'done')))
-		 {
-		 $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract);
-		 if ($result <= 0)
-		 {
-		 $error++;
-		 setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
-		 }
-		 }*/
+		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract);	// We do not do 'refresh', too heavy (due to ssh file check) for a long list of contracts
+			if ($result <= 0) {
+				$error++;
+
+				if ($result == -2) {
+					// We overwrite status 'suspended' and status 'done' with 'unreachable' (a status only for screen output)
+					$statuslabel = 'unreachable';
+					$color = 'orange';
+				} else {
+					setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
+				}
+			}
+		}
+		 */
 
 		print '
                     <!-- Instance of customer -->
@@ -172,7 +178,9 @@ if (count($listofcontractidreseller) == 0) {
 		print '<span class="caption-helper floatright clearboth">';
 		print '<!-- status = '.dol_escape_htmltag($statuslabel).' -->';
 		print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
-		if ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
+		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			print $langs->trans("Redirection");
+		} elseif ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
 		elseif ($statuslabel == 'done') print $langs->trans("Alive");
 		elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
 		elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");

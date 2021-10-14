@@ -14,6 +14,11 @@ if [ "x$1" == "x" ]; then
    exit 1
 fi
 
+if [ "$(id -u)" == "0" ]; then
+   echo "This script must be run as admin, not as root" 1>&2
+   exit 1
+fi
+
 echo "Update git dirs found into $1."
 
 for dir in `ls -d $1/dolibarr* | grep -v documents`

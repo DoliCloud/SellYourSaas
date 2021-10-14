@@ -58,10 +58,10 @@ if [[ "x$databaseport" == "x" ]]; then
 fi
 
 if [ "x$instanceserver" == "x1" && "x$IPSERVERDEPLOYMENT" == "x" ]; then
-   echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
-   exit 1
+	echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 1
 fi
-
 if [ "x$database" == "x" ]; then
     echo "Failed to find the DATABASE by reading entry 'database=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
@@ -77,6 +77,18 @@ if [ "x$databaseuser" == "x" ]; then
 	echo "Usage: ${0} [test|confirm]"
 	exit 4
 fi
+if [ "x$archivedirtest" == "x" ]; then
+    echo "Failed to find the archivedirtest value by reading entry 'archivedirtest=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 31
+fi
+if [ "x$archivedirpaid" == "x" ]; then
+    echo "Failed to find the archivedirpaid value by reading entry 'archivedirpaid=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 31
+fi
+
+
 echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
 databasepass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepass" == "x" ]]; then
@@ -127,13 +139,15 @@ echo "testorconfirm = $testorconfirm"
 MYSQL=`which mysql`
 MYSQLDUMP=`which mysqldump` 
 
-if [[ ! -d $archivedirtest ]]; then
-	echo Failed to find archive directory $archivedirtest
-	exit 8
-fi
-if [[ ! -d $archivedirpaid ]]; then
-	echo Failed to find archive directory $archivedirpaid
-	exit 9
+if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
+	if [[ ! -d $archivedirtest ]]; then
+		echo Failed to find archive directory $archivedirtest
+		exit 8
+	fi
+	if [[ ! -d $archivedirpaid ]]; then
+		echo Failed to find archive directory $archivedirpaid
+		exit 9
+	fi
 fi
 
 echo "***** Clean temporary files"
@@ -336,11 +350,11 @@ if [ -s /tmp/osutoclean ]; then
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
 				if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
-					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
+					echo "$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
+					$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > "$archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
 				else
-					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
-					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+					echo "$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
+					$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > "$archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
 				fi
 
 				echo "Now drop the database"
@@ -556,6 +570,15 @@ echo "***** Now clean journal files older than 60 days"
 echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;"
 find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;
 
+# Clean log files
+if [[ "x$instanceserver" == "x1" ]]; then
+	echo "***** We are on a deployment server, so we clean log files" 
+	echo "Clean web server _error logs"
+	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log 2>/dev/null`; do > $fic; done
+	echo "Clean applicative log files"
+	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
+	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+fi
 
 # Clean archives 
 if [ "x$2" == "xtempdirs" ]; then

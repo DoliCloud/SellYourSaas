@@ -927,9 +927,10 @@ if ($action == 'updateurl') {
 
 					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (case of STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set)';
+					// First launch update of resources:
+					// This update qty of contract lines + qty into linked template invoice.
+					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 
 					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
@@ -1357,8 +1358,7 @@ if ($action == 'updateurl') {
 				$mode='registerpaymentmode';
 			}
 		}
-	} else // createpayment with old method
-	{
+	} else { // createpayment with old method (STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is empty)
 		$stripeToken = GETPOST("stripeToken", 'alpha');
 		$label = 'Card '.dol_print_date($now, 'dayhourrfc');
 
@@ -1598,13 +1598,14 @@ if ($action == 'updateurl') {
 						}
 					}
 
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id." that is not null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
+					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
 
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (old case when STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is not set)';
+					// First launch update of resources:
+					// This update qty of contract lines + qty into linked template invoice.
+					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id.", so we create it then create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
+					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
 
 					// Now create invoice draft
 					$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
@@ -2527,9 +2528,7 @@ if ($welcomecid > 0) {
 		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
 		</p>
 		<p>
-		<a class="btn btn-primary" target="_blank" href="https://'.$contract->ref_customer.'?username='.$_SESSION['initialapplogin'].'">
-		'.$langs->trans("TakeMeTo", $productlabel).'
-		</a>
+		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).'</a>
 		</p>
 
 		</div>';
@@ -2679,13 +2678,14 @@ if ($mythirdpartyaccount->isareseller) {
 	});
 		</script>';
 
-	print '<a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
+	print '<br><a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a>';
 	print '<div id="divmorereselleroptions" style="display: hidden">';
-	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span>';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
-		print '<br>&plan=XXX : ';
-		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span>';
+		print '&plan=XXX : ';
+		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span><br>';
 	}
+	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span><br>';
+	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
 	print '</div>';
 	print '<br>';
 
@@ -2748,8 +2748,13 @@ foreach ($listofcontractid as $contractid => $contract) {
 	}
 
 	$nbofinstances++;
-	if ($suspended) $nbofinstancessuspended++;
-	else $nbofinstancesdone++;
+	if ($suspended) {
+		$nbofinstancessuspended++;
+	} else {
+		if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$nbofinstancesdone++;
+		}
+	}
 }
 $nboftickets = $langs->trans("SoonAvailable");
 if ($mythirdpartyaccount->isareseller) {
@@ -2771,8 +2776,13 @@ if ($mythirdpartyaccount->isareseller) {
 		}
 
 		$nbofinstancesreseller++;
-		if ($suspended) $nbofinstancessuspendedreseller++;
-		else $nbofinstancesdonereseller++;
+		if ($suspended) {
+			$nbofinstancessuspendedreseller++;
+		} else {
+			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				$nbofinstancesdonereseller++;
+			}
+		}
 	}
 }
 
@@ -2807,7 +2817,8 @@ if (empty($welcomecid)) {
 			$delayindays = round($delaybeforeendoftrial / 3600 / 24);
 
 			if (empty($atleastonepaymentmode)) {
-				if ($delaybeforeendoftrial > 0) {		// Trial not yet expired
+				if ($delaybeforeendoftrial > 0) {
+					// Trial not yet expired
 					if (! $isASuspendedContract) {
 						//$firstline = reset($contract->lines);
 						print '
@@ -2816,7 +2827,7 @@ if (empty($welcomecid)) {
 							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), $contract->ref_customer).' !</h4>';
 						if ($mode != 'registerpaymentmode') {
 							print '<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentMode");
 							print '</a>
 								</p>';
@@ -2833,7 +2844,7 @@ if (empty($welcomecid)) {
 						if ($mode != 'registerpaymentmode') {
 							print '
 								<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentModeToRestoreInstance");
 							print '</a>
 								</p>';
@@ -2842,8 +2853,8 @@ if (empty($welcomecid)) {
 							</div>
 						';
 					}
-				} else // Trial expired
-				{
+				} else {
+					// Trial expired
 					$atleastonecontractwithtrialended++;
 
 					$messageforinstance[$contract->ref_customer] = 1;
@@ -2856,7 +2867,7 @@ if (empty($welcomecid)) {
 					if ($mode != 'registerpaymentmode') {
 						print '
 							<p>
-							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 						print $langs->trans("AddAPaymentModeToRestoreInstance");
 						print '</a>
 							</p>';
@@ -2866,26 +2877,30 @@ if (empty($welcomecid)) {
 					';
 				}
 			} else {
-				if ($delaybeforeendoftrial > 0) {		// Trial not yet expired
-					if ($contract->array_options['options_deployment_status'] != 'processing') {
-						//$firstline = reset($contract->lines);
+				if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+					// If not switched in maintenance mode
+					if ($delaybeforeendoftrial > 0) {
+						// Trial not yet expired
+						if ($contract->array_options['options_deployment_status'] != 'processing') {
+							//$firstline = reset($contract->lines);
+							print '
+								<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
+								<div class="note note-info">
+								<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
+								</div>
+							';
+						}
+					} else {
+						// Trial expired
+						$atleastonecontractwithtrialended++;
+
 						print '
-							<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
+							<!-- XDaysAfterEndOfTrialPaymentModeSet -->
 							<div class="note note-info">
-							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
+							<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
 							</div>
 						';
 					}
-				} else // Trial expired
-				{
-					$atleastonecontractwithtrialended++;
-
-					print '
-						<!-- XDaysAfterEndOfTrialPaymentModeSet -->
-						<div class="note note-info">
-						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
-						</div>
-					';
 				}
 			}
 		}
@@ -2893,25 +2908,27 @@ if (empty($welcomecid)) {
 		if ($isASuspendedContract) {
 			if (empty($messageforinstance[$contract->ref_customer])		// If warning for 'expired trial' not already shown
 				&& $delaybeforeendoftrial <= 0) {							// If trial has expired
-				$delayafterexpiration = ($now - $expirationdate);
-				$delayindays = round($delayafterexpiration / 3600 / 24);
-				$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
+				if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+					$delayafterexpiration = ($now - $expirationdate);
+					$delayindays = round($delayafterexpiration / 3600 / 24);
+					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
 
-				print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
-				print '<div class="note note-warning">'."\n";
-				print '		<h4 class="block">'."\n";
-				if ($delayindays >= 0) {
-					print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
-				} else {
-					print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
+					print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
+					print '<div class="note note-warning">'."\n";
+					print '		<h4 class="block">'."\n";
+					if ($delayindays >= 0) {
+						print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
+					} else {
+						print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
+					}
+					if (empty($atleastonepaymentmode)) {
+						print '<br><a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
+					} elseif (GETPOST('mode', 'alpha') != 'registerpaymentmode') {
+						print '<br>'.$langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
+					}
+					print '     </h4>'."\n";
+					print '</div>'."\n";
 				}
-				if (empty($atleastonepaymentmode)) {
-					print '<br><a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
-				} elseif (GETPOST('mode', 'alpha') != 'registerpaymentmode') {
-					print '<br>'.$langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
-				}
-				print '     </h4>'."\n";
-				print '</div>'."\n";
 			}
 		} elseif ($isAPayingContract && $expirationdate > 0) {
 			$delaybeforeexpiration = ($expirationdate - $now);

@@ -289,7 +289,7 @@ TypeOfSupport=Niveau d'assistance
 PleaseReadFAQFirst=Avant de soumettre un ticket de support, veuillez vérifier si la réponse n'est pas déjà disponible ici : <br> <br> <center> <a href="%s" target="_faq"> FAQ (Foire Aux Questions) </a> </center>
 CurrentServiceStatus=L'état de nos services peut être consulté en temps réel sur <a href="%s" target="_status">cette page</a>. Si un service apparaît inactif, alors nous sommes probablement déjà au courant et en train d'intervenir. Merci de patienter...
 NewTicket=Nouveau ticket
-SupportDesc=Envoyer un nouveau ticket (demande/question)
+SupportDesc=Envoyer un nouveau ticket (question/problème)
 SelectYourSupportChannel=Sélectionnez votre canal d'assistance
 PremiumSupport=Support Premium
 NoPremiumPlan=Pas de souscription active à une telle offre
@@ -379,7 +379,7 @@ YourAccountHasBeenClosed=Votre compte a été fermé.
 SorryInstanceSuspended=Désolé, votre instance <strong>%s</strong> a été suspendue.
 SorryInstanceInMaintenance=Désolé, votre instance <strong> %s </strong> est en mode maintenance. Merci de revenir plus tard...
 SorryServerInMaintenance=Désolé, le serveur est en mode maintenance. Merci de revenir plus tard...
-InstanceInMaintenanceMode=L'instance est en mode maintenance! <br> Utilisez un navigateur avec la valeur '<b> %s </b>' dans sa chaîne User-Agent pour le contourner.
+InstanceInMaintenanceMode=L'instance est en mode maintenance! <br> Utilisez un navigateur avec la valeur '<b>%s</b>' dans sa chaîne User-Agent pour le contourner.
 InstanceUnsuspended=L'instance est active
 SorryAccountDeleted=Désolé, ce compte semble détruit. Merci de nous contacter (%s) si vous désirez recréer un compte avec ce login/e-mail.
 LatestResUpdateDate=Date dernière mise à jour ressources
@@ -507,7 +507,7 @@ PaymentChargedButReversedByBank=Paiement encaissé puis annulé illégitimement 
 StripeAccount=Compte Stripe
 StripeAccountForCustomerHelp=Le compte Stripe à utiliser pour collecter les factures clients. Remplissez quelque chose ici uniquement si vous devez collecter de l'argent en utilisant un autre compte Stripe que la valeur par défaut. <br> Exemple: cus_ABCD@pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Nb max d'instances
-ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL: <br> &forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une adresse IP<br>&extcss=mycssurl<br>
+ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL: <br> &forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une adresse IP<br>&extcss=mycssurl<br>&disablecustomeremail=1 Pour désactiver l'envoi de l'email confirmation vers le client après son inscription 
 AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instances existantes, votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span>, hors remises
 SeeOurPrices=Voir les prix de chaque formule <a href="%s" target="_blank">ici</a>
 NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.
@@ -571,7 +571,9 @@ SELLYOURSAAS_SALTFORPASSWORDENCRYPTION=Salt utilisé pour construire la clé de 
 KMFoundForTicketGroup=Nous avons trouvé des sujets et des FAQ susceptibles de répondre à votre question, merci de les vérifier avant de soumettre le ticket
 InstanceMoveInProgress=Votre instance est actuellement en cours de mise à niveau matérielle. Si vous n'avez pas récupéré l'accès après 1 heure, veuillez contacter le support depuis votre tableau de bord client.
 ActiveInstanceOfASpammer=Instance d'un utilisateur malveillant (hacker, spammeur). Pas encore non déployé.
-MaintenanceMessage=Message à afficher
+MaintenanceMessage=Message à afficher, ou URL de redirection (commençant par http...)
 ConfirmMaintenance=Voulez-vous vraiment basculer cette instance en mode maintenance ? L'accès ne sera pas possible pour les utilisateurs communs. <br> Remarque : si un navigateur inclut la chaîne <b> %s </b> dans son User-Agent, il pourra contourner le verrouillage du message de maintenance.
 Assistance=Assistance
 ContactUs=Contactez-nous
+ToDisableEmailThatConfirmsRegistration=Pour désactiver l'email de confirmation vers le client client après son inscription
+NoEmailSentAfterRegistration=Aucun email n'a été envoyé au client après cette inscription
