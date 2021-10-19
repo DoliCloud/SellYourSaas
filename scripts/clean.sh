@@ -151,6 +151,7 @@ if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
 fi
 
 echo "***** Clean temporary files"
+
 echo rm -f /tmp/instancefound*
 rm -f /tmp/instancefound*
 if [ -f /tmp/instancefound-dbinsellyoursaas ]; then
@@ -165,6 +166,7 @@ if [ -f /tmp/instancefound-dbinmysqldic ]; then
 	echo Failed to delete file /tmp/instancefound-dbinmysqldic
 	exit 19
 fi
+
 echo rm -f /tmp/osutoclean*
 rm -f /tmp/osutoclean*
 if [ -f /tmp/osutoclean ]; then
@@ -175,6 +177,7 @@ if [ -f /tmp/osutoclean-oldundeployed ]; then
 	echo Failed to delete file /tmp/osutoclean-oldundeployed
 	exit 14
 fi
+
 echo rm -f /tmp/osusernamefound*
 rm -f /tmp/osusernamefound*
 if [ -f /tmp/osusernamefound ]; then
@@ -182,6 +185,13 @@ if [ -f /tmp/osusernamefound ]; then
 	exit 15
 fi
 
+echo "Nettoyage vieux fichiers log"
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+
+echo "Nettoyage vieux fichiers /tmp"
+echo find . -mtime +30 -name 'phpsendmail*' -exec rm {} \;
+find . -mtime +30 -name 'phpsendmail*' -exec rm {} \;
 
 
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
