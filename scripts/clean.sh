@@ -190,8 +190,8 @@ echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.lo
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
 
 echo "Nettoyage vieux fichiers /tmp"
-echo find . -mtime +30 -name 'phpsendmail*' -exec rm {} \;
-find . -mtime +30 -name 'phpsendmail*' -exec rm {} \;
+echo find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
 
 
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
