@@ -92,4 +92,10 @@ if [[ "x$masterserver" == "x1" ]]; then
 fi
 
 echo "Nettoyage vieux fichiers log"
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+
+echo "Nettoyage vieux /tmp"
+echo find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+
