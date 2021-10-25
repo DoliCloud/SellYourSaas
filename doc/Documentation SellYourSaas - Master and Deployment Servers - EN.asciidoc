@@ -1202,6 +1202,9 @@ Then reload the new configuration:
 [source, bash]
 ---------------
 systemctl reload service_name.service
+or
+systemctl stop mysqld.service
+systemctl start mysqld.service
 ---------------
 
 
@@ -1848,7 +1851,7 @@ mysql           soft     nofile           4096
 mysql           hard     nofile           32768
 ---------------
 
-Pour voir les limites:
+To see limits of OS:
 
 [source,bash]
 ---------------
@@ -2150,12 +2153,11 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-==== Secure the root account (optional)
+==== Secure the root account
 
 On *all servers*:
 
-In order not to allow brute force cracking, if it is not already the case, put the user *root* of the database in authentication
-from the system root account only (using *auth_socket* or *unix_socket*):
+In order not to allow brute force cracking, if it is not already the case, put the user *root* of the database in authentication from the system root account only (using *auth_socket* or *unix_socket*):
 
 For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
 
@@ -2193,7 +2195,7 @@ update mysql.user set plugin='unix_socket' where user='root' and host='localhost
 You must stop/start database server to validate this change !
 
 
-Note: The show specific parameters that are not the default values, you can launch:
+Note: To show specific parameters that are not the default values, you can launch:
 
 [source,bash]
 ---------------
@@ -4014,6 +4016,10 @@ systemctl status cron
 ---------------
 
 - Edit the crons from *root* and *admin* 
+
+---------------
+crontab -e
+---------------
 
 
 ==== Set reverse IP name and add a DNS name for IP
