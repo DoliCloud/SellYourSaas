@@ -391,6 +391,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--no-tablespaces";
 	$param[]="-c";
 	$param[]="-e";
+	//$param[]="-q";
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 
