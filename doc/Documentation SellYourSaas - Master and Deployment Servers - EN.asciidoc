@@ -895,7 +895,8 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 sudo apt update
 sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
-sudo apt install -y php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y apache2 apache2-bin lynx
+sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -911,7 +912,8 @@ sudo apt install -y mailutils postfix
 sudo apt update
 sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
-sudo apt install -y php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y apache2 apache2-bin lynx
+sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -2227,7 +2229,7 @@ Give permission, on the *Master server*, to the account *sellyoursaas* of each d
 
 [source,sql]
 ---------------
-CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf of the deployment server)
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf quitof the deployment server)
 
 GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
 
@@ -3001,7 +3003,7 @@ chmod +t /dev/shm /var/lib/php/sessions
 
 ==== Define size of upload and session options
 
-Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
+Modify the file */etc/php/*.*/apache2/php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
@@ -3088,10 +3090,10 @@ And copy them on local directory:
 [source,bash]
 ---------------
 mkdir /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp/spam/;
 chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
 
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
