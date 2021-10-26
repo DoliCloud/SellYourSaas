@@ -14,6 +14,7 @@
 # undeploy    remove only instance (must be easy to restore) - rest can be done later with clean.sh
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
+export nowlog=`date +'%Y%m%d-%H%M%S'`
 
 echo
 echo
@@ -581,8 +582,8 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 16
 			fi
 			
-			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog
 			
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
@@ -656,8 +657,8 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 18
 			fi
 			
-			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
-			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog
 			
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
