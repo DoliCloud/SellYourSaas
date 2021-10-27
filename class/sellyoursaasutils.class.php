@@ -3196,6 +3196,8 @@ class SellYourSaasUtils
 				if (! empty($contract->array_options['options_timezone'])) {
 					$substitarray['TZ=UTC'] = 'TZ='.$contract->array_options['options_timezone'];
 				}
+				$substitarray['__SMTP_SPF_STRING__'] = '_spf'.$sldAndSubdomain.'.'.$domainname;
+
 
 				$dirfortmpfiles = DOL_DATA_ROOT.'/sellyoursaas/temp';
 				dol_mkdir($dirfortmpfiles, '', '0775');
