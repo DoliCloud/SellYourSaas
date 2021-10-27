@@ -123,7 +123,7 @@ export REMOTEIP=${23}
 export SELLYOURSAAS_ACCOUNT_URL=${24}
 export instancenameold=${25}
 export domainnameold=${26}
-export customurl=${27}
+export customurl=${27//£/ }
 if [ "x$customurl" == "x-" ]; then
 	customurl=""
 fi

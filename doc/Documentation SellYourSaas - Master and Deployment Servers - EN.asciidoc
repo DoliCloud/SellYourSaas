@@ -3338,7 +3338,7 @@ For example, you can use *supervision@mysaasdomain.com* as the email for letsenc
 
 This enables the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
 
-To read generated .pem files, you can run
+To read certificate .crt or .pem files, you can run:
 
 [source,bash]
 ---------------

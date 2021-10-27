@@ -132,7 +132,7 @@ $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
 $origin = GETPOST('origin', 'aZ09');
 $partner=GETPOST('partner', 'int');
 $partnerkey=GETPOST('partnerkey', 'alpha');		// md5 of partner name_alias
-$custmourl = '';
+$customurl = '';
 
 $fromsocid=GETPOST('fromsocid', 'int');
 $reusecontractid = GETPOST('reusecontractid', 'int');
@@ -155,7 +155,7 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 	$tldid = '.'.join('.', $instancefullnamearray);
 	$password = $argv[3];
 	$reusesocid = $argv[4];
-	$custmourl = $argv[5];
+	$customurl = $argv[5];
 	if (empty($productref) || empty($sldAndSubdomain) || empty($tldid) || empty($password) || empty($reusesocid)) {
 		print "***** ".$script_file." *****\n";
 		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
@@ -163,7 +163,8 @@ if (substr($sapi_type, 0, 3) == 'cli') {
 		print "Example: ".$script_file." SERVICETODEPLOY myinstance.withX.mysellyoursaasdomain.com mypassword 123 [myinstance.withold.mysellyoursaasdomain.com]\n";
 		exit(-1);
 	}
-	$CERTIFFORCUSTOMDOMAIN = $custmourl;
+
+	$CERTIFFORCUSTOMDOMAIN = $customurl;
 	if ($CERTIFFORCUSTOMDOMAIN &&
 		(! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt') || ! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.key') || ! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'-intermediate.crt'))) {
 		print "***** ".$script_file." *****\n";
@@ -973,8 +974,8 @@ if ($reusecontractid) {
 		$contract->array_options['options_username_db'] = $generateddbusername;
 		$contract->array_options['options_password_db'] = $generateddbpassword;
 
-		if ($custmourl) {
-			$contract->array_options['options_custom_url'] = $custmourl;
+		if ($customurl) {
+			$contract->array_options['options_custom_url'] = $customurl;
 		}
 
 		//$contract->array_options['options_nb_users'] = 1;
