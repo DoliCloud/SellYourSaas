@@ -1555,7 +1555,7 @@ instances:
     search_string: ['apache2']
     exact_match: False
     thresholds:
-      critical: [5, 5000]
+      critical: [4, 5000]
 
   - name: fail2ban
     search_string: ['fail2ban-server']
