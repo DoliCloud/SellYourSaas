@@ -310,6 +310,21 @@ a2enconf charset localized-error-pages other-vhosts-access-log security serve-cg
 a2enconf php7.2-fpm|php7.4-fpm
 ---------------
 
+On modifie la configuration du module *mpm_event* en éditant le fichier */etc/apache2/mods-enabled/mpm_event.conf*:
+
+[source,bash]
+---------------
+<IfModule mpm_event_module>
+        StartServers               5
+        MinSpareThreads          100
+        MaxSpareThreads          150
+        ThreadLimit               64
+        ThreadsPerChild           20
+        MaxRequestWorkers        200
+        MaxConnectionsPerChild  5000
+</IfModule>
+---------------
+
 
 === Installation of unix watchdog (optional) ===
 
