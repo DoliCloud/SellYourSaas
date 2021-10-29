@@ -155,11 +155,11 @@ fi
 
 if [ "x$errstring" != "x" ]; then
 	echo "Send email to $EMAILTO to inform about backup system error"
-	echo -e "The backup of system for "`hostname`" localy failed.\nerrstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup system of "`hostname`" failed" $EMAILTO
+	echo -e "The local backup of system for "`hostname`" failed (started at $now).\nerrstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup system of "`hostname`" failed" $EMAILTO
 	echo
 else
 	echo "Send email to $EMAILTO to inform about backup system success"
-	echo -e "The backup of system for "`hostname`" succeed" | mail -aFrom:$EMAILFROM -s "[Backup system - "`hostname`"] Backup of system succeed" $EMAILTO
+	echo -e "The local backup of system for "`hostname`" succeed (started at $now)" | mail -aFrom:$EMAILFROM -s "[Backup system - "`hostname`"] Backup of system succeed" $EMAILTO
 	echo
 fi
 
