@@ -578,7 +578,7 @@ if (! $nboferrors) {
 		if (empty($instancefilter)) {
 			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 			$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-			$msg = 'Backup done without errors on '.gethostname().' by '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
+			$msg = 'Backup done without errors on '.gethostname().' by '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".strftime("%Y%m%d-%H%M%S").")\n\n".$out;
 
 			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
 			$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
@@ -607,7 +607,7 @@ if (! $nboferrors) {
 			$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
 			// Supervision tools are generic for all domain. No ay to target a specific supervision email.
 
-			$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]."\n\n".$out;
+			$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".strftime("%Y%m%d-%H%M%S").")\n\n".$out;
 
 			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
@@ -652,7 +652,7 @@ if (! $nboferrors) {
 				}
 			}
 		} else {
-			print 'Script was called for a given instance. No email or indicator sent in such situation'."\n";
+			print 'Script was called for only one given instance. No email or supervision event sent in such situation'."\n";
 		}
 	}
 }
