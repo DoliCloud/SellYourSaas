@@ -501,7 +501,9 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 			if (! $error && $okforremoteaction) {
 				dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($this->db);
-				$result = $sellyoursaasutils->sellyoursaasRemoteAction($remoteaction, $object, 'admin', '', '', '0', 'Remote action executed from trigger', 300);	// No events added
+				// Param '0' means an event is added for some remot action only, '-1' means never add remote action
+				$forceaddevent = '0';
+				$result = $sellyoursaasutils->sellyoursaasRemoteAction($remoteaction, $object, 'admin', '', '', $forceaddevent, 'Remote action '.$remoteaction.' executed from trigger '.$action, 300);
 				if ($result <= 0) {
 					$error++;
 					$this->error=$sellyoursaasutils->error;

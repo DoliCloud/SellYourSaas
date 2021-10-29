@@ -2794,7 +2794,7 @@ class SellYourSaasUtils
 	 * @param	string					$appusername	App login. Used for replacement of __APPUSERNAME__
 	 * @param	string					$email			Initial email. Used for replacement of __APPEMAIL__
 	 * @param	string					$password		Initial password. Used for replacement of __APPPASSWORD__
-	 * @param	string					$forceaddevent	'1'=Force to add event. If '0', add of event is done only for remoteaction = 'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy','undeployall'
+	 * @param	string					$forceaddevent	'1'=Force to add event. '-1'=Never add. If '0', add of event is done only for remoteaction = 'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy','undeployall'
 	 *													$forceaddevent is set by caller but is also overwrote to on when we detect qty has changed.
 	 * @param	string					$comment		Comment
 	 * @param   int                     $timeout        Time out in seconds
@@ -3047,8 +3047,10 @@ class SellYourSaasUtils
 				$contract->fetch($tmpobject->fk_contrat);
 				$contract->fetch_thirdparty();
 
-				// Set var to force to add an event at end of remote action.
-				$forceaddevent = 1;
+				// We are in a case of $remoteaction that need to add an event when forceaddevent = 0, to force to add an event at end of remote action.
+				if ($forceaddevent != '-1') {
+					$forceaddevent = 1;
+				}
 				if ($remoteaction == 'rename') {
 					$forceaddevent = 'Rename old name '.$object->oldcopy->ref_customer.' into '.$contract->ref_customer;
 				}
