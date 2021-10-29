@@ -770,7 +770,8 @@ fi
 
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"
+sleep 1
+echo `date +'%Y-%m-%d %H:%M:%S'`" return 0"
 echo
 
-sleep 1
 exit 0

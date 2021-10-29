@@ -1305,6 +1305,7 @@ fi
 #fi
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished with no error"
+echo `date +'%Y-%m-%d %H:%M:%S'`" return 0" 
 echo
 
 exit 0
