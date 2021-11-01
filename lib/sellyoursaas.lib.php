@@ -21,6 +21,35 @@
  * \brief   Library files with common functions for SellYourSaas module
  */
 
+if (!function_exists('getDolGlobalString')) {
+	/**
+	 * Return dolibarr global constant string value
+	 * @param string $key key to return value, return '' if not set
+	 * @param string $default value to return
+	 * @return string
+	 */
+	function getDolGlobalString($key, $default = '')
+	{
+		global $conf;
+		// return $conf->global->$key ?? $default;
+		return (string) (empty($conf->global->$key) ? $default : $conf->global->$key);
+	}
+}
+
+if (!function_exists('getDolGlobalInt')) {
+	/**
+	 * Return dolibarr global constant int value
+	 * @param string $key key to return value, return 0 if not set
+	 * @param int $default value to return
+	 * @return int
+	 */
+	function getDolGlobalInt($key, $default = 0)
+	{
+		global $conf;
+		// return $conf->global->$key ?? $default;
+		return (int) (empty($conf->global->$key) ? $default : $conf->global->$key);
+	}
+}
 
 /**
  * To compare on date property
