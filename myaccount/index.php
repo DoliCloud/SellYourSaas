@@ -467,7 +467,7 @@ if ($action == 'updateurl') {
 		$arr_mime = array();
 		$arr_name = array();
 		$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
-		$listofpaths = dol_dir_list($upload_dir, 'all', 0, '', '', 'name', SORT_ASC, 0);
+		$listofpaths = dol_dir_list($upload_dir, 'all', 0, '', array('^\.', '^thumbs$'), 'name', SORT_ASC, 0);
 		if (count($listofpaths)) {
 			foreach ($listofpaths as $key => $val) {
 				$arr_file[] = $listofpaths[$key]['fullname'];
