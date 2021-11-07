@@ -1,7 +1,7 @@
 <VirtualHost *:443 *:80>
         __VirtualHostHead__
         
-		# Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
+        # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
         php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__webAppPath__/
 
         ServerName __webAppDomain__
