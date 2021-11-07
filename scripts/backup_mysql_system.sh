@@ -33,6 +33,7 @@ export targetdir2="/home/admin/backup/conf"
 
 export DATABASE=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export webserver=`grep '^webserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -103,7 +104,14 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	
-	if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
+    export foundmasterdatabase=0;  
+    if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
+            foundmasterdatabase=1;
+    fi
+    if [ "x$DATABASE" != "x" -a "x$webserver" == "x1" ]; then
+            foundmasterdatabase=1;
+    fi
+    if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.zst"
 		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.zst"
@@ -114,7 +122,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	else
-		echo "No sellyoursaas master database found to backup."
+		echo "No sellyoursaas database found to backup."
 	fi
 else
 	echo "Do a tar of config files"
@@ -138,7 +146,14 @@ else
 	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	
-	if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
+    export foundmasterdatabase=0;  
+    if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
+            foundmasterdatabase=1;
+    fi
+    if [ "x$DATABASE" != "x" -a "x$webserver" == "x1" ]; then
+            foundmasterdatabase=1;
+    fi
+    if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
 		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.gz"
@@ -149,7 +164,7 @@ else
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 		rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	else
-		echo "No sellyoursaas master database found to backup."
+		echo "No sellyoursaas database found to backup."
 	fi
 fi
 

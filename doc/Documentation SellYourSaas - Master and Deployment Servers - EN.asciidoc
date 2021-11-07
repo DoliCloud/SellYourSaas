@@ -2667,6 +2667,14 @@ aa-enforce bin.secureBash
 ---------------
 
 
+* Note: To unload ALL apparmor profiles:
+
+[source,bash]
+---------------
+aa-teardown
+---------------
+
+
 * Note: To disable a profile of rules
 
 [source,bash]
@@ -4576,7 +4584,7 @@ sudo chown mysql /var/run/mysqld;
 sudo mysqld_safe --skip-grant-tables &
 ---------------
 
-* With a mode different from recovery, modify server.conf to set 1, 2, 3, 4
+* With a mode different for recovery, modify */etc/mysql/mariadb.conf.d/50-server.conf* to set 1, 2, 3, 4
 
 [source,bash]
 ---------------
@@ -4591,7 +4599,7 @@ NOTE: If launching takes a long time, to follow what's happening, do:
 
 [source,bash]
 ---------------
-lsof -p PID_de_mysql 
+lsof -p PID_of_ps_grep_mysqld 
 ---------------
 to see files and DBs treated in relog. They are open either by date of the inodes or by alphabetical order in the dbn folder... (do it several times to determine which)
 
@@ -5155,5 +5163,5 @@ When logged with a customer linux account osu..., you get this error:
 mysql -A -C -u dbu... -p'...' -h localhost -D dbn...
 ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (13)
 
-Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter --protocol tcp.
+Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter *--protocol tcp*.
 
