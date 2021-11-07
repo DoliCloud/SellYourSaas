@@ -1975,7 +1975,9 @@ pour mettre dans la section *[Service]* une valeur au nombre limit de fichier pl
 [source,bash]
 ---------------
 LimitNOFILE=50000
-Restart=on-watchdog
+Restart=no
+#Restart=on-abort     # on-abort is also possible
+#Restart=on-watchdog  # on-watchdog is also possible
 ---------------
 
 Ceci devrait éviter les alertes du type "Could not increase number of max_open_files to more than".
