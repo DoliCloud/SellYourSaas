@@ -664,4 +664,11 @@ if [ -s /tmp/deletedirs.sh ]; then
 fi
 
 
+if [[ $testorconfirm == "confirm" ]]; then
+	echo "***** Clean temporary files"
+	
+	echo rm -f /tmp/instancefound*
+	rm -f /tmp/instancefound*
+fi
+
 exit 0
