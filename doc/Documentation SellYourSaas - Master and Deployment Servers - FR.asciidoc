@@ -2992,6 +2992,12 @@ chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
 su root syslog
 ---------------
 
+* Modifier le fichier */etc/logrotate.d/apache2* pour augmenter le délai de purge à 365 jours.
+
+[source,conf]
+---------------
+rotate 365
+---------------
 
 * Créer un fichier */etc/logrotate.d/logrotate_admin_log*
 
