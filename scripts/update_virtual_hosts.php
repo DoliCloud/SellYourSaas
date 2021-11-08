@@ -212,10 +212,10 @@ foreach ($listofvirtualhost as $virtualhostconfarray) {
 		//php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:/home/jail/home/osur3s2ffyep/dbnzCo96O2J/
 
 		if ($rewritefile) {
-			print "  -> We will rewrite the file ".$virtualhostconf." after adding the string (old file will be renamed into .completed).\n";
+			print "  -> We will rewrite the file ".$virtualhostconf." after adding the string (old file will be renamed into .beforeupdate).\n";
 
 			if ($mode == 'confirm') {
-				dol_move($virtualhostconf, $virtualhostconf.'.completed', 0, 1, 0, 0);
+				dol_move($virtualhostconf, $virtualhostconf.'.beforeupdate', 0, 1, 0, 0);
 				$handlew = fopen($virtualhostconf, 'w');
 			} else {
 				$handlew = fopen('/dev/null', 'w');
