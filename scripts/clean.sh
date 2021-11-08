@@ -600,6 +600,18 @@ if [ "x$2" == "xtempdirs" ]; then
 fi
 
 
+if [[ $testorconfirm == "confirm" ]]; then
+	echo "***** Clean temporary files"
+	
+	echo rm -f /tmp/instancefound*
+	rm -f /tmp/instancefound*
+	echo rm -f /tmp/osutoclean*
+	rm -f /tmp/osutoclean*
+	echo rm -f /tmp/osusernamefound*
+	rm -f /tmp/osusernamefound*
+fi
+
+
 echo
 echo TODO Manually...
 
@@ -661,18 +673,6 @@ done
 if [ -s /tmp/deletedirs.sh ]; then
 	echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
 	echo You can execute commands into file /tmp/deletedirs.sh
-fi
-
-
-if [[ $testorconfirm == "confirm" ]]; then
-	echo "***** Clean temporary files"
-	
-	echo rm -f /tmp/instancefound*
-	rm -f /tmp/instancefound*
-	echo rm -f /tmp/osutoclean*
-	rm -f /tmp/osutoclean*
-	echo rm -f /tmp/osusernamefound*
-	rm -f /tmp/osusernamefound*
 fi
 
 exit 0
