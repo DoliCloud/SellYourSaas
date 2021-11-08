@@ -669,6 +669,10 @@ if [[ $testorconfirm == "confirm" ]]; then
 	
 	echo rm -f /tmp/instancefound*
 	rm -f /tmp/instancefound*
+	echo rm -f /tmp/osutoclean*
+	rm -f /tmp/osutoclean*
+	echo rm -f /tmp/osusernamefound*
+	rm -f /tmp/osusernamefound*
 fi
 
 exit 0
