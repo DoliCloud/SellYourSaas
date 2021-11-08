@@ -1113,12 +1113,16 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	then
 		if [[ -f /var/spool/cron/crontabs/$osusername ]]; then
 			echo merge existing $cronfile with existing /var/spool/cron/crontabs/$osusername
+			# We remove the line that contains the dbname into the tmp file
 			echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
 			cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
+			# Now we add the lines to use for this instance into the tmp file
 			echo "cat $cronfile >> /tmp/$dbname.tmp"
 			cat $cronfile >> /tmp/$dbname.tmp
 			echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 			cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+			echo rm /tmp/$dbname.tmp
+			rm /tmp/$dbname.tmp
 		else
 			echo cron file /var/spool/cron/crontabs/$osusername does not exists yet
 			echo cp $cronfile /var/spool/cron/crontabs/$osusername
