@@ -1121,8 +1121,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			cat $cronfile >> /tmp/$dbname.tmp
 			echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 			cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
-			echo rm /tmp/$dbname.tmp
-			rm /tmp/$dbname.tmp
+			echo rm -f /tmp/$dbname.tmp
+			rm -f /tmp/$dbname.tmp
 		else
 			echo cron file /var/spool/cron/crontabs/$osusername does not exists yet
 			echo cp $cronfile /var/spool/cron/crontabs/$osusername
