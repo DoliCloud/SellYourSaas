@@ -153,7 +153,8 @@ if (empty($instanceserver) || empty($mode) || empty($option) || empty($stringtoa
 	print "Update virtual hosts of instances by adding a line if not already found.\n";
 	print "Script must be ran from each deployment server with login root.\n";
 	print "\n";
-	print "Usage: ".$script_file."  test|confirm  discardiffound|addiffound|replace  'line to add'\n";
+	print "Usage:   ".$script_file."  test|confirm  discardiffound|addiffound|replace  'line to add'\n";
+	print "Example: ".$script_file."  test  replace  'php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__InstanceRoot__'\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -171,17 +172,24 @@ print "Process each virtual host into directory ".$dirtoscan." to add ".$stringt
 $listofvirtualhost = dol_dir_list($dirtoscan, 'files', 0, '\.conf$');
 foreach ($listofvirtualhost as $virtualhostconfarray) {
 	$virtualhostconf = $virtualhostconfarray['fullname'];
-	print "Process file ".$virtualhostconf."\n";
+	print "***** Process file ".$virtualhostconf."\n";
 	$handle = fopen($virtualhostconf, 'r');
 	if ($handle) {
 		$found = 0;
 		$addnewstring = 1;
 		$totallineoriginal = 0;
+		$apachedocumentroot = '';
 		$arrayoflines = array();
 		while ($s = fgets($handle, 4096)) {
 			$totallineoriginal++;
-			if (preg_match('/'.preg_quote($stringtoadd, '/').'/', $s)) {
-				print " String to add already found".($option == 'replace' ? ' (lines will be replaced)' : ($option == 'discardiffound' ? ' (no change on file will be done)' : ' (file will be completed)')).": ".$s;
+			$reg = array();
+			if (preg_match('/^\s*DocumentRoot\s*(.*)$/', $s, $reg)) {
+				$apachedocumentroot = preg_replace('/htdocs\/?$/', '', $reg[1]);
+				print "  We found the value ".$apachedocumentroot." for InstanceRoot.\n";
+			}
+			$stringtosearch = str_replace('__InstanceRoot__', '.*', preg_quote($stringtoadd, '/'));
+			if ($stringtosearch && preg_match('/'.$stringtosearch.'/', $s)) {
+				print "  A string similar to the one to add already found".($option == 'replace' ? ' (lines will be replaced)' : ($option == 'discardiffound' ? ' (no change on file will be done)' : ' (file will be completed)')).": ".$s;
 				$found++;
 				// Do we have to keep it or discard line ?
 				if ($option == 'discardiffound') {
@@ -199,12 +207,12 @@ foreach ($listofvirtualhost as $virtualhostconfarray) {
 		$rewritefile = 1;
 		if ($found && $option == 'discardiffound') {
 			$rewritefile = 0;
-			print " -> We discard file ".$virtualhostconf.".\n";
+			print "  -> We discard file ".$virtualhostconf.".\n";
 		}
 		//php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:/home/jail/home/osur3s2ffyep/dbnzCo96O2J/
 
 		if ($rewritefile) {
-			print " -> We rewrite file ".$virtualhostconf." after adding the string (old file is renamed .completed).\n";
+			print "  -> We will rewrite the file ".$virtualhostconf." after adding the string (old file will be renamed into .completed).\n";
 
 			if ($mode == 'confirm') {
 				dol_move($virtualhostconf, $virtualhostconf.'.completed', 0, 1, 0, 0);
@@ -213,31 +221,36 @@ foreach ($listofvirtualhost as $virtualhostconfarray) {
 				$handlew = fopen('/dev/null', 'w');
 			}
 			if (! $handlew) {
-				print " ERROR: Failed to open file ".$virtualhostconf." for writing.\n";
+				print "  ERROR: Failed to open file ".$virtualhostconf." for writing.\n";
 				fclose($handlew);
 				continue;
 			} else {
 				$linenb = 0;
-				print " We have ".count($arrayoflines)." old lines on ".$totallineoriginal." to rewrite.\n";
+				print "  We have ".count($arrayoflines)." old lines on ".$totallineoriginal." to rewrite.\n";
 				foreach ($arrayoflines as $line) {
 					fwrite($handlew, $line);
 					$linenb++;
 
 					// We add the string
 					if ($linenb == 1 && $addnewstring) {
-						print " We also add the new string after line ".$linenb.".\n";
-						fwrite($handlew, $stringtoadd);
+						$newstringtoadd = $stringtoadd;
+						if ($apachedocumentroot) {
+							$newstringtoadd = str_replace('__InstanceRoot__', $apachedocumentroot, $newstringtoadd);
+						}
+						print "  We also add this new string after line ".$linenb.": ".$newstringtoadd."\n";
+						fwrite($handlew, $newstringtoadd."\n");
 					}
 				}
 			}
 
 			fclose($handlew);
-			print "File has been rewritten.\n";
+			if ($mode == 'confirm') {
+				print "  File has been rewritten.\n";
+			} else {
+				print "  File has NOT been rewritten (test mode).\n";
+			}
 		}
 	}
-
-	exit;
-
 }
 
 exit(0);
