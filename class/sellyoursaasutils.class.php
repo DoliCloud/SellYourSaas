@@ -117,10 +117,9 @@ class SellYourSaasUtils
 						}
 
 						// Search contract linked to invoice
-						$invoice->fetchObjectLinked();
+						$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
-							//dol_sort_array($object->linkedObjects['facture'], 'date');
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
 								if (! empty($draftinvoiceprocessed[$invoice->id])) continue;	// If already processed because of a previous contract line, do nothing more
 
@@ -1375,7 +1374,8 @@ class SellYourSaasUtils
 						// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
 						// Search contract linked to invoice
 						$foundcontract = null;
-						$invoice->fetchObjectLinked();
+						$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
+
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
 							//dol_sort_array($object->linkedObjects['facture'], 'date');
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
@@ -1615,7 +1615,7 @@ class SellYourSaasUtils
 					dol_syslog("* Process contract in doRefreshContracts for contract id=".$object->id." ref=".$object->ref." ref_customer=".$object->ref_customer);
 
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
-					$isAPayingContract = sellyoursaasIsPaidInstance($object, 0, 0);		// This load ->linkedObjectsIds
+					$isAPayingContract = sellyoursaasIsPaidInstance($object, 0, 0);		// This load also ->linkedObjectsIds
 					dol_syslog('', 0, -1);
 					if ($mode == 'test' && $isAPayingContract) {
 						$contractignored[$object->id]=$object->ref;
@@ -1636,7 +1636,7 @@ class SellYourSaasUtils
 					//var_dump($expirationdate.' '.$enddatetoscan);
 
 					// Load linked ->linkedObjects (objects linked)
-					$object->fetchObjectLinked();
+					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 					// Test if there is at least 1 open invoice
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
@@ -1814,7 +1814,7 @@ class SellYourSaasUtils
 					//var_dump($expirationdate.' '.$enddatetoscan);
 
 					// Test if there is pending invoice
-					$object->fetchObjectLinked();
+					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 					if (is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						usort($object->linkedObjects['facture'], "cmp");
@@ -2103,7 +2103,7 @@ class SellYourSaasUtils
 						//   if already a template invoice exists, we will suspend instance
 						$customerHasAPaymentMode = sellyoursaasThirdpartyHasPaymentMode($object->thirdparty->id);
 						if ($customerHasAPaymentMode) {
-							// Portion of code similar to more complete code into index.php
+							// Portion of code similar to a more complete code into index.php
 							// We set some parameter to be able to use same code
 							$sellyoursaasutils = $this;
 							$db = $this->db;
@@ -2126,7 +2126,7 @@ class SellYourSaasUtils
 								}
 
 								// Make a test to pass loop if there is already a template invoice
-								$result = $contract->fetchObjectLinked();
+								$result = $contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 								if ($result < 0) {
 									continue;							// There is an error, so we discard this contract to avoid to create template twice
 								}
@@ -2333,7 +2333,7 @@ class SellYourSaasUtils
 									if ($invoice_draft->id > 0) {
 										$srcObject = $invoice_draft;
 
-										$srcObject->fetchObjectLinked();
+										$srcObject->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 										if (! empty($srcObject->linkedObjectsIds['contrat'])) {
 											$contractidid = reset($srcObject->linkedObjectsIds['contrat']);
@@ -2669,7 +2669,7 @@ class SellYourSaasUtils
 								//setEventMessages($contract->error, $contract->errors, 'errors');
 							} else {
 								// Now we force disable of recurring invoices
-								$object->fetchObjectLinked();
+								$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 								if (is_array($object->linkedObjects['facturerec'])) {
 									foreach ($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
@@ -3644,7 +3644,7 @@ class SellYourSaasUtils
 								$forceaddevent = 'Qty line '.$tmpobject->id.' updated '.$currentqty.' -> '.$newqty;
 
 								// Test if there is template invoice linkded
-								$contract->fetchObjectLinked();
+								$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 								if (is_array($contract->linkedObjects['facturerec']) && count($contract->linkedObjects['facturerec']) > 0) {
 									//dol_sort_array($contract->linkedObjects['facture'], 'date');

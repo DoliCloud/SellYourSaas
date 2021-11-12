@@ -35,7 +35,7 @@ function cmp($a, $b)
 }
 
 /**
- * Return if a thirdparty has a payment mode
+ * Return if a thirdparty has a payment mode set as a default payment mode.
  *
  * @param 	int	$thirdpartyidtotest		Third party id
  * @return 	int							>0 if there is at least one payment mode, 0 if no payment mode
