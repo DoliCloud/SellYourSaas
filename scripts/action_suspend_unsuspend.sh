@@ -404,6 +404,8 @@ if [[ "$mode" == "rename" ]]; then
 			echo "Failed to unsuspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
 			sleep 1
 			exit 20
+		else
+			sleep 1
 		fi
 	else
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
