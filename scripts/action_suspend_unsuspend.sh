@@ -411,6 +411,8 @@ if [[ "$mode" == "rename" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 	fi
 
+
+	# If we rename instance
 	if [[ "$fqn" != "$fqnold" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
 
@@ -439,6 +441,9 @@ if [[ "$mode" == "rename" ]]; then
 				echo "Failed to delete virtual host with old name instance $instancenameold.$domainnameold with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in rename" $EMAILTO
 				sleep 1
 				exit 4
+			#else
+			#   A sleep is already don at end of script
+			#	sleep 1			
 			fi
 		else
 			echo "Virtual host $apacheconf seems already disabled"
@@ -449,6 +454,7 @@ if [[ "$mode" == "rename" ]]; then
 	fi
 
 fi
+
 
 # Suspend
 
@@ -590,6 +596,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 			echo "Failed to suspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Warning] Pb when suspending $instancename.$domainname" $EMAILTO
 			sleep 1 
 			exit 6
+		#else
+		#   A sleep is already don at end of script
+		#	sleep 1			
 		fi
 	else
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
@@ -723,6 +732,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 		echo "Failed to unsuspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
 		sleep 1
 		exit 8
+	#else
+	#   A sleep is already don at end of script
+	#	sleep 1			
 	fi
 
 fi

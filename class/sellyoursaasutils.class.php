@@ -1932,9 +1932,11 @@ class SellYourSaasUtils
 	 * after the planned end date (+ grace offset SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND)
 	 * CAN BE A CRON TASK
 	 *
-	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 * @param	int   $noapachereload	0=Reload apache after remote action, 1=No apache reload
+	 * @param	int   $maxnbofinstances	Max number f ionstances (0 = no max)
+	 * @return	int						0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doSuspendExpiredTestInstances()
+	public function doSuspendExpiredTestInstances($noapachereload = 0, $maxnbofinstances = 0)
 	{
 		global $conf, $langs;
 
@@ -1944,7 +1946,7 @@ class SellYourSaasUtils
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doSuspendExpiredTestInstances.log';
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
-		$result = $this->doSuspendInstances('test');
+		$result = $this->doSuspendInstances('test', $noapachereload, $maxnbofinstances);
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
@@ -1957,9 +1959,11 @@ class SellYourSaasUtils
 	 * after the planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND)
 	 * CAN BE A CRON TASK
 	 *
-	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 * @param	int   $noapachereload	0=Reload apache after remote action, 1=No apache reload
+	 * @param	int   $maxnbofinstances	Max number f ionstances (0 = no max)
+	 * @return	int						0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doSuspendExpiredRealInstances()
+	public function doSuspendExpiredRealInstances($noapachereload = 0, $maxnbofinstances = 0)
 	{
 		global $conf, $langs;
 
@@ -1969,7 +1973,7 @@ class SellYourSaasUtils
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doSuspendExpiredRealInstances.log';
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
-		$result = $this->doSuspendInstances('paid');
+		$result = $this->doSuspendInstances('paid', $noapachereload, $maxnbofinstances);
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
@@ -1982,14 +1986,16 @@ class SellYourSaasUtils
 	 * It sets the status of services to "offline" and send an email to the customer.
 	 * Note: An instance can also be suspended from backoffice by setting service to "offline". In such a case, no email is sent.
 	 *
-	 * @param	string	$mode		'test' or 'paid'
-	 * @return	int					0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 * @param	string	$mode				'test' or 'paid'
+	 * @param	int   	$noapachereload		0=Reload apache after remote action, 1=Force no apache reload
+	 * @param	int   	$maxnbofinstances	Max number f ionstances (0 = no max)
+	 * @return	int							0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	private function doSuspendInstances($mode)
+	private function doSuspendInstances($mode, $noapachereload = 0, $maxnbofinstances = 0)
 	{
 		global $conf, $langs, $user;
 
-		$MAXPERCALL = 25;
+		$MAXPERCALL = ($maxnbofinstances > 0 ? $maxnbofinstances : 25);
 
 		if ($mode != 'test' && $mode != 'paid') {
 			$this->error = 'Function doSuspendInstances called with bad value for parameter $mode';
@@ -2367,14 +2373,13 @@ class SellYourSaasUtils
 									}
 								}
 							}
-						} else // Third party has no payment mode defined, we suspend it.
-						{
+						} else {// Third party has no payment mode defined, we suspend it.
 							$wemustsuspendinstance = true;
 						}
 
 						if ($wemustsuspendinstance) {
-							//$conf->global->noapachereload = 1;       // Set a global variable that can be read later by trigger
-							$conf->global->noapachereload = 0;       // Set a global variable that can be read later by trigger
+
+							$conf->global->noapachereload = $noapachereload;	// Set a global variable that can be read later by trigger
 							$comment = "Closed by batch doSuspendInstances('".$mode."') the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
 							$result = $object->closeAll($user, 0, $comment);			// This may execute trigger that make remote actions to suspend instance
 							$conf->global->noapachereload = null;    // unset a global variable that can be read later by trigger
@@ -2449,7 +2454,6 @@ class SellYourSaasUtils
 						}
 					}
 				}
-				$ifetchservice++;
 			}
 		} else {
 			$error++;
@@ -2457,14 +2461,18 @@ class SellYourSaasUtils
 		}
 
 		if (! $error) {
+			// TODO Disable the apache reload after each closing of actions and do it once here.
+
 			$this->db->commit();
-			$this->output = $numofexpiredcontractlines.' expired contract lines found'."\n";
+			$this->output = 'Launch with noapachereload = '.$noapachereload."\n";
+			$this->output.= $numofexpiredcontractlines.' expired contract lines found'."\n";
 			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' suspended'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only).'."\n";
 			$this->output.= count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' converted into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
 			if ($erroremail) $this->output.='. Got errors when sending some email : '.$erroremail;
 		} else {
 			$this->db->rollback();
-			$this->output = "Rollback after error\n";
+			$this->output = 'Launch with noapachereload = '.$noapachereload."\n";
+			$this->output.= "Rollback after error\n";
 			$this->output.= $numofexpiredcontractlines.' expired contract lines found'."\n";
 			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to suspend'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only).'."\n";
 			$this->output.= count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' to convert into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
