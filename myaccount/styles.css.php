@@ -154,7 +154,7 @@ border: 1px solid #e5e5e5;*zoom: 1;
 }
 .prioritymedium {
 	color: #fff;
-    background-color: #9898620;
+    background-color: #889820;
     padding: 3px;
     border-radius: 5px;
 }
