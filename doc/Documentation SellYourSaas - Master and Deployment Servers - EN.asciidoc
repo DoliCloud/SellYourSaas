@@ -2111,8 +2111,10 @@ with
 ---------------
 bind-address = 0.0.0.0
 max_connections      = 500
-max_user_connections = 30
+max_user_connections = 25
+# wait_timeout and interactive_timeout must be set both or none
 wait_timeout         = 7200
+interactive_timeout  = 7200
 table_open_cache     = 10000
 table_definition_cache = 8000
 sort_buffer_size=2M
