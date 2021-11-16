@@ -3309,7 +3309,7 @@ This must be done on deployment servers only.
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
 
-===== From a SSL provider 
+===== Solution 1: From a SSL provider 
 
 * Create the key *withX.mysaasdomainname.com.key* and csr *withX.mysaasdomainname.com.csr* files like so:
 
@@ -3342,7 +3342,7 @@ Choose:
 
 * Submit the *.csr* file to the SSL certificate provider.
 
-===== From LetsEncrypt
+===== Solution 2: From LetsEncrypt
 
 * To create a SSL certficate *on the master* :
 
@@ -3372,7 +3372,7 @@ openssl x509 -in fullchain.pem -text
 ---------------
 
 
-* To renew a certificate *on the master*:
+* To renew a certificate on the *master*:
 
 [source,bash]
 ---------------
@@ -3381,7 +3381,7 @@ ou
 certbot renew --manual --force-renewal
 ---------------
 
-* For wildcard certificates on *deployment servers*:
+* To renew a certificate on the *deployment servers*:
 
 You can use the same command as used originally (with --dry-run option first if you want to check)
 
