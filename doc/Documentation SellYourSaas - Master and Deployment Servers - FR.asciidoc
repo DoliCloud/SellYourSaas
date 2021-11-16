@@ -1034,9 +1034,10 @@ Sur le *Serveur Master*:
 
         # Add alias git on sellyoursaas git dir
         Alias "/git" "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git"
-        <Directory /home/admin/wwwroot>
+        <Directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git>
         AllowOverride FileInfo Limit
         Options +Indexes
+        Order allow,deny
         Require ip 1.2.3.4
         </Directory>
 
