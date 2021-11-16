@@ -3362,13 +3362,21 @@ certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.
 
 For example, you can use *supervision@mysaasdomain.com* as the email for letsencrypt account.
 
-This enables the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
+This create certificates and also enable the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
 
 To read certificate .crt or .pem files, you can run:
 
 [source,bash]
 ---------------
 openssl x509 -in fullchain.pem -text
+---------------
+
+To read renewal scheduler:
+
+[source,bash]
+---------------
+systemctl list-timers
+systemctl status snap.certbot.renew.timer
 ---------------
 
 
@@ -3402,7 +3410,7 @@ or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 * Get the SSL certificate files (file *.crt* of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
-* Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt*:
+* Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the certificate files:
 
 For example, if your certificates files were generated with letsencrypt, you can do:
 
