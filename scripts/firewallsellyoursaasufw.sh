@@ -66,7 +66,25 @@ ufw allow out 2049/udp
 
 # From external source to local - In
 # SSH
-ufw allow in 22/tcp
+atleastoneipfound=0
+for fic in `ls /etc/sellyoursaas-allowed-ip.d/*.conf`
+do
+	echo Process file $fic
+	cat "$fic" | grep -v '^#' | sed 's/Require ip//i' | grep '.*\..*\..*\..*' | grep 'while read line
+	do
+		# Allow ssh to the ip
+		ufw allow from $line to any port 22 proto tcp
+
+		atleastoneipfound=1	
+	done
+done
+if [ "x$atleastoneipfound" == "x1"]; then
+	ufw delete allow in 22/tcp
+else 
+	ufw allow in 22/tcp
+fi
+
+
 # HTTP
 ufw allow in 80/tcp
 ufw allow in 8080/tcp
