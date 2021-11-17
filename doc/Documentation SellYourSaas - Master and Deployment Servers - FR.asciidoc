@@ -996,9 +996,8 @@ Sur le *Serveur Master*:
         AuthName "Authenticate to backoffice"
         AuthUserFile /etc/apache2/.htpasswd
         Require valid-user
-        # Or if you prefer restrict to some ip, comment all directives and use this one instead:
-        #Require ip x.y.z.w
-        #Require ip a.b.c.d
+        # Or if you prefer restrict to some ip, you can add lines "Require ip x.y.z.w" into a .conf file into this directory:
+        IncludeOptional /etc/sellyoursaas-allowed-ip.d/*.conf
         </Directory>
 
         #leaving /public, /api and /dav accessible to everyone
