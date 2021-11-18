@@ -52,8 +52,9 @@ class Packages extends CommonObject
 	 * @var string String with name of icon for packages
 	 */
 	public $picto = 'label';
-	
+
 	const STATUS_DRAFT = 0;
+	const STATUS_ACTIVE = 1;
 
 
 	/**
