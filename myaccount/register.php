@@ -426,6 +426,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 					.registerleftflex > *{
 						max-width:70%;
+						padding-left:0px;
 					}
 					.registerleftflex > #flexleftdown{
 						-webkit-box-ordinal-group: 1;
