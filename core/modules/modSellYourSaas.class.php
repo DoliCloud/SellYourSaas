@@ -470,7 +470,8 @@ class modSellYourSaas extends DolibarrModules
 			'user'=>0);
 		$r++;
 
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_cancellation_list',
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_cancellation_list',
 			'type'=>'left',
 			'titre'=>'NewCancellationForm',
 			'mainmenu'=>'sellyoursaas',
@@ -564,7 +565,7 @@ class modSellYourSaas extends DolibarrModules
 	 *  @param      string	$options    Options when enabling module ('', 'noboxes')
 	 *  @return     int             	1 if OK, 0 if KO
 	 */
-	function init($options = '')
+	public function init($options = '')
 	{
 		global $conf, $langs;
 
@@ -685,7 +686,7 @@ class modSellYourSaas extends DolibarrModules
 		//include_once DOL_DOCUMENT_ROOT.'/website/class/website.class.php';
 		//$tmpwebsite = new WebSite($this->db);
 		//$result = $tmpwebsite->importWebSite('website_sellyoursaas-demo.zip');
-
+		$sql = array();
 		return $this->_init($sql, $options);
 	}
 
@@ -697,7 +698,7 @@ class modSellYourSaas extends DolibarrModules
 	 *  @param      string	$options    Options when enabling module ('', 'noboxes')
 	 *  @return     int             	1 if OK, 0 if KO
 	 */
-	function remove($options = '')
+	public function remove($options = '')
 	{
 		$sql = array();
 
