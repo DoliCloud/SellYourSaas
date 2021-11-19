@@ -729,7 +729,7 @@ class SellYourSaasUtils
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
 		$sql.= ' WHERE sr.fk_soc = f.fk_soc';
 		$sql.= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
-		$sql.= " AND sr.status = ".$servicestatus;
+		$sql.= " AND sr.status = ".((int) $servicestatus);
 		$sql.= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql.= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";		// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
 		//print $sql;exit;
@@ -1358,7 +1358,9 @@ class SellYourSaasUtils
 						include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 						$formmail=new FormMail($this->db);
 
-						if (! empty($labeltouse)) $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
+						if (! empty($labeltouse)) {
+							$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
+						}
 
 						if (! empty($labeltouse) && is_object($arraydefaultmessage) && $arraydefaultmessage->id > 0) {
 							$subject = $arraydefaultmessage->topic;
@@ -1423,10 +1425,14 @@ class SellYourSaasUtils
 
 						$trackid = 'inv'.$invoice->id;
 						$moreinheader = 'X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
+						$addr_cc = '';
+						if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
+							$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
+						}
 
 						// Send email (substitutionarray must be done just before this)
 						include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-						$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, '', '', 0, -1, '', '', $trackid, $moreinheader);
+						$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, $addr_cc, '', 0, -1, '', '', $trackid, $moreinheader);
 						if ($mailfile->sendfile()) {
 							$result = 1;
 						} else {
