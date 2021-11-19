@@ -31,7 +31,7 @@ fi
 
 old_serial=$(grep serial $zone_file |awk '{print $1}')
 new_serial=$((old_serial+1))
-old_challenge=$(grep _acme-challenge $zone_file |awk '{print $4}')
+old_challenge=$(grep _acme-challenge $zone_file | awk '{print $4}' | head -n 1)
 new_challenge="\"$CERTBOT_VALIDATION\""
 $verbose && echo "old serial : $old_serial"
 $verbose && echo "new serial : $new_serial"
