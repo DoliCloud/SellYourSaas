@@ -168,7 +168,13 @@ if ($totalInvoiced == 0) {
 		}
 		print '<br>';
 	} else {
-		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
+		if (count($amounttopayasfirstinvoicetinstances) > 0) {
+			// The amount to pay is 0 but there is at least one instance, it means all deployed instances are free.
+			print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoPayableInstanceYetOnlyFree").'</small></div>';
+		} else {
+			// There is no instance at all
+			print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
+		}
 		print '<br><br>';
 	}
 } else {	// There is already some invoices. This is already a customer.
