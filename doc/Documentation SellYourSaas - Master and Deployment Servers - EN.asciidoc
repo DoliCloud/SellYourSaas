@@ -906,7 +906,7 @@ sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
 sudo apt install -y fail2ban
@@ -923,7 +923,7 @@ sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
 sudo apt install -y fail2ban
@@ -2392,14 +2392,22 @@ But remove it after you solve the problem, to have the tables writable again.
 
 On *deployment servers*:
 
-Copy */bin/bash* or */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
+Copy */bin/bash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
 [source,bash]
 ---------------
 cp /bin/bash /bin/secureBash
 ---------------
 
-Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
+On Ubuntu 20.04+, copy also */usr/bin/bash* into */usr/bin/secureBash*
+
+[source,bash]
+---------------
+cp /bin/bash /bin/secureBash
+---------------
+
+
+Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/usr.bin.secureBash* with Ubuntu 20.04) with this content:
 
 [source,bash]
 ---------------
@@ -2407,7 +2415,11 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
 #include <tunables/global>
 
 # You must use here the real path and not the symlink path
-/bin/secureBash {
+# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
+# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
+
+/{usr/,}bin/secureBash {
+  # Warning: this comments are interpreted
   #include <abstractions/base>
   #include <abstractions/nameservice>
 
@@ -2421,7 +2433,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   deny /etc/default/nss r,
   deny /etc/host.conf r,
   deny /etc/hosts r,
-  #deny /etc/passwd r,
+  deny /etc/passwd r,
   deny /etc/securetty r,
   deny /etc/shadow r,
   deny /etc/sudoers r,
@@ -2442,7 +2454,6 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   deny owner /var/www/ r,
   deny owner /var/www/** r,
 
-  owner /home/*/home/*/** rix,
   /etc/crontab r,
   /var/spool/cron/crontabs/** r,
 
@@ -2535,9 +2546,10 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /usr/bin/zstd rix,
   /usr/bin/awk rix,
   /usr/bin/basename rix,
+  /usr/bin/clamdscan rix,
   /usr/bin/clear rix,
   /usr/bin/clear_console rix,
-  /usr/bin/crontab rix,
+  /usr/bin/crontab Cx -> sub_crontab,
   /usr/bin/cut rix,
   /usr/bin/dircolors rix,
   /usr/bin/dirname rix,
@@ -2570,7 +2582,8 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /usr/games/ r,
   /usr/include/python2.7/pyconfig.h r,
   /usr/lib/git-core/** rix,
-  /usr/lib/openssh/sftp-server rix,
+  /usr/lib/openssh/sftp-server Cx -> sub_profile_sftp_server,  
+  #/usr/lib/openssh/sftp-server rix,
   /usr/lib{,32,64}/** mr,
   /usr/local/bin/ r,
   /usr/local/lib/python2.7/dist-packages/ r,
@@ -2647,19 +2660,203 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* with this content:
   /var/spool/postfix/public/pickup w,
   owner @{HOME}/ rwl,
   owner @{HOME}/** rwl,
+  owner /home/*/home/*/** rix,
   owner /mnt/diskhome/home/** rixwlk,
+  @{HOME}/dbn*/*_error.log r,			# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
   /mnt/diskhome/home/osu*/dbn*/*_error.log r,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
   /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
   /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+
+  unix (connect),
+
+  
+  profile sub_crontab {
+		# Warning: this comments are interpreted
+		#include <abstractions/base>
+		#include <abstractions/nameservice> 
+		/usr/bin/crontab rix,
+		/etc/crontab r,
+		/var/spool/cron/crontabs/** r,
+		
+		allow /etc/passwd r,
+  }
+  
+  profile sub_profile_sftp_server {
+		# Warning: this comments are interpreted
+		#include <abstractions/base>
+		#include <abstractions/nameservice> 
+		allow /etc/passwd r,
+		
+		owner @{HOME}/ rwl,
+		owner @{HOME}/** rwl,
+		owner /home/*/home/*/** rixwlk,
+		owner /mnt/diskhome/home/** rixwlk,
+		@{HOME}/dbn*/*_error.log r,		# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
+		/mnt/diskhome/home/osu*/dbn*/*_error.log r,
+  }  
 }
 ---------------
 
-!!! Warning, create also a file for */usr/bin/secureBash* with Ubuntu 20.04+
+
+Create an apparmor file */etc/apparmor.d/usr.bin.apache2* with this content:
+
+[source,bash]
+---------------
+# Last Modified: Wed Nov 24 16:11:33 2021
+#include <tunables/global>
+
+# You must use here the real path and not the symlink path
+# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
+# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
+
+profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <apache2.d>
+  #include <local/usr.sbin.apache2>
+
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability kill,
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+  capability sys_admin,
+  capability sys_tty_config,
+
+  signal send peer=@{profile_name}//*,
+
+  / rw,
+  /** mrwlkix,
 
 
-* Activate the rule apparmor in mode *enforce* (or *complain*)
+  ^DEFAULT_URI flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+
+    deny /etc/passwd r,
+    deny /etc/group r,
+
+    network inet,
+    network inet6,
+    network unix dgram,
+
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/clamav/clamd.conf r,
+    /etc/postfix/dynamicmaps.cf.d/ r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /usr/bin/bash rix,
+    /usr/bin/cat rix,
+    /usr/bin/clamdscan rix,
+    /usr/bin/id rix,
+    /usr/sbin/sendmail rix,
+    /usr/sbin/post* rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+  }
+
+  ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+
+    network inet,
+    network inet6,
+
+    capability dac_read_search,
+  }
+
+  ^sellyoursaas-instances flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+    
+    deny /etc/passwd r,
+    deny /etc/group r,
+    
+    network inet,
+    network inet6,
+    network unix dgram,
+    
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/clamav/clamd.conf r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /usr/bin/bash rix,
+    /usr/bin/cat rix,
+    /usr/bin/clamdscan rix,
+    /usr/bin/id rix,
+    /usr/sbin/post* rix,
+    /usr/sbin/sendmail rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+  }
+}
+---------------
+
+
+
+* Note: To activate(reload)/desactivate a rule apparmor, use *aa-disable* or *aa-enforce* (or *aa-complain*)
+
+To enable a profile:
 
 [source,bash]
 ---------------
@@ -2669,35 +2866,34 @@ aa-status
 /etc/init.d/apparmor status
 ---------------
 
-
-* Note: To reload an apparmor profile of rules:
-
-[source,bash]
----------------
-aa-enforce bin.secureBash
----------------
-
-
-* Note: To unload ALL apparmor profiles:
+To disable a profile:
 
 [source,bash]
 ---------------
-aa-teardown
----------------
-
-
-* Note: To disable a profile of rules
-
-[source,bash]
----------------
-apparmor_parser -v -R /etc/apparmor.d/usr.sbin.mysqld
-or 
 aa-disable usr.sbin.mysqld
 ---------------
 
-A reboot of server may be required to take into account any change on profile files.
+Sometimes, a reboot of server may be required to take into account any change on profile files.
 
 All the disabled profiles are visible into */etc/apparmor.d/disable*
+
+The log are visilbe into */var/log/kern.log* or */var/log/audit/audit.log*. You can use *aa-logprof* to convert content of this file into real rules into existing profiles.
+
+
+* Note: To unload ALL apparmor profiles and reload them:
+
+[source,bash]
+---------------
+aa-teardown; /etc/init.d/apparmor start;
+---------------
+
+
+* Note: To list all confined/unconfined processus:
+
+[source,bash]
+---------------
+ps fauxZ
+---------------
 
 
 * To avoid to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no* (Still require ????)
@@ -3042,6 +3238,17 @@ session.use_only_cookies = 1
 session.cookie_httponly = 1
 session.cookie_samesite = Lax
 ---------------
+
+==== Disable some functions (optionnal)
+
+Complete also the parameter disable_functions by adding:
+
+[source,bash]
+---------------
+passthru,shell_exec,system,proc_open,popen
+---------------
+
+Do not add "exec".
 
 
 ==== Add a wrapper PHP for the mail() function
