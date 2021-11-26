@@ -985,7 +985,7 @@ a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 
-On the Deployment servers:
+On the *Deployment servers*:
 
 * Creation of the directory of the configuration files of the virtual hosts of the instances.
 
@@ -1032,9 +1032,9 @@ On the *Master server*:
 
 [source, bash]
 ---------------
-htpasswd -cm /etc/apache2/.htpasswd <wanted username>
+htpasswd -cm /etc/apache2/.htpasswd <wanted login>
 ---------------
-Choose a password. You will need to give this user and password to anyone who wants to access the backoffice *admin.mysaasdomainname.com* .
+Choose a password. You will need to give this couple login/password to anyone who wants to access the backoffice *admin.mysaasdomainname.com* .
 
 
 * Create a virtual host file */etc/apache2/sites-available/admin.mysaasdomainname.com.conf* for *admin.mysaasdomainname.com* on the Dolibarr *Master* for the administration of SellyourSaas
@@ -1048,7 +1048,7 @@ Choose a password. You will need to give this user and password to anyone who wa
         #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
         #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
         #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster@mysaasdomainname.com"
-        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/jail/home:/home/admin/backup/dump:/home/admin/tools/
+        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/jail/home
 
         ServerName      admin.mysaasdomainname.com
         DocumentRoot /home/admin/wwwroot/dolibarr/htdocs/
@@ -3448,10 +3448,9 @@ Note: Reports are into */var/crash*
 
 [source,bash]
 ---------------
-sudo apt remove cerbot
-sudo apt install snapd
-sudo snap install --classic certbot
-sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo apt remove cerbot; sudo apt install snapd;
+sudo snap install --classic certbot;
+sudo ln -fs /snap/bin/certbot /usr/bin/certbot
 
 # Old method was:
 #cd /root
@@ -3479,7 +3478,9 @@ This must be done on deployment servers only.
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
 
-===== Solution 1: From a SSL provider 
+You can use the solution 1 (not free and need annual manual update) or solution 2 (recommended as free and with no manual update required):
+
+===== Solution 1: From a SSL provider
 
 * Create the key *withX.mysaasdomainname.com.key* and csr *withX.mysaasdomainname.com.csr* files like so:
 
@@ -3561,7 +3562,7 @@ certbot renew --manual --force-renewal
 
 * To renew a certificate on the *deployment servers*:
 
-You can use the same command as used originally (with --dry-run option first if you want to check)
+You can use the same command as used originally (with --dry-run option first if you want to check, replace value between <>)
 
 [source,bash]
 ---------------
@@ -3576,9 +3577,9 @@ or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 
 
-==== Install certificates files
+==== Install the certificates files
 
-* Get the SSL certificate files (file *.crt* of the certificate and the intermediate certificate) and install them into */etc/apache2*)
+* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
 * Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the certificate files:
 
