@@ -1591,7 +1591,9 @@ class SellYourSaasUtils
 		$sql.= " AND date_format(cd.date_fin_validite, '%Y-%m-%d') <= date_format('".$this->db->idate($enddatetoscan)."', '%Y-%m-%d')";
 		$sql.= " AND cd.statut = 4";
 		$sql.= " AND c.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
-		if ($thirdparty_id > 0) $sql.=" AND c.fk_soc = ".$thirdparty_id;
+		$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
+
+		if ($thirdparty_id > 0) $sql.=" AND c.fk_soc = ".((int) $thirdparty_id);
 		//print $sql;
 
 		$resql = $this->db->query($sql);
@@ -1858,10 +1860,15 @@ class SellYourSaasUtils
 
 							$errorforlocaltransaction = 0;
 
-							$comment = 'Refresh contract '.$object->ref." by doRenewalContracts";
-							// First launch update of resources:
-							// This update qty of contract lines + qty into linked template invoice.
-							$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+							$comment = 'Renew date of contract '.$object->ref." by doRenewalContracts";
+
+							// First launch update of resources if it is not a redirect contract:
+							$result = 1;
+							if (empty($object->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
+								// This update qty of contract lines + qty into linked template invoice.
+								$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+							}
+
 							if ($result <= 0) {
 								$contracterror[$object->id]=$object->ref;
 
@@ -1922,7 +1929,7 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output .= count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
+		$this->output .= count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only, including redirect contracts)';
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
@@ -2040,6 +2047,7 @@ class SellYourSaasUtils
 		$sql.= " AND cd.date_fin_validite < '".$this->db->idate($datetotest)."'";
 		$sql.= " AND cd.statut = 4";												// Not yet suspended
 		$sql.= " AND se.fk_object = c.fk_soc AND se.dolicloud = 'yesv2'";
+		$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 		$sql.= $this->db->order('c.rowid', 'ASC');
 		// Limit is managed into loop later
 
@@ -2071,14 +2079,14 @@ class SellYourSaasUtils
 						continue;
 					}
 
-					$object->fetch_thirdparty();
-
 					dol_syslog("* Process fetch line nb ".$ifetchservice." - contract id=".$object->id." ref=".$object->ref." ref_customer=".$object->ref_customer);
 
 					if (preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
 						dol_syslog("It is a redirect contract in test mode, it will not be processed by this batch");
 						continue;											// Discard if this is a redirect contract
 					}
+
+					$object->fetch_thirdparty();
 
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
 					$isAPayingContract = sellyoursaasIsPaidInstance($object);

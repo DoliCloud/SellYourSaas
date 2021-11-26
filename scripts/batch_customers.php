@@ -202,8 +202,11 @@ if ($instancefiltercomplete) {
 		$stringforsearch.="'".trim($instancefiltecompletevalue)."'";
 	}
 	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
-} else $sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
+} else {
+	$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
+}
 $sql.= " AND ce.deployment_status IS NOT NULL";
+$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 // Add filter on deployment server
 if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
 	$sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
