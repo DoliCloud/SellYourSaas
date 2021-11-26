@@ -4,23 +4,27 @@ IPTABLES=iptables
 
 masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$masterserver" == "x" ]]; then
-	echo Failed to get masterserver parameter
+	echo Failed to get masterserver parameter.
 	exit 1
 fi
 
 dnsserver=`grep '^dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
-	echo Failed to get dnsserver parameter 
+	echo Failed to get dnsserver parameter.
 	exit 2
 fi
 
 instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$instanceserver" == "x" ]]; then
-	echo Failed to get instanceserver parameter
+	echo Failed to get instanceserver parameter.
 	exit 3
 fi
 
-
+allowed_hosts=`grep '^allowed_hosts=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$allowed_hosts" == "x" && "x$instanceserver" != "x" && "x$instanceserver" != "x0" ]]; then
+	echo Parameter allowed_host not found or empty. This is not possible when the server is an instanceserver.
+	exit 4
+fi
 
 
 case $1 in
@@ -29,6 +33,8 @@ case $1 in
 ufw enable
 
 # From local to external target - Out
+#------------------------------------
+
 # SSH
 ufw allow out 22/tcp
 # HTTP
@@ -64,44 +70,75 @@ ufw allow out 53/udp
 ufw allow out 2049/tcp
 ufw allow out 2049/udp
 
-# From external source to local - In
-# SSH
-atleastoneipfound=0
-for fic in `ls /etc/sellyoursaas-allowed-ip.d/*.conf`
-do
-	echo Process file $fic
-	cat "$fic" | grep -v '^#' | sed 's/Require ip//i' | grep '.*\..*\..*\..*' | grep 'while read line
-	do
-		# Allow ssh to the ip
-		ufw allow from $line to any port 22 proto tcp
 
-		atleastoneipfound=1	
+# From external source to local - In
+#-----------------------------------
+
+atleastoneipfound=0
+
+if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
+	# SSH and MySQL
+	for fic in `ls /etc/sellyoursaas-allowed-ip.d/*.conf`
+	do
+		echo Process file $fic
+		cat "$fic" | grep -v '^#' | sed 's/Require ip//i' | grep '.*\..*\..*\..*' | while read line
+		do
+			# Allow ssh to the ip
+			ufw allow from $line to any port 22 proto tcp
+	
+			atleastoneipfound=1	
+		done
 	done
-done
-if [ "x$atleastoneipfound" == "x1"]; then
+fi
+
+if [[ "x$atleastoneipfound" == "x1" ]]; then
+	echo Disallow In access for SSH and Mysql to everybody
+	# SSH
 	ufw delete allow in 22/tcp
+	# Mysql/Mariadb
+	ufw delete allow in 3306/tcp
 else 
+	echo Allow In access with SSH and Mysql to everybody
+	# SSH
 	ufw allow in 22/tcp
+	# Mysql/Mariadb
+	ufw allow in 3306/tcp
 fi
 
 
 # HTTP
 ufw allow in 80/tcp
-ufw allow in 8080/tcp
 ufw allow in 443/tcp
 # DNS
 ufw allow in 53/tcp
 ufw allow in 53/udp
-# Mysql/Mariadb
-ufw allow in 3306/tcp
 
-# For master server
-ufw allow in 111/udp
-ufw allow in 111/tcp
-ufw allow in 2049/tcp
-ufw allow in 2049/udp
+# To see master NFS server
+if [[ "x$masterserver" != "x0" ]]; then
+	echo Enable NFS entry from instance servers
+	ufw allow in 111/udp
+	ufw allow in 111/tcp
+	ufw allow in 2049/udp
+	ufw allow in 2049/tcp
+else
+	ufw delete allow in 111/udp
+	ufw delete allow in 111/tcp
+	ufw delete allow in 2049/tcp
+	ufw delete allow in 2049/udp
+fi
 
-
+# To accept remote action on port 8080
+if [[ "x$allowed_hosts" != "x" ]]; then
+	ufw delete allow in 8080/tcp
+	echo Process allowed_host=$allowed_hosts to accept remote call on 8080
+	for ipsrc in `echo $allowed_hosts | tr "," "\n"`
+	do
+		echo Process ip $ipsrc - Allow remote actions requests on port 8080 from this ip
+		ufw allow from $ipsrc to any port 8080 proto tcp
+	done
+else
+	echo No entry allowed_host found in /etc/sellyoursaas.conf, so no remote action can be requested to this server.
+fi
 
 ufw default deny incoming
 ufw default deny outgoing
