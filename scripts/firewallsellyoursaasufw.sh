@@ -74,14 +74,14 @@ ufw allow out 2049/udp
 # From external source to local - In
 #-----------------------------------
 
-atleastoneipfound=0
+export atleastoneipfound=0
 
 if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 	# SSH and MySQL
 	for fic in `ls /etc/sellyoursaas-allowed-ip.d/*.conf`
 	do
 		echo Process file $fic
-		cat "$fic" | grep -v '^#' | sed 's/Require ip//i' | grep '.*\..*\..*\..*' | while read line
+		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*\..*\..*\..*'`
 		do
 			# Allow SSH and Mysql to the restricted ip $line
 			echo Allow SSH and Mysql to the restricted ip $line
@@ -90,7 +90,7 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 			# Mysql/Mariadb
 			ufw allow from $line to any port 3306 proto tcp
 	
-			atleastoneipfound=1	
+			export atleastoneipfound=1
 		done
 	done
 fi
