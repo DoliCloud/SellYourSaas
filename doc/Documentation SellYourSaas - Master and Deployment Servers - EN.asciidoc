@@ -682,6 +682,8 @@ With the following content:
 
 [source,conf]
 ---------------
+# File /etc/sellyoursaas.conf
+
 # domain du service
 domain=mysaasdomainname.com
 
@@ -695,9 +697,9 @@ emailfrom=robot@mysaasdomainname.com
 # email supervision
 emailsupervision=supervision@mysaasdomainname.com
 
-# Set to 1 if this server is the master server
+# Set to 1 if this server is the master server, 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas-allowed-ip.d/sellyoursaas-allowed-ip.conf only
 masterserver=1
-# Set to 1 if this server host instances for the pool (deployment server)
+# Set to 1 if this server host instances for the pool (deployment server), 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas-allowed-ip.d/sellyoursaas-allowed-ip.conf only
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
