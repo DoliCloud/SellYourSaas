@@ -133,8 +133,8 @@ fi
 
 # To accept remote action on port 8080
 if [[ "x$allowed_hosts" != "x" ]]; then
-	ufw delete allow in 8080/tcp
 	echo Process allowed_host=$allowed_hosts to accept remote call on 8080
+	ufw delete allow in 8080/tcp
 	for ipsrc in `echo $allowed_hosts | tr "," "\n"`
 	do
 		echo Process ip $ipsrc - Allow remote actions requests on port 8080 from this ip
@@ -142,6 +142,7 @@ if [[ "x$allowed_hosts" != "x" ]]; then
 	done
 else
 	echo No entry allowed_host found in /etc/sellyoursaas.conf, so no remote action can be requested to this server.
+	ufw delete allow in 8080/tcp
 fi
 
 ufw default deny incoming
