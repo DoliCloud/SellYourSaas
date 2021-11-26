@@ -83,8 +83,12 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 		echo Process file $fic
 		cat "$fic" | grep -v '^#' | sed 's/Require ip//i' | grep '.*\..*\..*\..*' | while read line
 		do
-			# Allow ssh to the ip
+			# Allow SSH and Mysql to the restrcited ip $line
+			echo Allow SSH and Mysql to the restrcited ip $line
+			# SSH
 			ufw allow from $line to any port 22 proto tcp
+			# Mysql/Mariadb
+			ufw allow from $line to any port 3306 proto tcp
 	
 			atleastoneipfound=1	
 		done
