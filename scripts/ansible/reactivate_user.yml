@@ -1,0 +1,20 @@
+---
+# Script to reactivate a user on the servers
+#
+# To run the script:
+# ansible-playbook -K reactivate_user.yml -i hosts-xxx -e 'target=targethost name=username'
+# ansible-playbook -K reactivate_user.yml -i hosts-xxx -e 'target=targethost name=username' --limit=*.mydomain.com
+#
+
+- name: Create user on target system(s)
+  hosts: '{{target}}'
+  become: yes
+  #become_method: sudo
+  become_user: root
+  tasks:
+  - name: Deactivate system user
+    command: "chage -E-1 {{name}}"
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
