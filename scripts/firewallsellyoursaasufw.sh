@@ -119,7 +119,6 @@ else
 	ufw allow in 22/tcp
 fi
 
-
 # MYSQL
 export atleastoneipfound=0
 
@@ -163,8 +162,6 @@ else
 	ufw allow in 3306/tcp
 fi
 
-
-
 # Seems not required
 #ufw allow from 127.0.0.0/8 to any port 22 proto tcp
 #ufw allow from 192.168.0.0/16 to any port 22 proto tcp
@@ -202,6 +199,8 @@ if [[ "x$allowed_hosts" != "x" ]]; then
 	for ipsrc in `echo $allowed_hosts | tr "," "\n"`
 	do
 		echo Process ip $ipsrc - Allow remote actions requests on port 8080 from this ip
+		ufw allow from $ipsrc to any port 22 proto tcp
+		ufw allow from $ipsrc to any port 3306 proto tcp
 		ufw allow from $ipsrc to any port 8080 proto tcp
 	done
 else
