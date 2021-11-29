@@ -143,10 +143,10 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 	fi
 
 	# MySQL
-	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-mysql.conf`
+	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-mysql.conf 2>/dev/null`
 	do
 		echo Process file $fic
-		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*[\.:].*[\.:].*[\.:].*' 2>/dev/null`
+		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*[\.:].*[\.:].*[\.:].*'`
 		do
 			# Allow Mysql to the restricted ip $line
 			echo Allow Mysql to the restricted ip $line
