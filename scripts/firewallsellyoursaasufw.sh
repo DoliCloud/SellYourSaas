@@ -91,7 +91,7 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 			echo delete rule number $num
 			ufw --force delete $num
 		done
-		for num in `ufw status numbered |(grep ' 22/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
+		for num in `ufw status numbered |(grep ' 3306/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
 		do
 			echo delete rule number $num
 			ufw --force delete $num
