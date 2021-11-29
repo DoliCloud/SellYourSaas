@@ -409,11 +409,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	// Launch load
 	$fullcommand=$command." ".join(" ", $param);
 	if (command_exists("zstd") && "x$usecompressformatforarchive" == 'xzstd') {
-		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q > /dev/null';
-		else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | zstd -d -q  | '.$fullcommand;
+		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand="cat '".$dirroot.'/../'.$dumpfiletoload."' | zstd -d -q > /dev/null";
+		else $fullcommand="cat '".$dirroot.'/../'.$dumpfiletoload."' | zstd -d -q  | ".$fullcommand;
 	} else {
-		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d > /dev/null';
-		else $fullcommand='cat '.$dirroot.'/../'.$dumpfiletoload.' | gzip -d | '.$fullcommand;
+		if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand="cat '".$dirroot.'/../'.$dumpfiletoload."' | gzip -d > /dev/null";
+		else $fullcommand="cat '".$dirroot.'/../'.$dumpfiletoload."' | gzip -d | ".$fullcommand;
 	}
 
 	$output=array();
