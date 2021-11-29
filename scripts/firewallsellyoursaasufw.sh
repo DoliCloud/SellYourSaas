@@ -131,6 +131,8 @@ else
 fi
 ufw allow from 127.0.0.0/8 to any port 22 proto tcp
 ufw allow from 192.168.0.0/16 to any port 22 proto tcp
+ufw allow from 127.0.0.0/8 to any port 3306 proto tcp
+ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
 
 
 # HTTP
