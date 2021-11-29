@@ -4,6 +4,8 @@
 # To run the script:
 # ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost name=user key="key"'
 # notice the double quotes around the key so spaces are interpreted as part of it
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost ip=www.xxx.yyy.zzz name=user key="key"'
+# you can specify an IP for that user with the syntax above
 # ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost name=user key="key"' --limit=*.mydomain.com
 #
 
@@ -16,7 +18,6 @@
   - name: Create system user
     user:
       name: '{{ name }}'
-    register: command_output
 
   - name: Upload his public key
     authorized_key:
@@ -34,5 +35,10 @@
       name: ssh
       state: restarted
 
-  - debug:
-      var: command_output.stdout_lines
+  - name: If IP was provided, add it to the conf dir
+    ansible.builtin.lineinfile:
+      path: "/etc/sellyoursaas.d/{{ name }}.conf"
+      line: "{{ ip }}"
+      create: yes
+    ignore_errors: true
+    when: ip is defined
