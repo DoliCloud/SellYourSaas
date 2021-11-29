@@ -15,7 +15,19 @@
     user:
       name: '{{ name }}'
       state: absent
-    register: command_output
 
-  - debug:
-      var: command_output.stdout_lines
+  - name: Remove user from SSH conf
+    lineinfile:
+      path: /etc/ssh/sshd_config.d/sellyoursaas.conf
+      line: "AllowUsers {{ name }}"
+      state: absent
+
+  - name: Restart SSH service to flush that user from in-memory configuration
+    service:
+      name: ssh
+      state: restarted
+
+  - name: Remove IP file from sellyoursaas.d
+    ansible.builtin.file:
+      path: "/etc/sellyoursaas.d/{{ name }}.conf"
+      state: absent
