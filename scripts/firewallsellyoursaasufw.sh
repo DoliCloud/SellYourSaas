@@ -80,6 +80,27 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 	# SSH and MySQL
 	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf`
 	do
+			export atleastoneipfound=1
+	done
+
+	if [[ "x$atleastoneipfound" == "x1" ]]; then
+		# SSH
+		echo Disallow existing In access for SSH and Mysql for specific ip
+		for num in `ufw status numbered |(grep ' 22/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
+		do
+			echo delete rule number $num
+			ufw --force delete $num
+		done
+		for num in `ufw status numbered |(grep ' 22/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
+		do
+			echo delete rule number $num
+			ufw --force delete $num
+		done
+	fi
+
+	# SSH and MySQL
+	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf`
+	do
 		echo Process file $fic
 		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*\..*\..*\..*'`
 		do
@@ -89,8 +110,6 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 			ufw allow from $line to any port 22 proto tcp
 			# Mysql/Mariadb
 			ufw allow from $line to any port 3306 proto tcp
-	
-			export atleastoneipfound=1
 		done
 	done
 fi

@@ -770,6 +770,13 @@ Put *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master
 Put *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on deployment servers.
 Do not forget to set a value for *databasepass*. We will reuse this value later.
 
+Create also an empty directory:
+
+[source,conf]
+---------------
+mkdir -p /etc/sellyoursaas.d
+---------------
+
 
 === Installing the nfs share
 
