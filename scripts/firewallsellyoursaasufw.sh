@@ -30,7 +30,6 @@ fi
 case $1 in
   start)
 
-ufw enable
 
 # From local to external target - Out
 #------------------------------------
@@ -130,6 +129,8 @@ else
 	# Mysql/Mariadb
 	ufw allow in 3306/tcp
 fi
+ufw allow from 127.0.0.0/8 to any port 22 proto tcp
+ufw allow from 192.168.0.0/16 to any port 22 proto tcp
 
 
 # HTTP
@@ -170,6 +171,7 @@ fi
 ufw default deny incoming
 ufw default deny outgoing
 
+ufw enable
 ufw reload
 
 $0 status
