@@ -194,11 +194,11 @@ fi
 
 # To accept remote action on port 8080
 if [[ "x$allowed_hosts" != "x" ]]; then
-	echo Process allowed_host=$allowed_hosts to accept remote call on 8080
+	echo Process allowed_host=$allowed_hosts to accept remote call on 22, 3306 and 8080
 	ufw delete allow in 8080/tcp
 	for ipsrc in `echo $allowed_hosts | tr "," "\n"`
 	do
-		echo Process ip $ipsrc - Allow remote actions requests on port 8080 from this ip
+		echo Process ip $ipsrc - Allow remote actions requests on port 22, 3306 and 8080 from this ip
 		ufw allow from $ipsrc to any port 22 proto tcp
 		ufw allow from $ipsrc to any port 3306 proto tcp
 		ufw allow from $ipsrc to any port 8080 proto tcp
