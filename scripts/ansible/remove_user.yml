@@ -1,0 +1,21 @@
+---
+# Script to delete a user from the servers
+#
+# To run the script:
+# ansible-playbook -K remove_user.yml -i hosts-xxx -e 'target=targethost name=username'
+# ansible-playbook -K remove_user.yml -i hosts-xxx -e 'target=targethost name=username' --limit=*.mydomain.com
+#
+
+- name: Create user on target system(s)
+  hosts: '{{target}}'
+  become: yes
+  become_user: root
+  tasks:
+  - name: Create system user
+    user:
+      name: '{{ name }}'
+      state: absent
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines

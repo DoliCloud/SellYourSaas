@@ -1,0 +1,38 @@
+---
+# Script to create a system user on servers
+#
+# To run the script:
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost name=user key="key"'
+# notice the double quotes around the key so spaces are interpreted as part of it
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost name=user key="key"' --limit=*.mydomain.com
+#
+
+- name: Create user on target system(s)
+  hosts: '{{target}}'
+  become: yes
+  #become_method: sudo
+  become_user: root
+  tasks:
+  - name: Create system user
+    user:
+      name: '{{ name }}'
+    register: command_output
+
+  - name: Upload his public key
+    authorized_key:
+      user: '{{ name }}'
+      state: present
+      key: '{{ key }}'
+
+  - name: Add user to AllowUsers in SSH sellyoursaas conf
+    lineinfile:
+      path: /etc/ssh/sshd_config.d/sellyoursaas.conf
+      line: "AllowUsers {{ name }}"
+
+  - name: Restart SSH service to recognize that new user
+    service:
+      name: ssh
+      state: restarted
+
+  - debug:
+      var: command_output.stdout_lines
