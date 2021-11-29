@@ -78,7 +78,7 @@ export atleastoneipfound=0
 
 if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 	# SSH and MySQL
-	for fic in `ls /etc/sellyoursaas-allowed-ip.d/*.conf`
+	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf`
 	do
 		echo Process file $fic
 		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*\..*\..*\..*'`
