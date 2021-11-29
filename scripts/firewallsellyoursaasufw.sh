@@ -76,26 +76,65 @@ ufw allow out 2049/udp
 # From external source to local - In
 #-----------------------------------
 
+
+# SSH
 export atleastoneipfound=0
 
 if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
-	# SSH and MySQL
-	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf`
+	# If value is 2, we want a restriction per user found into a file (Value = 1 means access to everybody)
+	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-ssh.conf 2>/dev/null`
 	do
-		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*\..*\..*\..*'`
+		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*[\.:].*[\.:].*[\.:].*'`
 		do
 			export atleastoneipfound=1
 		done
 	done
 
 	if [[ "x$atleastoneipfound" == "x1" ]]; then
-		# SSH
-		echo Disallow existing In access for SSH and Mysql for specific ip
+		echo Disallow existing In access for SSH for specific ip
 		for num in `ufw status numbered |(grep ' 22/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
 		do
 			echo delete rule number $num
 			ufw --force delete $num
 		done
+	fi
+
+	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-ssh.conf 2>/dev/null`
+	do
+		echo Process file $fic
+		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*[\.:].*[\.:].*[\.:].*'`
+		do
+			# Allow SSH to the restricted ip $line
+			echo Allow SSH to the restricted ip $line
+			ufw allow from $line to any port 22 proto tcp
+		done
+	done
+fi
+
+if [[ "x$atleastoneipfound" == "x1" ]]; then
+	echo Disallow In access for SSH to everybody
+	ufw delete allow in 22/tcp
+else 
+	echo Allow In access with SSH to everybody
+	ufw allow in 22/tcp
+fi
+
+
+# MYSQL
+export atleastoneipfound=0
+
+if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
+	# If value is 2, we want a restriction per user found into a file (Value = 1 means access to everybody)
+	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-mysql.conf 2>/dev/null`
+	do
+		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*[\.:].*[\.:].*[\.:].*'`
+		do
+			export atleastoneipfound=1
+		done
+	done
+
+	if [[ "x$atleastoneipfound" == "x1" ]]; then
+		echo Disallow existing In access for Mysql for specific ip
 		for num in `ufw status numbered |(grep ' 3306/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
 		do
 			echo delete rule number $num
@@ -103,17 +142,14 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 		done
 	fi
 
-	# SSH and MySQL
-	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf`
+	# MySQL
+	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-mysql.conf`
 	do
 		echo Process file $fic
-		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*\..*\..*\..*'`
+		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*[\.:].*[\.:].*[\.:].*' 2>/dev/null`
 		do
-			# Allow SSH and Mysql to the restricted ip $line
-			echo Allow SSH and Mysql to the restricted ip $line
-			# SSH
-			ufw allow from $line to any port 22 proto tcp
-			# Mysql/Mariadb
+			# Allow Mysql to the restricted ip $line
+			echo Allow Mysql to the restricted ip $line
 			ufw allow from $line to any port 3306 proto tcp
 		done
 	done
@@ -121,17 +157,14 @@ fi
 
 if [[ "x$atleastoneipfound" == "x1" ]]; then
 	echo Disallow In access for SSH and Mysql to everybody
-	# SSH
-	ufw delete allow in 22/tcp
-	# Mysql/Mariadb
 	ufw delete allow in 3306/tcp
 else 
 	echo Allow In access with SSH and Mysql to everybody
-	# SSH
-	ufw allow in 22/tcp
-	# Mysql/Mariadb
 	ufw allow in 3306/tcp
 fi
+
+
+
 # Seems not required
 #ufw allow from 127.0.0.0/8 to any port 22 proto tcp
 #ufw allow from 192.168.0.0/16 to any port 22 proto tcp
