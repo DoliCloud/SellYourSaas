@@ -56,7 +56,7 @@ ufw allow out 143/tcp
 ufw allow out 993/tcp
 # DCC (anti spam public services)
 #ufw allow out 6277/tcp
-#ufw allow out 6277/udp
+#ufw allow out 6277/udpvi /etc/
 # Rdate
 ufw allow out 37/tcp
 ufw allow out 123/udp
@@ -68,6 +68,9 @@ ufw allow out 53/udp
 # NFS
 ufw allow out 2049/tcp
 ufw allow out 2049/udp
+#Required ?
+#ufw allow out 111/tcp
+#ufw allow out 111/udp
 
 
 # From external source to local - In
@@ -129,10 +132,11 @@ else
 	# Mysql/Mariadb
 	ufw allow in 3306/tcp
 fi
-ufw allow from 127.0.0.0/8 to any port 22 proto tcp
-ufw allow from 192.168.0.0/16 to any port 22 proto tcp
-ufw allow from 127.0.0.0/8 to any port 3306 proto tcp
-ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
+# Seems not required
+#ufw allow from 127.0.0.0/8 to any port 22 proto tcp
+#ufw allow from 192.168.0.0/16 to any port 22 proto tcp
+#ufw allow from 127.0.0.0/8 to any port 3306 proto tcp
+#ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
 
 
 # HTTP
@@ -141,17 +145,19 @@ ufw allow in 443/tcp
 # DNS
 ufw allow in 53/tcp
 ufw allow in 53/udp
+ufw allow in 953/tcp
+ufw allow in 953/udp
 
 # To see master NFS server
 if [[ "x$masterserver" != "x0" ]]; then
 	echo Enable NFS entry from instance servers
-	ufw allow in 111/udp
 	ufw allow in 111/tcp
-	ufw allow in 2049/udp
+	ufw allow in 111/udp
 	ufw allow in 2049/tcp
+	ufw allow in 2049/udp
 else
-	ufw delete allow in 111/udp
 	ufw delete allow in 111/tcp
+	ufw delete allow in 111/udp
 	ufw delete allow in 2049/tcp
 	ufw delete allow in 2049/udp
 fi
