@@ -86,7 +86,6 @@ $ispaid = sellyoursaasIsPaidInstance($object);
 if ($ispaid) {
 	if ($object->array_options['options_deployment_status'] != 'undeployed') {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
@@ -104,7 +103,6 @@ if ($ispaid) {
 		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 	} else {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->DOLICLOUD_INSTANCES_PATH."/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
@@ -127,7 +125,6 @@ if ($ispaid) {
 } else {
 	if ($object->array_options['options_deployment_status'] != 'undeployed') {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
@@ -144,7 +141,6 @@ if ($ispaid) {
 		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
 		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 	} else {
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= 'sudo rm -fr '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
