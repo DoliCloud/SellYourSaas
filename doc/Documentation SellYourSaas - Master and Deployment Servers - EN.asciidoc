@@ -2729,7 +2729,9 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /{usr/,}bin/cat rix,
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
     /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
     /usr/bin/id rix,
     /usr/bin/zip rix,
     /usr/bin/zstd rix,
@@ -2798,7 +2800,9 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /{usr/,}bin/cat rix,
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
     /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
     /usr/bin/id rix,
     /usr/bin/zip rix,
     /usr/bin/zstd rix,
@@ -4322,7 +4326,7 @@ ${IPTABLES} -t filter -A INPUT -p udp -s <deployment.server.IP> --dport nfs -m s
 ${IPTABLES} -t filter -A OUTPUT -p tcp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -p udp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
-
+s
 And on the *deployment servers*
 
 If we have two IPs get them like so:
