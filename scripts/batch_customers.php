@@ -37,7 +37,7 @@ $path=dirname($_SERVER['PHP_SELF']).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-	exit(1);
+	exit(-1);
 }
 
 // Global variables
@@ -108,7 +108,7 @@ if ($fp) {
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
-	exit;
+	exit(-1);
 }
 
 
@@ -120,7 +120,7 @@ if ($fp) {
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error) {
 	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
-	exit;
+	exit(-1);
 }
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
@@ -133,7 +133,7 @@ $langs->load("main");				// To load language file for default language
 
 // Load user and its permissions
 //$result=$user->fetch('','admin');	// Load user for login 'admin'. Comment line to run as anonymous user.
-//if (! $result > 0) { dol_print_error('',$user->error); exit; }
+//if (! $result > 0) { dol_print_error('',$user->error); exit(-1); }
 //$user->getrights();
 
 
@@ -152,7 +152,7 @@ if (! isset($argv[1])) {	// Check parameters
 	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats.\n";
 	print "- updatecountsonly    updates counters of instances only (only nb of user for instances)\n";
 	print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
-	exit;
+	exit(-1);
 }
 print '--- start script with mode '.$argv[1]."\n";
 //print 'Argument 1='.$argv[1]."\n";
@@ -292,7 +292,7 @@ print "Found ".count($instances)." not trial instances including ".$nbofactivesu
 if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
 	if (empty($conf->global->DOLICLOUD_BACKUP_PATH)) {
 		print "Error: Setup of module SellYourSaas not complete. Path to backup not defined.\n";
-		exit -1;
+		exit(-1);
 	}
 
 	// Loop on each instance
@@ -442,7 +442,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		$endyear=$tmp['year'];
 		if (empty($serverprice)) {
 			print 'ERROR Value of variable $serverprice is not defined.';
-			exit;
+			exit(-1);
 		}
 
 		$YEARSTART = 2018;
