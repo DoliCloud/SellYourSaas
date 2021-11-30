@@ -155,10 +155,10 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 fi
 
 if [[ "x$atleastoneipfound" == "x1" ]]; then
-	echo Disallow In access for SSH and Mysql to everybody
+	echo Disallow In access for Mysql to everybody
 	ufw delete allow in 3306/tcp
 else 
-	echo Allow In access with SSH and Mysql to everybody
+	echo Allow In access with Mysql to everybody
 	ufw allow in 3306/tcp
 fi
 
