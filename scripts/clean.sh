@@ -57,32 +57,32 @@ if [[ "x$databaseport" == "x" ]]; then
 	databaseport="3306"
 fi
 
-if [ "x$instanceserver" == "x1" && "x$IPSERVERDEPLOYMENT" == "x" ]; then
+if [[ "x$instanceserver" == "x1" && "x$IPSERVERDEPLOYMENT" == "x" ]]; then
 	echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 1
 fi
-if [ "x$database" == "x" ]; then
+if [[ "x$database" == "x" ]]; then
     echo "Failed to find the DATABASE by reading entry 'database=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 29
 fi
-if [ "x$databasehost" == "x" ]; then
+if [[ "x$databasehost" == "x" ]]; then
     echo "Failed to find the DATABASEHOST by reading entry 'databasehost=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 30
 fi
-if [ "x$databaseuser" == "x" ]; then
+if [[ "x$databaseuser" == "x" ]]; then
     echo "Failed to find the DATABASEUSER by reading entry 'databaseuser=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 4
 fi
-if [ "x$archivedirtest" == "x" ]; then
+if [[ "x$archivedirtest" == "x" ]]; then
     echo "Failed to find the archivedirtest value by reading entry 'archivedirtest=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 31
 fi
-if [ "x$archivedirpaid" == "x" ]; then
+if [[ "x$archivedirpaid" == "x" ]]; then
     echo "Failed to find the archivedirpaid value by reading entry 'archivedirpaid=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 31
