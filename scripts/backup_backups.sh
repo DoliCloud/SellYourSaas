@@ -165,7 +165,7 @@ do
 	
 	$command 2>&1
    	# WARNING: The set of rescommand must be just after the $command. No echo between.
-	$rescommand=$?
+	rescommand=$?
     if [ "x$rescommand" != "x0" ]; then
 		ret1[$SERVDESTICURSOR]=$rescommand
     	echo "ERROR Failed to make rsync for $DIRSOURCE1 to $SERVDESTICURSOR. ret=${ret1[$SERVDESTICURSOR]}."
@@ -208,7 +208,7 @@ if [[ "x$instanceserver" == "x1" ]]; then
 
 			        $command 2>&1
 				   	# WARNING: The set of rescommand must be just after the $command. No echo between.
-					$rescommand=$?
+					rescommand=$?
 			        if [ "x$rescommand" != "x0" ]; then
 			        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
 			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}."
