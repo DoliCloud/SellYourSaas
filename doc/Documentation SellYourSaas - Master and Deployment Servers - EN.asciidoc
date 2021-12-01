@@ -1232,26 +1232,10 @@ systemctl start mysqld.service
 
 === Installation of the firewall ===
 
-TODO Graphic with flux and ports
+TODO Graphic with flux and ports...
 
 
-* Add a firewall. Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
-
-
-==== With iptables (deprecated) ====
-
-Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
-
-[source, bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
-systemctl daemon-reload
-systemctl enable firewallsellyoursaas
-systemctl is-enabled firewallsellyoursaas
-systemctl status firewallsellyoursaas
----------------
-
-==== With ufw (recommended) ====
+* Add a firewall with ufw:
 
 Edit file */etc/ufw/before.rules* to allow out ping, by adding this:
 
