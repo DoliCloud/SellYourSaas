@@ -5376,3 +5376,49 @@ You can also try
 dpkg-reconfigure keyboard-configuration
 ---------------
 
+
+==== Error on apt on shim-signed of grub-efi-amd64-signed package
+
+If you get this error after upgrading packages on a server:
+
+[source,bash]
+---------------
+apt install -f
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+2 not fully installed or removed.
+After this operation, 0 B of additional disk space will be used.
+Setting up grub-efi-amd64-signed (1.167.2+2.04-1ubuntu44.2) ...
+mount: /var/lib/grub/esp: special device /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0-0-0-0-part15 does not exist.
+dpkg: error processing package grub-efi-amd64-signed (--configure):
+ installed grub-efi-amd64-signed package post-installation script subprocess returned error exit status 32
+No apport report written because the error message indicates its a followup error from a previous failure.
+                                                                                                          dpkg: dependency problems prevent configuration of shim-signed:
+ shim-signed depends on grub-efi-amd64-signed | grub-efi-arm64-signed; however:
+  Package grub-efi-amd64-signed is not configured yet.
+  Package grub-efi-arm64-signed is not installed.
+
+dpkg: error processing package shim-signed (--configure):
+ dependency problems - leaving unconfigured
+Errors were encountered while processing:
+ grub-efi-amd64-signed
+ shim-signed
+E: Sub-process /usr/bin/dpkg returned an error code (1)
+---------------
+
+First check with *parted /dev/xxx* and then *p* that you have a fat32 boot disk with *boot, esp* flag. If not do *set XX esp on*.
+
+Retry. If it fails again, launch *debconf-get-selections | grep grub-efi* to know what is setup into debconf database for grub-common and grup-pc entry that use grub-efi.
+
+If one point to the disk that does not exists mentionned into the error, edit the line to remove it and keep only the disk you need as boot devices with:
+
+[source,bash]
+---------------
+cat << EOF | sudo debconf-set-selections
+grub-common grub-efi/install_devices_disks_changed multiselect /dev/vda15
+grub-pc grub-efi/install_devices_disks_changed multiselect /dev/vda15
+EOF
+---------------
+
