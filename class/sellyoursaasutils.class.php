@@ -80,7 +80,7 @@ class SellYourSaasUtils
 
 		$now = dol_now();
 
-		dol_syslog(__METHOD__." search and validate draft invoices. langs->defaultlang=".$langs->defaultlang, LOG_DEBUG);
+		dol_syslog(__METHOD__." search and validate draft invoices with positive amount. langs->defaultlang=".$langs->defaultlang, LOG_DEBUG);
 
 		$error = 0;
 		$this->output = '';
@@ -94,6 +94,7 @@ class SellYourSaasUtils
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE f.fk_statut = '.Facture::STATUS_DRAFT;
 		$sql.= " AND se.fk_object = f.fk_soc AND se.dolicloud = 'yesv2'";
+		$sql.= " AND f.total_ttc > 0";
 		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".((int) $restrictonthirdpartyid);
 		$sql.= " ORDER BY f.datef, f.rowid";
 
