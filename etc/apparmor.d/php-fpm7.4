@@ -25,7 +25,11 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   /usr/sbin/php-fpm* rix,
 
   # PHP-FPM use this to swith profile for virtual hosts
-  # An entry must be added with content 'apparmor_hat = sellyoursaas' into the virtual host pool file /etc/php/7.4/fpm/pool.d/xxx.conf
+  # An entry must be added into the virtual host pool file /etc/php/7.4/fpm/pool.d/xxx.conf with content like 
+  # listen.owner = osu...
+  # listen.group = osu...
+  # listen.mode = 0600
+  # apparmor_hat = sellyoursaas
   change_profile -> php-fpm7.4//sellyoursaas,
 
 
