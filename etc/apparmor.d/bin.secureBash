@@ -9,6 +9,7 @@
   # Warning: this comments are interpreted
   #include <abstractions/base>
   #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
 
   deny capability setgid,
   deny capability setuid,
@@ -111,8 +112,6 @@
   /proc/*/auxv r,
   /run/mysqld/mysqld.sock rw,
   /sbin/ r,
-  /tmp/ rix,
-  /tmp/** rw,
   /sys/devices/system/cpu/ r,
   /usr/bin/awk rix,
   /usr/bin/basename rix,
@@ -209,7 +208,7 @@
 
   unix (connect),
 
-  
+
   profile sub_crontab {
 		# Warning: this comments are interpreted
 		#include <abstractions/base>
@@ -220,7 +219,7 @@
 		
 		allow owner /etc/passwd r,
   }
-  
+
   profile sub_profile_sftp_server {
 		# Warning: this comments are interpreted
 		#include <abstractions/base>

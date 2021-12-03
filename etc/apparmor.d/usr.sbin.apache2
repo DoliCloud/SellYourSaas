@@ -123,6 +123,8 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /proc/*/attr/current rw,
     /proc/loadavg r,
     /run/clamav/** rw,
+    /tmp/spam/ rw,
+    /tmp/spam/** rw,
     /{usr/,}bin/bash rix,
     /{usr/,}bin/cat rix,
     /{usr/,}bin/gzip rix,

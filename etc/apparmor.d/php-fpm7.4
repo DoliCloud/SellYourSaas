@@ -1,3 +1,10 @@
+# Last Modified: Fri Dec  3 00:15:55 2021
+#include <tunables/global>
+
+# You must use here the real path and not the symlink path
+# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
+# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
+
 profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   #include <abstractions/base>
   #include <abstractions/mysql>
@@ -5,41 +12,23 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   #include <abstractions/openssl>
   #include <abstractions/php>
   #include <abstractions/ssl_certs>
+  #include <abstractions/user-tmp>
   #include <local/php-fpm7.4>
-
-  capability chown,
-  capability dac_override,
-  capability dac_read_search,
-  capability kill,
-  capability net_bind_service,
-  capability setgid,
-  capability setuid,
-  capability sys_admin,
-  capability sys_tty_config,
 
   signal send peer=@{profile_name}//*,
 
   unix (connect),
 
-  deny /etc/group r,
-  deny /etc/passwd r,
   deny /var/www/** r,
-
-  /etc/php{,5,7}/** r,
-  /home/dolibarr rwlk,
-  /home/dolibarr/** rw,
-  /run/php{,-fpm}/php*-fpm-*.sock w,
-  /run/php{,-fpm}/php*-fpm.pid rw,
-  /run/php{,-fpm}/php*-fpm.sock rwlk,
+  
+  /bin/dash mrix,
   /usr/sbin/php-fpm* rix,
-  /var/log/php*-fpm.log rw,
-  @{PROC}/@{pid}/attr/{apparmor/,}current rw,
-  owner / rw,
-  owner /etc/ImageMagick-6/log.xml r,
-  owner /etc/ImageMagick-6/policy.xml r,
-  owner /run/systemd/notify w,
 
-  change_profile -> sellyoursaas//*,
+  # PHP-FPM use this to swith profile for virtual hosts
+  # An entry must be added with content 'apparmor_hat = sellyoursaas' into the virtual host pool file /etc/php/7.4/fpm/pool.d/xxx.conf
+  change_profile -> php-fpm7.4//sellyoursaas,
+
+
   ^sellyoursaas flags=(attach_disconnected) {
     #include <abstractions/base>
     #include <abstractions/mysql>
@@ -54,10 +43,11 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     network inet6,
     network unix dgram,
 
-    signal receive peer=php-fpm7.4,
-
     unix (connect),
 
+    # Note: there is already the abstractions/user-tmp that allows /tmp but for owner only
+    #allow /tmp/test.txt r,
+    
     deny /etc/group r,
     deny /etc/passwd r,
     deny /var/www/** r,

@@ -2463,7 +2463,7 @@ The log are visible into */var/log/kern.log* or */var/log/audit/audit.log*. You 
 
 [source,bash]
 ---------------
-aa-teardown; /etc/init.d/apparmor start;
+aa-teardown; /etc/init.d/apparmor restart;
 ---------------
 
 
