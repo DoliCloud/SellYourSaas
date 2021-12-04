@@ -138,7 +138,7 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 	var_dump($contract->linkedObjects);*/
 
 	$foundtemplate=0;
-	if (is_array($contract->linkedObjectsIds['facturerec'])) {
+	if (!empty($contract->linkedObjectsIds['facturerec']) && is_array($contract->linkedObjectsIds['facturerec'])) {
 		foreach ($contract->linkedObjectsIds['facturerec'] as $idelementelement => $templateinvoiceid) {
 			$foundtemplate++;
 			break;
@@ -149,7 +149,7 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 
 	if ($mode == 0) {
 		$foundinvoice=0;
-		if (is_array($contract->linkedObjectsIds['facture'])) {
+		if (!empty($contract->linkedObjectsIds['facture']) && is_array($contract->linkedObjectsIds['facture'])) {
 			foreach ($contract->linkedObjectsIds['facture'] as $idelementelement => $invoiceid) {
 				$foundinvoice++;
 				break;
