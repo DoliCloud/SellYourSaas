@@ -580,3 +580,7 @@ ToDisableEmailThatConfirmsRegistration=To disable the email ro customer for conf
 NoEmailSentAfterRegistration=No email was sent to customer after this registration
 EmailCCInvoices=Email Copy for invoices
 YourYearlyPaymentRequest=Your request for yearly payment
+EmailTemplateTrialExpiringReminder=Email template for soon end of trial
+EmailTemplateTrialExpiringReminderHelp=By default, the email template with code "GentleTrialExpiringReminder" (see Email template page) is used to warn users of its end of trial. You can force here to use another email template code for this service.
+EmailTemplateSuspendedTrial=Email template for end of trial 
+EmailTemplateSuspendedTrialHelp=By default, the email template with code "CustomerAccountSuspendedTrial" (see Email template page) is used to warn users of end of trial is finished. You can force here to use another email template code for this service.
