@@ -427,7 +427,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 	if (! $error && $action != 'updatecountsonly') {
 		$stats=array();
 
-		// Get list of existing stats
+		// Load list of existing stats into $stats
 		$sql ="SELECT name, x, y";                        // name is 'total', 'totalcommissions', 'totalinstancepaying', 'totalinstances', 'totalusers', 'benefit', 'totalcustomers', 'totalcustomerspaying'
 		$sql.=" FROM ".MAIN_DB_PREFIX."dolicloud_stats";
 		$sql.=" WHERE service = '".$dbmaster->escape($servicetouse)."'";
@@ -462,9 +462,8 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 			exit(-1);
 		}
 
-		$YEARSTART = 2018;
-
-		// Update all missing stats
+		// Update all missing stats (we restart only from january of previous year)
+		$YEARSTART = $endyear - 1;
 		for ($year = $YEARSTART; $year <= $endyear; $year++) {
 			for ($m = 1; $m <= 12; $m++) {
 				$datefirstday=dol_get_first_day($year, $m, 1);
@@ -509,7 +508,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 							print " -> ".$y."\n";
 
-							if ($today <= $datelastday) {	// Remove if current month
+							if ($today <= $datelastday) {	// Remove existing entry if current month
 								$sql ="DELETE FROM ".MAIN_DB_PREFIX."dolicloud_stats";
 								$sql.=" WHERE name = '".$dbmaster->escape($statkey)."' AND x='".$dbmaster->escape($x)."'";
 								$sql.=" AND service = '".$dbmaster->escape($servicetouse)."'";
@@ -520,7 +519,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 							$sql ="INSERT INTO ".MAIN_DB_PREFIX."dolicloud_stats(service, name, x, y)";
 							$sql.=" VALUES('".$dbmaster->escape($servicetouse)."', '".$dbmaster->escape($statkey)."', '".$dbmaster->escape($x)."', ".((float) $y).")";
-							dol_syslog("sql=".$sql);
+
 							$resql=$dbmaster->query($sql);
 							//if (! $resql) dol_print_error($dbmaster,'');		// Ignore error, we may have duplicate record here if record already exists and not deleted
 						}
