@@ -479,7 +479,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 				$x=sprintf("%04d%02d", $year, $m);
 
-				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','benefit','totalcustomerspaying','totalcustomers');
+				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','benefit','totalcustomers','totalcustomerspaying');
 				foreach ($statkeylist as $statkey) {
 					if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {
 						// Calculate stats fro this key

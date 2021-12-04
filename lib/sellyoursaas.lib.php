@@ -181,17 +181,26 @@ function sellyoursaasIsPaymentKo($contract)
 	$paymenterror=0;
 
 	if (is_array($contract->linkedObjects['facture'])) {
-		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
-			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
+		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
+			if ($invoice->statut == Facture::STATUS_CLOSED) {
+				continue;
+			}
 
 			// The invoice is not paid, we check if there is at least one payment issue
-			$sql=' SELECT id FROM '.MAIN_DB_PREFIX."actioncomm WHERE elementtype = 'invoice' AND fk_element = ".$invoice->id." AND code='INVOICE_PAYMENT_ERROR'";
+			// See also request into index.php
+			$sql = "SELECT id FROM ".MAIN_DB_PREFIX."actioncomm";
+			$sql .= " WHERE elementtype = 'invoice' AND fk_element = ".$invoice->id;
+			$sql .= " AND (code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";
+			$sql .= ' ORDER BY datep DESC';
+
 			$resql=$db->query($sql);
 			if ($resql) {
-				$num=$db->num_rows($resql);
+				$num = $db->num_rows($resql);
 				$db->free($resql);
 				return $num;
-			} else dol_print_error($db);
+			} else {
+				dol_print_error($db);
+			}
 		}
 	}
 
@@ -212,7 +221,7 @@ function sellyoursaasHasOpenInvoices($contract)
 	$atleastoneopeninvoice=0;
 
 	if (is_array($contract->linkedObjects['facture'])) {
-		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
+		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
 			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
 			if ($invoice->statut == Facture::STATUS_ABANDONED) continue;
 			if (empty($invoice->paid)) {

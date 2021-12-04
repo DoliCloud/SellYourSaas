@@ -502,6 +502,13 @@ if (count($listofcontractidreseller) == 0) {
 								print ' - '.$langs->trans("ActivePaymentError");
 							} else {
 								print ' - '.$langs->trans("APaymentModeWasRecorded");
+
+								// Discount code entered
+								if ($contract->array_options['options_discountcode']) {
+									print '<br><span class="opacitymedium">'.$langs->trans("DiscountCode").'</span> : <span class="bold">';
+									print $contract->array_options['options_discountcode'];
+									print '</span>';
+								}
 							}
 						}
 					}
