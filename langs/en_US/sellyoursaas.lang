@@ -582,5 +582,5 @@ EmailCCInvoices=Email Copy for invoices
 YourYearlyPaymentRequest=Your request for yearly payment
 EmailTemplateTrialExpiringReminder=Email template for soon end of trial
 EmailTemplateTrialExpiringReminderHelp=By default, the email template with code "GentleTrialExpiringReminder" (see Email template page) is used to warn users of its end of trial. You can force here to use another email template code for this service.
-EmailTemplateSuspendedTrial=Email template for end of trial 
-EmailTemplateSuspendedTrialHelp=By default, the email template with code "CustomerAccountSuspendedTrial" (see Email template page) is used to warn users of end of trial is finished. You can force here to use another email template code for this service.
+EmailTemplateSuspendedTrial=Email template for account suspended 
+EmailTemplateSuspendedTrialHelp=By default, the email template with code "CustomerAccountSuspendedTrial" (see Email template page) is used to warn users of account suspended (trial is finished). You can force here to use another email template for this service trial suspension.
