@@ -588,7 +588,7 @@ if ($action == 'updatestatsonly') {
 			$arraytags=null;
 			$statsd->gauge('sellyoursaas.instancedeployed', (float) ($nbofinstancedeployed), 1.0, $arraytags);
 			$statsd->gauge('sellyoursaas.instancepaymentko', (float) (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror)), 1.0, $arraytags);
-			$statsd->gauge('sellyoursaas.instancepaymentok', (float) (count($instance) - (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror))), 1.0, $arraytags);
+			$statsd->gauge('sellyoursaas.instancepaymentok', (float) (count($instances) - (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror))), 1.0, $arraytags);
 		} catch (Exception $e) {
 			print 'Failed to send to datadog';
 		}
