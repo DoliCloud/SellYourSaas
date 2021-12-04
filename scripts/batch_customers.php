@@ -462,7 +462,8 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 			exit(-1);
 		}
 
-		// Update all missing stats (we restart only from january of previous year)
+		// Update all missing stats (we start from january of previous year, but update will be done only if stats not yet
+		// already calculated or if it is stats of current month)
 		$YEARSTART = $endyear - 1;
 		for ($year = $YEARSTART; $year <= $endyear; $year++) {
 			for ($m = 1; $m <= 12; $m++) {
