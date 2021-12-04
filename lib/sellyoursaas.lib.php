@@ -190,7 +190,7 @@ function sellyoursaasIsPaymentKo($contract)
 			// See also request into index.php
 			$sql = "SELECT id FROM ".MAIN_DB_PREFIX."actioncomm";
 			$sql .= " WHERE elementtype = 'invoice' AND fk_element = ".$invoice->id;
-			$sql .= " AND (code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";
+			$sql .= " AND (code LIKE 'AC_PAYMENT_%_KO' OR label = 'Cancellation of payment by the bank')";
 			$sql .= ' ORDER BY datep DESC';
 
 			$resql=$db->query($sql);
