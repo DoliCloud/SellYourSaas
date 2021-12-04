@@ -1203,6 +1203,13 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 Later, we will enable the virtual host and we will create also the virtual host for the HTTPS on port 443 by using letsencrypt.
 
 
+TODO: For a future use of php-fpm, add into /etc/php/7.4/fpm/pool.d/*.conf
+
+php_admin_value[open_basedir] = /tmp/:/home/dolibarr:/home/dolibarr/maxmind/:/usr/share/GeoIP/
+apparmor_hat = sellyoursaas 
+
+
+
 === Timeout of server launches
 
 On Ubuntu 18.04+ when MariaDb has been migrated from a MySql:
@@ -1232,26 +1239,10 @@ systemctl start mysqld.service
 
 === Installation of the firewall ===
 
-TODO Graphic with flux and ports
+TODO Graphic with flux and ports...
 
 
-* Add a firewall. Configuring a firewall is not part of the SellYourSaas project. However, 2 sample scripts are provided (one for iptables, one for ufw):
-
-
-==== With iptables (deprecated) ====
-
-Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
-
-[source, bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
-systemctl daemon-reload
-systemctl enable firewallsellyoursaas
-systemctl is-enabled firewallsellyoursaas
-systemctl status firewallsellyoursaas
----------------
-
-==== With ufw (recommended) ====
+* Add a firewall with ufw:
 
 Edit file */etc/ufw/before.rules* to allow out ping, by adding this:
 
@@ -2422,246 +2413,7 @@ Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/us
 
 [source,bash]
 ---------------
-# Last Modified: Thu Nov 10 11:20:06 2016
-#include <tunables/global>
-
-# You must use here the real path and not the symlink path
-# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
-# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
-
-/{usr/,}bin/secureBash {
-  # Warning: this comments are interpreted
-  #include <abstractions/base>
-  #include <abstractions/nameservice>
-
-  deny capability setgid,
-  deny capability setuid,
-  deny capability sys_resource,
-
-
-  deny /etc/apt/sources.list r,
-  deny /etc/apt/sources.list.d/ r,
-  deny /etc/default/nss r,
-  deny /etc/host.conf r,
-  deny /etc/hosts r,
-  deny /etc/passwd r,
-  deny /etc/securetty r,
-  deny /etc/shadow r,
-  deny /etc/sudoers r,
-  deny /etc/sudoers.d/ r,
-  deny /etc/sudoers.d/README r,
-  deny /home/ r,
-  deny /home/jail/ r,
-  deny /lib/x86_64-linux-gnu/security/pam_deny.so m,
-  deny /lib/x86_64-linux-gnu/security/pam_env.so m,
-  deny /lib/x86_64-linux-gnu/security/pam_permit.so m,
-  deny /lib/x86_64-linux-gnu/security/pam_umask.so m,
-  deny /lib/x86_64-linux-gnu/security/pam_unix.so m,
-  deny /proc/filesystems r,
-  deny /proc/sys/kernel/ngroups_max r,
-  deny /usr/bin/sudo rx,
-  deny /usr/lib/sudo/sudoers.so m,
-  deny /var/lib/sudo/sree1/ w,
-  deny owner /var/www/ r,
-  deny owner /var/www/** r,
-
-  /etc/crontab r,
-  /var/spool/cron/crontabs/** r,
-
-  /{usr/,}bin/ r,
-  /{usr/,}bin/cat rix,
-  /{usr/,}bin/chmod rix,
-  /{usr/,}bin/cp rix,
-  /{usr/,}bin/customerCocoonBash mr,
-  /{usr/,}bin/dash rix,
-  /{usr/,}bin/grep rix,
-  /{usr/,}bin/gzip rix,
-  /{usr/,}bin/less rix,
-  /{usr/,}bin/lesspipe rix,
-  /{usr/,}bin/ls rix,
-  /{usr/,}bin/more rix,
-  /{usr/,}bin/mkdir rix,
-  /{usr/,}bin/mv rix,
-  /{usr/,}bin/rm rix,
-  /{usr/,}bin/rmdir rix,
-  /{usr/,}bin/sed rix,
-  /{usr/,}bin/tar rix,
-  /{usr/,}bin/uname rix,
-  /dev/tty rw,
-  /etc/.pwd.lock wk,
-  /etc/bash.bashrc r,
-  /etc/bash_completion r,
-  /etc/bash_completion.d/ r,
-  /etc/bash_completion.d/** r,
-  /etc/clamav/clamd.conf r,
-  /etc/init.d/ r,
-  /etc/inputrc r,
-  /etc/mailname r,
-  /etc/mysql/conf.d/ r,
-  /etc/mysql/conf.d/mysqld_safe_syslog.cnf r,
-  /etc/mysql/conf.d/mysql.cnf r,
-  /etc/mysql/conf.d/mysqldump.cnf r,
-  /etc/mysql/mariadb.cnf r,
-  /etc/mysql/mariadb.conf.d/ r,
-  /etc/mysql/mariadb.conf.d/50-client.cnf r,
-  /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf r,
-  /etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf r,
-  /etc/mysql/mariadb.conf.d/50-server.cnf r,
-  /etc/mysql/my.cnf r,
-  /etc/pam.d/* r,
-  /etc/papersize r,
-  /etc/php/7.*/apache2/conf.d/ r,
-  /etc/php/7.*/apache2/conf.d/* r,
-  /etc/php/7.*/cli/* r,
-  /etc/php/7.*/cli/conf.d/ r,
-  /etc/php/7.*/cli/conf.d/* r,
-  /etc/php/7.*/fpm/conf.d/ r,
-  /etc/php/7.*/fpm/conf.d/* r,
-  /etc/php/7.*/mods-available/ r,
-  /etc/php/7.*/mods-available/* r,
-  /etc/postfix/dynamicmaps.cf r,
-  /etc/postfix/main.cf r,
-  /etc/profile r,
-  /etc/profile.d/ r,
-  /etc/profile.d/*.sh r,
-  /etc/python2.7/sitecustomize.py r,
-  /etc/resolv.conf r,
-  /etc/ssl/openssl.cnf r,
-  /etc/vim/vimrc r,
-  /etc/wgetrc r,
-  /etc/ImageMagick-6/ r,
-  /etc/ImageMagick-6/* r,
-  /opt/groovy-1.8.6/bin/ r,
-  /proc/*/auxv r,
-  /run/mysqld/mysqld.sock rw,
-  /sbin/ r,
-  /tmp/ rix,
-  /tmp/** rw,
-  /sys/devices/system/cpu/ r,
-  /usr/bin/awk rix,
-  /usr/bin/basename rix,
-  /usr/bin/clamdscan rix,
-  /usr/bin/clear rix,
-  /usr/bin/clear_console rix,
-  /usr/bin/crontab Cx -> sub_crontab,
-  /usr/bin/cut rix,
-  /usr/bin/dircolors rix,
-  /usr/bin/dirname rix,
-  /usr/bin/du rix,
-  /usr/bin/env rix,
-  /usr/bin/expr rix,
-  /usr/bin/find rix,
-  /usr/bin/git rix,
-  /usr/bin/groups rix,
-  /usr/bin/head rix,
-  /usr/bin/id rix,
-  /usr/bin/locale-check rix,
-  /usr/bin/mawk rix,
-  /usr/bin/mysql rix,
-  /usr/bin/mysqldump rix,
-  /usr/bin/passwd rix,
-  /usr/bin/php rix,
-  /usr/bin/php7.* rix,
-  /usr/bin/python rix,
-  /usr/bin/python2.7 rix,
-  /usr/bin/rsync rix,
-  /usr/bin/scp rix,
-  /usr/bin/tail rix,
-  /usr/bin/unzip rix,
-  /usr/bin/vim.basic rix,
-  /usr/bin/vim.nox rix,
-  /usr/bin/wget rix,
-  /usr/bin/zip rix,
-  /usr/bin/zstd rix,
-  /usr/include/python2.7/pyconfig.h r,
-  /usr/lib/git-core/** rix,
-  /usr/lib/openssh/sftp-server Cx -> sub_profile_sftp_server,  
-  #/usr/lib/openssh/sftp-server rix,
-  /usr/lib{,32,64}/** mr,
-  /usr/local/bin/ r,
-  /usr/local/lib/python2.7/dist-packages/ r,
-  /usr/local/sbin/ r,
-  /usr/sbin/ r,
-  /usr/sbin/postdrop rix,
-  /usr/sbin/sendmail rix,
-  /usr/share/bash-completion/** rix,
-  /usr/share/command-not-found/priority.txt r,
-  /usr/share/command-not-found/programs.d/ r,
-  /usr/share/command-not-found/programs.d/all-main.db rk,
-  /usr/share/command-not-found/programs.d/all-multiverse.db rk,
-  /usr/share/command-not-found/programs.d/all-universe.db rk,
-  /usr/share/command-not-found/programs.d/amd64-main.db rk,
-  /usr/share/command-not-found/programs.d/amd64-multiverse.db rk,
-  /usr/share/command-not-found/programs.d/amd64-restricted.db rk,
-  /usr/share/command-not-found/programs.d/amd64-universe.db rk,
-  /usr/share/mysql/charsets/Index.xml r,
-  /usr/share/pyshared/CommandNotFound/CommandNotFound.py r,
-  /usr/share/pyshared/CommandNotFound/__init__.py r,
-  /usr/share/pyshared/CommandNotFound/util.py r,
-  /usr/share/pyshared/apport_python_hook.py r,
-  /usr/share/pyshared/apt/__init__.py r,
-  /usr/share/pyshared/apt/cache.py r,
-  /usr/share/pyshared/apt/cdrom.py r,
-  /usr/share/pyshared/apt/deprecation.py r,
-  /usr/share/pyshared/apt/package.py r,
-  /usr/share/pyshared/apt/progress/__init__.py r,
-  /usr/share/pyshared/apt/progress/base.py r,
-  /usr/share/pyshared/apt/progress/old.py r,
-  /usr/share/pyshared/apt/progress/text.py r,
-  /usr/share/pyshared/aptsources/__init__.py r,
-  /usr/share/pyshared/aptsources/distinfo.py r,
-  /usr/share/pyshared/aptsources/sourceslist.py r,
-  /usr/share/pyshared/lazr.restfulclient-0.12.0-nspkg.pth r,
-  /usr/share/pyshared/lazr.uri-1.0.3-nspkg.pth r,
-  /usr/share/pyshared/zope.interface-3.6.1-nspkg.pth r,
-  /usr/share/vim/vim*/** rix,
-  /usr/share/ImageMagick-6/ r,
-  /usr/share/ImageMagick-6/* r,
-  /var/spool/postfix/public/pickup w,
-  owner /var/spool/postfix/maildrop/ rw,
-  owner /var/spool/postfix/maildrop/** rw,
-  owner @{HOME}/ rwl,
-  owner @{HOME}/** rwl,
-  owner /home/*/home/*/** rix,
-  owner /mnt/diskhome/home/** rixwlk,
-  @{HOME}/dbn*/*_error.log r,			# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
-  /mnt/diskhome/home/osu*/dbn*/*_error.log r,
-  /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
-  /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
-  /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
-  /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
-
-  unix (connect),
-
-  
-  profile sub_crontab {
-		# Warning: this comments are interpreted
-		#include <abstractions/base>
-		#include <abstractions/nameservice> 
-		/usr/bin/crontab rix,
-		/etc/crontab r,
-		/var/spool/cron/crontabs/** r,
-		
-		allow owner /etc/passwd r,
-  }
-  
-  profile sub_profile_sftp_server {
-		# Warning: this comments are interpreted
-		#include <abstractions/base>
-		/etc/ssl/openssl.cnf r,
-       /etc/nsswitch.conf r,
-		
-       #allow owner /etc/passwd r,
-       allow /etc/passwd r,
-		
-		owner @{HOME}/ rwl,
-		owner @{HOME}/** rwl,
-		owner /home/*/home/*/** rixwlk,
-		owner /mnt/diskhome/home/** rixwlk,
-		@{HOME}/dbn*/*_error.log r,		# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
-		/mnt/diskhome/home/osu*/dbn*/*_error.log r,
-  }  
-}
+Get content of the file into this repository in etc/apparmor.d/bin.secureBash
 ---------------
 
 
@@ -2669,162 +2421,16 @@ Create an apparmor file */etc/apparmor.d/usr.sbin.apache2* with this content:
 
 [source,bash]
 ---------------
-# Last Modified: Wed Nov 24 16:11:33 2021
-#include <tunables/global>
-
-# You must use here the real path and not the symlink path
-# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
-# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
-
-profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
-  #include <abstractions/base>
-  #include <abstractions/nameservice>
-  #include <apache2.d>
-  #include <local/usr.sbin.apache2>
-
-  capability chown,
-  capability dac_override,
-  capability dac_read_search,
-  capability kill,
-  capability net_bind_service,
-  capability setgid,
-  capability setuid,
-  capability sys_admin,
-  capability sys_tty_config,
-
-  signal send peer=@{profile_name}//*,
-
-  / rw,
-  /** mrwlkix,
-
-
-  ^DEFAULT_URI flags=(attach_disconnected) {
-    #include <abstractions/apache2-common>
-    #include <abstractions/base>
-    #include <abstractions/php>
-    #include <abstractions/postfix-common>
-    #include <abstractions/user-tmp>
-    #include <abstractions/openssl>
-
-    deny /etc/passwd r,
-    deny /etc/group r,
-
-    network inet,
-    network inet6,
-    network unix dgram,
-
-    /dev/tty rw,
-    /etc/ImageMagick*/** rw,
-    /etc/clamav/clamd.conf r,
-    /etc/postfix/dynamicmaps.cf.d/ r,
-    /etc/ssl/openssl.cnf rw,
-    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
-    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
-    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
-    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
-    /proc/*/attr/current rw,
-    /proc/loadavg r,
-    /run/clamav/** rw,
-    /{usr/,}bin/bash rix,
-    /{usr/,}bin/cat rix,
-    /{usr/,}bin/gzip rix,
-    /{usr/,}bin/tar rix,
-    /usr/bin/clamdscan rix,
-    /usr/bin/id rix,
-    /usr/bin/zip rix,
-    /usr/bin/zstd rix,
-    /usr/sbin/sendmail rix,
-    /usr/sbin/post* rix,
-    /usr/share/ImageMagick*/** rw,
-    /usr/share/zoneinfo-icu/ r,
-    /usr/share/zoneinfo-icu/** r,
-    /usr/share/zoneinfo/ r,
-    /usr/share/zoneinfo/** r,
-    /var/log/apache2/access.log w,
-    /var/log/apache2/access_ssl.log w,
-    /var/log/apache2/error_ssl.log w,
-    /var/log/apache2/other_vhosts_access.log w,
-    /var/log/apache2/other_vhosts_error.log w,
-    /var/log/phpmail.log w,
-    /var/log/phpsendmail.log rw,
-    /var/spool/postfix/public/pickup rw,
-    /var/www/html/index.html r,
-    owner /mnt/diskhome/home/osu*/** rw,
-    owner /var/spool/postfix/maildrop/ rw,
-    owner /var/spool/postfix/maildrop/** rw,
-  }
-
-  ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
-    #include <abstractions/apache2-common>
-    #include <abstractions/base>
-    #include <abstractions/php>
-    #include <abstractions/postfix-common>
-    #include <abstractions/user-tmp>
-    #include <abstractions/openssl>
-
-    network inet,
-    network inet6,
-
-    capability dac_read_search,
-  }
-
-  ^sellyoursaas-instances flags=(attach_disconnected) {
-    #include <abstractions/apache2-common>
-    #include <abstractions/base>
-    #include <abstractions/php>
-    #include <abstractions/postfix-common>
-    #include <abstractions/user-tmp>
-    #include <abstractions/openssl>
-    
-    deny /etc/passwd r,
-    deny /etc/group r,
-    
-    network inet,
-    network inet6,
-    network unix dgram,
-    
-    /dev/tty rw,
-    /etc/ImageMagick*/** rw,
-    /etc/clamav/clamd.conf r,
-    /etc/ssl/openssl.cnf rw,
-    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
-    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
-    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
-    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
-    /proc/*/attr/current rw,
-    /proc/loadavg r,
-    /run/clamav/** rw,
-    /{usr/,}bin/bash rix,
-    /{usr/,}bin/cat rix,
-    /{usr/,}bin/gzip rix,
-    /{usr/,}bin/tar rix,
-    /usr/bin/clamdscan rix,
-    /usr/bin/id rix,
-    /usr/bin/zip rix,
-    /usr/bin/zstd rix,
-    /usr/sbin/post* rix,
-    /usr/sbin/sendmail rix,
-    /usr/share/ImageMagick*/** rw,
-    /usr/share/zoneinfo-icu/ r,
-    /usr/share/zoneinfo-icu/** r,
-    /usr/share/zoneinfo/ r,
-    /usr/share/zoneinfo/** r,
-    /var/log/apache2/access.log w,
-    /var/log/apache2/access_ssl.log w,
-    /var/log/apache2/error_ssl.log w,
-    /var/log/apache2/other_vhosts_access.log w,
-    /var/log/apache2/other_vhosts_error.log w,
-    /var/log/phpmail.log w,
-    /var/log/phpsendmail.log rw,
-    /var/spool/postfix/public/pickup rw,
-    /var/www/html/index.html r,
-    owner /mnt/diskhome/home/osu*/** rw,
-    owner /var/spool/postfix/maildrop/ rw,
-    owner /var/spool/postfix/maildrop/** rw,
-  }
-}
+Get content of the file into this repository in etc/apparmor.d/usr.sbin.apache2
 ---------------
 
+
+Create an apparmor file */etc/apparmor.d/php-fpm7.4* with this content:
+
+[source,bash]
+---------------
+Get content of the file into this repository in etc/apparmor.d/php-fpm7.4
+---------------
 
 
 * Note: To activate(reload)/desactivate a rule apparmor, use *aa-disable* or *aa-enforce* (or *aa-complain*)
@@ -2850,14 +2456,14 @@ Sometimes, a reboot of server may be required to take into account any change on
 
 All the disabled profiles are visible into */etc/apparmor.d/disable*
 
-The log are visilbe into */var/log/kern.log* or */var/log/audit/audit.log*. You can use *aa-logprof* to convert content of this file into real rules into existing profiles.
+The log are visible into */var/log/kern.log* or */var/log/audit/audit.log*. You can use *aa-logprof* to know the log file used and convert its content into real rules into existing profiles.
 
 
 * Note: To unload ALL apparmor profiles and reload them:
 
 [source,bash]
 ---------------
-aa-teardown; /etc/init.d/apparmor start;
+aa-teardown; /etc/init.d/apparmor restart;
 ---------------
 
 
@@ -4322,7 +3928,7 @@ ${IPTABLES} -t filter -A INPUT -p udp -s <deployment.server.IP> --dport nfs -m s
 ${IPTABLES} -t filter -A OUTPUT -p tcp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ${IPTABLES} -t filter -A OUTPUT -p udp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
-
+s
 And on the *deployment servers*
 
 If we have two IPs get them like so:
@@ -5386,5 +4992,51 @@ You can also try
 [source,bash]
 ---------------
 dpkg-reconfigure keyboard-configuration
+---------------
+
+
+==== Error on apt on shim-signed of grub-efi-amd64-signed package
+
+If you get this error after upgrading packages on a server:
+
+[source,bash]
+---------------
+apt install -f
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+2 not fully installed or removed.
+After this operation, 0 B of additional disk space will be used.
+Setting up grub-efi-amd64-signed (1.167.2+2.04-1ubuntu44.2) ...
+mount: /var/lib/grub/esp: special device /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0-0-0-0-part15 does not exist.
+dpkg: error processing package grub-efi-amd64-signed (--configure):
+ installed grub-efi-amd64-signed package post-installation script subprocess returned error exit status 32
+No apport report written because the error message indicates its a followup error from a previous failure.
+                                                                                                          dpkg: dependency problems prevent configuration of shim-signed:
+ shim-signed depends on grub-efi-amd64-signed | grub-efi-arm64-signed; however:
+  Package grub-efi-amd64-signed is not configured yet.
+  Package grub-efi-arm64-signed is not installed.
+
+dpkg: error processing package shim-signed (--configure):
+ dependency problems - leaving unconfigured
+Errors were encountered while processing:
+ grub-efi-amd64-signed
+ shim-signed
+E: Sub-process /usr/bin/dpkg returned an error code (1)
+---------------
+
+First check with *parted /dev/xxx* and then *p* that you have a fat32 boot disk with *boot, esp* flag. If not do *set XX esp on*.
+
+Retry. If it fails again, launch *debconf-get-selections | grep grub-efi* to know what is setup into debconf database for grub-common and grup-pc entry that use grub-efi.
+
+If one point to the disk that does not exists mentionned into the error, edit the line to remove it and keep only the disk you need as boot devices with:
+
+[source,bash]
+---------------
+cat << EOF | sudo debconf-set-selections
+grub-common grub-efi/install_devices_disks_changed multiselect /dev/vda15
+grub-pc grub-efi/install_devices_disks_changed multiselect /dev/vda15
+EOF
 ---------------
 

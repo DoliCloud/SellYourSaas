@@ -164,11 +164,13 @@ do
 	
 	
 	$command 2>&1
-    if [ "x$?" != "x0" ]; then
-    	echo "ERROR Failed to make rsync for $DIRSOURCE1 to $SERVDESTICURSOR"
+   	# WARNING: The set of rescommand must be just after the $command. No echo between.
+	rescommand=$?
+    if [ "x$rescommand" != "x0" ]; then
+		ret1[$SERVDESTICURSOR]=$rescommand
+    	echo "ERROR Failed to make rsync for $DIRSOURCE1 to $SERVDESTICURSOR. ret=${ret1[$SERVDESTICURSOR]}."
     	echo "Command was: $command"
-		ret1[$SERVDESTICURSOR]=$?
-    	export errstring="$errstring\nDir $DIRSOURCE1 to $SERVDESTICURSOR "`date '+%Y-%m-%d %H:%M:%S'`
+    	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir $DIRSOURCE1 to $SERVDESTICURSOR. ret=${ret1[$SERVDESTICURSOR]}. Command was: $command\n"
     fi
 done
 
@@ -205,11 +207,13 @@ if [[ "x$instanceserver" == "x1" ]]; then
 		        	echo `date +'%Y-%m-%d %H:%M:%S'`" $command";
 
 			        $command 2>&1
-			        if [ "x$?" != "x0" ]; then
-			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR"
-					   	echo "Command was: $command"
+				   	# WARNING: The set of rescommand must be just after the $command. No echo between.
+					rescommand=$?
+			        if [ "x$rescommand" != "x0" ]; then
 			        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
-			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. Command was: $command\n"
+			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}."
+					   	echo "Command was: $command"
+			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}. Command was: $command\n"
 			        fi
 				else
 					echo "Canceled. An error occured in backup of DIRSOURCE1"

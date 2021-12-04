@@ -38,7 +38,7 @@ $path=dirname(__FILE__).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-	exit(1);
+	exit(-1);
 }
 
 // Global variables
@@ -154,7 +154,7 @@ if (empty($instanceserver)) {
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error) {
 	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
-	exit;
+	exit(-1);
 }
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
@@ -276,7 +276,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$result = dol_mkdir($dirroot.'/'.$login);
 	if ($result < 0) {
 		print "ERROR failed to create target dir ".$dirroot.'/'.$login."\n";
-		exit(1);
+		exit(-1);
 	}
 
 	$command="rsync";

@@ -851,7 +851,7 @@ sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
 sudo apt install -y fail2ban
@@ -868,7 +868,7 @@ sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
 sudo apt install -y fail2ban
@@ -1154,26 +1154,10 @@ systemctl reload nom_du_service.service
 
 === Installation du firewall ===
 
-TODO Graphic avec les flux et les ports.
+TODO Graphic avec les flux et les ports...
 
 
-* Créer un firewall. La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
-
-
-==== Avec iptables (déprécié) ====
-
-Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
-
-[source, bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
-systemctl daemon-reload
-systemctl enable firewallsellyoursaas
-systemctl is-enabled firewallsellyoursaas
-systemctl status firewallsellyoursaas
----------------
-
-==== Avec ufw (recommandé) ====
+* Créer un firewall avec ufw
 
 Editer le fichier */etc/ufw/before.rules* pour permettre les ping sortant, en ajoutant ceci:
 
@@ -2285,7 +2269,11 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
 #include <tunables/global>
 
 # You must use here the real path and not the symlink path
-/bin/secureBash {
+# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
+# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
+
+/{usr/,}bin/secureBash {
+  # Warning: this comments are interpreted
   #include <abstractions/base>
   #include <abstractions/nameservice>
 
@@ -2299,7 +2287,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   deny /etc/default/nss r,
   deny /etc/host.conf r,
   deny /etc/hosts r,
-  #deny /etc/passwd r,
+  deny /etc/passwd r,
   deny /etc/securetty r,
   deny /etc/shadow r,
   deny /etc/sudoers r,
@@ -2320,35 +2308,35 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   deny owner /var/www/ r,
   deny owner /var/www/** r,
 
-  owner /home/*/home/*/** rix,
   /etc/crontab r,
   /var/spool/cron/crontabs/** r,
 
-  /bin/ r,
-  /bin/cat rix,
-  /bin/chmod rix,
-  /bin/cp rix,
-  /bin/customerCocoonBash mr,
-  /bin/dash rix,
-  /bin/grep rix,
-  /bin/gzip rix,
-  /bin/less rix,
-  /bin/lesspipe rix,
-  /bin/ls rix,
-  /bin/more rix,
-  /bin/mkdir rix,
-  /bin/mv rix,
-  /bin/rm rix,
-  /bin/rmdir rix,
-  /bin/sed rix,
-  /bin/tar rix,
-  /bin/uname rix,
+  /{usr/,}bin/ r,
+  /{usr/,}bin/cat rix,
+  /{usr/,}bin/chmod rix,
+  /{usr/,}bin/cp rix,
+  /{usr/,}bin/customerCocoonBash mr,
+  /{usr/,}bin/dash rix,
+  /{usr/,}bin/grep rix,
+  /{usr/,}bin/gzip rix,
+  /{usr/,}bin/less rix,
+  /{usr/,}bin/lesspipe rix,
+  /{usr/,}bin/ls rix,
+  /{usr/,}bin/more rix,
+  /{usr/,}bin/mkdir rix,
+  /{usr/,}bin/mv rix,
+  /{usr/,}bin/rm rix,
+  /{usr/,}bin/rmdir rix,
+  /{usr/,}bin/sed rix,
+  /{usr/,}bin/tar rix,
+  /{usr/,}bin/uname rix,
   /dev/tty rw,
   /etc/.pwd.lock wk,
   /etc/bash.bashrc r,
   /etc/bash_completion r,
   /etc/bash_completion.d/ r,
   /etc/bash_completion.d/** r,
+  /etc/clamav/clamd.conf r,
   /etc/init.d/ r,
   /etc/inputrc r,
   /etc/mailname r,
@@ -2365,6 +2353,8 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /etc/mysql/my.cnf r,
   /etc/pam.d/* r,
   /etc/papersize r,
+  /etc/php/7.*/apache2/conf.d/ r,
+  /etc/php/7.*/apache2/conf.d/* r,
   /etc/php/7.*/cli/* r,
   /etc/php/7.*/cli/conf.d/ r,
   /etc/php/7.*/cli/conf.d/* r,
@@ -2391,31 +2381,12 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /tmp/ rix,
   /tmp/** rw,
   /sys/devices/system/cpu/ r,
-  /usr/bin/ r,
-  /usr/bin/cat rix,
-  /usr/bin/chmod rix,
-  /usr/bin/cp rix,
-  /usr/bin/customerCocoonBash mr,
-  /usr/bin/dash rix,
-  /usr/bin/grep rix,
-  /usr/bin/gzip rix,
-  /usr/bin/less rix,
-  /usr/bin/lesspipe rix,
-  /usr/bin/ls rix,
-  /usr/bin/more rix,
-  /usr/bin/mkdir rix,
-  /usr/bin/mv rix,
-  /usr/bin/rm rix,
-  /usr/bin/rmdir rix,
-  /usr/bin/sed rix,
-  /usr/bin/tar rix,
-  /usr/bin/uname rix,
-  /usr/bin/zstd rix,
   /usr/bin/awk rix,
   /usr/bin/basename rix,
+  /usr/bin/clamdscan rix,
   /usr/bin/clear rix,
   /usr/bin/clear_console rix,
-  /usr/bin/crontab rix,
+  /usr/bin/crontab Cx -> sub_crontab,
   /usr/bin/cut rix,
   /usr/bin/dircolors rix,
   /usr/bin/dirname rix,
@@ -2442,13 +2413,13 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /usr/bin/unzip rix,
   /usr/bin/vim.basic rix,
   /usr/bin/vim.nox rix,
-  /usr/share/bash-completion/** rix,
-  /usr/share/vim/vim74/** rix,
   /usr/bin/wget rix,
-  /usr/games/ r,
+  /usr/bin/zip rix,
+  /usr/bin/zstd rix,
   /usr/include/python2.7/pyconfig.h r,
   /usr/lib/git-core/** rix,
-  /usr/lib/openssh/sftp-server rix,
+  /usr/lib/openssh/sftp-server Cx -> sub_profile_sftp_server,  
+  #/usr/lib/openssh/sftp-server rix,
   /usr/lib{,32,64}/** mr,
   /usr/local/bin/ r,
   /usr/local/lib/python2.7/dist-packages/ r,
@@ -2456,6 +2427,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /usr/sbin/ r,
   /usr/sbin/postdrop rix,
   /usr/sbin/sendmail rix,
+  /usr/share/bash-completion/** rix,
   /usr/share/command-not-found/priority.txt r,
   /usr/share/command-not-found/programs.d/ r,
   /usr/share/command-not-found/programs.d/all-main.db rk,
@@ -2485,56 +2457,220 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /usr/share/pyshared/lazr.restfulclient-0.12.0-nspkg.pth r,
   /usr/share/pyshared/lazr.uri-1.0.3-nspkg.pth r,
   /usr/share/pyshared/zope.interface-3.6.1-nspkg.pth r,
-  /usr/share/vim/vim*/debian.vim r,
-  /usr/share/vim/vim*/defaults.vim r,
-  /usr/share/vim/vim*/filetype.vim r,
-  /usr/share/vim/vim*/ftplugin.vim r,
-  /usr/share/vim/vim*/indent.vim r,
-  /usr/share/vim/vim*/pack/ r,
-  /usr/share/vim/vim*/lang/en_GB/LC_MESSAGES/vim.mo r,
-  /usr/share/vim/vim*/plugin/ r,
-  /usr/share/vim/vim*/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim*/plugin/gzip.vim r,
-  /usr/share/vim/vim*/plugin/logiPat.vim r,
-  /usr/share/vim/vim*/plugin/manpager.vim r,
-  /usr/share/vim/vim*/plugin/matchparen.vim r,
-  /usr/share/vim/vim*/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim*/plugin/rrhelper.vim r,
-  /usr/share/vim/vim*/plugin/spellfile.vim r,
-  /usr/share/vim/vim*/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim*/plugin/tohtml.vim r,
-  /usr/share/vim/vim*/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim*/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim*/rgb.txt r,
-  /usr/share/vim/vim*/scripts.vim r,
-  /usr/share/vim/vim*/syntax/css.vim r,
-  /usr/share/vim/vim*/syntax/html.vim r,
-  /usr/share/vim/vim*/syntax/javascript.vim r,
-  /usr/share/vim/vim*/syntax/php.vim r,
-  /usr/share/vim/vim*/syntax/sql.vim r,
-  /usr/share/vim/vim*/syntax/sqloracle.vim r,
-  /usr/share/vim/vim*/syntax/syncolor.vim r,
-  /usr/share/vim/vim*/syntax/synload.vim r,
-  /usr/share/vim/vim*/syntax/syntax.vim r,
-  /usr/share/vim/vim*/syntax/nosyntax.vim r,
-  /usr/share/vim/vim*/syntax/vb.vim r,
+  /usr/share/vim/vim*/** rix,
   /usr/share/ImageMagick-6/ r,
   /usr/share/ImageMagick-6/* r,
+  /var/spool/postfix/public/pickup w,
   owner /var/spool/postfix/maildrop/ rw,
   owner /var/spool/postfix/maildrop/** rw,
-  /var/spool/postfix/public/pickup w,
   owner @{HOME}/ rwl,
   owner @{HOME}/** rwl,
+  owner /home/*/home/*/** rix,
   owner /mnt/diskhome/home/** rixwlk,
+  @{HOME}/dbn*/*_error.log r,			# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
   /mnt/diskhome/home/osu*/dbn*/*_error.log r,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
   /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
   /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+
+  unix (connect),
+
+  
+  profile sub_crontab {
+		# Warning: this comments are interpreted
+		#include <abstractions/base>
+		#include <abstractions/nameservice> 
+		/usr/bin/crontab rix,
+		/etc/crontab r,
+		/var/spool/cron/crontabs/** r,
+		
+		allow owner /etc/passwd r,
+  }
+  
+  profile sub_profile_sftp_server {
+		# Warning: this comments are interpreted
+		#include <abstractions/base>
+		/etc/ssl/openssl.cnf r,
+       /etc/nsswitch.conf r,
+		
+       #allow owner /etc/passwd r,
+       allow /etc/passwd r,
+		
+		owner @{HOME}/ rwl,
+		owner @{HOME}/** rwl,
+		owner /home/*/home/*/** rixwlk,
+		owner /mnt/diskhome/home/** rixwlk,
+		@{HOME}/dbn*/*_error.log r,		# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
+		/mnt/diskhome/home/osu*/dbn*/*_error.log r,
+  }  
 }
 ---------------
 
-!!! Créer aussi un fichier pour /usr/bin/secureBash avec Ubuntu 20.04+
+
+Create an apparmor file */etc/apparmor.d/usr.sbin.apache2* with this content:
+
+[source,bash]
+---------------
+# Last Modified: Wed Nov 24 16:11:33 2021
+#include <tunables/global>
+
+# You must use here the real path and not the symlink path
+# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
+# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
+
+profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <apache2.d>
+  #include <local/usr.sbin.apache2>
+
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability kill,
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+  capability sys_admin,
+  capability sys_tty_config,
+
+  signal send peer=@{profile_name}//*,
+
+  / rw,
+  /** mrwlkix,
+
+
+  ^DEFAULT_URI flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+
+    deny /etc/passwd r,
+    deny /etc/group r,
+
+    network inet,
+    network inet6,
+    network unix dgram,
+
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/clamav/clamd.conf r,
+    /etc/postfix/dynamicmaps.cf.d/ r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
+    /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
+    /usr/bin/id rix,
+    /usr/bin/zip rix,
+    /usr/bin/zstd rix,
+    /usr/sbin/sendmail rix,
+    /usr/sbin/post* rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+  }
+
+  ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+
+    network inet,
+    network inet6,
+
+    capability dac_read_search,
+  }
+
+  ^sellyoursaas-instances flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+    
+    deny /etc/passwd r,
+    deny /etc/group r,
+    
+    network inet,
+    network inet6,
+    network unix dgram,
+    
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/clamav/clamd.conf r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
+    /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
+    /usr/bin/id rix,
+    /usr/bin/zip rix,
+    /usr/bin/zstd rix,
+    /usr/sbin/post* rix,
+    /usr/sbin/sendmail rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+  }
+}
+---------------
 
 
 * Activer la règle apparmor en mode *enforce* (ou *complain*)
