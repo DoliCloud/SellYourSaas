@@ -493,6 +493,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 	$totalinstances = $totalusers = 0;
 	$listofinstancespaying=array(); $listofinstancespayingall=array(); $listofinstancespayingwithoutrecinvoice = array();
 	$listofcustomers=array(); $listofcustomerspaying=array(); $listofcustomerspayingwithoutrecinvoice=array(); $listofcustomerspayingall=array();
+	$listofsuspendedrecurringinvoice=array();
 
 	// Get list of instance
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
@@ -531,25 +532,25 @@ function sellyoursaas_calculate_stats($db, $datelim)
 					$totalusers+=$nbofuser;
 
 					// Return true if instance $object is paying instance (invoice or template invoice exists)
-					$ispaid = sellyoursaasIsPaidInstance($object, 0, 1);										// This also load $object->linkedObjects['facturerec']
+					$ispaid = sellyoursaasIsPaidInstance($object, 0, 0);
 					if (! $ispaid) {		// This is a test only customer or expired or suspended (no invoice or template invoice at all)
 						if ($tmpdata['expirationdate'] < $now) {
 							$totalinstancesexpiredfree++;
 						}
 
-						if ($tmpdata['status'] == 5) {
+						if ($tmpdata['status'] == ContratLigne::STATUS_CLOSED) {		// Status of line with package app
 							$totalinstancessuspendedfree++;
 						}
 
 						$listofcustomers[$obj->customer_id]++;
 						//print "cpt=".$totalinstances." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price." -> 0<br>\n";
-					} else // This is a paying customer (with at least one invoice or recurring invoice)
-					{
+					} else {
+						// This is a paying customer (with at least one invoice or recurring invoice)
 						if ($tmpdata['expirationdate'] < $now) {
 							$totalinstancesexpiredpaying++;
 						}
 
-						if ($tmpdata['status'] == 5) {
+						if ($tmpdata['status'] == ContratLigne::STATUS_CLOSED) {
 							$totalinstancessuspendedpaying++;
 						}
 
@@ -557,8 +558,10 @@ function sellyoursaas_calculate_stats($db, $datelim)
 						$price = 0;
 
 						$atleastonenotsuspended = 0;
-						if (is_array($object->linkedObjects['facturerec'])) {		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
-							foreach ($object->linkedObjects['facturerec'] as $idelementelement => $templateinvoice) {
+						if (is_array($object->linkedObjectsIds['facturerec'])) {		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
+							foreach ($object->linkedObjectsIds['facturerec'] as $rowidelementelement => $idtemplateinvoice) {
+								$templateinvoice = new FactureRec($db);
+								$templateinvoice->fetch($idtemplateinvoice);
 								if (! $templateinvoice->suspended) {
 									if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency >= 1) {
 										$price += $templateinvoice->total_ht / $templateinvoice->frequency;
@@ -569,6 +572,8 @@ function sellyoursaas_calculate_stats($db, $datelim)
 									}
 
 									$atleastonenotsuspended = 1;
+								} else {
+									$listofsuspendedrecurringinvoice[$idtemplateinvoice]=$idtemplateinvoice;
 								}
 							}
 						}
@@ -618,6 +623,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 		'totalinstances'=>(int) $totalinstances,
 		'totalusers'=>(int) $totalusers,
 		'totalcustomerspaying'=>(int) count($listofcustomerspaying), 'totalcustomers'=>(int) count($listofcustomers),
-		'listofinstancespaying'=>$listofinstancespaying, 'listofinstancespayingall'=>$listofinstancespayingall, 'listofinstancespayingwithoutrecinvoice'=>$listofinstancespayingwithoutrecinvoice
+		'listofinstancespaying'=>$listofinstancespaying, 'listofinstancespayingall'=>$listofinstancespayingall, 'listofinstancespayingwithoutrecinvoice'=>$listofinstancespayingwithoutrecinvoice,
+		'listofsuspendedrecurringinvoice'=>$listofsuspendedrecurringinvoice
 	);
 }

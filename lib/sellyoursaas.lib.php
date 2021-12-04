@@ -231,14 +231,18 @@ function sellyoursaasHasOpenInvoices($contract)
  *
  * @param 	Contrat $contract				Object contract
  * @param	int		$onlyexpirationdate		1=Return only property 'expiration_date' (no need to load each product line properties to also set the 'nbofgbs', 'status', 'duration_value', ...)
- * @return	array							Array of data array('expirationdate'=>Timestamp of expiration date, or 0 if error or not found)
+ * @return	array							Array of data array(
+ * 												'expirationdate'=>Timestamp of expiration date, or 0 if error or not found,
+ * 												'status'=>Status of line of package app,
+ * 												'duration_value', 'duration_unit', 'nbusers', 'nbofgbs', 'appproductid'
+ * 											)
  */
 function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 {
 	global $db;
 
 	$expirationdate = 0;
-	$status = 0;
+	$statusofappline = 0;
 	$duration_value = 0;
 	$duration_unit = '';
 	$nbofusers = 0;
@@ -275,7 +279,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 				$duration_unit = $prodforline->duration_unit;
 				$appproductid = $prodforline->id;
 
-				$status = $line->statut;
+				$statusofappline = $line->statut;
 
 				if (empty($duration_value) || empty($duration_unit)) {
 					dol_syslog("Error, the definition of duration for product ID ".$prodforline->id." is uncomplete.", LOG_ERR);
@@ -294,7 +298,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 		}
 	}
 
-	return array('expirationdate'=>$expirationdate, 'status'=>$status, 'duration_value'=>$duration_value, 'duration_unit'=>$duration_unit, 'nbusers'=>$nbofusers, 'nbofgbs'=>$nbofgbs, 'appproductid'=>$appproductid);
+	return array('expirationdate'=>$expirationdate, 'status'=>$statusofappline, 'duration_value'=>$duration_value, 'duration_unit'=>$duration_unit, 'nbusers'=>$nbofusers, 'nbofgbs'=>$nbofgbs, 'appproductid'=>$appproductid);
 }
 
 

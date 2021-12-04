@@ -542,18 +542,18 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 } else {
 	$out.= "***** Summary for all deployment servers\n";
 }
-$out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
-$out.= "Nb of paying instances (deployed with or without payment error): ".count($instances)."\n";	// $instance is qualified instances
-$out.= "Nb of paying instances (deployed suspended): ".count($instancespaidsuspended);
-$out.= (count($instancespaidsuspended)?", suspension on ".join(', ', $instancespaidsuspended):"")."\n";
-$out.= "Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror);
-$out.= (count($instancespaidsuspended)?", suspension and payment error on ".join(', ', $instancespaidsuspended):"")."\n";
-$out.= "Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n";
-$out.= "Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror);
+$out.= "** Nb of instances deployed: ".$nbofinstancedeployed."\n";
+$out.= "** Nb of paying instances (deployed with or without payment error): ".count($instances)."\n";	// $instance is qualified instances
+$out.= "** Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
+$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended):"")."\n";
+$out.= "** Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
+$out.= (count($instancespaidsuspended)?"Suspension and payment error on ".join(', ', $instancespaidsuspended):"")."\n";
+$out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n";
+$out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror);
 $out.= (count($instancespaidnotsuspendedpaymenterror)?", not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror):"")."\n";
 if ($action != 'updatestatsonly') {
-	$out.= "Nb of paying instances processed ok: ".$nbofok."\n";
-	$out.= "Nb of paying instances processed ko: ".$nboferrors;
+	$out.= "** Nb of paying instances processed ok: ".$nbofok."\n";
+	$out.= "** Nb of paying instances processed ko: ".$nboferrors;
 }
 if (count($instancesbackuperror)) {
 	$out.= ", error for backup on ";
