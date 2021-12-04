@@ -71,7 +71,7 @@ if (! $res) {
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
-include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");
+include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
 
 
 // Read /etc/sellyoursaas.conf file
@@ -257,7 +257,7 @@ if ($resql) {
 
 				// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
 				$payment_status='PAID';
-				$ispaid = sellyoursaasIsPaidInstance($object);
+				$ispaid = sellyoursaasIsPaidInstance($object);	// This load linkedObjectsIds
 				if (! $ispaid) {
 					$payment_status='TRIAL';
 				} else {
@@ -511,15 +511,15 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 							if ($today <= $datelastday) {	// Remove if current month
 								$sql ="DELETE FROM ".MAIN_DB_PREFIX."dolicloud_stats";
-								$sql.=" WHERE name = '".$statkey."' AND x='".$x."'";
-								$sql.=" AND service = '".$servicetouse."'";
+								$sql.=" WHERE name = '".$dbmaster->escape($statkey)."' AND x='".$dbmaster->escape($x)."'";
+								$sql.=" AND service = '".$dbmaster->escape($servicetouse)."'";
 								dol_syslog("sql=".$sql);
 								$resql=$dbmaster->query($sql);
 								if (! $resql) dol_print_error($dbmaster, '');
 							}
 
 							$sql ="INSERT INTO ".MAIN_DB_PREFIX."dolicloud_stats(service, name, x, y)";
-							$sql.=" VALUES('".$servicetouse."', '".$statkey."', '".$x."', ".$y.")";
+							$sql.=" VALUES('".$dbmaster->escape($servicetouse)."', '".$dbmaster->escape($statkey)."', '".$dbmaster->escape($x)."', ".((float) $y).")";
 							dol_syslog("sql=".$sql);
 							$resql=$dbmaster->query($sql);
 							//if (! $resql) dol_print_error($dbmaster,'');		// Ignore error, we may have duplicate record here if record already exists and not deleted
@@ -534,7 +534,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 
 
-// Result
+// Output result
 $out = '';
 if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
 	$out.= "\n";
@@ -544,13 +544,13 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 }
 $out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
 $out.= "Nb of paying instances (deployed with or without payment error): ".count($instances)."\n";	// $instance is qualified instances
-$out.= "Nb of paying instances (deployed suspended): ".count($instancespaidsuspendedandpaymenterror);
+$out.= "Nb of paying instances (deployed suspended): ".count($instancespaidsuspended);
+$out.= (count($instancespaidsuspended)?", suspension on ".join(', ', $instancespaidsuspended):"")."\n";
 $out.= "Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror);
-$out.= "Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended);
+$out.= (count($instancespaidsuspended)?", suspension and payment error on ".join(', ', $instancespaidsuspended):"")."\n";
+$out.= "Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n";
 $out.= "Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror);
-$out.= (count($instancespaidsuspended)?", suspension on ".join(', ', $instancespaidsuspended):"");
-$out.= "\n";
-$out.= "Nb of paying instances (deployed but payment ko, not yet suspended): ".count($instancespaidnotsuspendedpaymenterror)."\n";
+$out.= (count($instancespaidnotsuspendedpaymenterror)?", not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror):"")."\n";
 if ($action != 'updatestatsonly') {
 	$out.= "Nb of paying instances processed ok: ".$nbofok."\n";
 	$out.= "Nb of paying instances processed ko: ".$nboferrors;

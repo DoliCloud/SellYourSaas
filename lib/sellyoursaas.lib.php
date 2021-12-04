@@ -166,14 +166,18 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 /**
  * Return if instance has a last payment in error or not
  *
- * @param 	Contrat $contract		Object contract
- * @return	int						>0 if this is a contract with current payment error
+ * @param 	Contrat 	$contract			Object contract
+ * @return	int								>0 if this is a contract with current payment error
  */
 function sellyoursaasIsPaymentKo($contract)
 {
 	global $db;
 
-	$contract->fetchObjectLinked();
+	// TODO Replace this with a direct select on actioncomm linked to open invoices of contract.
+
+	$loadalsoobjects = 1;	// We nee the object 'facture' to test its status
+	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', $loadalsoobjects);
+
 	$paymenterror=0;
 
 	if (is_array($contract->linkedObjects['facture'])) {
