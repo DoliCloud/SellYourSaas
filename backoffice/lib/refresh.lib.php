@@ -359,10 +359,13 @@ function sellyoursaas_calculate_stats($db, $datelim)
 	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
 	if ($datelim) $sql.= " AND ce.deployment_date_end <= '".$db->idate($datelim)."'";	// Only instances deployed before this date
 
-	dol_syslog("sellyoursaas_calculate_stats sql=".$sql, LOG_DEBUG, 1);
+	dol_syslog("sellyoursaas_calculate_stats", LOG_DEBUG, 1);
+
 	$resql=$db->query($sql);
 	if ($resql) {
 		$num = $db->num_rows($resql);
+		dol_syslog("sellyoursaas_calculate_stats found ".$num." record", LOG_DEBUG, 1);
+
 		$i = 0;
 		if ($num) {
 			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
@@ -372,6 +375,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 			$object = new Contrat($db);
 			//$cacheofthirdparties = array();
 
+			// Loop on all deployed instances
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
@@ -443,7 +447,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 						$listofinstancespayingall[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
 						$totalinstancespayingall++;
 
-						if ($atleastonenotsuspended && $tmpdata['expirationdate'] >= $now && $tmpdata['status'] != 5) {	// If service really paying and not expired and not suspended
+						if ($atleastonenotsuspended && $tmpdata['expirationdate'] >= $now && $tmpdata['status'] != ContratLigne::STATUS_CLOSED) {	// If service really paying and not expired and not suspended
 							$total+=$price;
 
 							$listofcustomerspaying[$obj->customer_id]++;
@@ -451,10 +455,12 @@ function sellyoursaas_calculate_stats($db, $datelim)
 							$totalinstancespaying++;
 
 							//print "cpt=".$totalinstancespaying." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price."<br>\n";
+
+							// If this instance has a parent company, we calculate the commission.
 							if ($atleastonenotsuspended && ! empty($obj->parent)) {
 								$thirdpartyparent = new Societe($db);		// TODO Extend the select with left join on parent + extrafield to get this data
 								$thirdpartyparent->fetch($obj->parent);
-								$totalcommissions+=price2num($price * $thirdpartyparent->array_options['options_commission'] / 100);
+								$totalcommissions += price2num($price * $thirdpartyparent->array_options['options_commission'] / 100);
 							}
 						}
 					}
