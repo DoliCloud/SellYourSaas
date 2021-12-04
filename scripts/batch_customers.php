@@ -431,6 +431,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		$sql ="SELECT name, x, y";                        // name is 'total', 'totalcommissions', 'totalinstancepaying', 'totalinstances', 'totalusers', 'benefit', 'totalcustomers', 'totalcustomerspaying'
 		$sql.=" FROM ".MAIN_DB_PREFIX."dolicloud_stats";
 		$sql.=" WHERE service = '".$dbmaster->escape($servicetouse)."'";
+		$sql.=" ORDER BY x, name";
 
 		dol_syslog($script_file."", LOG_DEBUG);
 		$resql=$dbmaster->query($sql);
