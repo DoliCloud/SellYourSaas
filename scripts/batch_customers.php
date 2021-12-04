@@ -165,11 +165,16 @@ $nbofok=0;
 // Nb of deployed instances
 $nbofinstancedeployed=0;
 // Nb of paying instance
-$nbofactiveok=0;
-$nbofactive=0;
-$nbofactivesusp=0;
-$nbofactivepaymentko=0;
 $nboferrors=0;
+$instances=array();
+$instancespaidsuspended=array();
+$instancespaidnotsuspendedpaymenterror=array();
+$instancespaidsuspendedandpaymenterror=array();
+$instancespaidnotsuspended=array();
+$instancesbackuperror=array();
+$instancesupdateerror=array();
+
+
 $instancefilter=(isset($argv[2])?$argv[2]:'');
 $instancefiltercomplete=$instancefilter;
 
@@ -180,10 +185,6 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 	$instancefiltercomplete=$instancefiltercomplete.".".$tmpstring;   // Automatically concat first domain name
 }
 
-$instances=array();
-$instancesactivebutsuspended=array();
-$instancesbackuperror=array();
-$instancesupdateerror=array();
 
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
@@ -223,50 +224,65 @@ if ($resql) {
 	$num = $dbtousetosearch->num_rows($resql);
 	$i = 0;
 	if ($num) {
+		// Loop on each deployed instance
 		while ($i < $num) {
 			$obj = $dbtousetosearch->fetch_object($resql);
 			if ($obj) {
 				$instance = $obj->instance;
-				$payment_status='PAID';
 
 				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
+				// Set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
+				$instance_status = 'UNKNOWN';
 				$result = $object->fetch($obj->id);
 				if ($result <= 0) {
 					$i++;
 					dol_print_error($dbmaster, $object->error, $object->errors);
 					continue;
 				} else {
-					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; } elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; } elseif ($object->array_options['options_deployment_status'] == 'done') {										// should be here due to test into SQL request
+					if ($object->array_options['options_deployment_status'] == 'processing') {
+						$instance_status = 'PROCESSING';
+					} elseif ($object->array_options['options_deployment_status'] == 'undeployed') {
+						$instance_status = 'UNDEPLOYED';
+					} elseif ($object->array_options['options_deployment_status'] == 'done') {
+						// should be here due to test into SQL request
 						$instance_status = 'DEPLOYED';
 						$nbofinstancedeployed++;
-					} else { $instance_status = 'UNKNOWN'; }
+					}
 				}
-
 				$issuspended = sellyoursaasIsSuspended($object);
 				if ($issuspended) {
 					$instance_status = 'SUSPENDED';
 				}
 
+				// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
+				$payment_status='PAID';
 				$ispaid = sellyoursaasIsPaidInstance($object);
 				if (! $ispaid) {
 					$payment_status='TRIAL';
 				} else {
 					$ispaymentko = sellyoursaasIsPaymentKo($object);
-					if ($ispaymentko) $payment_status='FAILURE';
+					if ($ispaymentko) {
+						$payment_status='FAILURE';
+					}
 				}
 
-				print "Analyze instance ".($i+1)." ".$instance." instance_status=".$instance_status." payment_status=".$payment_status."\n";
+				print "Analyze ".($instancefiltercomplete ? '' : ' deployed')." instance ".($i+1)." ".$instance.": instance_status=".$instance_status." payment_status=".$payment_status.(empty($object->array_options['options_suspendmaintenance_message']) ? "" : " (maintenance/redirect: ".($object->array_options['options_suspendmaintenance_message']).")")."\n";
 
 				// Count
 				if (! in_array($payment_status, array('TRIAL'))) {
-					$nbofactive++;
-
+					// We analyze all non trial deployed instances
 					if (in_array($instance_status, array('SUSPENDED'))) {
-						$nbofactivesusp++;
-						$instancesactivebutsuspended[$obj->id]=$obj->ref.' ('.$instance.')';
-					} elseif (in_array($payment_status, array('FAILURE','PAST_DUE'))) $nbofactivepaymentko++;
-					else $nbofactiveok++; // not suspended, not close request
+						$instancespaidsuspended[$obj->id] = $obj->ref.' ('.$instance.')';
+						if (in_array($payment_status, array('FAILURE'))) {
+							$instancespaidsuspendedandpaymenterror[$obj->id] = $obj->ref.' ('.$instance.')';
+						}
+					} else {
+						$instancespaidnotsuspended[$obj->id] = $obj->ref.' ('.$instance.')';
+						if (in_array($payment_status, array('FAILURE'))) {
+							$instancespaidnotsuspendedpaymenterror[$obj->id] = $obj->ref.' ('.$instance.')';
+						}
+					}
 
 					$instances[$obj->id]=$instance;
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
@@ -285,7 +301,7 @@ if ($resql) {
 	$nboferrors++;
 	dol_print_error($dbtousetosearch);
 }
-print "Found ".count($instances)." not trial instances including ".$nbofactivesusp." suspended + ".$nbofactivepaymentko." active with payment ko\n";
+print "We found ".count($instances)." qualified instances including ".count($instancespaidsuspended)." suspended + ".count($instancespaidnotsuspendedpaymenterror)." active with payment ko\n";
 
 
 //print "----- Start loop for backup_instance\n";
@@ -414,7 +430,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		// Get list of existing stats
 		$sql ="SELECT name, x, y";                        // name is 'total', 'totalcommissions', 'totalinstancepaying', 'totalinstances', 'totalusers', 'benefit', 'totalcustomers', 'totalcustomerspaying'
 		$sql.=" FROM ".MAIN_DB_PREFIX."dolicloud_stats";
-		$sql.=" WHERE service = '".$servicetouse."'";
+		$sql.=" WHERE service = '".$dbmaster->escape($servicetouse)."'";
 
 		dol_syslog($script_file."", LOG_DEBUG);
 		$resql=$dbmaster->query($sql);
@@ -526,11 +542,11 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 	$out.= "***** Summary for all deployment servers\n";
 }
 $out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
-$out.= "Nb of paying instances (deployed with or without payment error): ".$nbofactive."\n";
-$out.= "Nb of paying instances (deployed but suspended): ".$nbofactivesusp;
-$out.= (count($instancesactivebutsuspended)?", suspension on ".join(', ', $instancesactivebutsuspended):"");
+$out.= "Nb of paying instances (deployed with or without payment error): ".count($instance)."\n";	// $instance is qualified instances
+$out.= "Nb of paying instances (deployed but suspended): ".count($instancespaidsuspended);
+$out.= (count($instancespaidsuspended)?", suspension on ".join(', ', $instancespaidsuspended):"");
 $out.= "\n";
-$out.= "Nb of paying instances (deployed but payment ko, not yet suspended): ".$nbofactivepaymentko."\n";
+$out.= "Nb of paying instances (deployed but payment ko, not yet suspended): ".count($instancespaidnotsuspendedpaymenterror)."\n";
 if ($action != 'updatestatsonly') {
 	$out.= "Nb of paying instances processed ok: ".$nbofok."\n";
 	$out.= "Nb of paying instances processed ko: ".$nboferrors;
@@ -555,7 +571,7 @@ print $out;
 if ($action == 'updatestatsonly') {
 	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 		try {
-			print 'Send data to DataDog (sellyoursaas.instancedeployed='.((float) $nbofinstancedeployed).', sellyoursaas.instancepaymentko='.((float) ($nbofactivesusp + $nbofactivepaymentko)).', sellyoursaas.instancepaymentok='.((float) ($nbofactive - ($nbofactivesusp + $nbofactivepaymentko))).")\n";
+			print 'Send data to DataDog (sellyoursaas.instancedeployed='.((float) $nbofinstancedeployed).', sellyoursaas.instancepaymentko='.((float) (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror))).', sellyoursaas.instancepaymentok='.((float) (count($instance) - (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror)))).")\n";
 			dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 			$arrayconfig=array();
@@ -567,9 +583,10 @@ if ($action == 'updatestatsonly') {
 
 			$arraytags=null;
 			$statsd->gauge('sellyoursaas.instancedeployed', (float) ($nbofinstancedeployed), 1.0, $arraytags);
-			$statsd->gauge('sellyoursaas.instancepaymentko', (float) ($nbofactivesusp + $nbofactivepaymentko), 1.0, $arraytags);
-			$statsd->gauge('sellyoursaas.instancepaymentok', (float) ($nbofactive - ($nbofactivesusp + $nbofactivepaymentko)), 1.0, $arraytags);
+			$statsd->gauge('sellyoursaas.instancepaymentko', (float) (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror)), 1.0, $arraytags);
+			$statsd->gauge('sellyoursaas.instancepaymentok', (float) (count($instance) - (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror))), 1.0, $arraytags);
 		} catch (Exception $e) {
+			print 'Failed to send to datadog';
 		}
 	}
 }
@@ -652,6 +669,7 @@ if (! $nboferrors) {
 							)
 						);
 				} catch (Exception $e) {
+					print 'Failed to send event to datadog';
 				}
 			}
 		} else {
