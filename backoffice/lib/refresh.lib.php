@@ -356,6 +356,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 	$sql.= " ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 	$sql.= " AND ce.deployment_status = 'done'";
+	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
 	if ($datelim) $sql.= " AND ce.deployment_date_end <= '".$db->idate($datelim)."'";	// Only instances deployed before this date
 
 	dol_syslog("sellyoursaas_calculate_stats sql=".$sql, LOG_DEBUG, 1);
@@ -375,6 +376,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
 					unset($object->linkedObjects);
+					unset($object->linkedObjectsIds);
 
 					// Get resource for instance
 					$object->fetch($obj->id);
@@ -470,14 +472,20 @@ function sellyoursaas_calculate_stats($db, $datelim)
 	//var_dump($listofinstancespaying);
 	return array(
 		'total'=>(double) $total, 'totalcommissions'=>(double) $totalcommissions,
-		'totalinstancespaying'=>(int) $totalinstancespaying, 'totalinstancespayingall'=>(int) $totalinstancespayingall, 'totalinstancespayingwithoutrecinvoice'=>(int) $totalinstancespayingwithoutrecinvoice,
-		'totalinstancessuspendedfree'=>(int) $totalinstancessuspendedfree, 'totalinstancessuspendedpaying'=>(int) $totalinstancessuspendedpaying,
-		'totalinstancesexpiredfree'=>(int) $totalinstancesexpiredfree, 'totalinstancesexpired'=>(int) $totalinstancesexpiredpaying,
+		'totalinstancespaying'=>(int) $totalinstancespaying,
+		'totalinstancespayingall'=>(int) $totalinstancespayingall,
+		'totalinstancespayingwithoutrecinvoice'=>(int) $totalinstancespayingwithoutrecinvoice,
+		'totalinstancessuspendedfree'=>(int) $totalinstancessuspendedfree,
+		'totalinstancessuspendedpaying'=>(int) $totalinstancessuspendedpaying,
+		'totalinstancesexpiredfree'=>(int) $totalinstancesexpiredfree,
+		'totalinstancesexpired'=>(int) $totalinstancesexpiredpaying,
 		'totalinstances'=>(int) $totalinstances,
 		'totalusers'=>(int) $totalusers,
 		'totalcustomers'=>(int) count($listofcustomers),	// Trial only customers
 		'totalcustomerspaying'=>(int) count($listofcustomerspaying),
-		'listofinstancespaying'=>$listofinstancespaying, 'listofinstancespayingall'=>$listofinstancespayingall, 'listofinstancespayingwithoutrecinvoice'=>$listofinstancespayingwithoutrecinvoice,
+		'listofinstancespaying'=>$listofinstancespaying,
+		'listofinstancespayingall'=>$listofinstancespayingall,
+		'listofinstancespayingwithoutrecinvoice'=>$listofinstancespayingwithoutrecinvoice,
 		'listofsuspendedrecurringinvoice'=>$listofsuspendedrecurringinvoice
 	);
 }
