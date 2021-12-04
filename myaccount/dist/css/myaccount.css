@@ -306,7 +306,7 @@ div.tab-content {
 .width80p { width:80%; }
 .width100p { width:100%; }
 
-@media only screen and (min-width: 750px)
+@media only screen and (min-width: 769px)
 {
 	input#username {
     	width: 300px;
@@ -346,8 +346,20 @@ div.tab-content {
 	input[type='file'] {
 		width: inherit;
 	}
+
+	.home-page-url a.blue.btn-sm {
+	    font-size: 0.9em;
+	}
 }
 
+
+/* Force values for small screen (320-480 = smartphone) */
+@media only screen and (max-width: 480px)
+{
+	.home-page-url a.blue.btn-sm {
+	    font-size: 0.9em;
+	}
+}
 
 
 .boxresource .uppercase {
