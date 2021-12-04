@@ -543,8 +543,11 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 	$out.= "***** Summary for all deployment servers\n";
 }
 $out.= "Nb of instances deployed: ".$nbofinstancedeployed."\n";
-$out.= "Nb of paying instances (deployed with or without payment error): ".count($instance)."\n";	// $instance is qualified instances
-$out.= "Nb of paying instances (deployed but suspended): ".count($instancespaidsuspended);
+$out.= "Nb of paying instances (deployed with or without payment error): ".count($instances)."\n";	// $instance is qualified instances
+$out.= "Nb of paying instances (deployed suspended): ".count($instancespaidsuspendedandpaymenterror);
+$out.= "Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror);
+$out.= "Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended);
+$out.= "Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror);
 $out.= (count($instancespaidsuspended)?", suspension on ".join(', ', $instancespaidsuspended):"");
 $out.= "\n";
 $out.= "Nb of paying instances (deployed but payment ko, not yet suspended): ".count($instancespaidnotsuspendedpaymenterror)."\n";
