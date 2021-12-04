@@ -168,9 +168,9 @@ $nbofinstancedeployed=0;
 $nboferrors=0;
 $instances=array();
 $instancespaidsuspended=array();
-$instancespaidnotsuspendedpaymenterror=array();
 $instancespaidsuspendedandpaymenterror=array();
 $instancespaidnotsuspended=array();
+$instancespaidnotsuspendedpaymenterror=array();
 $instancesbackuperror=array();
 $instancesupdateerror=array();
 
@@ -250,9 +250,15 @@ if ($resql) {
 						$nbofinstancedeployed++;
 					}
 				}
-				$issuspended = sellyoursaasIsSuspended($object);
-				if ($issuspended) {
-					$instance_status = 'SUSPENDED';
+				if ($instance_status == 'DEPLOYED') {
+					$issuspended = sellyoursaasIsSuspended($object);
+					if ($issuspended) {
+						$instance_status = 'SUSPENDED';
+					}
+					// Note: to check that all non deployed instance has line with status that is 5 (close), you can run
+					// select * from llx_contrat as c, llx_contrat_extrafields as ce, llx_contratdet as cd WHERE ce.fk_object = c.rowid
+					// AND cd.fk_contrat = c.rowid AND ce.deployment_status <> 'done' AND cd.statut <> 5;
+					// You should get nothing.
 				}
 
 				// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
@@ -547,7 +553,7 @@ $out.= "** Nb of paying instances (deployed with or without payment error): ".co
 $out.= "** Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
 $out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended):"")."\n";
 $out.= "** Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
-$out.= (count($instancespaidsuspended)?"Suspension and payment error on ".join(', ', $instancespaidsuspended):"")."\n";
+$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror):"")."\n";
 $out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n";
 $out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror);
 $out.= (count($instancespaidnotsuspendedpaymenterror)?", not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror):"")."\n";
