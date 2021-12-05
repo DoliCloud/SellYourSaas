@@ -224,15 +224,19 @@ if ($resql) {
 	$num = $dbtousetosearch->num_rows($resql);
 	$i = 0;
 	if ($num) {
-		// Loop on each deployed instance
+		// Loop on each deployed instance/contract
 		while ($i < $num) {
 			$obj = $dbtousetosearch->fetch_object($resql);
 			if ($obj) {
+				// We process the instance
 				$instance = $obj->instance;
 
 				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
-				// Set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
+				unset($object->linkedObjects);
+				unset($object->linkedObjectsIds);
+
+				// Load data of instance and set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
 				$instance_status = 'UNKNOWN';
 				$result = $object->fetch($obj->id);
 				if ($result <= 0) {
@@ -250,6 +254,7 @@ if ($resql) {
 						$nbofinstancedeployed++;
 					}
 				}
+
 				if ($instance_status == 'DEPLOYED') {
 					$issuspended = sellyoursaasIsSuspended($object);
 					if ($issuspended) {
@@ -481,8 +486,8 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','benefit','totalcustomers','totalcustomerspaying');
 				foreach ($statkeylist as $statkey) {
-					if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {
-						// Calculate stats fro this key
+					if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {	// If metric does not exist yet or if we are current month.
+						// Calculate stats for the metric $statkey
 						print "Calculate and update stats for ".$statkey." x=".$x.' datelastday='.dol_print_date($datelastday, 'dayhour', 'gmt');
 
 						$rep = null;
