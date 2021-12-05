@@ -352,7 +352,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 
 	$nbofinstancedeployed = 0;
 
-	// Get list of instance
+	// Get list of deployed instances
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
 	$sql.= " ce.deployment_status as instance_status,";
 	$sql.= " s.parent, s.nom as name";
@@ -363,7 +363,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
 	if ($datelim) $sql.= " AND ce.deployment_date_end <= '".$db->idate($datelim)."'";	// Only instances deployed before this date
 
-	dol_syslog("sellyoursaas_calculate_stats", LOG_DEBUG, 1);
+	dol_syslog("sellyoursaas_calculate_stats begin", LOG_DEBUG, 1);
 
 	$resql=$db->query($sql);
 	if ($resql) {
@@ -375,10 +375,9 @@ function sellyoursaas_calculate_stats($db, $datelim)
 			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 			dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
-			$templateinvoice = new FactureRec($db);
-
 			$now = dol_now();
 			$object = new Contrat($db);
+			$templateinvoice = new FactureRec($db);
 			//$cacheofthirdparties = array();
 
 			// Loop on all deployed instances
@@ -507,7 +506,8 @@ function sellyoursaas_calculate_stats($db, $datelim)
 							$listofinstancespayingall[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
 							$totalinstancespayingall++;
 
-							if ($atleastonenotsuspended && $tmpdata['expirationdate'] >= $now && $tmpdata['status'] != ContratLigne::STATUS_CLOSED) {	// If service really paying and not expired and not suspended
+							if ($atleastonenotsuspended && $instance_status != 'SUSPENDED' && $payment_status != 'FAILURE' && $tmpdata['status'] != ContratLigne::STATUS_CLOSED) {
+								// If service really paying and not suspended and no payment error
 								$total += $price;
 
 								$listofcustomerspaying[$obj->customer_id]++;
@@ -523,6 +523,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 									$totalcommissions += price2num($price * $thirdpartyparent->array_options['options_commission'] / 100);
 								}
 							} else {
+								// We have here some expired contracts not yet renew
 								print 'We exclude this contract '.$object->ref."\n";
 							}
 						}

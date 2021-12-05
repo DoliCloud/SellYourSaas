@@ -480,65 +480,79 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 			for ($m = 1; $m <= 12; $m++) {
 				$datefirstday=dol_get_first_day($year, $m, 1);
 				$datelastday=dol_get_last_day($year, $m, 1);
-				if ($datefirstday > $today) continue;
+				if ($datefirstday > $today) {
+					continue;
+				}
+
+				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','benefit','totalcustomers','totalcustomerspaying');
 
 				$x=sprintf("%04d%02d", $year, $m);
 
-				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','benefit','totalcustomers','totalcustomerspaying');
+				$dowehavetomakeupdatefordate = 0;
 				foreach ($statkeylist as $statkey) {
 					if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {	// If metric does not exist yet or if we are current month.
-						// Calculate stats for the metric $statkey
-						print "Calculate and update stats for ".$statkey." x=".$x.' datelastday='.dol_print_date($datelastday, 'dayhour', 'gmt');
-
-						$rep = null;
-						$part = 0;
-
-						$rep=sellyoursaas_calculate_stats($dbmaster, $datelastday);	// Get qty and amount into template invoices linked to active contracts
-						$part = (empty($conf->global->SELLYOURSAAS_PERCENTAGE_FEE) ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
-
-						if ($rep) {
-							$total=$rep['total'];
-							$totalcommissions=$rep['totalcommissions'];
-							$totalinstancespaying=$rep['totalinstancespaying'];
-							$totalinstancespayingall=$rep['totalinstancespayingall'];
-							$totalinstances=$rep['totalinstances'];
-							$totalusers=$rep['totalusers'];
-							$totalcustomerspaying=$rep['totalcustomerspaying'];
-							$totalcustomers=$rep['totalcustomers'];
-							$benefit=($total * (1 - $part) - $serverprice - $totalcommissions);
-
-							$y=0;
-							if ($statkey == 'total') $y=$total;
-							if ($statkey == 'totalcommissions') $y=$totalcommissions;
-							if ($statkey == 'totalinstancespaying') $y=$totalinstancespaying;
-							if ($statkey == 'totalinstancespayingall') $y=$totalinstancespayingall;
-							if ($statkey == 'totalinstances') $y=$totalinstances;
-							if ($statkey == 'totalusers') $y=$totalusers;
-							if ($statkey == 'benefit') $y=$benefit;
-							if ($statkey == 'totalcustomerspaying') $y=$totalcustomerspaying;
-							if ($statkey == 'totalcustomers') $y=$totalcustomers;
-
-							print " -> ".$y."\n";
-
-							if ($today <= $datelastday) {	// Remove existing entry if current month
-								$sql ="DELETE FROM ".MAIN_DB_PREFIX."dolicloud_stats";
-								$sql.=" WHERE name = '".$dbmaster->escape($statkey)."' AND x='".$dbmaster->escape($x)."'";
-								$sql.=" AND service = '".$dbmaster->escape($servicetouse)."'";
-								dol_syslog("sql=".$sql);
-								$resql=$dbmaster->query($sql);
-								if (! $resql) dol_print_error($dbmaster, '');
-							}
-
-							$sql ="INSERT INTO ".MAIN_DB_PREFIX."dolicloud_stats(service, name, x, y)";
-							$sql.=" VALUES('".$dbmaster->escape($servicetouse)."', '".$dbmaster->escape($statkey)."', '".$dbmaster->escape($x)."', ".((float) $y).")";
-
-							$resql=$dbmaster->query($sql);
-							//if (! $resql) dol_print_error($dbmaster,'');		// Ignore error, we may have duplicate record here if record already exists and not deleted
-						}
+						$dowehavetomakeupdatefordate = 1;
+						break;
 					}
 				}
-			}
-		}
+
+				if ($dowehavetomakeupdatefordate) {
+					// Update stats for the metric
+					print 'Calculate statistics for x='.$x."\n";
+					$rep = sellyoursaas_calculate_stats($dbmaster, $datelastday);	// Get qty and amount into template invoices linked to active contracts
+					$part = (empty($conf->global->SELLYOURSAAS_PERCENTAGE_FEE) ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
+
+					foreach ($statkeylist as $statkey) {
+						if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {	// If metric does not exist yet or if we are current month.
+							// Update stats for the metric $statkey
+							print "Update stats for ".$statkey." x=".$x.' datelastday='.dol_print_date($datelastday, 'dayhour', 'gmt');
+
+							if ($rep) {
+								$total=$rep['total'];
+								$totalcommissions=$rep['totalcommissions'];
+								$totalinstancespaying=$rep['totalinstancespaying'];
+								$totalinstancespayingall=$rep['totalinstancespayingall'];
+								$totalinstances=$rep['totalinstances'];
+								$totalusers=$rep['totalusers'];
+								$totalcustomerspaying=$rep['totalcustomerspaying'];
+								$totalcustomers=$rep['totalcustomers'];
+								$benefit=($total * (1 - $part) - $serverprice - $totalcommissions);
+
+								$y=0;
+								if ($statkey == 'total') $y=$total;
+								if ($statkey == 'totalcommissions') $y=$totalcommissions;
+								if ($statkey == 'totalinstancespaying') $y=$totalinstancespaying;
+								if ($statkey == 'totalinstancespayingall') $y=$totalinstancespayingall;
+								if ($statkey == 'totalinstances') $y=$totalinstances;
+								if ($statkey == 'totalusers') $y=$totalusers;
+								if ($statkey == 'benefit') $y=$benefit;
+								if ($statkey == 'totalcustomerspaying') $y=$totalcustomerspaying;
+								if ($statkey == 'totalcustomers') $y=$totalcustomers;
+
+								print " -> ".$y."\n";
+
+								if ($today <= $datelastday) {	// Remove existing entry if current month
+									$sql ="DELETE FROM ".MAIN_DB_PREFIX."dolicloud_stats";
+									$sql.=" WHERE name = '".$dbmaster->escape($statkey)."' AND x='".$dbmaster->escape($x)."'";
+									$sql.=" AND service = '".$dbmaster->escape($servicetouse)."'";
+									dol_syslog("sql=".$sql);
+									$resql = $dbmaster->query($sql);
+									if (! $resql) {
+										dol_print_error($dbmaster, '');
+									}
+								}
+
+								$sql = "INSERT INTO ".MAIN_DB_PREFIX."dolicloud_stats(service, name, x, y)";
+								$sql .= " VALUES('".$dbmaster->escape($servicetouse)."', '".$dbmaster->escape($statkey)."', '".$dbmaster->escape($x)."', ".((float) $y).")";
+
+								$resql = $dbmaster->query($sql);
+								//if (! $resql) dol_print_error($dbmaster,'');		// Ignore error, we may have duplicate record here if record already exists and not deleted
+							}
+						}
+					}	// end of loop on each metric
+				}	// if we have to make update for this period
+			}	// end loop on month
+		} // end loop on year
 	}
 }
 
