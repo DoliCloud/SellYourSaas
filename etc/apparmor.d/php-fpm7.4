@@ -23,7 +23,11 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   
   /bin/dash mrix,
   /usr/sbin/php-fpm* rix,
+  /run/php{,-fpm}/php*-fpm-*.sock w,
+  /run/php{,-fpm}/php*-fpm*.pid rw,
+  /run/php{,-fpm}/php*-fpm*.sock rwlk,
 
+  
   # PHP-FPM use this to swith profile for virtual hosts
   # An entry must be added into the virtual host pool file /etc/php/7.4/fpm/pool.d/xxx.conf with content like 
   # listen = /run/php/php7.4-fpm-myvirtualhosts.sock
@@ -96,7 +100,7 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /var/log/apache2/error_ssl.log w,
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
-    /var/log/php*-fpm.log rw,
+    /var/log/php*-fpm*.log rw,
     /var/log/phpmail.log w,
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
