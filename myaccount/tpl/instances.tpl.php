@@ -913,7 +913,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 
         			<div class="horizontal-fld clearboth margintoponly">
         			<div class="control-group required">
-        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128" required />
+        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required />
         			</div>
         			</div>
         			<div class="horizontal-fld margintoponly">
