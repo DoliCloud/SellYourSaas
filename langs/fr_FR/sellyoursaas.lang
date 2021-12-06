@@ -137,7 +137,7 @@ SignMeUp=Créer mon instance
 ErrorPasswordMismatch=Erreur, les 2 saisies de mot de passe doivent être identiques
 ErrorOnlyCharAZAllowedFor=Seuls les caractères a-z, 0-9 ou - sont autorisés pour le %s
 NameForYourApplication=nom d'adresse
-AccountAlreadyExistsForEmail=Un compte existe déjà pour cet email. Si vous avez déjà un compte client et voulez créer une seconde instance sur le même compte, logguez vous simplement sur votre <a href="%s" target="_myaccount">espace client</a> pour créer votre instance suplémentaire.
+AccountAlreadyExistsForEmail=Un compte existe déjà pour cet email. Si vous avez déjà un compte client et voulez créer une seconde instance sur le même compte, logguez vous simplement sur votre <a href="%s" target="_myaccount">espace client</a> pour créer votre instance supplémentaire.
 AnonymousUser=Utilisateur anonyme
 NotLanguage=Pas la langue
 DeploymentDateStart=Date début déploiement (UTC)
