@@ -3452,11 +3452,15 @@ chmod -R o-w /home/admin/tools/maxmind
 On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr to use this database file.
 
 
-== Installation of plugin SellYourSaas
+== Installation or update of plugin SellYourSaas
+
+For a first installation, you must make the initial setup of plugin. 
+If you just added a new deployment server, you must just edit the setup of the module to declare the new server.
+
 
 On the *Master*:
 
-Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainname.com):
+Connect to Dolibarr's master server's user interface (https://admin.mysaasdomainname.com):
 
 * Activate the module *SellYourSaas* and *Vendor*
 
@@ -3502,7 +3506,14 @@ Connect to Dolibarr's master server's user interface(https://admin.mysaasdomainn
 
 * Create a *Third-party tag* called "SaaS customers" and "Saas resellers"
 
-* Setup the module *SellYoursSaas*, at least the mandatory fields.
+* Setup the module *SellYoursSaas*, at least the mandatory fields:
+
+** Name of Saas service
+** Name of main domain
+** Liste des sous-domaines pour déploiement de nouvelles instances: You must enter here the domain name and ip of deployment server that are open for deployment.
+** List of ip
+** Main email 
+...
 
 * Create a *Package* to configure the applications to be deployed (files, config, database dump...)
 
