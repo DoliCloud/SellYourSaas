@@ -877,12 +877,12 @@ if (count($listofcontractid) == 0) {				// Should not happen
 	print '<br>';
 
 	print '<!-- Form to add an instance -->'."\n";
-	print '<form id="formaddanotherinstance" class="form-group reposition" style="display: none;" action="register_instance.php" method="POST">';
+	print '<form id="formaddanotherinstance" class="form-group reposition" style="'.(GETPOST('addanotherinstance', 'int') ? '' : 'display: none;').'" action="register_instance.php" method="POST">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="deployall" />';
 	print '<input type="hidden" name="fromsocid" value="0" />';
-	print '<input type="hidden" name="reusesocid" value="'.$socid.'" />';
-	print '<!-- thirdpartyidinsession = '.$_SESSION['dol_loginsellyoursaas'].' -->';
+	print '<input type="hidden" name="reusesocid" value="'.((int) $socid).'" />';
+	print '<!-- thirdpartyidinsession = '.dol_escape_htmltag($_SESSION['dol_loginsellyoursaas']).' -->';
 
 	print '<div class="row">
     	<div class="col-md-12">
