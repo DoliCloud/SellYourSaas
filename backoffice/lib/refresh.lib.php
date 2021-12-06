@@ -524,7 +524,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 								}
 							} else {
 								// We have here some expired contracts not yet renew
-								print 'We exclude this contract '.$object->ref."\n";
+								//print 'We exclude this contract '.$object->ref."\n";
 							}
 						}
 					}
