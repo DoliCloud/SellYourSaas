@@ -745,13 +745,15 @@ if ($reusecontractid) {
 		if ($result < 0) {
 			dol_print_error_email('FETCHTP'.$email, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
 			exit(-1);
-		} elseif ($result > 0) {	// Found one record
+		} elseif ($result > 0) {	// Found 1 record of an existing account.
 			$myaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+			$myaccountorigindomain = $tmpthirdparty->array_options['options_domain_registration_page'];
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
 				if (! empty($conf->global->$newnamekey)) $myaccounturl = $conf->global->$newnamekey;
 			}
+			$myaccounturl.='?mode=instances&service='.((int) $service).'#addanotherinstance';
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				setEventMessages($langs->trans("AccountAlreadyExistsForEmail", $myaccounturl), null, 'errors');
