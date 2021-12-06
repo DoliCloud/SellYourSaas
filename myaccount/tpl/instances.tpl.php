@@ -928,7 +928,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
         			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
         			<div class="linked-flds">
         			<span class="opacitymedium">https://</span>
-        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="" maxlength="29" required />
+        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
         			<select name="tldid" id="tldid" >';
 		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
