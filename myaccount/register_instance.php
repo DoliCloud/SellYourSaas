@@ -753,7 +753,7 @@ if ($reusecontractid) {
 				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
 				if (! empty($conf->global->$newnamekey)) $myaccounturl = $conf->global->$newnamekey;
 			}
-			$myaccounturl.='?mode=instances&addanotherinstance=1&service='.((int) $service).'#addanotherinstance';
+			$myaccounturl.='?mode=instances&addanotherinstance=1&service='.((int) $service).'&sldAndSubdomain='.urlencode($sldAndSubdomain).'#addanotherinstance';
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				setEventMessages($langs->trans("AccountAlreadyExistsForEmail", $myaccounturl), null, 'errors');
