@@ -595,6 +595,16 @@ if (count($instancesupdateerror)) {
 $out.= "\n";
 print $out;
 
+// Write instances into tmp file
+$createlistofpaidinstance = 0;
+if ($createlistofpaidinstance) {
+	if ($handle = fopen('/tmp/listofpaidinstances', 'w')) {
+		foreach ($instances as $id => $instance) {
+			fwrite($handle, $id." ".$instance."\n");
+		}
+		fclose($handle);
+	}
+}
 
 // Send to DataDog (metric)
 if ($action == 'updatestatsonly') {
