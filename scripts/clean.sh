@@ -580,6 +580,16 @@ echo "***** Now clean journal files older than 60 days"
 echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;"
 find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;
 
+# Clean tmp files
+
+
+# Now clean also old dir in archives-test
+if [[ "x$masterserver" == "x1" ]]; then
+	echo "***** We are on a master, so we clean sellyoursaas temp files" 
+	echo "Clean sellyoursaas temp files"
+	find "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/." ! -path "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/" -mtime +1 -exec rm -fr {} \;
+fi
+
 # Clean log files
 if [[ "x$instanceserver" == "x1" ]]; then
 	echo "***** We are on a deployment server, so we clean log files" 
