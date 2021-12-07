@@ -2628,11 +2628,14 @@ commonjailtemplatename=commonjail
 ---------------
 
 
-Add this constant in your backoffice to activate Jailkit
-* SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
+* Enable the feature to be able to set if a deployment of a service will be done into jailkit or not.
+
+For this, add this constant in your Dolibarr master backoffice in menu *Home - Setup - Other to activate Jailkit*
+
+ SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 
-A new "SSH access type" option will be available in your service (Application):
+After this addition, a new field *"SSH access type"* is now available in the service of the Application to deploy:
 
 image::config_jailkit_service.png[SSH access type]
 
@@ -2641,6 +2644,8 @@ and in contracts (instances):
 
 image::config_jailkit_contrat.png[SSH access type]
 
+
+Just set this field on the service of the Application to deploy to value *JailKit* and new contracts will be deployed using an account in jailkit.
 
 
 === Allow generation of PNG thumbs from PDFs
