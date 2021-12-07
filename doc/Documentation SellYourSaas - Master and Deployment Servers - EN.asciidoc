@@ -2645,7 +2645,7 @@ and in contracts (instances):
 image::config_jailkit_contrat.png[SSH access type]
 
 
-Just set this field on the service of the Application to deploy to value *JailKit* and new contracts will be deployed using an account in jailkit.
+Just set this field on the service of the Application to deploy to value *1* or *2* and new contracts will be deployed using an account in Jailkit.
 
 
 === Allow generation of PNG thumbs from PDFs
