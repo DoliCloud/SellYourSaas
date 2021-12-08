@@ -879,7 +879,7 @@ mount -a
 
 ==== On deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access user accounts). Put the right permissions.
+On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access osu... user accounts). Set the right permissions.
 
 [source, bash]
 ---------------
@@ -1299,17 +1299,17 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launche
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher3.sh /etc/init.d/apache_watchdog_launcher3
 systemctl daemon-reload
 
-systemctl enable apache_watchdog_launcher1
-systemctl is-enabled apache_watchdog_launcher1
-systemctl status apache_watchdog_launcher1
+systemctl enable apache_watchdog_launcher1;
+systemctl is-enabled apache_watchdog_launcher1;
+systemctl status apache_watchdog_launcher1;
 
-systemctl enable apache_watchdog_launcher2
-systemctl is-enabled apache_watchdog_launcher2
-systemctl status apache_watchdog_launcher2
+systemctl enable apache_watchdog_launcher2;
+systemctl is-enabled apache_watchdog_launcher2;
+systemctl status apache_watchdog_launcher2;
 
-systemctl enable apache_watchdog_launcher3
-systemctl is-enabled apache_watchdog_launcher3
-systemctl status apache_watchdog_launcher3
+systemctl enable apache_watchdog_launcher3;
+systemctl is-enabled apache_watchdog_launcher3;
+systemctl status apache_watchdog_launcher3;
 ---------------
 
 
@@ -1331,7 +1331,7 @@ systemctl status remote_server_launcher
 Note: The agent is launched on port 8080 and is waiting master orders.
 
 
-To use systemd create a file /etc/systemd/system/remote-server-launcher.service :
+To use systemd create a file */etc/systemd/system/remote-server-launcher.service* :
 
 [source,bash]
 ---------------
@@ -3651,7 +3651,11 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]      
-      
+
+  #
+  # The following entries are for deployment server only
+  #      
+
   - name: agent_sellyoursaas
     search_string: ['remote_server']
     exact_match: False
@@ -3669,6 +3673,12 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]
+ 
+  - name: apache_watchdog_daemon3
+    search_string: ['apache_watchdog_daemon3']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
 ---------------
 
 
