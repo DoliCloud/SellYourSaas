@@ -2635,7 +2635,7 @@ For this, add this constant in your Dolibarr master backoffice in menu *Home - S
  SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 
-After this addition, a new field *"SSH access type"* is now available in the service of the Application to deploy:
+After this addition, a new field *"SSH access type"* is now available in the Service of the Application to deploy:
 
 image::config_jailkit_service.png[SSH access type]
 
