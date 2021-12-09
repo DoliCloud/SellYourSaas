@@ -484,7 +484,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 					continue;
 				}
 
-				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','benefit','totalcustomers','totalcustomerspaying');
+				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','totalcustomers','totalcustomerspaying','benefit','serverprice');
 
 				$x=sprintf("%04d%02d", $year, $m);
 
@@ -525,9 +525,10 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 								if ($statkey == 'totalinstancespayingall') $y=$totalinstancespayingall;
 								if ($statkey == 'totalinstances') $y=$totalinstances;
 								if ($statkey == 'totalusers') $y=$totalusers;
-								if ($statkey == 'benefit') $y=$benefit;
 								if ($statkey == 'totalcustomerspaying') $y=$totalcustomerspaying;
 								if ($statkey == 'totalcustomers') $y=$totalcustomers;
+								if ($statkey == 'serverprice') $y=$serverprice;
+								if ($statkey == 'benefit') $y=$benefit;
 
 								print " -> ".$y."\n";
 
