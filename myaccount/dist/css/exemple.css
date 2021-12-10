@@ -1,0 +1,77 @@
+body{
+   padding-top: 0px; 
+}
+
+a{
+    color:#608ef2;
+}
+
+.customregistermain{
+    display:flex;
+    justify-content:space-around;
+    max-width:100%;
+}
+.customregistermain > * {
+    width:100%;
+    padding:10px
+}
+
+.customregisterinformation{
+    display: flex;
+    flex-direction:column;
+    justify-content: space-around;
+}
+.customregisterinformation > *{
+    align-self: center;
+    padding-left:200px;
+}
+.customcompanylogo{
+    display:block;
+}
+
+.customregisterheader {
+    display:flex
+}
+.customregisterheader > h1{
+    margin:auto;
+    padding-left:100px
+}
+.defaultheader{
+	display:none;
+}
+.page-header-top{
+	display:none;
+}
+
+@media (max-width: 873px) {
+    body{
+        padding-top: 0px!important; 
+    }
+
+    .customregistermain{
+        flex-direction:column;
+    }
+
+    .customregisterinformation > *{
+        max-width:70%;
+        padding-left:0px;
+    }
+    .customcompanylogo{
+        -webkit-box-ordinal-group: 1;
+        -moz-box-ordinal-group: 1;
+        -ms-flex-order: 1;
+        -webkit-order: 1;
+        order: 1;
+    }
+    .register_text{
+        -webkit-box-ordinal-group: 2;
+        -moz-box-ordinal-group: 2;
+        -ms-flex-order: 2;
+        -webkit-order: 2;
+        order: 2;
+    }
+
+    .customregisterheader > h1{
+    padding-left:0px
+}
+}

@@ -85,7 +85,6 @@ $reusesocid = GETPOST('reusesocid', 'int');
 $fromsocid = GETPOST('fromsocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
 $extcss=GETPOST('extcss', 'alpha');
-$customregister = GETPOST('customregister','alpha');
 
 $productid=GETPOST('service', 'int');
 $productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):'');
@@ -320,7 +319,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			}
 		}
 
-		if (! GETPOST('noheader', 'int') && empty($customregister)) {
+		if (! GETPOST('noheader', 'int')) {
 			?>
 		<div class="page-header-top">
 			<div class="container">
@@ -357,114 +356,36 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 		?>
 	  <div class="block medium center">
 		<?php
-		if (! GETPOST('noheader', 'int') && empty($customregister)) {
+		if (! GETPOST('noheader', 'int')) {
 			?>
 		<header class="invers">
-		  <h1><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
-		</header>
-			<?php
-		}elseif (!empty($customregister)) {
-			?>
-		<header class="invers">
-			<div class="registerheaderflex">
+			<div class="customregisterheader">
 				<h1><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
 				<div class="paddingtop20">
 					<div class="btn-sm">
-					  <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
+					<span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
 						<?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
-					  <a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
-					  </div>
+					<a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
+					</div>
 						<?php if (! empty($homepage)) { ?>
-					  <div class="btn-sm home-page-url">
-					  <span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="<?php echo $homepage ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
+					<div class="btn-sm home-page-url">
+					<span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="<?php echo $homepage ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
 					</div>
 					<?php } ?>
 				</div>
 			</div>
+		  <h1 class="defaultheader"><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
 		</header>
 			<?php
 		}
-		if (!empty($customregister)) {
-			?>
-			<style>
-				a{
-					color:#608ef2;
-				}
-
-				.registermainflex{
-					display:flex;
-					justify-content:space-around;
-					max-width:100%;
-				}
-				.registermainflex > * {
-					width:100%;
-					padding:10px
-				}
-
-				.registerleftflex{
-					display: flex;
-					flex-direction:column;
-					justify-content: space-around;
-				}
-				.registerleftflex > *{
-					align-self: center;
-					padding-left:200px
-				}
-
-				.registerheaderflex {
-					display:flex
-				}
-				.registerheaderflex > h1{
-					margin:auto;
-					padding-left:100px
-				}
-
-				@media (max-width: 873px) {
-					.registermainflex{
-						flex-direction:column;
-					}
-
-					.registerleftflex > *{
-						max-width:70%;
-						padding-left:0px;
-					}
-					.registerleftflex > #flexleftdown{
-						-webkit-box-ordinal-group: 1;
-						-moz-box-ordinal-group: 1;
-						-ms-flex-order: 1;
-						-webkit-order: 1;
-						order: 1;
-					}
-					.registerleftflex > .register_text{
-						-webkit-box-ordinal-group: 2;
-						-moz-box-ordinal-group: 2;
-						-ms-flex-order: 2;
-						-webkit-order: 2;
-						order: 2;
-					}
-
-					.registerheaderflex > h1{
-					padding-left:0px
-				}
-				}
-
-			</style>	
-			<div class="signup2 centpercent registermainflex">
-			<?php
-		}else {
-			print '<div class="signup2 centpercent">';
-		}
+		print '<div class="signup2 centpercent customregistermain">';
 		?>
 
 			<?php
 			if (! empty($tmpproduct->array_options['options_register_text'])) {
 				$keytouse = $tmpproduct->array_options['options_register_text'];
 				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
-				if (!empty($customregister)) {
-					?>
-					<div class="registerleftflex">
-					<?php
-				}
+					print '<div class="customregisterinformation">'."\n";		
 					print '<div class="register_text">'."\n";
 					if ($langs->trans($keytouse) != $keytouse) {
 						print $langs->trans($keytouse);
@@ -474,15 +395,13 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						}
 					}
 					print '</div>'."\n";
-				if (!empty($customregister)) {
 					?>
-					<div class="valignmiddle" id="flexleftdown">
+					<div class="valignmiddle customcompanylogo">
 					<a href="<?php echo $homepage ?>"><img style="max-width:100%"src="<?php echo $linklogo; ?>" /></a><br>
 					</div>
 					<?php
 					print '</div>'."\n";
 				}
-			}
 			?>
 
 		  <form action="register_instance.php" method="post" id="formregister">

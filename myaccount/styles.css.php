@@ -289,6 +289,14 @@ margin-top: 20px;
 
 .signup2 { max-width: 700px; display: inline-block; text-align: initial; }
 
+.customcompanylogo{
+	display:none;
+}
+
+.customregisterheader{
+	display:none;
+}
+
 .paddingtop20 {
     padding-top: 0px;
 }
