@@ -2136,12 +2136,12 @@ class SellYourSaasUtils
 
 								if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 									// Should not happen, already excluded into select
-									dol_syslog("--- Instance is in maintenance mode with an URL of redirection, we do not create recurring invoice, but flag instance for suspension", LOG_DEBUG, 0);
+									dol_syslog("--- Instance is in maintenance mode with an URL of redirection, we do not create recurring invoice, but we flag instance for suspension", LOG_DEBUG, 0);
 									$wemustsuspendinstance = true;
 									continue;	// This may be a contract used as redirection to another one, so we discard this contract to avoid to create template not expected
 								}
-								if ($contract->total_ht == 0) {
-									dol_syslog("--- Amount is null, we do not create recurring invoice, but flag instance for suspension", LOG_DEBUG, 0);
+								if ($contract->total_ht == 0) {		// $contract->total_ht is set from sum of lines into the $contract->fetch_lines() done by $contract->fetch()
+									dol_syslog("--- Amount is null, we do not create recurring invoice, but we flag instance for suspension", LOG_DEBUG, 0);
 									$wemustsuspendinstance = true;
 									continue;	// Amount is null, so we do not create recurring invoice for that. Note: This can happen, if we install a instance with all services that are free.
 								}
