@@ -84,7 +84,7 @@ $username_db = $object->array_options['options_username_db'];
 $password_db = $object->array_options['options_password_db'];
 $database_db = $object->array_options['options_database_db'];
 $prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
-$port_db     = $object->array_options['options_port_db'];
+$port_db     = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
 $username_web = $object->array_options['options_username_os'];
 $password_web = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
@@ -538,7 +538,7 @@ function print_user_table($newdb, $object)
 		$sortorder = "ASC";
 	}
 
-	$prefix_db   = $object->array_options['options_prefix_db'];
+	$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 
 	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
