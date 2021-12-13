@@ -2117,6 +2117,7 @@ class SellYourSaasUtils
 						//   if no template invoice yet (for example a second instance for existing customer), we will create the template invoice (= test instance will move in a paid mode instead of being suspended).
 						//   if already a template invoice exists, we will suspend instance
 						$customerHasAPaymentMode = sellyoursaasThirdpartyHasPaymentMode($object->thirdparty->id);
+
 						if ($customerHasAPaymentMode) {
 							// Portion of code similar to a more complete code into index.php
 							// We set some parameter to be able to use same code
@@ -2125,19 +2126,24 @@ class SellYourSaasUtils
 							$listofcontractid = array($object);
 
 							foreach ($listofcontractid as $contract) {
+
 								dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
-								if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-									dol_syslog("--- Instance is in maintenance mode with an URL redirection, we discard this contract", LOG_DEBUG, 0);
-									continue;	// This may be a contract used as redirection to another one, so we discard this contract to avoid to create template not expected
-								}
 								if ($contract->array_options['options_deployment_status'] != 'done') {
 									dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
 									continue;	// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
 								}
+
+								if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+									// Should not happen, already excluded into select
+									dol_syslog("--- Instance is in maintenance mode with an URL of redirection, we do not create recurring invoice, but flag instance for suspension", LOG_DEBUG, 0);
+									$wemustsuspendinstance = true;
+									continue;	// This may be a contract used as redirection to another one, so we discard this contract to avoid to create template not expected
+								}
 								if ($contract->total_ht == 0) {
-									dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
-									continue;	// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
+									dol_syslog("--- Amount is null, we do not create recurring invoice, but flag instance for suspension", LOG_DEBUG, 0);
+									$wemustsuspendinstance = true;
+									continue;	// Amount is null, so we do not create recurring invoice for that. Note: This can happen, if we install a instance with all services that are free.
 								}
 
 								// Make a test to pass loop if there is already a template invoice

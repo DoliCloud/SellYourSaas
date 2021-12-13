@@ -933,13 +933,24 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
+		// listofdomain can be:  with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
 		$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 		foreach ($listofdomain as $val) {
 			$newval=$val;
 			$reg = array();
-			if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-				$newval = preg_replace('/:.*$/', '', $newval);
-				if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) continue;
+			if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
+				$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+				$domainqualified = false;
+				$tmpdomains = explode('+', $reg[1]);
+				foreach($tmpdomains as $tmpdomain) {
+					if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
+						$domainqualified = true;
+						break;
+					}
+				}
+				if (! $domainqualified) {
+					continue;
+				}
 			}
 			// $newval is subdomain (with.mysaasdomainname.com for example)
 
