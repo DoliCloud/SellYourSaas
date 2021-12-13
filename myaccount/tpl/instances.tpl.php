@@ -963,7 +963,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 			if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
 			print '<option class="optionfordomain';
 			foreach($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
-				print ' '.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
+				print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 			}
 			print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
 		}
@@ -976,9 +976,9 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		// Add code to make constraints on deployment servers
 		print '<!-- JS Code to force plan -->';
 		print '<script type="text/javascript" language="javascript">
-    		jQuery(document).ready(function() {';
+    		jQuery(document).ready(function() {'."\n";
 		foreach($arrayofplansfull as $key => $plan) {
-			print '/* '.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domain'].' */'."\n";
+			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
 		}
 		print '</script>';
 
