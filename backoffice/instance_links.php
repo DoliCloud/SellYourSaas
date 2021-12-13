@@ -224,6 +224,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$password_db  = $object->array_options['options_password_db'];
 	$database_db  = $object->array_options['options_database_db'];
 	$port_db      = $object->array_options['options_port_db'];
+	$prefix_db    = $object->array_options['options_prefix_db'];
 	$hostname_os  = $object->array_options['options_hostname_os'];
 	$username_os  = $object->array_options['options_username_os'];
 	$password_os  = $object->array_options['options_password_os'];
@@ -238,6 +239,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->password_db  = $password_db;
 	$object->database_db  = $database_db;
 	$object->port_db      = $port_db;
+	$object->prefix_db    = $prefix_db;
 	$object->username_os  = $username_os;
 	$object->password_os  = $password_os;
 	$object->hostname_os  = $hostname_os;
@@ -245,7 +247,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->password_web = $password_web;
 	$object->hostname_web = $hostname_os;
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, ($port_db?$port_db:3306));
+	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, ($port_db ? $port_db : 3306));
 
 	$stringofversion = '';
 	$stringoflistofmodules = '';
@@ -264,7 +266,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		// Get user/pass of last admin user
 		if ($fordolibarr) {
 			// TODO Put the definition of sql to get last used admin user into the package.
-			$sql="SELECT login, pass FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+			$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
 				$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 			}
