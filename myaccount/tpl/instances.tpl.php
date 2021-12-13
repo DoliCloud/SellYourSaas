@@ -904,7 +904,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 
 		print '<div class="horizontal-fld centpercent marginbottomonly">';
 		print '<strong>'.$langs->trans("YourSubscriptionPlan").'</strong> ';
-		print $form->selectarray('service', $arrayofplans, $planid, 0, 0, 0, '', 0, 0, 0, '', 'minwidth500');
+		print $form->selectarray('service', $arrayofplans, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
 		print '<br>';
 		print '</div>';
 		//print ajax_combobox('service');
@@ -929,7 +929,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
         			<div class="linked-flds">
         			<span class="opacitymedium">https://</span>
         			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-        			<select name="tldid" id="tldid" >';
+        			<select name="tldid" id="tldid">';
 		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
