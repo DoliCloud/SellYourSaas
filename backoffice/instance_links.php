@@ -223,8 +223,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$username_db  = $object->array_options['options_username_db'];
 	$password_db  = $object->array_options['options_password_db'];
 	$database_db  = $object->array_options['options_database_db'];
-	$port_db      = $object->array_options['options_port_db'];
-	$prefix_db    = $object->array_options['options_prefix_db'];
+	$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+	$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
 	$hostname_os  = $object->array_options['options_hostname_os'];
 	$username_os  = $object->array_options['options_username_os'];
 	$password_os  = $object->array_options['options_password_os'];
@@ -247,7 +247,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->password_web = $password_web;
 	$object->hostname_web = $hostname_os;
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, ($port_db ? $port_db : 3306));
+	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
 	$stringofversion = '';
 	$stringoflistofmodules = '';
