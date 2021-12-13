@@ -483,7 +483,7 @@ GetFileOfIps=Télécharger fichier des IPs
 ParametersOnMasterServer=Paramètres du serveur Master
 ParametersOnDeploymentServers=Paramètres des serveurs de Déploiement
 RestrictDomainNames=Visible sur certains domaines seulement
-KeepEmptyForNoRestrictionOnDomain=Gardez vide si les services (en vente) qui incluent ce package doivent être toujours visibles sur le tableau de bord. Entrez un ou plusieurs noms de domaines, séparés par un virgule, pour exclure la visibilité des services fournissant ce package lorsque le tableau de bord n'a pas le même nom de domaine.<br>Exemple: mydomain.com, mydomain2.com
+KeepEmptyForNoRestrictionOnDomain=Gardez vide si les services (en vente) qui incluent ce package doivent être toujours visibles sur le tableau de bord. Entrez un ou plusieurs noms de domaines, séparés par un virgule, pour exclure la visibilité des services fournissant ce package lorsque le tableau de bord n'a pas le même nom de domaine.<br>Exemple: mydomain.com,mydomain2.com
 SellYourSaasSubDomainsHelp=Entrez la liste complète (séparée par une virgule) des sous-domaines à afficher dans les listes déroulantes lorsqu'un utilisateur souhaite créer une nouvelle instance. Si le sous-domaine doit être visible uniquement lorsque le tableau de bord ou la page d'inscription se trouve sur un domaine particulier, entrez le domaine après ':'. Mettre un nom factice rendra le sous-domaine jamais visible, sauf si vous ajoutez &forcesubdomain= comme paramètre sur la page d'enregistrement d'instance.
 DelayAutomaticPayment=Retarder le paiement automatique
 DelayAutomaticPaymentDesc=Ne pas essayer de prendre le paiement automatiquement avant cette date

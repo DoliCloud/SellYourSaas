@@ -483,7 +483,7 @@ GetFileOfIps=Obter arquivo de IPs
 ParametersOnMasterServer=Parâmetros para o servidor mestre
 ParametersOnDeploymentServers=Parâmetros para servidores de implantação
 RestrictDomainNames=Visível apenas em alguns domínios
-KeepEmptyForNoRestrictionOnDomain=Mantenha em branco se os serviços (em vendas) que incluem este pacote devem estar sempre visíveis no painel. Digite alguns nomes de domínio, separados por coma, para excluir a visibilidade dos serviços que fornecem este pacote quando o painel não tiver o mesmo nome de domínio. <br> Exemplo: mydomain.com, mydomain2.com
+KeepEmptyForNoRestrictionOnDomain=Mantenha em branco se os serviços (em vendas) que incluem este pacote devem estar sempre visíveis no painel. Digite alguns nomes de domínio, separados por coma, para excluir a visibilidade dos serviços que fornecem este pacote quando o painel não tiver o mesmo nome de domínio. <br> Exemplo: mydomain.com,mydomain2.com
 SellYourSaasSubDomainsHelp=Digite a lista completa (separada por vírgula) de subdomínios para mostrar nas listas de combinação quando um usuário deseja criar uma nova instância. Se o subdomínio precisar estar visível apenas quando o painel ou a página de registro estiver em um domínio específico, digite o domínio após ':'. Colocar um nome fictício tornará o subdomínio nunca visível, exceto se você adicionar & forcesubdomain = como parâmetro na página de registro.
 DelayAutomaticPayment=Atraso no pagamento automático
 DelayAutomaticPaymentDesc=Não tente receber o pagamento automaticamente antes desta data
