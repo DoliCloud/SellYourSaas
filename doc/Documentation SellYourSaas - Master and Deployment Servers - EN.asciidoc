@@ -1382,6 +1382,19 @@ NOTE: The rules available may vary depending on the version of the OS installed.
 
 NOTE: Remember to also modify *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
 
+NOTE: Fail2ban won't start if any log mentioned in its conf does not exist, you can check that fail2ban is actually running with :
+
+[source, bash]
+---------------
+systemctl status fail2ban
+---------------
+
+If not, you can create all required logs with :
+[source, bash]
+---------------
+grep logpath /etc/fail2ban/jail.local |cut -d= -f2|grep '^ /'|sort|uniq|xargs touch
+---------------
+
 
 [source, bash]
 ---------------
@@ -2635,7 +2648,7 @@ For this, add this constant in your Dolibarr master backoffice in menu *Home - S
  SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
 
 
-After this addition, a new field *"SSH access type"* is now available in the Service of the Application to deploy:
+After this addition, a new field *"SSH access type"* is now available in the Service of the Application/Package to deploy:
 
 image::config_jailkit_service.png[SSH access type]
 
@@ -3584,7 +3597,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
 ---------------
 
-Edit the file to add *min_collection_interval: 300* under *postfix_user: postfix* and under *queues: - deffered*
+Edit the file to add *min_collection_interval: 300* under *postfix_user: postfix*, and add under *queues: - defered* to existing options.
 
 Add the following line into the file */etc/sudoers*
 
