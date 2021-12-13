@@ -76,6 +76,7 @@ $value	= GETPOST('value', 'alpha');
  */
 if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
 	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	// move the x part in domain:x into domain:closed:x
 	$tmpdomainkey = explode(':',$listofdomains[$keytodesactivate]);
 	if ($value == 0) {
 		if (!empty($tmpdomainkey[1])) {
@@ -87,6 +88,7 @@ if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
 		dolibarr_set_const($db,"SELLYOURSAAS_SUB_DOMAIN_NAMES",$listofdomains, 'chaine', 0, '', $conf->entity);
 	}
 	else if ($value == 1) {
+		// move the domain:closed:x into domain:x
 		if (!empty($tmpdomainkey[2])) {
 			$tmpdomainkey[1]=$tmpdomainkey[2];
 			unset($tmpdomainkey[2]);

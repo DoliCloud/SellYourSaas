@@ -385,7 +385,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			if (! empty($tmpproduct->array_options['options_register_text'])) {
 				$keytouse = $tmpproduct->array_options['options_register_text'];
 				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
-					print '<div class="customregisterinformation">'."\n";		
+					print '<div class="customregisterinformation">'."\n";
 					print '<div class="register_text">'."\n";
 					if ($langs->trans($keytouse) != $keytouse) {
 						print $langs->trans($keytouse);
@@ -540,9 +540,17 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						foreach ($listofdomain as $val) {
 							$newval = $val;
 							$reg = array();
-							if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-								$newval = preg_replace('/:.*$/', '', $newval);
-								if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) {
+							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
+								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+								$domainqualified = false;
+								$tmpdomains = explode('+', $reg[1]);
+								foreach($tmpdomains as $tmpdomain) {
+									if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
+										$domainqualified = true;
+										break;
+									}
+								}
+								if (! $domainqualified) {
 									print '<!-- '.$newval.' disabled. Allowed only if main domain of registration page is '.$reg[1].' -->';
 									continue;
 								}

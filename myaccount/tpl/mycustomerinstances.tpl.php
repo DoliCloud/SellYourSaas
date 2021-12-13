@@ -740,9 +740,19 @@ if ($form->result['nbofthirdparties'] == 0) {
 foreach ($listofdomain as $val) {
 	$newval=$val;
 	$reg = array();
-	if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-		$newval = preg_replace('/:.*$/', '', $newval);
-		if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) continue;
+	if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
+		$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+		$domainqualified = false;
+		$tmpdomains = explode('+', $reg[1]);
+		foreach($tmpdomains as $tmpdomain) {
+			if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
+				$domainqualified = true;
+				break;
+			}
+		}
+		if (! $domainqualified) {
+			continue;
+		}
 	}
 	// $newval is subdomain (with.mysaasdomainname.com for example)
 
