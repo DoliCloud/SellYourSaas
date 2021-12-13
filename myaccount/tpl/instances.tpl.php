@@ -33,7 +33,8 @@ $forcesubdomain = GETPOST('forcesubdomain', 'alpha');
 
 // List of available plans/products
 $arrayofplans=array();
-$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers';
+$arrayofplansfull=array();
+$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pa.restrict_domains';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 $sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 $sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
@@ -117,6 +118,10 @@ if ($resqlproducts) {
 				if ($tmpprod->duration) $arrayofplans[$obj->rowid].=$tmpduration;
 			}
 			$arrayofplans[$obj->rowid].=')';
+
+			$arrayofplansfull[$obj->rowid]['id'] = $obj->rowid;
+			$arrayofplansfull[$obj->rowid]['label'] = $arrayofplans[$obj->rowid];
+			$arrayofplansfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
 		}
 		$i++;
 	}
@@ -938,6 +943,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		foreach ($listofdomain as $val) {
 			$newval=$val;
 			$reg = array();
+			$tmpdomains = array();
 			if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 				$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
 				$domainqualified = false;
@@ -955,13 +961,26 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 			// $newval is subdomain (with.mysaasdomainname.com for example)
 
 			if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
-			print '<option value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
+			print '<option class="optionfordomain';
+			foreach($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
+				print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
+			}
+			print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
 		}
 		print '</select>
         			<br class="unfloat" />
         			</div>
         			</div>
-        			</section>';
+        			</section>'."\n";
+
+		// Add code to make constraints on deployment servers
+		print '<!-- JS Code to force plan -->';
+		print '<script type="text/javascript" language="javascript">
+    		jQuery(document).ready(function() {'."\n";
+		foreach($arrayofplansfull as $key => $plan) {
+			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+		}
+		print '</script>';
 
 		if (GETPOST('admin', 'alpha')) {
 			print '<div class="horizontal-fld clearboth margintoponly">';
