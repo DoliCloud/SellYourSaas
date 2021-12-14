@@ -1,5 +1,9 @@
 /* CSS myaccount */
 
+div.block header h1 {
+	margin-bottom: 0;: 
+}
+
 label {
     margin-bottom: .3rem;
 }
@@ -365,7 +369,7 @@ div.tab-content {
 @media only screen and (max-width: 480px)
 {
 	.home-page-url a.blue.btn-sm {
-	    font-size: 0.9em;
+	    font-size: 0.72em;
 	}
 }
 

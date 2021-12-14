@@ -1,9 +1,15 @@
+/* Alternative CSS for myaccount */
+
 body{
 	padding: 0px; 
 }
 
 a{
     color:#608ef2;
+}
+
+div.block header h1 {
+	margin-bottom: 0; 
 }
 
 .customregistermain{
@@ -51,6 +57,11 @@ a{
     body{
         padding-top: 0px!important; 
     }
+
+	div.block header h1 {
+		margin-bottom: 0;
+		font-size: 1.1em; 
+	}
 
     .customregistermain{
         flex-direction:column;
