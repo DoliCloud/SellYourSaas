@@ -976,7 +976,38 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		// Add code to make constraints on deployment servers
 		print '<!-- JS Code to force plan -->';
 		print '<script type="text/javascript" language="javascript">
-    		jQuery(document).ready(function() {'."\n";
+			function disable_combo_if_not(s) {
+				console.log("Disable combo choice except if s="+s);
+				$("#tldid > option").each(function() {
+					if (this.value.endsWith(s)) {
+						console.log("We enable the option "+this.value);
+						this.removeAttr("disabled");
+					} else {
+						console.log("We disable the option "+this.value);
+						this.attr("disabled", "disabled");
+						this.removeAttr("selected");
+					}
+				}
+			}
+
+    		jQuery(document).ready(function() {
+				jQuery("#service").change(function () {
+					var pid = jQuery("#service option:selected").val();
+					console.log("We select product id = "+pid);
+				';
+		foreach ($arrayofplansfull as $key => $plan) {
+			if ($plan['restrict_domains']) {
+				$firstdomain = preg_replace('/,.*$/', '', $plan['restrict_domains']);
+				print " if (pid = ".$key.") { disable_combo_if_not('".$firstdomain."'); }\n";
+			} else {
+				print '	/* No restriction for pid = '.$key.', firstdomain is '.$firstdomain.' */'."\n";
+			}
+		}
+
+		print '
+				});
+			});'."\n";
+
 		foreach($arrayofplansfull as $key => $plan) {
 			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
 		}
