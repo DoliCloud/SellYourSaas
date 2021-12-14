@@ -20,8 +20,8 @@ a{
     display: flex;
     flex-direction:column;
     justify-content: space-around;
-    padding-left: 50px;
-    padding-right: 50px;
+    padding-left: 100px;
+    padding-right: 100px;
 }
 .customregisterinformation > *{
     align-self: center;
@@ -45,7 +45,9 @@ a{
 	display:none;
 }
 
-@media (max-width: 873px) {
+/* For other sizes */
+
+@media (max-width: 768px) {
     body{
         padding-top: 0px!important; 
     }
@@ -54,6 +56,10 @@ a{
         flex-direction:column;
     }
 
+	.customregisterinformation {
+	    padding-left: 10px;
+    	padding-right: 10px;
+	}
     .customregisterinformation > *{
         max-width:70%;
         padding-left:0px;
@@ -74,6 +80,10 @@ a{
     }
 
     .customregisterheader > h1{
-    padding-left:0px
+    	padding-left:0px
+	}
 }
+
+@media (max-width: 320px) {
+
 }
