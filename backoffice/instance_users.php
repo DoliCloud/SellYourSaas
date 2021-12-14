@@ -83,13 +83,15 @@ $hostname_db = $object->array_options['options_hostname_db'];
 $username_db = $object->array_options['options_username_db'];
 $password_db = $object->array_options['options_password_db'];
 $database_db = $object->array_options['options_database_db'];
-$prefix_db   = $object->array_options['options_prefix_db'];
-$port_db     = $object->array_options['options_port_db'];
+$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
+$port_db     = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
 $username_web = $object->array_options['options_username_os'];
 $password_web = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
-if (empty($prefix_db)) $prefix_db = 'llx_';
+if (empty($prefix_db)) {
+	$prefix_db = 'llx_';
+}
 
 // Security check
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
@@ -178,7 +180,7 @@ if (empty($reshook)) {
 	if ($action == "deletesupportuser") {
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
-			$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM llx_user WHERE login = '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."')";
+			$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM ".$prefix_db."user WHERE login = '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."')";
 			$resql=$newdb->query($sql);
 			if (! $resql) dol_print_error($newdb);
 
@@ -298,7 +300,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	if (is_object($newdb) && $newdb->connected) {
 		// Get user/pass of last admin user
-		$sql="SELECT login, pass FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+		$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 		// TODO Set definition to read users table into the package
 		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
 			$sql="SELECT name as login, '' as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
@@ -405,6 +407,7 @@ $username_db = $object->array_options['options_username_db'];
 $password_db = $object->array_options['options_password_db'];
 $database_db = $object->array_options['options_database_db'];
 $port_db     = $object->array_options['options_port_db'];
+$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 $username_web = $object->array_options['options_username_os'];
 $password_web = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
@@ -413,7 +416,7 @@ $dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $pas
 
 if (!$error && is_object($dbcustomerinstance) && $dbcustomerinstance->connected) {
 	// Get user/pass of last admin user
-	$sql="SELECT login, pass, pass_crypted FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+	$sql="SELECT login, pass, pass_crypted FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 	// TODO Set definition of algorithm to hash password into the package
 	if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
 		$sql="SELECT name as login, '' as pass, password as pass_crypted FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
@@ -535,6 +538,8 @@ function print_user_table($newdb, $object)
 		$sortorder = "ASC";
 	}
 
+	$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
+
 	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 	print '<table class="noborder" width="100%">';
@@ -559,7 +564,7 @@ function print_user_table($newdb, $object)
 	if (is_object($newdb) && $newdb->connected) {
 		// Get user/pass of all users in database
 		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
-		$sql.=" FROM llx_user";
+		$sql.=" FROM ".$prefix_db."user";
 		$sql .= $newdb->order($sortfield, $sortorder);
 
 		// TODO Set definition of SQL to get list of all users into the package
@@ -578,12 +583,12 @@ function print_user_table($newdb, $object)
 		$resql=$newdb->query($sql);
 		if (empty($resql)) {	// Alternative for Dolibarr 3.7-
 			$sql ="SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-			$sql.=" FROM llx_user ORDER";
+			$sql.=" FROM ".$prefix_db."user ORDER";
 			$sql .= $newdb->order($sortfield, $sortorder);
 			$resql=$newdb->query($sql);
 			if (empty($resql)) {	// Alternative for Dolibarr 3.3-
 				$sql ="SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-				$sql.=" FROM llx_user";
+				$sql.=" FROM ".$prefix_db."user";
 				$sql .= $newdb->order($sortfield, $sortorder);
 				$resql=$newdb->query($sql);
 			}

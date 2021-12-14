@@ -167,13 +167,15 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 	$hostname_db = $object->hostname_db;
 	if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];
 	$port_db = $object->port_db;
-	if (empty($port_db)) $port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+	if (empty($port_db)) $port_db = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
 	$username_db = $object->username_db;
 	if (empty($username_db)) $username_db = $object->array_options['options_username_db'];
 	$password_db = $object->password_db;
 	if (empty($password_db)) $password_db = $object->array_options['options_password_db'];
 	$database_db = $object->database_db;
 	if (empty($database_db)) $database_db = $object->array_options['options_database_db'];
+	$prefix_db = $object->prefix_db;
+	if (empty($prefix_db)) $prefix_db = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 
 	$server = (! empty($hostname_db) ? $hostname_db : $instance);
 
@@ -217,9 +219,9 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 				}
 			}
 
-			$sqltogetlastloginadmin = "SELECT login, pass, datelastlogin FROM llx_user WHERE admin = 1 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
-			$sqltogetmodules = "SELECT name, value FROM llx_const WHERE name LIKE 'MAIN_MODULE_%' or name = 'MAIN_VERSION_LAST_UPGRADE' or name = 'MAIN_VERSION_LAST_INSTALL'";
-			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM llx_user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY datelastlogin DESC LIMIT 1";
+			$sqltogetlastloginadmin = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE admin = 1 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+			$sqltogetmodules = "SELECT name, value FROM ".$prefix_db."const WHERE name LIKE 'MAIN_MODULE_%' or name = 'MAIN_VERSION_LAST_UPGRADE' or name = 'MAIN_VERSION_LAST_INSTALL'";
+			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY datelastlogin DESC LIMIT 1";
 
 			// Get user/pass of last admin user
 			if (! $error) {
