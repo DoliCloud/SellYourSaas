@@ -109,13 +109,13 @@ if (count($listofcontractidreseller) == 0) {
 		if (empty($dbprefix)) $dbprefix = 'llx_';
 
 		// Get info about PLAN of Contract
-		$planlabel = $planref;			// By default but we will take ref and label of service of type 'app' later
+		$planlabel = $planref;			// By default, but we will take the name of service of type 'app' just after
 
 		$planid = 0;
 		$freeperioddays = 0;
 		$directaccess = 0;
 		foreach ($contract->lines as $keyline => $line) {
-			if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
+			if ($line->statut == ContratLigne::STATUS_CLOSED && $contract->array_options['options_deployment_status'] != 'undeployed') {
 				$statuslabel = 'suspended';
 			}
 
@@ -142,7 +142,8 @@ if (count($listofcontractidreseller) == 0) {
 		// Update resources of instance
 		/*
 		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract);	// We do not do 'refresh', too heavy (due to ssh file check) for a long list of contracts
+			$comment = 'Refresh contract '.$contract->ref.' after entering dashboard';
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 			if ($result <= 0) {
 				$error++;
 
@@ -350,8 +351,11 @@ if (count($listofcontractidreseller) == 0) {
 				if ($line->price_ht) {
 					print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
 					//if ($line->qty > 1 && $labelprodsing) print ' / '.$labelprodsing;
-					if ($tmpproduct->array_options['options_resource_label']) print ' / '.$tmpproduct->array_options['options_resource_label'];
-					elseif (preg_match('/users/i', $tmpproduct->ref)) print ' / '.$langs->trans("User");	// backward compatibility
+					if ($tmpproduct->array_options['options_resource_label']) {
+						print ' / '.$langs->trans($tmpproduct->array_options['options_resource_label']);
+					} elseif (preg_match('/users/i', $tmpproduct->ref)) {
+						print ' / '.$langs->trans("User");	// backward compatibility
+					}
 					// TODO
 					print $tmpduration;
 					print '</span>';
@@ -385,18 +389,30 @@ if (count($listofcontractidreseller) == 0) {
 
 		print '<br><br>';
 
-		// Plan
+		// Show the current Plan (with link to change it)
 		print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
 		if ($action == 'changeplan' && $planid > 0 && $id == GETPOST('id', 'int')) {
 			print '<input type="hidden" name="mode" value="instances"/>';
 			print '<input type="hidden" name="action" value="updateplan" />';
 			print '<input type="hidden" name="contractid" value="'.$contract->id.'" />';
 
-			// List of available plans
+			// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+			$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
+			
+			// List of available plans/products
 			$arrayofplanstoswitch=array();
 			$sqlproducts = 'SELECT p.rowid, p.ref, p.label FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 			$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
+			$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
+			$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
+			$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
+			$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
+			$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
+			$sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
+			$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
+			$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
+			$sqlproducts.= ")";
 			$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
 			$sqlproducts.= " ORDER BY pe.position ASC";
 			$resqlproducts = $db->query($sqlproducts);
@@ -427,6 +443,7 @@ if (count($listofcontractidreseller) == 0) {
 
 		// Billing
 		if ($statuslabel != 'undeployed') {
+			print '<!-- Billing information of contract -->'."\n";
 			print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.$langs->trans("Billing").' : </span>';
 			if ($foundtemplate > 1) {
 				$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
@@ -438,11 +455,14 @@ if (count($listofcontractidreseller) == 0) {
 
 				print '<span style="color:orange">'.$langs->trans("WarningFoundMoreThanOneInvoicingTemplate", $sellyoursaasemail).'</span>';
 			} else {
-				if ($priceinvoicedht != $contract->total_ht) {
+				// Invoice amount line
+				if ($foundtemplate != 0 && $priceinvoicedht != $contract->total_ht) {
 					if ($pricetoshow != '') print $langs->trans("FlatOrDiscountedPrice").' = ';
 				}
 				print '<span class="bold">'.$pricetoshow.'</span>';
-				if ($foundtemplate == 0) {	// Same than ispaid
+
+				// Discount and next invoice line
+				if ($foundtemplate == 0) {	// foundtemplate means there is at least one template invoice (so contract is a paying contract)
 					if ($contract->array_options['options_date_endfreeperiod'] < $now) $color='orange';
 
 					print ' <span style="color:'.$color.'">';
@@ -554,7 +574,8 @@ if (count($listofcontractidreseller) == 0) {
 				                  </div>
 				                </div>
 
-				                </form>';
+				                </form>
+								';
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
@@ -592,12 +613,12 @@ if (count($listofcontractidreseller) == 0) {
 				                    <div class="col-md-3">
 				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_database_db'].'">
 				                    </div>
+				                  </div>
+				                  <div class="form-group col-md-12 row">
 				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLogin").'</label>
 				                    <div class="col-md-3">
 				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_db'].'">
 				                    </div>
-				                  </div>
-				                  <div class="form-group col-md-12 row">
 				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
 				                    <div class="col-md-3">
 				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
@@ -633,7 +654,7 @@ if (count($listofcontractidreseller) == 0) {
 }
 
 
-	// Link to add new instance
+	// Section to add/create a new instance
 	print '
     	<!-- Add a new instance -->
     	<div class="portlet-body" style=""><br>
@@ -644,13 +665,13 @@ if (count($listofcontractidreseller) == 0) {
 
 	$selectofthirdparties = $form->select_company('', 'reusesocid', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'centpercent');
 
-if ($form->result['nbofthirdparties'] == 0) {
-	print $langs->trans("YouDontHaveCustomersYet").'...<br>';
-} else {
-	print '<a href="#addanotherinstance" id="addanotherinstance">';
-	print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
-	print '</a>';
-}
+	if ($form->result['nbofthirdparties'] == 0) {
+		print $langs->trans("YouDontHaveCustomersYet").'...<br>';
+	} else {
+		print '<a href="#addanotherinstance" id="addanotherinstance">';
+		print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
+		print '</a>';
+	}
 
 	print '<script type="text/javascript" language="javascript">
         function applyDomainConstraints( domain )
@@ -671,101 +692,176 @@ if ($form->result['nbofthirdparties'] == 0) {
             }
             return domain
         }
-        /* Apply constraints in sldAndSubdomain field */
-        jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {
-            console.log("Update sldAndSubdomain field in mycustomerinstances.tpl.php");
-            $(this).val( applyDomainConstraints( $(this).val() ) );
-        });
     	jQuery(document).ready(function() {
+	        /* Apply constraints in sldAndSubdomain field */
+	        jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {
+	            console.log("Update sldAndSubdomain field in mycustomerinstances.tpl.php");
+	            $(this).val( applyDomainConstraints( $(this).val() ) );
+	        });
     		jQuery("#addanotherinstance").click(function() {
     			console.log("Click on addanotherinstance");
     			jQuery("#formaddanotherinstance").toggle();
     		});
-    	});
+    	
+            jQuery("#formaddanotherinstance").submit(function() {
+                console.log("We clicked on submit on instance.tpl.php")
+
+                jQuery(document.body).css({ \'cursor\': \'wait\' });
+                jQuery("div#waitMask").show();
+                jQuery("#waitMask").css("opacity"); // must read it first
+                jQuery("#waitMask").css("opacity", "0.7");
+
+				return true;	/* Use return false to show the hourglass without submitting the page (for debug) */
+            });
+		});
     		</script>';
 
 	print '<br>';
 
+	print '<!-- Form to add an instance -->'."\n";
 	print '<form id="formaddanotherinstance" class="form-group reposition" style="display: none;" action="register_instance.php" method="POST">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="deployall" />';
 	print '<input type="hidden" name="fromsocid" value="'.$mythirdpartyaccount->id.'" />';
 	print '<input type="hidden" name="mode" value="mycustomerinstances" />';
-	print '<!-- thirdpartyidinsession = '.$_SESSION['dol_loginsellyoursaas'].' -->';
+	print '<!-- thirdpartyidinsession = '.dol_escape_htmltag($_SESSION['dol_loginsellyoursaas']).' -->';
 
 	print '<div class="row">
     	<div class="col-md-12">
 
     	<div class="portlet light">';
 
+	//var_dump($arrayofplans);
 	//natcasesort($arrayofplans);
 
-	print '
-    		<div class="group">
-    		<div class="horizontal-fld">';
+	if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+		print '<!-- RegistrationSuspendedForTheMomentPleaseTryLater -->'."\n";
+		print '<div class="alert alert-warning" style="margin-bottom: 0px">';
+		print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
+		print '</div>';
+	} else {
+		print '<div class="group">';
 
-	$savsocid = $user->socid;	// Save socid of user
-	$user->socid = 0;
-	print $langs->trans("Customer").' '.$selectofthirdparties.'<br><br>';
-	$user->socid = $savsocid;	// Restore socid of user
+		print '<div class="horizontal-fld centpercent marginbottomonly">';
 
-	print $langs->trans("Type").' '.$form->selectarray('service', $arrayofplans, $planid, 0, 0, 0, '', 0, 0, 0, '', 'centpercent').'<br><br>';
-	print '
-    		</div>
+		$savsocid = $user->socid;	// Save socid of user
+		$user->socid = 0;
+		print $langs->trans("Customer").' '.$selectofthirdparties.'<br><br>';
+		$user->socid = $savsocid;	// Restore socid of user
 
-    		<div class="horizontal-fld clearboth">
+		print '<strong>'.$langs->trans("Plan").'</strong> ';
+		print $form->selectarray('service', $arrayofplans, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
+		print '<br>';
+		print '</div>';
+		//print ajax_combobox('service');
+		
+		print '
+    		<div class="horizontal-fld clearboth margintoponly">
     		<div class="control-group required">
     		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128" required />
     		</div>
     		</div>
-    		<div class="horizontal-fld ">
+    		<div class="horizontal-fld margintoponly">
     		<div class="control-group required">
     		<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
     		</div>
     		</div>
     		</div> <!-- end group -->
 
-    		<section id="selectDomain">
-    		<br>
+    		<section id="selectDomain" style="margin-top: 20px;">
     		<div class="fld select-domain required">
     		<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
     		<div class="linked-flds">
     		<span class="opacitymedium">https://</span>
-    		<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="" maxlength="29" required />
+    		<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
     		<select name="tldid" id="tldid" >';
-	// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
-	$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
+		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
-	$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-foreach ($listofdomain as $val) {
-	$newval=$val;
-	$reg = array();
-	if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-		$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
-		$domainqualified = false;
-		$tmpdomains = explode('+', $reg[1]);
-		foreach($tmpdomains as $tmpdomain) {
-			if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
-				$domainqualified = true;
-				break;
+		// listofdomain can be:  with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
+		$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+		foreach ($listofdomain as $val) {
+			$newval=$val;
+			$reg = array();
+			$tmpdomains = array();
+			if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
+				$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+				$domainqualified = false;
+				$tmpdomains = explode('+', $reg[1]);
+				foreach($tmpdomains as $tmpdomain) {
+					if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
+						$domainqualified = true;
+						break;
+					}
+				}
+				if (! $domainqualified) {
+					continue;
+				}
+			}
+			// $newval is subdomain (with.mysaasdomainname.com for example)
+
+			if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+			print '<option class="optionfordomain';
+			foreach($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
+				print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
+			}
+			print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
+		}
+		print '</select>
+	    		<br class="unfloat" />
+	    		</div>
+	    		</div>
+	    		</section>'."\n";
+
+		// Add code to make constraints on deployment servers
+		print '<!-- JS Code to force plan -->';
+		print '<script type="text/javascript" language="javascript">
+				function disable_combo_if_not(s) {
+					console.log("Disable combo choice except if s="+s);
+					$("#tldid > option").each(function() {
+						if (this.value.endsWith(s)) {
+							console.log("We enable the option "+this.value);
+							$(this).removeAttr("disabled");
+							$(this).attr("selected", "selected");
+						} else {
+							console.log("We disable the option "+this.value);
+							$(this).attr("disabled", "disabled");
+							$(this).removeAttr("selected");
+						}
+					});
+				}
+				
+	    		jQuery(document).ready(function() {
+					jQuery("#service").change(function () {
+						var pid = jQuery("#service option:selected").val();
+						console.log("We select product id = "+pid);
+					';
+		foreach ($arrayofplansfull as $key => $plan) {
+			if ($plan['restrict_domains']) {
+				$firstdomain = preg_replace('/,.*$/', '', $plan['restrict_domains']);
+				print " if (pid == ".$key.") { disable_combo_if_not('".$firstdomain."'); }\n";
+			} else {
+				print '	/* No restriction for pid = '.$key.', firstdomain is '.$firstdomain.' */'."\n";
 			}
 		}
-		if (! $domainqualified) {
-			continue;
+	
+		print '
+				});
+			});'."\n";
+	
+		foreach($arrayofplansfull as $key => $plan) {
+			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
 		}
+		print '</script>';
+	
+		if (GETPOST('admin', 'alpha')) {
+			print '<div class="horizontal-fld clearboth margintoponly">';
+			print '<input type="checkbox" name="disablecustomeremail" /> '.$langs->trans("DisableEmailToCustomer");
+			print '</div>';
+		}
+	
+		print '<br><input type="submit" class="btn btn-warning default change-plan-link" name="changeplan" value="'.$langs->trans("Create").'">';
 	}
-	// $newval is subdomain (with.mysaasdomainname.com for example)
-
-	if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
-	print '<option value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
-}
-	print '</select>
-    		<br class="unfloat" />
-    		</div>
-    		</div>
-    		</section>';
-
-	print '<br><input type="submit" class="btn btn-warning default change-plan-link" name="changeplan" value="'.$langs->trans("Create").'">';
 
 	print '</div></div></div>';
 
@@ -776,7 +872,8 @@ foreach ($listofdomain as $val) {
 
 
 	print '
-    		</div></div>
+    		</div>
+			</div>
     	';
 
 if (GETPOST('tab', 'alpha')) {
