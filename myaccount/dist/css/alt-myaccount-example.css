@@ -20,10 +20,12 @@ a{
     display: flex;
     flex-direction:column;
     justify-content: space-around;
+    padding-left: 50px;
+    padding-right: 50px;
 }
 .customregisterinformation > *{
     align-self: center;
-    padding-left:200px;
+    /* padding-left:200px; */
 }
 .customcompanylogo{
     display:block;
