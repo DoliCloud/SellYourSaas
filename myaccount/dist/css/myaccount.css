@@ -374,7 +374,12 @@ div.tab-content {
     text-transform: unset !important;
 }
 
-body { color: #333333; font-family: "Open Sans", sans-serif; padding:0px !important; margin: 0px !important; direction: ltr; }
+body { 
+	color: #333333; 
+	font-family: "Open Sans", sans-serif; 
+	padding: 0px !important; 
+	margin: 0px !important; 
+}
 
 
 ul.kmlist {
