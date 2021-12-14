@@ -369,7 +369,8 @@ div.tab-content {
 @media only screen and (max-width: 480px)
 {
 	.home-page-url a.blue.btn-sm {
-	    font-size: 0.72em;
+	    font-size: 0.78em;
+	    padding-right: 0;
 	}
 }
 
