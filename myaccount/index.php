@@ -2683,7 +2683,7 @@ if ($mythirdpartyaccount->isareseller) {
 		</script>';
 
 	print '<br><a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a>';
-	print '<div id="divmorereselleroptions" style="display: hidden">';
+	print '<div id="divmorereselleroptions" style="display: hidden" class="small">';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
 		print '&plan=XXX : ';
 		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span><br>';
