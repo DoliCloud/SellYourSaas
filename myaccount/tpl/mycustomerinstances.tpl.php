@@ -398,7 +398,7 @@ if (count($listofcontractidreseller) == 0) {
 
 			// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 			$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-			
+
 			// List of available plans/products
 			$arrayofplanstoswitch=array();
 			$sqlproducts = 'SELECT p.rowid, p.ref, p.label FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
@@ -702,7 +702,7 @@ if (count($listofcontractidreseller) == 0) {
     			console.log("Click on addanotherinstance");
     			jQuery("#formaddanotherinstance").toggle();
     		});
-    	
+
             jQuery("#formaddanotherinstance").submit(function() {
                 console.log("We clicked on submit on instance.tpl.php")
 
@@ -754,7 +754,7 @@ if (count($listofcontractidreseller) == 0) {
 		print '<br>';
 		print '</div>';
 		//print ajax_combobox('service');
-		
+
 		print '
     		<div class="horizontal-fld clearboth margintoponly">
     		<div class="control-group required">
@@ -830,7 +830,7 @@ if (count($listofcontractidreseller) == 0) {
 						}
 					});
 				}
-				
+
 	    		jQuery(document).ready(function() {
 					jQuery("#service").change(function () {
 						var pid = jQuery("#service option:selected").val();
@@ -844,22 +844,23 @@ if (count($listofcontractidreseller) == 0) {
 				print '	/* No restriction for pid = '.$key.', firstdomain is '.$firstdomain.' */'."\n";
 			}
 		}
-	
+
 		print '
 				});
+				jQuery("#service").trigger("change");
 			});'."\n";
-	
+
 		foreach($arrayofplansfull as $key => $plan) {
 			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
 		}
 		print '</script>';
-	
+
 		if (GETPOST('admin', 'alpha')) {
 			print '<div class="horizontal-fld clearboth margintoponly">';
 			print '<input type="checkbox" name="disablecustomeremail" /> '.$langs->trans("DisableEmailToCustomer");
 			print '</div>';
 		}
-	
+
 		print '<br><input type="submit" class="btn btn-warning default change-plan-link" name="changeplan" value="'.$langs->trans("Create").'">';
 	}
 

@@ -1008,6 +1008,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 
 			print '
 					});
+					jQuery("#service").trigger("change");
 				});'."\n";
 
 			foreach($arrayofplansfull as $key => $plan) {
