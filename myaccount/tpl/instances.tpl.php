@@ -987,7 +987,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 						this.attr("disabled", "disabled");
 						this.removeAttr("selected");
 					}
-				}
+				});
 			}
 
     		jQuery(document).ready(function() {
