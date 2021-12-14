@@ -39,18 +39,32 @@ else header('Cache-Control: no-cache');
 
 
 print "/* CSS content (all pages) */
+
 body.bodywebsite { margin: 0; }
+
 .centpercent { width: 100%; }
+
 .floatleft { float: left; }
+
 .floatright { float: right; }
+
 .navbar-brand { margin-left: 15px; }
+
 .opacitymedium { opacity: 0.5; }
 /* input[type='text'],input[type='password'] { width: 250px; } */
+
 input[name='firstName'], input[name='lastName'] { width: 200px; }
+
 #securitycode { width: 150px; }
+
+input#urlforpartner {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
 label {
-margin-bottom: .1rem;
-margin-top: .4rem;
+	margin-bottom: .1rem;
+	margin-top: .4rem;
 }
 
 input#discountcode {
