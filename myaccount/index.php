@@ -2882,28 +2882,45 @@ if (empty($welcomecid)) {
 				}
 			} else {
 				if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-					// If not switched in maintenance mode
+					// If not a redeirect instance
 					if ($delaybeforeendoftrial > 0) {
 						// Trial not yet expired
 						if ($contract->array_options['options_deployment_status'] != 'processing') {
 							//$firstline = reset($contract->lines);
-							print '
-								<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
-								<div class="note note-info">
-								<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
-								</div>
-							';
+							if ($contract->total_ht > 0) {
+								print '
+									<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
+									<div class="note note-info">
+									<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
+									</div>
+								';
+							} else {
+								print '
+									<!-- XDaysBeforeEndOfTrialForAlwaysFreeInstance -->
+									<div class="note note-info">
+									<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialForAlwaysFreeInstance", abs($delayindays), $contract->ref_customer).'</h4>
+									</div>
+								';
+							}
 						}
 					} else {
 						// Trial expired
 						$atleastonecontractwithtrialended++;
-
-						print '
-							<!-- XDaysAfterEndOfTrialPaymentModeSet -->
-							<div class="note note-info">
-							<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
-							</div>
-						';
+						if ($contract->total_ht > 0) {
+							print '
+								<!-- XDaysAfterEndOfTrialPaymentModeSet -->
+								<div class="note note-info">
+								<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
+								</div>
+							';
+						} else {
+							print '
+								<!-- XDaysAfterEndOfTrialForAlwaysFreeInstance -->
+								<div class="note note-info">
+								<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialForAlwaysFreeInstance", $contract->ref_customer, abs($delayindays)).'</h4>
+								</div>
+							';
+						}
 					}
 				}
 			}
