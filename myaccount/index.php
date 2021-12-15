@@ -2882,7 +2882,7 @@ if (empty($welcomecid)) {
 				}
 			} else {
 				if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-					// If not a redeirect instance
+					// If not a redirect instance
 					if ($delaybeforeendoftrial > 0) {
 						// Trial not yet expired
 						if ($contract->array_options['options_deployment_status'] != 'processing') {
