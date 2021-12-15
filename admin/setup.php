@@ -147,6 +147,8 @@ if ($action == 'set') {
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAXDEPLOYMENTPERIP', GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIP", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR', GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', GETPOST("SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT", 'int'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL", 'int'), 'chaine', 0, '', $conf->entity);
+
 		dolibarr_set_const($db, 'SELLYOURSAAS_VPN_PROBA_REFUSED', GETPOST("SELLYOURSAAS_VPN_PROBA_REFUSED", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_INFRA_COST', GETPOST("SELLYOURSAAS_INFRA_COST", 'int'), 'chaine', 0, '', $conf->entity);
@@ -663,6 +665,13 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT" value="'.getDolGlobalInt('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', 4).'">';
+print '</td>';
+print '<td><span class="opacitymedium">4</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPARALLEL" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 4).'">';
 print '</td>';
 print '<td><span class="opacitymedium">4</span></td>';
 print '</tr>';

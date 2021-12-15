@@ -88,6 +88,7 @@ require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/packages.class.php');
+dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
 // Re set variables specific to new environment
 $conf->global->SYSLOG_FILE_ONEPERSESSION=1;
@@ -632,9 +633,15 @@ if ($reusecontractid) {
 	// Check if some deployment are already in process and ask to wait
 	$MAXDEPLOYMENTPARALLEL = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL);
 
+	$tmp=explode('.', $sldAndSubdomain.$tldid, 2);
+	$sldAndSubdomain=$tmp[0];
+	$domainname=$tmp[1];
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+	$serverdeployement = $sellyoursaasutils->getRemoveServerDeploymentIp($domainname);
+
 	$nbofinstanceindeployment=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
-	//$select .= " WHERE deployment_ip = '".$db->escape($remoteip)."'";
+	$select .= " WHERE options_deployment_host = '".$db->escape($serverdeployement)."'";
 	$select .= " WHERE deployment_status IN ('processing')";
 	$resselect = $db->query($select);
 	if ($resselect) {
@@ -954,7 +961,6 @@ if ($reusecontractid) {
 		$sldAndSubdomain=$tmp[0];
 		$domainname=$tmp[1];
 
-		dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 		$serverdeployement = $sellyoursaasutils->getRemoveServerDeploymentIp($domainname);
 
