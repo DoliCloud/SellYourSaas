@@ -397,7 +397,7 @@ border-radius: 0 4px 4px 0;
 .register_text {
     padding: 10px 20px;
     text-align: justify;
-    opacity: 0.5;
+    opacity: 0.65;
 }
 
 .areaforresources {
