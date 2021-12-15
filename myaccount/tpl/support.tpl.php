@@ -166,16 +166,16 @@ if ($sellyoursaassupporturl) {
 
 			if ($tmpproduct->array_options['options_typesupport'] != 'none'
 				&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-				if (! $ispaid) {
+				if (! $ispaid) {	// non paid instances
 					$priority = 'low';
 					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
 				} else {
-					if ($ispaid) {
+					if ($ispaid) {	// paid with level Premium
 						if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
 							$priority = 'high';
 							$prioritylabel = '<span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span>';
 							$atleastonehigh++;
-						} else {
+						} else {	// paid with level Basic
 							$priority = 'medium';
 							$prioritylabel = '<span class="prioritymedium">'.$langs->trans("Priority").' '.$langs->trans("Medium").'</span>';
 						}
