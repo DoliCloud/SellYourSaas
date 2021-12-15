@@ -210,7 +210,7 @@ if (empty($reshook)) {
 		if (is_object($newdb)) {
 			// TODO Set definition to disable a user into the package
 			$sql="UPDATE ".$prefix_db."user set statut=1 WHERE rowid = ".GETPOST('remoteid', 'int');
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				$sql="UPDATE ".$prefix_db."glpi_user set is_active=TRUE WHERE rowid = ".GETPOST('remoteid', 'int');
 			}
 
@@ -242,7 +242,7 @@ if (empty($reshook)) {
 			$conf->global->MAIN_SECURITY_HASH_ALGO = $savalgo;
 
 			// TODO Set definition of algorithm to hash password into the package
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				if (!empty($conf->global->MAIN_SHOW_PASSWORD_INTO_LOG)) {
 					dol_syslog("new password=".$password);
 				}
@@ -251,7 +251,7 @@ if (empty($reshook)) {
 
 			// TODO Set definition to update password of a userinto the package
 			$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				$sql="UPDATE glpi_users set password='".$newdb->escape($password_crypted)."' WHERE id = ".((int) GETPOST('remoteid', 'int'));
 			}
 
@@ -302,7 +302,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		// Get user/pass of last admin user
 		$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 		// TODO Set definition to read users table into the package
-		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 			$sql="SELECT name as login, '' as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 		}
 
@@ -418,7 +418,7 @@ if (!$error && is_object($dbcustomerinstance) && $dbcustomerinstance->connected)
 	// Get user/pass of last admin user
 	$sql="SELECT login, pass, pass_crypted FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 	// TODO Set definition of algorithm to hash password into the package
-	if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+	if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 		$sql="SELECT name as login, '' as pass, password as pass_crypted FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 	}
 
@@ -568,7 +568,7 @@ function print_user_table($newdb, $object)
 		$sql .= $newdb->order($sortfield, $sortorder);
 
 		// TODO Set definition of SQL to get list of all users into the package
-		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
 			//$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, concat(gp.name, ' ', gp.interface) as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
 			$sql .= " glpi_useremails.email as email";

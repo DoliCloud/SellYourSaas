@@ -259,7 +259,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		$stringoflistofmodules='';
 
 		$fordolibarr = 1;
-		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 			$forglpi = 1;
 		}
 
@@ -267,7 +267,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		if ($fordolibarr) {
 			// TODO Put the definition of sql to get last used admin user into the package.
 			$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 			}
 
