@@ -633,8 +633,9 @@ if ($reusecontractid) {
 	$MAXDEPLOYMENTPARALLEL = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL);
 
 	$nbofinstanceindeployment=-1;
-	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
-	$select.= " AND deployment_status IN ('processing')";
+	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
+	//$select .= " WHERE deployment_ip = '".$db->escape($remoteip)."'";
+	$select .= " WHERE deployment_status IN ('processing')";
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
