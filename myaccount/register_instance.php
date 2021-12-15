@@ -641,7 +641,7 @@ if ($reusecontractid) {
 
 	$nbofinstanceindeployment=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
-	$select .= " WHERE options_deployment_host = '".$db->escape($serverdeployement)."'";
+	$select .= " WHERE deployment_host = '".$db->escape($serverdeployement)."'";
 	$select .= " AND deployment_status IN ('processing')";
 	$resselect = $db->query($select);
 	if ($resselect) {
