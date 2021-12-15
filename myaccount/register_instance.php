@@ -1520,7 +1520,33 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 
 	  <div style="text-align: center;">
 		<?php
-		$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.$conf->global->SELLYOURSAAS_LOGO_SMALL);
+		// $generateddbhostname is the name of instance we tried to deploy
+		$sellyoursaasdomain = getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+
+		// Show logo (search in order: small company logo, large company logo, theme logo, common logo)
+		$linklogo = '';
+		$constlogo = 'SELLYOURSAAS_LOGO';
+		$constlogosmall = 'SELLYOURSAAS_LOGO_SMALL';
+
+		$constlogoalt = 'SELLYOURSAAS_LOGO_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
+		$constlogosmallalt = 'SELLYOURSAAS_LOGO_SMALL_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
+
+		if (! empty($conf->global->$constlogoalt)) {
+			$constlogo=$constlogoalt;
+			$constlogosmall=$constlogosmallalt;
+		}
+
+		if (empty($linklogo) && ! empty($conf->global->$constlogosmall)) {
+			if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall)) {
+				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/'.$conf->global->$constlogosmall);
+			}
+		} elseif (empty($linklogo) && ! empty($conf->global->$constlogo)) {
+			if (is_readable($conf->mycompany->dir_output.'/logos/'.$conf->global->$constlogo)) {
+				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/'.$conf->global->$constlogo);
+			}
+		} else {
+			$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.$conf->global->SELLYOURSAAS_LOGO_SMALL);
+		}
 
 		if (GETPOST('partner', 'alpha')) {
 			$tmpthirdparty = new Societe($db);
@@ -1550,19 +1576,20 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 
 			<center>OOPS...</center>
 			<?php
-			dol_print_error_email('DEPLOY'.$generateddbhostname, '', $errormessages, 'alert alert-error');
+			dol_print_error_email('DEPLOY-'.$generateddbhostname.'-', '', $errormessages, 'alert alert-error');
+
 			/*
 			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 			$sellyoursaasemail = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
 			$sellyoursaasemailnoreply = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 
-			$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
-			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-			$constforaltemailto = 'SELLYOURSAAS_SUPERVISION_EMAIL-'.$domainname;
-			$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$domainname;
+			$sellyoursaasdomain=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$sellyoursaasdomain;
+			$constforaltemailto = 'SELLYOURSAAS_SUPERVISION_EMAIL-'.$sellyoursaasdomain;
+			$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$sellyoursaasdomain;
 			if (! empty($conf->global->$constforaltname))
 			{
-				$sellyoursaasdomain = $domainname;
+				$sellyoursaasdomain = $sellyoursaasdomain;
 				$sellyoursaasname = $conf->global->$constforaltname;
 				$sellyoursaasemail = $conf->global->$constforaltemailto;
 				$sellyoursaasemailnoreply = $conf->global->$constforaltemailnoreply;
