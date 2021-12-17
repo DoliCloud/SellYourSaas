@@ -23,6 +23,10 @@ span.pictowarning {
     color: #ff8800;
 }
 
+.start {
+	text-align: start;
+}
+
 .clearboth {
 	clear: both;
 }

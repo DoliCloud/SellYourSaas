@@ -3084,7 +3084,7 @@ sudo systemctl status apport.service
 Note: Reports are into */var/crash*
 
 
-=== Install certbot (for SSL certificates)
+=== Install certbot (for LetsEncrypt SSL certificates)
 
 [source,bash]
 ---------------
