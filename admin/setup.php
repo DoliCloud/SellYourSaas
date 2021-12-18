@@ -111,7 +111,6 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG"), 'chaine', 0, '', $conf->entity);
 
-		//dolibarr_set_const($db,"SELLYOURSAAS_ALLOW_RESELLER_PROGRAM",GETPOST("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM"),'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_COMMISSION", GETPOST("SELLYOURSAAS_DEFAULT_COMMISSION"), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_RESELLER_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_RESELLER_CATEG"), 'chaine', 0, '', $conf->entity);
 
@@ -709,7 +708,9 @@ print '</td>';
 print '<td><span class="opacitymedium">1234567890123456</span></td>';
 print '</tr>';
 
+
 // Other
+
 
 print '<tr class="liste_titre"><td>'.$langs->trans("Other").'</td>';
 print '<td>';
@@ -723,6 +724,13 @@ print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_INFRA_COST" value="'.getDolGlobalInt('SELLYOURSAAS_INFRA_COST', 0).'">';
 print '</td>';
 print '<td><span class="opacitymedium">5</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PERCENTAGE_FEE").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_PERCENTAGE_FEE" value="'.getDolGlobalInt('SELLYOURSAAS_PERCENTAGE_FEE', 0).'">';
+print '</td>';
+print '<td><span class="opacitymedium">0.02</span></td>';
 print '</tr>';
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
@@ -811,9 +819,24 @@ if ($conf->use_javascript_ajax) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
-//print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
 print '<td></td>';
+print '</tr>';
+
+// SELLYOURSAAS_DATADOG_ENABLED
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_ENABLED").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_DATADOG_ENABLED', array(), null, 0, 0, 0);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_DATADOG_ENABLED">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_DATADOG_ENABLED">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium">If a datadog agent is running on each of your server, enable this option si SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';
 print '</tr>';
 
 print '</table>';
@@ -822,6 +845,8 @@ print '</div>';
 
 print '<br>';
 
+
+// Parameters for deployment servers
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder centpercent">';

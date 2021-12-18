@@ -395,7 +395,8 @@ Resellers=Resellers
 SummaryOld=Summary (DoliCloud old)
 BecomeReseller=Apply to be a reseller
 SELLYOURSAAS_ALLOW_RESELLER_PROGRAM=Enable the "Resellers" feature
-SELLYOURSAAS_INFRA_COST=Amount for infrastructure monthly cost (used to calculate profit) 
+SELLYOURSAAS_INFRA_COST=Amount for infrastructure monthly cost (used to calculate profit)
+SELLYOURSAAS_PERCENTAGE_FEE=Percentage of fee per transaction (used to calculate profit)
 BecomeResellerDesc=You will apply to become a %s Reseller. First check into menu 'My account' that all data are correctly filled. Then please read the following page to be sure you understand what this means: <a href="%s" target="_blank">Become a %s reseller</a>
 YourTextBecomeReseller=My web site: https://_______________________ (the request will be discarded if this information is not provided)\n\nI understood the meaning of the %s reseller program and I want to be part of it, so please enable the reseller feature for my account.\nI plan to get ___ new customers per year.\nI understand that I have no work to do except promoting my personalized URL to record new customers. My initial commission rate will be %s %% (but may increase when my customer number increase).
 NbOfResellers=Number of resellers
@@ -549,6 +550,7 @@ OptinForCommercialMessagesOnMyAccount=I agree to receive messages from %s includ
 SELLYOURSAAS_GETIPINTEL_EMAIL=API Key (email) to use GetIPIntelservice (IP VPN probability)
 SELLYOURSAAS_IPQUALITY_KEY=API Key to use IPQualityScore (IP TOR usage)
 SELLYOURSAAS_EMAIL_ADDRESSES_BANNED=List of email addresses or domain names that you want to deny during registration (separated by commas)
+SELLYOURSAAS_DATADOG_ENABLED=Send Metrics to Datadog
 ErrorEMailAddressBannedForSecurityReasons=This type of email address has been banned for security reasons. Use another email address or contact us if you cannot do otherwise.
 ErrorTechnicalErrorOccurredPleaseContactUsByEmail=A technical error occurred. Please contact us by email (%s)
 RegistrationURLDesc=To get an URL to register an instance, you must have created a service in the good category and with the type "Application".
