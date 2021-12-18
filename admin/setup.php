@@ -151,6 +151,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, 'SELLYOURSAAS_VPN_PROBA_REFUSED', GETPOST("SELLYOURSAAS_VPN_PROBA_REFUSED", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_INFRA_COST', GETPOST("SELLYOURSAAS_INFRA_COST", 'int'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'SELLYOURSAAS_PERCENTAGE_FEE', GETPOST("SELLYOURSAAS_PERCENTAGE_FEE", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBHOURSBETWEENTRIES", GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES", 'none'), 'chaine', 0, 'Nb hours minium between each invoice payment try', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES", GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES", 'none'), 'chaine', 0, 'Nb days before stopping invoice payment try', $conf->entity);
 
