@@ -418,7 +418,8 @@ function is_windows()
 }
 
 /**
- * Check if shell command exists and executable
+ * Check if shell command exists and executable.
+ * This function must be used only for command line PHP. The method shell_exec should not available in web context with recommended setup.
  *
  * @param   string  $command    Name of shell command (eg zstd)
  * @return  boolean             true or false

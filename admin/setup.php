@@ -306,11 +306,9 @@ print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? 
 print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 $arrayoffunctionsdisabled = explode(',', ini_get('disable_functions'));
 if (in_array('exec', $arrayoffunctionsdisabled)) {
-	print 'Parameter <b>disable_functions</b>: must not contains: exec<br>';
-} elseif (in_array('shell_exec', $arrayoffunctionsdisabled)) {
-	print 'Parameter <b>disable_functions</b>: must not contains: shell_exec<br>';
+	print "Parameter <b>disable_functions</b>: Bad. Must not contain 'exec'<br>";
 } else {
-	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec,shell_exec<br>';
+	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
 }
 print "<br>\n";
 

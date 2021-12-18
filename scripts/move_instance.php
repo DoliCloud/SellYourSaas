@@ -403,13 +403,6 @@ echo $command."\n";
 
 $return_val = 0;
 if ($mode == 'confirm' || $mode == 'confirmredirect') {
-	//$output = shell_exec($command);
-	/*ob_start();
-	passthru($command, $return_val);
-	$content_grabbed=ob_get_contents();
-	ob_end_clean();
-	$return_val = $resultarray['result'];
-	*/
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($command, $outputfile, 0);
 

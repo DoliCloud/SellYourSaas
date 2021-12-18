@@ -349,12 +349,6 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 			echo $command."\n";
 
 			if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase') {
-
-				//$output = shell_exec($command);
-				/*ob_start();
-				passthru($command, $return_val);
-				$content_grabbed=ob_get_contents();
-				ob_end_clean();*/
 				$utils = new Utils($db);
 				$outputfile = $conf->admin->dir_temp.'/out.tmp';
 				$resultarray = $utils->executeCLI($command, $outputfile);

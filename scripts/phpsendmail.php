@@ -27,6 +27,16 @@ $fromline = '';
 $referenceline = '';
 $emailfrom = '';
 
+
+// Main
+
+if (function_exists('shell_exec')) {
+	file_put_contents($logfile, "shell_exec is available. ok\n", FILE_APPEND);
+} else {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " The method shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
+	exit(1);
+}
+
 $pointer = fopen('php://stdin', 'r');
 
 while ($line = fgets($pointer)) {
@@ -82,10 +92,10 @@ if (! $optionffound) {
 	$command .= "'-f".$emailfrom."'";
 }
 
-$ip=$_SERVER["REMOTE_ADDR"];
+$ip = empty($_SERVER["REMOTE_ADDR"]) ? '' : $_SERVER["REMOTE_ADDR"];
 if (empty($ip)) {
-		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
-	// exit(1);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
+	// exit(2);		// We do not exit, this can occurs sometime
 }
 
 // Rules
@@ -161,6 +171,7 @@ if (empty($fromline) && empty($emailfrom)) {
 file_put_contents($logfile, $command."\n", FILE_APPEND);
 
 // Execute the command
+// We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
 $resexec =  shell_exec($command);
 
 if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);
