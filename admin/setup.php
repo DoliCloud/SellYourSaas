@@ -724,7 +724,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INFRA_COST").'</td>
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_INFRA_COST" value="'.getDolGlobalString('SELLYOURSAAS_INFRA_COST', 0).'">';
 print '</td>';
-print '<td><span class="opacitymedium">5</span></td>';
+print '<td><span class="opacitymedium">50</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PERCENTAGE_FEE").'</td>';
