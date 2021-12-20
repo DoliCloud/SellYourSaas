@@ -18,6 +18,6 @@ The project submission wireframe needs to be accompanied
 by a PDF file which explain the different pages of the 
 wireframe.
 
-## 3. Wireframe export :
+## 3.Export du wireframe :
 
 Finaly, you need to create the export of the wireframe in a folder named Wireframe.
