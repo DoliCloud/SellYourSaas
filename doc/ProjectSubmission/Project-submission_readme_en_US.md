@@ -2,7 +2,7 @@
 
 The project submission need to be composed of 3 files :
 - a Wireframe pencil project
-- an Explanation PDF
+- an Explanation PDF of the Wireframe
 - a Wireframe export
 
 ## 1. Wireframe creation :
@@ -20,4 +20,4 @@ wireframe.
 
 ## 3. Wireframe export :
 
-Finnaly, you need to create the export of the wireframe in a folder named Wireframe.
+Finaly, you need to create the export of the wireframe in a folder named Wireframe.
