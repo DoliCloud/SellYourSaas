@@ -422,7 +422,10 @@ if ($nbtotalofrecords > $limit2) {
 		print $langs->trans("YouCanClainAmountWhen", price(empty($conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM) ? 100 : $conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM, 1, $langs, 1, -1, -1, $conf->currency)).'<br>';
 		$labelforcompany = $mysoc->name. ' ('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Country").': '.$langs->trans("Country".$mysoc->country_code).')';
 
-		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
+		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
+		if (empty($emailforresellerinvoice)) {
+			$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
+		}
 		if (empty($emailforresellerinvoice)) {
 			$emailforresellerinvoice = $mysoc->email;
 		}
