@@ -22,10 +22,11 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   deny /var/www/** r,
   
   /bin/dash mrix,
-  /usr/sbin/php-fpm* rix,
   /run/php{,-fpm}/php*-fpm-*.sock w,
   /run/php{,-fpm}/php*-fpm*.pid rw,
   /run/php{,-fpm}/php*-fpm*.sock rwlk,
+  /usr/sbin/php-fpm* rix,
+  owner /run/systemd/notify w,
 
   
   # PHP-FPM use this to swith profile for virtual hosts
@@ -39,6 +40,7 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
 
 
   ^sellyoursaas flags=(attach_disconnected) {
+	# warning, if you add the include <abstractions/lxc/container-base>, it will allow somme command like mysqldump command even without the rule.
     #include <abstractions/base>
     #include <abstractions/mysql>
     #include <abstractions/nameservice>
@@ -52,11 +54,10 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     network inet6,
     network unix dgram,
 
+	signal send peer=@{profile_name}//*,
+
     unix (connect),
 
-    # Note: there is already the abstractions/user-tmp that allows /tmp but for owner only
-    #allow /tmp/test.txt r,
-    
     deny /etc/group r,
     deny /etc/passwd r,
     deny /var/www/** r,
@@ -65,7 +66,10 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /dev/tty rw,
     /etc/ImageMagick*/** rw,
     /etc/clamav/clamd.conf r,
+    /etc/mysql/conf.d/mysql.cnf r,
+    /etc/mysql/conf.d/mysqldump.cnf r,
     /etc/mysql/mariadb.cnf r,
+    /etc/mysql/mariadb.conf.d/ r,
     /etc/php{,5,7}/** r,
     /etc/postfix/dynamicmaps.cf.d/ r,
     /etc/ssl/openssl.cnf rw,
@@ -73,8 +77,8 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
-    /home/dolibarr rwlk,
-    /home/dolibarr/** rw,
+    #/home/dolibarr rwlk,
+    #/home/dolibarr/** rw,
     /proc/*/attr/current rw,
     /proc/loadavg r,
     /run/clamav/** rw,
@@ -112,9 +116,15 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /{usr/,}bin/uncompress rix,
     @{PROC}/@{pid}/attr/{apparmor/,}current rw,
     owner /mnt/diskhome/home/osu*/** rw,
+	owner /run/php{,-fpm}/php*-fpm-*.sock w,
+    owner /run/php{,-fpm}/php*-fpm*.pid rw,
+    owner /run/php{,-fpm}/php*-fpm*.sock rwlk,
     owner /run/systemd/notify w,
     owner /var/spool/postfix/maildrop/ rw,
     owner /var/spool/postfix/maildrop/** rw,
+
+    # Note: there is already the abstractions/user-tmp that allows /tmp but for owner only
+    #allow /tmp/test.txt r,
 
   }
 }
