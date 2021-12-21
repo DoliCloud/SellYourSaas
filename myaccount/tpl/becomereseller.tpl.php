@@ -112,11 +112,13 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 		$texttouse = GETPOST('content', 'none');
 		// Text is in french or english (no other language for resellers)
 if (! $texttouse) {
-	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+	$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasname = getDolGlobalString($newnamekey);
+		}
 	}
 
 	$texttouse = (preg_match('/fr/i', $langs->defaultlang)?$langs->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault):$langsen->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault));

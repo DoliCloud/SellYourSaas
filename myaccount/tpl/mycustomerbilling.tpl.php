@@ -419,10 +419,18 @@ if ($nbtotalofrecords > $limit2) {
 		print '</table>';
 
 		print '<br>';
-		print $langs->trans("YouCanClainAmountWhen", price(empty($conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM) ? 100 : $conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM, 1, $langs, 1, -1, -1, $conf->currency)).'<br>';
+		print $langs->trans("YouCanClainAmountWhen", price(getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM') ? getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM') : 100, 1, $langs, 1, -1, -1, $conf->currency)).'<br>';
 		$labelforcompany = $mysoc->name. ' ('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Country").': '.$langs->trans("Country".$mysoc->country_code).')';
 
 		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
+		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
+				$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				if (getDolGlobalString($newnamekey)) {
+					$emailforresellerinvoice = getDolGlobalString($newnamekey);
+				}
+		}
+
 		if (empty($emailforresellerinvoice)) {
 			$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 		}
