@@ -82,7 +82,7 @@ do
 	chmod o-rwx /etc/apache2/$fic
 done
 
-if [[ "x$instanceserver" == "x1" ]]; then
+if [[ "x$instanceserver" != "x0" ]]; then
 	echo We are on a deployment server, so we clean log files 
 	echo "Clean web server _error logs"
 	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log 2>/dev/null`; do > $fic; done

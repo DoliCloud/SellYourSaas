@@ -57,7 +57,7 @@ if [[ "x$databaseport" == "x" ]]; then
 	databaseport="3306"
 fi
 
-if [[ "x$instanceserver" == "x1" && "x$IPSERVERDEPLOYMENT" == "x" ]]; then
+if [[ "x$instanceserver" != "x0" && "x$IPSERVERDEPLOYMENT" == "x" ]]; then
 	echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 1
@@ -591,7 +591,7 @@ if [[ "x$masterserver" == "x1" ]]; then
 fi
 
 # Clean log files
-if [[ "x$instanceserver" == "x1" ]]; then
+if [[ "x$instanceserver" != "x0" ]]; then
 	echo "***** We are on a deployment server, so we clean log files" 
 	echo "Clean web server _error logs"
 	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log 2>/dev/null`; do > $fic; done

@@ -176,7 +176,7 @@ done
 
 	
 # Loop on each target server to make backup of SOURCE2 (if no error during backup of SOURCE1)
-if [[ "x$instanceserver" == "x1" ]]; then
+if [[ "x$instanceserver" != "x0" ]]; then
 	echo
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories $DIRSOURCE2/osu to $SERVDESTI..."
 
