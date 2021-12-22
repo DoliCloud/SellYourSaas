@@ -15,15 +15,34 @@
   #become_method: sudo
   become_user: root
   tasks:
+  - name: Get public key into a variable
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php ip {{name}}"
+    register: userip
+
+  - name: Get public key into a variable
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php public_key {{name}}"
+    register: userpublickey
+
+  - name: Print return information from the previous task
+    ansible.builtin.debug:
+      var: userip
+      verbosity: 2
+
+  - name: Print return information from the previous task
+    ansible.builtin.debug:
+      var: userpublickey
+      verbosity: 2
+
   - name: Create system user
     user:
       name: '{{ name }}'
 
-  - name: Upload his public key
+  - name: Set public key of user
     authorized_key:
       user: '{{ name }}'
       state: present
-      key: '{{ key }}'
+      key: '{{ userpublickey }}'
+    when: userpublickey is defined
 
   - name: Add user to AllowUsers in SSH sellyoursaas conf
     lineinfile:
@@ -38,7 +57,7 @@
   - name: If IP was provided, add it to the conf dir
     ansible.builtin.lineinfile:
       path: "/etc/sellyoursaas.d/{{ name }}.conf"
-      line: "{{ ip }}"
+      line: "Require ip {{ userip }}"
       create: yes
     ignore_errors: true
-    when: ip is defined
+    when: userip is defined
