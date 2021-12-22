@@ -18,7 +18,7 @@
  */
 
 /**
- *      \file       sellyoursaas/scripts/deploy_sshkey.php
+ *      \file       sellyoursaas/scripts/master_deploy_sshkey.php
  *		\ingroup    sellyoursaas
  *      \brief      Script to run from master server to redeploy the public keys found into setup to the authorized_keys_support file of all customers
  *                  on deployment servers. Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).
@@ -78,14 +78,14 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print 'Redeploy the public keys found into setup to the authorized_keys_support file of all customers on deployment servers.'."\n";
+	print 'Redeploy the public keys found into the setup (SELLYOURSAAS_PUBLIC_KEY) to the authorized_keys_support file of all customers on deployment servers.'."\n";
 	print 'Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).'."\n";
 	print "This script must be ran from the master server.\n";
 	print "\n";
 	print "Usage: ".$script_file." (test|confirm) [instancefilter]\n";
 	print "\n";
-	print "- test     test deployment of public key authorized_keys_support (nothing is done)\n";
-	print "- confirm  deploy public key authorized_keys_support (it erases old verions)\n";
+	print "- test     test deployment of the public keys into authorized_keys_support (nothing is done)\n";
+	print "- confirm  deploy the public key into authorized_keys_support (it erases old verions)\n";
 	exit;
 }
 print '--- start'."\n";
@@ -114,19 +114,22 @@ $instancefiltercomplete=$instancefilter;
 $instances=array();
 $instanceserror=array();
 
+$dbtousetosearch = $db;
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($db);
 
-// Get list of instance
+
+// Get list of instance that we must deploy to.
 $sql = "SELECT c.rowid as id, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
-if ($instancefiltercomplete) $sql.= " AND c.ref_customer LIKE '".$instancefiltercomplete.".%'";
+if ($instancefiltercomplete) {
+	$sql.= " AND c.ref_customer LIKE '".$dbtousetosearch->escape($instancefiltercomplete).".%'";
+}
 $sql.= " AND ce.deployment_status IS NOT NULL";
 
-$dbtousetosearch = $db;
 
 dol_syslog($script_file, LOG_DEBUG);
 
@@ -149,7 +152,15 @@ if ($resql) {
 				$result = $object->fetch($obj->id);
 				if ($result <= 0) $found=false;
 				else {
-					if ($object->array_options['options_deployment_status'] == 'processing') { $instance_status = 'PROCESSING'; } elseif ($object->array_options['options_deployment_status'] == 'undeployed') { $instance_status = 'UNDEPLOYED'; } elseif ($object->array_options['options_deployment_status'] == 'done') { $instance_status = 'DEPLOYED'; } else { $instance_status = 'UNKNOWN'; }
+					if ($object->array_options['options_deployment_status'] == 'processing') {
+						$instance_status = 'PROCESSING';
+					} elseif ($object->array_options['options_deployment_status'] == 'undeployed') {
+						$instance_status = 'UNDEPLOYED';
+					} elseif ($object->array_options['options_deployment_status'] == 'done') {
+						$instance_status = 'DEPLOYED';
+					} else {
+						$instance_status = 'UNKNOWN';
+					}
 				}
 
 				$ispaid = sellyoursaasIsPaidInstance($object);
@@ -196,13 +207,8 @@ if ($resql) {
 print "Found ".count($instances)." instances including ".$nbofactivesusp." suspended\n";
 
 
-//print "----- Start loop for backup_instance\n";
+//print "----- Start loop on each instance\n";
 if ($action == 'test' || $action == 'confirm') {
-	if (empty($conf->global->DOLICLOUD_BACKUP_PATH)) {
-		print "Error: Setup of module SellYourSaas not complete. Path to backup not defined.\n";
-		exit -1;
-	}
-
 	// Loop on each instance
 	if (! $error) {
 		$i = 0;
@@ -214,7 +220,7 @@ if ($action == 'test' || $action == 'confirm') {
 			$return_val=0; $error=0; $errors=array();	// No error by default into each loop
 
 			// Run backup
-			print "--- Process deploy of public key of instance ".($i+1)." (id ".$key.") ".$instance.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+			print "--- Process deploy of public key to instance ".($i+1)." (id ".$key.") ".$instance.' - '.strftime("%Y%m%d-%H%M%S")."\n";
 
 			$errors=array();
 
@@ -246,8 +252,8 @@ if ($action == 'test' || $action == 'confirm') {
 
 
 // Result
-print "Nb of instances process ok: ".$nbofok."\n";
-print "Nb of instances process ko: ".$nboferrors;
+print "Nb of instances deployment ok: ".$nbofok."\n";
+print "Nb of instances deployment ko: ".$nboferrors;
 print (count($instanceserror)?", error for deploy public key on ".join(',', $instanceserror):"");
 print "\n";
 if (! $nboferrors) {

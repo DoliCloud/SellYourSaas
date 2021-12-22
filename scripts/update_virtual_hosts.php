@@ -20,7 +20,7 @@
  */
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');
-if (! defined('NOREQUIREDB')) define('NOREQUIREDB', '1');				// Do not create database handler $db
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');				// Do not create database handler $db
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -151,7 +151,7 @@ if (0 != posix_getuid()) {
 }
 
 if (empty($instanceserver) || empty($mode) || empty($option) || empty($stringtoadd)) {
-	print "Update virtual hosts of instances by adding a line if not already found.\n";
+	print "Update all virtual hosts files of instances by adding a line if not already found.\n";
 	print "Script must be ran from each deployment server with login root.\n";
 	print "\n";
 	print "Usage:   ".$script_file."  test|confirm  discardiffound|addiffound|replace  'line to add'\n";

@@ -18,7 +18,7 @@
  *
  * FEATURE
  *
- * Redeploy some instances.
+ * Redeploy some instances from command line.
  * This script is run from the master server.
  */
 
