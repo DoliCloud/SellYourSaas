@@ -40,6 +40,8 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 $version='1.0';
 $error=0;
 
+$mode = $argv[1];
+
 
 // -------------------- START OF YOUR CODE HERE --------------------
 @set_time_limit(0);							// No timeout for this script
@@ -59,13 +61,17 @@ if ($fp) {
 		}
 	}
 } else {
-	print "Failed to open /etc/sellyoursaas.conf file\n";
-	exit(-1);
+	if ($mode != 'test') {
+		print "Failed to open /etc/sellyoursaas.conf file\n";
+		exit(-1);
+	}
 }
 
 if (empty($dolibarrdir)) {
-	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
-	exit(-1);
+	if ($mode != 'test') {
+		print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+		exit(-1);
+	}
 }
 
 
@@ -94,7 +100,6 @@ include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
-
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
@@ -134,8 +139,10 @@ if ($fp) {
 		}
 	}
 } else {
-	print "Failed to open /etc/sellyoursaas.conf file\n";
-	exit;
+	if ($mode == 'test') {
+		print "Failed to open /etc/sellyoursaas.conf file\n";
+	}
+	exit(-1);
 }
 
 
@@ -159,7 +166,6 @@ if (empty($db)) $db=$dbmaster;
 //if (! $result > 0) { dol_print_error('',$user->error); exit; }
 //$user->getrights();
 
-$mode = $argv[1];
 if ($mode == 'test') {
 	print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 }
