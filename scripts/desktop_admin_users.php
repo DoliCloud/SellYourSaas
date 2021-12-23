@@ -74,9 +74,9 @@ if (! $res) die("Include of master fails");
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
-	print "This script must be ran remotely from an allowed computer.\n";
+	print "This script must be ran remotely from an allowed desktop.\n";
 	print "\n";
-	print "Usage: ".$script_file." (create|deactivate|reactivate|remove) login hostgroup target [userip=userip] [userpublickey=\"userpublickey\"]\n";
+	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) login hostfile target [userip=userip] [userpublickey=\"userpublickey\"]\n";
 	print "\n";
 	exit(-1);
 }
@@ -95,7 +95,7 @@ $now = time();
 // mandatory params
 $action = $argv[1];
 $login = $argv[2];
-$hostgroup = $argv[3];
+$hostfile = $argv[3];
 
 // optional params
 $userip = '';
@@ -135,7 +135,7 @@ $currentdir = getcwd();
 
 chdir($path.'/ansible');
 
-$command = "ansible-playbook -v -K ".$scriptyaml." -i hosts-".$hostgroup." -e 'target=".$target." login=".$login;
+$command = "ansible-playbook -v -K ".$scriptyaml." -i hosts-".$hostfile." -e 'target=".$target." login=".$login;
 if ($userip) {
 	$command .= " userip=\"".$userip."\"";
 }
