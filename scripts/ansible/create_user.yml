@@ -73,12 +73,14 @@
     lineinfile:
       path: /etc/ssh/sshd_config.d/sellyoursaas.conf
       line: "AllowUsers {{ login }}"
+    register: addlineinsshconf
 
   - name: Restart SSH service to recognize that new user
     service:
       name: ssh
       state: restarted
-
+    when: addlineinsshconf.changed
+      
   - name: If IP was provided, we delete the login-allowed-ip.conf file
     ansible.builtin.file:
       path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
