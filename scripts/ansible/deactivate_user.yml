@@ -2,8 +2,8 @@
 # Script to deactivate a system user on the servers
 #
 # To run the script:
-# ansible-playbook -K deactivate_user.yml -i hosts-xxx -e 'target=targethost name=username'
-# ansible-playbook -K deactivate_user.yml -i hosts-xxx -e 'target=targethost name=username' --limit=*.mydomain.com
+# ansible-playbook -K deactivate_user.yml -i hosts-xxx -e 'target=targethost login=username'
+# ansible-playbook -K deactivate_user.yml -i hosts-xxx -e 'target=targethost login=username' --limit=*.mydomain.com
 #
 
 - name: Create user on target system(s)
@@ -12,7 +12,7 @@
   become_user: root
   tasks:
   - name: Deactivate system user
-    command: "chage -E0 {{name}}"
+    command: "chage -E0 {{login}}"
     register: command_output
 
   - debug:

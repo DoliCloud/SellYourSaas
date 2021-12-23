@@ -2,8 +2,8 @@
 # Script to delete a user from the servers
 #
 # To run the script:
-# ansible-playbook -K remove_user.yml -i hosts-xxx -e 'target=targethost name=username'
-# ansible-playbook -K remove_user.yml -i hosts-xxx -e 'target=targethost name=username' --limit=*.mydomain.com
+# ansible-playbook -K remove_user.yml -i hosts-xxx -e 'target=targethost login=username'
+# ansible-playbook -K remove_user.yml -i hosts-xxx -e 'target=targethost login=username' --limit=*.mydomain.com
 #
 
 - name: Create user on target system(s)
@@ -13,13 +13,13 @@
   tasks:
   - name: Create system user
     user:
-      name: '{{ name }}'
+      name: '{{ login }}'
       state: absent
 
   - name: Remove user from SSH conf
     lineinfile:
       path: /etc/ssh/sshd_config.d/sellyoursaas.conf
-      line: "AllowUsers {{ name }}"
+      line: "AllowUsers {{ login }}"
       state: absent
 
   - name: Restart SSH service to flush that user from in-memory configuration
@@ -29,5 +29,5 @@
 
   - name: Remove IP file from sellyoursaas.d
     ansible.builtin.file:
-      path: "/etc/sellyoursaas.d/{{ name }}.conf"
+      path: "/etc/sellyoursaas.d/{{ login }}.conf"
       state: absent

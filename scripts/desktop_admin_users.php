@@ -33,7 +33,7 @@ $path=dirname($_SERVER['PHP_SELF']).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-	exit;
+	exit(-1);
 }
 
 // Global variables
@@ -78,7 +78,7 @@ if (! isset($argv[1])) {	// Check parameters
 	print "\n";
 	print "Usage: ".$script_file." (create|deactivate|reactivate|remove) login hostgroup target [userip=userip] [userpublickey=\"userpublickey\"]\n";
 	print "\n";
-	exit;
+	exit(-1);
 }
 print '--- start'."\n";
 //print 'Argument 1='.$argv[1]."\n";
@@ -126,6 +126,9 @@ if ($action == 'create') {
 	$scriptyaml = 'reactivate_user.yml';
 } elseif ($action == 'delete') {
 	$scriptyaml = 'delete_user.yml';
+} else {
+	echo "Error: Bad parameter action. Must be (create|deactivate|reactivate|remove).\n";
+	exit(-1);
 }
 
 $currentdir = getcwd();
