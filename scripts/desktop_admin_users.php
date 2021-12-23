@@ -76,7 +76,7 @@ if (! isset($argv[1])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed computer.\n";
 	print "\n";
-	print "Usage: ".$script_file." (create|deactivate|reactivate|remove) login hostgroup target [ip] [key]\n";
+	print "Usage: ".$script_file." (create|deactivate|reactivate|remove) login hostgroup target [userip=userip] [userpublickey=\"userpublickey\"]\n";
 	print "\n";
 	exit;
 }
@@ -92,13 +92,30 @@ print '--- start'."\n";
 
 $now = time();
 
+// mandatory params
 $action = $argv[1];
 $login = $argv[2];
 $hostgroup = $argv[3];
-$target = empty($argv[4]) ? '' : $argv[4];
-$userip = empty($argv[5]) ? '' : $argv[5];
-$userpublickey = empty($argv[6]) ? '': $argv[6];
 
+// optional params
+$userip = '';
+$userpublickey = '';
+$target = empty($argv[4]) ? '' : $argv[4];
+for($i = 4; $i <= 6; $i++) {
+	$moreparam = empty($argv[$i]) ? '' : $argv[$i];
+	//print $moreparam."\n";
+	if ($moreparam) {
+		$arrayparam = explode('=', $moreparam, 2);
+		if (count($arrayparam) == 2) {
+			if ($arrayparam[0] == 'userip') {
+				$userip = $arrayparam[1];
+			}
+			if ($arrayparam[0] == 'userpublickey') {
+				$userpublickey = $arrayparam[1];
+			}
+		}
+	}
+}
 
 $scriptyaml = '';
 if ($action == 'create') {
