@@ -25,6 +25,7 @@
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');
 if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');				// Do not create database handler $db
+if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -32,15 +33,16 @@ $path=dirname($_SERVER['PHP_SELF']).'/';
 
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
-	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-	exit;
+	fwrite(STDERR, "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n");
+	exit(-1);
 }
 
 // Global variables
 $version='1.0';
 $error=0;
 
-$mode = $argv[1];
+
+$mode = empty($argv[1]) ? '' : $argv[1];
 
 
 // -------------------- START OF YOUR CODE HERE --------------------
@@ -61,17 +63,13 @@ if ($fp) {
 		}
 	}
 } else {
-	if ($mode != 'test') {
-		print "Failed to open /etc/sellyoursaas.conf file\n";
-		exit(-1);
-	}
+	fwrite(STDERR, "Failed to open /etc/sellyoursaas.conf file\n");
+	exit(-1);
 }
 
 if (empty($dolibarrdir)) {
-	if ($mode != 'test') {
-		print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
-		exit(-1);
-	}
+	fwrite(STDERR, "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n");
+	exit(-1);
 }
 
 
@@ -139,9 +137,7 @@ if ($fp) {
 		}
 	}
 } else {
-	if ($mode == 'test') {
-		print "Failed to open /etc/sellyoursaas.conf file\n";
-	}
+	fwrite(STDERR, "Failed to open /etc/sellyoursaas.conf file\n");
 	exit(-1);
 }
 
@@ -199,7 +195,6 @@ if ($resql) {
 		$obj = $dbmaster->fetch_object($resql);
 		if ($obj) {
 			if ($mode == 'test') {
-				var_dump($obj);
 				print 'Found ip='.$obj->ippublicmain." key=".$obj->rsapublicmain."\n";
 			} else {
 				if ($mode == 'ip') {
@@ -211,7 +206,7 @@ if ($resql) {
 			}
 		}
 	} else {
-		print 'Bad number of record found when searching the login'."\n";
+		fwrite(STDERR, 'Bad number of record found when searching the login'."\n");
 		exit(1);
 	}
 } else {

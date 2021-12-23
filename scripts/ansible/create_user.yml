@@ -2,11 +2,11 @@
 # Script to create a system user on servers
 #
 # To run the script:
-# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost name=user key="key"'
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user key="key"'
 # notice the double quotes around the key so spaces are interpreted as part of it
-# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost ip=www.xxx.yyy.zzz name=user key="key"'
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost ip=www.xxx.yyy.zzz login=user key="key"'
 # you can specify an IP for that user with the syntax above
-# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost name=user key="key"' --limit=*.mydomain.com
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userpublickey="publickey"' --limit=*.mydomain.com
 #
 
 - name: Create user on target system(s)
@@ -15,31 +15,54 @@
   #become_method: sudo
   become_user: root
   tasks:
-  - name: Get public key into a variable
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php ip {{name}}"
-    register: userip
+  - name: Check if SellYourSaas is installed on this sevrer
+    stat: 
+      path: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php
+    register: sellyoursaas_installed_rules
 
   - name: Get public key into a variable
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php public_key {{name}}"
-    register: userpublickey
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php ip {{login}}"
+    register: command_for_userip
+    when: sellyoursaas_installed_rules.stat.exists == True
+
+  - name: Get public key into a variable
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php public_key {{login}}"
+    register: command_for_userpublickey
+    when: 
+      - sellyoursaas_installed_rules.stat.exists == True
+      - userpublickey is not defined
+
+  - name: Set var userip if not defined
+    set_fact:
+      userip: "{{ command_for_userip.stdout }}"
+    when: 
+      - sellyoursaas_installed_rules.stat.exists == True
+      - userip is not defined
+
+  - name: Set var userpublickey if not defined
+    set_fact:
+      userpublickey: "{{ command_for_userpublickey.stdout }}"
+    when: 
+      - sellyoursaas_installed_rules.stat.exists == True
+      - userpublickey is not defined
 
   - name: Print return information from the previous task
     ansible.builtin.debug:
       var: userip
-      verbosity: 2
+      verbosity: 1
 
   - name: Print return information from the previous task
     ansible.builtin.debug:
       var: userpublickey
-      verbosity: 2
+      verbosity: 1
 
   - name: Create system user
     user:
-      name: '{{ name }}'
+      name: '{{ login }}'
 
   - name: Set public key of user
     authorized_key:
-      user: '{{ name }}'
+      user: '{{ login }}'
       state: present
       key: '{{ userpublickey }}'
     when: userpublickey is defined
@@ -47,7 +70,7 @@
   - name: Add user to AllowUsers in SSH sellyoursaas conf
     lineinfile:
       path: /etc/ssh/sshd_config.d/sellyoursaas.conf
-      line: "AllowUsers {{ name }}"
+      line: "AllowUsers {{ login }}"
 
   - name: Restart SSH service to recognize that new user
     service:
@@ -56,7 +79,7 @@
 
   - name: If IP was provided, add it to the conf dir
     ansible.builtin.lineinfile:
-      path: "/etc/sellyoursaas.d/{{ name }}.conf"
+      path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
       line: "Require ip {{ userip }}"
       create: yes
     ignore_errors: true
