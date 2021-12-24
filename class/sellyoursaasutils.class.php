@@ -727,12 +727,14 @@ class SellYourSaasUtils
 		$this->db->begin();
 
 		$sql = 'SELECT f.rowid, se.fk_object as socid, sr.rowid as companypaymentmodeid';
-		$sql.= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
-		$sql.= ' WHERE sr.fk_soc = f.fk_soc';
-		$sql.= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
-		$sql.= " AND sr.status = ".((int) $servicestatus);
-		$sql.= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
-		$sql.= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";		// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
+		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
+		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
+		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
+		$sql .= " AND sr.status = ".((int) $servicestatus);
+		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
+		$sql .= " AND type = 'card'";	// This exclude payment mode of type IBAN for example (only card is used for doTakePaymentStripe)
+		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
+		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
 		//print $sql;exit;
 
 		$resql = $this->db->query($sql);
@@ -1287,7 +1289,9 @@ class SellYourSaasUtils
 							} else {
 								$error++;
 								$errorforinvoice++;
-								dol_syslog("No card or payment method found for this stripe customer ".$customer->id, LOG_WARNING);
+
+								dol_syslog("BADPAYMENTMODE No card or payment method found for this stripe customer ".$customer->id, LOG_WARNING);
+
 								$this->errors[]='Failed to get card | payment method for stripe customer = '.$customer->id;
 
 								$labeltouse = 'InvoicePaymentFailure';
