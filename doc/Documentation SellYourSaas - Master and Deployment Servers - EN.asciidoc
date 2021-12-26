@@ -1718,9 +1718,9 @@ echo $?
 
 === Test and setup of ClamAV
 
-The processes *freshclam* and *clamd* should be running. Test them.
+The processes *freshclam* and *clamd* should be running. If not, launch them manually (for example */etc/init.d/clamav-freshclam status* or */etc/init.d/clamav-daemon status* to launch them).
 
-To test clamav tool, create a file */tmp/testvirus* with content
+Test them: To test clamav tool, create a file */tmp/testvirus* with content
 
 [source,bash]
 ---------------
