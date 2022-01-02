@@ -168,7 +168,7 @@ fi
 #ufw allow from 127.0.0.0/8 to any port 3306 proto tcp
 #ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
 
-echo Allow In access to common port (http and dns) to everybody
+echo "Allow In access to common port (http and dns) to everybody"
 # HTTP
 ufw allow in 80/tcp
 ufw allow in 443/tcp
