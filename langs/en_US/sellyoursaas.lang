@@ -206,6 +206,7 @@ MyInstances=My applications & options
 InstancesOfMyCustomers=Instances & options of my customers
 BillingDesc=Review your billing situation, update your payment method
 CancellationForms=Cancellation forms
+ListOfCancellationForms=List of cancellation forms
 NewCancellationForm=New cancellation form
 SoonAvailable=Soon available
 SorryFeatureNotAvailableInYourPlan=Sorry, this feature is not available in your plan. Please contact us.
