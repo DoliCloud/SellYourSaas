@@ -334,7 +334,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					  <div class="btn-sm">
 					  <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
 						<?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
-					  <a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
+					  <a href="/" class="btn blue btn-sm btnalreadyanaccount margintop valignmiddle"><?php echo $langs->trans("LoginAction"); ?></a>
 					  </div>
 						<?php if (! empty($homepage)) { ?>
 					  <div class="btn-sm home-page-url">
@@ -365,7 +365,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					<div class="btn-sm">
 					<span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
 						<?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
-					<a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
+					<a href="/" class="btn blue btn-sm btnalreadyanaccount margintop valignmiddle"><?php echo $langs->trans("LoginAction"); ?></a>
 					</div>
 						<?php if (! empty($homepage)) { ?>
 					<div class="btn-sm home-page-url">
