@@ -598,6 +598,16 @@ Add a swap on */swap/swap.img* if the disk is not SSD, otherwise on the non SSD 
 https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory-swap-file-on-a-vps#4
 
 
+=== Addition of a filesystem for logs (optional)
+
+Add a new disk of 500 Mb and mount it on */mnt/disklog*
+
+Then modify the file */etc/apache2/envvars* to set *export APACHE_LOG_DIR=/mnt/disklog/*
+Delete the dir */home/admin/logs* and replace it with a symbolic link to */mnt/disklog*
+
+Restart Apache. All apache log files of Apache are now stored into */mnt/disklog*.
+
+
 === Creation of working directories
 
 On the *Master* server and the *Deployment* servers, create the directories to store backups and archives.
@@ -4871,6 +4881,12 @@ scw instance server create type=DEV1-S zone=fr-par-1|nl-ams-1 image=ubuntu_focal
     tags.0=build_method=from-qcow2 \
     tags.1=disk_img_url=http://51.15.201.97/focal-server-cloudimg-amd64-disk-kvm.img \
 
+
+=== Command to make a bind filesystem
+
+bindfs /tmp /home/mylogin/mydir
+
+fusermount -u /home/mylogin/mydir
 
 
 === TroubleShooting
