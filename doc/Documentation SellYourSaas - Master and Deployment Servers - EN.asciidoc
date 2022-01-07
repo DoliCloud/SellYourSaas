@@ -1881,23 +1881,36 @@ cpulimit launched with script  cpulimit --exe=apache2 --limit=20
 See script *cpulimit_daemon* to put into */etc/init.d*.
 
 
+=== Adding disk quotas per users (optionnal)
+
+Note: Some global quotas can be set with the *ulimit* tool in */etc/security/limits.conf* (see next chapter on ulimit)
+
 
 === Setup of /etc/security/limits.conf (optional)
 
-* Edit the file */etc/security/limits.conf* for example to increase the max number of files open by a process
+* Create a file */etc/security/limits.d/sellyoursaas.conf* (or edit file */etc/security/limits.conf* if ot does not work) for example to increase the max number of files open by a process and set the max filesize for users with ID > 1000
 
 [source,conf]
 ---------------
 mysql           soft     nofile           4096
 mysql           hard     nofile           32768
+
+# Set max size of block (4096 B) for files
+1000:           soft     fsize            1000000
+1000:           hard     fsize            1000000
 ---------------
 
-To see limits of OS:
+Note: To get/see the current limits of OS and connected user:
 
 [source,bash]
 ---------------
 ulimit -a
 ---------------
+
+Note:
+On peut vérifier qu'il y a bien la ligne *session required pam_limits.so* dans les fichiers /etc/pam.d/system-auth ou /etc/pam.d/password-auth et/ou /etc/pam.d/sudo afin d’être certain de toujours fixer les seuils définis par l’administrateur lors de chaque connexion d’utilisateur au système. Si les limites définies dans ce fichier ne sont pas prises en compte le premier réflexe consiste à s’assurer que le module pam_limits.so est bien activé dans les fichiers de configuration de PAM.
+REMARQUE : sur certaines distributions les fichiers de configuration de PAM peuvent différer. On peut rencontrer la définition des limites dans les fichiers /etc/pam.d/common-session ou /etc/pam.d/login. Mais, le principe reste le même : s’assurer qu’à chaque connexion utilisateur les seuils des ressources du système sont bien appliqués.
+
 
 
 === Setup of Postfix
