@@ -608,6 +608,41 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 Relaunch fail2ban and check errors into */var/log/fail2ban.log*
 
 
+
+=== Test and setup of ClamAV
+
+The processes *freshclam* and *clamd* should be running. If not, launch them manually (for example */etc/init.d/clamav-freshclam start* or */etc/init.d/clamav-daemon start* to launch them).
+
+Test them: To test clamav tool, create a file */tmp/testvirus* with content
+
+[source,bash]
+---------------
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+---------------
+
+And to test *clamav* command line and daemon:
+
+[source,bash]
+---------------
+clamdscan /tmp/testvirus --fdpass
+---------------
+
+Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
+
+[source,bash]
+---------------
+aa-disable usr.sbin.clamd
+ls -alrt /etc/apparmor.d/disable
+service apparmor reload
+service apparmor status
+service apache2 stop
+service apache2 start
+---------------
+
+You should see into the status of apparmor a line saying that Profile *usr/sbin/clamd* is disabled.
+Note: It seems we must also restart apache to have this effective inside apache.
+
+
 === Installation of Afick
 
 * Install afick.pl tool from the debian package found on afick web site.
