@@ -595,3 +595,5 @@ EmailTemplateSuspendedTrialHelp=By default, the email template with code "Custom
 WeWillContactYouForMandaSepate=We will contact you to provide the SEPA Mandate to sign
 BankSaved=Your Bank Account Number to use for payment has been recorded
 ABankWithThisLabelAlreadyExists=A bank with this label already exists. Try to use a different label.
+CommentOnQty=Comments on quantites
+CommentOnQtyDesc=This field is filled during a refresh of quantities of a contract and linked recurring invoices, to store the details of the count.

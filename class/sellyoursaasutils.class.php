@@ -2872,7 +2872,8 @@ class SellYourSaasUtils
 				dol_syslog("Try to ssh2_connect to ".$server." with timeout of ".$TIMEOUTSSH." instead of ".$originalConnectionTimeout);
 
 				$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-				$connection = @ssh2_connect($server, $server_port);
+
+				$connection = ssh2_connect($server, $server_port);
 
 				ini_set('default_socket_timeout', $originalConnectionTimeout);
 
@@ -3043,8 +3044,6 @@ class SellYourSaasUtils
 		}
 
 		$ispaidinstance = 0;
-
-		$resultstringforallrefreshcalculation = '';	// Usedwhen $remoteaction == 'refresh' or 'refreshmetrics'
 
 		// Loop on each line of contract ($tmpobject is a ContractLine): It set or not $doremoteaction if an action must be done for the line,
 		// then do it by calling remote agent, or making action for qty calculation (ssh2 connect, sql execution, ...)
@@ -3490,10 +3489,11 @@ class SellYourSaasUtils
 						'__CONTRACTREF__'=>$contract->ref,
 					);
 
-
-					// Now execute the formula to set $newqty
+					// Now execute the formula to set $newqty or $newcommentonqty
 					$currentqty = $tmpobject->qty;
+					$currentcommentonqty = $contract->array_options['options_commentonqty'];
 					$newqty = null;	// If $newqty remains null, we won't change/record value.
+					$newcommentonqty = '';
 
 					$tmparray = explode(':', $producttmp->array_options['options_resource_formula'], 2);
 					if ($tmparray[0] === 'SQL') {
@@ -3533,22 +3533,25 @@ class SellYourSaasUtils
 							$error++;
 							$errorfordb++;
 						} else {
+							$sqlformula = trim($sqlformula);
+
 							dol_syslog("Execute sql=".$sqlformula);
 
 							$resql = $dbinstance->query($sqlformula);
 							if ($resql) {
-								// If request is a simple count
 								if (preg_match('/^select count/i', $sqlformula)) {
+									// If request is a simple SELECT COUNT
 									$objsql = $dbinstance->fetch_object($resql);
 									if ($objsql) {
 										$newqty = $objsql->nb;
-										$resultstringforallrefreshcalculation .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+										$newcommentonqty .= '';
 									} else {
 										$error++;
 										$this->error = 'SQL to get resource return nothing';
 										$this->errors[] = 'SQL to get resource return nothing';
 									}
 								} else {
+									// If request is a SELECT nb, fieldlogin as comment
 									$num = $dbinstance->num_rows($resql);
 									if ($num > 0) {
 										$itmp = 0;
@@ -3567,7 +3570,8 @@ class SellYourSaasUtils
 											}
 											$itmp++;
 										}
-										$resultstringforallrefreshcalculation .= 'Note: '.join(',', $arrayofcomment)."\n";
+										$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+										$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
 									} else {
 										$error++;
 										$this->error = 'SQL to get resource return nothing';
@@ -3659,18 +3663,23 @@ class SellYourSaasUtils
 					}
 
 					if (! $error && ! is_null($newqty)) {
-						if ($newqty != $currentqty) {
+						if (($newqty != $currentqty) || ($newcommentonqty != $currentcommentonqty)) {
 							// tmpobject is contract line
 							$tmpobject->qty = $newqty;
+
+							// So update of contract line and template invoice lines qty are in same transaction.
+							$this->db->begin();
+
 							$result = $tmpobject->update($user);
+
 							if ($result <= 0) {
 								$error++;
 								$this->error = 'Failed to update the count for product '.$producttmp->ref;
 							} else {
 								$forceaddevent = 'Qty line '.$tmpobject->id.' updated '.$currentqty.' -> '.$newqty;
 
-								// Test if there is template invoice linkded
-								$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
+								// Test if there is template invoice linked
+								$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 'facturerec');
 
 								if (is_array($contract->linkedObjects['facturerec']) && count($contract->linkedObjects['facturerec']) > 0) {
 									//dol_sort_array($contract->linkedObjects['facture'], 'date');
@@ -3679,8 +3688,9 @@ class SellYourSaasUtils
 									foreach ($contract->linkedObjects['facturerec'] as $invoice) {
 										//if ($invoice->suspended == FactureRec::STATUS_SUSPENDED) continue;	// Draft invoice are not invoice not paid
 										$sometemplateinvoice++;
-										$lasttemplateinvoice=$invoice;
+										$lasttemplateinvoice = $invoice;
 									}
+
 									if ($sometemplateinvoice > 1) {
 										$error++;
 										$this->error = 'Contract '.$contract->ref.' has too many template invoice ('.$sometemplateinvoice.') so we dont know which one to update';
@@ -3688,8 +3698,10 @@ class SellYourSaasUtils
 										// We search into template invoice ($lasttemplateinvoice) the line with same product id that the one processed in contract
 										$sqlsearchline = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'facturedet_rec WHERE fk_facture = '.$lasttemplateinvoice->id.' AND fk_product = '.$tmpobject->fk_product;
 										$resqlsearchline = $this->db->query($sqlsearchline);
+
 										if ($resqlsearchline) {
 											$num_search_line = $this->db->num_rows($resqlsearchline);
+
 											if ($num_search_line > 1) {
 												$error++;
 												$this->error = 'Contract '.$contract->ref.' has a template invoice with id ('.$lasttemplateinvoice->id.') that has several lines for product id '.$tmpobject->fk_product.' so we don t know on which line to update qty';
@@ -3713,10 +3725,20 @@ class SellYourSaasUtils
 													$result = $invoicerecline->update($user);
 
 													$result = $lasttemplateinvoice->update_price();
+
+													if ($lasttemplateinvoice->array_options['options_commentonqty'] != $newcommentonqty) {
+														$lasttemplateinvoice->array_options['options_commentonqty'] = $newcommentonqty;
+
+														$result = $lasttemplateinvoice->update($user);
+														if ($result < 0) {
+															$error++;
+															$this->error = $lasttemplateinvoice->error;
+														}
+													}
 												} else {				// Template has no line corresponding to this contract line
-													//$error++;
-													//$this->error = 'Contract '.$contract->ref.' has a template invoice that misses a product line found into contract so we are not able to update qty into contract.';
-													dol_syslog("Warning, contract ".$contract->ref." has a template invoice that misses a product line found into contract so we are not able to update qty into contract. Try to avoid this case.", LOG_WARNING);
+													//$error++;			// We don't want to rollback and report error in this case (this may be done on purpose).
+													//$this->error = 'Contract '.$contract->ref.' has a template invoice that misses a product line found into contract so we are not able to update qty into template invoice.';
+													dol_syslog("Warning, contract ".$contract->ref." has a template invoice that misses a product line found into contract so we are not able to update qty into template invoice. Try to avoid this case.", LOG_WARNING);
 												}
 											}
 										} else {
@@ -3726,6 +3748,13 @@ class SellYourSaasUtils
 									}
 								}
 							}
+
+							// So update of contract line and template invoice lines qty are in same transaction.
+							if ($error) {
+								$this->db->rollback();
+							} else {
+								$this->db->commit();
+							}
 						} else {
 							dol_syslog("No change on qty. Still ".$currentqty);
 						}
@@ -3734,7 +3763,9 @@ class SellYourSaasUtils
 					}
 
 					if (! $error) {
-						$contract->array_options['options_latestresupdate_date']=dol_now();
+						$contract->array_options['options_latestresupdate_date'] = dol_now();
+						$contract->array_options['options_commentonqty'] = $newcommentonqty;
+
 						$result = $contract->update($user);
 						if ($result <= 0) {
 							$error++;
