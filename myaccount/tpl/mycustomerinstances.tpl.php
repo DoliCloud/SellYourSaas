@@ -785,7 +785,11 @@ if (count($listofcontractidreseller) == 0) {
 			$reg = array();
 			$tmpdomains = array();
 			if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-				$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+				$tmpnewval = explode(':', $newval);
+				if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed') {
+					continue;
+				}
+				$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
 				$domainqualified = false;
 				$tmpdomains = explode('+', $reg[1]);
 				foreach($tmpdomains as $tmpdomain) {
