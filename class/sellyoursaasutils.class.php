@@ -3102,8 +3102,12 @@ class SellYourSaasUtils
 					if (empty($this->error)) {
 						$this->error = 'Failed to get ip for deployment server';
 					}
-					dol_syslog($this->error.' domainname='.$domainname.' contract='.$contract->array_options['options_deployment_host'], LOG_ERR);
+					dol_syslog($this->error.' domainname='.$domainname.' contract->array_options["options_deployment_host"]='.$contract->array_options['options_deployment_host'], LOG_ERR);
 					$error++;
+					break;
+				}
+				if ($serverdeployment === 'none') {
+					dol_syslog("Deployment server is set to 'none' so remote action are canceled without errors", LOG_WARNING);
 					break;
 				}
 
