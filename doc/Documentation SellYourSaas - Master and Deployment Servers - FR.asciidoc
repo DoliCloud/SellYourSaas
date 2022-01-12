@@ -4852,12 +4852,8 @@ Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys"
 
 Pour activer les statistiques Google Analytics, mettre le tag dans la configuration du module sellyoursaas.
 
-Pour activer les statistiques DataDog, renseigner les constantes :
+Pour activer les statistiques DataDog, activer l'option dans la configuration du module SellYourSaas.
  
-  - SELLYOURSAAS_DATADOG_ENABLED à 1
-  - SELLYOURSAAS_DATADOG_APIKEY avec la clé API de DataDog
-  - SELLYOURSAAS_DATADOG_APPKEY avec la clé APP de DataDog
-
 Voici le détail des évennement ou URL qui peuvent etre trackées:
 
 * Page affichée lorsqu'on affiche le formulaire d'inscription

@@ -158,9 +158,13 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_NBHOURSBETWEENTRIES", GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES", 'none'), 'chaine', 0, 'Nb hours minium between each invoice payment try', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES", GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES", 'none'), 'chaine', 0, 'Nb days before stopping invoice payment try', $conf->entity);
 
-		dolibarr_set_const($db, "SELLYOURSAAS_ANONYMOUSUSER", GETPOST("SELLYOURSAAS_ANONYMOUSUSER", 'none'), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_LOGIN_FOR_SUPPORT", GETPOST("SELLYOURSAAS_LOGIN_FOR_SUPPORT", 'none'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_ANONYMOUSUSER", GETPOST("SELLYOURSAAS_ANONYMOUSUSER", 'alpha'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_LOGIN_FOR_SUPPORT", GETPOST("SELLYOURSAAS_LOGIN_FOR_SUPPORT", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_PASSWORD_FOR_SUPPORT", GETPOST("SELLYOURSAAS_PASSWORD_FOR_SUPPORT", 'none'), 'chaine', 0, '', $conf->entity);
+
+		dolibarr_set_const($db, "SELLYOURSAAS_DATADOG_ENABLED", GETPOST("SELLYOURSAAS_DATADOG_ENABLED", 'int'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_DATADOG_APIKEY", GETPOST("SELLYOURSAAS_DATADOG_APIKEY", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_DATADOG_APPKEY", GETPOST("SELLYOURSAAS_DATADOG_APPKEY", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		$dir=GETPOST("DOLICLOUD_INSTANCES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
@@ -845,17 +849,24 @@ print '</tr>';
 // SELLYOURSAAS_DATADOG_ENABLED
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_ENABLED").'</td>';
 print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_DATADOG_ENABLED', array(), null, 0, 0, 0);
-} else {
-	if (empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_DATADOG_ENABLED">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_DATADOG_ENABLED">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
+$array = array('0' => 'No', '1' => 'Yes', '2' => 'Yes with detail of remote action errors');
+print $form->selectarray('SELLYOURSAAS_DATADOG_ENABLED', $array, $conf->global->SELLYOURSAAS_DATADOG_ENABLED, 0);
 print '</td>';
 print '<td><span class="opacitymedium">If a datadog agent is running on each of your server, enable this option si SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_APPKEY").'</td>';
+print '<td>';
+print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_DATADOG_APPKEY" value="'.getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY', '').'">';
+print '</td>';
+print '<td><span class="opacitymedium">MyApp</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_APIKEY").'</td>';
+print '<td>';
+print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_DATADOG_APIKEY" value="'.getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY', '').'">';
+print '</td>';
+print '<td><span class="opacitymedium">45fdf4sds54fdf</span></td>';
 print '</tr>';
 
 print '</table>';

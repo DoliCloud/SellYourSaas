@@ -4808,11 +4808,7 @@ Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
 
-To activate DataDog statistics, fill in the constants:
- 
-  - SELLYOURSAAS_DATADOG_ENABLED à 1
-  - SELLYOURSAAS_DATADOG_APIKEY with the Datadog API key
-  - SELLYOURSAAS_DATADOG_APIKEY with the Datadog APP key
+To activate DataDog statistics, set the option into the module SellYourSaas:
 
 This is a detail of events or URL that can be tracked:
 
@@ -4864,9 +4860,6 @@ You can force different values for some setup parameters to overwrite the defaul
 
 To define account to use getipintel API for VPN probability.
 * SELLYOURSAAS_GETIPINTEL_EMAIL = contact+checkcustomer@nltechno.com
-
-To enable native Datadog reporting (datadog-agent must just be installed)
-* SELLYOURSAAS_DATADOG_ENABLED = 1
 
 If you use an external db server (same value of "databasehost" and "databaseport" in sellyoursaas.conf)
 * SELLYOURSAAS_FORCE_DATABASE_HOST = ip or host name of your external mysql server
