@@ -597,3 +597,4 @@ BankSaved=Your Bank Account Number to use for payment has been recorded
 ABankWithThisLabelAlreadyExists=A bank with this label already exists. Try to use a different label.
 CommentOnQty=Comments on quantites
 CommentOnQtyDesc=This field is filled during a refresh of quantities of a contract and linked recurring invoices, to store the details of the count.
+DeploymentHostDesc=The ip of the server the instance was deployed to. You can set this value to "none" to say there is no more existing deployment server for this instance (for example if server was destroyed)
