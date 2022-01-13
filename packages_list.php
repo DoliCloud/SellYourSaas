@@ -60,8 +60,8 @@ $id			= GETPOST('id', 'int');
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int')?GETPOST('limit', 'int'):$conf->liste_limit;
-$sortfield = GETPOST('sortfield', 'alpha');
-$sortorder = GETPOST('sortorder', 'alpha');
+$sortfield = GETPOST('sortfield', 'aZ09comma');
+$sortorder = GETPOST('sortorder', 'aZ09comma');
 $page = GETPOST('page', 'int');
 if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
 $offset = $limit * $page;
@@ -325,13 +325,13 @@ if (is_numeric($nbtotalofrecords) && ($limit > $nbtotalofrecords || empty($limit
 	if ($limit) {
 		$sql .= $db->plimit($limit + 1, $offset);
 	}
-	
+
 	$resql = $db->query($sql);
 	if (!$resql) {
 		dol_print_error($db);
 		exit;
 	}
-	
+
 	$num = $db->num_rows($resql);
 }
 
@@ -533,10 +533,10 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 	if (empty($obj)) {
 		break; // Should not happen
 	}
-	
+
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
-	
+
 	// Show here line of result
 	print '<tr class="oddeven">';
 	foreach ($object->fields as $key => $val) {
@@ -546,18 +546,18 @@ while ($i < ($limit ? min($num, $limit) : $num)) {
 		} elseif ($key == 'status') {
 			$cssforfield .= ($cssforfield ? ' ' : '').'center';
 		}
-		
+
 		if (in_array($val['type'], array('timestamp'))) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
 		} elseif ($key == 'ref') {
 			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
 		}
-		
+
 		if (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('rowid', 'status')) && empty($val['arrayofkeyval'])) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'right';
 		}
 		//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
-		
+
 		if (!empty($arrayfields['t.'.$key]['checked'])) {
 			print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').'>';
 			if ($key == 'status') {
@@ -649,7 +649,7 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 	if ($massaction == 'builddoc' || $action == 'remove_file' || $show_files) {
 		$hidegeneratedfilelistifempty = 0;
 	}
-	
+
 	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 	$formfile = new FormFile($db);
 
@@ -660,7 +660,7 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 	$filedir=$diroutputmassaction;
 	$genallowed = $permissiontoread;
 	$delallowed = $permissiontoadd;
-	
+
 	print $formfile->showdocuments('massfilesarea_sellyoursaas', '', $filedir, $urlsource, 0, $delallowed, '', 1, 1, 0, 48, 1, $param, $title, '', '', '', null, $hidegeneratedfilelistifempty);
 }
 
