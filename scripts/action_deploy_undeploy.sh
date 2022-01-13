@@ -38,11 +38,15 @@ if [[ "x$templatesdir" != "x" ]]; then
 	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
+	export fpmpoolfile="$templatesdir/osuxxx.template"
 else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+	export fpmpoolfile="$scriptdir/templates/osuxxx.template"
 fi
+
+
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
@@ -1032,7 +1036,52 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online 
 		ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
-	fi	
+	fi
+	
+	
+	# Deploy also the php fpm pool file
+	export phpfpmconf="/etc/apache2/sellyoursaas-fpm-pool/$fqn.conf"
+	if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm conf $phpfpmconf from $fpmpoolfile"
+		if [[ -s $phpfpmconf ]]
+		then
+			echo "Apache conf $phpfpmconf already exists, we delete it since it may be a file from an old instance with same name"
+			rm -f $phpfpmconf
+		fi
+	
+		echo "cat $fpmpoolfile | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+				  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
+				  sed -e 's/__webAppLogName__/$instancename/g' | \
+	              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+	              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+	              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+				  sed -e 's/__osUsername__/$osusername/g' | \
+				  sed -e 's/__osGroupname__/$osusername/g' | \
+				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
+				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
+				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
+				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmconf"
+		cat $fpmpoolfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+				  sed -e "s/__webAppLogName__/$instancename/g" | \
+	              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+	              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+	              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+				  sed -e "s/__osUsername__/$osusername/g" | \
+				  sed -e "s/__osGroupname__/$osusername/g" | \
+				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
+				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
+				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
+				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__webAppPath__;$instancedir;g" > $phpfpmconf
+	fi
 	
 	
 	echo /usr/sbin/apache2ctl configtest
@@ -1075,14 +1124,19 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo Disable conf with a2dissite $fqn.custom.conf
 		#a2dissite $fqn.conf
 		rm /etc/apache2/sellyoursaas-online/$fqn.custom.conf
-		
+
+		echo Delete php fpm file $fqn.conf
+		if [ -f /etc/apache2/sellyoursaas-fpm-pool/$fqn.conf ]; then
+			rm /etc/apache2/sellyoursaas-fpm-pool/$fqn.conf
+		fi
+
 		/usr/sbin/apache2ctl configtest
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running apache2ctl configtest 
 			echo "Failed to undeploy or undeployall instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
 			exit 21
-		fi 
-		
+		fi
+
 		if [[ "x$apachereload" != "xnoapachereload" ]]; then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload."
 			service apache2 reload

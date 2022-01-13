@@ -35,6 +35,8 @@ export archivedirpaid=`grep '^archivedirpaid=' /etc/sellyoursaas.conf | cut -d '
 export archivedirbind="/etc/bind/archives"
 export archivedircron="/var/spool/cron/crontabs.disabled"
 
+
+
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
    exit 100
@@ -207,6 +209,22 @@ do
 		echo "Site $basfic is enabled, we keep it"
 	fi
 done
+
+echo "***** Clean available fpm pool that are not enabled hosts (safe)"
+if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
+	for fic in `ls /etc/apache2/sellyoursaas-fpm-pool/*.*.*.*.conf /etc/apache2/sellyoursaas-fpm-pool/*.home.lan 2>/dev/null`
+	do
+		basfic=`basename $fic` 
+		if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
+			echo Remove file with rm /etc/apache2/sellyoursaas-available/$basfic
+			if [[ $testorconfirm == "confirm" ]]; then
+				rm /etc/apache2/sellyoursaas-available/$basfic
+			fi
+		else
+			echo "Site $basfic is enabled, we keep it"
+		fi
+	done
+fi
 
 
 echo "***** Get list of databases of all instances and save it into /tmp/instancefound-dbinsellyoursaas"
