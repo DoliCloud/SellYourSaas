@@ -1004,8 +1004,9 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			foreach ($arrayofplansfull as $key => $plan) {
 				if (!empty($plan['restrict_domains'])) {
 					$restrict_domains = explode(",", $plan['restrict_domains']);
+					print "/* Code if we select pid = ".$key." so plan = ".$plan['label']." with restrict_domains = ".$plan['restrict_domains']." */\n";
 					foreach($restrict_domains as $domain) {
-						print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
+						print " if (pid == ".$key.") { disable_combo_if_not('".trim($domain)."'); }\n";
 					}
 				} else {
 					print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
