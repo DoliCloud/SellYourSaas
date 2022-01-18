@@ -159,7 +159,7 @@ if (count($listofcontractidreseller) == 0) {
 		 */
 
 		print '
-                    <!-- Instance of customer -->
+                    <!-- Card for instance of customer -->
     			    <div class="row" id="contractid'.$contract->id.'" data-contractref="'.$contract->ref.'">
     			      <div class="col-md-12">
 
@@ -185,12 +185,13 @@ if (count($listofcontractidreseller) == 0) {
 		elseif ($statuslabel == 'done') print $langs->trans("Alive");
 		elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
 		elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");
+		elseif ($statuslabel == 'unreachable') print $langs->trans("Unreachable").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
 		else print $statuslabel;
 		print '</span></span>';
 
 		// Instance name
 		print '<span class="bold uppercase">'.$instancename.'</span>';
-		print '<span class="caption-helper"> - '.$planlabel.'</span>	<!-- This is service -->';
+		print '<span class="caption-helper"> - '.$planlabel.'</span>	<!-- This is product ref -->';
 
 		print '<br>';
 
@@ -220,10 +221,11 @@ if (count($listofcontractidreseller) == 0) {
 
 		print '<!-- <span class="caption-helper"><span class="opacitymedium">'.$langs->trans("ID").' : '.$contract->ref.'</span></span><br> -->';
 		print '<span class="caption-helper">';
+		print "\n";
 		if ($contract->array_options['options_deployment_status'] == 'processing') {
 			print '<span class="opacitymedium">'.$langs->trans("DateStart").' : </span><span class="bold">'.dol_print_date($contract->array_options['options_deployment_date_start'], 'dayhour').'</span>';
-			if (($now - $contract->array_options['options_deployment_date_start']) > 120) {	// More then 2 minutes ago
-				print ' - <a href="register_instance.php?reusecontractid='.$contract->id.'">'.$langs->trans("Restart").'</a>';
+			if (($now - $contract->array_options['options_deployment_date_start']) > 120) {	// More than 2 minutes ago
+				print ' - <a href="register_instance.php?reusecontractid='.$contract->id.'">'.$langs->trans("Restart").'</a>'; // Link to redeploy / restart deployment
 			}
 		} elseif ($contract->array_options['options_deployment_status'] == 'done') {
 			print '<span class="opacitymedium">'.$langs->trans("DeploymentDate").' : </span><span class="bold">'.dol_print_date($contract->array_options['options_deployment_date_end'], 'dayhour').'</span>';
@@ -232,13 +234,13 @@ if (count($listofcontractidreseller) == 0) {
 			print '<br>';
 			print '<span class="opacitymedium">'.$langs->trans("UndeploymentDate").' : </span><span class="bold">'.dol_print_date($contract->array_options['options_undeployment_date'], 'dayhour').'</span>';
 		}
-		print '
-    							</span><br>';
-
+		print "\n";
+		print '</span><br>';
+		
 		// Calculate price on invoicing
 		$contract->fetchObjectLinked();
 
-		$foundtemplate=0;
+		$foundtemplate=0; $datenextinvoice='';
 		$pricetoshow = ''; $priceinvoicedht = 0;
 		$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
 		if (is_array($contract->linkedObjects['facturerec'])) {
@@ -260,6 +262,9 @@ if (count($listofcontractidreseller) == 0) {
 					}
 					if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] != 'done') $pricetoshow = $langs->trans("InvoicingSuspended");	// Replace price
 				}
+				if ((! $templateinvoice->suspended) && $contract->array_options['options_deployment_status'] == 'done') {
+					$datenextinvoice = $templateinvoice->date_when;
+				}
 			}
 		}
 
@@ -269,6 +274,7 @@ if (count($listofcontractidreseller) == 0) {
 		print '</div>';
 		print '</div>';
 
+		print '<!-- tabs for instance -->'."\n";
 		print '
     				      <div class="portlet-body" style="'.$displayforinstance.'">
 
@@ -286,20 +292,30 @@ if (count($listofcontractidreseller) == 0) {
 
     				            <div class="tab-pane active" id="tab_resource_'.$contract->id.'">
     								<!-- <p class="opacitymedium" style="padding: 15px; margin-bottom: 5px;">'.$langs->trans("YourCustomersResourceAndOptionsDesc").' :</p> -->
-    					            <div style="padding-left: 12px; padding-bottom: 12px; padding-right: 12px">';
+						            <div class="areaforresources" style="padding-bottom: 12px;">';
 		foreach ($contract->lines as $keyline => $line) {
 			//var_dump($line);
 			print '<div class="resource inline-block boxresource">';
-			print '<div class="">';
 
 			$resourceformula='';
 			$tmpproduct = new Product($db);
 			if ($line->fk_product > 0) {
 				$tmpproduct->fetch($line->fk_product);
 
-				$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, 40, 40, 1, 1, 1);
-				print $htmlforphoto;
-
+				$maxHeight=40;
+				$maxWidth=40;
+				$alt='';
+				$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
+				
+				if (empty($htmlforphoto) || $htmlforphoto == '<!-- Photo -->' || $htmlforphoto == '<!-- Photo -->'."\n") {
+					print '<!--no photo defined -->';
+					print '<table width="100%" valign="top" align="center" border="0" cellpadding="2" cellspacing="2"><tr><td width="100%" class="photo">';
+					print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png" title="'.dol_escape_htmltag($alt).'">';
+					print '</td></tr></table>';
+				} else {
+					print $htmlforphoto;
+				}
+				
 				//var_dump($tmpproduct->array_options);
 				/*if ($tmpproduct->array_options['options_app_or_option'] == 'app')
 				 {
@@ -314,13 +330,14 @@ if (count($listofcontractidreseller) == 0) {
 				 print '<span class="opacitymedium small">'.$langs->trans("Option").'</span><br>';
 				 }*/
 
+				// Label
 				$labelprod = $tmpproduct->label;
 				if (preg_match('/instance/i', $tmpproduct->ref) || preg_match('/instance/i', $tmpproduct->label)) {
 					$labelprod = $langs->trans("Application");
-				} elseif ($tmpproduct->array_options['options_resource_label'] == 'User') {
+				} elseif ($tmpproduct->array_options['options_resource_label'] == 'User' && preg_match('/User/i', $tmpproduct->label)) {
 					$labelprod = $langs->trans("Users");
 				}
-				// Label
+
 				print '<span class="opacitymedium small">'.$labelprod.'</span><br>';
 				// Qty
 				$resourceformula = $tmpproduct->array_options['options_resource_formula'];
@@ -352,7 +369,7 @@ if (count($listofcontractidreseller) == 0) {
 					print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
 					//if ($line->qty > 1 && $labelprodsing) print ' / '.$labelprodsing;
 					if ($tmpproduct->array_options['options_resource_label']) {
-						print ' / '.$langs->trans($tmpproduct->array_options['options_resource_label']);
+						print ' / '.$langs->trans($tmpproduct->array_options['options_resource_label']);	// Label of units
 					} elseif (preg_match('/users/i', $tmpproduct->ref)) {
 						print ' / '.$langs->trans("User");	// backward compatibility
 					}
@@ -374,8 +391,7 @@ if (count($listofcontractidreseller) == 0) {
 						}
 					}
 				}
-			} else // If there is no product, this is users
-			{
+			} else { // If there is no product, this is a free product
 				print '<span class="opacitymedium small">';
 				print ($this->description ? $this->description : ($line->label ? $line->label : $line->libelle));
 				// TODO
@@ -383,7 +399,6 @@ if (count($listofcontractidreseller) == 0) {
 				print '</span>';
 			}
 
-			print '</div>';
 			print '</div>';
 		}
 
@@ -402,6 +417,7 @@ if (count($listofcontractidreseller) == 0) {
 			// List of available plans/products
 			$arrayofplanstoswitch=array();
 			$sqlproducts = 'SELECT p.rowid, p.ref, p.label FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
+			$sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 			$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 			$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
@@ -623,8 +639,24 @@ if (count($listofcontractidreseller) == 0) {
 				                    <div class="col-md-3">
 				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
 				                    </div>
-				                  </div>
-				                </div>
+    				                  </div>';
+
+			if (! empty($contract->array_options['options_username_ro_db'])) {
+				print '
+	    				                  <div class="form-group col-md-12 row">
+	    				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLoginReadOnly").'</label>
+	    				                    <div class="col-md-3">
+	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
+	    				                    </div>
+	    				                    <label class="col-md-3 control-label">'.$langs->trans("PasswordReadOnly").'</label>
+	    				                    <div class="col-md-3">
+	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
+	    				                    </div>
+	    				                  </div>';
+			}
+
+			print '
+				                    	</div>
 
 				                </form>
 					           ';
@@ -668,7 +700,7 @@ if (count($listofcontractidreseller) == 0) {
 	if ($form->result['nbofthirdparties'] == 0) {
 		print $langs->trans("YouDontHaveCustomersYet").'...<br>';
 	} else {
-		print '<a href="#addanotherinstance" id="addanotherinstance">';
+		print '<a href="#addanotherinstance" id="addanotherinstance" class="valignmiddle">';
 		print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
 		print '</a>';
 	}
@@ -845,6 +877,7 @@ if (count($listofcontractidreseller) == 0) {
 				$restrict_domains = explode(",", $plan['restrict_domains']);
 				foreach($restrict_domains as $domain) {
 					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
+					break;
 				}
 			} else {
 				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
