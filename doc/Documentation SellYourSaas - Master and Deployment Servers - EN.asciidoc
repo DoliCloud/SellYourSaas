@@ -3925,6 +3925,7 @@ crontab -e
 nameofserver
 ---------------
 
+
 Edit the file */etc/hosts* to get the entry of the new server:
 
 [source, bash]

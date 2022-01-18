@@ -224,12 +224,11 @@ if ($favicon) {
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
 $head.='<!-- Bootstrap core CSS -->
-<!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
-<link href="dist/css/bootstrap.css" rel="stylesheet">';
+<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
 if ($extcss) {
-	$head.='<link href="'.$extcss.'" rel="stylesheet">';
+	$head.='<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 } else {
-	$head.='<link href="dist/css/myaccount.css" rel="stylesheet">';
+	$head.='<link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">';
 }
 
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
