@@ -236,7 +236,7 @@ if (count($listofcontractidreseller) == 0) {
 		}
 		print "\n";
 		print '</span><br>';
-		
+
 		// Calculate price on invoicing
 		$contract->fetchObjectLinked();
 
@@ -306,7 +306,7 @@ if (count($listofcontractidreseller) == 0) {
 				$maxWidth=40;
 				$alt='';
 				$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
-				
+
 				if (empty($htmlforphoto) || $htmlforphoto == '<!-- Photo -->' || $htmlforphoto == '<!-- Photo -->'."\n") {
 					print '<!--no photo defined -->';
 					print '<table width="100%" valign="top" align="center" border="0" cellpadding="2" cellspacing="2"><tr><td width="100%" class="photo">';
@@ -315,7 +315,7 @@ if (count($listofcontractidreseller) == 0) {
 				} else {
 					print $htmlforphoto;
 				}
-				
+
 				//var_dump($tmpproduct->array_options);
 				/*if ($tmpproduct->array_options['options_app_or_option'] == 'app')
 				 {
@@ -877,7 +877,9 @@ if (count($listofcontractidreseller) == 0) {
 				$restrict_domains = explode(",", $plan['restrict_domains']);
 				foreach($restrict_domains as $domain) {
 					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
-					break;
+					if ($domain == $domainname) {
+						break;	// We keep only the first domain in list as the domain to keep possible for deployment
+					}
 				}
 			} else {
 				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";

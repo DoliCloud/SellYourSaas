@@ -1006,7 +1006,9 @@ if (count($listofcontractid) == 0) {				// Should not happen
 					print "/* Code if we select pid = ".$key." so plan = ".$plan['label']." with restrict_domains = ".$plan['restrict_domains']." */\n";
 					foreach($restrict_domains as $domain) {
 						print " if (pid == ".$key.") { disable_combo_if_not('".trim($domain)."'); }\n";
-						break;	// We keep only the first domain in list as the domain to keep possible for deployment
+						if ($domain == $domainname) {
+							break;	// We keep only the first domain in list as the domain to keep possible for deployment
+						}
 					}
 				} else {
 					print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
@@ -1050,7 +1052,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 	print '</form>';
 
 	print '</div>';	// end Add a new instance
-	
+
 
 	print '
     	    </div>
