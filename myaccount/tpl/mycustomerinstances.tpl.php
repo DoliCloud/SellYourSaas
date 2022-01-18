@@ -1021,7 +1021,9 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
 				foreach ($restrict_domains as $domain) {
 					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
-					break;
+					if ($domain == $domainname) {
+						break;	// We keep only the first domain in list as the domain to keep possible for deployment
+					}
 				}
 			} else {
 				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
