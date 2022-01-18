@@ -841,11 +841,13 @@ if (count($listofcontractidreseller) == 0) {
 						console.log("We select product id = "+pid);
 					';
 		foreach ($arrayofplansfull as $key => $plan) {
-			if ($plan['restrict_domains']) {
-				$firstdomain = preg_replace('/,.*$/', '', $plan['restrict_domains']);
-				print " if (pid == ".$key.") { disable_combo_if_not('".$firstdomain."'); }\n";
+			if (!empty($plan['restrict_domains'])) {
+				$restrict_domains = explode(",", $plan['restrict_domains']);
+				foreach($restrict_domains as $domain) {
+					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
+				}
 			} else {
-				print '	/* No restriction for pid = '.$key.', firstdomain is '.$firstdomain.' */'."\n";
+				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
 			}
 		}
 
