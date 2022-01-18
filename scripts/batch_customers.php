@@ -366,13 +366,13 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 			if (! $error) {
 				$nbofok++;
 				print '-> Backup process success for '.$instance."\n";
+				sleep(2);	// On success, we wait 2 seconds
 			} else {
 				$nboferrors++;
 				$instancesbackuperror[$instance] = array('date' => dol_now('gmt'));
 				print '-> Backup process fails for '.$instance."\n";
+				sleep(5);	// On error, we wait 5 seconds
 			}
-
-			sleep(2);
 
 			$i++;
 		}
