@@ -3176,6 +3176,9 @@ Choose:
 
 * Submit the *.csr* file to the SSL certificate provider.
 
+* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
+
+
 ===== Solution 2: From LetsEncrypt
 
 * To create a SSL certficate *on the master* :
@@ -3241,8 +3244,6 @@ or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 
 ==== Install the certificates files
-
-* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
 * Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the certificate files:
 
