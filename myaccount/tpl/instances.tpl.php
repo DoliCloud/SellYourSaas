@@ -1003,10 +1003,12 @@ if (count($listofcontractid) == 0) {				// Should not happen
 					';
 			foreach ($arrayofplansfull as $key => $plan) {
 				if ($plan['restrict_domains']) {
-					$firstdomain = preg_replace('/,.*$/', '', $plan['restrict_domains']);
-					print " if (pid == ".$key.") { disable_combo_if_not('".$firstdomain."'); }\n";
+					$restrict_domains = explode(",", $plan['restrict_domains']);
+					foreach($restrict_domains as $domain) {
+						print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
+					}
 				} else {
-					print '	/* No restriction for pid = '.$key.', firstdomain is '.$firstdomain.' */'."\n";
+					print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
 				}
 			}
 
