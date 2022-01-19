@@ -1501,9 +1501,8 @@ if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVIC
 
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
 $head.='<!-- Bootstrap core CSS -->
-<!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
-<link href="dist/css/bootstrap.css" rel="stylesheet">
-<link href="dist/css/myaccount.css" rel="stylesheet">';
+<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
+<link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">';
 
 $title = $langs->trans("Registration").($tmpproduct->label?' ('.$tmpproduct->label.')':'');
 

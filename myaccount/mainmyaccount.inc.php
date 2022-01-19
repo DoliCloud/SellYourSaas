@@ -277,7 +277,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		$themeparam='';
 		//print 'themepath='.$themepath.' themeparam='.$themeparam;exit;
 		print '<link rel="stylesheet" type="text/css" href="'.$themepath.$themeparam.'">'."\n";
-		print '<link href="dist/css/bootstrap.css" rel="stylesheet">'."\n";
+		print '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">'."\n";
 		if (! empty($conf->global->MAIN_FIX_FLASH_ON_CHROME)) {
 			print '<!-- Includes CSS that does not exists as a workaround of flash bug of chrome -->'."\n".'<link rel="stylesheet" type="text/css" href="filethatdoesnotexiststosolvechromeflashbug">'."\n";
 		}

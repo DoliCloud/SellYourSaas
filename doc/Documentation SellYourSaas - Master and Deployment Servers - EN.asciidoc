@@ -3176,6 +3176,9 @@ Choose:
 
 * Submit the *.csr* file to the SSL certificate provider.
 
+* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
+
+
 ===== Solution 2: From LetsEncrypt
 
 * To create a SSL certficate *on the master* :
@@ -3191,7 +3194,7 @@ Run cerbot with the following command line (you can test it beforehand by adding
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
 ---------------
 
 For example, you can use *supervision@mysaasdomain.com* as the email for letsencrypt account.
@@ -3242,8 +3245,6 @@ or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 ==== Install the certificates files
 
-* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
-
 * Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the certificate files:
 
 For example, if your certificates files were generated with letsencrypt, you can do:
@@ -3256,7 +3257,7 @@ ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/cert.pem with.sellyoursa
 ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/chain.pem with.sellyoursaas.com-intermediate.crt
 ---------------
 
-NOTE: This is the certificate that will be used for the client instances. Custom certificates for instances will be in */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
+NOTE: This is the wildcard certificate that will be used for the customer instances. Custom certificates for instances will be saved into */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
 * If the file */etc/apache2/sites-available/default-ssl.conf* exists, rename it into */etc/apache2/sites-available/000-default-ssl.conf*
 
@@ -3923,6 +3924,7 @@ crontab -e
 ---------------
 nameofserver
 ---------------
+
 
 Edit the file */etc/hosts* to get the entry of the new server:
 
@@ -5157,5 +5159,15 @@ You can also change this in live from mysql command tool:
 ---------------
 set global net_buffer_length=100000;
 set global max_allowed_packet=100000000;
+---------------
+
+
+==== Web request are slow due to maximum number of child reached
+
+You may experience a too high number of child processed (reaching the maximum). You can see this on pahe https://withX.mysaasdomain.com/server-status
+If this child are in state R, then you can try to reduce this by enabling the module ReqTimeout and set
+[source,bash]
+---------------
+RequestReadTimeout handshake=5 header=10 body=30
 ---------------
 
