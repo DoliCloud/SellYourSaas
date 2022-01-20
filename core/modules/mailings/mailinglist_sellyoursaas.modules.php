@@ -169,11 +169,19 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$cibles = array();
 		$j = 0;
 
-		foreach ($_POST['lang_id'] as $key => $val) {
-			if (empty($val)) unset($_POST['lang_id'][$key]);
+		if (GETPOSTISSET('lang_id')) {
+			foreach ($_POST['lang_id'] as $key => $val) {
+				if (empty($val)) {
+					unset($_POST['lang_id'][$key]);
+				}
+			}
 		}
-		foreach ($_POST['not_lang_id'] as $key => $val) {
-			if (empty($val)) unset($_POST['not_lang_id'][$key]);
+		if (GETPOSTISSET('not_lang_id')) {
+			foreach ($_POST['not_lang_id'] as $key => $val) {
+				if (empty($val)) {
+					unset($_POST['not_lang_id'][$key]);
+				}
+			}
 		}
 
 		$productid = GETPOST('productid', 'int');
