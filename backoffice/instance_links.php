@@ -303,7 +303,6 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 		// Get $stringofversion and $stringoflistofmodules
 		// TODO Put the defintion in a sql into package
-		// TODO no data if prefix db is different
 		if ($fordolibarr) {
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
