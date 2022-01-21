@@ -187,16 +187,20 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$productid = GETPOST('productid', 'int');
 
 		$sql = " SELECT s.rowid as id, email, nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label,";
-		$sql .= " se.stripeaccount, se.domain_registration_page,";
-		$sql .= " coe.deployment_host";
+		$sql .= " se.stripeaccount, se.domain_registration_page";
+		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
+			(! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
+			($productid > 0)) {
+				$sql .= ", coe.deployment_host";
+		}
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
 		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
 			(! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
 			($productid > 0)) {
-			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
-			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
+				$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
+				$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
 		}
 		$sql .= ", ".MAIN_DB_PREFIX."categorie_societe as cs";
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
@@ -306,7 +310,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 */
 	function getNbOfRecipients($filter = 1, $option = '')
 	{
-		$a=parent::getNbOfRecipients("select count(distinct(email)) as nb from ".MAIN_DB_PREFIX."societe as s where email IS NOT NULL AND email != ''");
+		$a=parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email != ''");
 		if ($a < 0) return -1;
 		return $a;
 	}
