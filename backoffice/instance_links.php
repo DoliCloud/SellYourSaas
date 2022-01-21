@@ -248,6 +248,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->hostname_web = $hostname_os;
 
 	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	$newdb->prefix_db = $prefix_db;
 
 	$stringofversion = '';
 	$stringoflistofmodules = '';
