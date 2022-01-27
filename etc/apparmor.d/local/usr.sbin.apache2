@@ -69,6 +69,8 @@
     owner /var/spool/postfix/maildrop/ rw,
     owner /var/spool/postfix/maildrop/** rw,
 
+    # Note: there is already the abstractions/user-tmp that allows /tmp but for owner only
+    #allow /tmp/test.txt r,
   }
 
   ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
@@ -118,6 +120,7 @@
     /etc/mysql/mariadb.cnf r,
     /etc/mysql/mariadb.conf.d/ r,    
     /etc/ssl/openssl.cnf rw,
+    /etc/postfix/dynamicmaps.cf.d/ r,
 	/home/admin/logs/** w,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
@@ -130,9 +133,9 @@
 	/tmp/spam/ rw,
     /tmp/spam/** rw,
     /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
     /usr/bin/id rix,
     /usr/bin/mysqldump mrix,
-    /usr/bin/free rix,
     /usr/bin/zip rix,
     /usr/bin/zstd rix,
     /usr/sbin/post* rix,
@@ -162,6 +165,8 @@
     owner /var/spool/postfix/maildrop/ rw,
     owner /var/spool/postfix/maildrop/** rw,
 
+    # Note: there is already the abstractions/user-tmp that allows /tmp but for owner only
+    #allow /tmp/test.txt r,
   }
 
     
