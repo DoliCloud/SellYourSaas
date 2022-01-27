@@ -30,7 +30,8 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     #include <abstractions/php>
     #include <abstractions/postfix-common>
     #include <abstractions/user-tmp>
-
+    #include <abstractions/mysql>
+    
     network inet,
     network inet6,
     network unix dgram,
@@ -40,6 +41,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
 
     /dev/tty rw,
     /etc/ImageMagick*/** rw,
+	/etc/apache2/.htpasswd r,
     /etc/clamav/clamd.conf r,
     /etc/mysql/conf.d/mysql.cnf r,
     /etc/mysql/conf.d/mysqldump.cnf r,
@@ -47,6 +49,8 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /etc/mysql/mariadb.conf.d/ r,  
     /etc/postfix/dynamicmaps.cf.d/ r,
     /etc/ssl/openssl.cnf rw,
+	/home/admin/logs/** w,
+	/home/admin/wwwroot/** rix,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
@@ -54,11 +58,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /proc/*/attr/current rw,
     /proc/loadavg r,
     /run/clamav/** rw,
-    /{usr/,}bin/bash rix,
-    /{usr/,}bin/cat rix,
-    /{usr/,}bin/gzip rix,
-    /{usr/,}bin/tar rix,
-    /{usr/,}bin/uncompress rix,
+	/run/mysqld/mysqld.sock r,
     /usr/bin/clamdscan rix,
     /usr/bin/id rix,
     /usr/bin/mysqldump mrix,
@@ -74,6 +74,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /usr/share/zoneinfo/** r,
     /var/log/apache2/access.log w,
     /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error.log w,
     /var/log/apache2/error_ssl.log w,
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
@@ -81,6 +82,11 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
     /var/www/html/index.html r,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
     owner /mnt/diskhome/home/osu*/** rw,
     owner /run/systemd/notify w,
     owner /var/spool/postfix/maildrop/ rw,
@@ -95,12 +101,20 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     #include <abstractions/php>
     #include <abstractions/postfix-common>
     #include <abstractions/user-tmp>
+    #include <abstractions/mysql>
 
     capability dac_read_search,
 
     network inet,
     network inet6,
 
+	/home/admin/logs/** w,  
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
   }
     
   ^sellyoursaas-instances flags=(attach_disconnected) {
@@ -110,6 +124,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     #include <abstractions/php>
     #include <abstractions/postfix-common>
     #include <abstractions/user-tmp>
+    #include <abstractions/mysql>
 
     network inet,
     network inet6,
@@ -126,6 +141,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /etc/mysql/mariadb.cnf r,
     /etc/mysql/mariadb.conf.d/ r,    
     /etc/ssl/openssl.cnf rw,
+	/home/admin/logs/** w,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
@@ -133,13 +149,9 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /proc/*/attr/current rw,
     /proc/loadavg r,
     /run/clamav/** rw,
+	/run/mysqld/mysqld.sock r,    
     /tmp/spam/ rw,
     /tmp/spam/** rw,
-    /{usr/,}bin/bash rix,
-    /{usr/,}bin/cat rix,
-    /{usr/,}bin/gzip rix,
-    /{usr/,}bin/tar rix,
-    /{usr/,}bin/uncompress rix,
     /usr/bin/clamdscan rix,
     /usr/bin/id rix,
     /usr/bin/mysqldump mrix,
@@ -155,6 +167,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /usr/share/zoneinfo/** r,
     /var/log/apache2/access.log w,
     /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error.log w,
     /var/log/apache2/error_ssl.log w,
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
@@ -162,6 +175,11 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
     /var/www/html/index.html r,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
     owner /mnt/diskhome/home/osu*/** rw,
     owner /run/systemd/notify w,
     owner /var/spool/postfix/maildrop/ rw,

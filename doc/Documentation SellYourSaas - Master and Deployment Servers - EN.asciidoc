@@ -2461,11 +2461,11 @@ Get content of the file into this repository in etc/apparmor.d/bin.secureBash
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/usr.sbin.apache2* with this content:
+Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.dusr.sbin.apache2/* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository, in etc/apparmor.d/usr.sbin.apache2
+Get content of the file into this repository, in etc/apparmor.d/local/usr.sbin.apache2 or etc/apparmor.d/usr.sbin.apache2
 ---------------
 
 
