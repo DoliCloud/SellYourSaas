@@ -1215,8 +1215,11 @@ Later, we will enable the virtual host and we will create also the virtual host 
 
 TODO: For a future use of php-fpm, add into /etc/php/7.4/fpm/pool.d/*.conf
 
+[source, ini]
+---------------
 php_admin_value[open_basedir] = /tmp/:/home/dolibarr:/home/dolibarr/maxmind/:/usr/share/GeoIP/
 apparmor_hat = sellyoursaas 
+---------------
 
 
 
@@ -2462,7 +2465,7 @@ Create an apparmor file */etc/apparmor.d/usr.sbin.apache2* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/usr.sbin.apache2
+Get content of the file into this repository, in etc/apparmor.d/usr.sbin.apache2
 ---------------
 
 
