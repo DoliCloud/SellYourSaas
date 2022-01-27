@@ -370,7 +370,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		exit(-26);
 	}
 	if (! isValidEmail($email)) {
-		setEventMessages($langs->trans("ErrorBadEMail"), null, 'errors');
+		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
 		header("Location: ".$newurl);
 		exit(-27);
 	}
@@ -385,7 +385,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		if (! empty($listofbanned)) {
 			foreach ($listofbanned as $banned) {
 				if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
-					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
+					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
 					header("Location: ".$newurl);
 					exit(-29);
 				}
