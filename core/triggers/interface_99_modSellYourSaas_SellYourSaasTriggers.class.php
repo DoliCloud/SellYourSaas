@@ -158,7 +158,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				break;
 			case 'LINECONTRACT_ACTIVATE':
 				if (empty($object->context['deployallwasjustdone'])) {
-					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran and context 'deployallwasjustdone' is not 1, so we launch the unsuspend remote actions");
+					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran and context 'deployallwasjustdone' is not 1, so we will launch the unsuspend remote actions if line has type 'app'");
 					$object->fetch_product();
 					if ($object->product->array_options['options_app_or_option'] == 'app') {
 						$contract = new Contrat($this->db);
@@ -170,7 +170,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						}
 					}
 				} else {
-					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran but context 'deployallwasjustdone' is 1, so we do not launch the unsuspend remote actions");
+					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran but context 'deployallwasjustdone' is 1, so we do NOT launch the unsuspend remote actions");
 				}
 				break;
 			case 'LINECONTRACT_CLOSE':
@@ -308,6 +308,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 							$this->error = $contract->error;
 							$this->errors = $contract->errors;
 						}
+						dol_syslog("Contract lines have been activated");
 					}
 				} else {
 					dol_syslog("The cancel/paid invoice ".$object->ref." is a credit note, or has no linked contract to check to unsuspend.");
@@ -462,14 +463,15 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 			$contract = null;
 			if (get_class($object) == 'Contrat') {	// object is contract
 				$contract = $object;
-			} else // object is a line of contract fo type 'app'
-			{
+			} else { // object is a line of contract for type 'app'
 				$contract = new Contrat($this->db);
 				$contract->fetch($object->fk_contrat);
 			}
 
 			// No remote action required or this is not a sellyoursaas instance
-			if (in_array($remoteaction, array('suspend','unsuspend','undeploy','undeployall')) && empty($contract->array_options['options_deployment_status'])) $okforremoteaction=0;
+			if (in_array($remoteaction, array('suspend','unsuspend','undeploy','undeployall')) && empty($contract->array_options['options_deployment_status'])) {
+				$okforremoteaction=0;
+			}
 
 			if (! $error && $okforremoteaction && $contract) {
 				if ($remoteaction == 'deploy' || $remoteaction == 'unsuspend') {		// when remoteaction = 'deploy' or 'unsuspend'
@@ -520,6 +522,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					}
 				}
 			}
+
+			dol_syslog("Trigger ".$action." ends with error=".$error);
 		}
 
 		if ($error) {

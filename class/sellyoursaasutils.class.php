@@ -749,7 +749,7 @@ class SellYourSaasUtils
 						continue;
 					}
 
-					dol_syslog("this->transaction_opened = ".$this->transaction_opened);
+					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->transaction_opened = ".$this->transaction_opened);
 
 					$this->db->begin();
 
@@ -901,6 +901,10 @@ class SellYourSaasUtils
 		// Loop on each invoice to pay
 		foreach ($invoices as $invoice) {
 			$errorforinvoice = 0;     // We reset the $errorforinvoice at each invoice loop
+
+			// Note: The db->begin and commit has been started into the doTakePaymentStripe() that already contains a loop on each invoice,
+			// so adding a begin / commit here will be useless when called by doTakePaymentStripe().
+			// TODO Add the begin / commit for other cases
 
 			$invoice->fetch_thirdparty();
 
@@ -1221,6 +1225,7 @@ class SellYourSaasUtils
 										dol_syslog('* Record payment for invoice id '.$invoice->id.'. It includes closing of invoice and regenerating document');
 
 										// This include closing invoices to 'paid' (and trigger including unsuspending) and regenerating document
+										// So this method can be very long if there is an unsuspend with timeout.
 										$paiement_id = $paiement->create($user, 1);
 										if ($paiement_id < 0) {
 											$postactionmessages[] = $paiement->error.($paiement->error?' ':'').join("<br>\n", $paiement->errors);
