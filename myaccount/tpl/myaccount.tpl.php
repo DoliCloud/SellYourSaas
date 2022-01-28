@@ -230,10 +230,10 @@ print '
 					';
 if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
 	print '
-		                <div class="form-group">
+		                <div class="form-group paddingtop">
 		                  <!--<label>'.$langs->trans("OptinForCommercialMessages").'</label><br>-->
-		                  <input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1" '.($mythirdpartyaccount->array_options['options_optinmessages'] ? ' checked' : '').' name="optinmessages">
-							<span class="inline valignmiddle opacitymedium">'.$langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname).'</span>
+		                  <input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1" '.($mythirdpartyaccount->array_options['options_optinmessages'] ? ' checked' : '').' id="optinmessages" name="optinmessages">
+							<label for="optinmessages" class="valignmiddle nobold inline"><span class="inline valignmiddle opacitymedium small">'.$langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname).'</span></label>
 		                </div>';
 }
 					print '
