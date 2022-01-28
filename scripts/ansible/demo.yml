@@ -1,5 +1,5 @@
 ---
-# Script to update an entry into sellyoursaas conf.
+# Script of demo for sellyoursaas ansible use.
 #
 # To run the script:
 # ansible-playbook update_sellyoursaas_conf.yml
