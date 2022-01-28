@@ -2,8 +2,8 @@
 # Script to run clean.sh SellYourSaas command on servers
 #
 # To run the script:
-# ansible-playbook -K launch_apt_upgrade.yml -i hosts-xxx -e 'target=targethost command=(test|confirm)'
-# ansible-playbook -K launch_apt_upgrade.yml -i hosts-xxx -e 'target=targethost command=(test|confirm)' --limit=*.mydomain.com
+# ansible-playbook -K launch_apt_upgrade.yml -i hosts-xxx -e 'target=targethost'
+# ansible-playbook -K launch_apt_upgrade.yml -i hosts-xxx -e 'target=targethost reboot=1' --limit=*.mydomain.com
 #
 
 - name: Update and upgrade apt packages
@@ -21,6 +21,8 @@
 
   - name: Reboot the server and wait for it to come back up.
     reboot:
-
+    when:
+      - reboot is defined
+      
   - debug:
       var: command_output.stdout_lines

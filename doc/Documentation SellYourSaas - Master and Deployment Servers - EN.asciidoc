@@ -1213,11 +1213,12 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 Later, we will enable the virtual host and we will create also the virtual host for the HTTPS on port 443 by using letsencrypt.
 
 
-TODO: For a future use of php-fpm, add into /etc/php/7.4/fpm/pool.d/*.conf
+TODO: For a future use of php-fpm, add into */etc/php/7.4/fpm/pool.d/**.conf*
 
 [source, ini]
 ---------------
 php_admin_value[open_basedir] = /tmp/:/home/dolibarr:/home/dolibarr/maxmind/:/usr/share/GeoIP/
+; a commenter si pb pour lancer php-fpm tourne en boucle
 apparmor_hat = sellyoursaas 
 ---------------
 
@@ -4933,7 +4934,8 @@ or
 nameserver 127.0.0.56
 
 If not, create it and restart postfix.
-     
+
+
 ==== php sessions files in /var/lib/php/sessions are not purged
 
 php session purge can be done by 
