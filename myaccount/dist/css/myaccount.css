@@ -7,6 +7,9 @@ div.block header h1 {
 label {
     margin-bottom: .3rem;
 }
+label.nobold {
+	font-weight: normal;
+}
 
 .firstpaymentmessage {
     width: 80%;

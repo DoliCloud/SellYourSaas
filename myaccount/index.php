@@ -602,6 +602,8 @@ if ($action == 'updateurl') {
 } elseif ($action == 'updatemythirdpartylogin') {
 	$email = trim(GETPOST('email', 'nohtml'));
 	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
+	$emailccinvoice = trim(GETPOST('emailccinvoice', 'nohtml'));
+	$oldemailccinvoice = trim(GETPOST('oldemailccinvoice', 'nohtml'));
 	$firstname = trim(GETPOST('firstName', 'nohtml'));
 	$lastname = trim(GETPOST('lastName', 'nohtml'));
 	$phone = trim(GETPOST('phone', 'nohtml'));
@@ -609,49 +611,52 @@ if ($action == 'updateurl') {
 
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+		$error++;
 	}
-	if (! isValidEmail($email)) {
-		setEventMessages($langs->trans("ErrorBadValueForEmail"), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+	if ($email && ! isValidEmail($email)) {
+		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
+		$error++;
 	}
 	if ($oldemail != $email) {		// A request to change email was done.
 		// Test if email already exists
 		$tmpthirdparty = new Societe($db);
 		$tmpthirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $email);
 		if ($tmpthirdparty->id > 0) {
+			$error++;
 			setEventMessages($langs->trans("SorryEmailExistsforAnotherAccount", $email), null, 'errors');
-			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-			exit;
 		}
 	}
 	if (!empty($phone) && !isValidPhone($phone)) {
 		setEventMessages($langs->trans("ErrorBadValueForPhone"), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+		$error++;
 	}
 
-	$db->begin();	// Start transaction
+	if (! $error) {
+		$db->begin();	// Start transaction
 
-	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
-	$mythirdpartyaccount->email = $email;
-	$mythirdpartyaccount->phone = $phone;
-	$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
-	$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
-	$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
+		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+		$mythirdpartyaccount->email = $email;
+		$mythirdpartyaccount->phone = $phone;
+		$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
+		$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
+		$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
+		$mythirdpartyaccount->array_options['options_emailccinvoice'] = $emailccinvoice;
 
-	$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
+		$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
 
-	if ($result > 0) {
-		setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
-		$db->commit();
-	} else {
-		$langs->load("errors");
-		setEventMessages($langs->trans('ErrorFailedToSaveRecord'), null, 'errors');
-		setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
-		$db->rollback();
+		if ($result > 0) {
+			setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+
+			$db->commit();
+
+			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
+			exit;
+		} else {
+			$langs->load("errors");
+			setEventMessages($langs->trans('ErrorFailedToSaveRecord'), null, 'errors');
+			setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
+			$db->rollback();
+		}
 	}
 } elseif ($action == 'updatepassword') {
 	$password = GETPOST('password', 'nohtml');
