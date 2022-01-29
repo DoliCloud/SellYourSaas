@@ -25,6 +25,7 @@
     /etc/mysql/conf.d/mysqldump.cnf r,
     /etc/mysql/mariadb.cnf r,
     /etc/mysql/mariadb.conf.d/ r,  
+    /etc/php{,5,7}/** r,  
     /etc/postfix/dynamicmaps.cf.d/ r,
     /etc/ssl/openssl.cnf rw,
 	/home/admin/logs/** w,
@@ -39,9 +40,9 @@
     /run/clamav/** rw,
 	/run/mysqld/mysqld.sock r,
     /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
     /usr/bin/id rix,
     /usr/bin/mysqldump mrix,
-    /usr/bin/free rix,
     /usr/bin/zip rix,
     /usr/bin/zstd rix,
     /usr/sbin/post* rix,
@@ -61,9 +62,9 @@
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
     /var/www/html/index.html r,
-    /{usr/,}bin/dash rix,
     /{usr/,}bin/bash rix,
     /{usr/,}bin/cat rix,
+    /{usr/,}bin/dash rix,
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
@@ -90,6 +91,8 @@
     network inet,
     network inet6,
 
+	signal receive set=term peer=apache2,
+
 	/home/admin/logs/** w,  
     /var/log/apache2/access.log w,
     /var/log/apache2/access_ssl.log w,
@@ -97,6 +100,10 @@
     /var/log/apache2/error_ssl.log w,
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
+    /{usr/,}bin/dash rix,
+    /{usr/,}bin/sh rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,    
   }
     
   ^sellyoursaas-instances flags=(attach_disconnected) {
@@ -111,6 +118,8 @@
     network inet,
     network inet6,
     network unix dgram,
+
+	signal receive set=term peer=apache2,
 
 	# Warning, this may create troubles with sending email from postfix on ubuntu 18.04
     deny /etc/group r,
@@ -162,9 +171,9 @@
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
     /var/www/html/index.html r,
-    /{usr/,}bin/dash rix,
     /{usr/,}bin/bash rix,
     /{usr/,}bin/cat rix,
+    /{usr/,}bin/dash rix,
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
