@@ -167,7 +167,7 @@ else
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 		rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	else
-		echo "No sellyoursaas database found to backup (parameter database=$database in /etc/sellyoursaas.conf)."
+		echo "No sellyoursaas database found to backup (parameter in /etc/sellyoursaas.conf: database=$database, masterserver=$masterserver, webserver=$webserver)."
 	fi
 fi
 
