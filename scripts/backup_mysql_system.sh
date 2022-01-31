@@ -153,6 +153,9 @@ else
     if [ "x$DATABASE" != "x" -a "x$webserver" == "x1" ]; then
             foundmasterdatabase=1;
     fi
+    
+    echo 
+    
     if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
@@ -164,7 +167,7 @@ else
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 		rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas database found to backup (parameter database=$database in /etc/sellyoursaas.conf)."
 	fi
 fi
 

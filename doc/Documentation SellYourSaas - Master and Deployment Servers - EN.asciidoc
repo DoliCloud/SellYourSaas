@@ -3205,7 +3205,7 @@ Run cerbot with the following command line (you can test it beforehand by adding
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --expand
 ---------------
 
 For example, you can use *supervision@mysaasdomain.com* as the email for letsencrypt account.
@@ -3243,15 +3243,22 @@ You can use the same command as used originally (with --dry-run option first if 
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
 ---------------
 
 Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
 */etc/letsencrypt/renewal/withX.mysaasdomain.com.conf*
 
-To check that a DNS update is ok for a challenge, you can use this URL: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
+To check that a DNS update is ok for a challenge, you can use this URL: 
+https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
 or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
+* To remove completely a certificate, you can run
+
+[source,bash]
+---------------
+find /etc/letsencrypt/ -name "*with<X>.<your_domain>*" -exec rm -fr {} \;
+---------------
 
 
 ==== Install the certificates files
