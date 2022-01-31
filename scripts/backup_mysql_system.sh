@@ -147,10 +147,10 @@ else
 	rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	
     export foundmasterdatabase=0;  
-    if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
+    if [ "x$DATABASE" != "x" -a "x$masterserver" != "x" -a "x$masterserver" != "x0" ]; then
             foundmasterdatabase=1;
     fi
-    if [ "x$DATABASE" != "x" -a "x$webserver" == "x1" ]; then
+    if [ "x$DATABASE" != "x" -a "x$webserver" != "x" -a "x$webserver" != "x0" ]; then
             foundmasterdatabase=1;
     fi
     
