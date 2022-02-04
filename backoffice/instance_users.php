@@ -114,6 +114,7 @@ if (empty($reshook)) {
 
 	if ($action == "createsupportuser") {
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb->prefix_db = $prefix_db;
 		if (is_object($newdb)) {
 			$savMAIN_SECURITY_HASH_ALGO = $conf->global->MAIN_SECURITY_HASH_ALGO;
 			$savMAIN_SECURITY_SALT = $conf->global->MAIN_SECURITY_SALT;
