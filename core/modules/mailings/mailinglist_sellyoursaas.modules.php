@@ -19,17 +19,14 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
  */
 class mailing_mailinglist_sellyoursaas extends MailingTargets
 {
-	// CHANGE THIS: Put here a name not already used
-	var $name='mailinglist_sellyoursaas';
-	// CHANGE THIS: Put here a description of your selector module
-	var $desc = 'Prospects or Customers SellYourSaas';
-	// CHANGE THIS: Set to 1 if selector is available for admin users only
-	var $require_admin=0;
+	public $name='mailinglist_sellyoursaas';
+	public $desc = 'Prospects or Customers SellYourSaas';
+	public $require_admin=0;
 
-	var $enabled=0;
-	var $require_module=array();
-	var $picto='sellyoursaas@sellyoursaas';
-	var $db;
+	public $enabled=0;
+	public $require_module=array();
+	public $picto='sellyoursaas@sellyoursaas';
+	public $db;
 
 
 	/**
@@ -37,7 +34,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *
 	 * 	@param	DoliDB	$db		Database handler
 	 */
-	function __construct($db)
+	public function __construct($db)
 	{
 		global $conf;
 
@@ -53,7 +50,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *
 	 *   @return     string      Retourne zone select
 	 */
-	function formFilter()
+	public function formFilter()
 	{
 		global $langs;
 		$langs->load("members");
@@ -70,18 +67,18 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s.=' ';
 
 		$s.=$langs->trans("Country").': ';
-		$formother=new FormAdmin($db);
+		$formother=new FormAdmin($this->db);
 		$s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id');
 
 		$s.='<br> ';
 
 		$s.=$langs->trans("Language").': ';
-		$formother=new FormAdmin($db);
+		$formother=new FormAdmin($this->db);
 
 		$s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
 		$s.=$langs->trans("NotLanguage").': ';
-		$formother=new FormAdmin($db);
+		$formother=new FormAdmin($this->db);
 		$s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
 		$s.='<br> ';
@@ -129,9 +126,10 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			}
 			$this->db->free($resql);
 		} else dol_print_error($this->db);
+		//$s .= $langs->trans("Package").': ';
 
-		$s.=$langs->trans("Product").': ';
-		$s.=$form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
+		$s .= $langs->trans("Product").': ';
+		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 
 		$s .= '<br>';
 
@@ -148,12 +146,13 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *  @param		int			$id		ID
 	 *  @return     string      		Url lien
 	 */
-	function url($id)
+	public function url($id)
 	{
 		return '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$id.'">'.img_object('', "company").'</a>';
 	}
 
 
+	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 	/**
 	 *  This is the main function that returns the array of emails
 	 *
@@ -161,8 +160,9 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *  @param	array	$filtersarray   Requete sql de selection des destinataires
 	 *  @return int           			<0 if error, number of emails added if ok
 	 */
-	function add_to_target($mailing_id, $filtersarray = array())
+	public function add_to_target($mailing_id, $filtersarray = array())
 	{
+		// phpcs:enable
 		global $conf;
 
 		$target = array();
@@ -288,7 +288,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *
 	 *	@return		array
 	 */
-	function getSqlArrayForStats()
+	public function getSqlArrayForStats()
 	{
 		// CHANGE THIS: Optionnal
 
@@ -308,9 +308,9 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 *	@param	string	$option		Options
 	 *	@return	int					Nb of recipients
 	 */
-	function getNbOfRecipients($filter = 1, $option = '')
+	public function getNbOfRecipients($filter = 1, $option = '')
 	{
-		$a=parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email != ''");
+		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email != ''");
 		if ($a < 0) return -1;
 		return $a;
 	}
