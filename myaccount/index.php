@@ -963,7 +963,7 @@ if ($action == 'updateurl') {
 					if ($result != 0) {
 						$error++;
 						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-						dol_syslog("--- Failed to take payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+						dol_syslog("--- Error when taking payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
 					} else {
 						dol_syslog("--- Success to take payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
 					}
@@ -1328,11 +1328,7 @@ if ($action == 'updateurl') {
 								if ($result != 0) {
 									$error++;
 									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-									dol_syslog("--- Failed to take payment in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
-
-									//var_dump($sellyoursaasutils);exit;
-
-									// TODO Ask authentication
+									dol_syslog("--- Error when taking payment in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
 								} else {
 									dol_syslog("--- Success to take payment in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
 								}
@@ -1645,7 +1641,7 @@ if ($action == 'updateurl') {
 					if ($result != 0) {
 						$error++;
 						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-						dol_syslog("--- Failed to take payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+						dol_syslog("--- Error when taking payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
 					} else {
 						dol_syslog("--- Success to take payment", LOG_DEBUG, 0);
 					}
@@ -1963,7 +1959,7 @@ if ($action == 'updateurl') {
 								if ($result != 0) {
 									$error++;
 									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-									dol_syslog("--- Failed to take payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+									dol_syslog("--- Error when taking payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
 								} else {
 									dol_syslog("--- Success to take payment", LOG_DEBUG, 0);
 								}
