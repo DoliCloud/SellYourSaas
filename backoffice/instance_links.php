@@ -248,6 +248,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->hostname_web = $hostname_os;
 
 	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	$newdb->prefix_db = $prefix_db;
 
 	$stringofversion = '';
 	$stringoflistofmodules = '';
@@ -302,7 +303,6 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 		// Get $stringofversion and $stringoflistofmodules
 		// TODO Put the defintion in a sql into package
-		// TODO no data if prefix db is different
 		if ($fordolibarr) {
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
@@ -439,7 +439,6 @@ if (empty($object->nbofusers)) {    // If value not already loaded
 			// If this is a line for a metric
 			if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
 				&& ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref))) {
-
 				$generatedunixlogin=$contract->array_options['options_username_os'];
 				$generatedunixpassword=$contract->array_options['options_password_os'];
 				$tmp=explode('.', $object->ref_customer, 2);
@@ -617,31 +616,31 @@ print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 	$arrayofips=array();
 
-	foreach ($arraylistofinstances as $instance) {
-		$arrayofips[] = $instance->array_options['options_deployment_ip'];
+foreach ($arraylistofinstances as $instance) {
+	$arrayofips[] = $instance->array_options['options_deployment_ip'];
 
-		// Nb of users
-		print '<tr>';
-		print '<td>'.$instance->getNomUrl(1).'</td>';
-		print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
-		print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
-		print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
-		print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
-		print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
-		print '<td>'.$instance->getLibStatut(7).'</td>';
-		print '<td align="right">';
-		if ($user->rights->sellyoursaas->write) {
-			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
-			if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
-				print ' &nbsp; ';
-				print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
-				print ' &nbsp; ';
-				print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
-			}
+	// Nb of users
+	print '<tr>';
+	print '<td>'.$instance->getNomUrl(1).'</td>';
+	print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
+	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
+	print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
+	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
+	print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
+	print '<td>'.$instance->getLibStatut(7).'</td>';
+	print '<td align="right">';
+	if ($user->rights->sellyoursaas->write) {
+		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
+		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
+			print ' &nbsp; ';
+			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
+			print ' &nbsp; ';
+			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
 		}
-		print '</td>';
-		print '</tr>';
 	}
+	print '</td>';
+	print '</tr>';
+}
 
 	print '<tr class="liste_total">';
 	print '<td></td>';
