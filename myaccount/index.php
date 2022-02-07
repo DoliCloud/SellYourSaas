@@ -1337,7 +1337,8 @@ if ($action == 'updateurl') {
 								if ($sellyoursaasutils->stripechargedone > 0) {
 									dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
 
-									$db->commit();
+									$rescommit = $db->commit();
+									dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
 
 									$db->begin();
 								}
@@ -1650,7 +1651,8 @@ if ($action == 'updateurl') {
 					if ($sellyoursaasutils->stripechargedone > 0) {
 						dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
 
-						$db->commit();
+						$rescommit = $db->commit();
+						dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
 
 						$db->begin();
 					}
@@ -1968,7 +1970,8 @@ if ($action == 'updateurl') {
 								if ($sellyoursaasutils->stripechargedone > 0) {
 									dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
 
-									$db->commit();
+									$rescommit = $db->commit();
+									dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
 
 									$db->begin();
 								}
