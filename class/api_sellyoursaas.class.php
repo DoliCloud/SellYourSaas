@@ -73,9 +73,13 @@ class Sellyoursaasapi extends DolibarrApi
 		}
 
 		foreach ($conf->global as $key => $val) {
-			if (preg_match('/^SELLYOURSAAS_ANNOUNCE/', $key)) {
+			if (preg_match('/^SELLYOURSAAS_ANNOUNCE_ON/', $key)) {
 				if ($val) {
 					$return[$key] = $val;
+					$newkey = preg_replace('/_ON/', '', $key);
+					if (!empty($conf->global->$newkey)) {
+						$return[$newkey] = $conf->global->$newkey;
+					}
 				}
 			}
 		}
