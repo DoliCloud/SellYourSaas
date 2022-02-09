@@ -220,8 +220,8 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 				// Button on, click to disable
 				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.urlencode($key).'&token='.newToken().'">';
 				$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
-				$enabledisablehtml.='</a> ';
-				$enabledisablehtml.=$langs->trans("OnDomainOnly", $tmparraydomain[1]);
+				$enabledisablehtml.='</a><br>';
+				$enabledisablehtml.='<span class="small opacitymedium">'.$langs->trans("OnDomainOnly", $tmparraydomain[1]).'</span>';
 			}
 		} else {
 			// Button on, click to disable
