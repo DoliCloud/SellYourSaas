@@ -66,15 +66,17 @@ class Sellyoursaasapi extends DolibarrApi
 	{
 		global $conf;
 
-		$return = array(
-			'SELLYOURSAAS_DISABLE_NEW_INSTANCES' => $conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES,	// Global disabling of new instance creation
-			'SELLYOURSAAS_ANNOUNCE_ON' => $conf->global->SELLYOURSAAS_ANNOUNCE_ON,
-			'SELLYOURSAAS_ANNOUNCE' => $conf->global->SELLYOURSAAS_ANNOUNCE
-		);
+		$return = array();
+
+		if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+			$return['SELLYOURSAAS_DISABLE_NEW_INSTANCES'] = $conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES;	// Global disabling of new instance creation
+		}
 
 		foreach ($conf->global as $key => $val) {
 			if (preg_match('/^SELLYOURSAAS_ANNOUNCE/', $key)) {
-				$return[$key] = $val;
+				if ($val) {
+					$return[$key] = $val;
+				}
 			}
 		}
 
