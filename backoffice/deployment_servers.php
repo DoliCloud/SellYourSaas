@@ -104,10 +104,21 @@ if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
 
 if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON') {
 	$keyforparam = 'SELLYOURSAAS_ANNOUNCE_ON_'.$keyforaction;
-	if (GETPOST('value')) dolibarr_set_const($db, $keyforparam, 1, 'chaine', 0, '', $conf->entity);
-	else dolibarr_set_const($db, $keyforparam, 0, 'chaine', 0, '', $conf->entity);
+	if ($value) {
+		dolibarr_set_const($db, $keyforparam, 1, 'chaine', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, $keyforparam, 0, 'chaine', 0, '', $conf->entity);
+	}
 }
 
+if ($action == 'setSELLYOURSAAS_ANNOUNCE') {
+	$keyforparam = 'SELLYOURSAAS_ANNOUNCE_'.$keyforaction;
+	if ($value) {
+		dolibarr_set_const($db, $keyforparam, $value, 'chaine', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, $keyforparam, 0, 'chaine', 0, '', $conf->entity);
+	}
+}
 
 
 /*
@@ -214,7 +225,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 			if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
 				// Button off, click to enable
 				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.urlencode($key).'&token='.newToken().'">';
-				$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
+				$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
 				$enabledisablehtml.='</a>';
 			} else {
 				// Button on, click to disable
@@ -250,7 +261,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		} else {
 			// Button on, click to disable
 			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
-			$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+			$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'error valignmiddle paddingright');
 			$enabledisablehtml.='</a> ';
 		}
 		print $enabledisablehtml;
@@ -258,12 +269,17 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 
 		print '<td class="nowraponall">';
 		$keyforparam2 = 'SELLYOURSAAS_ANNOUNCE_'.$tmparraydomain[0];
-		print '<textarea class="flat inputsearch inline-block maxwidth200" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_2.'">';
+		print '<form method="POST">';
+		print '<input type="hidden" name="action" value="setSELLYOURSAAS_ANNOUNCE">';
+		print '<input type="hidden" name="key" value="'.$tmparraydomain[0].'">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<textarea class="flat inputsearch inline-block maxwidth200" type="text" name="value" rows="'.ROWS_2.'">';
 		print $conf->global->$keyforparam2;
 		print '</textarea>';
 		print '<div class="center valigntop inline-block">';
 		print '<input type="submit" name="saveannounce" class="button small" value="'.$langs->trans("Save").'">';
 		print '</div>';
+		print '</form>';
 		print '</td>';
 
 		print '</tr>';
