@@ -107,7 +107,7 @@ if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON') {
 	if ($value) {
 		dolibarr_set_const($db, $keyforparam, 1, 'chaine', 0, '', $conf->entity);
 	} else {
-		dolibarr_set_const($db, $keyforparam, 0, 'chaine', 0, '', $conf->entity);
+		dolibarr_del_const($db, $keyforparam, $conf->entity);
 	}
 }
 
@@ -116,7 +116,7 @@ if ($action == 'setSELLYOURSAAS_ANNOUNCE') {
 	if ($value) {
 		dolibarr_set_const($db, $keyforparam, $value, 'chaine', 0, '', $conf->entity);
 	} else {
-		dolibarr_set_const($db, $keyforparam, 0, 'chaine', 0, '', $conf->entity);
+		dolibarr_del_const($db, $keyforparam, $conf->entity);
 	}
 }
 
