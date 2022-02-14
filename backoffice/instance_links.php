@@ -560,10 +560,14 @@ if (empty($object->nbofusers)) {    // If value not already loaded
 							}
 
 							$object->nbofusers += $newqty;
+							$object->array_options['options_latestresupdate_date'] = dol_now();
+							$object->array_options['options_commentonqty'] = $newcommentonqty;
 						} else {
 							$error++;
-							setEventMessages($dbinstance->error, $dbinstance->errors, 'errors');
+							setEventMessages($dbinstance->lasterror(), $dbinstance->errors, 'errors');
 						}
+
+						$dbinstance->close();
 					}
 				} else {
 					$error++;
