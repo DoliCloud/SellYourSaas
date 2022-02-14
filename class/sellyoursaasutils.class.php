@@ -2140,7 +2140,6 @@ class SellYourSaasUtils
 							$listofcontractid = array($object);
 
 							foreach ($listofcontractid as $contract) {
-
 								dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
 								if ($contract->array_options['options_deployment_status'] != 'done') {
@@ -2413,7 +2412,6 @@ class SellYourSaasUtils
 						}
 
 						if ($wemustsuspendinstance) {
-
 							$conf->global->noapachereload = $noapachereload;	// Set a global variable that can be read later by trigger
 							$comment = "Closed by batch doSuspendInstances('".$mode.", ".$noapachereload.", ".$maxnbofinstances."') the ".dol_print_date($now, 'dayhourrfc').')';
 							$result = $object->closeAll($user, 0, $comment);			// This may execute trigger that make remote actions to suspend instance
@@ -3534,7 +3532,7 @@ class SellYourSaasUtils
 								$this->errors = $dbinstance->errors;
 							}
 						} else {
-							dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we failed previously to connect with ssh", LOG_WARNING);
+							dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we already failed previously to connect with ssh", LOG_WARNING);
 
 							$dbinstance = null;
 
@@ -3888,7 +3886,7 @@ class SellYourSaasUtils
 						&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 							$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 							if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
-						}
+					}
 
 					$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - Error on remote action for instance: '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name, 90);
 					$messageofevent.= 'Error on remote action for instance: '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";

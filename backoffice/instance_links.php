@@ -485,30 +485,81 @@ if (empty($object->nbofusers)) {    // If value not already loaded
 					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
 				);
 
+				$newcommentonqty = '';
+
 				$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
 				if ($tmparray[0] == 'SQL') {
 					$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
-					dol_syslog("Try to connect to instance database (at ".$generateddbhostname.") to execute formula calculation");
+					//$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
+					$serverdeployment = $contract->array_options['options_deployment_host'];
+
+					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
+
+					$serverdb = $serverdeployment;
+					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+					if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+						$serverdb = $generateddbhostname;
+					}
 
 					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
 					//var_dump($serverdeployement);		// just ip of deployement server
 					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-					$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+
 					if (! $dbinstance || ! $dbinstance->connected) {
 						$error++;
 						setEventMessages($dbinstance->error, $dbinstance->errors, 'errors');
 					} else {
+						$sqlformula = trim($sqlformula);
+
 						dol_syslog("Execute sql=".$sqlformula);
+
 						$resql = $dbinstance->query($sqlformula);
 						if ($resql) {
-							$objsql = $dbinstance->fetch_object($resql);
-							if ($objsql) {
-								$object->nbofusers += $objsql->nb;
+							if (preg_match('/^select count/i', $sqlformula)) {
+								// If request is a simple SELECT COUNT
+								$objsql = $dbinstance->fetch_object($resql);
+								if ($objsql) {
+									$newqty = $objsql->nb;
+									$newcommentonqty .= '';
+								} else {
+									$error++;
+									/*$this->error = 'SQL to get resource return nothing';
+									$this->errors[] = 'SQL to get resource return nothing';*/
+									setEventMessages('SQL to get resource return nothing', null, 'errors');
+								}
 							} else {
-								$error++;
-								setEventMessages('SQL to get resource return nothing', null, 'errors');
+								// If request is a SELECT nb, fieldlogin as comment
+								$num = $dbinstance->num_rows($resql);
+								if ($num > 0) {
+									$itmp = 0;
+									$arrayofcomment = array();
+									while ($itmp < $num) {
+										// If request is a list to count
+										$objsql = $dbinstance->fetch_object($resql);
+										if ($objsql) {
+											if (empty($newqty)) {
+												$newqty = 0;	// To have $newqty not null and allow addition just after
+											}
+											$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
+											if (isset($objsql->comment)) {
+												$arrayofcomment[] = $objsql->comment;
+											}
+										}
+										$itmp++;
+									}
+									$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+									$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
+								} else {
+									$error++;
+									/*$this->error = 'SQL to get resource return nothing';
+									$this->errors[] = 'SQL to get resource return nothing';*/
+									setEventMessages('SQL to get resource return nothing', null, 'errors');
+								}
 							}
+
+							$object->nbofusers += $newqty;
 						} else {
 							$error++;
 							setEventMessages($dbinstance->error, $dbinstance->errors, 'errors');
