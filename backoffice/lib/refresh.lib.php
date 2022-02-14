@@ -264,10 +264,56 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 			// Get nb of users (special case for hard coded field into some GUI tabs)
 			if (! $error) {
 				if ($sqltocountusers) {
+					$sqlformula = $sqltocountusers;
+					$dbinstance = $newdb;
+					$newcommentonqty = '';
+					$newqty = 0;
+
 					$resql=$newdb->query($sqltocountusers);
 					if ($resql) {
-						$obj = $newdb->fetch_object($resql);
-						$object->nbofusers += $obj->nb;
+						if (preg_match('/^select count/i', $sqlformula)) {
+							// If request is a simple SELECT COUNT
+							$objsql = $dbinstance->fetch_object($resql);
+							if ($objsql) {
+								$newqty = $objsql->nb;
+								$newcommentonqty .= '';
+							} else {
+								$error++;
+								/*$this->error = 'SQL to get resource return nothing';
+								 $this->errors[] = 'SQL to get resource return nothing';*/
+								setEventMessages('SQL to get resource return nothing', null, 'errors');
+							}
+						} else {
+							// If request is a SELECT nb, fieldlogin as comment
+							$num = $dbinstance->num_rows($resql);
+							if ($num > 0) {
+								$itmp = 0;
+								$arrayofcomment = array();
+								while ($itmp < $num) {
+									// If request is a list to count
+									$objsql = $dbinstance->fetch_object($resql);
+									if ($objsql) {
+										if (empty($newqty)) {
+											$newqty = 0;	// To have $newqty not null and allow addition just after
+										}
+										$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
+										if (isset($objsql->comment)) {
+											$arrayofcomment[] = $objsql->comment;
+										}
+									}
+									$itmp++;
+								}
+								$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+								$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
+							} else {
+								$error++;
+								/*$this->error = 'SQL to get resource return nothing';
+								 $this->errors[] = 'SQL to get resource return nothing';*/
+								setEventMessages('SQL to get resource return nothing', null, 'errors');
+							}
+						}
+
+						$object->nbofusers += $newqty;
 					} else {
 						$error++;
 						setEventMessages($newdb->lasterror(), null, 'errors');
@@ -290,13 +336,13 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					$object->date_lastlogin = ($obj->datelastlogin ? ($newdb->jdate($obj->datelastlogin)+$deltatzserver) : '');
 				} else {
 					$error++;
-					$errors[]='Failed to connect to database '.$instance.'.on.dolicloud.com'.' '.$username_db;
+					$errors[]='Failed to connect to database '.$instance.' '.$username_db;
 				}
 			}
 
 			$done++;
 		} else {
-			$errors[]='Failed to connect '.$conf->db->type.' '.$instance.'.on.dolicloud.com '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
+			$errors[]='Failed to connect '.$conf->db->type.' '.$instance.' '.$username_db.' '.$password_db.' '.$database_db.' '.$port_db;
 			$ret=-1;
 		}
 

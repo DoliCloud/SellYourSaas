@@ -425,7 +425,8 @@ if ($id > 0) {
 }
 
 
-if (empty($object->nbofusers)) {    // If value not already loaded
+// If value was not already loaded, we do it now (value may have been calculated into refresh.lib.php)
+if (empty($object->nbofusers)) {
 	// Try to get data
 	if (is_object($newdb) && $newdb->connected) {
 		$contract = $object;
@@ -485,6 +486,7 @@ if (empty($object->nbofusers)) {    // If value not already loaded
 					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
 				);
 
+				$newqty = 0;
 				$newcommentonqty = '';
 
 				$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
