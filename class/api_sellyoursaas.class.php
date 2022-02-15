@@ -58,19 +58,26 @@ class Sellyoursaasapi extends DolibarrApi
 	/**
 	 * Get setup or status information of SellYourSaas
 	 *
+	 * @param 	string 	$lang 	Language code
 	 * @return array
 	 *
 	 * @url	GET setup
 	 **/
-	public function setup()
+	public function setup($lang = '')
 	{
 		global $conf;
 
 		$return = array();
 
+		$tmplangs = new Translate('', $conf);
+		$tmplangs->setDefaultLang($lang);
+		$tmplangs->load("sellyoursaas@sellyoursaas");
+
 		if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 			$return['SELLYOURSAAS_DISABLE_NEW_INSTANCES'] = $conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES;	// Global disabling of new instance creation
 		}
+
+		$arrayofdifferentmessages = array();
 
 		foreach ($conf->global as $key => $val) {
 			if (preg_match('/^SELLYOURSAAS_ANNOUNCE_ON/', $key)) {
@@ -79,10 +86,16 @@ class Sellyoursaasapi extends DolibarrApi
 					$newkey = preg_replace('/_ON/', '', $key);
 					if (!empty($conf->global->$newkey)) {
 						$return[$newkey] = $conf->global->$newkey;
+						$arrayofdifferentmessages[] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));
+						$return[$newkey.'_trans'] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));
 					}
 				}
 			}
 		}
+
+		$arrayofdifferentmessages = array_unique($arrayofdifferentmessages);
+
+		$return['message'] = join(', ', $arrayofdifferentmessages);
 
 		return $return;
 	}
