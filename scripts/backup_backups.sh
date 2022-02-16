@@ -112,10 +112,10 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 if [ "x$1" == "x" ]; then
-	echo "Missing parameter 1 - test|confirm" 1>&2
+	echo
 	echo "Usage: ${0} (test|confirm) [m|w] [osu...]"
-fi
-if [[ "x$1" == "x" ]]; then
+	echo "Where m (default) is to keep 1 month of backup, and w is to keep 1 week of backup"
+	echo "You can also set a username to backup the backp of a given user."
 	exit 1
 fi
 
