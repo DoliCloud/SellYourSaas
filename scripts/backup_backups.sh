@@ -259,8 +259,12 @@ if [ "x$ret" != "x0" ]; then
 	exit $ret
 fi
 
-echo "Send email to $EMAILTO to inform about backup success"
-echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+if [ "x$3" != "x" ]; then
+	echo Script was called for only one given instance. No email or supervision event sent in such situation
+else
+	echo "Send email to $EMAILTO to inform about backup success"
+	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+fi
 echo
 
 exit 0
