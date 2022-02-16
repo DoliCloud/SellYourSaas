@@ -45,7 +45,7 @@ if (! defined('NOSESSION'))      define('NOSESSION', '1');
 if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS' && !empty($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
 	header('Access-Control-Allow-Origin: *');
 	header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-	header('Access-Control-Allow-Headers: Content-Type');
+	header('Access-Control-Allow-Headers: Content-Type, Authorization');
 	http_response_code(204);
 	exit;
 }
@@ -73,6 +73,10 @@ $lang = GETPOST('lang', 'aZ09');
 /*
  * View
  */
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 $return = array();
 
