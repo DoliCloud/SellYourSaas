@@ -2,7 +2,7 @@
 # Copy all backups on other locations (on a remote backup server)
 #
 # Put the following entry into your root cron
-#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm [m|w] [osu...]
+#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm [m|w] [osuX]
 
 #set -e
 
@@ -113,20 +113,20 @@ fi
 
 if [ "x$1" == "x" ]; then
 	echo
-	echo "Usage: ${0} (test|confirm) [m|w] [osu...]"
+	echo "Usage: ${0} (test|confirm) [m|w] [osuX]"
 	echo "Where m (default) is to keep 1 month of backup, and w is to keep 1 week of backup"
-	echo "You can also set a username to backup the backp of a given user."
+	echo "You can also set a group of 4 first letter on username to backup the backup of a limited number of users."
 	exit 1
 fi
 
 if [ "x$SERVDESTI" == "x" ]; then
 	echo "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf" 1>&2
-	echo "Usage: ${0} (test|confirm) [osux]"
+	echo "Usage: ${0} (test|confirm) [osuX]"
 fi
 
 if [ "x$DOMAIN" == "x" ]; then
 	echo "Value for domain seems to not be set into /etc/sellyoursaas.conf" 1>&2
-	echo "Usage: ${0} (test|confirm) [osux]"
+	echo "Usage: ${0} (test|confirm) [osuX]"
 fi
 
 
