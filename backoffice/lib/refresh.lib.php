@@ -198,24 +198,90 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 		$done=0;
 
 		if ($newdb->connected && $newdb->database_selected) {
-			$sqltocountusers = '';
 			// Now search the real SQL request to count users
 			foreach ($object->lines as $contractline) {
 				if (empty($contractline->fk_product)) continue;
 				$producttmp = new Product($db);
 				$producttmp->fetch($contractline->fk_product);
 
+				$sqltocountusers = '';
+
 				// If this is a line for a metric
 				if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
 					&& ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref))) {
-					$dbprefix = ($object->array_options['options_prefix_db']?$object->array_options['options_prefix_db']:'llx_');
 
-					$sqltocountusers = $producttmp->array_options['options_resource_formula'];
-					// Example: $sqltocountusers="SELECT COUNT(login) as nb FROM llx_user WHERE statut <> 0 AND login <> '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__';
-					$sqltocountusers = preg_replace('/^SQL:/', '', $sqltocountusers);
-					$sqltocountusers = preg_replace('/__SELLYOURSAAS_LOGIN_FOR_SUPPORT__/', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT, $sqltocountusers);
-					$sqltocountusers = preg_replace('/__INSTANCEDBPREFIX__/', $dbprefix, $sqltocountusers);
-					break;
+					$dbprefix = ($object->array_options['options_prefix_db'] ? $object->array_options['options_prefix_db'] : 'llx_');
+					$substitarray=array(
+						'__INSTANCEDBPREFIX__' => $dbprefix,
+						'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__' => $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
+					);
+
+					$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
+					if ($tmparray[0] == 'SQL') {
+						$sqltocountusers = make_substitutions($tmparray[1], $substitarray);
+						// Get nb of users (special case for hard coded field into some GUI tabs)
+						if ($sqltocountusers) {
+							$sqlformula = $sqltocountusers;
+							$dbinstance = $newdb;
+							$newcommentonqty = '';
+							$newqty = 0;
+
+							$resql=$newdb->query($sqltocountusers);
+							if ($resql) {
+								if (preg_match('/^select count/i', $sqlformula)) {
+									// If request is a simple SELECT COUNT
+									$objsql = $dbinstance->fetch_object($resql);
+									if ($objsql) {
+										$newqty = $objsql->nb;
+										$newcommentonqty .= '';
+									} else {
+										$error++;
+										/*$this->error = 'SQL to get resource return nothing';
+										 $this->errors[] = 'SQL to get resource return nothing';*/
+										setEventMessages('SQL to get resource return nothing', null, 'errors');
+									}
+								} else {
+									// If request is a SELECT nb, fieldlogin as comment
+									$num = $dbinstance->num_rows($resql);
+									if ($num > 0) {
+										$itmp = 0;
+										$arrayofcomment = array();
+										while ($itmp < $num) {
+											// If request is a list to count
+											$objsql = $dbinstance->fetch_object($resql);
+											if ($objsql) {
+												if (empty($newqty)) {
+													$newqty = 0;	// To have $newqty not null and allow addition just after
+												}
+												$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
+												if (isset($objsql->comment)) {
+													$arrayofcomment[] = $objsql->comment;
+												}
+											}
+											$itmp++;
+										}
+										$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+										$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
+									} else {
+										$error++;
+										/*$this->error = 'SQL to get resource return nothing';
+										 $this->errors[] = 'SQL to get resource return nothing';*/
+										setEventMessages('SQL to get resource return nothing', null, 'errors');
+									}
+								}
+
+								$object->nbofusers += $newqty;
+							} else {
+								$error++;
+								setEventMessages($newdb->lasterror(), null, 'errors');
+							}
+						} else {
+							setEventMessages('NoResourceToCountUsersFound', null, 'warnings');
+						}
+					} else {
+						$error++;
+						setEventMessages('No SQL formula found for this metric', null, 'errors');
+					}
 				}
 			}
 
@@ -259,68 +325,6 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					$object->modulesenabled=join(',', $modulesenabled);
 					$object->version=($lastupgrade?$lastupgrade:$lastinstall);
 				} else $error++;
-			}
-
-			// Get nb of users (special case for hard coded field into some GUI tabs)
-			if (! $error) {
-				if ($sqltocountusers) {
-					$sqlformula = $sqltocountusers;
-					$dbinstance = $newdb;
-					$newcommentonqty = '';
-					$newqty = 0;
-
-					$resql=$newdb->query($sqltocountusers);
-					if ($resql) {
-						if (preg_match('/^select count/i', $sqlformula)) {
-							// If request is a simple SELECT COUNT
-							$objsql = $dbinstance->fetch_object($resql);
-							if ($objsql) {
-								$newqty = $objsql->nb;
-								$newcommentonqty .= '';
-							} else {
-								$error++;
-								/*$this->error = 'SQL to get resource return nothing';
-								 $this->errors[] = 'SQL to get resource return nothing';*/
-								setEventMessages('SQL to get resource return nothing', null, 'errors');
-							}
-						} else {
-							// If request is a SELECT nb, fieldlogin as comment
-							$num = $dbinstance->num_rows($resql);
-							if ($num > 0) {
-								$itmp = 0;
-								$arrayofcomment = array();
-								while ($itmp < $num) {
-									// If request is a list to count
-									$objsql = $dbinstance->fetch_object($resql);
-									if ($objsql) {
-										if (empty($newqty)) {
-											$newqty = 0;	// To have $newqty not null and allow addition just after
-										}
-										$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
-										if (isset($objsql->comment)) {
-											$arrayofcomment[] = $objsql->comment;
-										}
-									}
-									$itmp++;
-								}
-								$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
-								$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
-							} else {
-								$error++;
-								/*$this->error = 'SQL to get resource return nothing';
-								 $this->errors[] = 'SQL to get resource return nothing';*/
-								setEventMessages('SQL to get resource return nothing', null, 'errors');
-							}
-						}
-
-						$object->nbofusers += $newqty;
-					} else {
-						$error++;
-						setEventMessages($newdb->lasterror(), null, 'errors');
-					}
-				} else {
-					setEventMessages('NoResourceToCountUsersFound', null, 'warnings');
-				}
 			}
 
 			$deltatzserver=(getServerTimeZoneInt()-0)*3600;	// Diff between TZ of NLTechno and DoliCloud
