@@ -41,6 +41,15 @@ if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DE
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 if (! defined('NOSESSION'))      define('NOSESSION', '1');
 
+// Response for preflight requests (used by browser when into a CORS context)
+if (!empty($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS' && !empty($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
+	header('Access-Control-Allow-Origin: *');
+	header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+	header('Access-Control-Allow-Headers: Content-Type');
+	http_response_code(204);
+	exit;
+}
+
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
 
