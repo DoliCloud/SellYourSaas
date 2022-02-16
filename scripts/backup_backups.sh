@@ -189,7 +189,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 		echo
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ----- Process directory $backupdir/osu$i"
-		nbofdir=`ls -d $backupdir/osu$i* | wc -l`
+		nbofdir=`ls -d $backupdir/osu$i* 2>/dev/null | wc -l`
 		if [ "x$nbofdir" != "x0" ]; then
 			# Test if we force backup on a given dir
 			if [ "x$3" != "x" ]; then
