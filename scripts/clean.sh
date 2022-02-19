@@ -570,24 +570,24 @@ done;
 # Now clean also old dir in archives-test
 echo "***** Now clean also old dir in $archivedirtest - 15 days after being archived"
 cd $archivedirtest
-find $archivedirtest -maxdepth 1 -name 'osu*' -type d -mtime +15 -exec rm -fr {} \;
+find $archivedirtest -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +15 -exec rm -fr {} \;
 
 # Now clean also old dir in archives-paid
 echo "***** Now clean also old dir in $archivedirpaid - 90 days after being archived"
 cd $archivedirpaid
-find $archivedirpaid -maxdepth 1 -name 'osu*' -type d -mtime +90 -exec rm -fr {} \;
+find $archivedirpaid -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +90 -exec rm -fr {} \;
 
 if [[ "$dnsserver" == "1" ]]; then
 	# Now clean also old files in $archivedirbind
 	echo "***** Now clean also old files in $archivedirbind - 15 days after being archived"
 	cd $archivedirbind
-	find $archivedirbind -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+	find $archivedirbind -maxdepth 1 -type f -path '*archives*' -mtime +15 -exec rm -f {} \;
 fi
 
 # Now clean also old files in $archivedircron
 echo "***** Now clean also old files in $archivedircron - 15 days after being archived"
 cd $archivedircron
-find $archivedircron -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+find $archivedircron -maxdepth 1 -type f -path '*cron*' -mtime +15 -exec rm -f {} \;
 
 # Now clean miscellaneous files
 echo "***** Now clean miscellaneous files"
@@ -637,8 +637,8 @@ if [[ $testorconfirm == "confirm" ]]; then
 	rm -f /tmp/osutoclean*
 	echo rm -f /tmp/osusernamefound*
 	rm -f /tmp/osusernamefound*
-	echo rm -fr /tmp/idlistofdb
-	rm -fr /tmp/idlistofdb
+	echo rm -f /tmp/idlistofdb
+	rm -f /tmp/idlistofdb
 fi
 
 
@@ -658,7 +658,7 @@ echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseus
 
 if [[ $testorconfirm == "test" ]]; then
 	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so we can force to undeployed them correctly again"
-	rm -fr /tmp/idlistofdb
+	rm -f /tmp/idlistofdb
 	>> /tmp/idlistofdb
 	for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`; 
 	do 
