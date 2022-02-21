@@ -40,6 +40,20 @@ if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 // Load Dolibarr environment
 include './mainmyaccount.inc.php';
 
+// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+$tmpdomain = preg_replace('/^https?:\/\//i', '', $_SERVER["SERVER_NAME"]); // Remove http(s)://
+$tmpdomain = preg_replace('/\/.*$/i', '', $tmpdomain); // Remove part after domain
+$tmpdomain = preg_replace('/^.*\.([^\.]+)\.([^\.]+)$/', '\1.\2', $tmpdomain); // Remove part 'www.abc.' before 'mydomain.com'
+
+// Code to set cookie for first utm_source
+if (!empty($_GET["utm_source"])) {
+	$cookiename = "utm_source_cookie";
+	$cookievalue = $_GET["utm_source"];
+	if (empty($_COOKIE[$cookiename]) && $tmpdomain) {
+		$domain = $tmpdomain;
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, true, true); // keep cookie 60 days and add tag httponly
+	}
+}
 
 // Load Dolibarr environment
 $res=0;
@@ -182,8 +196,6 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 }
 
 
-include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-
 $urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
@@ -310,20 +322,6 @@ if (! empty($conf->paypal->enabled)) {
 
 $initialaction = $action;
 
-
-// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
-include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-
-// Code to set cookie for first utm_source
-if (!empty($_GET["utm_source"])) {
-	$cookiename = "utm_source_cookie";
-	$cookievalue = $_GET["utm_source"];
-	if (empty($_COOKIE[$cookiename]) && $domainname) {
-		$domain = $domainname;
-		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, (empty($dolibarr_main_force_https) ? false : true), true); // keep cookie 60 days and add tag httponly
-	}
-}
 
 
 /*
@@ -2781,7 +2779,6 @@ if ($mythirdpartyaccount->isareseller) {
 	print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
