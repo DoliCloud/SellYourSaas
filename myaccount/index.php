@@ -311,6 +311,21 @@ if (! empty($conf->paypal->enabled)) {
 $initialaction = $action;
 
 
+// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
+
+// Code to set cookie for first utm_source
+if (!empty($_GET["utm_source"])) {
+	$cookiename = "utm_source_cookie";
+	$cookievalue = $_GET["utm_source"];
+	if (empty($_COOKIE[$cookiename]) && $domainname) {
+		$domain = $domainname;
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, (empty($dolibarr_main_force_https) ? false : true), true); // keep cookie 60 days and add tag httponly
+	}
+}
+
+
 /*
  * Action
  */
