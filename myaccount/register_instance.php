@@ -831,7 +831,7 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_date_registration'] = dol_now();
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin?'-'.$origin:'');
-	$tmpthirdparty->array_options['options_utm_source'] = $_COOKIE['utm_source_cookie'];
+	$tmpthirdparty->array_options['options_source_utm'] = $_COOKIE['utm_source_cookie'];
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
 
