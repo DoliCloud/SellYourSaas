@@ -52,7 +52,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * Ready-to-use showcase website (optional) to sell your application.
 * Dedicated customer area (invoicing, ticket, customer account).
 * Pre-wired for supervision via DataDog.
-* Pre-wired for performance analysis, conversion rate via Google Analytics.
+* Pre-wired for performance analysis, conversion rate via Web Analytics tools (Google Analytics, Matomo, ...).
 * Payment by credit or debit card via Stripe, SCA (Strong Customer Authentication) compliant.
 * Payment by SEPA direct debit (but no direct interface to submit SEPA files to the bank).
 * Anti-abuse systems for applications.
@@ -4824,27 +4824,31 @@ Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 == Annexes
 
-=== Some common URLs for Google Analytics objectives or DataDog Statistics
+=== Some common URLs for Web Analytics objectives or DataDog Statistics
 
-To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
+To activate Web Analytics statistics (Google Analytics, Matomo, ...), put the tag in the configuration of the sellyoursaas module. Check that the domain name of your web site (https://www.mysellyoursaasdomain.com) and the domain of the customer area (https://myaccount.sellyoursaasdomain.com) are enabled.
 
 To activate DataDog statistics, set the option into the module SellYourSaas:
 
 This is a detail of events or URL that can be tracked:
 
 * Page returned when we show the subscription form
-- URL: /register.php   (can be used as goal in *Google Analytics "Prospective client"*)                 
+- Name of event: Form to register
+- URL: /register.php   (example: can be used as goal in *Google Analytics "Prospective client"*)                 
 - Event DataDog: None
 
 * Page shown after a completed subscription
-- URL: /register.php   (can be used as goal in *Google Analytics "Subscribed client"*)                 
+- Name of event: Instance created
+- URL: /index.php?welcomecid=   (example: can be used as goal in *Google Analytics "Subscribed client"*)                 
 - Event DataDog: None
 
 * Page shown when a payment method is added for the first time = New client
-- URL: /register.php   (can be used as goal in *Google Analytics "Won client"*)                 
+- Name of event: Payment mode added
+- URL: /index.php?paymentrecorded=1   (example: can be used as goal in *Google Analytics "Won client"*)                 
 - Event Datadog: *sellyoursaas.paymentmodeadded*
 
 * Page shown when a payment method is modified with success
+- Name of event: Payment mode modified
 - URL: /index.php?paymentmodified=1
 - Event Datadog: *sellyoursaas.paymentmodemodified*
 
