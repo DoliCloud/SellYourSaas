@@ -138,7 +138,13 @@ if (empty($reshook)) {
 				setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
 			}
 
+			$loginforsupport = $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+
 			$password = $conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT;
+			if (empty($password)) {
+				require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
+				$password = getRandomPassword(false);
+			}
 
 			// Calculate hash with remote setup
 			$password_crypted_for_remote = dol_hash($password);
@@ -155,11 +161,12 @@ if (empty($reshook)) {
 			$emailsupport = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 			$signature = '--<br>Support team';
 
-			$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature)";
-			$sql .= " VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."', 1,";
-			$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT)."'").",";
+			$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature, api_key)";
+			$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
+			$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
 			$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
-			$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."')";
+			$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
+			$sql .= " '".$newdb->escape($password)."')";
 			$resql=$newdb->query($sql);
 			if (! $resql) {
 				if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
@@ -177,6 +184,8 @@ if (empty($reshook)) {
 			if ($resaddright <= 0) {
 				setEventMessages('Failed to set all permissions : '.$edituser->error, $edituser->errors, 'warnings');
 			}
+
+			setEventMessages('Password for user <b>'.$loginforsupport.'</b> set to <b>'.$password.'</b>', null, 'warnings');
 		}
 	}
 	if ($action == "deletesupportuser") {

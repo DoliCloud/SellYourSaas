@@ -600,7 +600,7 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 === Addition of a filesystem for logs (optional)
 
-Add a new disk of 500 Mb and mount it on */mnt/disklog*
+Add a new disk of 500 Mb and mount it on */mnt/disklog* or create a virtual mount.
 
 Then modify the file */etc/apache2/envvars* to set *export APACHE_LOG_DIR=/mnt/disklog/*
 Delete the dir */home/admin/logs* and replace it with a symbolic link to */mnt/disklog*
@@ -1042,7 +1042,7 @@ Note: Reload of apache seems not enough.
 [source, conf]
 ---------------
 ErrorLogFormat "[%v] [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\ %a] %M% ,\ referer\ %{Referer}i"
-ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
+ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/other_vhosts_error.log 1G"
 ---------------
 
 
