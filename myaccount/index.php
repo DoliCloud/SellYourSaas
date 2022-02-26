@@ -49,7 +49,7 @@ $tmpdomain = preg_replace('/^.*\.([^\.]+)\.([^\.]+)$/', '\1.\2', $tmpdomain); //
 // Must be before the main that make a redirect on login if not logged
 if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["partner"])) {
 	$cookiename = "utm_source_cookie";
-	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? $_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
+	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? 'partner'.$_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
 	if (empty($_COOKIE[$cookiename]) && $tmpdomain) {
 		$domain = $tmpdomain;
 		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, false, true); // keep cookie 60 days and add tag httponly
