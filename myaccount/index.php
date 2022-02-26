@@ -46,12 +46,13 @@ $tmpdomain = preg_replace('/\/.*$/i', '', $tmpdomain); // Remove part after doma
 $tmpdomain = preg_replace('/^.*\.([^\.]+)\.([^\.]+)$/', '\1.\2', $tmpdomain); // Remove part 'www.abc.' before 'mydomain.com'
 
 // Code to set cookie for first utm_source
-if (!empty($_GET["utm_source"])) {
+// Must be before the main that make a redirect on login if not logged
+if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["partner"])) {
 	$cookiename = "utm_source_cookie";
-	$cookievalue = $_GET["utm_source"];
+	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? $_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
 	if (empty($_COOKIE[$cookiename]) && $tmpdomain) {
 		$domain = $tmpdomain;
-		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, true, true); // keep cookie 60 days and add tag httponly
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, false, true); // keep cookie 60 days and add tag httponly
 	}
 }
 
