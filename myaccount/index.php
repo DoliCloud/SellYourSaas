@@ -1384,6 +1384,8 @@ if ($action == 'updateurl') {
 					if ($backurl) $url=$backurl;
 
 					if ($thirdpartyhadalreadyapaymentmode > 0) {
+						dol_syslog("PaymentModeHasBeenModified");
+
 						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 						$_SESSION['showconversiontracker']='paymentmodified';
 
@@ -1407,6 +1409,8 @@ if ($action == 'updateurl') {
 							}
 						}
 					} else {
+						dol_syslog("PaymentModeHasBeenAdded");
+
 						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 						$_SESSION['showconversiontracker']='paymentrecorded';
 
