@@ -163,7 +163,7 @@ if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
 }
 if (GETPOST('usernamebis', 'alpha')) $login=GETPOST('usernamebis', 'alpha');
 ?>
-<span class="span-icon-user">
+<span class="span-icon-user fa fa-user">
 <input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" name="username" class="flat input-field input-icon-user" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
 </span>
 </td>
@@ -173,10 +173,10 @@ if (GETPOST('usernamebis', 'alpha')) $login=GETPOST('usernamebis', 'alpha');
 <td class="nowrap center valignmiddle">
 <br>
 <?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="password" class="hidden"><?php echo $langs->trans("Password"); ?></label><?php } ?>
-<span class="span-icon-password">
+<span class="span-icon-password fa fa-lock">
 <input type="password" id="password" maxlength="128" placeholder="<?php echo $langs->trans("Password"); ?>" name="password" class="flat input-field input-icon-password" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="<?php echo empty($conf->global->MAIN_LOGIN_ENABLE_PASSWORD_AUTOCOMPLETE)?'off':'on'; ?>" />
 </span>
-<br><br>
+<br>
 </td></tr>
 <?php
 /*
@@ -206,7 +206,7 @@ if (0) {
 	<!-- Captcha -->
 	<tr>
 	<td class="nowrap none center">
-
+	<br>
 	<table class="login_table_securitycode centpercent"><tr>
 	<td>
 	<span class="span-icon-security">
@@ -219,6 +219,8 @@ if (0) {
 
 	</td></tr>
 <?php } ?>
+
+<tr><td><br><br></td></tr>
 </table>
 
 </div> <!-- end div login-right -->

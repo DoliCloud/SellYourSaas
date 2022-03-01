@@ -114,7 +114,7 @@ if (! preg_match('/class="ok"/', $message)) {
 <tr>
 <td class="nowrap valignmiddle" style="text-align: center;">
 	<?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
-<span class="span-icon-user">
+<span class="span-icon-user fa fa-user">
 	<?php
 	if (empty($asknewpass)) {
 		?>

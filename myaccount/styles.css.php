@@ -42,6 +42,7 @@ print "/* CSS content (all pages) */
 
 body.bodywebsite { margin: 0; }
 
+
 .centpercent { width: 100%; }
 
 .floatleft { float: left; }
@@ -408,6 +409,25 @@ border-radius: 0 4px 4px 0;
 .badge-myaccount-status {
 	box-shadow: 0px 0px 10px #ccc;
 }
+
+
+input.input-field {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+	margin-left: -28px;
+    padding-left: 34px;
+    background-color: transparent;
+}
+
+.span-icon-user, .span-icon-password {
+ 	font-family: 'Font Awesome 5 Free';
+	padding-left: 10px;
+}
+.span-icon-user:before, .span-icon-password:before {
+
+}
+
 
 /* For smartphones */
 
