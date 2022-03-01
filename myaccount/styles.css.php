@@ -425,7 +425,7 @@ input.input-field {
 	padding-left: 10px;
 }
 .span-icon-user:before, .span-icon-password:before {
-
+	opacity: 0.4;
 }
 
 
