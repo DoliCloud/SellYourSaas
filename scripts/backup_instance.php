@@ -195,7 +195,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
 	print "         the parameter --delete run the rsync with the --delete option\n";
 	print "         the parameter --notransaction run the mysqldump without the --single-transaction\n";
-	print "         the parameter --quick run the mysqldump without the --quick option\n";
+	print "         the parameter --quick run the mysqldump with the --quick option\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
