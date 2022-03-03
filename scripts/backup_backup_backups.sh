@@ -10,8 +10,16 @@
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
+
+
+echo "**** ${0} started"
+echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups of backup on local server" 
+
+if [ "x$USER" == "x" ]; then
+	
+fi
+
 echo
-echo "**** ${0}"
 echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
