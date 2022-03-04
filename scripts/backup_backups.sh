@@ -216,8 +216,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}. Command was: $command\n"
 			        fi
 				else
-					echo "Canceled. An error occured in backup of DIRSOURCE1"
-					export errstring="$errstring\nCanceled. An error occured in backup of DIRSOURCE1"
+					echo "Canceled. An error occured in backup of DIRSOURCE2=$DIRSOURCE2/osu$i"
+					export errstring="$errstring\nCanceled. An error occured in backup of DIRSOURCE2=$DIRSOURCE2/osu$i"
 				fi
 			done
 	    else
