@@ -173,6 +173,7 @@ $instancespaidnotsuspended=array();
 $instancespaidnotsuspendedpaymenterror=array();
 $instancesbackuperror=array();
 $instancesupdateerror=array();
+$instancesbackupsuccess=array();
 
 
 $instancefilter=(isset($argv[2])?$argv[2]:'');
@@ -365,6 +366,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 			// Return
 			if (! $error) {
 				$nbofok++;
+				$instancesbackupsuccess[$instance] = array('date' => dol_now('gmt'));
 				print '-> Backup process success for '.$instance."\n";
 				sleep(2);	// On success, we wait 2 seconds
 			} else {
@@ -571,8 +573,8 @@ $out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment er
 $out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n";
 $out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
 $out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n":"");
+
 if ($action != 'updatestatsonly') {
-	$out.= "** Nb of paying instances processed ok: ".$nbofok."\n";
 	$out.= "** Nb of paying instances processed ko: ".$nboferrors;
 }
 if (count($instancesbackuperror)) {
@@ -587,7 +589,20 @@ if (count($instancesupdateerror)) {
 		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
 	}
 }
+
 $out.= "\n";
+
+if ($action != 'updatestatsonly') {
+	$out.= "** Nb of paying instances processed ok: ".$nbofok;
+}
+if (count($instancesbackupsuccess)) {
+	$out.= ", success for backup on ";
+	foreach ($instancesbackupsuccess as $instance => $val) {
+		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
+	}
+}
+$out.= "\n";
+
 print $out;
 
 // Write instances into tmp file
