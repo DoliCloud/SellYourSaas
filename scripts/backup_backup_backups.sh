@@ -23,6 +23,10 @@ fi
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups of backup on local server"
 
+export PID=${$}
+export realpath=$(realpath "${0}")
+export scriptdir=$(dirname "$realpath")
+
 echo
 echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
@@ -33,42 +37,27 @@ echo "# arguments ------> ${@}"
 echo "# path to me -----> ${0}"
 echo "# parent path ----> ${0%/*}"
 echo "# my name --------> ${0##*/}"
-echo "# realname -------> $(realpath ${0})"
-echo "# realname name --> $(basename $(realpath ${0}))"
-echo "# realname dir ---> $(dirname $(realpath ${0}))"
+echo "# scriptdir-------> $scriptdir"
 
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupserver=`grep '^remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
-export PID=${$}
-export scriptdir=$(dirname $(realpath ${0}))
-
 export testorconfirm=$2
-
-# Source
 export USER=$1
-export SERVSOURCE=$remotebackupserver
-export SERVPORTSOURCE="22"
-export DIRSOURCE1="$remotebackupdir/home*";
-export DIRSOURCE2="$remotebackupdir/backup*";
-
-# Target
-export DIRDESTI1="$backupdir";
-export DIRDESTI2="$backupdir";
-
-export DISTRIB_RELEASE=`lsb_release -r -s`
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
 export OPTIONS=" -4 --stats -rlt --chmod=u=rwX --backup --suffix=.old";
-if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
-	# Version must be 20.10+ on both side !
-	#export OPTIONS="$OPTIONS --open-noatime" 
-	export OPTIONS="$OPTIONS"
-else 
-	export OPTIONS="$OPTIONS --noatime"
-fi
+
+#export DISTRIB_RELEASE=`lsb_release -r -s`
+#if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
+#	# Version must be 20.10+ on both side !
+#	#export OPTIONS="$OPTIONS --open-noatime" 
+#	export OPTIONS="$OPTIONS"
+#else 
+#	export OPTIONS="$OPTIONS --noatime"
+#fi
 
 if [ "x$testorconfirm" != "xconfirm" ]; then
 	export OPTIONS="-n $OPTIONS"
@@ -98,7 +87,15 @@ echo "DIRDESTI2=$DIRDESTI2"
 echo "PID=$PID"
 echo "testorconfirm=$testorconfirm"
 
+# Source
 export SERVSOURCE=$remotebackupserver
+export SERVPORTSOURCE="22"
+export DIRSOURCE1="$remotebackupdir/home*";
+export DIRSOURCE2="$remotebackupdir/backup*";
+
+# Target
+export DIRDESTI1="$backupdir";
+export DIRDESTI2="$backupdir";
 
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups of backup on local server" 
@@ -115,16 +112,18 @@ export ret=0
 export ret1=0
 export ret2=0
 
+cd "$scriptdir"
+
 # Loop on each target server
 for SERVSOURCECURSOR in `echo $SERVSOURCE | sed -e 's/,/ /g'`
 do
 	# Case of /mnt/diskbackup/home_
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of system backup $SERVSOURCECURSOR to $DIRDESTI1 ..."
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of system backup on $SERVSOURCECURSOR:$DIRSOURCE1$i to $DIRDESTI1 ..."
 
-	for i in 'a', 'b', 'c', 'd', 'e', 'f', g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
+	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE1$i"
 		export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
-		export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE1$i $DIRDESTI1";
+		export command="rsync -x --exclude-from=backup_backups.exclude $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE1$i $DIRDESTI1";
 		echo "$command";
 
 		$command 2>&1
@@ -143,9 +142,9 @@ do
 	export ret2=0
 	if [ "x$ret1" == "x0" ]; then
 		echo
-		echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories to $DIRDESTI2 ..."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE2$i to $DIRDESTI2 ..."
 
-		for i in 'a', 'b', 'c', 'd', 'e', 'f', g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
+		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE2$i"
 
 					# Test if we force backup on a given dir
@@ -156,7 +155,7 @@ do
 					#fi
 
 					export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
-			        export command="rsync -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE2$i $DIRDESTI2";
+			        export command="rsync -x --exclude-from=backup_backups.exclude $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE2$i $DIRDESTI2";
 		        	echo "$command";
 
 			        $command 2>&1
