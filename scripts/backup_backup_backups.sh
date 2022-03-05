@@ -65,8 +65,8 @@ fi
 if [ "x$USER" == "x" ]; then
 	export USER="admin"
 fi
-if [ "x$USER" == "x" ]; then
-	export USER="admin"
+if [ "x$3" == "x--delete" ]; then
+	export OPTIONS="$OPTIONS --delete"
 fi
 
 if [ "x$remotebackupdir" == "x" ]; then
@@ -101,7 +101,7 @@ export DIRDESTI2="$backupdir";
 echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups of backup on local server" 
 
 if [ "x$remotebackupserver" == "x" ]; then
-	echo "Usage:   ${0}  remotelogin  (test|confirm)"
+	echo "Usage:   ${0}  remotelogin  (test|confirm)  [--delete]"
 	echo "Example: ${0}  admin        test"
 	echo "Note:    The user running the script must have its public key declared on the backup server to backup"
 	exit

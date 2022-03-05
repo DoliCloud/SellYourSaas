@@ -76,6 +76,17 @@ if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 else 
 	export OPTIONS="$OPTIONS --noatime"
 fi
+if [ "x$2" == "x--delete" ]; then
+	export OPTIONS="$OPTIONS --delete"
+fi
+if [ "x$3" == "x--delete" ]; then
+	export OPTIONS="$OPTIONS --delete"
+fi
+if [ "x$4" == "x--delete" ]; then
+	export OPTIONS="$OPTIONS --delete"
+fi
+
+
 
 if [ "x$USER" == "x" ]; then
 	export USER="admin"
@@ -113,7 +124,7 @@ fi
 
 if [ "x$1" == "x" ]; then
 	echo
-	echo "Usage: ${0} (test|confirm) [m|w] [osuX]"
+	echo "Usage: ${0} (test|confirm) [m|w] [osuX] [--delete]"
 	echo "Where m (default) is to keep 1 month of backup, and w is to keep 1 week of backup"
 	echo "You can also set a group of 4 first letter on username to backup the backup of a limited number of users."
 	exit 1
@@ -155,7 +166,7 @@ done
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
 	#echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/..."
-	#rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/
+	#rsync $TESTN -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
@@ -183,7 +194,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	#for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 	#do
 	#	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/..."
-	#	rsync $TESTN --delete -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
+	#	rsync $TESTN -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
 	#done
 
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
