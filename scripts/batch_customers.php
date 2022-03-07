@@ -348,7 +348,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 				$command .= ' --delete';
 			}
 			//$command .= " --notransaction";
-			//$command .= " --quick";
+			$command .= " --quick";
 
 			echo $command."\n";
 
