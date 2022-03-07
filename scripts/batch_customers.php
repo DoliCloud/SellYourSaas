@@ -345,8 +345,11 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 
 			$command = ($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
 			if ($action == 'backupdelete') {
-				$command .= ' delete';
+				$command .= ' --delete';
 			}
+			//$command .= "--notransaction";
+			//$command .= "--quick";
+
 			echo $command."\n";
 
 			if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase') {

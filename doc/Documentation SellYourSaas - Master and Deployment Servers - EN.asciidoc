@@ -5060,11 +5060,20 @@ You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS
 Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
 
 
-==== Error when doing mysqldump
+==== Error when doing mysqldump (need PROCESS privileges)
 
 mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
 
 Try to add the parameter --no-tablespaces into the mysqldump command.
+
+
+==== Error when doing mysqldump (execution time exceeded)
+
+mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
+
+Try to read the max_execution_time of your database with:  show variables like '%max_execution_time%';
+
+Then try to increase it with:  SET global max_execution_time = ...;    with millisecond 
 
 
 ==== Error mysql when connecting to database
