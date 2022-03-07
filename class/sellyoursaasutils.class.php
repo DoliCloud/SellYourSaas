@@ -122,7 +122,9 @@ class SellYourSaasUtils
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-								if (! empty($draftinvoiceprocessed[$invoice->id])) continue;	// If already processed because of a previous contract line, do nothing more
+								if (! empty($draftinvoiceprocessed[$invoice->id])) {
+									continue;	// If already processed because of a previous contract line, do nothing more
+								}
 
 								// We ignore $contract->nbofserviceswait +  and $contract->nbofservicesclosed
 								$nbservice = $contract->nbofservicesopened + $contract->nbofservicesexpired;
@@ -132,6 +134,12 @@ class SellYourSaasUtils
 								if ($nbservice && $contract->array_options['options_deployment_status'] != 'undeployed') {
 									if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
 										$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
+									}
+
+									// Set notes with the $contract->array_options['options_commentonqty']
+									if (!empty($contract->array_options['options_commentonqty'])) {
+										$newpublicnote = dol_concatdesc($invoice->note_public, $contract->array_options['options_commentonqty']);
+										$invoice->update_note($newpublicnote, '_public');
 									}
 
 									$result = $invoice->validate($user);
