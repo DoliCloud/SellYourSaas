@@ -67,6 +67,7 @@ if [ "x$2" != "xonline" ]; then
 	            	sed 's!__webSSLCertificateIntermediate__!'$webSSLCertificateIntermediate'!g' | \
 					sed 's!__VirtualHostHead__!'${virtualhosthead}'!g' | \
 					sed 's!__AllowOverride__!'${allowoverride}'!g' \
+					sed 's!__IncludeFromContract__!'${includefromcontract}'!g' \
 					> /etc/apache2/sellyoursaas-offline/$fileshort
 			else
 		        rm -f /etc/apache2/sellyoursaas-offline/$domain.conf 2>/dev/null
@@ -80,6 +81,7 @@ if [ "x$2" != "xonline" ]; then
               		sed 's!__webSSLCertificateIntermediate__!'$webSSLCertificateIntermediate'!g' | \
 					sed 's!__VirtualHostHead__!'${virtualhosthead}'!g' | \
 					sed 's!__AllowOverride__!'${allowoverride}'!g' \
+					sed 's!__IncludeFromContract__!'${includefromcontract}'!g' \
 					> /etc/apache2/sellyoursaas-offline/$fileshort
 			fi
 	done
