@@ -48,7 +48,7 @@ export USER=$1
 
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
 #export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
-export OPTIONS=" -4 --stats -rlt --chmod=u=rwX --backup --suffix=.old";
+export OPTIONS=" -4 --stats -rlt --chmod=u=rwX";
 
 #export DISTRIB_RELEASE=`lsb_release -r -s`
 #if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
