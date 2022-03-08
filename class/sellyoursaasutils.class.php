@@ -136,9 +136,21 @@ class SellYourSaasUtils
 										$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
 									}
 
+									// Define output language
+									$outputlangs = $langs;
+									$newlang = '';
+									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang) && GETPOST('lang_id', 'aZ09')) $newlang = GETPOST('lang_id', 'aZ09');
+									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang)) $newlang = $invoice->thirdparty->default_lang;
+									if (!empty($newlang)) {
+										$outputlangs = new Translate("", $conf);
+										$outputlangs->setDefaultLang($newlang);
+										$outputlangs->loadLangs(array('main', 'bills', 'products', 'sellyoursaas@sellyoursaas'));
+									}
+
 									// Set notes with the $contract->array_options['options_commentonqty']
 									if (!empty($contract->array_options['options_commentonqty'])) {
-										$newpublicnote = dol_concatdesc($invoice->note_public, $contract->array_options['options_commentonqty']);
+										$publicnoteofcontract = str_replace('User Accounts', $outputlangs->trans("ListOfUsers"), $contract->array_options['options_commentonqty']);
+										$newpublicnote = dol_concatdesc($invoice->note_public, $publicnoteofcontract);
 										$invoice->update_note($newpublicnote, '_public');
 									}
 
@@ -151,16 +163,6 @@ class SellYourSaasUtils
 										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
 
-										// Define output language
-										$outputlangs = $langs;
-										$newlang = '';
-										if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) $newlang = GETPOST('lang_id', 'aZ09');
-										if ($conf->global->MAIN_MULTILANGS && empty($newlang))	$newlang = $invoice->thirdparty->default_lang;
-										if (! empty($newlang)) {
-											$outputlangs = new Translate("", $conf);
-											$outputlangs->setDefaultLang($newlang);
-											$outputlangs->loadLangs(array('main','bills','products'));
-										}
 										$model_pdf = ($invoice->model_pdf ? $invoice->model_pdf : $invoice->modelpdf);
 										$ret = $invoice->fetch($id); // Reload to get new records
 
@@ -3590,7 +3592,7 @@ class SellYourSaasUtils
 											$itmp++;
 										}
 										//$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
-										$newcommentonqty .= 'User Accounts ('.$newqty.'): '.join(', ', $arrayofcomment)."\n";
+										$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
 									} else {
 										$error++;
 										$this->error = 'SQL to get resource return nothing';
