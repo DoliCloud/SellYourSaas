@@ -3589,8 +3589,8 @@ class SellYourSaasUtils
 											}
 											$itmp++;
 										}
-										$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
-										$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
+										//$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+										$newcommentonqty .= 'User Accounts ('.$newqty.'): '.join(', ', $arrayofcomment)."\n";
 									} else {
 										$error++;
 										$this->error = 'SQL to get resource return nothing';
