@@ -130,7 +130,7 @@ do
 		if [ "x$?" != "x0" ]; then
 		  	echo "ERROR Failed to make rsync for $DIRSOURCE1"
 		   	export ret1=$(($ret1 + 1));
-		   	export errstring="$errstring Dir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
+		   	export errstring="$errstring\nDir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
 		fi
 	done
 
@@ -162,7 +162,7 @@ do
 			        if [ "x$?" != "x0" ]; then
 			        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
 			        	export ret2=$(($ret2 + 1));
-			        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
+			        	export errstring="$errstring\nDir $DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`
 			        fi
 
 				echo
