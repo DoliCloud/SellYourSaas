@@ -144,8 +144,8 @@ class SellYourSaasUtils
 									if (!empty($newlang)) {
 										$outputlangs = new Translate("", $conf);
 										$outputlangs->setDefaultLang($newlang);
-										$outputlangs->loadLangs(array('main', 'bills', 'products', 'sellyoursaas@sellyoursaas'));
 									}
+									$outputlangs->loadLangs(array('main', 'bills', 'products', 'users', 'sellyoursaas@sellyoursaas'));
 
 									// Set notes with the $contract->array_options['options_commentonqty']
 									if (!empty($contract->array_options['options_commentonqty'])) {
