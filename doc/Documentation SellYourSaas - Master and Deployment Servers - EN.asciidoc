@@ -649,7 +649,7 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 
 === Getting files of Dolibarr and SellYourSaas application
 
-On all servers (*Master and Deploiement*):
+On all servers (*Master and Deployment*):
 
 * Under the *root* login, install git tool:
 
