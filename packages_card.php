@@ -168,7 +168,7 @@ if ($action == 'create') {
 	print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 
 	print dol_get_fiche_head(array(), '');
-	
+
 	print '<table class="border centpercent tableforfieldcreate">'."\n";
 
 	// Common attributes
@@ -218,7 +218,7 @@ if (($id || $ref) && $action == 'edit') {
 	print '</table>';
 
 	print dol_get_fiche_end();
-	
+
 	print '<div class="center"><input type="submit" class="button" name="save" value="'.$langs->trans("Save").'">';
 	print ' &nbsp; <input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
 	print '</div>';
@@ -229,7 +229,7 @@ if (($id || $ref) && $action == 'edit') {
 // Part to show record
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
 	$res = $object->fetch_optionals();
-	
+
 	$head = packagesPrepareHead($object);
 	print dol_get_fiche_head($head, 'card', $langs->trans("Packages"), -1, 'label');
 
@@ -347,7 +347,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<div class="clearboth"></div>';
 
 	print dol_get_fiche_end();
-	
+
 
 	// Buttons for actions
 	if ($action != 'presend' && $action != 'editline') {
@@ -404,7 +404,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		print '<a name="builddoc"></a>'; // ancre
 
 		$includedocgeneration = 0;
-		
+
 		// Documents
 		if ($includedocgeneration) {
 			$objref = dol_sanitizeFileName($object->ref);
@@ -415,33 +415,33 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$delallowed = $user->rights->mymodule->myobject->write; // If you can create/edit, you can remove a file on card
 			print $formfile->showdocuments('mymodule:MyObject', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
-		
+
 		// Show links to link elements
 		$linktoelem = $form->showLinkToObjectBlock($object, null, array('myobject'));
 		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
-		
 
-		print '</div><div class="fichehalfright"><div class="ficheaddleft">';
+
+		print '</div><div class="fichehalfright">';
 
 		$MAXEVENT = 10;
-		
+
 		$morehtmlright = '<a href="'.dol_buildpath('/mymodule/myobject_agenda.php', 1).'?id='.$object->id.'">';
 		$morehtmlright .= $langs->trans("SeeAll");
 		$morehtmlright .= '</a>';
-		
+
 		// List of actions on element
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
 		$formactions = new FormActions($db);
 		$somethingshown = $formactions->showactions($object, $object->element.'@'.$object->module, (is_object($object->thirdparty) ? $object->thirdparty->id : 0), 1, '', $MAXEVENT, '', $morehtmlright);
-		
-		print '</div></div></div>';
+
+		print '</div></div>';
 	}
 
 	//Select mail models is same action as presend
 	if (GETPOST('modelselected')) {
 		$action = 'presend';
 	}
-	
+
 	// Presend form
 	$modelmail='packages';
 	$defaulttopic='Information';

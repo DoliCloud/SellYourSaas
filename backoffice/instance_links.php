@@ -223,7 +223,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$username_db  = $object->array_options['options_username_db'];
 	$password_db  = $object->array_options['options_password_db'];
 	$database_db  = $object->array_options['options_database_db'];
-	$port_db      = $object->array_options['options_port_db'];
+	$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+	$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
 	$hostname_os  = $object->array_options['options_hostname_os'];
 	$username_os  = $object->array_options['options_username_os'];
 	$password_os  = $object->array_options['options_password_os'];
@@ -238,6 +239,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->password_db  = $password_db;
 	$object->database_db  = $database_db;
 	$object->port_db      = $port_db;
+	$object->prefix_db    = $prefix_db;
 	$object->username_os  = $username_os;
 	$object->password_os  = $password_os;
 	$object->hostname_os  = $hostname_os;
@@ -245,7 +247,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->password_web = $password_web;
 	$object->hostname_web = $hostname_os;
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, ($port_db?$port_db:3306));
+	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	$newdb->prefix_db = $prefix_db;
 
 	$stringofversion = '';
 	$stringoflistofmodules = '';
@@ -257,15 +260,15 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		$stringoflistofmodules='';
 
 		$fordolibarr = 1;
-		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 			$forglpi = 1;
 		}
 
 		// Get user/pass of last admin user
 		if ($fordolibarr) {
 			// TODO Put the definition of sql to get last used admin user into the package.
-			$sql="SELECT login, pass FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 			}
 
@@ -352,7 +355,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
 			if ($action != 'classify')
-				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&amp;id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
+				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&token='.newToken().'&id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
 			if ($action == 'classify') {
 				//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
 				$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
@@ -406,7 +409,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 		if ($user->rights->sellyoursaas->write)
 		{
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=upgrade">'.$langs->trans('Upgrade').'</a>';
+			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=upgrade&token='.newToken().'">'.$langs->trans('Upgrade').'</a>';
 		}
 
 		print "</div><br>";
@@ -422,7 +425,8 @@ if ($id > 0) {
 }
 
 
-if (empty($object->nbofusers)) {    // If value not already loaded
+// If value was not already loaded, we do it now (value may have been calculated into refresh.lib.php)
+if (empty($object->nbofusers)) {
 	// Try to get data
 	if (is_object($newdb) && $newdb->connected) {
 		$contract = $object;
@@ -436,7 +440,6 @@ if (empty($object->nbofusers)) {    // If value not already loaded
 			// If this is a line for a metric
 			if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
 				&& ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref))) {
-
 				$generatedunixlogin=$contract->array_options['options_username_os'];
 				$generatedunixpassword=$contract->array_options['options_password_os'];
 				$tmp=explode('.', $object->ref_customer, 2);
@@ -483,34 +486,90 @@ if (empty($object->nbofusers)) {    // If value not already loaded
 					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
 				);
 
+				$newqty = 0;
+				$newcommentonqty = '';
+
 				$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
 				if ($tmparray[0] == 'SQL') {
 					$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
-					dol_syslog("Try to connect to instance database (at ".$generateddbhostname.") to execute formula calculation");
+					//$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
+					$serverdeployment = $contract->array_options['options_deployment_host'];
+
+					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
+
+					$serverdb = $serverdeployment;
+					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
+					if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
+						$serverdb = $generateddbhostname;
+					}
 
 					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
 					//var_dump($serverdeployement);		// just ip of deployement server
 					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-					$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
+
 					if (! $dbinstance || ! $dbinstance->connected) {
 						$error++;
 						setEventMessages($dbinstance->error, $dbinstance->errors, 'errors');
 					} else {
+						$sqlformula = trim($sqlformula);
+
 						dol_syslog("Execute sql=".$sqlformula);
+
 						$resql = $dbinstance->query($sqlformula);
 						if ($resql) {
-							$objsql = $dbinstance->fetch_object($resql);
-							if ($objsql) {
-								$object->nbofusers += $objsql->nb;
+							if (preg_match('/^select count/i', $sqlformula)) {
+								// If request is a simple SELECT COUNT
+								$objsql = $dbinstance->fetch_object($resql);
+								if ($objsql) {
+									$newqty = $objsql->nb;
+									$newcommentonqty .= '';
+								} else {
+									$error++;
+									/*$this->error = 'SQL to get resource return nothing';
+									$this->errors[] = 'SQL to get resource return nothing';*/
+									setEventMessages('SQL to get resource return nothing', null, 'errors');
+								}
 							} else {
-								$error++;
-								setEventMessages('SQL to get resource return nothing', null, 'errors');
+								// If request is a SELECT nb, fieldlogin as comment
+								$num = $dbinstance->num_rows($resql);
+								if ($num > 0) {
+									$itmp = 0;
+									$arrayofcomment = array();
+									while ($itmp < $num) {
+										// If request is a list to count
+										$objsql = $dbinstance->fetch_object($resql);
+										if ($objsql) {
+											if (empty($newqty)) {
+												$newqty = 0;	// To have $newqty not null and allow addition just after
+											}
+											$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
+											if (isset($objsql->comment)) {
+												$arrayofcomment[] = $objsql->comment;
+											}
+										}
+										$itmp++;
+									}
+									$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+									$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
+								} else {
+									$error++;
+									/*$this->error = 'SQL to get resource return nothing';
+									$this->errors[] = 'SQL to get resource return nothing';*/
+									setEventMessages('SQL to get resource return nothing', null, 'errors');
+								}
 							}
+
+							$object->nbofusers += $newqty;
+							$object->array_options['options_latestresupdate_date'] = dol_now();
+							$object->array_options['options_commentonqty'] = $newcommentonqty;
 						} else {
 							$error++;
-							setEventMessages($dbinstance->error, $dbinstance->errors, 'errors');
+							setEventMessages($dbinstance->lasterror(), $dbinstance->errors, 'errors');
 						}
+
+						$dbinstance->close();
 					}
 				} else {
 					$error++;
@@ -543,7 +602,7 @@ print '<table class="noborder centpercent tableforfield">';
 print '<tr><td width="20%">'.$langs->trans("NbOfUsers").'</td><td><font size="+2">'.round($object->nbofusers).'</font></td>';
 print '<td></td><td>';
 if (! $object->user_id && $user->rights->sellyoursaas->write) {
-	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=refresh">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refresh&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
 }
 print '</td>';
 print '</tr>';
@@ -551,8 +610,8 @@ print '</tr>';
 // Authorized key file
 print '<tr>';
 print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey">'.$langs->trans("Create").'</a>)';
-print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey">'.$langs->trans("Delete").'</a>)':'');
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
@@ -560,8 +619,8 @@ print '</tr>';
 // Install.lock file
 print '<tr>';
 print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock">'.$langs->trans("Create").'</a>)';
-print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock">'.$langs->trans("Delete").'</a>)':'');
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
@@ -628,12 +687,12 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td>'.$instance->getLibStatut(7).'</td>';
 	print '<td align="right">';
 	if ($user->rights->sellyoursaas->write) {
-		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
+		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
 		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
 			print ' &nbsp; ';
-			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
+			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
 			print ' &nbsp; ';
-			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
+			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=removespamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("RemoveAntiSpamTracker").'</a>';
 		}
 	}
 	print '</td>';
@@ -645,7 +704,7 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td></td>';
 	print '<td></td>';
 	print '<td>';
-	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist">'.$langs->trans("GetFileOfIps").'</a>';
+	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
 	print '</td>';
 	print '<td></td>';
 	print '<td></td>';

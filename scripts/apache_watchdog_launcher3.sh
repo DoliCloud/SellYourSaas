@@ -13,7 +13,7 @@
 # Script to launch apache watch dog.
 #
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo "**** ${0}"
@@ -59,7 +59,7 @@ fi
 
 if [ "x$1" == "xstop" ]; then
 	
-        pid=`ps ax | grep 'tail' | grep 'error.log' | grep -v grep | awk ' { print $1 } '`
+        pid=`ps ax | grep 'tail' | grep '/var/log/apache2/other_vhosts_error.log' | grep -v grep | awk ' { print $1 } '`
         if [ "x$pid" == "x" ]; then
                 echo apache_watchdog_daemon3 "tail" process not started
         else

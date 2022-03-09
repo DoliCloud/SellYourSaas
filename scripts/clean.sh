@@ -9,7 +9,7 @@
 
 source /etc/lsb-release
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo "**** ${0}"
@@ -35,6 +35,8 @@ export archivedirpaid=`grep '^archivedirpaid=' /etc/sellyoursaas.conf | cut -d '
 export archivedirbind="/etc/bind/archives"
 export archivedircron="/var/spool/cron/crontabs.disabled"
 
+
+
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
    exit 100
@@ -57,26 +59,38 @@ if [[ "x$databaseport" == "x" ]]; then
 	databaseport="3306"
 fi
 
-if [ "x$instanceserver" == "x1" && "x$IPSERVERDEPLOYMENT" == "x" ]; then
-   echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
-   exit 1
+if [[ "x$instanceserver" != "x0" && "x$IPSERVERDEPLOYMENT" == "x" ]]; then
+	echo "Failed to find the IPSERVERDEPLOYMENT by reading entry 'ipserverdeployment=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 1
 fi
-
-if [ "x$database" == "x" ]; then
+if [[ "x$database" == "x" ]]; then
     echo "Failed to find the DATABASE by reading entry 'database=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 29
 fi
-if [ "x$databasehost" == "x" ]; then
+if [[ "x$databasehost" == "x" ]]; then
     echo "Failed to find the DATABASEHOST by reading entry 'databasehost=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 30
 fi
-if [ "x$databaseuser" == "x" ]; then
+if [[ "x$databaseuser" == "x" ]]; then
     echo "Failed to find the DATABASEUSER by reading entry 'databaseuser=' into file /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} [test|confirm]"
 	exit 4
 fi
+if [[ "x$archivedirtest" == "x" ]]; then
+    echo "Failed to find the archivedirtest value by reading entry 'archivedirtest=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 31
+fi
+if [[ "x$archivedirpaid" == "x" ]]; then
+    echo "Failed to find the archivedirpaid value by reading entry 'archivedirpaid=' into file /etc/sellyoursaas.conf" 1>&2
+	echo "Usage: ${0} [test|confirm]"
+	exit 31
+fi
+
+
 echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
 databasepass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepass" == "x" ]]; then
@@ -127,16 +141,19 @@ echo "testorconfirm = $testorconfirm"
 MYSQL=`which mysql`
 MYSQLDUMP=`which mysqldump` 
 
-if [[ ! -d $archivedirtest ]]; then
-	echo Failed to find archive directory $archivedirtest
-	exit 8
-fi
-if [[ ! -d $archivedirpaid ]]; then
-	echo Failed to find archive directory $archivedirpaid
-	exit 9
+if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
+	if [[ ! -d $archivedirtest ]]; then
+		echo Failed to find archive directory $archivedirtest
+		exit 8
+	fi
+	if [[ ! -d $archivedirpaid ]]; then
+		echo Failed to find archive directory $archivedirpaid
+		exit 9
+	fi
 fi
 
 echo "***** Clean temporary files"
+
 echo rm -f /tmp/instancefound*
 rm -f /tmp/instancefound*
 if [ -f /tmp/instancefound-dbinsellyoursaas ]; then
@@ -151,6 +168,7 @@ if [ -f /tmp/instancefound-dbinmysqldic ]; then
 	echo Failed to delete file /tmp/instancefound-dbinmysqldic
 	exit 19
 fi
+
 echo rm -f /tmp/osutoclean*
 rm -f /tmp/osutoclean*
 if [ -f /tmp/osutoclean ]; then
@@ -161,6 +179,7 @@ if [ -f /tmp/osutoclean-oldundeployed ]; then
 	echo Failed to delete file /tmp/osutoclean-oldundeployed
 	exit 14
 fi
+
 echo rm -f /tmp/osusernamefound*
 rm -f /tmp/osusernamefound*
 if [ -f /tmp/osusernamefound ]; then
@@ -168,6 +187,13 @@ if [ -f /tmp/osusernamefound ]; then
 	exit 15
 fi
 
+echo "Nettoyage vieux fichiers log"
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+
+echo "Nettoyage vieux fichiers /tmp"
+echo find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
 
 
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
@@ -183,6 +209,22 @@ do
 		echo "Site $basfic is enabled, we keep it"
 	fi
 done
+
+echo "***** Clean available fpm pool that are not enabled hosts (safe)"
+if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
+	for fic in `ls /etc/apache2/sellyoursaas-fpm-pool/*.*.*.*.conf /etc/apache2/sellyoursaas-fpm-pool/*.home.lan 2>/dev/null`
+	do
+		basfic=`basename $fic` 
+		if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
+			echo Remove file with rm /etc/apache2/sellyoursaas-available/$basfic
+			if [[ $testorconfirm == "confirm" ]]; then
+				rm /etc/apache2/sellyoursaas-available/$basfic
+			fi
+		else
+			echo "Site $basfic is enabled, we keep it"
+		fi
+	done
+fi
 
 
 echo "***** Get list of databases of all instances and save it into /tmp/instancefound-dbinsellyoursaas"
@@ -336,11 +378,11 @@ if [ -s /tmp/osutoclean ]; then
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
 				if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
-					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst
+					echo "$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | zstd -z -9 -q > $archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
+					$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | zstd -z -9 -q > "$archivedirtest/$osusername/dump.$dbname.$now.sql.zst"
 				else
-					echo "$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
-					$MYSQLDUMP -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz
+					echo "$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname | gzip > $archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
+					$MYSQLDUMP --no-tablespaces -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname | gzip > "$archivedirtest/$osusername/dump.$dbname.$now.sql.tgz"
 				fi
 
 				echo "Now drop the database"
@@ -528,24 +570,24 @@ done;
 # Now clean also old dir in archives-test
 echo "***** Now clean also old dir in $archivedirtest - 15 days after being archived"
 cd $archivedirtest
-find $archivedirtest -maxdepth 1 -name 'osu*' -type d -mtime +15 -exec rm -fr {} \;
+find $archivedirtest -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +15 -exec rm -fr {} \;
 
 # Now clean also old dir in archives-paid
 echo "***** Now clean also old dir in $archivedirpaid - 90 days after being archived"
 cd $archivedirpaid
-find $archivedirpaid -maxdepth 1 -name 'osu*' -type d -mtime +90 -exec rm -fr {} \;
+find $archivedirpaid -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +90 -exec rm -fr {} \;
 
 if [[ "$dnsserver" == "1" ]]; then
 	# Now clean also old files in $archivedirbind
 	echo "***** Now clean also old files in $archivedirbind - 15 days after being archived"
 	cd $archivedirbind
-	find $archivedirbind -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+	find $archivedirbind -maxdepth 1 -type f -path '*archives*' -mtime +15 -exec rm -f {} \;
 fi
 
 # Now clean also old files in $archivedircron
 echo "***** Now clean also old files in $archivedircron - 15 days after being archived"
 cd $archivedircron
-find $archivedircron -maxdepth 1 -type f -mtime +15 -exec rm -f {} \;
+find $archivedircron -maxdepth 1 -type f -path '*cron*' -mtime +15 -exec rm -f {} \;
 
 # Now clean miscellaneous files
 echo "***** Now clean miscellaneous files"
@@ -556,6 +598,25 @@ echo "***** Now clean journal files older than 60 days"
 echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;"
 find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;
 
+# Clean tmp files
+
+
+# Now clean also old dir in archives-test
+if [[ "x$masterserver" == "x1" ]]; then
+	echo "***** We are on a master, so we clean sellyoursaas temp files" 
+	echo "Clean sellyoursaas temp files"
+	find "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/." ! -path "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/" -mtime +1 -exec rm -fr {} \;
+fi
+
+# Clean log files
+if [[ "x$instanceserver" != "x0" ]]; then
+	echo "***** We are on a deployment server, so we clean log files" 
+	echo "Clean web server _error logs"
+	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log 2>/dev/null`; do > $fic; done
+	echo "Clean applicative log files"
+	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
+	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+fi
 
 # Clean archives 
 if [ "x$2" == "xtempdirs" ]; then
@@ -564,6 +625,20 @@ if [ "x$2" == "xtempdirs" ]; then
 	find "$archivedirpaid" -type d -path '*/osu*/temp' -exec rm -fr {} \;
 	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
 	find "$archivedirtest" -type d -path '*/osu*/temp' -exec rm -fr {} \;
+fi
+
+
+if [[ $testorconfirm == "confirm" ]]; then
+	echo "***** Clean temporary files"
+	
+	echo rm -f /tmp/instancefound*
+	rm -f /tmp/instancefound*
+	echo rm -f /tmp/osutoclean*
+	rm -f /tmp/osutoclean*
+	echo rm -f /tmp/osusernamefound*
+	rm -f /tmp/osusernamefound*
+	echo rm -f /tmp/idlistofdb
+	rm -f /tmp/idlistofdb
 fi
 
 
@@ -583,7 +658,7 @@ echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseus
 
 if [[ $testorconfirm == "test" ]]; then
 	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so we can force to undeployed them correctly again"
-	rm -fr /tmp/idlistofdb
+	rm -f /tmp/idlistofdb
 	>> /tmp/idlistofdb
 	for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`; 
 	do 
@@ -629,6 +704,5 @@ if [ -s /tmp/deletedirs.sh ]; then
 	echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
 	echo You can execute commands into file /tmp/deletedirs.sh
 fi
-
 
 exit 0

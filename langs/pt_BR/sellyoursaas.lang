@@ -2,5 +2,4 @@
 Authorized_keyInstalled=Arquivo authorized_keys_support instalado
 AccountAlreadyExistsForEmail=Já existe uma conta para este email. Se você já é um usuário registrado e deseja criar outra instância para sua conta, faça logon no <a href="%s" target="_myaccount">painel do cliente</a> para criar outra instância.
 DeploymentDate=Data de implantação
-PleaseReadFAQFirst=Antes de enviar qualquer tíquete de suporte, verifique se a resposta ainda não está disponível aqui: <br> <br> <center> <a href="%s" target="_faq"> FAQs (perguntas sobre o Foire Aux) </a> </center>
 RecreateAuthorizedKey=Criar arquivo allowed_keys

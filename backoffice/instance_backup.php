@@ -41,6 +41,7 @@ require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/geturl.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaasutils.class.php");
@@ -85,7 +86,6 @@ $ispaid = sellyoursaasIsPaidInstance($object);
 if ($ispaid) {
 	if ($object->array_options['options_deployment_status'] != 'undeployed') {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
@@ -94,7 +94,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
@@ -103,7 +103,6 @@ if ($ispaid) {
 		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 	} else {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->DOLICLOUD_INSTANCES_PATH."/".$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
@@ -113,7 +112,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
@@ -126,7 +125,6 @@ if ($ispaid) {
 } else {
 	if ($object->array_options['options_deployment_status'] != 'undeployed') {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
@@ -135,7 +133,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
@@ -143,7 +141,6 @@ if ($ispaid) {
 		$restorestringfromarchiveshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
 		$restorestringfromarchive = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 	} else {
-		$restorestringpretoshow .= "su - admin"."\n";
 		$restorestringpretoshow .= "cd ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
 		$restorestringpretoshow .= 'sudo rm -fr '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo rm -fr ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
@@ -154,7 +151,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
@@ -163,8 +160,12 @@ if ($ispaid) {
 	}
 }
 
-$moveinstancestringtoshow .= "su - admin"."\n";
-$moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/move_instance.php '.$object->ref_customer.' newinstancename.withNEW.mydomain.com (test|confirm)'."\n";
+$tmparray = explode('.', $object->ref_customer);
+
+$moveinstancestringtoshow .= "chmod a+r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
+$moveinstancestringtoshow .= "su - admin\n";
+$moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm|confirmredirect)';
+$moveinstancestringtoshow .= "chmod o-r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
 
 
 // Increase limit of time. Works only if we are not in safe mode
@@ -307,7 +308,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
 			if ($action != 'classify')
-				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&amp;id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
+				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&token='.newToken().'&id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
 			if ($action == 'classify') {
 				//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
 				$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
@@ -422,7 +423,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		print '<div class="tabsAction">';
 
 		if ($user->rights->sellyoursaas->write) {
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=backupinstance">'.$langs->trans('BackupNow').'</a>';
+			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=backupinstance&token='.newToken().'">'.$langs->trans('BackupNow').'</a>';
 		}
 
 		print "</div>";
@@ -470,7 +471,7 @@ if ($restorestringfrombackupshort) {
 	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(can be run on any server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
 	print $backupstringtoshow."\n";
-	print $restorestringtoshow."\n";
+	print $restorestringtoshow;
 	print '</textarea>';
 
 	print '<br>';
@@ -481,8 +482,8 @@ if ($restorestringfrombackupshort) {
 if ($moveinstancestringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run on master server)</span><br>';
-	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
-	print $moveinstancestringtoshow."\n";
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_3.'">';
+	print $moveinstancestringtoshow;
 	print '</textarea>';
 
 	print '<br>';

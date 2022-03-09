@@ -25,35 +25,44 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE becomereseller.tpl.php -->
 <?php
 
-	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+	if (! empty($conf->global->$newnamekey)) {
+		$sellyoursaasname = $conf->global->$newnamekey;
+	}
 }
 
-	// Print warning to read FAQ before
-	$url = $conf->global->SELLYOURSAAS_RESELLER_URL;
+// Print warning to read FAQ before
+$url = $conf->global->SELLYOURSAAS_RESELLER_URL;
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_RESELLER_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) $url = $conf->global->$newnamekey;
+	if (! empty($conf->global->$newnamekey)) {
+		$url = $conf->global->$newnamekey;
+	}
 }
 
-	if (preg_match('/^fr/i', $langs->defaultlang)) $url = preg_replace('/en-/', 'fr-', $url);
-	if (preg_match('/^es/i', $langs->defaultlang)) $url = preg_replace('/en-/', 'es-', $url);
+if (preg_match('/^fr/i', $langs->defaultlang)) {
+	$url = preg_replace('/en-/', 'fr-', $url);
+}
+if (preg_match('/^es/i', $langs->defaultlang)) {
+	$url = preg_replace('/en-/', 'es-', $url);
+}
+if (empty($url)) {
+	$url = 'UrlDocresellerNotSetup (See param SELLYOURSAAS_RESELLER_URL)';
+}
 
 
-
-	print '
+print '
 		<div class="alert alert-success note note-success">
 		<h4 class="block">'.$langs->trans("BecomeResellerDesc", $sellyoursaasname, $url, $sellyoursaasname).'</h4>
-	<br>
 		</div>
 	';
 
 
-	print '
+print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
 
@@ -103,11 +112,13 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 		$texttouse = GETPOST('content', 'none');
 		// Text is in french or english (no other language for resellers)
 if (! $texttouse) {
-	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+	$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasname = getDolGlobalString($newnamekey);
+		}
 	}
 
 	$texttouse = (preg_match('/fr/i', $langs->defaultlang)?$langs->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault):$langsen->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault));

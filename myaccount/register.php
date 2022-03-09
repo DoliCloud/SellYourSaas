@@ -86,16 +86,15 @@ $fromsocid = GETPOST('fromsocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
 $extcss=GETPOST('extcss', 'alpha');
 
+// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
+
 $productid=GETPOST('service', 'int');
 $productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):'');
 if (empty($productid) && empty($productref)) {
 	$productref = $plan;
 	if (empty($productref)) {
-		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-
-		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
-		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-
 		$suffix='_'.strtoupper(str_replace('.', '_', $domainname));
 		$constname="SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
 		$defaultproduct=(! empty($conf->global->$constname) ? $conf->global->$constname : $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT);
@@ -150,9 +149,14 @@ if ($productref != 'none') {
 	}
 	$productref = $tmpproduct->ref;
 
+	if (empty($tmpproduct->status)) {
+		print "Product '".$productref."' is not on sale.";
+		exit;
+	}
+
 	$tmppackage->fetch($tmpproduct->array_options['options_package']);
 	if (empty($tmppackage->id)) {
-		print "Package with id '".$tmpproduct->array_options['options_package']." was not found.";
+		print "Package with id '".$tmpproduct->array_options['options_package']."' was not found.";
 		exit;
 	}
 }
@@ -192,6 +196,18 @@ if ($socid > 0) {
 $hookmanager->initHooks(array('sellyoursaas-register'));
 
 
+// Code to set cookie for first utm_source
+if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["partner"])) {
+	$cookiename = "utm_source_cookie";
+	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? 'partner'.$_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
+	if (empty($_COOKIE[$cookiename]) && $domainname) {
+		$domain = $domainname;
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, false, true); // keep cookie 60 days and add tag httponly
+	}
+}
+
+
+
 /*
  * Action
  */
@@ -219,12 +235,11 @@ if ($favicon) {
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
 $head.='<!-- Bootstrap core CSS -->
-<!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
-<link href="dist/css/bootstrap.css" rel="stylesheet">';
+<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
 if ($extcss) {
-	$head.='<link href="'.$extcss.'" rel="stylesheet">';
+	$head.='<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 } else {
-	$head.='<link href="dist/css/myaccount.css" rel="stylesheet">';
+	$head.='<link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">';
 }
 
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
@@ -329,7 +344,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					  <div class="btn-sm">
 					  <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
 						<?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
-					  <a href="/" class="btn blue btn-sm btnalreadyanaccount margintop"><?php echo $langs->trans("LoginAction"); ?></a>
+					  <a href="/" class="btn blue btn-sm btnalreadyanaccount valignmiddle"><?php echo $langs->trans("LoginAction"); ?></a>
 					  </div>
 						<?php if (! empty($homepage)) { ?>
 					  <div class="btn-sm home-page-url">
@@ -354,18 +369,34 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 		if (! GETPOST('noheader', 'int')) {
 			?>
 		<header class="invers">
-		  <h1><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
+			<div class="customregisterheader">
+				<h1><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
+				<div class="paddingtop20">
+					<div class="btn-sm">
+					<span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
+						<?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
+					<a href="/" class="btn blue btn-sm btnalreadyanaccount valignmiddle"><?php echo $langs->trans("LoginAction"); ?></a>
+					</div>
+						<?php if (! empty($homepage)) { ?>
+					<div class="btn-sm home-page-url">
+					<span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="<?php echo $homepage ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
+					</div>
+						<?php } ?>
+				</div>
+			</div>
+		  <h1 class="defaultheader"><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
 		</header>
 			<?php
 		}
+		print '<div class="signup2 centpercent customregistermain">';
 		?>
-		<div class="signup2 centpercent">
 
 			<?php
 			if (! empty($tmpproduct->array_options['options_register_text'])) {
 				$keytouse = $tmpproduct->array_options['options_register_text'];
 				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
-				print '<div class="register_text">'."\n";
+					print '<div class="customregisterinformation">'."\n";
+					print '<div class="register_text">'."\n";
 				if ($langs->trans($keytouse) != $keytouse) {
 					print $langs->trans($keytouse);
 				} else {	// We try english version
@@ -373,7 +404,13 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						print $langsen->trans($keytouse);
 					}
 				}
-				print '</div>'."\n";
+					print '</div>'."\n";
+				?>
+					<div class="valignmiddle customcompanylogo">
+					<a href="<?php echo $homepage ?>"><img style="max-width:100%"src="<?php echo $linklogo; ?>" /></a><br>
+					</div>
+					<?php
+					print '</div>'."\n";
 			}
 			?>
 
@@ -513,9 +550,17 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						foreach ($listofdomain as $val) {
 							$newval = $val;
 							$reg = array();
-							if (preg_match('/:(.*)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-								$newval = preg_replace('/:.*$/', '', $newval);
-								if ($reg[1] != $domainname && $newval != GETPOST('forcesubdomain', 'alpha')) {
+							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
+								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+								$domainqualified = false;
+								$tmpdomains = explode('+', $reg[1]);
+								foreach ($tmpdomains as $tmpdomain) {
+									if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
+										$domainqualified = true;
+										break;
+									}
+								}
+								if (! $domainqualified) {
 									print '<!-- '.$newval.' disabled. Allowed only if main domain of registration page is '.$reg[1].' -->';
 									continue;
 								}
@@ -612,7 +657,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			}
 			if ($urlfortermofuse) {
 				?>
-			  <p class="termandcondition center" style="color:#444;margin:10px 0;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
+			  <p class="termandcondition small center" style="color:#444;margin:10px 0;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
 				<?php
 			}
 			?>

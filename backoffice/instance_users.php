@@ -83,13 +83,15 @@ $hostname_db = $object->array_options['options_hostname_db'];
 $username_db = $object->array_options['options_username_db'];
 $password_db = $object->array_options['options_password_db'];
 $database_db = $object->array_options['options_database_db'];
-$prefix_db   = $object->array_options['options_prefix_db'];
-$port_db     = $object->array_options['options_port_db'];
+$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
+$port_db     = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
 $username_web = $object->array_options['options_username_os'];
 $password_web = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
-if (empty($prefix_db)) $prefix_db = 'llx_';
+if (empty($prefix_db)) {
+	$prefix_db = 'llx_';
+}
 
 // Security check
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
@@ -112,6 +114,8 @@ if (empty($reshook)) {
 
 	if ($action == "createsupportuser") {
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb->prefix_db = $prefix_db;
+
 		if (is_object($newdb)) {
 			$savMAIN_SECURITY_HASH_ALGO = $conf->global->MAIN_SECURITY_HASH_ALGO;
 			$savMAIN_SECURITY_SALT = $conf->global->MAIN_SECURITY_SALT;
@@ -134,7 +138,13 @@ if (empty($reshook)) {
 				setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
 			}
 
+			$loginforsupport = $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+
 			$password = $conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT;
+			if (empty($password)) {
+				require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
+				$password = getRandomPassword(false);
+			}
 
 			// Calculate hash with remote setup
 			$password_crypted_for_remote = dol_hash($password);
@@ -151,11 +161,12 @@ if (empty($reshook)) {
 			$emailsupport = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 			$signature = '--<br>Support team';
 
-			$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature)";
-			$sql .= " VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."', 1,";
-			$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT)."'").",";
+			$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature, api_key)";
+			$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
+			$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
 			$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
-			$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."')";
+			$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
+			$sql .= " '".$newdb->escape($password)."')";
 			$resql=$newdb->query($sql);
 			if (! $resql) {
 				if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
@@ -173,12 +184,14 @@ if (empty($reshook)) {
 			if ($resaddright <= 0) {
 				setEventMessages('Failed to set all permissions : '.$edituser->error, $edituser->errors, 'warnings');
 			}
+
+			setEventMessages('Password for user <b>'.$loginforsupport.'</b> set to <b>'.$password.'</b>', null, 'warnings');
 		}
 	}
 	if ($action == "deletesupportuser") {
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
-			$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM llx_user WHERE login = '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."')";
+			$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM ".$prefix_db."user WHERE login = '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."')";
 			$resql=$newdb->query($sql);
 			if (! $resql) dol_print_error($newdb);
 
@@ -208,7 +221,7 @@ if (empty($reshook)) {
 		if (is_object($newdb)) {
 			// TODO Set definition to disable a user into the package
 			$sql="UPDATE ".$prefix_db."user set statut=1 WHERE rowid = ".GETPOST('remoteid', 'int');
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				$sql="UPDATE ".$prefix_db."glpi_user set is_active=TRUE WHERE rowid = ".GETPOST('remoteid', 'int');
 			}
 
@@ -240,7 +253,7 @@ if (empty($reshook)) {
 			$conf->global->MAIN_SECURITY_HASH_ALGO = $savalgo;
 
 			// TODO Set definition of algorithm to hash password into the package
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				if (!empty($conf->global->MAIN_SHOW_PASSWORD_INTO_LOG)) {
 					dol_syslog("new password=".$password);
 				}
@@ -249,7 +262,7 @@ if (empty($reshook)) {
 
 			// TODO Set definition to update password of a userinto the package
 			$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				$sql="UPDATE glpi_users set password='".$newdb->escape($password_crypted)."' WHERE id = ".((int) GETPOST('remoteid', 'int'));
 			}
 
@@ -298,9 +311,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	if (is_object($newdb) && $newdb->connected) {
 		// Get user/pass of last admin user
-		$sql="SELECT login, pass FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+		$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 		// TODO Set definition to read users table into the package
-		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 			$sql="SELECT name as login, '' as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 		}
 
@@ -351,7 +364,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
 			if ($action != 'classify')
-				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&amp;id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
+				$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&token='.newToken().'&id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
 			if ($action == 'classify') {
 				//$morehtmlref.=$form->form_project($_SERVER['PHP_SELF'] . '?id=' . $object->id, $object->socid, $object->fk_project, 'projectid', 0, 0, 1, 1);
 				$morehtmlref.='<form method="post" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
@@ -405,6 +418,7 @@ $username_db = $object->array_options['options_username_db'];
 $password_db = $object->array_options['options_password_db'];
 $database_db = $object->array_options['options_database_db'];
 $port_db     = $object->array_options['options_port_db'];
+$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 $username_web = $object->array_options['options_username_os'];
 $password_web = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
@@ -413,9 +427,9 @@ $dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $pas
 
 if (!$error && is_object($dbcustomerinstance) && $dbcustomerinstance->connected) {
 	// Get user/pass of last admin user
-	$sql="SELECT login, pass, pass_crypted FROM llx_user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+	$sql="SELECT login, pass, pass_crypted FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 	// TODO Set definition of algorithm to hash password into the package
-	if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+	if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 		$sql="SELECT name as login, '' as pass, password as pass_crypted FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 	}
 
@@ -486,8 +500,8 @@ if (!$error && ! $user->societe_id) {
 	print '<div class="tabsAction">';
 
 	if ($user->rights->sellyoursaas->write) {
-		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=createsupportuser&amp;token='.newToken().'">'.$langs->trans('CreateSupportUser').'</a>';
-		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=deletesupportuser&amp;token='.newToken().'">'.$langs->trans('DeleteSupportUser').'</a>';
+		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createsupportuser&token='.newToken().'">'.$langs->trans('CreateSupportUser').'</a>';
+		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletesupportuser&token='.newToken().'">'.$langs->trans('DeleteSupportUser').'</a>';
 	}
 
 	print "</div><br>";
@@ -535,6 +549,8 @@ function print_user_table($newdb, $object)
 		$sortorder = "ASC";
 	}
 
+	$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
+
 	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
 	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
 	print '<table class="noborder" width="100%">';
@@ -546,7 +562,7 @@ function print_user_table($newdb, $object)
 	foreach ($arrayfields as $key => $value) {
 		if ($key == 'statut') {
 			$cssforfield = ($cssforfield ? ' ' : '').'center';
-		}else{
+		} else {
 			$cssforfield = "";
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
@@ -559,11 +575,11 @@ function print_user_table($newdb, $object)
 	if (is_object($newdb) && $newdb->connected) {
 		// Get user/pass of all users in database
 		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
-		$sql.=" FROM llx_user";
+		$sql.=" FROM ".$prefix_db."user";
 		$sql .= $newdb->order($sortfield, $sortorder);
 
 		// TODO Set definition of SQL to get list of all users into the package
-		if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
+		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
 			//$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, concat(gp.name, ' ', gp.interface) as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
 			$sql .= " glpi_useremails.email as email";
@@ -578,12 +594,12 @@ function print_user_table($newdb, $object)
 		$resql=$newdb->query($sql);
 		if (empty($resql)) {	// Alternative for Dolibarr 3.7-
 			$sql ="SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-			$sql.=" FROM llx_user ORDER";
+			$sql.=" FROM ".$prefix_db."user ORDER";
 			$sql .= $newdb->order($sortfield, $sortorder);
 			$resql=$newdb->query($sql);
 			if (empty($resql)) {	// Alternative for Dolibarr 3.3-
 				$sql ="SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-				$sql.=" FROM llx_user";
+				$sql.=" FROM ".$prefix_db."user";
 				$sql .= $newdb->order($sortfield, $sortorder);
 				$resql=$newdb->query($sql);
 			}
@@ -603,35 +619,35 @@ function print_user_table($newdb, $object)
 				print '</td>';
 				foreach ($arrayfields as $key => $value) {
 					if (! empty($arrayfields[$key]['checked'])) {
-					    if ($key == 'statut') {
-					        if ($obj->statut) {
-					            print '<td class="center">';
-					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
-					            print '</td>';
-					        } else {
-					            print '<td class="center">';
-					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
-					            print '</td>';
-					        }
-					    } elseif ($key == 'pass') {
-					        $valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-					        print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
-					    } elseif ($key == 'login') {
-					        print '<td class="nowraponall">';
-					        print $obj->$key;
-					        print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
-					        print '</td>';
-					    } elseif ($key == 'email') {
-					        print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
-					    } elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
-					        print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
-					    } else {
-					        print '<td>'.$obj->$key.'</td>';
-					    }
+						if ($key == 'statut') {
+							if ($obj->statut) {
+								print '<td class="center">';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
+								print '</td>';
+							} else {
+								print '<td class="center">';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
+								print '</td>';
+							}
+						} elseif ($key == 'pass') {
+							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+							print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
+						} elseif ($key == 'login') {
+							print '<td class="nowraponall">';
+							print $obj->$key;
+							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
+							print '</td>';
+						} elseif ($key == 'email') {
+							print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
+						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
+							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
+						} else {
+							print '<td>'.$obj->$key.'</td>';
+						}
 					}
 				}
 				print '<td align="center">';
-				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&remoteid='.$obj->rowid.'&id='.$id.'&token='.newToken().'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'">'.img_picto('ResetPassword', 'object_technic').'</a>';
 				print '</td>';
 				print '</tr>';
 				$i++;

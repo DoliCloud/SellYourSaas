@@ -114,11 +114,11 @@ if (! preg_match('/class="ok"/', $message)) {
 <tr>
 <td class="nowrap valignmiddle" style="text-align: center;">
 	<?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
-<span class="span-icon-user">
+<span class="span-icon-user fa fa-user">
 	<?php
 	if (empty($asknewpass)) {
 		?>
-	<input type="text" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  autofocus="autofocus" />
+	<input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-field input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  autofocus="autofocus" />
 	<br><br>
 		<?php
 	} else {

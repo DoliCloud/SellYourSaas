@@ -158,7 +158,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				break;
 			case 'LINECONTRACT_ACTIVATE':
 				if (empty($object->context['deployallwasjustdone'])) {
-					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran and context 'deployallwasjustdone' is not 1, so we launch the unsuspend remote actions");
+					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran and context 'deployallwasjustdone' is not 1, so we will launch the unsuspend remote actions if line has type 'app'");
 					$object->fetch_product();
 					if ($object->product->array_options['options_app_or_option'] == 'app') {
 						$contract = new Contrat($this->db);
@@ -170,7 +170,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						}
 					}
 				} else {
-					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran but context 'deployallwasjustdone' is 1, so we do not launch the unsuspend remote actions");
+					dol_syslog("Trigger LINECONTRACT_ACTIVATE is ran but context 'deployallwasjustdone' is 1, so we do NOT launch the unsuspend remote actions");
 				}
 				break;
 			case 'LINECONTRACT_CLOSE':
@@ -207,7 +207,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					$nametotest = strtolower($nametotest);
 
 					// Test new name syntax
-					if ($nametotest != $object->ref_customer) {	// Same control than in register_instance but we add . because we test FQDN and not only first part.
+					if ($nametotest != $object->ref_customer) {
 						$this->errors[]="Bad value for the new name of URL (must be lowercase, without spaces, not starting with '-')";
 						return -1;
 					}
@@ -308,6 +308,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 							$this->error = $contract->error;
 							$this->errors = $contract->errors;
 						}
+						dol_syslog("Contract lines have been activated");
 					}
 				} else {
 					dol_syslog("The cancel/paid invoice ".$object->ref." is a credit note, or has no linked contract to check to unsuspend.");
@@ -462,14 +463,15 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 			$contract = null;
 			if (get_class($object) == 'Contrat') {	// object is contract
 				$contract = $object;
-			} else // object is a line of contract fo type 'app'
-			{
+			} else { // object is a line of contract for type 'app'
 				$contract = new Contrat($this->db);
 				$contract->fetch($object->fk_contrat);
 			}
 
 			// No remote action required or this is not a sellyoursaas instance
-			if (in_array($remoteaction, array('suspend','unsuspend','undeploy','undeployall')) && empty($contract->array_options['options_deployment_status'])) $okforremoteaction=0;
+			if (in_array($remoteaction, array('suspend','unsuspend','undeploy','undeployall')) && empty($contract->array_options['options_deployment_status'])) {
+				$okforremoteaction=0;
+			}
 
 			if (! $error && $okforremoteaction && $contract) {
 				if ($remoteaction == 'deploy' || $remoteaction == 'unsuspend') {		// when remoteaction = 'deploy' or 'unsuspend'
@@ -501,7 +503,9 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 			if (! $error && $okforremoteaction) {
 				dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($this->db);
-				$result = $sellyoursaasutils->sellyoursaasRemoteAction($remoteaction, $object, 'admin', '', '', '0', 'Remote action executed from trigger', 300);	// No events added
+				// Param '0' means an event is added for some remot action only, '-1' means never add remote action
+				$forceaddevent = '0';
+				$result = $sellyoursaasutils->sellyoursaasRemoteAction($remoteaction, $object, 'admin', '', '', $forceaddevent, 'Remote action '.$remoteaction.' executed from trigger '.$action, 300);
 				if ($result <= 0) {
 					$error++;
 					$this->error=$sellyoursaasutils->error;
@@ -518,6 +522,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					}
 				}
 			}
+
+			dol_syslog("Trigger ".$action." ends with error=".$error);
 		}
 
 		if ($error) {

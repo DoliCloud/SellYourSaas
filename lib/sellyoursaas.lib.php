@@ -21,13 +21,42 @@
  * \brief   Library files with common functions for SellYourSaas module
  */
 
+if (!function_exists('getDolGlobalString')) {
+	/**
+	 * Return dolibarr global constant string value
+	 * @param string $key key to return value, return '' if not set
+	 * @param string $default value to return
+	 * @return string
+	 */
+	function getDolGlobalString($key, $default = '')
+	{
+		global $conf;
+		// return $conf->global->$key ?? $default;
+		return (string) (empty($conf->global->$key) ? $default : $conf->global->$key);
+	}
+}
+
+if (!function_exists('getDolGlobalInt')) {
+	/**
+	 * Return dolibarr global constant int value
+	 * @param string $key key to return value, return 0 if not set
+	 * @param int $default value to return
+	 * @return int
+	 */
+	function getDolGlobalInt($key, $default = 0)
+	{
+		global $conf;
+		// return $conf->global->$key ?? $default;
+		return (int) (empty($conf->global->$key) ? $default : $conf->global->$key);
+	}
+}
 
 /**
  * To compare on date property
  *
- * @param date $a		Date A
- * @param date $b		Date B
- * @return boolean		Result of comparison
+ * @param 	int 	$a		Date A
+ * @param 	int 	$b		Date B
+ * @return 	boolean			Result of comparison
  */
 function cmp($a, $b)
 {
@@ -35,7 +64,7 @@ function cmp($a, $b)
 }
 
 /**
- * Return if a thirdparty has a payment mode
+ * Return if a thirdparty has a payment mode set as a default payment mode.
  *
  * @param 	int	$thirdpartyidtotest		Third party id
  * @return 	int							>0 if there is at least one payment mode, 0 if no payment mode
@@ -109,7 +138,7 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 	var_dump($contract->linkedObjects);*/
 
 	$foundtemplate=0;
-	if (is_array($contract->linkedObjectsIds['facturerec'])) {
+	if (!empty($contract->linkedObjectsIds['facturerec']) && is_array($contract->linkedObjectsIds['facturerec'])) {
 		foreach ($contract->linkedObjectsIds['facturerec'] as $idelementelement => $templateinvoiceid) {
 			$foundtemplate++;
 			break;
@@ -120,7 +149,7 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 
 	if ($mode == 0) {
 		$foundinvoice=0;
-		if (is_array($contract->linkedObjectsIds['facture'])) {
+		if (!empty($contract->linkedObjectsIds['facture']) && is_array($contract->linkedObjectsIds['facture'])) {
 			foreach ($contract->linkedObjectsIds['facture'] as $idelementelement => $invoiceid) {
 				$foundinvoice++;
 				break;
@@ -137,28 +166,41 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 /**
  * Return if instance has a last payment in error or not
  *
- * @param 	Contrat $contract		Object contract
- * @return	int						>0 if this is a contract with current payment error
+ * @param 	Contrat 	$contract			Object contract
+ * @return	int								>0 if this is a contract with current payment error
  */
 function sellyoursaasIsPaymentKo($contract)
 {
 	global $db;
 
-	$contract->fetchObjectLinked();
+	// TODO Replace this with a direct select on actioncomm linked to open invoices of contract.
+
+	$loadalsoobjects = 1;	// We nee the object 'facture' to test its status
+	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', $loadalsoobjects);
+
 	$paymenterror=0;
 
 	if (is_array($contract->linkedObjects['facture'])) {
-		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
-			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
+		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
+			if ($invoice->statut == Facture::STATUS_CLOSED) {
+				continue;
+			}
 
 			// The invoice is not paid, we check if there is at least one payment issue
-			$sql=' SELECT id FROM '.MAIN_DB_PREFIX."actioncomm WHERE elementtype = 'invoice' AND fk_element = ".$invoice->id." AND code='INVOICE_PAYMENT_ERROR'";
+			// See also request into index.php
+			$sql = "SELECT id FROM ".MAIN_DB_PREFIX."actioncomm";
+			$sql .= " WHERE elementtype = 'invoice' AND fk_element = ".$invoice->id;
+			$sql .= " AND (code LIKE 'AC_PAYMENT_%_KO' OR label = 'Cancellation of payment by the bank')";
+			$sql .= ' ORDER BY datep DESC';
+
 			$resql=$db->query($sql);
 			if ($resql) {
-				$num=$db->num_rows($resql);
+				$num = $db->num_rows($resql);
 				$db->free($resql);
 				return $num;
-			} else dol_print_error($db);
+			} else {
+				dol_print_error($db);
+			}
 		}
 	}
 
@@ -179,7 +221,7 @@ function sellyoursaasHasOpenInvoices($contract)
 	$atleastoneopeninvoice=0;
 
 	if (is_array($contract->linkedObjects['facture'])) {
-		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
+		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
 			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
 			if ($invoice->statut == Facture::STATUS_ABANDONED) continue;
 			if (empty($invoice->paid)) {
@@ -197,15 +239,19 @@ function sellyoursaasHasOpenInvoices($contract)
  * For expiration date, it takes the lowest planed end date for services (whatever is service status)
  *
  * @param 	Contrat $contract				Object contract
- * @param	int		$onlyexpirationdate		1=Return only expiration date (no need to load each product line properties)
- * @return	array							Array of data array('expirationdate'=>Timestamp of expiration date, or 0 if error or not found)
+ * @param	int		$onlyexpirationdate		1=Return only property 'expiration_date' (no need to load each product line properties to also set the 'nbofgbs', 'status', 'duration_value', ...)
+ * @return	array							Array of data array(
+ * 												'expirationdate'=>Timestamp of expiration date, or 0 if error or not found,
+ * 												'status'=>Status of line of package app,
+ * 												'duration_value', 'duration_unit', 'nbusers', 'nbofgbs', 'appproductid'
+ * 											)
  */
 function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 {
 	global $db;
 
 	$expirationdate = 0;
-	$status = 0;
+	$statusofappline = 0;
 	$duration_value = 0;
 	$duration_unit = '';
 	$nbofusers = 0;
@@ -225,7 +271,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 		}
 
 		if (empty($onlyexpirationdate) && $line->fk_product > 0) {
-			if (empty($cachefortmpprod[$line->fk_product])) {
+			if (empty($cachefortmpprod[$line->fk_product])) {	// if product not already loaded into the cache
 				$tmpprod = new Product($db);
 				$result = $tmpprod->fetch($line->fk_product, '', '', '', 1, 1, 1);
 				if ($result > 0) {
@@ -236,12 +282,13 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 			}
 			$prodforline = $cachefortmpprod[$line->fk_product];
 
+			// Get data depending on type of line (status, duration_xxx, appproductid, nbofusers, nbofgbs)
 			if ($prodforline->array_options['options_app_or_option'] == 'app') {
 				$duration_value = $prodforline->duration_value;
 				$duration_unit = $prodforline->duration_unit;
 				$appproductid = $prodforline->id;
 
-				$status = $line->statut;
+				$statusofappline = $line->statut;
 
 				if (empty($duration_value) || empty($duration_unit)) {
 					dol_syslog("Error, the definition of duration for product ID ".$prodforline->id." is uncomplete.", LOG_ERR);
@@ -260,7 +307,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 		}
 	}
 
-	return array('expirationdate'=>$expirationdate, 'status'=>$status, 'duration_value'=>$duration_value, 'duration_unit'=>$duration_unit, 'nbusers'=>$nbofusers, 'nbofgbs'=>$nbofgbs, 'appproductid'=>$appproductid);
+	return array('expirationdate'=>$expirationdate, 'status'=>$statusofappline, 'duration_value'=>$duration_value, 'duration_unit'=>$duration_unit, 'nbusers'=>$nbofusers, 'nbofgbs'=>$nbofgbs, 'appproductid'=>$appproductid);
 }
 
 
@@ -297,14 +344,14 @@ function getRootUrlForAccount($object)
 
 	$newobject = $object;
 
-	// If $object is a contract, we take ref_c
-	if (get_class($newobject) == 'Contrat') {
+	// If $object is a contract, we take ref_customer
+	if ($newobject && get_class($newobject) == 'Contrat') {
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 		$ret = 'https://myaccount.'.getDomainFromURL($newobject->ref_customer, 1);
 	}
 
 	// If $object is a product, we take package
-	if (get_class($newobject) == 'Product') {
+	if ($newobject && get_class($newobject) == 'Product') {
 		dol_include_once('/sellyoursaas/class/packages.class.php');
 
 		$newobject->fetch_optionals();
@@ -315,7 +362,7 @@ function getRootUrlForAccount($object)
 	}
 
 	// If $object is a package, we take first restrict and add account.
-	if (get_class($newobject) == 'Packages') {
+	if ($newobject && get_class($newobject) == 'Packages') {
 		$tmparray = explode(',', $newobject->restrict_domains);
 		if (is_array($tmparray)) {
 			foreach ($tmparray as $key => $val) {

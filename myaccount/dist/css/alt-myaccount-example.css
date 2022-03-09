@@ -1,0 +1,107 @@
+/* Alternative CSS for myaccount */
+
+body{
+	padding: 0px; 
+}
+
+a{
+    color:#608ef2;
+}
+.customregisterheader a {
+	color: #FFF;		
+}
+
+div.block header h1 {
+	margin-bottom: 0; 
+}
+
+.customregistermain{
+    display:flex;
+    justify-content:space-around;
+    max-width:100%;
+}
+.customregistermain > * {
+    width:100%;
+    padding:10px
+}
+
+.customregisterinformation{
+    display: flex;
+    flex-direction:column;
+    justify-content: space-around;
+    padding-left: 100px;
+    padding-right: 100px;
+}
+.customregisterinformation > *{
+    align-self: center;
+    /* padding-left:200px; */
+}
+.customcompanylogo{
+    display:block;
+}
+
+.customregisterheader {
+    display:flex
+}
+.customregisterheader > h1{
+    margin:auto;
+    margin-top: 7px;
+    padding-left:100px
+}
+.defaultheader{
+	display:none;
+}
+.page-header-top{
+	display:none;
+}
+
+/* For other sizes */
+
+@media (max-width: 768px) {
+    body{
+        padding-top: 0px!important; 
+    }
+
+	div.block header h1 {
+		margin-bottom: 0;
+		font-size: 1.1em; 
+	}
+
+    .customregistermain{
+        flex-direction:column;
+    }
+
+	.customregisterinformation {
+	    padding-left: 10px;
+    	padding-right: 10px;
+	}
+    .customregisterinformation > *{
+        max-width:90%;
+        padding-left:0px;
+    }
+    .customcompanylogo{
+        -webkit-box-ordinal-group: 1;
+        -moz-box-ordinal-group: 1;
+        -ms-flex-order: 1;
+        -webkit-order: 1;
+        order: 1;
+        padding-bottom: 20px;
+    }
+    .register_text{
+        -webkit-box-ordinal-group: 2;
+        -moz-box-ordinal-group: 2;
+        -ms-flex-order: 2;
+        -webkit-order: 2;
+        order: 2;
+        padding: 0 0;
+    }
+
+    .customregisterheader > h1{
+    	margin-top: 0;
+    	padding-left:0px
+	}
+}
+
+@media (max-width: 320px) {
+
+}

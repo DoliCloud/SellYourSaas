@@ -69,11 +69,11 @@ print '
 				<table class="noborder centpercent tablecommission">
 				<tr class="liste_titre">
 
-	              <td style="min-width: 100px">
-	                '.$langs->trans("Date").'
-	              </td>
 	              <td>
 	                '.$langs->trans("Invoice").'
+	              </td>
+	              <td style="min-width: 100px">
+	                '.$langs->trans("Date").'
 	              </td>
 	              <td align="right">
 	                '.$langs->trans("AmountHT").'
@@ -145,11 +145,8 @@ while ($i < min($num, $limit)) {
 
 	print '
 							<tr>
-			              <td>
-			                '.dol_print_date($obj->datef, 'dayrfc', $langs).'
-			              </td>
-			              <td>
-			                '.img_mime('pdf.pdf', $titleinvoice).' '.($obj->ref_supplier ? $obj->ref_supplier : $obj->ref);
+			              <td class="nowraponall">
+			                '.($obj->ref_supplier ? $obj->ref_supplier : $obj->ref);
 	$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
@@ -161,7 +158,12 @@ while ($i < min($num, $limit)) {
 
 	$totalpaidht += $obj->total_ht;
 
+	print img_mime('pdf.pdf', $titleinvoice, 'paddingleft');
+
 	print '
+			              </td>
+			              <td>
+			                '.dol_print_date($obj->datef, 'dayrfc', $langs).'
 			              </td>
 			              <td align="right">
 			                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
@@ -212,11 +214,11 @@ while ($i < min($num, $limit)) {
 	              <td style="min-width: 150px">
 			         '.$langs->trans("Customer").'
 	              </td>
-	              <td style="min-width: 100px">
-	                '.$langs->trans("Date").'
-	              </td>
 	              <td>
 	                '.$langs->trans("Invoice").'
+	              </td>
+	              <td style="min-width: 100px">
+	                '.$langs->trans("Date").'
 	              </td>
 	              <td align="right">
 	                '.$langs->trans("AmountHT").'
@@ -311,11 +313,9 @@ while ($i < min($num, $limit2)) {
 	print $tmpthirdparty->name;
 	//.' '.$form->textwithpicto('', $langs->trans("CurrentCommission").': '.($commissionpercent?$commissionpercent:0).'%', 1).'
 	print '</td>
-                      <td>
-                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
-                      </td>
-                      <td>
+                      <td class="nowraponall">
                         ';
+	$titleinvoice = $tmpinvoice->ref.($tmpinvoice->ref_supplier ? ' ('.$tmpinvoice->ref_supplier.')' : '');
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
@@ -328,11 +328,14 @@ while ($i < min($num, $limit2)) {
 	} else {
 		$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
 		$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
-		print '<a href="'.$urltouse.'" target="_download">'.img_mime('pdf.pdf').$tmpinvoice->ref.'</a>';
+		print '<a href="'.$urltouse.'" target="_download">'.$tmpinvoice->ref.img_mime('pdf.pdf', $titleinvoice, 'paddingleft').'</a>';
 	}
 
 	print '
               </td>
+                      <td>
+                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
+                      </td>
               <td align="right">
                 '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
               </td>
@@ -341,6 +344,8 @@ while ($i < min($num, $limit2)) {
 	//$s = $tmpinvoice->getLibStatut(2, $alreadypayed + $amount_credit_notes_included);
 	$s = $tmpinvoice->getLibStatut(2, -1);
 	$s = preg_replace('/'.$langs->trans("BillShortStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
+	$s = preg_replace('/'.$langs->trans("BillStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
+
 	print $s;
 	print '
               </td>
@@ -408,15 +413,31 @@ if ($nbtotalofrecords > $limit2) {
 		print '<td></td>';
 		print '<td></td>';
 		print '<td></td>';
-		print '<td align="right">'.price($commoldystem + $totalamountcommission - $totalpaidht).'</td>';
+		print '<td align="right">'.price(price2num($commoldystem + $totalamountcommission - $totalpaidht, 'MT')).'</td>';
 		print '</tr>';
 
 		print '</table>';
 
 		print '<br>';
-		print $langs->trans("YouCanClainAmountWhen", price(empty($conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM) ? 100 : $conf->global->SELLYOURSAAS_MINAMOUNT_TO_CLAIM, 1, $langs, 1, -1, -1, $conf->currency)).'<br>';
+		print $langs->trans("YouCanClainAmountWhen", price(getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM') ? getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM') : 100, 1, $langs, 1, -1, -1, $conf->currency)).'<br>';
 		$labelforcompany = $mysoc->name. ' ('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Country").': '.$langs->trans("Country".$mysoc->country_code).')';
-		print $langs->trans("SendYourInvoiceTo", $labelforcompany, $mysoc->email);
+
+		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
+		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
+				$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				if (getDolGlobalString($newnamekey)) {
+					$emailforresellerinvoice = getDolGlobalString($newnamekey);
+				}
+		}
+
+		if (empty($emailforresellerinvoice)) {
+			$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
+		}
+		if (empty($emailforresellerinvoice)) {
+			$emailforresellerinvoice = $mysoc->email;
+		}
+		print $langs->trans("SendYourInvoiceTo", $labelforcompany, $emailforresellerinvoice);
 		print '</div>';
 
 		print '

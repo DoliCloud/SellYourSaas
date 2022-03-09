@@ -908,8 +908,8 @@ pre code {
   position: relative;
   width: 100%;
   min-height: 1px;
-  padding-right: 15px;
-  padding-left: 15px;
+  padding-right: 11px;
+  padding-left: 11px;
 }
 
 @media (min-width: 576px) {
@@ -9316,4 +9316,3 @@ a.text-gray-dark:focus, a.text-gray-dark:hover {
     display: none !important;
   }
 }
-/*# sourceMappingURL=bootstrap.css.map */

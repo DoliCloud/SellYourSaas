@@ -59,7 +59,17 @@ $instance = GETPOST('instance');	// example: 'testldr3.with.mysaasdomainname.com
 // SEarch instance
 $contract = new Contrat($db);
 if ($instance) {
-	$contract->fetch(0, '', $instance);
+	$result = $contract->fetch(0, '', $instance);
+	if ($result == 0) {
+		$sql = "SELECT fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE custom_url = '".$db->escape($instance)."' AND suspendmaintenance_message like 'http%'";
+		$resql = $db->query($sql);
+		if ($resql) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				$contract->fetch($obj->fk_object);
+			}
+		}
+	}
 	$contract->fetch_thirdparty();
 }
 
@@ -74,6 +84,18 @@ if ($langs->defaultlang == 'en_US') {
 	$langsen->setDefaultLang('en_US');
 	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
 }
+
+
+if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+	dol_syslog("Maintenance mode is on for ".$contract->ref_customer." with a redirect to ".$contract->array_options['options_suspendmaintenance_message']);
+	header("Location: ".$contract->array_options['options_suspendmaintenance_message']);
+	exit;
+}
+
+
+/*
+ * View
+ */
 
 http_response_code(503);	// 503 Service Unavailable
 
@@ -94,7 +116,9 @@ if ($instance == 'myaccount') {
 }
 print '<br>';
 if (! empty($contract->array_options['options_suspendmaintenance_message']) && $contract->array_options['options_suspendmaintenance_message'] != 'nomessage') {
+	print '<br><div class="opacitymedium">';
 	print $langs->trans($contract->array_options['options_suspendmaintenance_message']).'<br>';
+	print '</div><br>';
 }
 print '<br>';
 if ($instance && $instance != 'myaccount') {

@@ -1,0 +1,102 @@
+---
+# Script to create a system user on servers
+#
+# To run the script:
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user'
+# notice the double quotes around the key so spaces are interpreted as part of it
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userip=www.xxx.yyy.zzz userpublickey="publickey"'
+# you can specify an IP for that user with the syntax above
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userip=www.xxx.yyy.zzz userpublickey="publickey"' --limit=*.mydomain.com
+#
+
+- name: Create user on target system(s)
+  hosts: '{{target}}'
+  become: yes
+  #become_method: sudo
+  become_user: root
+  tasks:
+  - name: Check if SellYourSaas is installed on this sevrer
+    stat: 
+      path: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php
+    register: sellyoursaas_installed_rules
+
+  - name: Get user main public ip into a variable
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php ip {{login}}"
+    register: command_for_userip
+    when: sellyoursaas_installed_rules.stat.exists == True
+
+  - name: Get public key into a variable
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php public_key {{login}}"
+    register: command_for_userpublickey
+    when: 
+      - sellyoursaas_installed_rules.stat.exists == True
+      - userpublickey is not defined
+
+  - name: Set var userip if not defined
+    set_fact:
+      userip: "{{ command_for_userip.stdout }}"
+    when: 
+      - sellyoursaas_installed_rules.stat.exists == True
+      - userip is not defined
+
+  - name: Set var userpublickey if not defined
+    set_fact:
+      userpublickey: "{{ command_for_userpublickey.stdout }}"
+    when: 
+      - sellyoursaas_installed_rules.stat.exists == True
+      - userpublickey is not defined
+
+  - name: Print return information from the previous task
+    ansible.builtin.debug:
+      var: userip
+      verbosity: 1
+
+  - name: Print return information from the previous task
+    ansible.builtin.debug:
+      var: userpublickey
+      verbosity: 1
+
+  - name: Create system user
+    user:
+      name: '{{ login }}'
+      shell: /bin/bash
+      comment: "User created from desktop_admin_users.php"
+
+  - name: Set public key of user
+    authorized_key:
+      user: '{{ login }}'
+      state: present
+      key: '{{ userpublickey }}'
+    when:
+      - userpublickey is defined
+      - userpublickey|length > 0
+
+  - name: Add user to AllowUsers in SSH sellyoursaas conf
+    lineinfile:
+      path: /etc/ssh/sshd_config.d/sellyoursaas.conf
+      line: "AllowUsers {{ login }}"
+    register: addlineinsshconf
+
+  - name: Restart SSH service to recognize that new user
+    service:
+      name: ssh
+      state: restarted
+    when: addlineinsshconf.changed
+      
+  - name: If IP was provided, we delete the login-allowed-ip.conf file
+    ansible.builtin.file:
+      path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
+      state: absent
+    when: 
+      - userip is defined
+      - userip|length > 0
+
+  - name: If IP was provided, add it to the conf dir
+    ansible.builtin.lineinfile:
+      path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
+      line: "Require ip {{ userip }}"
+      create: yes
+    ignore_errors: true
+    when: 
+      - userip is defined
+      - userip|length > 0

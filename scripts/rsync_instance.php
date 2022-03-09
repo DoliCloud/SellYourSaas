@@ -111,7 +111,7 @@ if ($fp) {
 
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error) {
-	dol_print_error($dbmaster, "host=".$databasehost.", port='.$databaseport.', user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
+	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
 	exit;
 }
 if ($dbmaster) {
@@ -135,7 +135,7 @@ if (0 == posix_getuid() && empty($conf->global->SELLYOURSAAS_SCRIPT_BYPASS_ROOT_
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
 	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
-	$instance=$instance.".".$tmpstring;   // Automatically concat first domain name
+	$instance = $instance.".".$tmpstring;   // Automatically concat first domain name
 }
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
@@ -191,7 +191,8 @@ if (! in_array($mode, array('confirm','confirmunlock','confirmclean'))) $param[]
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
 $param[]="-v";
-$param[]="--noatime";
+//$param[]="--noatime";				// launching server must be lower then 20.10
+//$param[]="--open-noatime";		// version must be 20.10 on both side
 $param[]="--exclude .buildpath";
 $param[]="--exclude .codeclimate.yml";
 $param[]="--exclude .editorconfig";

@@ -156,26 +156,28 @@ if ($sellyoursaassupporturl) {
 				}
 			}
 
-							$ispaid = sellyoursaasIsPaidInstance($contract);
+			$ispaid = sellyoursaasIsPaidInstance($contract);
 
-							$color = "green";
-							if ($statuslabel == 'processing') $color = 'orange';
-							if ($statuslabel == 'suspended') $color = 'orange';
-							if ($statuslabel == 'undeployed') $color = 'grey';
+			$color = "green";
+			if ($statuslabel == 'processing') { $color = 'orange'; }
+			if ($statuslabel == 'suspended') { $color = 'orange'; }
+			if ($statuslabel == 'undeployed') { $color = 'grey'; }
+			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
-			if ($tmpproduct->array_options['options_typesupport'] != 'none') {
-				if (! $ispaid) {
+			if ($tmpproduct->array_options['options_typesupport'] != 'none'
+				&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				if (! $ispaid) {	// non paid instances
 					$priority = 'low';
-					$prioritylabel = $langs->trans("Trial").' = <span class="prioritylow">'.$langs->trans("Low").'</span>';
+					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
 				} else {
-					if ($ispaid) {
+					if ($ispaid) {	// paid with level Premium
 						if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
 							$priority = 'high';
-							$prioritylabel = '<span class="priorityhigh">'.$langs->trans("High").'</span>';
+							$prioritylabel = '<span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span>';
 							$atleastonehigh++;
-						} else {
+						} else {	// paid with level Basic
 							$priority = 'medium';
-							$prioritylabel = '<span class="prioritymedium">'.$langs->trans("Medium").'</span>';
+							$prioritylabel = '<span class="prioritymedium">'.$langs->trans("Priority").' '.$langs->trans("Medium").'</span>';
 						}
 					}
 				}
@@ -186,9 +188,8 @@ if ($sellyoursaassupporturl) {
 				//$labeltoshow = $tmpproduct->label.' - '.$contract->ref_customer.' ';
 				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
 				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
-				$labeltoshow .= ' <span class="opacitymedium">('.$langs->trans("Priority").': ';
+				$labeltoshow .= ' - ';
 				$labeltoshow .= $prioritylabel;
-				$labeltoshow .= ')</span>';
 
 				print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
@@ -200,22 +201,26 @@ if ($sellyoursaassupporturl) {
 		}
 	}
 
-				// Add link other or miscellaneous
-				if (! $atleastonefound) $labelother = $langs->trans("Miscellaneous");
-	else $labelother = $langs->trans("Other");
-				$labelother .= ' <span class="opacitymedium">('.$langs->trans("Priority").': <span class="prioritylow">'.$langs->trans("Low").'</span>)</span>';
+	// Add link other or miscellaneous
+	if (! $atleastonefound) {
+		$labelother = $langs->trans("Miscellaneous");
+	} else {
+		$labelother = $langs->trans("Other");
+	}
 
-				print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
+	$labelother .= ' &nbsp; <span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span>';
+
+	print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
 	if (empty($atleastonehigh)) {
-		$labeltoshow = $langs->trans("PremiumSupport").' ('.$langs->trans("Priority").': <span class="priorityhigh">'.$langs->trans("High").'</span>) / '.$langs->trans("NoPremiumPlan");
+		$labeltoshow = $langs->trans("PremiumSupport").' <span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span> ('.$langs->trans("NoPremiumPlan").')';
 		print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
 	}
-				print '</select>';
-				print ajax_combobox("supportchannel");
+	print '</select>';
+	print ajax_combobox("supportchannel");
 
-				print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
+	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
 
-				print '</form>';
+	print '</form>';
 
 	if ($action == 'presend' && GETPOST('supportchannel', 'alpha')) {
 		print '<br><br>';
@@ -321,7 +326,7 @@ if ($sellyoursaassupporturl) {
 		}
 
 		if ($atleastonepublicgroup) {
-			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1);
+			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
 			//$stringtoprint .= ajax_combobox('groupticket');
 			$stringtoprint .= '<br>';
 		}
@@ -330,16 +335,14 @@ if ($sellyoursaassupporturl) {
 		<script>
 		jQuery(document).ready(function() {
 			function groupticketchange(){
-				console.log("We called groupticketchange, so we try to load list KM linked to event");
-				$("#KWwithajax").html("");
-
 				idgroupticket = $("#ticketcategory_select").val();
+				console.log("We called groupticketchange and have selected id="+idgroupticket+", so we try to load list KM linked to event");
 
-				console.log("We have selected id="+idgroupticket);
+				$("#KWwithajax").html("");
 
 				if (idgroupticket != "") {
 					$.ajax({ url: \'/ajax/fetchKnowledgeRecord.php\',
-						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\' },
+						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\', lang:\''.dol_escape_htmltag($langs->defaultlang).'\'},
 						 type: \'GET\',
 						 success: function(response) {
 							var urllist = \'\';
@@ -347,11 +350,11 @@ if ($sellyoursaassupporturl) {
 							response = JSON.parse(response)
 							for (key in response) {
 								console.log(response[key])
-								urllist += "<li>" + response[key].title + " " + \'<a href="\'+response[key].ref + "\">"+response[key].url+"</a></li>";
+								urllist += \'<li><a href="\'+ response[key].url + \'" target="_blank">\'+response[key].title+\'</a></li>\';
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.$langs->trans("KMFoundForTicketGroup").':</div><ul class="kmlist">\'+urllist+\'<ul>\');
+								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul>\');
 								$("#KWwithajax").show();
 							}
 						 },
@@ -361,7 +364,9 @@ if ($sellyoursaassupporturl) {
 					});
 				}
 			};
+
 			$("#ticketcategory_select").bind("change",function() { groupticketchange(); });
+
 			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 			var trackChange = function(element) {
 			var observer = new MutationObserver(function(mutations, observer) {

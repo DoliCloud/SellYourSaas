@@ -53,8 +53,8 @@ $action		= GETPOST('action', 'alpha');
 $mode		= GETPOST('mode', 'alpha');
 
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
-$sortfield = GETPOST("sortfield", 'alpha');
-$sortorder = GETPOST("sortorder", 'alpha');
+$sortfield = GETPOST("sortfield", 'aZ09comma');
+$sortorder = GETPOST('sortorder', 'aZ09comma');
 $page = GETPOST("page", 'int');
 if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
 $offset = $limit * $page;
@@ -135,12 +135,12 @@ print '<tr class="oddeven"><td>';
 $enabledisablehtml='';
 if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 	// Button off, click to enable
-	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=0'.$param.'">';
+	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=0'.$param.'">';
 	$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
 	$enabledisablehtml.='</a>';
 } else {
 	// Button on, click to disable
-	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&value=1'.$param.'">';
+	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=1'.$param.'">';
 	$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
 	$enabledisablehtml.='</a>';
 }
@@ -151,24 +151,22 @@ print '<tr class="oddeven"><td>';
 $enabledisableannounce='';
 if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON)) {
 	// Button off, click to enable
-	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1'.$param.'">';
+	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&token='.newToken().'&value=1'.$param.'">';
 	$enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
 	$enabledisableannounce.='</a>';
 } else {
 	// Button on, click to disable
-	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0'.$param.'">';
+	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&token='.newToken().'&value=0'.$param.'">';
 	$enabledisableannounce.=img_picto($langs->trans('MessageOn'), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
 	$enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
-print $langs->trans("AnnounceOnCustomerDashboard");
+print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
 print '<br>';
-print '<span class="opacitymedium">';
-print $langs->trans("Example").': (AnnounceMajorOutage), (AnnounceMinorOutage), (AnnounceMaintenanceInProgress), Any custom text...</span><br>';
 print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_6.'">';
 print $conf->global->SELLYOURSAAS_ANNOUNCE;
 print '</textarea>';
-print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button" value="'.$langs->trans("Save").'"></center>';
+print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button small" value="'.$langs->trans("Save").'"></div>';
 print '</td></tr>';
 print "</table></form><br>";
 
@@ -183,71 +181,6 @@ if ($resql) {
 } else dol_print_error($db);
 
 print "\n";
-/*print "<!-- section of deployment servers -->\n";
-print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder nohover centpercent">';
-print '<tr class="liste_titre">';
-print '<td>'.$langs->trans('DeploymentServers').'</td></tr>';
-print '<tr class="oddeven nohover">';
-print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ', $listofipwithinstances).'</strong></td>';
-print '</tr>';
-print '<tr class="">';
-print '<td>';
-$helptooltip = "SELLYOURSAAS_SUB_DOMAIN_IP = ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP.'<br><br>SELLYOURSAAS_SUB_DOMAIN_NAMES = '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
-print $form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), $helptooltip).':<br>';
-print '<table class="noborder">';
-print '<tr class="liste_titre_bidon"><td>'.$langs->trans("IP").'</td><td>'.$langs->trans("Domain").'</td><td>';
-$helptooltip = img_warning('', '').' '.$langs->trans("EvenIfDomainIsOpenTo");
-print $form->textwithpicto($langs->trans("Registration"), $helptooltip);
-print '</td><td></td><td></td></tr>';
-$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
-$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-foreach ($listofips as $key => $val) {
-	$tmparraydomain = explode(':', $listofdomains[$key]);
-	print '<tr class="oddeven"><td>'.$val.'</td><td>'.$tmparraydomain[0].'</td><td>';
-	if (! empty($tmparraydomain[1])) {
-		if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
-			print $langs->trans("Closed");
-		} else {
-			print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("OnDomainOnly", $tmparraydomain[1]);
-		}
-	} else {
-		print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("Open");
-	}
-	print '</td>';
-	print '<td>';
-	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
-	print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
-	print '</td>';
-	print '<td>';
-	$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
-	print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
-	print '</td>';
-	print '</tr>';
-}
-print '</table>';
-print '</td>';
-print '</tr>';
-/*
-print '<tr class="oddeven"><td>';
-print $langs->trans("CommandToManageRemoteDeploymentAgent").'<br>';
-print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
-print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
-print '</textarea>';
-print '</td></tr>';
-print '<tr class="oddeven"><td>';
-print $langs->trans("CommandToPutInstancesOnOffline").'<br>';
-print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
-print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
-print '</textarea>';
-print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline">'.$langs->trans("PutAllInstancesOffLine").'</a>';
-print ' &nbsp; - &nbsp; ';
-print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeonline">'.$langs->trans("PutAllInstancesOnLine").'</a>';
-print '</td></tr>';
-
-print "</table>";
-print '</div>';
-print "<br>";*/
 
 
 print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';

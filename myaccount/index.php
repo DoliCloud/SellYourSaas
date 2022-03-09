@@ -40,6 +40,21 @@ if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 // Load Dolibarr environment
 include './mainmyaccount.inc.php';
 
+// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+$tmpdomain = preg_replace('/^https?:\/\//i', '', $_SERVER["SERVER_NAME"]); // Remove http(s)://
+$tmpdomain = preg_replace('/\/.*$/i', '', $tmpdomain); // Remove part after domain
+$tmpdomain = preg_replace('/^.*\.([^\.]+)\.([^\.]+)$/', '\1.\2', $tmpdomain); // Remove part 'www.abc.' before 'mydomain.com'
+
+// Code to set cookie for first utm_source
+// Must be before the main that make a redirect on login if not logged
+if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["partner"])) {
+	$cookiename = "utm_source_cookie";
+	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? 'partner'.$_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
+	if (empty($_COOKIE[$cookiename]) && $tmpdomain) {
+		$domain = $tmpdomain;
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, false, true); // keep cookie 60 days and add tag httponly
+	}
+}
 
 // Load Dolibarr environment
 $res=0;
@@ -79,6 +94,7 @@ $conf->global->SYSLOG_FILE_ONEPERSESSION=2;
 
 $welcomecid = GETPOST('welcomecid', 'int');
 $mode = GETPOST('mode', 'aZ09');
+
 $action = GETPOST('action', 'aZ09');
 $cancel = GETPOST('cancel', 'alphanohtml');
 $backtourl = GETPOST('backtourl', 'alpha');
@@ -108,6 +124,12 @@ $firstrecord=GETPOST('firstrecord', 'int');
 $lastrecord=GETPOST('lastrecord', 'int');
 $search_instance_name=GETPOST('search_instance_name', 'alphanohtml');
 $search_customer_name=GETPOST('search_customer_name', 'alphanohtml');
+
+// Var used to create a new BAN for SEPA payments
+$bankname = GETPOST('bankname', 'alphanohtml');
+$iban = GETPOST('iban', 'alphanohtml');
+$bic = GETPOST('bic', 'alphanohtml');
+
 
 $MAXINSTANCEVIGNETTE = 4;
 
@@ -174,8 +196,6 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 	$urlfaq = $conf->global->SELLYOURSAAS_MAIN_FAQ_URL;
 }
 
-
-include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 
 $urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
@@ -302,6 +322,7 @@ if (! empty($conf->paypal->enabled)) {
 }
 
 $initialaction = $action;
+
 
 
 /*
@@ -467,7 +488,7 @@ if ($action == 'updateurl') {
 		$arr_mime = array();
 		$arr_name = array();
 		$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
-		$listofpaths = dol_dir_list($upload_dir, 'all', 0, '', '', 'name', SORT_ASC, 0);
+		$listofpaths = dol_dir_list($upload_dir, 'files', 0, '', '', 'name', SORT_ASC, 0);
 		if (count($listofpaths)) {
 			foreach ($listofpaths as $key => $val) {
 				$arr_file[] = $listofpaths[$key]['fullname'];
@@ -595,6 +616,8 @@ if ($action == 'updateurl') {
 } elseif ($action == 'updatemythirdpartylogin') {
 	$email = trim(GETPOST('email', 'nohtml'));
 	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
+	$emailccinvoice = trim(GETPOST('emailccinvoice', 'nohtml'));
+	$oldemailccinvoice = trim(GETPOST('oldemailccinvoice', 'nohtml'));
 	$firstname = trim(GETPOST('firstName', 'nohtml'));
 	$lastname = trim(GETPOST('lastName', 'nohtml'));
 	$phone = trim(GETPOST('phone', 'nohtml'));
@@ -602,49 +625,52 @@ if ($action == 'updateurl') {
 
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+		$error++;
 	}
-	if (! isValidEmail($email)) {
-		setEventMessages($langs->trans("ErrorBadValueForEmail"), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+	if ($email && ! isValidEmail($email)) {
+		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
+		$error++;
 	}
 	if ($oldemail != $email) {		// A request to change email was done.
 		// Test if email already exists
 		$tmpthirdparty = new Societe($db);
 		$tmpthirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $email);
 		if ($tmpthirdparty->id > 0) {
+			$error++;
 			setEventMessages($langs->trans("SorryEmailExistsforAnotherAccount", $email), null, 'errors');
-			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-			exit;
 		}
 	}
 	if (!empty($phone) && !isValidPhone($phone)) {
 		setEventMessages($langs->trans("ErrorBadValueForPhone"), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+		$error++;
 	}
 
-	$db->begin();	// Start transaction
+	if (! $error) {
+		$db->begin();	// Start transaction
 
-	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
-	$mythirdpartyaccount->email = $email;
-	$mythirdpartyaccount->phone = $phone;
-	$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
-	$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
-	$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
+		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+		$mythirdpartyaccount->email = $email;
+		$mythirdpartyaccount->phone = $phone;
+		$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
+		$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
+		$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
+		$mythirdpartyaccount->array_options['options_emailccinvoice'] = $emailccinvoice;
 
-	$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
+		$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
 
-	if ($result > 0) {
-		setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
-		$db->commit();
-	} else {
-		$langs->load("errors");
-		setEventMessages($langs->trans('ErrorFailedToSaveRecord'), null, 'errors');
-		setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
-		$db->rollback();
+		if ($result > 0) {
+			setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+
+			$db->commit();
+
+			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
+			exit;
+		} else {
+			$langs->load("errors");
+			setEventMessages($langs->trans('ErrorFailedToSaveRecord'), null, 'errors');
+			setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
+			$db->rollback();
+		}
 	}
 } elseif ($action == 'updatepassword') {
 	$password = GETPOST('password', 'nohtml');
@@ -678,1305 +704,1404 @@ if ($action == 'updateurl') {
 		setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
 		$db->rollback();
 	}
-} elseif ($action == 'createpaymentmode') {		// Create credit card stripe
-	if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {
-		$setupintentid = GETPOST('setupintentid', 'alpha');
+} elseif ($action == 'createpaymentmode') {		// Create credit card stripe or sepa record
+	if (GETPOST("submitsepa", 'aZ09')) {
+		$langs->load("banks");
+		include_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
 
-		/*$thirdparty_id = $mythirdpartyaccount->id;
-		$thirdparty_id = GETPOST('thirdparty_id', 'alpha');
-		if ($thirdparty_id != $mythirdpartyaccount->id)
-		{
-			setEventMessages('Error: The thirdpartyid received ('.$thirdparty_id.') is not the same than the id of logged thirdparty in current session ('.$mythirdpartyaccount->id.')', null, 'errors');
-			$action='';
-			$mode='registerpaymentmode';
-			$error++;
-		}*/
-		if (empty($setupintentid)) {
-			setEventMessages('Error: Failed to get the setupintent id', null, 'errors');
-			$action='';
-			$mode='registerpaymentmode';
+		$companybankaccount = new CompanyBankAccount($db);
+		$companybankaccount->label = GETPOST('bankname', 'alphanohtml');
+		$companybankaccount->bank = GETPOST('bankname', 'alphanohtml');
+		$companybankaccount->iban_prefix = GETPOST('iban', 'alphanohtml');
+		$companybankaccount->iban = GETPOST('iban', 'alphanohtml');
+		$companybankaccount->bic = GETPOST('bic', 'alphanohtml');
+		$companybankaccount->socid = $mythirdpartyaccount->id;
+		$companybankaccount->datec = dol_now();
+		$companybankaccount->frstrecur = 'RECUR';
+
+		if (empty($companybankaccount->label)) {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("BankName")), null, 'errors');
+			$action = '';
 			$error++;
 		}
 
+		// Test if iban is ok
+		$testiban = checkIbanForAccount($companybankaccount);
+		if (empty($companybankaccount->iban_prefix) || !$testiban) {
+			setEventMessages($langs->trans("IbanNotValid"), null, 'errors');
+			$action = '';
+			$error++;
+		}
+		$testbic = checkSwiftForAccount($companybankaccount);
+		if (empty($companybankaccount->bic) || !$testbic) {
+			setEventMessages($langs->trans("SwiftNotValid"), null, 'errors');
+			$action = '';
+			$error++;
+		}
+
+		$db->begin();
+
 		if (! $error) {
-			$thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($mythirdpartyaccount->id);    // Check if customer has already a payment mode or not
+			$companybankid = $companybankaccount->create($user);
 
-			require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
-			global $stripearrayofkeysbyenv;
-			// Reforce the $stripearrayofkeys because content may change depending on option
-			if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha') || ! empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
-				$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
-			} else {
-				$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
+			if (empty($companybankaccount->rum)) {
+				require_once DOL_DOCUMENT_ROOT.'/compta/prelevement/class/bonprelevement.class.php';
+				$prelevement = new BonPrelevement($db);
+
+				$companybankaccount->rum = $prelevement->buildRumNumber($mythirdpartyaccount->code_client, $companybankaccount->datec, $companybankid);
 			}
-			// Force to use the correct API key
-			\Stripe\Stripe::setApiKey($stripearrayofkeys['secret_key']);
 
-			$setupintent = \Stripe\SetupIntent::retrieve($setupintentid);
-			if (empty($setupintent->payment_method)) {        // Example: $setupintent->payment_method = 'pm_...'
-				setEventMessages('Error: The payment_method is empty into the setupintentid', null, 'errors');
-				$action='';
-				$mode='registerpaymentmode';
+			$resultbankcreate = $companybankaccount->update($user);
+			if ($resultbankcreate > 0) {
+				$resultbanksetdefault = $companybankaccount->setAsDefault(0, '');
+				if ($resultbanksetdefault > 0) {
+					setEventMessages($langs->trans("BankSaved"), null, 'mesgs');
+					setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
+				} else {
+					setEventMessages($companybankaccount->error, $companybankaccount->errors, 'errors');
+					$error++;
+				}
+			} else {
+				if ($db->lasterrno() == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+					setEventMessages($langs->trans("ABankWithThisLabelAlreadyExists"), null, 'errors');
+				} else {
+					setEventMessages($companybankaccount->error, $companybankaccount->errors, 'errors');
+				}
 				$error++;
 			}
 		}
 
-		if (! $error) {
-			$payment_method = \Stripe\PaymentMethod::retrieve($setupintent->payment_method);
+		if (!$error) {
+			$bankname = '';
+			$iban = '';
+			$bic = '';
 
-			// Note: Here setupintent->customer is defined but $payment_method->customer is not yet. It will be attached later by ->attach
+			$db->commit();
+		} else {
+			$db->rollback();
+		}
+	} else {
+		if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {
+			$setupintentid = GETPOST('setupintentid', 'alpha');
 
-			// Ajout
-			$companypaymentmode = new CompanyPaymentMode($db);
-
-			$companypaymentmode->fk_soc          = $mythirdpartyaccount->id;
-			$companypaymentmode->bank            = GETPOST('bank', 'alpha');
-			$companypaymentmode->label           = 'Setup intent for '.$payment_method->id;
-			$companypaymentmode->number          = '';
-			$companypaymentmode->last_four       = $payment_method->card->last4;
-			$companypaymentmode->proprio         = GETPOST('proprio', 'alpha');
-			$companypaymentmode->exp_date_month  = $payment_method->card->exp_month;
-			$companypaymentmode->exp_date_year   = $payment_method->card->exp_year;
-			$companypaymentmode->cvn             = '';
-			$companypaymentmode->datec           = $now;
-			$companypaymentmode->default_rib     = 1;
-			$companypaymentmode->type            = 'card';
-			$companypaymentmode->country_code    = $payment_method->card->country;
-			$companypaymentmode->comment         = 'Credit card entered from customer dashboard with STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION on (using SetupIntent)';
-			$companypaymentmode->ipaddress       = getUserRemoteIP();
-
-			$companypaymentmode->stripe_card_ref = $payment_method->id;
-			$companypaymentmode->stripe_account  = $setupintent->customer.'@'.$stripearrayofkeys['publishable_key'];
-			$companypaymentmode->status          = $servicestatusstripe;
-
-			$companypaymentmode->card_type       = $payment_method->card->brand;
-			$companypaymentmode->owner_address   = $payment_method->billing_details->address->line1;
-			$companypaymentmode->approved        = ($payment_method->card->checks->cvc_check == 'pass' ? 1 : 0);
-			$companypaymentmode->email           = $payment_method->billing_details->email;
-
-			$db->begin();
+			/*$thirdparty_id = $mythirdpartyaccount->id;
+			$thirdparty_id = GETPOST('thirdparty_id', 'alpha');
+			if ($thirdparty_id != $mythirdpartyaccount->id)
+			{
+				setEventMessages('Error: The thirdpartyid received ('.$thirdparty_id.') is not the same than the id of logged thirdparty in current session ('.$mythirdpartyaccount->id.')', null, 'errors');
+				$action='';
+				$mode='registerpaymentmode';
+				$error++;
+			}*/
+			if (empty($setupintentid)) {
+				setEventMessages('Error: Failed to get the setupintent id', null, 'errors');
+				$action='';
+				$mode='registerpaymentmode';
+				$error++;
+			}
 
 			if (! $error) {
-				$result = $companypaymentmode->create($user);
-				if ($result < 0) {
-					$error++;
-					setEventMessages($companypaymentmode->error, $companypaymentmode->errors, 'errors');
-					$action='createcard';     // Force chargement page création
+				$thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($mythirdpartyaccount->id);    // Check if customer has already a payment mode or not
+
+				require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
+				global $stripearrayofkeysbyenv;
+				// Reforce the $stripearrayofkeys because content may change depending on option
+				if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha') || ! empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+					$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
+				} else {
+					$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
 				}
+				// Force to use the correct API key
+				\Stripe\Stripe::setApiKey($stripearrayofkeys['secret_key']);
+
+				$setupintent = \Stripe\SetupIntent::retrieve($setupintentid);
+				if (empty($setupintent->payment_method)) {        // Example: $setupintent->payment_method = 'pm_...'
+					setEventMessages('Error: The payment_method is empty into the setupintentid', null, 'errors');
+					$action='';
+					$mode='registerpaymentmode';
+					$error++;
+				}
+			}
+
+			if (! $error) {
+				$payment_method = \Stripe\PaymentMethod::retrieve($setupintent->payment_method);
+
+				// Note: Here setupintent->customer is defined but $payment_method->customer is not yet. It will be attached later by ->attach
+
+				// Ajout
+				$companypaymentmode = new CompanyPaymentMode($db);
+
+				$companypaymentmode->fk_soc          = $mythirdpartyaccount->id;
+				$companypaymentmode->bank            = GETPOST('bank', 'alpha');
+				$companypaymentmode->label           = 'Setup intent for '.$payment_method->id;
+				$companypaymentmode->number          = '';
+				$companypaymentmode->last_four       = $payment_method->card->last4;
+				$companypaymentmode->proprio         = GETPOST('proprio', 'alpha');
+				$companypaymentmode->exp_date_month  = $payment_method->card->exp_month;
+				$companypaymentmode->exp_date_year   = $payment_method->card->exp_year;
+				$companypaymentmode->cvn             = '';
+				$companypaymentmode->datec           = $now;
+				$companypaymentmode->default_rib     = 1;
+				$companypaymentmode->type            = 'card';
+				$companypaymentmode->country_code    = $payment_method->card->country;
+				$companypaymentmode->comment         = 'Credit card entered from customer dashboard with STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION on (using SetupIntent)';
+				$companypaymentmode->ipaddress       = getUserRemoteIP();
+
+				$companypaymentmode->stripe_card_ref = $payment_method->id;
+				$companypaymentmode->stripe_account  = $setupintent->customer.'@'.$stripearrayofkeys['publishable_key'];
+				$companypaymentmode->status          = $servicestatusstripe;
+
+				$companypaymentmode->card_type       = $payment_method->card->brand;
+				$companypaymentmode->owner_address   = $payment_method->billing_details->address->line1;
+				$companypaymentmode->approved        = ($payment_method->card->checks->cvc_check == 'pass' ? 1 : 0);
+				$companypaymentmode->email           = $payment_method->billing_details->email;
+
+				$db->begin();
 
 				if (! $error) {
-					$stripe = new Stripe($db);
-					$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
-
-					// Get the Stripe customer (should have been created already when creating the setupintent)
-					// Note that we should have already the customer in $setupintent->customer
-					$cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 0);
-					if (! $cu) {
+					$result = $companypaymentmode->create($user);
+					if ($result < 0) {
 						$error++;
-						setEventMessages($stripe->error, $stripe->errors, 'errors');
-					} else {
-						dol_syslog('--- Stripe customer retrieved cu = '.$cu->id);
+						setEventMessages($companypaymentmode->error, $companypaymentmode->errors, 'errors');
+						$action='createcard';     // Force chargement page création
+					}
 
-						// Attach payment_method from SetupIntent to customer
-						try {
-							//$payment_method_obj = \Stripe\PaymentMethod::retrieve($payment_method->id);
-							$payment_method_obj = $payment_method;
+					if (! $error) {
+						$stripe = new Stripe($db);
+						$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
 
-							if (empty($payment_method_obj->customer)) {
-								$arrayforattach = array(
-									'customer' => $cu->id,
-									//'metadata' => array('dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>getUserRemoteIP())
-								);
-								$result = $payment_method_obj->attach($arrayforattach);
-
-								// TODO To set this payment mode as default, you must make
-								// $arrayofparam = array('invoice_settings' => array('default_payment_method' => $payment_method_obj->id));
-								// $cu->update($arrayofparam);
-							} elseif ($payment_method_obj->customer != $cu->id) {
-								$error++;
-								$errormsg = "The payment method ".$payment_method->id." is already attached to the customer ".$payment_method_obj->customer." that is not ".$cu->id;
-								dol_syslog($errormsg, LOG_ERR);
-							}
-						} catch (Stripe\Error\InvalidRequest $e) {
-							//var_dump($e);
+						// Get the Stripe customer (should have been created already when creating the setupintent)
+						// Note that we should have already the customer in $setupintent->customer
+						$cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 0);
+						if (! $cu) {
 							$error++;
-							$errormsg = $e->getMessage();
-							if ($errormsg != 'The payment method you provided has already been attached to a customer.') {
+							setEventMessages($stripe->error, $stripe->errors, 'errors');
+						} else {
+							dol_syslog('--- Stripe customer retrieved cu = '.$cu->id);
+
+							// Attach payment_method from SetupIntent to customer
+							try {
+								//$payment_method_obj = \Stripe\PaymentMethod::retrieve($payment_method->id);
+								$payment_method_obj = $payment_method;
+
+								if (empty($payment_method_obj->customer)) {
+									$arrayforattach = array(
+										'customer' => $cu->id,
+										//'metadata' => array('dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>getUserRemoteIP())
+									);
+									$result = $payment_method_obj->attach($arrayforattach);
+
+									// TODO To set this payment mode as default, you must make
+									// $arrayofparam = array('invoice_settings' => array('default_payment_method' => $payment_method_obj->id));
+									// $cu->update($arrayofparam);
+								} elseif ($payment_method_obj->customer != $cu->id) {
+									$error++;
+									$errormsg = "The payment method ".$payment_method->id." is already attached to the customer ".$payment_method_obj->customer." that is not ".$cu->id;
+									dol_syslog($errormsg, LOG_ERR);
+								}
+							} catch (Stripe\Error\InvalidRequest $e) {
+								//var_dump($e);
+								$error++;
+								$errormsg = $e->getMessage();
+								if ($errormsg != 'The payment method you provided has already been attached to a customer.') {
+									dol_syslog('--- FailedToAttachPaymentMethodToCustomer Exception '.$errormsg, LOG_WARNING);
+									setEventMessages($langs->trans('FailedToAttachPaymentMethodToCustomer').($errormsg?'<br>'.$errormsg:''), null, 'errors');
+									$action='';
+								}
+							} catch (Exception $e) {
+								//var_dump($e);
+								$error++;
+								$errormsg = $e->getMessage();
 								dol_syslog('--- FailedToAttachPaymentMethodToCustomer Exception '.$errormsg, LOG_WARNING);
 								setEventMessages($langs->trans('FailedToAttachPaymentMethodToCustomer').($errormsg?'<br>'.$errormsg:''), null, 'errors');
 								$action='';
 							}
-						} catch (Exception $e) {
-							//var_dump($e);
-							$error++;
-							$errormsg = $e->getMessage();
-							dol_syslog('--- FailedToAttachPaymentMethodToCustomer Exception '.$errormsg, LOG_WARNING);
-							setEventMessages($langs->trans('FailedToAttachPaymentMethodToCustomer').($errormsg?'<br>'.$errormsg:''), null, 'errors');
-							$action='';
+						}
+					}
+
+					if (! $error) {
+						$companypaymentmode->setAsDefault($companypaymentmode->id, 1);
+						dol_syslog("--- A credit card was recorded. Now we reset the stripeaccount (to force use of default Stripe setup)", LOG_DEBUG, 0);
+
+						$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
+						$db->query($sql);
+
+						if ($mythirdpartyaccount->client == 2) {
+							dol_syslog("--- Set status of thirdparty to prospect+client instead of only prospect", LOG_DEBUG, 0);
+							$mythirdpartyaccount->set_as_client();
+						}
+
+						if (! $error) {
+							$labelofevent = 'Payment mode added by '.getUserRemoteIP();
+							$codeofevent = 'AC_ADD_PAYMENT';
+							if ($thirdpartyhadalreadyapaymentmode > 0) {
+								$labelofevent = 'Payment mode modified by '.getUserRemoteIP();
+								$codeofevent = 'AC_MOD_PAYMENT';
+							}
+
+							include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+							// Create an event
+							$actioncomm = new ActionComm($db);
+							$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+							$actioncomm->code        = $codeofevent;
+							$actioncomm->label       = $labelofevent;
+							$actioncomm->datep       = $now;
+							$actioncomm->datef       = $now;
+							$actioncomm->percentage  = -1;   // Not applicable
+							$actioncomm->socid       = $mythirdpartyaccount->id;
+							$actioncomm->authorid    = $user->id;   // User saving action
+							$actioncomm->userownerid = $user->id;	// Owner of action
+							$actioncomm->note_private= $labelofevent.' - Company payment mode id created or modified = '.$companypaymentmode->id;
+							//$actioncomm->fk_element  = $mythirdpartyaccount->id;
+							//$actioncomm->elementtype = 'thirdparty';
+							$ret=$actioncomm->create($user);       // User creating action
 						}
 					}
 				}
 
+				// We can a commit / begin here so we are sure the payment is recorded, even if payment later fails.
+				// But we prefer to have payment mode recorded only if payment is success.
+
+				$erroronstripecharge = 0;
+
+
+				// Loop on each pending invoices of the thirdparty and try to pay them with payment = remain amount of invoice.
+				// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended)
 				if (! $error) {
-					$companypaymentmode->setAsDefault($companypaymentmode->id, 1);
-					dol_syslog("--- A credit card was recorded. Now we reset the stripeaccount (to force use of default Stripe setup)", LOG_DEBUG, 0);
+					dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
 
-					$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
-					$db->query($sql);
+					$sellyoursaasutils = new SellYourSaasUtils($db);
 
-					if ($mythirdpartyaccount->client == 2) {
-						dol_syslog("--- Set status of thirdparty to prospect+client instead of only prospect", LOG_DEBUG, 0);
-						$mythirdpartyaccount->set_as_client();
+					$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
+					if ($result != 0) {
+						$error++;
+						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+						dol_syslog("--- Error when taking payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+					} else {
+						dol_syslog("--- Success to take payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
 					}
 
-					if (! $error) {
-						$labelofevent = 'Payment mode added by '.getUserRemoteIP();
-						$codeofevent = 'AC_ADD_PAYMENT';
-						if ($thirdpartyhadalreadyapaymentmode > 0) {
-							$labelofevent = 'Payment mode modified by '.getUserRemoteIP();
-							$codeofevent = 'AC_MOD_PAYMENT';
-						}
+					// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
+					if ($sellyoursaasutils->stripechargedone > 0) {
+						dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
 
-						include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
-						// Create an event
-						$actioncomm = new ActionComm($db);
-						$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-						$actioncomm->code        = $codeofevent;
-						$actioncomm->label       = $labelofevent;
-						$actioncomm->datep       = $now;
-						$actioncomm->datef       = $now;
-						$actioncomm->percentage  = -1;   // Not applicable
-						$actioncomm->socid       = $mythirdpartyaccount->id;
-						$actioncomm->authorid    = $user->id;   // User saving action
-						$actioncomm->userownerid = $user->id;	// Owner of action
-						$actioncomm->note_private= $labelofevent.' - Company payment mode id created or modified = '.$companypaymentmode->id;
-						//$actioncomm->fk_element  = $mythirdpartyaccount->id;
-						//$actioncomm->elementtype = 'thirdparty';
-						$ret=$actioncomm->create($user);       // User creating action
-					}
-				}
-			}
+						$db->commit();
 
-			$erroronstripecharge = 0;
-
-
-			// Loop on each pending invoices of the thirdparty and try to pay them with payment = remain amount of invoice.
-			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended)
-			if (! $error) {
-				dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
-
-				$sellyoursaasutils = new SellYourSaasUtils($db);
-
-				$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
-				if ($result != 0) {
-					$error++;
-					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-				}
-
-				// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
-				if ($sellyoursaasutils->stripechargedone > 0) {
-					dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
-
-					$db->commit();
-
-					$db->begin();
-				}
-			}
-
-			// Make renewals on contracts of customer
-			if (! $error) {
-				dol_syslog("--- Make renewals on contracts for thirdparty id=".$mythirdpartyaccount->id, LOG_DEBUG, 0);
-
-				$sellyoursaasutils = new SellYourSaasUtils($db);
-
-				$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
-				if ($result != 0) {
-					$error++;
-					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-					dol_syslog("Failed to make renewal of contract ".$sellyoursaasutils->error, LOG_ERR);
-				}
-			}
-
-			// Create a recurring invoice (+real invoice + contract renewal) if there is no recurring invoice yet
-			if (! $error) {
-				foreach ($listofcontractid as $contract) {
-					dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
-
-					if ($contract->array_options['options_deployment_status'] != 'done') {
-						dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
-						continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
-					}
-					if ($contract->total_ht == 0) {
-						dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
-						continue;							// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
-					}
-
-					// Make a test to pass loop if there is already a template invoice
-					$result = $contract->fetchObjectLinked();
-					if ($result < 0) {
-						dol_syslog("--- Error during fetchObjectLinked, we discard this contract", LOG_ERR, 0);
-						continue;							// There is an error, so we discard this contract to avoid to create template twice
-					}
-					if (! empty($contract->linkedObjectsIds['facturerec'])) {
-						$templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
-						if ($templateinvoice > 0) {			// There is already a template invoice, so we discard this contract to avoid to create template twice
-							dol_syslog("--- There is already a recurring invoice on the contract contract_id = ".$contract->id, LOG_DEBUG, 0);
-							continue;
-						}
-					}
-
-					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
-
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
-
-					dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
-
-					// Now create invoice draft
-					$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
-					if ($dateinvoice < $now) $dateinvoice = $now;
-
-					$invoice_draft = new Facture($db);
-					$tmpproduct = new Product($db);
-
-					// Create empty invoice
-					if (! $error) {
-						$invoice_draft->socid				= $contract->socid;
-						$invoice_draft->type				= Facture::TYPE_STANDARD;
-						$invoice_draft->number				= '';
-						$invoice_draft->date				= $dateinvoice;
-
-						$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
-						$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
-						$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
-						$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
-
-						$invoice_draft->fetch_thirdparty();
-
-						$origin='contrat';
-						$originid=$contract->id;
-
-						$invoice_draft->origin = $origin;
-						$invoice_draft->origin_id = $originid;
-
-						// Possibility to add external linked objects with hooks
-						$invoice_draft->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
-
-						$idinvoice = $invoice_draft->create($user);      // This include class to add_object_linked() and add add_contact()
-						if (! ($idinvoice > 0)) {
-							setEventMessages($invoice_draft->error, $invoice_draft->errors, 'errors');
-							$error++;
-						}
-					}
-
-					$frequency=1;
-					$frequency_unit='m';
-					$discountcode = strtoupper(trim(GETPOST('discountcode', 'aZ09')));	// If a discount code was prodived on page
-					/* If a discount code exists on contract level, it was used to prefill the payment page, so it is received into the GETPOST('discountcode', 'int').
-					if (empty($discountcode) && ! empty($contract->array_options['options_discountcode'])) {	// If no discount code provided, but we find one on contract, we use this one
-						$discountcode = $contract->array_options['options_discountcode'];
-					}*/
-
-					$discounttype = '';
-					$discountval = 0;
-					$validdiscountcodearray = array();
-					$nbofproductapp = 0;
-
-					// Add lines on invoice
-					if (! $error) {
-						// Add lines of contract to template invoice
-						$srcobject = $contract;
-
-						$lines = $srcobject->lines;
-						if (empty($lines) && method_exists($srcobject, 'fetch_lines')) {
-							$srcobject->fetch_lines();
-							$lines = $srcobject->lines;
-						}
-
-						$date_start = false;
-						$fk_parent_line=0;
-						$num=count($lines);
-						for ($i=0; $i<$num; $i++) {
-							$label=(! empty($lines[$i]->label)?$lines[$i]->label:'');
-							$desc=(! empty($lines[$i]->desc)?$lines[$i]->desc:$lines[$i]->libelle);
-							if ($invoice_draft->situation_counter == 1) $lines[$i]->situation_percent =  0;
-
-							// Positive line
-							$product_type = ($lines[$i]->product_type ? $lines[$i]->product_type : 0);
-
-							// Date start
-							$date_start = false;
-							if ($lines[$i]->date_debut_prevue) $date_start = $lines[$i]->date_debut_prevue;
-							if ($lines[$i]->date_debut_reel) $date_start = $lines[$i]->date_debut_reel;
-							if ($lines[$i]->date_start) $date_start = $lines[$i]->date_start;
-
-							// Date end
-							$date_end = false;
-							if ($lines[$i]->date_fin_prevue) $date_end = $lines[$i]->date_fin_prevue;
-							if ($lines[$i]->date_fin_reel) $date_end = $lines[$i]->date_fin_reel;
-							if ($lines[$i]->date_end) $date_end = $lines[$i]->date_end;
-
-							// If date start is in past, we set it to now
-							$now = dol_now();
-							if ($date_start < $now) {
-								dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-								$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
-								$duration_value = $tmparray['duration_value'];
-								$duration_unit = $tmparray['duration_unit'];
-
-								$date_start = $now;
-								$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-
-								// Because we update the end date planned of contract too
-								$sqltoupdateenddate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$db->idate($date_end)."' WHERE fk_contrat = ".$srcobject->id;
-								$resqltoupdateenddate = $db->query($sqltoupdateenddate);
-							}
-
-							// Reset fk_parent_line for no child products and special product
-							if (($lines[$i]->product_type != 9 && empty($lines[$i]->fk_parent_line)) || $lines[$i]->product_type == 9) {
-								$fk_parent_line = 0;
-							}
-
-							// Discount
-							$discount = $lines[$i]->remise_percent;
-
-							// Extrafields
-							if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
-								$lines[$i]->fetch_optionals($lines[$i]->rowid);
-								$array_options = $lines[$i]->array_options;
-							}
-
-							$tva_tx = $lines[$i]->tva_tx;
-							if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) $tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
-
-							// View third's localtaxes for NOW and do not use value from origin.
-							$localtax1_tx = get_localtax($tva_tx, 1, $invoice_draft->thirdparty);
-							$localtax2_tx = get_localtax($tva_tx, 2, $invoice_draft->thirdparty);
-
-							//$price_invoice_template_line = $lines[$i]->subprice * GETPOST('frequency_multiple','int');
-							$price_invoice_template_line = $lines[$i]->subprice;
-
-
-							// Get data from product (frequency, discount type and val)
-							$tmpproduct->fetch($lines[$i]->fk_product);
-
-							dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
-							if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
-								// Protection to avoid to validate contract with several 'app' products.
-								$nbofproductapp++;
-								if ($nbofproductapp > 1) {
-									dol_syslog("--- Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
-									$error++;
-									break;
-								}
-								$frequency = $tmpproduct->duration_value;
-								$frequency_unit = $tmpproduct->duration_unit;
-
-								if ($tmpproduct->array_options['options_register_discountcode']) {
-									$tmpvaliddiscountcodearray = explode(',', $tmpproduct->array_options['options_register_discountcode']);
-									foreach ($tmpvaliddiscountcodearray as $valdiscount) {
-										$valdiscountarray = explode(':', $valdiscount);
-										$tmpcode = strtoupper(trim($valdiscountarray[0]));
-										$tmpval = str_replace('%', '', trim($valdiscountarray[1]));
-										if (is_numeric($tmpval)) {
-											$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
-										} else {
-											dol_syslog("--- Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
-										}
-									}
-									// If we entered a discountcode or get it from contract
-									if (! empty($validdiscountcodearray[$discountcode])) {
-										$discounttype = $validdiscountcodearray[$discountcode]['type'];
-										$discountval = $validdiscountcodearray[$discountcode]['value'];
-									} else {
-										$discountcode = '';
-									}
-									//var_dump($validdiscountcodearray); var_dump($discountcode); var_dump($discounttype); var_dump($discountval); exit;
-									if ($discounttype == 'percent') {
-										if ($discountval > $discount) {
-											$discount = $discountval;		// If discount with coupon code is higher than the one defined into contract.
-										}
-									}
-								}
-							}
-
-							// Insert the line
-							$result = $invoice_draft->addline($desc, $price_invoice_template_line, $lines[$i]->qty, $tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $discount, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $invoice_draft->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_options, $lines[$i]->situation_percent, $lines[$i]->fk_prev_id, $lines[$i]->fk_unit);
-
-							if ($result > 0) {
-								$lineid = $result;
-							} else {
-								$lineid = 0;
-								$error++;
-								break;
-							}
-
-							// Defined the new fk_parent_line
-							if ($result > 0 && $lines[$i]->product_type == 9) {
-								$fk_parent_line = $result;
-							}
-						}
-					}
-
-					// Now we convert invoice into a template
-					if (! $error) {
-						//var_dump($invoice_draft->lines);
-						//var_dump(dol_print_date($date_start,'dayhour'));
-						//exit;
-
-						//$frequency=1;
-						//$frequency_unit='m';
-						$frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
-						$frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
-						$tmp=dol_getdate($date_start?$date_start:$now);
-						$reyear=$tmp['year'];
-						$remonth=$tmp['mon'];
-						$reday=$tmp['mday'];
-						$rehour=$tmp['hours'];
-						$remin=$tmp['minutes'];
-						$nb_gen_max=0;
-						//print dol_print_date($date_start,'dayhour');
-						//var_dump($remonth);
-
-						$invoice_rec = new FactureRec($db);
-
-						$invoice_rec->titre = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
-						$invoice_rec->title = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
-						$invoice_rec->note_private = $contract->note_private;
-						//$invoice_rec->note_public  = dol_concatdesc($contract->note_public, '__(Period)__ : __INVOICE_DATE_NEXT_INVOICE_BEFORE_GEN__ - __INVOICE_DATE_NEXT_INVOICE_AFTER_GEN__');
-						$invoice_rec->note_public  = $contract->note_public;
-						$invoice_rec->mode_reglement_id = $invoice_draft->mode_reglement_id;
-
-						$invoice_rec->usenewprice = 0;
-
-						$invoice_rec->frequency = $frequency;
-						$invoice_rec->unit_frequency = $frequency_unit;
-						$invoice_rec->nb_gen_max = $nb_gen_max;
-						$invoice_rec->auto_validate = 0;
-
-						$invoice_rec->fk_project = 0;
-
-						$date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
-						$invoice_rec->date_when = $date_next_execution;
-
-						// Add discount into the template invoice (it was already added into lines)
-						if ($discountcode) {
-							$invoice_rec->array_options['options_discountcode'] = $discountcode;
-						}
-
-						// Get first contract linked to invoice used to generate template
-						if ($invoice_draft->id > 0) {
-							$srcObject = $invoice_draft;
-
-							$srcObject->fetchObjectLinked();
-
-							if (! empty($srcObject->linkedObjectsIds['contrat'])) {
-								$contractidid = reset($srcObject->linkedObjectsIds['contrat']);
-
-								$invoice_rec->origin = 'contrat';
-								$invoice_rec->origin_id = $contractidid;
-								$invoice_rec->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
-							}
-						}
-
-						$oldinvoice = new Facture($db);
-						$oldinvoice->fetch($invoice_draft->id);
-
-						$invoicerecid = $invoice_rec->create($user, $oldinvoice->id);
-						if ($invoicerecid > 0) {
-							$sql = 'UPDATE '.MAIN_DB_PREFIX.'facturedet_rec SET date_start_fill = 1, date_end_fill = 1 WHERE fk_facture = '.$invoice_rec->id;
-							$result = $db->query($sql);
-							if (! $error && $result < 0) {
-								$error++;
-								setEventMessages($db->lasterror(), null, 'errors');
-							}
-
-							$result=$oldinvoice->delete($user, 1);
-							if (! $error && $result < 0) {
-								$error++;
-								setEventMessages($oldinvoice->error, $oldinvoice->errors, 'errors');
-							}
-						} else {
-							$error++;
-							setEventMessages($invoice_rec->error, $invoice_rec->errors, 'errors');
-						}
-
-						// A template invoice was just created, we run generation of invoice if template invoice date is already in past
-						if (! $error) {
-							dol_syslog("--- A template invoice was generated with id ".$invoicerecid.", now we run createRecurringInvoices to build real invoice", LOG_DEBUG, 0);
-							$facturerec = new FactureRec($db);
-
-							$savperm1 = $user->rights->facture->creer;
-							$savperm2 = $user->rights->facture->invoice_advance->validate;
-
-							$user->rights->facture->creer = 1;
-							if (empty($user->rights->facture->invoice_advance)) $user->rights->facture->invoice_advance=new stdClass();
-							$user->rights->facture->invoice_advance->validate = 1;
-
-							$result = $facturerec->createRecurringInvoices($invoicerecid, 1);		// Generate real invoice from pending recurring invoices
-							if ($result != 0) {
-								$error++;
-								setEventMessages($facturerec->error, $facturerec->errors, 'errors');
-							}
-
-							$user->rights->facture->creer = $savperm1;
-							$user->rights->facture->invoice_advance->validate = $savperm2;
-						}
-						if (! $error) {
-							dol_syslog("--- Now we try to take payment for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
-
-							$sellyoursaasutils = new SellYourSaasUtils($db);
-
-							$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
-							if ($result != 0) {
-								$error++;
-								setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-								dol_syslog("--- Failed to take payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
-
-								//var_dump($sellyoursaasutils);exit;
-
-								// TODO Ask authentication
-							}
-
-							// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
-							if ($sellyoursaasutils->stripechargedone > 0) {
-								dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
-
-								$db->commit();
-
-								$db->begin();
-							}
-						}
-
-						// Make renewals on contracts of customer
-						if (! $error) {
-							dol_syslog("--- Now we make renewal of contracts for thirdpartyid=".$mythirdpartyaccount->id." if payments were ok and contract are not unsuspended", LOG_DEBUG, 0);
-
-							$sellyoursaasutils = new SellYourSaasUtils($db);
-
-							$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
-							if ($result != 0) {
-								$error++;
-								setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-							}
-						}
-					}
-				}
-			}
-
-			if (! $error) {
-				// Payment mode successfully recorded
-				setEventMessages($langs->trans("PaymentModeRecorded"), null, 'mesgs');
-
-				$db->commit();
-
-				$url=$_SERVER["PHP_SELF"];
-				if ($backurl) $url=$backurl;
-
-				if ($thirdpartyhadalreadyapaymentmode > 0) {
-					// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
-					$_SESSION['showconversiontracker']='paymentmodified';
-
-					$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentmodified=1';
-
-					// Send to DataDog (metric + event)
-					if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
-						try {
-							dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
-
-							$arrayconfig=array();
-							if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-								$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-							}
-
-							$statsd = new DataDog\DogStatsd($arrayconfig);
-
-							$arraytags=null;
-							$statsd->increment('sellyoursaas.paymentmodemodified', 1, $arraytags);
-						} catch (Exception $e) {
-						}
-					}
-				} else {
-					// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
-					$_SESSION['showconversiontracker']='paymentrecorded';
-
-					$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentrecorded=1';
-
-					// Send to DataDog (metric + event)
-					if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
-						try {
-							dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
-
-							$arrayconfig=array();
-							if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-								$arrayconfig=array('apiKey' => $conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-							}
-
-							$statsd = new DataDog\DogStatsd($arrayconfig);
-
-							$arraytags=null;
-							$statsd->increment('sellyoursaas.paymentmodeadded', 1, $arraytags);
-
-							global $dolibarr_main_url_root;
-							$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));
-							$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
-							//$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
-
-							$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-							if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-								&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-								$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-								if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
-							}
-
-							$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langscompany->trans("NewCustomer").': '.$mythirdpartyaccount->name, 90);
-							$messageofevent = ' - '.$langscompany->trans("PaymentModeAddedFrom").' '.getUserRemoteIP()."\n";
-							$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
-
-							// See https://docs.datadoghq.com/api/?lang=python#post-an-event
-							$statsd->event($titleofevent,
-								array(
-									'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
-									'alert_type' => 'info',
-									'source_type_name' => 'API',
-									'host'       => gethostname()
-								)
-							);
-						} catch (Exception $e) {
-						}
+						$db->begin();
 					}
 				}
 
-				header('Location: '.$url);
-				exit;
-			} else {
-				$db->rollback();
-
-				$action='';
-				$mode='registerpaymentmode';
-			}
-		}
-	} else // createpayment with old method
-	{
-		$stripeToken = GETPOST("stripeToken", 'alpha');
-		$label = 'Card '.dol_print_date($now, 'dayhourrfc');
-
-		if (! $stripeToken) {
-			dol_syslog("--- ErrorTokenWasNotProvidedByPreviousPage", LOG_ERR);
-			setEventMessages($langs->trans("ErrorTokenWasNotProvidedByPreviousPage"), null, 'errors');
-			$action='';
-			$mode='registerpaymentmode';
-			$error++;
-		}
-
-		if (! $error) {
-			$thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($mythirdpartyaccount->id);    // Check if customer has already a payment mode or not
-
-			// Add payment mode
-			$companypaymentmode = new CompanyPaymentMode($db);
-
-			$companypaymentmode->fk_soc          = $mythirdpartyaccount->id;
-			$companypaymentmode->bank            = GETPOST('bank', 'alpha');
-			$companypaymentmode->label           = $label;
-			$companypaymentmode->number          = GETPOST('cardnumber', 'alpha');
-			$companypaymentmode->last_four       = substr(GETPOST('cardnumber', 'alpha'), -4);
-			$companypaymentmode->proprio         = GETPOST('proprio', 'alpha');
-			$companypaymentmode->exp_date_month  = GETPOST('exp_date_month', 'int');
-			$companypaymentmode->exp_date_year   = GETPOST('exp_date_year', 'int');
-			$companypaymentmode->cvn             = GETPOST('cvn', 'alpha');
-			$companypaymentmode->datec           = $now;
-			$companypaymentmode->default_rib     = 1;
-			$companypaymentmode->type            = 'card';
-			$companypaymentmode->country_code    = $mythirdpartyaccount->country_code;
-			$companypaymentmode->status          = $servicestatusstripe;
-			$companypaymentmode->comment         = 'Credit card created from customer dashboard';     // TODO Fields not declared in companypaymentmode
-			$companypaymentmode->ipaddress       = getUserRemoteIP();                                 // TODO Fields not declared in companypaymentmode
-			// $companypaymentmode->stripe_card_ref is filled later
-			// $companypaymentmode->stripe_account is filled later
-
-			$db->begin();
-
-			if (! $error) {
-				$result = $companypaymentmode->create($user);
-				if ($result < 0) {
-					$error++;
-					setEventMessages($companypaymentmode->error, $companypaymentmode->errors, 'errors');
-					$action='createcard';     // Force chargement page création
-				}
-
-				if (! empty($conf->stripe->enabled) && class_exists('Stripe')) {
-					$stripe = new Stripe($db);
-					$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
-
-					// Create card on Stripe
-					if (! $error) {
-						// Get the Stripe customer and create if not linked (use default Stripe setup)
-						$cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 1);
-						if (! $cu) {
-							$error++;
-							setEventMessages($stripe->error, $stripe->errors, 'errors');
-							dol_syslog('Error: Failed to get Stripe customer remote object (cu), servicestatusstripe = '.$servicestatusstripe.', stripe->error = '.$stripe->error, LOG_ERR);
-						} else {
-							dol_syslog('--- Stripe customer retrieved or created, now we try to create card');
-
-							$metadata = array(
-								'dol_version'=>DOL_VERSION,
-								'dol_entity'=>$conf->entity,
-								'ipaddress'=>getUserRemoteIP()	// ip of visitor used to create card
-							);
-							//if (! empty($dol_id))        			$metadata["dol_id"] = $dol_id;
-							//if (! empty($dol_type))      			$metadata["dol_type"] = $dol_type;
-							if (! empty($mythirdpartyaccount->id)) 	$metadata["dol_thirdparty_id"] = $mythirdpartyaccount->id;
-
-							// Create Stripe card from Token
-							try {
-								$card = $cu->sources->create(array("source" => $stripeToken, "metadata" => $metadata));
-							} catch (\Stripe\Error\Card $e) {
-								// Since it's a decline, Stripe_CardError will be caught
-								$body = $e->getJsonBody();
-								$err  = $body['error'];
-
-								$stripefailurecode = $err['code'];
-								$stripefailuremessage = $err['message'];
-
-								$error++;
-								$errormsg = 'Code: '.$stripefailurecode.', '.$langs->trans("Message").': '.$stripefailuremessage;
-								dol_syslog('--- FailedToCreateCardRecord Strip Error Card '.$errormsg, LOG_WARNING);
-								setEventMessages($langs->trans('FailedToCreateCardRecord').($errormsg?'<br>'.$errormsg:''), null, 'errors');
-								$action='';
-
-								dol_syslog('--- FailedToCreateCardRecord '.json_encode($err), LOG_WARNING);
-							} catch (Exception $e) {
-								$error++;
-								$errormsg = $e->getMessage();
-								dol_syslog('--- FailedToCreateCardRecord Exception '.$e->getCode().' '.$errormsg, LOG_WARNING);
-								setEventMessages($langs->trans('FailedToCreateCardRecord').($errormsg?'<br>'.$errormsg:''), null, 'errors');
-								$action='';
-							}
-
-							if (! $error) {
-								if (empty($card)) {
-									$error++;
-									dol_syslog('--- FailedToCreateCardRecord', LOG_WARNING, 0);
-									setEventMessages($langs->trans('FailedToCreateCardRecord', ''), null, 'errors');
-									$action='';
-								} else {
-									global $stripearrayofkeysbyenv;
-									$stripearrayofkeys = $stripearrayofkeysbyenv[$servicestatusstripe];
-
-									$sql = "UPDATE " . MAIN_DB_PREFIX . "societe_rib";
-									$sql.= " SET stripe_card_ref = '".$db->escape($card->id)."',";
-									$sql.= " stripe_account = '".$db->escape($cu->id.'@'.$stripearrayofkeys['publishable_key'])."',";
-									$sql.= " status = ".((int) $servicestatusstripe).",";
-									$sql.= " card_type = '".$db->escape($card->brand)."',";
-									$sql.= " country_code = '".$db->escape($card->country)."',";
-									$sql.= " exp_date_month = '".$db->escape($card->exp_month)."',";
-									$sql.= " exp_date_year = '".$db->escape($card->exp_year)."',";
-									$sql.= " last_four = '".$db->escape($card->last4)."',";
-									$sql.= " ipaddress = '".$db->escape(getUserRemoteIP())."',";
-									$sql.= " approved = ".($card->cvc_check == 'pass' ? 1 : 0);
-									$sql.= " WHERE rowid = " . $companypaymentmode->id;
-									$sql.= " AND type = 'card'";
-									$resql = $db->query($sql);
-									if (! $resql) {
-										dol_syslog("Failed to update societe_rib ".$db->lasterror(), LOG_ERR);
-										setEventMessages($db->lasterror(), null, 'errors');
-									}
-
-									$stripecard = $card->id;
-								}
-							}
-						}
-					}
-				}
-
+				// Make renewals on contracts of customer
 				if (! $error) {
-					$companypaymentmode->setAsDefault($companypaymentmode->id, 1);
-					dol_syslog("--- A credit card was recorded. Now we reset the stripeaccount (to force use of default Stripe setup)", LOG_DEBUG, 0);
+					dol_syslog("--- Make renewals on contracts for thirdparty id=".$mythirdpartyaccount->id, LOG_DEBUG, 0);
 
-					$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
-					$db->query($sql);
+					$sellyoursaasutils = new SellYourSaasUtils($db);
 
-					if ($mythirdpartyaccount->client == 2) {
-						dol_syslog("--- Set status of thirdparty to prospect+client instead of only prospect", LOG_DEBUG, 0);
-						$mythirdpartyaccount->set_as_client();
+					$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
+					if ($result != 0) {
+						$error++;
+						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+						dol_syslog("Failed to make renewal of contract ".$sellyoursaasutils->error, LOG_ERR);
 					}
+				}
 
-					if (! $error) {
-						$labelofevent = 'Payment mode added by '.getUserRemoteIP();
-						$codeofevent = 'AC_ADD_PAYMENT';
-						if ($thirdpartyhadalreadyapaymentmode > 0) {
-							$labelofevent = 'Payment mode modified by '.getUserRemoteIP();
-							$codeofevent = 'AC_MOD_PAYMENT';
+				// Create a recurring invoice (+real invoice + contract renewal) if there is no recurring invoice yet
+				if (! $error) {
+					foreach ($listofcontractid as $contract) {
+						dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
+
+						if ($contract->array_options['options_deployment_status'] != 'done') {
+							dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
+							continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
+						}
+						if ($contract->total_ht == 0) {
+							dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
+							continue;							// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
 						}
 
-						include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
-						// Create an event
-						$actioncomm = new ActionComm($db);
-						$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-						$actioncomm->code        = $codeofevent;
-						$actioncomm->label       = $labelofevent;
-						$actioncomm->datep       = $now;
-						$actioncomm->datef       = $now;
-						$actioncomm->percentage  = -1;   // Not applicable
-						$actioncomm->socid       = $mythirdpartyaccount->id;
-						$actioncomm->authorid    = $user->id;   // User saving action
-						$actioncomm->userownerid = $user->id;	// Owner of action
-						$actioncomm->note_private= $labelofevent.' - Company payment mode id created or modified = '.$companypaymentmode->id;
-						//$actioncomm->fk_element  = $mythirdpartyaccount->id;
-						//$actioncomm->elementtype = 'thirdparty';
-						$ret=$actioncomm->create($user);       // User creating action
-					}
-				}
-			}
-
-			$erroronstripecharge = 0;
-
-
-			// Loop on each pending invoices of the thirdparty and try to pay them with payment = remain amount of invoice.
-			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended)
-			if (! $error) {
-				dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
-
-				$sellyoursaasutils = new SellYourSaasUtils($db);
-
-				$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
-				if ($result != 0) {
-					$error++;
-					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-				}
-
-				// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
-				if ($sellyoursaasutils->stripechargedone > 0) {
-					dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
-
-					$db->commit();
-
-					$db->begin();
-				}
-			}
-
-			// Make renewals on contracts of customer
-			if (! $error) {
-				dol_syslog("--- Make renewals on crontacts for thirdparty id=".$mythirdpartyaccount->id, LOG_DEBUG, 0);
-
-				$sellyoursaasutils = new SellYourSaasUtils($db);
-
-				$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
-				if ($result != 0) {
-					$error++;
-					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-					dol_syslog("Failed to make renewal of contract ".$sellyoursaasutils->error, LOG_ERR);
-				}
-			}
-
-			// Create a recurring invoice (+real invoice + contract renewal) if there is no reccuring invoice yet
-			if (! $error) {
-				foreach ($listofcontractid as $contract) {
-					dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
-
-					if ($contract->array_options['options_deployment_status'] != 'done') {
-						dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
-						continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
-					}
-					if ($contract->total_ht == 0) {
-						dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
-						continue;							// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
-					}
-
-					// Make a test to pass loop if there is already a template invoice
-					$result = $contract->fetchObjectLinked();
-					if ($result < 0) {
-						continue;							// There is an error, so we discard this contract to avoid to create template twice
-					}
-					if (! empty($contract->linkedObjectsIds['facturerec'])) {
-						$templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
-						if ($templateinvoice > 0) {			// There is already a template invoice, so we discard this contract to avoid to create template twice
-							dol_syslog("--- There is already a recurring invoice on this contract.", LOG_DEBUG, 0);
-							continue;
+						// Make a test to pass loop if there is already a template invoice
+						$result = $contract->fetchObjectLinked();
+						if ($result < 0) {
+							dol_syslog("--- Error during fetchObjectLinked, we discard this contract", LOG_ERR, 0);
+							continue;							// There is an error, so we discard this contract to avoid to create template twice
 						}
-					}
-
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id." that is not null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
-
-					$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode because we need to create a template invoice';
-					// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
-
-					dol_syslog("--- No template invoice found for the contract contract_id = ".$contract->id.", so we create it then create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
-
-					// Now create invoice draft
-					$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
-					if ($dateinvoice < $now) $dateinvoice = $now;
-
-					$invoice_draft = new Facture($db);
-					$tmpproduct = new Product($db);
-
-					// Create empty invoice
-					if (! $error) {
-						$invoice_draft->socid				= $contract->socid;
-						$invoice_draft->type				= Facture::TYPE_STANDARD;
-						$invoice_draft->number				= '';
-						$invoice_draft->date				= $dateinvoice;
-
-						$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
-						$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
-						$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
-						$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
-
-						$invoice_draft->fetch_thirdparty();
-
-						$origin='contrat';
-						$originid=$contract->id;
-
-						$invoice_draft->origin = $origin;
-						$invoice_draft->origin_id = $originid;
-
-						// Possibility to add external linked objects with hooks
-						$invoice_draft->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
-
-						$idinvoice = $invoice_draft->create($user);      // This include class to add_object_linked() and add add_contact()
-						if (! ($idinvoice > 0)) {
-							setEventMessages($invoice_draft->error, $invoice_draft->errors, 'errors');
-							$error++;
+						if (! empty($contract->linkedObjectsIds['facturerec'])) {
+							$templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
+							if ($templateinvoice > 0) {			// There is already a template invoice, so we discard this contract to avoid to create template twice
+								dol_syslog("--- There is already a recurring invoice on the contract contract_id = ".$contract->id, LOG_DEBUG, 0);
+								continue;
+							}
 						}
-					}
-					// Add lines on invoice
-					if (! $error) {
-						// Add lines of contract to template invoice
-						$srcobject = $contract;
 
-						$lines = $srcobject->lines;
-						if (empty($lines) && method_exists($srcobject, 'fetch_lines')) {
-							$srcobject->fetch_lines();
-							$lines = $srcobject->lines;
+						dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
+
+						$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (case of STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set)';
+						// First launch update of resources:
+						// This update qty of contract lines + qty into linked template invoice.
+						$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
+
+						dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
+
+						// Now create invoice draft
+						$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
+						if ($dateinvoice < $now) $dateinvoice = $now;
+
+						$invoice_draft = new Facture($db);
+						$tmpproduct = new Product($db);
+
+						// Create empty invoice
+						if (! $error) {
+							$invoice_draft->socid				= $contract->socid;
+							$invoice_draft->type				= Facture::TYPE_STANDARD;
+							$invoice_draft->number				= '';
+							$invoice_draft->date				= $dateinvoice;
+
+							$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
+							$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
+							$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
+							$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
+
+							$invoice_draft->fetch_thirdparty();
+
+							$origin='contrat';
+							$originid=$contract->id;
+
+							$invoice_draft->origin = $origin;
+							$invoice_draft->origin_id = $originid;
+
+							// Possibility to add external linked objects with hooks
+							$invoice_draft->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
+
+							$idinvoice = $invoice_draft->create($user);      // This include class to add_object_linked() and add add_contact()
+							if (! ($idinvoice > 0)) {
+								setEventMessages($invoice_draft->error, $invoice_draft->errors, 'errors');
+								$error++;
+							}
 						}
 
 						$frequency=1;
 						$frequency_unit='m';
+						$discountcode = strtoupper(trim(GETPOST('discountcode', 'aZ09')));	// If a discount code was prodived on page
+						/* If a discount code exists on contract level, it was used to prefill the payment page, so it is received into the GETPOST('discountcode', 'int').
+						if (empty($discountcode) && ! empty($contract->array_options['options_discountcode'])) {	// If no discount code provided, but we find one on contract, we use this one
+							$discountcode = $contract->array_options['options_discountcode'];
+						}*/
 
-						$date_start = false;
-						$fk_parent_line=0;
-						$num=count($lines);
-						for ($i=0; $i<$num; $i++) {
-							$label=(! empty($lines[$i]->label)?$lines[$i]->label:'');
-							$desc=(! empty($lines[$i]->desc)?$lines[$i]->desc:$lines[$i]->libelle);
-							if ($invoice_draft->situation_counter == 1) $lines[$i]->situation_percent =  0;
+						$discounttype = '';
+						$discountval = 0;
+						$validdiscountcodearray = array();
+						$nbofproductapp = 0;
 
-							// Positive line
-							$product_type = ($lines[$i]->product_type ? $lines[$i]->product_type : 0);
+						// Add lines on invoice
+						if (! $error) {
+							// Add lines of contract to template invoice
+							$srcobject = $contract;
 
-							// Date start
+							$lines = $srcobject->lines;
+							if (empty($lines) && method_exists($srcobject, 'fetch_lines')) {
+								$srcobject->fetch_lines();
+								$lines = $srcobject->lines;
+							}
+
 							$date_start = false;
-							if ($lines[$i]->date_debut_prevue)
-								$date_start = $lines[$i]->date_debut_prevue;
-							if ($lines[$i]->date_debut_reel)
-								$date_start = $lines[$i]->date_debut_reel;
-							if ($lines[$i]->date_start)
-								$date_start = $lines[$i]->date_start;
+							$fk_parent_line=0;
+							$num=count($lines);
+							for ($i=0; $i<$num; $i++) {
+								$label=(! empty($lines[$i]->label)?$lines[$i]->label:'');
+								$desc=(! empty($lines[$i]->desc)?$lines[$i]->desc:$lines[$i]->libelle);
+								if ($invoice_draft->situation_counter == 1) $lines[$i]->situation_percent =  0;
 
-							// Date end
-							$date_end = false;
-							if ($lines[$i]->date_fin_prevue)
-								$date_end = $lines[$i]->date_fin_prevue;
-							if ($lines[$i]->date_fin_reel)
-								$date_end = $lines[$i]->date_fin_reel;
-							if ($lines[$i]->date_end)
-								$date_end = $lines[$i]->date_end;
+								// Positive line
+								$product_type = ($lines[$i]->product_type ? $lines[$i]->product_type : 0);
 
-							// If date start is in past, we set it to now
-							$now = dol_now();
-							if ($date_start < $now) {
-								dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
-								$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
-								$duration_value = $tmparray['duration_value'];
-								$duration_unit = $tmparray['duration_unit'];
+								// Date start
+								$date_start = false;
+								if ($lines[$i]->date_debut_prevue) $date_start = $lines[$i]->date_debut_prevue;
+								if ($lines[$i]->date_debut_reel) $date_start = $lines[$i]->date_debut_reel;
+								if ($lines[$i]->date_start) $date_start = $lines[$i]->date_start;
 
-								$date_start = $now;
-								$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
+								// Date end
+								$date_end = false;
+								if ($lines[$i]->date_fin_prevue) $date_end = $lines[$i]->date_fin_prevue;
+								if ($lines[$i]->date_fin_reel) $date_end = $lines[$i]->date_fin_reel;
+								if ($lines[$i]->date_end) $date_end = $lines[$i]->date_end;
 
-								// BecauseWe update the end date planned of contract too
-								$sqltoupdateenddate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$db->idate($date_end)."' WHERE fk_contrat = ".$srcobject->id;
-								$resqltoupdateenddate = $db->query($sqltoupdateenddate);
+								// If date start is in past, we set it to now
+								$now = dol_now();
+								if ($date_start < $now) {
+									dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
+									$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
+									$duration_value = $tmparray['duration_value'];
+									$duration_unit = $tmparray['duration_unit'];
+
+									$date_start = $now;
+									$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
+
+									// Because we update the end date planned of contract too
+									$sqltoupdateenddate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$db->idate($date_end)."' WHERE fk_contrat = ".$srcobject->id;
+									$resqltoupdateenddate = $db->query($sqltoupdateenddate);
+								}
+
+								// Reset fk_parent_line for no child products and special product
+								if (($lines[$i]->product_type != 9 && empty($lines[$i]->fk_parent_line)) || $lines[$i]->product_type == 9) {
+									$fk_parent_line = 0;
+								}
+
+								// Discount
+								$discount = $lines[$i]->remise_percent;
+
+								// Extrafields
+								if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
+									$lines[$i]->fetch_optionals($lines[$i]->rowid);
+									$array_options = $lines[$i]->array_options;
+								}
+
+								$tva_tx = $lines[$i]->tva_tx;
+								if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) $tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
+
+								// View third's localtaxes for NOW and do not use value from origin.
+								$localtax1_tx = get_localtax($tva_tx, 1, $invoice_draft->thirdparty);
+								$localtax2_tx = get_localtax($tva_tx, 2, $invoice_draft->thirdparty);
+
+								//$price_invoice_template_line = $lines[$i]->subprice * GETPOST('frequency_multiple','int');
+								$price_invoice_template_line = $lines[$i]->subprice;
+
+
+								// Get data from product (frequency, discount type and val)
+								$tmpproduct->fetch($lines[$i]->fk_product);
+
+								dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
+								if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
+									// Protection to avoid to validate contract with several 'app' products.
+									$nbofproductapp++;
+									if ($nbofproductapp > 1) {
+										dol_syslog("--- Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
+										$error++;
+										break;
+									}
+									$frequency = $tmpproduct->duration_value;
+									$frequency_unit = $tmpproduct->duration_unit;
+
+									if ($tmpproduct->array_options['options_register_discountcode']) {
+										$tmpvaliddiscountcodearray = explode(',', $tmpproduct->array_options['options_register_discountcode']);
+										foreach ($tmpvaliddiscountcodearray as $valdiscount) {
+											$valdiscountarray = explode(':', $valdiscount);
+											$tmpcode = strtoupper(trim($valdiscountarray[0]));
+											$tmpval = str_replace('%', '', trim($valdiscountarray[1]));
+											if (is_numeric($tmpval)) {
+												$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
+											} else {
+												dol_syslog("--- Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
+											}
+										}
+										// If we entered a discountcode or get it from contract
+										if (! empty($validdiscountcodearray[$discountcode])) {
+											$discounttype = $validdiscountcodearray[$discountcode]['type'];
+											$discountval = $validdiscountcodearray[$discountcode]['value'];
+										} else {
+											$discountcode = '';
+										}
+										//var_dump($validdiscountcodearray); var_dump($discountcode); var_dump($discounttype); var_dump($discountval); exit;
+										if ($discounttype == 'percent') {
+											if ($discountval > $discount) {
+												$discount = $discountval;		// If discount with coupon code is higher than the one defined into contract.
+											}
+										}
+									}
+								}
+
+								// Insert the line
+								$result = $invoice_draft->addline($desc, $price_invoice_template_line, $lines[$i]->qty, $tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $discount, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $invoice_draft->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_options, $lines[$i]->situation_percent, $lines[$i]->fk_prev_id, $lines[$i]->fk_unit);
+
+								if ($result > 0) {
+									$lineid = $result;
+								} else {
+									$lineid = 0;
+									$error++;
+									break;
+								}
+
+								// Defined the new fk_parent_line
+								if ($result > 0 && $lines[$i]->product_type == 9) {
+									$fk_parent_line = $result;
+								}
+							}
+						}
+
+						// Now we convert invoice into a template
+						if (! $error) {
+							//var_dump($invoice_draft->lines);
+							//var_dump(dol_print_date($date_start,'dayhour'));
+							//exit;
+
+							//$frequency=1;
+							//$frequency_unit='m';
+							$frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
+							$frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
+							$tmp=dol_getdate($date_start?$date_start:$now);
+							$reyear=$tmp['year'];
+							$remonth=$tmp['mon'];
+							$reday=$tmp['mday'];
+							$rehour=$tmp['hours'];
+							$remin=$tmp['minutes'];
+							$nb_gen_max=0;
+							//print dol_print_date($date_start,'dayhour');
+							//var_dump($remonth);
+
+							$invoice_rec = new FactureRec($db);
+
+							$invoice_rec->titre = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
+							$invoice_rec->title = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
+							$invoice_rec->note_private = $contract->note_private;
+							//$invoice_rec->note_public  = dol_concatdesc($contract->note_public, '__(Period)__ : __INVOICE_DATE_NEXT_INVOICE_BEFORE_GEN__ - __INVOICE_DATE_NEXT_INVOICE_AFTER_GEN__');
+							$invoice_rec->note_public  = $contract->note_public;
+							$invoice_rec->mode_reglement_id = $invoice_draft->mode_reglement_id;
+
+							$invoice_rec->usenewprice = 0;
+
+							$invoice_rec->frequency = $frequency;
+							$invoice_rec->unit_frequency = $frequency_unit;
+							$invoice_rec->nb_gen_max = $nb_gen_max;
+							$invoice_rec->auto_validate = 0;
+
+							$invoice_rec->fk_project = 0;
+
+							$date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
+							$invoice_rec->date_when = $date_next_execution;
+
+							// Add discount into the template invoice (it was already added into lines)
+							if ($discountcode) {
+								$invoice_rec->array_options['options_discountcode'] = $discountcode;
 							}
 
-							// Reset fk_parent_line for no child products and special product
-							if (($lines[$i]->product_type != 9 && empty($lines[$i]->fk_parent_line)) || $lines[$i]->product_type == 9) {
-								$fk_parent_line = 0;
+							// Get first contract linked to invoice used to generate template
+							if ($invoice_draft->id > 0) {
+								$srcObject = $invoice_draft;
+
+								$srcObject->fetchObjectLinked();
+
+								if (! empty($srcObject->linkedObjectsIds['contrat'])) {
+									$contractidid = reset($srcObject->linkedObjectsIds['contrat']);
+
+									$invoice_rec->origin = 'contrat';
+									$invoice_rec->origin_id = $contractidid;
+									$invoice_rec->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
+								}
 							}
 
-							// Discount
-							$discount = $lines[$i]->remise_percent;
+							$oldinvoice = new Facture($db);
+							$oldinvoice->fetch($invoice_draft->id);
 
-							// Extrafields
-							if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
-								$lines[$i]->fetch_optionals($lines[$i]->rowid);
-								$array_options = $lines[$i]->array_options;
-							}
+							$invoicerecid = $invoice_rec->create($user, $oldinvoice->id);
+							if ($invoicerecid > 0) {
+								$sql = 'UPDATE '.MAIN_DB_PREFIX.'facturedet_rec SET date_start_fill = 1, date_end_fill = 1 WHERE fk_facture = '.$invoice_rec->id;
+								$result = $db->query($sql);
+								if (! $error && $result < 0) {
+									$error++;
+									setEventMessages($db->lasterror(), null, 'errors');
+								}
 
-							$tva_tx = $lines[$i]->tva_tx;
-							if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) $tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
-
-							// View third's localtaxes for NOW and do not use value from origin.
-							$localtax1_tx = get_localtax($tva_tx, 1, $invoice_draft->thirdparty);
-							$localtax2_tx = get_localtax($tva_tx, 2, $invoice_draft->thirdparty);
-
-							//$price_invoice_template_line = $lines[$i]->subprice * GETPOST('frequency_multiple','int');
-							$price_invoice_template_line = $lines[$i]->subprice;
-
-							$result = $invoice_draft->addline($desc, $price_invoice_template_line, $lines[$i]->qty, $tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $discount, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $invoice_draft->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_options, $lines[$i]->situation_percent, $lines[$i]->fk_prev_id, $lines[$i]->fk_unit);
-
-							if ($result > 0) {
-								$lineid = $result;
+								$result=$oldinvoice->delete($user, 1);
+								if (! $error && $result < 0) {
+									$error++;
+									setEventMessages($oldinvoice->error, $oldinvoice->errors, 'errors');
+								}
 							} else {
-								$lineid = 0;
 								$error++;
-								break;
+								setEventMessages($invoice_rec->error, $invoice_rec->errors, 'errors');
 							}
 
-							// Defined the new fk_parent_line
-							if ($result > 0 && $lines[$i]->product_type == 9) {
-								$fk_parent_line = $result;
+							// A template invoice was just created, we run generation of invoice if template invoice date is already in past
+							if (! $error) {
+								dol_syslog("--- A template invoice was generated with id ".$invoicerecid.", now we run createRecurringInvoices to build real invoice", LOG_DEBUG, 0);
+								$facturerec = new FactureRec($db);
+
+								$savperm1 = $user->rights->facture->creer;
+								$savperm2 = $user->rights->facture->invoice_advance->validate;
+
+								$user->rights->facture->creer = 1;
+								if (empty($user->rights->facture->invoice_advance)) $user->rights->facture->invoice_advance=new stdClass();
+								$user->rights->facture->invoice_advance->validate = 1;
+
+								$result = $facturerec->createRecurringInvoices($invoicerecid, 1);		// Generate real invoice from pending recurring invoices
+								if ($result != 0) {
+									$error++;
+									setEventMessages($facturerec->error, $facturerec->errors, 'errors');
+								}
+
+								$user->rights->facture->creer = $savperm1;
+								$user->rights->facture->invoice_advance->validate = $savperm2;
+							}
+							if (! $error) {
+								dol_syslog("--- Now we try to take payment for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+
+								$sellyoursaasutils = new SellYourSaasUtils($db);
+
+								$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
+								if ($result != 0) {
+									$error++;
+									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+									dol_syslog("--- Error when taking payment in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+								} else {
+									dol_syslog("--- Success to take payment in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
+								}
+
+								// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
+								if ($sellyoursaasutils->stripechargedone > 0) {
+									dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
+
+									$rescommit = $db->commit();
+									dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
+
+									$db->begin();
+								}
 							}
 
-							$tmpproduct->fetch($lines[$i]->fk_product);
+							// Make renewals on contracts of customer
+							if (! $error) {
+								dol_syslog("--- Now we make renewal of contracts for thirdpartyid=".$mythirdpartyaccount->id." if payments were ok and contract are not unsuspended", LOG_DEBUG, 0);
 
-							dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
-							if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
-								$frequency = $tmpproduct->duration_value;
-								$frequency_unit = $tmpproduct->duration_unit;
-							}
-						}
-					}
+								$sellyoursaasutils = new SellYourSaasUtils($db);
 
-					// Now we convert invoice into a template
-					if (! $error) {
-						//var_dump($invoice_draft->lines);
-						//var_dump(dol_print_date($date_start,'dayhour'));
-						//exit;
-
-						//$frequency=1;
-						//$frequency_unit='m';
-						$frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
-						$frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
-						$tmp=dol_getdate($date_start?$date_start:$now);
-						$reyear=$tmp['year'];
-						$remonth=$tmp['mon'];
-						$reday=$tmp['mday'];
-						$rehour=$tmp['hours'];
-						$remin=$tmp['minutes'];
-						$nb_gen_max=0;
-						//print dol_print_date($date_start,'dayhour');
-						//var_dump($remonth);
-
-						$invoice_rec = new FactureRec($db);
-
-						$invoice_rec->titre = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
-						$invoice_rec->title = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
-						$invoice_rec->note_private = $contract->note_private;
-						//$invoice_rec->note_public  = dol_concatdesc($contract->note_public, '__(Period)__ : __INVOICE_DATE_NEXT_INVOICE_BEFORE_GEN__ - __INVOICE_DATE_NEXT_INVOICE_AFTER_GEN__');
-						$invoice_rec->note_public  = $contract->note_public;
-						$invoice_rec->mode_reglement_id = $invoice_draft->mode_reglement_id;
-
-						$invoice_rec->usenewprice = 0;
-
-						$invoice_rec->frequency = $frequency;
-						$invoice_rec->unit_frequency = $frequency_unit;
-						$invoice_rec->nb_gen_max = $nb_gen_max;
-						$invoice_rec->auto_validate = 0;
-
-						$invoice_rec->fk_project = 0;
-
-						$date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
-						$invoice_rec->date_when = $date_next_execution;
-
-						// Get first contract linked to invoice used to generate template
-						if ($invoice_draft->id > 0) {
-							$srcObject = $invoice_draft;
-
-							$srcObject->fetchObjectLinked();
-
-							if (! empty($srcObject->linkedObjectsIds['contrat'])) {
-								$contractidid = reset($srcObject->linkedObjectsIds['contrat']);
-
-								$invoice_rec->origin = 'contrat';
-								$invoice_rec->origin_id = $contractidid;
-								$invoice_rec->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
-							}
-						}
-
-						$oldinvoice = new Facture($db);
-						$oldinvoice->fetch($invoice_draft->id);
-
-						$invoicerecid = $invoice_rec->create($user, $oldinvoice->id);
-						if ($invoicerecid > 0) {
-							$sql = 'UPDATE '.MAIN_DB_PREFIX.'facturedet_rec SET date_start_fill = 1, date_end_fill = 1 WHERE fk_facture = '.$invoice_rec->id;
-							$result = $db->query($sql);
-							if (! $error && $result < 0) {
-								$error++;
-								setEventMessages($db->lasterror(), null, 'errors');
-							}
-
-							$result=$oldinvoice->delete($user, 1);
-							if (! $error && $result < 0) {
-								$error++;
-								setEventMessages($oldinvoice->error, $oldinvoice->errors, 'errors');
-							}
-						} else {
-							$error++;
-							setEventMessages($invoice_rec->error, $invoice_rec->errors, 'errors');
-						}
-
-						// A template invoice was just created, we run generation of invoice if template invoice date is already in past
-						if (! $error) {
-							dol_syslog("--- A template invoice was generated with id ".$invoicerecid.", now we run createRecurringInvoices to build real invoice", LOG_DEBUG, 0);
-							$facturerec = new FactureRec($db);
-
-							$savperm1 = $user->rights->facture->creer;
-							$savperm2 = $user->rights->facture->invoice_advance->validate;
-
-							$user->rights->facture->creer = 1;
-							if (empty($user->rights->facture->invoice_advance)) $user->rights->facture->invoice_advance=new stdClass();
-							$user->rights->facture->invoice_advance->validate = 1;
-
-							$result = $facturerec->createRecurringInvoices($invoicerecid, 1);		// Generate real invoice from pending recurring invoices
-							if ($result != 0) {
-								$error++;
-								setEventMessages($facturerec->error, $facturerec->errors, 'errors');
-							}
-
-							$user->rights->facture->creer = $savperm1;
-							$user->rights->facture->invoice_advance->validate = $savperm2;
-						}
-						if (! $error) {
-							dol_syslog("--- Now we try to take payment for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
-
-							$sellyoursaasutils = new SellYourSaasUtils($db);
-
-							$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
-							if ($result != 0) {
-								$error++;
-								setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-								dol_syslog("--- Failed to take payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
-							}
-
-							// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
-							if ($sellyoursaasutils->stripechargedone > 0) {
-								dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
-
-								$db->commit();
-
-								$db->begin();
-							}
-						}
-
-						// Make renewals on contracts of customer
-						if (! $error) {
-							dol_syslog("--- Now we make renewal of contracts for thirdpartyid=".$mythirdpartyaccount->id." if payments were ok and contract are not unsuspended", LOG_DEBUG, 0);
-
-							$sellyoursaasutils = new SellYourSaasUtils($db);
-
-							$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
-							if ($result != 0) {
-								$error++;
-								setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+								$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
+								if ($result != 0) {
+									$error++;
+									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+								}
 							}
 						}
 					}
 				}
+
+				if (! $error) {
+					// Payment mode successfully recorded
+					setEventMessages($langs->trans("PaymentModeRecorded"), null, 'mesgs');
+
+					$db->commit();
+
+					$url=$_SERVER["PHP_SELF"];
+					if ($backurl) $url=$backurl;
+
+					if ($thirdpartyhadalreadyapaymentmode > 0) {
+						dol_syslog("PaymentModeHasBeenModified");
+
+						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
+						$_SESSION['showconversiontracker']='paymentmodified';
+
+						$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentmodified=1';
+
+						// Send to DataDog (metric + event)
+						if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+							try {
+								dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+
+								$arrayconfig=array();
+								if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+									$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+								}
+
+								$statsd = new DataDog\DogStatsd($arrayconfig);
+
+								$arraytags=null;
+								$statsd->increment('sellyoursaas.paymentmodemodified', 1, $arraytags);
+							} catch (Exception $e) {
+							}
+						}
+					} else {
+						dol_syslog("PaymentModeHasBeenAdded");
+
+						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
+						$_SESSION['showconversiontracker']='paymentrecorded';
+
+						$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentrecorded=1';
+
+						// Send to DataDog (metric + event)
+						if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+							try {
+								dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+
+								$arrayconfig=array();
+								if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+									$arrayconfig=array('apiKey' => $conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+								}
+
+								$statsd = new DataDog\DogStatsd($arrayconfig);
+
+								$arraytags=null;
+								$statsd->increment('sellyoursaas.paymentmodeadded', 1, $arraytags);
+
+								global $dolibarr_main_url_root;
+								$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));
+								$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
+								//$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
+
+								$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+								if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+									&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+									$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+									if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+								}
+
+								$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langscompany->trans("NewCustomer").': '.$mythirdpartyaccount->name, 90);
+								$messageofevent = ' - '.$langscompany->trans("PaymentModeAddedFrom").' '.getUserRemoteIP()."\n";
+								$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
+
+								// See https://docs.datadoghq.com/api/?lang=python#post-an-event
+								$statsd->event($titleofevent,
+									array(
+										'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
+										'alert_type' => 'info',
+										'source_type_name' => 'API',
+										'host'       => gethostname()
+									)
+								);
+							} catch (Exception $e) {
+							}
+						}
+					}
+
+					header('Location: '.$url);
+					exit;
+				} else {
+					$db->rollback();
+
+					$action='';
+					$mode='registerpaymentmode';
+				}
+			}
+		} else { // createpayment with old method (STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is empty)
+			$stripeToken = GETPOST("stripeToken", 'alpha');
+			$label = 'Card '.dol_print_date($now, 'dayhourrfc');
+
+			if (! $stripeToken) {
+				dol_syslog("--- ErrorTokenWasNotProvidedByPreviousPage", LOG_ERR);
+				setEventMessages($langs->trans("ErrorTokenWasNotProvidedByPreviousPage"), null, 'errors');
+				$action='';
+				$mode='registerpaymentmode';
+				$error++;
 			}
 
 			if (! $error) {
-				// Payment mode successfully recorded
-				setEventMessages($langs->trans("PaymentModeRecorded"), null, 'mesgs');
+				$thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($mythirdpartyaccount->id);    // Check if customer has already a payment mode or not
 
-				$db->commit();
+				// Add payment mode
+				$companypaymentmode = new CompanyPaymentMode($db);
 
-				$url=$_SERVER["PHP_SELF"];
-				if ($backurl) $url=$backurl;
+				$companypaymentmode->fk_soc          = $mythirdpartyaccount->id;
+				$companypaymentmode->bank            = GETPOST('bank', 'alpha');
+				$companypaymentmode->label           = $label;
+				$companypaymentmode->number          = GETPOST('cardnumber', 'alpha');
+				$companypaymentmode->last_four       = substr(GETPOST('cardnumber', 'alpha'), -4);
+				$companypaymentmode->proprio         = GETPOST('proprio', 'alpha');
+				$companypaymentmode->exp_date_month  = GETPOST('exp_date_month', 'int');
+				$companypaymentmode->exp_date_year   = GETPOST('exp_date_year', 'int');
+				$companypaymentmode->cvn             = GETPOST('cvn', 'alpha');
+				$companypaymentmode->datec           = $now;
+				$companypaymentmode->default_rib     = 1;
+				$companypaymentmode->type            = 'card';
+				$companypaymentmode->country_code    = $mythirdpartyaccount->country_code;
+				$companypaymentmode->status          = $servicestatusstripe;
+				$companypaymentmode->comment         = 'Credit card created from customer dashboard';     // TODO Fields not declared in companypaymentmode
+				$companypaymentmode->ipaddress       = getUserRemoteIP();                                 // TODO Fields not declared in companypaymentmode
+				// $companypaymentmode->stripe_card_ref is filled later
+				// $companypaymentmode->stripe_account is filled later
 
-				if ($thirdpartyhadalreadyapaymentmode > 0) {
-					// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
-					$_SESSION['showconversiontracker']='paymentmodified';
+				$db->begin();
 
-					$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentmodified=1';
+				if (! $error) {
+					$result = $companypaymentmode->create($user);
+					if ($result < 0) {
+						$error++;
+						setEventMessages($companypaymentmode->error, $companypaymentmode->errors, 'errors');
+						$action='createcard';     // Force chargement page création
+					}
 
-					// Send to DataDog (metric + event)
-					if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
-						try {
-							dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+					if (! empty($conf->stripe->enabled) && class_exists('Stripe')) {
+						$stripe = new Stripe($db);
+						$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
 
-							$arrayconfig=array();
-							if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-								$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+						// Create card on Stripe
+						if (! $error) {
+							// Get the Stripe customer and create if not linked (use default Stripe setup)
+							$cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 1);
+							if (! $cu) {
+								$error++;
+								setEventMessages($stripe->error, $stripe->errors, 'errors');
+								dol_syslog('Error: Failed to get Stripe customer remote object (cu), servicestatusstripe = '.$servicestatusstripe.', stripe->error = '.$stripe->error, LOG_ERR);
+							} else {
+								dol_syslog('--- Stripe customer retrieved or created, now we try to create card');
+
+								$metadata = array(
+									'dol_version'=>DOL_VERSION,
+									'dol_entity'=>$conf->entity,
+									'ipaddress'=>getUserRemoteIP()	// ip of visitor used to create card
+								);
+								//if (! empty($dol_id))        			$metadata["dol_id"] = $dol_id;
+								//if (! empty($dol_type))      			$metadata["dol_type"] = $dol_type;
+								if (! empty($mythirdpartyaccount->id)) 	$metadata["dol_thirdparty_id"] = $mythirdpartyaccount->id;
+
+								// Create Stripe card from Token
+								try {
+									$card = $cu->sources->create(array("source" => $stripeToken, "metadata" => $metadata));
+								} catch (\Stripe\Error\Card $e) {
+									// Since it's a decline, Stripe_CardError will be caught
+									$body = $e->getJsonBody();
+									$err  = $body['error'];
+
+									$stripefailurecode = $err['code'];
+									$stripefailuremessage = $err['message'];
+
+									$error++;
+									$errormsg = 'Code: '.$stripefailurecode.', '.$langs->trans("Message").': '.$stripefailuremessage;
+									dol_syslog('--- FailedToCreateCardRecord Strip Error Card '.$errormsg, LOG_WARNING);
+									setEventMessages($langs->trans('FailedToCreateCardRecord').($errormsg?'<br>'.$errormsg:''), null, 'errors');
+									$action='';
+
+									dol_syslog('--- FailedToCreateCardRecord '.json_encode($err), LOG_WARNING);
+								} catch (Exception $e) {
+									$error++;
+									$errormsg = $e->getMessage();
+									dol_syslog('--- FailedToCreateCardRecord Exception '.$e->getCode().' '.$errormsg, LOG_WARNING);
+									setEventMessages($langs->trans('FailedToCreateCardRecord').($errormsg?'<br>'.$errormsg:''), null, 'errors');
+									$action='';
+								}
+
+								if (! $error) {
+									if (empty($card)) {
+										$error++;
+										dol_syslog('--- FailedToCreateCardRecord', LOG_WARNING, 0);
+										setEventMessages($langs->trans('FailedToCreateCardRecord', ''), null, 'errors');
+										$action='';
+									} else {
+										global $stripearrayofkeysbyenv;
+										$stripearrayofkeys = $stripearrayofkeysbyenv[$servicestatusstripe];
+
+										$sql = "UPDATE " . MAIN_DB_PREFIX . "societe_rib";
+										$sql.= " SET stripe_card_ref = '".$db->escape($card->id)."',";
+										$sql.= " stripe_account = '".$db->escape($cu->id.'@'.$stripearrayofkeys['publishable_key'])."',";
+										$sql.= " status = ".((int) $servicestatusstripe).",";
+										$sql.= " card_type = '".$db->escape($card->brand)."',";
+										$sql.= " country_code = '".$db->escape($card->country)."',";
+										$sql.= " exp_date_month = '".$db->escape($card->exp_month)."',";
+										$sql.= " exp_date_year = '".$db->escape($card->exp_year)."',";
+										$sql.= " last_four = '".$db->escape($card->last4)."',";
+										$sql.= " ipaddress = '".$db->escape(getUserRemoteIP())."',";
+										$sql.= " approved = ".($card->cvc_check == 'pass' ? 1 : 0);
+										$sql.= " WHERE rowid = " . $companypaymentmode->id;
+										$sql.= " AND type = 'card'";
+										$resql = $db->query($sql);
+										if (! $resql) {
+											dol_syslog("Failed to update societe_rib ".$db->lasterror(), LOG_ERR);
+											setEventMessages($db->lasterror(), null, 'errors');
+										}
+
+										$stripecard = $card->id;
+									}
+								}
 							}
-
-							$statsd = new DataDog\DogStatsd($arrayconfig);
-
-							$arraytags=null;
-							$statsd->increment('sellyoursaas.paymentmodemodified', 1, $arraytags);
-						} catch (Exception $e) {
 						}
 					}
-				} else {
-					// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
-					$_SESSION['showconversiontracker']='paymentrecorded';
 
-					$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentrecorded=1';
+					if (! $error) {
+						$companypaymentmode->setAsDefault($companypaymentmode->id, 1);
+						dol_syslog("--- A credit card was recorded. Now we reset the stripeaccount (to force use of default Stripe setup)", LOG_DEBUG, 0);
 
-					// Send to DataDog (metric + event)
-					if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
-						try {
-							dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+						$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
+						$db->query($sql);
 
-							$arrayconfig=array();
-							if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-								$arrayconfig=array('apiKey' => $conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+						if ($mythirdpartyaccount->client == 2) {
+							dol_syslog("--- Set status of thirdparty to prospect+client instead of only prospect", LOG_DEBUG, 0);
+							$mythirdpartyaccount->set_as_client();
+						}
+
+						if (! $error) {
+							$labelofevent = 'Payment mode added by '.getUserRemoteIP();
+							$codeofevent = 'AC_ADD_PAYMENT';
+							if ($thirdpartyhadalreadyapaymentmode > 0) {
+								$labelofevent = 'Payment mode modified by '.getUserRemoteIP();
+								$codeofevent = 'AC_MOD_PAYMENT';
 							}
 
-							$statsd = new DataDog\DogStatsd($arrayconfig);
-
-							$arraytags=null;
-							$statsd->increment('sellyoursaas.paymentmodeadded', 1, $arraytags);
-
-							global $dolibarr_main_url_root;
-							$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));
-							$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
-							//$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
-
-							$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-							if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-								&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-								$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-								if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
-							}
-
-							$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langscompany->trans("NewCustomer").': '.$mythirdpartyaccount->name, 90);
-							$messageofevent = ' - '.$langscompany->trans("PaymentModeAddedFrom").' '.getUserRemoteIP()."\n";
-							$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
-
-							// See https://docs.datadoghq.com/api/?lang=python#post-an-event
-							$statsd->event($titleofevent,
-								array(
-									'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
-									'alert_type' => 'info',
-									'source_type_name' => 'API',
-									'host'       => gethostname()
-									)
-								);
-						} catch (Exception $e) {
+							include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+							// Create an event
+							$actioncomm = new ActionComm($db);
+							$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+							$actioncomm->code        = $codeofevent;
+							$actioncomm->label       = $labelofevent;
+							$actioncomm->datep       = $now;
+							$actioncomm->datef       = $now;
+							$actioncomm->percentage  = -1;   // Not applicable
+							$actioncomm->socid       = $mythirdpartyaccount->id;
+							$actioncomm->authorid    = $user->id;   // User saving action
+							$actioncomm->userownerid = $user->id;	// Owner of action
+							$actioncomm->note_private= $labelofevent.' - Company payment mode id created or modified = '.$companypaymentmode->id;
+							//$actioncomm->fk_element  = $mythirdpartyaccount->id;
+							//$actioncomm->elementtype = 'thirdparty';
+							$ret=$actioncomm->create($user);       // User creating action
 						}
 					}
 				}
 
-				header('Location: '.$url);
-				exit;
-			} else {
-				$db->rollback();
+				// We can a commit / begin here so we are sure the payment is recorded, even if payment later fails.
+				// But we prefer to have payment mode recorded only if payment is success.
 
-				$action='';
-				$mode='registerpaymentmode';
+				$erroronstripecharge = 0;
+
+
+				// Loop on each pending invoices of the thirdparty and try to pay them with payment = remain amount of invoice.
+				// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended)
+				if (! $error) {
+					dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
+
+					$sellyoursaasutils = new SellYourSaasUtils($db);
+
+					$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
+					if ($result != 0) {
+						$error++;
+						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+						dol_syslog("--- Error when taking payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+					} else {
+						dol_syslog("--- Success to take payment", LOG_DEBUG, 0);
+					}
+
+					// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
+					if ($sellyoursaasutils->stripechargedone > 0) {
+						dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
+
+						$rescommit = $db->commit();
+						dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
+
+						$db->begin();
+					}
+				}
+
+				// Make renewals on contracts of customer
+				if (! $error) {
+					dol_syslog("--- Make renewals on crontacts for thirdparty id=".$mythirdpartyaccount->id, LOG_DEBUG, 0);
+
+					$sellyoursaasutils = new SellYourSaasUtils($db);
+
+					$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
+					if ($result != 0) {
+						$error++;
+						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+						dol_syslog("Failed to make renewal of contract ".$sellyoursaasutils->error, LOG_ERR);
+					}
+				}
+
+				// Create a recurring invoice (+real invoice + contract renewal) if there is no reccuring invoice yet
+				if (! $error) {
+					foreach ($listofcontractid as $contract) {
+						dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
+
+						if ($contract->array_options['options_deployment_status'] != 'done') {
+							dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
+							continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
+						}
+						if ($contract->total_ht == 0) {
+							dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
+							continue;							// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
+						}
+
+						// Make a test to pass loop if there is already a template invoice
+						$result = $contract->fetchObjectLinked();
+						if ($result < 0) {
+							continue;							// There is an error, so we discard this contract to avoid to create template twice
+						}
+						if (! empty($contract->linkedObjectsIds['facturerec'])) {
+							$templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
+							if ($templateinvoice > 0) {			// There is already a template invoice, so we discard this contract to avoid to create template twice
+								dol_syslog("--- There is already a recurring invoice on this contract.", LOG_DEBUG, 0);
+								continue;
+							}
+						}
+
+						dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id." that is NOT null, so we refresh contract before creating template invoice + creating invoice (if template invoice date is already in past) + making contract renewal.", LOG_DEBUG, 0);
+
+						$comment = 'Refresh contract '.$contract->ref.' after entering a payment mode on dashboard, because we need to create a template invoice (old case when STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION is not set)';
+						// First launch update of resources:
+						// This update qty of contract lines + qty into linked template invoice.
+						$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
+
+						dol_syslog("--- No template invoice found linked to the contract contract_id = ".$contract->id.", so we create it then we create real invoice (if template invoice date is already in past) then make contract renewal.", LOG_DEBUG, 0);
+
+						// Now create invoice draft
+						$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
+						if ($dateinvoice < $now) $dateinvoice = $now;
+
+						$invoice_draft = new Facture($db);
+						$tmpproduct = new Product($db);
+
+						// Create empty invoice
+						if (! $error) {
+							$invoice_draft->socid				= $contract->socid;
+							$invoice_draft->type				= Facture::TYPE_STANDARD;
+							$invoice_draft->number				= '';
+							$invoice_draft->date				= $dateinvoice;
+
+							$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
+							$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
+							$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
+							$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
+
+							$invoice_draft->fetch_thirdparty();
+
+							$origin='contrat';
+							$originid=$contract->id;
+
+							$invoice_draft->origin = $origin;
+							$invoice_draft->origin_id = $originid;
+
+							// Possibility to add external linked objects with hooks
+							$invoice_draft->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
+
+							$idinvoice = $invoice_draft->create($user);      // This include class to add_object_linked() and add add_contact()
+							if (! ($idinvoice > 0)) {
+								setEventMessages($invoice_draft->error, $invoice_draft->errors, 'errors');
+								$error++;
+							}
+						}
+						// Add lines on invoice
+						if (! $error) {
+							// Add lines of contract to template invoice
+							$srcobject = $contract;
+
+							$lines = $srcobject->lines;
+							if (empty($lines) && method_exists($srcobject, 'fetch_lines')) {
+								$srcobject->fetch_lines();
+								$lines = $srcobject->lines;
+							}
+
+							$frequency=1;
+							$frequency_unit='m';
+
+							$date_start = false;
+							$fk_parent_line=0;
+							$num=count($lines);
+							for ($i=0; $i<$num; $i++) {
+								$label=(! empty($lines[$i]->label)?$lines[$i]->label:'');
+								$desc=(! empty($lines[$i]->desc)?$lines[$i]->desc:$lines[$i]->libelle);
+								if ($invoice_draft->situation_counter == 1) $lines[$i]->situation_percent =  0;
+
+								// Positive line
+								$product_type = ($lines[$i]->product_type ? $lines[$i]->product_type : 0);
+
+								// Date start
+								$date_start = false;
+								if ($lines[$i]->date_debut_prevue)
+									$date_start = $lines[$i]->date_debut_prevue;
+								if ($lines[$i]->date_debut_reel)
+									$date_start = $lines[$i]->date_debut_reel;
+								if ($lines[$i]->date_start)
+									$date_start = $lines[$i]->date_start;
+
+								// Date end
+								$date_end = false;
+								if ($lines[$i]->date_fin_prevue)
+									$date_end = $lines[$i]->date_fin_prevue;
+								if ($lines[$i]->date_fin_reel)
+									$date_end = $lines[$i]->date_fin_reel;
+								if ($lines[$i]->date_end)
+									$date_end = $lines[$i]->date_end;
+
+								// If date start is in past, we set it to now
+								$now = dol_now();
+								if ($date_start < $now) {
+									dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
+									$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
+									$duration_value = $tmparray['duration_value'];
+									$duration_unit = $tmparray['duration_unit'];
+
+									$date_start = $now;
+									$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
+
+									// BecauseWe update the end date planned of contract too
+									$sqltoupdateenddate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$db->idate($date_end)."' WHERE fk_contrat = ".$srcobject->id;
+									$resqltoupdateenddate = $db->query($sqltoupdateenddate);
+								}
+
+								// Reset fk_parent_line for no child products and special product
+								if (($lines[$i]->product_type != 9 && empty($lines[$i]->fk_parent_line)) || $lines[$i]->product_type == 9) {
+									$fk_parent_line = 0;
+								}
+
+								// Discount
+								$discount = $lines[$i]->remise_percent;
+
+								// Extrafields
+								if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
+									$lines[$i]->fetch_optionals($lines[$i]->rowid);
+									$array_options = $lines[$i]->array_options;
+								}
+
+								$tva_tx = $lines[$i]->tva_tx;
+								if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) $tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
+
+								// View third's localtaxes for NOW and do not use value from origin.
+								$localtax1_tx = get_localtax($tva_tx, 1, $invoice_draft->thirdparty);
+								$localtax2_tx = get_localtax($tva_tx, 2, $invoice_draft->thirdparty);
+
+								//$price_invoice_template_line = $lines[$i]->subprice * GETPOST('frequency_multiple','int');
+								$price_invoice_template_line = $lines[$i]->subprice;
+
+								$result = $invoice_draft->addline($desc, $price_invoice_template_line, $lines[$i]->qty, $tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $discount, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $invoice_draft->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_options, $lines[$i]->situation_percent, $lines[$i]->fk_prev_id, $lines[$i]->fk_unit);
+
+								if ($result > 0) {
+									$lineid = $result;
+								} else {
+									$lineid = 0;
+									$error++;
+									break;
+								}
+
+								// Defined the new fk_parent_line
+								if ($result > 0 && $lines[$i]->product_type == 9) {
+									$fk_parent_line = $result;
+								}
+
+								$tmpproduct->fetch($lines[$i]->fk_product);
+
+								dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
+								if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
+									$frequency = $tmpproduct->duration_value;
+									$frequency_unit = $tmpproduct->duration_unit;
+								}
+							}
+						}
+
+						// Now we convert invoice into a template
+						if (! $error) {
+							//var_dump($invoice_draft->lines);
+							//var_dump(dol_print_date($date_start,'dayhour'));
+							//exit;
+
+							//$frequency=1;
+							//$frequency_unit='m';
+							$frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
+							$frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
+							$tmp=dol_getdate($date_start?$date_start:$now);
+							$reyear=$tmp['year'];
+							$remonth=$tmp['mon'];
+							$reday=$tmp['mday'];
+							$rehour=$tmp['hours'];
+							$remin=$tmp['minutes'];
+							$nb_gen_max=0;
+							//print dol_print_date($date_start,'dayhour');
+							//var_dump($remonth);
+
+							$invoice_rec = new FactureRec($db);
+
+							$invoice_rec->title = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
+							$invoice_rec->titre = $invoice_rec->title;		// for backward compatibility
+
+							$invoice_rec->note_private = $contract->note_private;
+							//$invoice_rec->note_public  = dol_concatdesc($contract->note_public, '__(Period)__ : __INVOICE_DATE_NEXT_INVOICE_BEFORE_GEN__ - __INVOICE_DATE_NEXT_INVOICE_AFTER_GEN__');
+							$invoice_rec->note_public  = $contract->note_public;
+							$invoice_rec->mode_reglement_id = $invoice_draft->mode_reglement_id;
+
+							$invoice_rec->usenewprice = 0;
+
+							$invoice_rec->frequency = $frequency;
+							$invoice_rec->unit_frequency = $frequency_unit;
+							$invoice_rec->nb_gen_max = $nb_gen_max;
+							$invoice_rec->auto_validate = 0;
+
+							$invoice_rec->fk_project = 0;
+
+							$date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
+							$invoice_rec->date_when = $date_next_execution;
+
+							// Get first contract linked to invoice used to generate template
+							if ($invoice_draft->id > 0) {
+								$srcObject = $invoice_draft;
+
+								$srcObject->fetchObjectLinked();
+
+								if (! empty($srcObject->linkedObjectsIds['contrat'])) {
+									$contractidid = reset($srcObject->linkedObjectsIds['contrat']);
+
+									$invoice_rec->origin = 'contrat';
+									$invoice_rec->origin_id = $contractidid;
+									$invoice_rec->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
+								}
+							}
+
+							$oldinvoice = new Facture($db);
+							$oldinvoice->fetch($invoice_draft->id);
+
+							$invoicerecid = $invoice_rec->create($user, $oldinvoice->id);
+							if ($invoicerecid > 0) {
+								$sql = 'UPDATE '.MAIN_DB_PREFIX.'facturedet_rec SET date_start_fill = 1, date_end_fill = 1 WHERE fk_facture = '.$invoice_rec->id;
+								$result = $db->query($sql);
+								if (! $error && $result < 0) {
+									$error++;
+									setEventMessages($db->lasterror(), null, 'errors');
+								}
+
+								$result=$oldinvoice->delete($user, 1);
+								if (! $error && $result < 0) {
+									$error++;
+									setEventMessages($oldinvoice->error, $oldinvoice->errors, 'errors');
+								}
+							} else {
+								$error++;
+								setEventMessages($invoice_rec->error, $invoice_rec->errors, 'errors');
+							}
+
+							// A template invoice was just created, we run generation of invoice if template invoice date is already in past
+							if (! $error) {
+								dol_syslog("--- A template invoice was generated with id ".$invoicerecid.", now we run createRecurringInvoices to build real invoice", LOG_DEBUG, 0);
+								$facturerec = new FactureRec($db);
+
+								$savperm1 = $user->rights->facture->creer;
+								$savperm2 = $user->rights->facture->invoice_advance->validate;
+
+								$user->rights->facture->creer = 1;
+								if (empty($user->rights->facture->invoice_advance)) $user->rights->facture->invoice_advance=new stdClass();
+								$user->rights->facture->invoice_advance->validate = 1;
+
+								$result = $facturerec->createRecurringInvoices($invoicerecid, 1);		// Generate real invoice from pending recurring invoices
+								if ($result != 0) {
+									$error++;
+									setEventMessages($facturerec->error, $facturerec->errors, 'errors');
+								}
+
+								$user->rights->facture->creer = $savperm1;
+								$user->rights->facture->invoice_advance->validate = $savperm2;
+							}
+							if (! $error) {
+								dol_syslog("--- Now we try to take payment for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+
+								$sellyoursaasutils = new SellYourSaasUtils($db);
+
+								$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 0, 1, 0, 1);
+								if ($result != 0) {
+									$error++;
+									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+									dol_syslog("--- Error when taking payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+								} else {
+									dol_syslog("--- Success to take payment", LOG_DEBUG, 0);
+								}
+
+								// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
+								if ($sellyoursaasutils->stripechargedone > 0) {
+									dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
+
+									$rescommit = $db->commit();
+									dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
+
+									$db->begin();
+								}
+							}
+
+							// Make renewals on contracts of customer
+							if (! $error) {
+								dol_syslog("--- Now we make renewal of contracts for thirdpartyid=".$mythirdpartyaccount->id." if payments were ok and contract are not unsuspended", LOG_DEBUG, 0);
+
+								$sellyoursaasutils = new SellYourSaasUtils($db);
+
+								$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
+								if ($result != 0) {
+									$error++;
+									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+								}
+							}
+						}
+					}
+				}
+
+				if (! $error) {
+					// Payment mode successfully recorded
+					setEventMessages($langs->trans("PaymentModeRecorded"), null, 'mesgs');
+
+					$db->commit();
+
+					$url=$_SERVER["PHP_SELF"];
+					if ($backurl) $url=$backurl;
+
+					if ($thirdpartyhadalreadyapaymentmode > 0) {
+						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
+						$_SESSION['showconversiontracker']='paymentmodified';
+
+						$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentmodified=1';
+
+						// Send to DataDog (metric + event)
+						if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+							try {
+								dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+
+								$arrayconfig=array();
+								if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+									$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+								}
+
+								$statsd = new DataDog\DogStatsd($arrayconfig);
+
+								$arraytags=null;
+								$statsd->increment('sellyoursaas.paymentmodemodified', 1, $arraytags);
+							} catch (Exception $e) {
+							}
+						}
+					} else {
+						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
+						$_SESSION['showconversiontracker']='paymentrecorded';
+
+						$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentrecorded=1';
+
+						// Send to DataDog (metric + event)
+						if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+							try {
+								dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+
+								$arrayconfig=array();
+								if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
+									$arrayconfig=array('apiKey' => $conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+								}
+
+								$statsd = new DataDog\DogStatsd($arrayconfig);
+
+								$arraytags=null;
+								$statsd->increment('sellyoursaas.paymentmodeadded', 1, $arraytags);
+
+								global $dolibarr_main_url_root;
+								$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));
+								$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
+								//$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
+
+								$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+								if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+									&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+									$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+									if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+								}
+
+								$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langscompany->trans("NewCustomer").': '.$mythirdpartyaccount->name, 90);
+								$messageofevent = ' - '.$langscompany->trans("PaymentModeAddedFrom").' '.getUserRemoteIP()."\n";
+								$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
+
+								// See https://docs.datadoghq.com/api/?lang=python#post-an-event
+								$statsd->event($titleofevent,
+									array(
+										'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
+										'alert_type' => 'info',
+										'source_type_name' => 'API',
+										'host'       => gethostname()
+										)
+									);
+							} catch (Exception $e) {
+							}
+						}
+					}
+
+					header('Location: '.$url);
+					exit;
+				} else {
+					$db->rollback();
+
+					$action='';
+					$mode='registerpaymentmode';
+				}
 			}
 		}
 	}
@@ -2311,10 +2436,9 @@ if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVIC
 
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
 $head.='<!-- Bootstrap core CSS -->
-<!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
-<link href="dist/css/bootstrap.css" rel="stylesheet">
-<link href="dist/css/myaccount.css" rel="stylesheet">
-<link href="dist/css/stripe.css" rel="stylesheet">';
+<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
+<link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">
+<link href="dist/css/stripe.css" type="text/css" rel="stylesheet">';
 $head.="
 <script>
 var select2arrayoflanguage = {
@@ -2411,28 +2535,14 @@ if ($mythirdpartyaccount->isareseller) {
 }
 
 		print '<li class="nav-item'.($mode == 'support'?' active':'').' dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-gear"></i> '.$langs->trans("Other").'</a>
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-gear"></i> '.$langs->trans("Support").'</a>
             <ul class="dropdown-menu">';
 		// FAQ
 		print '<li><a class="dropdown-item" href="'.$urlfaq.'" target="_newfaq"><i class="fa fa-question pictofixedwidth"></i> '.$langs->trans("FAQs").'</a></li>';
 		// Support
 		print '<li class="dropdown-divider"></li>';
-		print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=support"><i class="fa fa-hands-helping pictofixedwidth"></i> '.$langs->trans("Support").'</a></li>';
-		// Reseler request
-if (! $mythirdpartyaccount->isareseller) {
-	$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
-	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-		$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (isset($conf->global->$newnamekey)) $allowresellerprogram = $conf->global->$newnamekey;
-	}
+		print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=support"><i class="fa fa-hands-helping pictofixedwidth"></i> '.$langs->trans("ContactUs").'</a></li>';
 
-	// Check if there is at least one package with status resale ok
-	if ($allowresellerprogram) {
-		print '<li class="dropdown-divider"></li>';
-		print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=becomereseller"><i class="fa fa-briefcase pictofixedwidth"></i> '.$langs->trans("BecomeReseller").'</a></li>';
-	}
-}
 		print '
             </ul>
           </li>
@@ -2440,9 +2550,25 @@ if (! $mythirdpartyaccount->isareseller) {
           <li class="nav-item'.($mode == 'myaccount'?' active':'').' dropdown">
              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#socid='.$mythirdpartyaccount->id.'"><i class="fa fa-user"></i> '.$langs->trans("MyAccount").' ('.$mythirdpartyaccount->email.')</a>
              <ul class="dropdown-menu">
-                 <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>
-                 <li class="dropdown-divider"></li>
-                 <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=logout"><i class="fa fa-sign-out pictofixedwidth"></i> '.$langs->trans("Logout").'</a></li>
+                 <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>';
+		// Reseler request
+if (! $mythirdpartyaccount->isareseller) {
+	$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
+	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+			if (isset($conf->global->$newnamekey)) $allowresellerprogram = $conf->global->$newnamekey;
+	}
+
+		// Check if there is at least one package with status resale ok
+	if ($allowresellerprogram) {
+			print '<li class="dropdown-divider"></li>';
+			print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=becomereseller"><i class="fa fa-briefcase pictofixedwidth"></i> '.$langs->trans("BecomeReseller").'</a></li>';
+	}
+}
+		print '
+			<li class="dropdown-divider"></li>
+			<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=logout"><i class="fa fa-sign-out pictofixedwidth"></i> '.$langs->trans("Logout").'</a></li>
              </ul>
            </li>
 
@@ -2524,9 +2650,7 @@ if ($welcomecid > 0) {
 		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
 		</p>
 		<p>
-		<a class="btn btn-primary" target="_blank" href="https://'.$contract->ref_customer.'?username='.$_SESSION['initialapplogin'].'">
-		'.$langs->trans("TakeMeTo", $productlabel).'
-		</a>
+		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).'</a>
 		</p>
 
 		</div>';
@@ -2660,11 +2784,14 @@ if ($mythirdpartyaccount->isareseller) {
 	print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
-	print '<a class="wordbreak" href="'.$urlforpartner.'" target="_blankinstance">'.$urlforpartner.'</a> &nbsp; ';
+	//print '<a class="wordbreak" href="'.$urlforpartner.'" target="_blankinstance">';
+	print '<input type="text" class="quatrevingtpercent" id="urlforpartner" name="urlforpartner" value="'.$urlforpartner.'">';
+	print ajax_autoselect("urlforpartner");
+	//print $urlforpartner;
+	//print '</a>';
 
 	print '<script type="text/javascript" language="javascript">
 	jQuery(document).ready(function() {
@@ -2676,13 +2803,14 @@ if ($mythirdpartyaccount->isareseller) {
 	});
 		</script>';
 
-	print '<a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
-	print '<div id="divmorereselleroptions" style="display: hidden">';
-	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'</span>';
+	print '<br><a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a>';
+	print '<div id="divmorereselleroptions" style="display: hidden" class="small">';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
-		print '<br>&plan=XXX : ';
-		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span>';
+		print '&plan=XXX : ';
+		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span><br>';
 	}
+	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'. An example is available with &extcss='.$sellyoursaasaccounturl.'/dist/css/alt-myaccount-example.css</span><br>';
+	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
 	print '</div>';
 	print '<br>';
 
@@ -2745,8 +2873,13 @@ foreach ($listofcontractid as $contractid => $contract) {
 	}
 
 	$nbofinstances++;
-	if ($suspended) $nbofinstancessuspended++;
-	else $nbofinstancesdone++;
+	if ($suspended) {
+		$nbofinstancessuspended++;
+	} else {
+		if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$nbofinstancesdone++;
+		}
+	}
 }
 $nboftickets = $langs->trans("SoonAvailable");
 if ($mythirdpartyaccount->isareseller) {
@@ -2768,8 +2901,13 @@ if ($mythirdpartyaccount->isareseller) {
 		}
 
 		$nbofinstancesreseller++;
-		if ($suspended) $nbofinstancessuspendedreseller++;
-		else $nbofinstancesdonereseller++;
+		if ($suspended) {
+			$nbofinstancessuspendedreseller++;
+		} else {
+			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				$nbofinstancesdonereseller++;
+			}
+		}
 	}
 }
 
@@ -2804,16 +2942,17 @@ if (empty($welcomecid)) {
 			$delayindays = round($delaybeforeendoftrial / 3600 / 24);
 
 			if (empty($atleastonepaymentmode)) {
-				if ($delaybeforeendoftrial > 0) {		// Trial not yet expired
+				if ($delaybeforeendoftrial > 0) {
+					// Trial not yet expired
 					if (! $isASuspendedContract) {
 						//$firstline = reset($contract->lines);
 						print '
 							<!-- XDaysBeforeEndOfTrial -->
 							<div class="note note-warning">
 							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), $contract->ref_customer).' !</h4>';
-						if ($mode != 'registerpaymentmode') {
+						if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
 							print '<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentMode");
 							print '</a>
 								</p>';
@@ -2830,7 +2969,7 @@ if (empty($welcomecid)) {
 						if ($mode != 'registerpaymentmode') {
 							print '
 								<p>
-								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentModeToRestoreInstance");
 							print '</a>
 								</p>';
@@ -2839,8 +2978,8 @@ if (empty($welcomecid)) {
 							</div>
 						';
 					}
-				} else // Trial expired
-				{
+				} else {
+					// Trial expired
 					$atleastonecontractwithtrialended++;
 
 					$messageforinstance[$contract->ref_customer] = 1;
@@ -2853,7 +2992,7 @@ if (empty($welcomecid)) {
 					if ($mode != 'registerpaymentmode') {
 						print '
 							<p>
-							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning">';
+							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 						print $langs->trans("AddAPaymentModeToRestoreInstance");
 						print '</a>
 							</p>';
@@ -2863,26 +3002,47 @@ if (empty($welcomecid)) {
 					';
 				}
 			} else {
-				if ($delaybeforeendoftrial > 0) {		// Trial not yet expired
-					if ($contract->array_options['options_deployment_status'] != 'processing') {
-						//$firstline = reset($contract->lines);
-						print '
-							<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
-							<div class="note note-info">
-							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
-							</div>
-						';
+				if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+					// If not a redirect instance
+					if ($delaybeforeendoftrial > 0) {
+						// Trial not yet expired
+						if ($contract->array_options['options_deployment_status'] != 'processing') {
+							//$firstline = reset($contract->lines);
+							if ($contract->total_ht > 0) {
+								print '
+									<!-- XDaysBeforeEndOfTrialPaymentModeSet -->
+									<div class="note note-info">
+									<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialPaymentModeSet", abs($delayindays), $contract->ref_customer).'</h4>
+									</div>
+								';
+							} else {
+								print '
+									<!-- XDaysBeforeEndOfTrialForAlwaysFreeInstance -->
+									<div class="note note-info">
+									<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrialForAlwaysFreeInstance", abs($delayindays), $contract->ref_customer).'</h4>
+									</div>
+								';
+							}
+						}
+					} else {
+						// Trial expired
+						$atleastonecontractwithtrialended++;
+						if ($contract->total_ht > 0) {
+							print '
+								<!-- XDaysAfterEndOfTrialPaymentModeSet -->
+								<div class="note note-info">
+								<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
+								</div>
+							';
+						} else {
+							print '
+								<!-- XDaysAfterEndOfTrialForAlwaysFreeInstance -->
+								<div class="note note-info">
+								<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialForAlwaysFreeInstance", $contract->ref_customer, abs($delayindays)).'</h4>
+								</div>
+							';
+						}
 					}
-				} else // Trial expired
-				{
-					$atleastonecontractwithtrialended++;
-
-					print '
-						<!-- XDaysAfterEndOfTrialPaymentModeSet -->
-						<div class="note note-info">
-						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrialPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
-						</div>
-					';
 				}
 			}
 		}
@@ -2890,25 +3050,27 @@ if (empty($welcomecid)) {
 		if ($isASuspendedContract) {
 			if (empty($messageforinstance[$contract->ref_customer])		// If warning for 'expired trial' not already shown
 				&& $delaybeforeendoftrial <= 0) {							// If trial has expired
-				$delayafterexpiration = ($now - $expirationdate);
-				$delayindays = round($delayafterexpiration / 3600 / 24);
-				$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
+				if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+					$delayafterexpiration = ($now - $expirationdate);
+					$delayindays = round($delayafterexpiration / 3600 / 24);
+					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
 
-				print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
-				print '<div class="note note-warning">'."\n";
-				print '		<h4 class="block">'."\n";
-				if ($delayindays >= 0) {
-					print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
-				} else {
-					print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
+					print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
+					print '<div class="note note-warning">'."\n";
+					print '		<h4 class="block">'."\n";
+					if ($delayindays >= 0) {
+						print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
+					} else {
+						print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
+					}
+					if (empty($atleastonepaymentmode)) {
+						print '<br><a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
+					} elseif (GETPOST('mode', 'alpha') != 'registerpaymentmode') {
+						print '<br>'.$langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
+					}
+					print '     </h4>'."\n";
+					print '</div>'."\n";
 				}
-				if (empty($atleastonepaymentmode)) {
-					print '<br><a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
-				} elseif (GETPOST('mode', 'alpha') != 'registerpaymentmode') {
-					print '<br>'.$langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
-				}
-				print '     </h4>'."\n";
-				print '</div>'."\n";
 			}
 		} elseif ($isAPayingContract && $expirationdate > 0) {
 			$delaybeforeexpiration = ($expirationdate - $now);
@@ -2931,7 +3093,7 @@ if (empty($welcomecid)) {
 	// Test if there is a payment error, if yes, ask to fix payment data
 	$sql = 'SELECT f.rowid, ee.code, ee.label, ee.extraparams FROM '.MAIN_DB_PREFIX.'facture as f';
 	$sql.= ' INNER JOIN '.MAIN_DB_PREFIX."actioncomm as ee ON ee.fk_element = f.rowid AND ee.elementtype = 'invoice'";
-	$sql.= " AND (ee.code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";
+	$sql.= " AND (ee.code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";		// See also into sellyoursaasIsPaymentKo
 	$sql.= ' WHERE f.fk_soc = '.$mythirdpartyaccount->id.' AND f.paye = 0';
 	$sql.= ' ORDER BY ee.datep DESC';
 

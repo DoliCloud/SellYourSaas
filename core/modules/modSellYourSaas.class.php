@@ -21,13 +21,12 @@ include_once DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php";
  */
 class modSellYourSaas extends DolibarrModules
 {
-
 	/**
 	 *   Constructor. Define names, constants, directories, boxes, permissions
 	 *
 	 *   @param		DoliDB		$db		Database handler
 	 */
-	function __construct($db)
+	public function __construct($db)
 	{
 		global $langs,$conf;
 
@@ -49,7 +48,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->editor_name = 'SellYourSaas team';
 		$this->editor_url = 'https://www.sellyoursaas.org';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.0';
+		$this->version = '1.1';
 		// Key used in llx_const table to save module status enabled/disabled (where SELLYOURSAAS is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Name of image file used for this module.
@@ -79,7 +78,7 @@ class modSellYourSaas extends DolibarrModules
 									'models' => 1,
 									'login' => 1,
 									'css' => array(),
-									'hooks' => array('thirdpartycard','thirdpartycomm','thirdpartycontact','contactthirdparty','thirdpartyticket','thirdpartynote','thirdpartydocument',
+									'hooks' => array('thirdpartycard','thirdpartycomm','thirdpartycontact','contactthirdparty','thirdpartyticket','thirdpartynote','thirdpartydocument','thirdpartypartnership',
 													'projectthirdparty','consumptionthirdparty','thirdpartybancard','thirdpartymargins','ticketlist','thirdpartynotification','agendathirdparty',
 													'thirdpartydao','formmail','searchform','thirdpartylist','customerlist','prospectlist','contractcard','contractdao','contractlist',
 													'pdfgeneration','odtgeneration','customreport'));
@@ -94,7 +93,7 @@ class modSellYourSaas extends DolibarrModules
 				'Welcome to SellYourSaas Home page<br><br>
 		        Link to the specification: https://framagit.org/eldy/sell-your-saas<br><br>
 		        ...You can enter content on this page to save any notes/information of your choices.', 'This is another constant to add', 0, 'allentities', 0),
-			1=>array('CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES', 'chaine', 1, 'Sync planned date of services in same contract', 0, 'current', 1),
+			1=>array('CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES', 'chaine', 1, 'Sync the planned date of services to the same value for all lines in the same contract', 0, 'current', 1),
 			2=>array('THIRDPARTY_LOGO_ALLOW_EXTERNAL_DOWNLOAD', 'chaine', 1, 'Allow to access thirdparty logo from external link', 0, 'current', 0),
 			3=>array('PRODUIT_SOUSPRODUITS', 'chaine', 1, 'Enable virtual products', 0, 'current', 0),
 			4=>array('STRIPE_ALLOW_LOCAL_CARD', 'chaine', 1, 'Allow to save stripe credit card locally', 0, 'current', 1),
@@ -169,20 +168,20 @@ class modSellYourSaas extends DolibarrModules
 		$this->cronjobs = array(
 			// Generation of draft invoices is done with priority 50
 
-			0 =>array('priority'=>61, 'label'=>'SellYourSaasValidateDraftInvoices',             'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doValidateDraftInvoices',             'parameters'=>'',      'comment'=>'Search draft invoices on sellyoursaas customers and check they are linked to a not closed contract. Validate it if not and if there is not another validated invoice, do nothing if closed.', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
+			0 =>array('priority'=>61, 'label'=>'SellYourSaasValidateDraftInvoices',             'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doValidateDraftInvoices',             'parameters'=>'',      'comment'=>'Search draft invoices on sellyoursaas customers and check they are linked to a not closed contract. Validate it if not and if there is not another validated invoice, do nothing if closed. You can set the id of a thirdparty as parameter to restrict the batch to a given thirdparty.', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 
 			1 =>array('priority'=>62, 'label'=>'SellYourSaasAlertSoftEndTrial',                 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doAlertSoftEndTrial',                 'parameters'=>'',      'comment'=>'Search contracts of sellyoursaas customers that are deployed + with open lines + about to expired (= date between (end date - SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT) and (end date - SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT + 7)) + not yet already warned (date_softalert_endfreeperiod is null), then send email remind', 'frequency'=>30, 'unitfrequency'=>60, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 
 			2 =>array('priority'=>65, 'label'=>'SellYourSaasAlertCreditCardExpiration',         'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doAlertCreditCardExpiration',         'parameters'=>'1, 20', 'comment'=>'Send warning to sellyoursaas customers with an active recurring invoice when default payment mode is credit card and it will expire at end of month', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 			//3 =>array('priority'=>66, 'label'=>'SellYourSaasAlertPaypalExpiration',             'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doAlertPaypalExpiration',             'parameters'=>'1, 20', 'comment'=>'Send warning when paypal preapproval will expire to sellyoursaas customers', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled'),
 
-			4 =>array('priority'=>75, 'label'=>'SellYourSaasTakePaymentStripe',                 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doTakePaymentStripe',                 'parameters'=>'0, 0',      'comment'=>'Loop on invoice for customer with default payment mode Stripe and take payment/send email. Unsuspend if it was suspended and all payments are now ok (done by trigger BILL_CANCEL or BILL_PAYED). First parameter is the maximum number of payments processed in one run. Second parameter is 1 to disable email to customer if payment fails.', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
+			4 =>array('priority'=>75, 'label'=>'SellYourSaasTakePaymentStripe',                 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doTakePaymentStripe',                 'parameters'=>'0, 0',  'comment'=>'Loop on invoice for customer with default payment mode Stripe and take payment/send email. Unsuspend if it was suspended and all payments are now ok (done by trigger BILL_CANCEL or BILL_PAYED). First parameter is the maximum number of payments processed in one run. Second parameter is 1 to disable email to customer if payment fails.', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 			//5 =>array('priority'=>76, 'label'=>'SellYourSaasTakePaymentPaypal',                 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doTakePaymentPaypal',                 'parameters'=>'',      'comment'=>'Loop on invoice for customer with default payment mode Paypal and take payment. Unsuspend if it was suspended.', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled'),
 
 			6 =>array('priority'=>77, 'label'=>'SellYourSaasRefreshContracts',                  'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doRefreshContracts',                  'parameters'=>'',      'comment'=>'Loop on each contract. If it is a paid contract, and there is no unpaid invoice for contract, and line not suspended and end date <= today + 2 days (so expired or soon expired, we must be sure to make refresh before new generation of invoice), we update qty on contract + qty on linked template invoice', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 			7 =>array('priority'=>78, 'label'=>'SellYourSaasRenewalContracts',                  'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doRenewalContracts',                  'parameters'=>'',      'comment'=>'Loop on each contract. If it is a paid contract, and there is no unpaid invoice for contract, and line not suspended and end date <= today - 1 day (so expired, we must be sure to make renewal after generation of invoice with 2 chances of invoice generation to not make renewal if payment error), we update qty on contract + qty on linked template invoice + the running contract service end date to end at next period', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 
-			8 =>array('priority'=>81, 'label'=>'SellYourSaasSuspendExpiredTestInstances',       'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doSuspendExpiredTestInstances',       'parameters'=>'',      'comment'=>'Suspend expired services of test instances (a test instance = instance without template neither standard invoice) if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND). Note that if a payment mode exists for customer, we do NOT suspend instance but create a template invoice instead.', 'frequency'=>4, 'unitfrequency'=>3600, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
+			8 =>array('priority'=>81, 'label'=>'SellYourSaasSuspendExpiredTestInstances',       'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doSuspendExpiredTestInstances',       'parameters'=>'0, 25', 'comment'=>'Suspend expired services of test instances (a test instance = instance without template neither standard invoice) if it is not a redirect instance and if we are after the planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND). Note that if a payment mode exists for customer, we do NOT suspend instance but create a template invoice instead. 1st parameter can be set to 1 to disable apache reload. 2nd parameter is maximum number of instance to suspend.', 'frequency'=>4, 'unitfrequency'=>3600, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 			9 =>array('priority'=>82, 'label'=>'SellYourSaasUndeployOldSuspendedTestInstances', 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doUndeployOldSuspendedTestInstances', 'parameters'=>'',      'comment'=>'Undeployed test instances if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT)', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 			10=>array('priority'=>85, 'label'=>'SellYourSaasSuspendExpiredRealInstances',       'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doSuspendExpiredRealInstances',       'parameters'=>'',      'comment'=>'Suspend expired services of paid instances if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND)', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
 			11=>array('priority'=>86, 'label'=>'SellYourSaasUndeployOldSuspendedRealInstances', 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doUndeployOldSuspendedRealInstances', 'parameters'=>'',      'comment'=>'Undeployed paid instances if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT)', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'$conf->sellyoursaas->enabled', 'datestart'=>$datestart),
@@ -330,34 +329,54 @@ class modSellYourSaas extends DolibarrModules
 
 		// Products - Services
 		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas',
-		'type'=>'left',
-		'titre'=>'Services',
-		'prefix' => img_picto('', 'service', 'class="paddingright pictofixedwidth"'),
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'mysaas_products',
-		'url'=>'/product/list.php?type=1&search_category_product_list[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
-		'langs'=>'',
-		'position'=>220,
-		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->read',
-		'target'=>'',
-		'user'=>0);
+			'fk_menu'=>'fk_mainmenu=sellyoursaas',
+			'type'=>'left',
+			'titre'=>'Services',
+			'prefix' => img_picto('', 'service', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_products',
+			'url'=>'/product/list.php?type=1&search_category_product_list[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
+			'langs'=>'',
+			'position'=>220,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->read',
+			'target'=>'',
+			'user'=>0
+		);
 		$r++;
 
 		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_products',
-		'type'=>'left',
-		'titre'=>'NewService',
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'mysaas_createproduct',
-		'url'=>'/product/card.php?type=1&action=create&categories[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
-		'langs'=>'',
-		'position'=>221,
-		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->write',
-		'target'=>'',
-		'user'=>0);
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_products',
+			'type'=>'left',
+			'titre'=>'NewService',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_createproduct',
+			'url'=>'/product/card.php?type=1&action=create&categories[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
+			'langs'=>'',
+			'position'=>221,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->write',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+
+		// Link to registration form page
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_products',
+			'type'=>'left',
+			'titre'=>'RegistrationPages',
+			'prefix' => img_picto('', 'generic', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_registration',
+			'url'=>'/sellyoursaas/registrationlinks_list.php',
+			'langs'=>'sellyoursaas@sellyoursaas',
+			'position'=>229,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->read',
+			'target'=>'',
+			'user'=>0);
 		$r++;
 
 
@@ -375,7 +394,8 @@ class modSellYourSaas extends DolibarrModules
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->sellyoursaas->read',
 			'target'=>'',
-			'user'=>0);
+			'user'=>0
+		);
 		$r++;
 		$this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_customers',
@@ -389,37 +409,40 @@ class modSellYourSaas extends DolibarrModules
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->sellyoursaas->write',
 			'target'=>'',
-			'user'=>0);
+			'user'=>0
+		);
 		$r++;
 
 		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_customers',
-		'type'=>'left',
-		'titre'=>'Prospects',
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'mysaas_customers_prospects',
-		'url'=>'/societe/list.php?search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=2,3&sortfield=s.tms&sortorder=desc',
-		'langs'=>'',
-		'position'=>233,
-		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->write',
-		'target'=>'',
-		'user'=>0);
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_customers',
+			'type'=>'left',
+			'titre'=>'Prospects',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_customers_prospects',
+			'url'=>'/societe/list.php?search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=2,3&sortfield=s.tms&sortorder=desc',
+			'langs'=>'',
+			'position'=>233,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->write',
+			'target'=>'',
+			'user'=>0
+		);
 		$r++;
 
 		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_customers',
-		'type'=>'left',
-		'titre'=>'Customers',
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'mysaas_customers_customers',
-		'url'=>'/societe/list.php?search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=1,3&sortfield=s.tms&sortorder=desc',
-		'langs'=>'',
-		'position'=>234,
-		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->write',
-		'target'=>'',
-		'user'=>0);
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_customers',
+			'type'=>'left',
+			'titre'=>'Customers',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_customers_customers',
+			'url'=>'/societe/list.php?search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=1,3&sortfield=s.tms&sortorder=desc',
+			'langs'=>'',
+			'position'=>234,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->write',
+			'target'=>'',
+			'user'=>0
+		);
 		$r++;
 
 
@@ -437,7 +460,8 @@ class modSellYourSaas extends DolibarrModules
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->sellyoursaas->read',
 			'target'=>'',
-			'user'=>0);
+			'user'=>0
+		);
 		$r++;
 
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_instances',
@@ -451,7 +475,8 @@ class modSellYourSaas extends DolibarrModules
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->sellyoursaas->write',
 			'target'=>'',
-			'user'=>0);
+			'user'=>0
+		);
 		$r++;
 
 		// Cancellation questions
@@ -468,10 +493,12 @@ class modSellYourSaas extends DolibarrModules
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->sellyoursaas->read',
 			'target'=>'',
-			'user'=>0);
+			'user'=>0
+		);
 		$r++;
 
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_cancellation_list',
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_cancellation_list',
 			'type'=>'left',
 			'titre'=>'NewCancellationForm',
 			'mainmenu'=>'sellyoursaas',
@@ -482,44 +509,27 @@ class modSellYourSaas extends DolibarrModules
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->sellyoursaas->write',
 			'target'=>'',
-			'user'=>0);
+			'user'=>0
+		);
 		$r++;
 
-
-		// Link to registration form page
-
-		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas',
-		'type'=>'left',
-		'titre'=>'RegistrationPages',
-		'prefix' => img_picto('', 'generic', 'class="paddingright pictofixedwidth"'),
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'website',
-		'url'=>'/sellyoursaas/registrationlinks_list.php',
-		'langs'=>'sellyoursaas@sellyoursaas',
-		'position'=>500,
-		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->read',
-		'target'=>'',
-		'user'=>0);
-		$r++;
 
 		// Link to customers dashboard
-
 		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas',
-		'type'=>'left',
-		'titre'=>'CustomerPortal',
-		'prefix' => img_picto('', 'globe', 'class="paddingright pictofixedwidth"'),
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'website',
-		'url'=>'__[SELLYOURSAAS_ACCOUNT_URL]__',
-		'langs'=>'sellyoursaas@sellyoursaas',
-		'position'=>501,
-		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->read',
-		'target'=>'_sellyoursaas_customer',
-		'user'=>0);
+			'fk_menu'=>'fk_mainmenu=sellyoursaas',
+			'type'=>'left',
+			'titre'=>'CustomerPortal',
+			'prefix' => img_picto('', 'globe', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'website',
+			'url'=>'__[SELLYOURSAAS_ACCOUNT_URL]__',
+			'langs'=>'sellyoursaas@sellyoursaas',
+			'position'=>501,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->read',
+			'target'=>'_sellyoursaas_customer',
+			'user'=>0
+		);
 		$r++;
 
 
@@ -527,33 +537,35 @@ class modSellYourSaas extends DolibarrModules
 		// Reseller
 
 		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas',
-		'type'=>'left',
-		'titre'=>'Resellers',
-		'prefix' => img_picto('', 'company', 'class="paddingright pictofixedwidth"'),
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'mysaas_resellerlist',
-		'url'=>'/societe/list.php?search_categ_sup=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
-		'langs'=>'',
-		'position'=>601,
-		'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->read',
-		'target'=>'',
-		'user'=>0);
+			'fk_menu'=>'fk_mainmenu=sellyoursaas',
+			'type'=>'left',
+			'titre'=>'Resellers',
+			'prefix' => img_picto('', 'company', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_resellerlist',
+			'url'=>'/societe/list.php?search_categ_sup=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->read',
+			'target'=>'',
+			'user'=>0
+		);
 		$r++;
 
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_resellerlist',
-		'type'=>'left',
-		'titre'=>'NewReseller',
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'mysaas_createreseller',
-		'url'=>'/societe/card.php?action=create&type=f&options_dolicloud=no&suppcats[]=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
-		'langs'=>'sellyoursaas@sellyoursaas',
-		'position'=>602,
-		'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->write',
-		'target'=>'',
-		'user'=>0);
+			'type'=>'left',
+			'titre'=>'NewReseller',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_createreseller',
+			'url'=>'/societe/card.php?action=create&type=f&options_dolicloud=no&suppcats[]=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
+			'langs'=>'sellyoursaas@sellyoursaas',
+			'position'=>602,
+			'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->write',
+			'target'=>'',
+			'user'=>0
+		);
 		$r++;
 	}
 
@@ -565,7 +577,7 @@ class modSellYourSaas extends DolibarrModules
 	 *  @param      string	$options    Options when enabling module ('', 'noboxes')
 	 *  @return     int             	1 if OK, 0 if KO
 	 */
-	function init($options = '')
+	public function init($options = '')
 	{
 		global $conf, $langs;
 
@@ -579,24 +591,27 @@ class modSellYourSaas extends DolibarrModules
 		$param=array('options'=>array(1=>1));
 		$resultx=$extrafields->addExtraField('separatorproduct',          "SELLYOURSAAS_NAME", 'separate',   100,     '',  'product', 0, 1, '',   $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('app'=>'Application','system'=>'System','option'=>'Option'));
-		$resultx=$extrafields->addExtraField('app_or_option',                   "AppOrOption",  'select',   110,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnAppOrOption',         '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('availabelforresellers', "AvailableForResellers", 'boolean',   111,     '',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('app_or_option',                   "AppOrOption",   'select',   110,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnAppOrOption',         '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('availabelforresellers', "AvailableForResellers",  'boolean',   111,     '',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('Packages:sellyoursaas/class/packages.class.php'=>null));
-		$resultx=$extrafields->addExtraField('package', 	        	            "Package",    'link',   111,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'IfSomethingMustBeDeployed', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('resource_formula', "QuantityCalculationFormula",    'text',   112, '8192',  'product', 0, 0,   '',     '', 1, '', -1, 'QtyFormulaExamples',        '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('resource_label',            "ResourceUnitLabel", 'varchar',   112,   '32',  'product', 0, 0,   '',     '', 1, '', -1, 'ResourceUnitLabelDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('package', 	        	            "Package",     'link',   111,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'IfSomethingMustBeDeployed', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('resource_formula', "QuantityCalculationFormula",     'text',   112, '8192',  'product', 0, 0,   '',     '', 1, '', -1, 'QtyFormulaExamples',        '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('resource_label',            "ResourceUnitLabel",  'varchar',   112,   '32',  'product', 0, 0,   '',     '', 1, '', -1, 'ResourceUnitLabelDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
-		$resultx=$extrafields->addExtraField('freeperioddays', 	          "DaysForFreePeriod",     'int',   113,    '6',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('freeperioddays', 	          "DaysForFreePeriod",      'int',   113,    '6',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('0'=>'No','1'=>'Yes','2'=>'DuringTestPeriodOnly','3'=>'AfterTestPeriodOnly'));
-		$resultx=$extrafields->addExtraField('directaccess', 	          "AccessToResources",  'select',   114,     '',  'product', 0, 0,   '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('directaccess', 	          "AccessToResources",   'select',   114,     '',  'product', 0, 0,   '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('0'=>'SystemDefault','1'=>'CommonUserJail','2'=>'PrivateUserJail'));
-		$resultx=$extrafields->addExtraField('sshaccesstype', 	              "SshAccessType",  'select',   114,     '',  'product', 0, 0,   '', $param, 1, '',  '($conf->global->SELLYOURSAAS_SSH_JAILKIT_ENABLED?1:0)', 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('sshaccesstype', 	              "SshAccessType",   'select',   114,     '',  'product', 0, 0,   '', $param, 1, '',  '($conf->global->SELLYOURSAAS_SSH_JAILKIT_ENABLED?1:0)', 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('basic'=>'Basic','premium'=>'Premium','none'=>'None'));
-		$resultx=$extrafields->addExtraField('typesupport', 	              "TypeOfSupport",  'select',   115,     '',  'product', 0, 0,   '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('register_text', 	               "RegisterText",  'varchar',  117,  '255',  'product', 0, 0,   '',     '', 1, '', -1, 'EnterHereTranslationKeyToUseOnRegisterPage', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('register_discountcode', 	      "DiscountCodes",  'varchar',  119,  '255',  'product', 0, 0,   '',     '', 1, '', -1, 'EnterHereListOfDiscountCodes', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled && !empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)');
-		$resultx=$extrafields->addExtraField('position', 	                       "Position",  'int',  120,    '5',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		//$resultx=$extrafields->addExtraField('separatorproductend',                   "Other",'separate',   199,     '',  'product', 0, 1,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('typesupport', 	              "TypeOfSupport",   'select',   115,     '',  'product', 0, 0,   '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('register_text', 	               "RegisterText",   'varchar',  120,  '255',  'product', 0, 0,   '',     '', 1, '', -1, 'EnterHereTranslationKeyToUseOnRegisterPage', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('register_discountcode', 	      "DiscountCodes",   'varchar',  121,  '255',  'product', 0, 0,   '',     '', 1, '', -1, 'EnterHereListOfDiscountCodes', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled && !empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)');
+		$resultx=$extrafields->addExtraField('email_template_trialreminder', "EmailTemplateTrialExpiringReminder",     'int',  123,     '',  'product', 0, 0,   '',     '', 1, '', -1, 'EmailTemplateTrialExpiringReminderHelp', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		//$resultx=$extrafields->addExtraField('email_template_trialend',               "EmailTemplateEndOfTrial",     'int',  124,     '',  'product', 0, 0,   '',     '', 1, '', -1, 'EmailTemplateEndOfTrialHelp', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('email_template_trialsuspended',       "EmailTemplateSuspendedTrial",     'int',  125,     '',  'product', 0, 0,   '',     '', 1, '', -1, 'EmailTemplateSuspendedTrialHelp', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('position', 	                       "Position",       'int',  150,    '5',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		//$resultx=$extrafields->addExtraField('separatorproductend',                   "Other", 'separate',   199,     '',  'product', 0, 1,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Thirdparty
 		$param=array('options'=>array(1=>1));
@@ -611,13 +626,15 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('date_registration',                "RegistrationDate", 'datetime', 103,    '', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('domain_registration_page', "DomainOfRegistrationPage",  'varchar', 103, '128', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('source',                                     "Source",  'varchar', 104,  '64', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('source_utm',                              "SourceUtm",  'varchar', 104,  '64', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('firstname',                               "FirstName",  'varchar', 105,  '64', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('lastname',                                 "LastName",  'varchar', 106,  '64', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('auto'=>null));
-		$resultx=$extrafields->addExtraField('password',                        "DashboardPassword", 'password', 190, '128', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('oldpassword',                  "OldDashboardPassword",  'varchar', 191, '128', 'thirdparty', 0, 0, '',     '', 0, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('pass_temp',                    "HashForPasswordReset",  'varchar', 192, '128', 'thirdparty', 0, 0, '',     '', 1, '',  0, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('optinmessages',          "OptinForCommercialMessages",  'boolean', 193,   '',  'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('password',                        "DashboardPassword", 'password', 150, '128', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('oldpassword',                  "OldDashboardPassword",  'varchar', 151, '128', 'thirdparty', 0, 0, '',     '', 0, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('pass_temp',                    "HashForPasswordReset",  'varchar', 152, '128', 'thirdparty', 0, 0, '',     '', 1, '',  0, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('optinmessages',          "OptinForCommercialMessages",  'boolean', 160,   '',  'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('emailccinvoice',                    "EmailCCInvoices",  'varchar', 180, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('manualcollection',                 "ManualCollection",  'boolean', 194,   '',  'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('commission',                      "PartnerCommission",      'int', 195,   '3', 'thirdparty', 0, 0, '', $param, 1, '',  1, 'If checked, the batch SellYourSaasValidateDraftInvoices will never validate invoices of this customer', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('stripeaccount',                       "StripeAccount",  'varchar', 197, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 'StripeAccountForCustomerHelp', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
@@ -631,17 +648,17 @@ class modSellYourSaas extends DolibarrModules
 		$param=array('options'=>array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed'));
 		$resultx=$extrafields->addExtraField('deployment_init_adminpass',  "DeploymentInitPassword",  'varchar', 103,  '64',    'contrat', 0, 0,    '',      '', 1, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('deployment_status',                "DeploymentStatus",   'select', 104,    '',    'contrat', 0, 0,    '',  $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('deployment_host',                    "DeploymentHost",  'varchar', 105, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('deployment_host',                    "DeploymentHost",  'varchar', 105, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 'DeploymentHostDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('deployment_date_start',         "DeploymentDateStart", 'datetime', 106,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('deployment_date_end',             "DeploymentDateEnd", 'datetime', 106,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('deployment_ip',                        "DeploymentIP",  'varchar', 107, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('deployment_vpn_proba',         "DeploymentIPVPNProba",   'double', 107, '8,4',    'contrat', 0, 0,    '',      '', 1, '', -1, 'DeploymentIPVPNProbaDesc:ipvpnprob', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('deployment_ipquality',         "DeploymentIPQuality",   'varchar', 107, '255',    'contrat', 0, 0,    '',      '', 1, '', -1,  'DeploymentIPQualityDesc:ipquality', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('deployment_ua',                 "DeploymentUserAgent",  'varchar', 108, '255',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('date_softalert_endfreeperiod', "DateSoftAlertEndTrial", 'datetime', 109,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('date_endfreeperiod',                   "DateEndTrial", 'datetime', 110,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('undeployment_date',                "UndeploymentDate", 'datetime', 111,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('undeployment_ip',                    "UndeploymentIP",  'varchar', 112, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('deployment_date_end',             "DeploymentDateEnd", 'datetime', 107,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('deployment_ip',                        "DeploymentIP",  'varchar', 108, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('deployment_vpn_proba',         "DeploymentIPVPNProba",   'double', 109, '8,4',    'contrat', 0, 0,    '',      '', 1, '', -1, 'DeploymentIPVPNProbaDesc:ipvpnprob', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('deployment_ipquality',         "DeploymentIPQuality",   'varchar', 110, '255',    'contrat', 0, 0,    '',      '', 1, '', -1,  'DeploymentIPQualityDesc:ipquality', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('deployment_ua',                 "DeploymentUserAgent",  'varchar', 111, '255',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('date_softalert_endfreeperiod', "DateSoftAlertEndTrial", 'datetime', 112,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('date_endfreeperiod',                   "DateEndTrial", 'datetime', 113,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('undeployment_date',                "UndeploymentDate", 'datetime', 114,    '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('undeployment_ip',                    "UndeploymentIP",  'varchar', 115, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('custom_url',                              "CustomURL",  'varchar', 117, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('custom_virtualhostline',      "CustomVirtualHostLine",  'varchar', 119, '255',    'contrat', 0, 0,    '',      '', 1, '', -1, 'EnterAVirtualHostLine:virthostline', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('hostname_os',                           "Hostname OS",  'varchar', 120, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
@@ -649,13 +666,13 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('password_os',                           "Password OS",  'varchar', 122,  '32',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('0'=>'SystemDefault','1'=>'CommonUserJail','2'=>'PrivateUserJail'));
 		$resultx=$extrafields->addExtraField('sshaccesstype', 	                    "SshAccessType",   'select', 123,    '',    'contrat', 0, 0,    '',  $param, 1, '', '($conf->global->SELLYOURSAAS_SSH_JAILKIT_ENABLED?1:0)', 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('hostname_db',                           "Hostname DB",  'varchar', 123, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('database_db',                           "Database DB",  'varchar', 124,  '32',    'contrat', 1, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('port_db',                                   "Port DB",  'varchar', 125,   '8',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('username_db',                           "Username DB",  'varchar', 126,  '32',    'contrat', 1, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('password_db',                           "Password DB",  'varchar', 127,  '64',    'contrat', 0, 0,    '',      '', 1, '', -1, 'ToUpdateDBPassword', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('username_ro_db',              "Read-only Username DB",  'varchar', 128,  '32',    'contrat', 1, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('password_ro_db',              "Read-only Password DB",  'varchar', 129,  '64',    'contrat', 0, 0,    '',      '', 1, '', -1, 'ToCreateDBUserManualy', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('hostname_db',                           "Hostname DB",  'varchar', 124, '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('database_db',                           "Database DB",  'varchar', 125,  '32',    'contrat', 1, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('port_db',                                   "Port DB",  'varchar', 126,   '8',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('username_db',                           "Username DB",  'varchar', 127,  '32',    'contrat', 1, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('password_db',                           "Password DB",  'varchar', 128,  '64',    'contrat', 0, 0,    '',      '', 1, '', -1, 'ToUpdateDBPassword', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('username_ro_db',              "Read-only Username DB",  'varchar', 129,  '32',    'contrat', 1, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('password_ro_db',              "Read-only Password DB",  'varchar', 130,  '64',    'contrat', 0, 0,    '',      '', 1, '', -1, 'ToCreateDBUserManualy', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('prefix_db',                 "Special table prefix DB",  'varchar', 140,  '64',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('timezone',                                 "TimeZone",  'varchar', 141,  '64',    'contrat', 0, 0,    '',      '', 1, '', -1, 'SellYourSaasTimeZoneDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('fileauthorizekey',             "DateFileauthorizekey", 'datetime', 150,    '',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
@@ -668,25 +685,31 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('cookieregister_counter',                    "RegistrationCounter",     'int', 170,  '10',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 1);
 		$resultx=$extrafields->addExtraField('cookieregister_previous_instance', "RegistrationPreviousInstance", 'varchar', 171, '128',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('discountcode', 	    	 			             "DiscountCode", 'varchar', 200, '255',    'contrat', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('suspendmaintenance_message', 		          "Maintenance message", 'varchar', 210, '255',    'contrat', 0, 0,  '',      '', 1, '',  0, '', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('suspendmaintenance_message', 		          "Maintenance message", 'varchar', 210, '255',    'contrat', 0, 0,  '',      '', 1, '', -2, '', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('commentonqty', 	    	                         "CommentOnQty",  'text',   220, '8192',   'contrat', 0, 0,  '',      '', 1, '',  1, 'CommentOnQtyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('spammer',                                              "EvilUser", 'varchar', 300,   '8',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Invoice
 		$param=array('options'=>array(1=>1));
 		$resultx=$extrafields->addExtraField('separatorinvoice',        "SELLYOURSAAS_NAME", 'separate', 1000,    '', 'facture', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('commission', "PartnerCommissionForThisInvoice",      'int', 1020,   '3', 'facture', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('commission', "PartnerCommissionForThisInvoice",     'int', 1020,   '3', 'facture', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('Societe:societe/class/societe.class.php'=>null));
 		$resultx=$extrafields->addExtraField('reseller',                         "Reseller",     'link', 1030,   '3', 'facture', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('delayautopayment',    "DelayAutomaticPayment",     'date', 1035,    '', 'facture', 0, 0, '',     '', 1, '', -1, 'DelayAutomaticPaymentDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Invoice rec
-		$resultx=$extrafields->addExtraField('discountcode', 	    	     "DiscountCode",  'varchar',  200,  '255',   'facture_rec', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('discountcode', 	    	     "DiscountCode",  'varchar',  200,  '255', 'facture_rec', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('commentonqty', 	    	     "CommentOnQty",  'text',     220, '8192', 'facture_rec', 0, 0,  '',      '', 1, '',  1, 'CommentOnQtyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+
+		// Users
+		$resultx=$extrafields->addExtraField('rsapublicmain', 	    	     "PublicRSAKey",  'text',     100,    '2000', 'user', 0, 0,  '',      '', 1, '',  1, 'PublicRSAKeyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('ippublicmain', 	    	     "IPPublicMain",  'varchar',  105,     '255', 'user', 0, 0,  '',      '', 1, '',  1, 'IPPublicMainDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Create/import website called 'sellyoursaas'
 		//include_once DOL_DOCUMENT_ROOT.'/website/class/website.class.php';
 		//$tmpwebsite = new WebSite($this->db);
 		//$result = $tmpwebsite->importWebSite('website_sellyoursaas-demo.zip');
-
+		$sql = array();
 		return $this->_init($sql, $options);
 	}
 
@@ -698,7 +721,7 @@ class modSellYourSaas extends DolibarrModules
 	 *  @param      string	$options    Options when enabling module ('', 'noboxes')
 	 *  @return     int             	1 if OK, 0 if KO
 	 */
-	function remove($options = '')
+	public function remove($options = '')
 	{
 		$sql = array();
 

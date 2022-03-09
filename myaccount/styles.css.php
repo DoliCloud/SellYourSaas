@@ -39,18 +39,33 @@ else header('Cache-Control: no-cache');
 
 
 print "/* CSS content (all pages) */
+
 body.bodywebsite { margin: 0; }
+
+
 .centpercent { width: 100%; }
+
 .floatleft { float: left; }
+
 .floatright { float: right; }
+
 .navbar-brand { margin-left: 15px; }
+
 .opacitymedium { opacity: 0.5; }
 /* input[type='text'],input[type='password'] { width: 250px; } */
+
 input[name='firstName'], input[name='lastName'] { width: 200px; }
+
 #securitycode { width: 150px; }
+
+input#urlforpartner {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
 label {
-margin-bottom: .1rem;
-margin-top: .4rem;
+	margin-bottom: .1rem;
+	margin-top: .4rem;
 }
 
 input#discountcode {
@@ -146,9 +161,24 @@ border: 1px solid #e5e5e5;*zoom: 1;
     min-width: 150px;
 }
 
-.prioritylow { color: #811; }
-.prioritymedium { color: #881; }
-.priorityhigh { color: #181; }
+.prioritylow {
+	color: #fff;
+    background-color: #dfba49;
+    padding: 3px;
+    border-radius: 5px;
+}
+.prioritymedium {
+	color: #fff;
+    background-color: #889820;
+    padding: 3px;
+    border-radius: 5px;
+}
+.priorityhigh {
+	color: #fff;
+    background-color: #118811;
+    padding: 3px;
+    border-radius: 5px;
+}
 
 .row-fluid .offset2:first-child {margin-left: 17.02127659574468%;*margin-left: 16.914893617021278%;}.row-fluid .offset1 {margin-left: 10.638297872340425%;*margin-left: 10.53191489361702%;}.row-fluid .offset1:first-child {margin-left: 8.51063829787234%;*margin-left: 8.404255319148938%;}
 [class*='span'].hide,.row-fluid [class*='span'].hide {display: none;}
@@ -274,6 +304,14 @@ margin-top: 20px;
 
 .signup2 { max-width: 700px; display: inline-block; text-align: initial; }
 
+.customcompanylogo{
+	display:none;
+}
+
+.customregisterheader{
+	display:none;
+}
+
 .paddingtop20 {
     padding-top: 0px;
 }
@@ -360,7 +398,7 @@ border-radius: 0 4px 4px 0;
 .register_text {
     padding: 10px 20px;
     text-align: justify;
-    opacity: 0.5;
+    opacity: 0.65;
 }
 
 .areaforresources {
@@ -371,6 +409,25 @@ border-radius: 0 4px 4px 0;
 .badge-myaccount-status {
 	box-shadow: 0px 0px 10px #ccc;
 }
+
+
+input.input-field {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+	margin-left: -28px;
+    padding-left: 34px;
+    background-color: transparent;
+}
+
+.span-icon-user, .span-icon-password {
+ 	font-family: 'Font Awesome 5 Free';
+	padding-left: 10px;
+}
+.span-icon-user:before, .span-icon-password:before {
+	opacity: 0.4;
+}
+
 
 /* For smartphones */
 

@@ -1,5 +1,5 @@
 ---
-# Script to run clean.sh command on servers
+# Script to run clean.sh SellYourSaas command on servers
 #
 # To run the script:
 # ansible-playbook -K launch_clean.yml -i hosts-xxx -e 'target=targethost command=(test|confirm)'
@@ -13,7 +13,7 @@
   become_user: root
   tasks:
   - name: Launch clean.sh
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh {{ command }}"
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh {{command}}"
     register: command_output
 
   - debug:

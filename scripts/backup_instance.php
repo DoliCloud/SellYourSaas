@@ -38,18 +38,44 @@ $path=dirname(__FILE__).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
-	exit(1);
+	exit(-1);
 }
 
 // Global variables
 $version='1.0';
 $RSYNCDELETE=0;
+$NOTRANS=0;
+$QUICK=0;
 
 $instance=isset($argv[1])?$argv[1]:'';
 $dirroot=isset($argv[2])?$argv[2]:'';
 $mode=isset($argv[3])?$argv[3]:'';
-if (isset($argv[4]) && $argv[4] == 'delete') {
-	$RSYNCDELETE=1;
+if (isset($argv[4])) {
+	if ($argv[4] == '--delete') {
+		$RSYNCDELETE=1;
+	} elseif ($argv[4] == '--notransaction') {
+		$NOTRANS=1;
+	} elseif ($argv[4] == '--quick') {
+		$QUICK=1;
+	}
+}
+if (isset($argv[5])) {
+	if ($argv[5] == '--delete') {
+		$RSYNCDELETE=1;
+	} elseif ($argv[5] == '--notransaction') {
+		$NOTRANS=1;
+	} elseif ($argv[5] == '--quick') {
+		$QUICK=1;
+	}
+}
+if (isset($argv[6])) {
+	if ($argv[6] == '--delete') {
+		$RSYNCDELETE=1;
+	} elseif ($argv[6] == '--notransaction') {
+		$NOTRANS=1;
+	} elseif ($argv[6] == '--quick') {
+		$QUICK=1;
+	}
 }
 
 @set_time_limit(0);							// No timeout for this script
@@ -154,7 +180,7 @@ if (empty($instanceserver)) {
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error) {
 	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
-	exit;
+	exit(-1);
 }
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
@@ -163,10 +189,13 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
-	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]\n";
+	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick]\n";
 	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
+	print "         the parameter --delete run the rsync with the --delete option\n";
+	print "         the parameter --notransaction run the mysqldump without the --single-transaction\n";
+	print "         the parameter --quick run the mysqldump with the --quick option\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -175,7 +204,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
 	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
-	$instance=$instance.".".$tmpstring;   // Automatically concat first domain name
+	$instance = $instance.".".$tmpstring;   // Automatically concat first domain name
 }
 
 
@@ -276,7 +305,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$result = dol_mkdir($dirroot.'/'.$login);
 	if ($result < 0) {
 		print "ERROR failed to create target dir ".$dirroot.'/'.$login."\n";
-		exit(1);
+		exit(-1);
 	}
 
 	$command="rsync";
@@ -286,7 +315,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="-rlt";
 	//$param[]="-vv";
 	$param[]="-v";
-	$param[]="--noatime";
+	//$param[]="--noatime";				// launching server must be lower then 20.10
+	//$param[]="--open-noatime";		// version must be 20.10 on both side
 	//$param[]="--exclude-from --exclude-from=$scriptdir/backup_backups.exclude";
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
@@ -384,12 +414,17 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]='-p"'.str_replace(array('"','`'), array('\"','\`'), $object->password_db).'"';
 	$param[]="--compress";
 	$param[]="-l";
-	$param[]="--single-transaction";
+	if (empty($NOTRANS)) {
+		$param[]="--single-transaction";
+	}
 	$param[]="-K";
 	$param[]="--tables";
 	$param[]="--no-tablespaces";
 	$param[]="-c";
 	$param[]="-e";
+	if (!empty($QUICK)) {
+		$param[]="-q";
+	}
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 

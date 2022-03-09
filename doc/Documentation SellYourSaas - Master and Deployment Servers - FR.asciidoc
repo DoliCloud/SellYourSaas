@@ -101,7 +101,7 @@ Pour le serveur master: VPS ou B2-15 ou +
 Pour le ou les serveurs de déploiement, pour 500 instances: B2-15 ou + (soit server 2 core minimum - Mémoire 8 Go minimum - Coût en 2020: 22 euros / mois). Doublez les caractéristiques si vous visez 1 000 instances client par serveur.
 
 
-=== Choix du Hostname pour le(s) server(s) and configuration
+=== Choix du Hostname pour le(s) server(s) et configuration
 
 Ajouter une entrée du nouveau serveur dans le DNS fourni par le provider du domaine. Ceci revient à ajouter une entrée dans la zone DNS de *mysaasdomainname.com*
 
@@ -346,7 +346,17 @@ Créer un fichier */etc/sudoers.d/myunixlogin*
 
 [source,conf]
 ---------------
-myunixlogin ALL=(ALL) NOPASSWD:ALL
+myunixlogin ALL=(ALL) ALL
+# You can also add this line to force user to re-enter its password to switch to root (and not for admin)
+myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
+---------------
+
+Cela permet aussi de basculer sur *admin* ou tout compte *osu...* sans avoir à saisir son mot de passe:
+
+[source, bash]
+---------------
+sudo su - admin
+sudo su - osu...
 ---------------
 
 Et positionner le owner *root.root* et les permissions *r--r-----*
@@ -673,7 +683,15 @@ databaseport=3306
 database=databaseduservermaster
 # Set a credential for an access to the master database (each server can have a different account to access the master database)
 databaseuser=sellyoursaas
-databasepass=...
+databasepass=xxxxx
+
+# Set location of the deployment database (default is localhost)
+databasehostdeployment=localhost
+# Set port of the deployment database (default is 3306)
+databaseportdeployment=3306
+# Set credential for the deployment database (if different of master database)
+databaseuserdeployment=sellyoursaas
+databasepassdeployment=xxxxx
 
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
@@ -829,15 +847,16 @@ Host github.com
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached ncdu
-sudo apt install mariadb-server mariadb-client
-sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install bind9
-sudo apt install spamc spamassassin clamav clamav-daemon
-sudo apt install fail2ban
-sudo apt install soffice libreoffice-common libreoffice-writer
-sudo apt install mailutils postfix
+sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
+sudo apt install -y mariadb-server mariadb-client
+sudo apt install -y apache2 apache2-bin lynx
+sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y bind9
+sudo apt install -y spamc spamassassin clamav clamav-daemon
+sudo apt install -y fail2ban
+sudo apt install -y soffice libreoffice-common libreoffice-writer
+sudo apt install -y mailutils postfix
 ---------------
 
 * Installation des packages Ubuntu *20.04+*
@@ -845,15 +864,16 @@ sudo apt install mailutils postfix
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install systemd-timesyncd git gzip zip zstd memcached ncdu
-sudo apt install mariadb-server mariadb-client
-sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
-sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install bind9
-sudo apt install spamc spamassassin clamav clamav-daemon
-sudo apt install fail2ban
-sudo apt install libreoffice-common libreoffice-writer
-sudo apt install mailutils postfix
+sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
+sudo apt install -y mariadb-server mariadb-client
+sudo apt install -y apache2 apache2-bin lynx
+sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y bind9
+sudo apt install -y spamc spamassassin clamav clamav-daemon
+sudo apt install -y fail2ban
+sudo apt install -y libreoffice-common libreoffice-writer
+sudo apt install -y mailutils
 ---------------
 
 
@@ -985,10 +1005,12 @@ Sur le *Serveur Master*:
         AuthType Basic
         AuthName "Authenticate to backoffice"
         AuthUserFile /etc/apache2/.htpasswd
-        require valid-user
+        Require valid-user
+        # Or if you prefer restrict to some ip, you can add lines "Require ip x.y.z.w" into a .conf file into this directory:
+        IncludeOptional /etc/sellyoursaas-allowed-ip.d/*.conf
         </Directory>
 
-        #leaving /public and /api accessible to everyone
+        #leaving /public, /api and /dav accessible to everyone
         <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
         AuthType None
         Require all granted
@@ -1004,7 +1026,12 @@ Sur le *Serveur Master*:
         Require all granted
         Satisfy any
         </Directory>
-        
+        <Files ~ "(document\.php|viewimage\.php|\.js\.php|\.js|\.css\.php|\.css|\.gif|\.png|\.svg|\.woff2|favicon\.ico)$">
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Files>
+
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks
@@ -1016,9 +1043,10 @@ Sur le *Serveur Master*:
 
         # Add alias git on sellyoursaas git dir
         Alias "/git" "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git"
-        <Directory /home/admin/wwwroot>
+        <Directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git>
         AllowOverride FileInfo Limit
         Options +Indexes
+        Order allow,deny
         Require ip 1.2.3.4
         </Directory>
 
@@ -1126,26 +1154,10 @@ systemctl reload nom_du_service.service
 
 === Installation du firewall ===
 
-TODO Graphic avec les flux et les ports.
+TODO Graphic avec les flux et les ports...
 
 
-* Créer un firewall. La configuration d'un firewall ne fait pas partie du projet Sell-Your-Saas mais 2 méthodes exemples sont toutefois fournies:
-
-
-==== Avec iptables (déprécié) ====
-
-Créer un fichier de lancement du firewall (par exemple dans */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh*). 
-
-[source, bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/firewallsellyoursaas.sh /etc/init.d/firewallsellyoursaas
-systemctl daemon-reload
-systemctl enable firewallsellyoursaas
-systemctl is-enabled firewallsellyoursaas
-systemctl status firewallsellyoursaas
----------------
-
-==== Avec ufw (recommandé) ====
+* Créer un firewall avec ufw
 
 Editer le fichier */etc/ufw/before.rules* pour permettre les ping sortant, en ajoutant ceci:
 
@@ -1267,7 +1279,7 @@ systemctl stop remote-server-launcher.service
 === Installation de fail2ban ===
 
 * Installation de fail2ban et activation des règles fail2ban suivantes:
-  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
   
 * Ainsi que les règles spécifiques à sellyoursaas:
@@ -1385,11 +1397,6 @@ enabled = true
 
 
 [sshd]
-
-enabled = true
-
-
-[webmin-auth]
 
 enabled = true
 
@@ -1735,7 +1742,7 @@ exclude_suffix := cache
 ---------------
 
 
-Test que l'exécution par la crontab fonctionne correctent en lançant sous root:
+Test que l'exécution par la crontab fonctionne correctement en lançant sous root:
 
 [source,bash]
 ---------------
@@ -1863,6 +1870,7 @@ smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
 
 #debug_peer_list = mysaasdomainname.com, mysaasdomainname.com
+#debug_peer_level = 4
 #compatibility_level = 2
 ---------------
 
@@ -1961,7 +1969,9 @@ pour mettre dans la section *[Service]* une valeur au nombre limit de fichier pl
 [source,bash]
 ---------------
 LimitNOFILE=50000
-Restart=on-watchdog
+Restart=no
+#Restart=on-abort     # on-abort is also possible
+#Restart=on-watchdog  # on-watchdog is also possible
 ---------------
 
 Ceci devrait éviter les alertes du type "Could not increase number of max_open_files to more than".
@@ -1990,8 +2000,10 @@ par
 ---------------
 bind-address = 0.0.0.0
 max_connections      = 500
-max_user_connections = 30
+max_user_connections = 25
+# wait_timeout and interactive_timeout must be set both or none
 wait_timeout         = 7200
+interactive_timeout  = 7200
 table_open_cache     = 10000
 table_definition_cache = 8000
 sort_buffer_size=2M
@@ -2257,7 +2269,11 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
 #include <tunables/global>
 
 # You must use here the real path and not the symlink path
-/bin/secureBash {
+# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
+# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
+
+/{usr/,}bin/secureBash {
+  # Warning: this comments are interpreted
   #include <abstractions/base>
   #include <abstractions/nameservice>
 
@@ -2271,7 +2287,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   deny /etc/default/nss r,
   deny /etc/host.conf r,
   deny /etc/hosts r,
-  #deny /etc/passwd r,
+  deny /etc/passwd r,
   deny /etc/securetty r,
   deny /etc/shadow r,
   deny /etc/sudoers r,
@@ -2292,35 +2308,35 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   deny owner /var/www/ r,
   deny owner /var/www/** r,
 
-  owner /home/*/home/*/** rix,
   /etc/crontab r,
   /var/spool/cron/crontabs/** r,
 
-  /bin/ r,
-  /bin/cat rix,
-  /bin/chmod rix,
-  /bin/cp rix,
-  /bin/customerCocoonBash mr,
-  /bin/dash rix,
-  /bin/grep rix,
-  /bin/gzip rix,
-  /bin/less rix,
-  /bin/lesspipe rix,
-  /bin/ls rix,
-  /bin/more rix,
-  /bin/mkdir rix,
-  /bin/mv rix,
-  /bin/rm rix,
-  /bin/rmdir rix,
-  /bin/sed rix,
-  /bin/tar rix,
-  /bin/uname rix,
+  /{usr/,}bin/ r,
+  /{usr/,}bin/cat rix,
+  /{usr/,}bin/chmod rix,
+  /{usr/,}bin/cp rix,
+  /{usr/,}bin/customerCocoonBash mr,
+  /{usr/,}bin/dash rix,
+  /{usr/,}bin/grep rix,
+  /{usr/,}bin/gzip rix,
+  /{usr/,}bin/less rix,
+  /{usr/,}bin/lesspipe rix,
+  /{usr/,}bin/ls rix,
+  /{usr/,}bin/more rix,
+  /{usr/,}bin/mkdir rix,
+  /{usr/,}bin/mv rix,
+  /{usr/,}bin/rm rix,
+  /{usr/,}bin/rmdir rix,
+  /{usr/,}bin/sed rix,
+  /{usr/,}bin/tar rix,
+  /{usr/,}bin/uname rix,
   /dev/tty rw,
   /etc/.pwd.lock wk,
   /etc/bash.bashrc r,
   /etc/bash_completion r,
   /etc/bash_completion.d/ r,
   /etc/bash_completion.d/** r,
+  /etc/clamav/clamd.conf r,
   /etc/init.d/ r,
   /etc/inputrc r,
   /etc/mailname r,
@@ -2337,6 +2353,8 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /etc/mysql/my.cnf r,
   /etc/pam.d/* r,
   /etc/papersize r,
+  /etc/php/7.*/apache2/conf.d/ r,
+  /etc/php/7.*/apache2/conf.d/* r,
   /etc/php/7.*/cli/* r,
   /etc/php/7.*/cli/conf.d/ r,
   /etc/php/7.*/cli/conf.d/* r,
@@ -2363,31 +2381,12 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /tmp/ rix,
   /tmp/** rw,
   /sys/devices/system/cpu/ r,
-  /usr/bin/ r,
-  /usr/bin/cat rix,
-  /usr/bin/chmod rix,
-  /usr/bin/cp rix,
-  /usr/bin/customerCocoonBash mr,
-  /usr/bin/dash rix,
-  /usr/bin/grep rix,
-  /usr/bin/gzip rix,
-  /usr/bin/less rix,
-  /usr/bin/lesspipe rix,
-  /usr/bin/ls rix,
-  /usr/bin/more rix,
-  /usr/bin/mkdir rix,
-  /usr/bin/mv rix,
-  /usr/bin/rm rix,
-  /usr/bin/rmdir rix,
-  /usr/bin/sed rix,
-  /usr/bin/tar rix,
-  /usr/bin/uname rix,
-  /usr/bin/zstd rix,
   /usr/bin/awk rix,
   /usr/bin/basename rix,
+  /usr/bin/clamdscan rix,
   /usr/bin/clear rix,
   /usr/bin/clear_console rix,
-  /usr/bin/crontab rix,
+  /usr/bin/crontab Cx -> sub_crontab,
   /usr/bin/cut rix,
   /usr/bin/dircolors rix,
   /usr/bin/dirname rix,
@@ -2414,13 +2413,13 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /usr/bin/unzip rix,
   /usr/bin/vim.basic rix,
   /usr/bin/vim.nox rix,
-  /usr/share/bash-completion/** rix,
-  /usr/share/vim/vim74/** rix,
   /usr/bin/wget rix,
-  /usr/games/ r,
+  /usr/bin/zip rix,
+  /usr/bin/zstd rix,
   /usr/include/python2.7/pyconfig.h r,
   /usr/lib/git-core/** rix,
-  /usr/lib/openssh/sftp-server rix,
+  /usr/lib/openssh/sftp-server Cx -> sub_profile_sftp_server,  
+  #/usr/lib/openssh/sftp-server rix,
   /usr/lib{,32,64}/** mr,
   /usr/local/bin/ r,
   /usr/local/lib/python2.7/dist-packages/ r,
@@ -2428,6 +2427,7 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /usr/sbin/ r,
   /usr/sbin/postdrop rix,
   /usr/sbin/sendmail rix,
+  /usr/share/bash-completion/** rix,
   /usr/share/command-not-found/priority.txt r,
   /usr/share/command-not-found/programs.d/ r,
   /usr/share/command-not-found/programs.d/all-main.db rk,
@@ -2457,56 +2457,220 @@ Add apparmor file */etc/apparmor.d/bin.secureBash* or */etc/apparmor.d/usr.bin.s
   /usr/share/pyshared/lazr.restfulclient-0.12.0-nspkg.pth r,
   /usr/share/pyshared/lazr.uri-1.0.3-nspkg.pth r,
   /usr/share/pyshared/zope.interface-3.6.1-nspkg.pth r,
-  /usr/share/vim/vim*/debian.vim r,
-  /usr/share/vim/vim*/defaults.vim r,
-  /usr/share/vim/vim*/filetype.vim r,
-  /usr/share/vim/vim*/ftplugin.vim r,
-  /usr/share/vim/vim*/indent.vim r,
-  /usr/share/vim/vim*/pack/ r,
-  /usr/share/vim/vim*/lang/en_GB/LC_MESSAGES/vim.mo r,
-  /usr/share/vim/vim*/plugin/ r,
-  /usr/share/vim/vim*/plugin/getscriptPlugin.vim r,
-  /usr/share/vim/vim*/plugin/gzip.vim r,
-  /usr/share/vim/vim*/plugin/logiPat.vim r,
-  /usr/share/vim/vim*/plugin/manpager.vim r,
-  /usr/share/vim/vim*/plugin/matchparen.vim r,
-  /usr/share/vim/vim*/plugin/netrwPlugin.vim r,
-  /usr/share/vim/vim*/plugin/rrhelper.vim r,
-  /usr/share/vim/vim*/plugin/spellfile.vim r,
-  /usr/share/vim/vim*/plugin/tarPlugin.vim r,
-  /usr/share/vim/vim*/plugin/tohtml.vim r,
-  /usr/share/vim/vim*/plugin/vimballPlugin.vim r,
-  /usr/share/vim/vim*/plugin/zipPlugin.vim r,
-  /usr/share/vim/vim*/rgb.txt r,
-  /usr/share/vim/vim*/scripts.vim r,
-  /usr/share/vim/vim*/syntax/css.vim r,
-  /usr/share/vim/vim*/syntax/html.vim r,
-  /usr/share/vim/vim*/syntax/javascript.vim r,
-  /usr/share/vim/vim*/syntax/php.vim r,
-  /usr/share/vim/vim*/syntax/sql.vim r,
-  /usr/share/vim/vim*/syntax/sqloracle.vim r,
-  /usr/share/vim/vim*/syntax/syncolor.vim r,
-  /usr/share/vim/vim*/syntax/synload.vim r,
-  /usr/share/vim/vim*/syntax/syntax.vim r,
-  /usr/share/vim/vim*/syntax/nosyntax.vim r,
-  /usr/share/vim/vim*/syntax/vb.vim r,
+  /usr/share/vim/vim*/** rix,
   /usr/share/ImageMagick-6/ r,
   /usr/share/ImageMagick-6/* r,
+  /var/spool/postfix/public/pickup w,
   owner /var/spool/postfix/maildrop/ rw,
   owner /var/spool/postfix/maildrop/** rw,
-  /var/spool/postfix/public/pickup w,
   owner @{HOME}/ rwl,
   owner @{HOME}/** rwl,
+  owner /home/*/home/*/** rix,
   owner /mnt/diskhome/home/** rixwlk,
+  @{HOME}/dbn*/*_error.log r,			# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
   /mnt/diskhome/home/osu*/dbn*/*_error.log r,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
   /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
   /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+
+  unix (connect),
+
+  
+  profile sub_crontab {
+		# Warning: this comments are interpreted
+		#include <abstractions/base>
+		#include <abstractions/nameservice> 
+		/usr/bin/crontab rix,
+		/etc/crontab r,
+		/var/spool/cron/crontabs/** r,
+		
+		allow owner /etc/passwd r,
+  }
+  
+  profile sub_profile_sftp_server {
+		# Warning: this comments are interpreted
+		#include <abstractions/base>
+		/etc/ssl/openssl.cnf r,
+       /etc/nsswitch.conf r,
+		
+       #allow owner /etc/passwd r,
+       allow /etc/passwd r,
+		
+		owner @{HOME}/ rwl,
+		owner @{HOME}/** rwl,
+		owner /home/*/home/*/** rixwlk,
+		owner /mnt/diskhome/home/** rixwlk,
+		@{HOME}/dbn*/*_error.log r,		# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
+		/mnt/diskhome/home/osu*/dbn*/*_error.log r,
+  }  
 }
 ---------------
 
-!!! Créer aussi un fichier pour /usr/bin/secureBash avec Ubuntu 20.04+
+
+Create an apparmor file */etc/apparmor.d/usr.sbin.apache2* with this content:
+
+[source,bash]
+---------------
+# Last Modified: Wed Nov 24 16:11:33 2021
+#include <tunables/global>
+
+# You must use here the real path and not the symlink path
+# Example of profiles on https://gitlab.com/apparmor/apparmor/tree/master/profiles/apparmor/profiles/extras
+# Doc on syntax on  https://doc.opensuse.org/documentation/leap/security/html/book-security/cha-apparmor-profiles.html
+
+profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <apache2.d>
+  #include <local/usr.sbin.apache2>
+
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability kill,
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+  capability sys_admin,
+  capability sys_tty_config,
+
+  signal send peer=@{profile_name}//*,
+
+  / rw,
+  /** mrwlkix,
+
+
+  ^DEFAULT_URI flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+
+    deny /etc/passwd r,
+    deny /etc/group r,
+
+    network inet,
+    network inet6,
+    network unix dgram,
+
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/clamav/clamd.conf r,
+    /etc/postfix/dynamicmaps.cf.d/ r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
+    /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
+    /usr/bin/id rix,
+    /usr/bin/zip rix,
+    /usr/bin/zstd rix,
+    /usr/sbin/sendmail rix,
+    /usr/sbin/post* rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+  }
+
+  ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+
+    network inet,
+    network inet6,
+
+    capability dac_read_search,
+  }
+
+  ^sellyoursaas-instances flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/openssl>
+    
+    deny /etc/passwd r,
+    deny /etc/group r,
+    
+    network inet,
+    network inet6,
+    network unix dgram,
+    
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/clamav/clamd.conf r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
+    /usr/bin/clamdscan rix,
+    /usr/bin/free rix,
+    /usr/bin/id rix,
+    /usr/bin/zip rix,
+    /usr/bin/zstd rix,
+    /usr/sbin/post* rix,
+    /usr/sbin/sendmail rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+  }
+}
+---------------
 
 
 * Activer la règle apparmor en mode *enforce* (ou *complain*)
@@ -2976,6 +3140,12 @@ chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
 su root syslog
 ---------------
 
+* Modifier le fichier */etc/logrotate.d/apache2* pour augmenter le délai de purge à 365 jours.
+
+[source,conf]
+---------------
+rotate 365
+---------------
 
 * Créer un fichier */etc/logrotate.d/logrotate_admin_log*
 
@@ -3116,6 +3286,7 @@ Note: Les rapports sont dans */var/crash*
 [source,bash]
 ---------------
 sudo apt remove cerbot
+sudo apt install snapd
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
@@ -3176,6 +3347,8 @@ Choisir:
 
 * Soumettre le fichier *.csr* auprès du fournisseur de certificats.
 
+* Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
+
 ===== Via LetsEncrypt
 
 * Run certbot or cerbot-auto
@@ -3211,8 +3384,6 @@ or host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 
 ==== Installer les fichiers certificats
-
-* Récupérer les certificats SSL (fichier *.crt* de certificat et de certificat intermédiaire) et les installer dans */etc/apache2*)
 
 * Créer un lien symbolique vers ces certificats avec le nom generique *withX.sellyoursaas.com.crt* et *withX.sellyoursaas.com-intermediate.crt*:
 
@@ -3325,10 +3496,7 @@ Mettre dans le cron du user *admin*:
 */10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
-# cron master and deployment root
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
-# cron master and deployment admin
-20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
 Note: *securitykeydefinedinscheduledjobsetup* is the value of the key you set into the setup of module *Scheduled jobs* on the Dolibarr master.
@@ -3401,8 +3569,8 @@ Sur le *Serveur Master*:
 
 [source,ini]
 ---------------
-a2ensite admin.mysellyoursaasdomain.com
-a2ensite myaccount.mysellyoursaasdomain.com
+a2ensite admin.mysaasdomain.com
+a2ensite myaccount.mysaasdomain.com
 /etc/init.d/apache2 restart
 ---------------
 
@@ -3570,7 +3738,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
 ---------------
 
-Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deffered*
+Editer le fichier pour ajouter *min_collection_interval: 300* sous *postfix_user: postfix* et sous *queues: - deferred*
 
 Ajouter la ligne suivante dans le fichier */etc/sudoers*
 
@@ -3675,8 +3843,8 @@ init_config:
 
 instances:
 
-  - name: DoliAsso customers instances (withX)
-    url: https://supervision.withX.mysellyoursaasdomain.org
+  - name: SellYourSaas customers instances (withX)
+    url: https://supervision.withX.mysaasdomain.org
     disable_ssl_validation: false
     min_collection_interval: 86400
 ---------------
@@ -3937,15 +4105,22 @@ fi
 
 - Vérifier les fichiers */etc/network/interfaces* et */etc/network/interfaces.d/* (pour remettre à la bonne valeur les ip publiques, virtuelles et internes vrack si le vrack OVH est utilisé)
 
-- Si webmin a été installé, se connecter à webmin pour désactiver les actions de supervision en doublons avec celle du serveur cloné.
-
 - Modifier les fichiers de serveurs virtuels Apache dans */etc/apache2/sites-enabled* pour mettre la nouvelle IP/nouveau nom.
 
 - Déclarer l'IP pour l'envoi d'emails:
-  - Si un serveur SMTP distant est utilisé, penser à autoriser l'IP du nouveau serveur à ce serveur.
-  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparé pour chaque domain utilisé *@mydomain.com* et pour chaque sous-domaines *@myserverX.mydomain.com*).
+  - Si un serveur SMTP distant est utilisé (SendGrid, ...) et que vous avez restreint son utilisation à certaines IP uniquement, pensez à autoriser l'IP du nouveau serveur à ce service.
+  - Ajouter les IPs du nouveau serveur dans la ou les entrées SPF du DNS (SPF a besoin d'une entrée séparée pour chaque domain utilisé *@mydomain.com* et pour chaque sous-domaines *@myserverX.mydomain.com*).
 
-- Créer un compte *sellyoursaas* avec les permissions d'accès depuis le serveur de déploiement sur la base de donnée du *Master*. Voir <<creer_un_compte_db_sellyoursaas>>.
+- Créer un compte *sellyoursaas* avec les permissions d'accès depuis le serveur de déploiement sur la base de donnée *dolibarr* du serveur *Master*. 
+
+[source,sql]
+---------------
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
+
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
+
+FLUSH PRIVILEGES;
+---------------
 
 - Modifier le fichier */etc/sellyoursaas.conf* avec la nouvelle IP et nom de sous-domaine du nouveau pool et information du compte d'accès base de donnée du master.
 
@@ -3966,7 +4141,7 @@ fi
   */etc/shadow*
   */etc/group*
   
-- Effacer les répertoires */mnt/diskhome/home/osu...*
+- Effacer les répertoires */mnt/diskhome/home/osu...* et */mnt/diskhome/backup/osu...*
   
 - Détruire la base de données 
 
@@ -3987,7 +4162,7 @@ mysql -uroot < /tmp/dbntodelete.sql
 
 - Ajouter l'entrée DNS NS pour *withX* au domain *mydomain.com* pointant sur *ns1withX.mydomain.com*.
 
-- Arrêter, relancer le firewall, fail2ban, bind9, apache, postfix, remote_server et le datadog-agent si utilisé.
+- Relancer le serveur.
 
 - Vérifier que, depuis le serveur Master, l'url *http://ipnouveauserverdeployment:8080/index.php/test* répond par un "404 Not Found".
 
@@ -4677,12 +4852,8 @@ Les étapes réalisées par l'agent et la remote action "recreateauthorizedkeys"
 
 Pour activer les statistiques Google Analytics, mettre le tag dans la configuration du module sellyoursaas.
 
-Pour activer les statistiques DataDog, renseigner les constantes :
+Pour activer les statistiques DataDog, activer l'option dans la configuration du module SellYourSaas.
  
-  - SELLYOURSAAS_DATADOG_ENABLED à 1
-  - SELLYOURSAAS_DATADOG_APIKEY avec la clé API de DataDog
-  - SELLYOURSAAS_DATADOG_APPKEY avec la clé APP de DataDog
-
 Voici le détail des évennement ou URL qui peuvent etre trackées:
 
 * Page affichée lorsqu'on affiche le formulaire d'inscription
@@ -4887,7 +5058,7 @@ Check that on the master server, the option *no_root_squash* is present into the
 
 mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
 
-Try to add the parameter -not-tablespace into the mysqldump command.
+Try to add the parameter --no-tablespaces into the mysqldump command.
 
 
 ==== Error mysql when connecting to database

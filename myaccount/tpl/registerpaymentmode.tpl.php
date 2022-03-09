@@ -21,6 +21,8 @@ if (empty($conf) || ! is_object($conf)) {
 	exit;
 }
 
+$langs->load("banks");
+
 ?>
 <!-- BEGIN PHP TEMPLATE registerpaymentmode.tpl.php -->
 <?php
@@ -55,15 +57,17 @@ print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="payment-form">'
 
 print '<input type="hidden" name="token" value="'.newToken().'">'."\n";
 print '<input type="hidden" name="action" value="createpaymentmode">'."\n";
+print '<input type="hidden" name="mode" value="registerpaymentmode">'."\n";
 print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
 //print '<input type="hidden" name="thirdparty_id" value="'.$mythirdpartyaccount->id.'">';
 
-$tmp = $mythirdpartyaccount->getOutstandingBills();
-$outstandingTotalIncTax = $tmp['total_ttc'];
-$outstandingRefs = $tmp['refs'];
+$tmp = $mythirdpartyaccount->getOutstandingBills('customer');
+$outstandingTotalIncTax = $tmp['opened'];
+$outstandingRefs = $tmp['refsopened'];
+$totalInvoiced = $tmp['total_ttc'];
 
 // If thirdparty is not yet a customer (no payment never done), we show him the amount to pay in its first invoice.
-if ($outstandingTotalIncTax == 0) {
+if ($totalInvoiced == 0) {
 	// Loop on contracts
 	$amounttopayasfirstinvoice = 0;
 	$amounttopayasfirstinvoicetinstances = array();
@@ -72,7 +76,8 @@ if ($outstandingTotalIncTax == 0) {
 			$sellyoursaasutils = new SellYourSaasUtils($db);
 
 			$comment = 'Refresh contract '.$contract->ref.' on the payment page to be able to show the correct amount to pay';
-			// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines
+			// First launch update of resources:
+			// This update status of install.lock+authorized key (but does not recreate them) and update qty of contract lines + qty into linked template invoice
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
 			$contract->fetch($contract->id);   // Reload to get new values after refresh
 
@@ -133,7 +138,7 @@ if ($outstandingTotalIncTax == 0) {
 		// Show input text for the discount code
 		if ($acceptdiscountcode) {
 			print '<br>';
-			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'"><br>';
+			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'" class="maxwidth150"><br>';
 			print '<div class="discountcodetext margintoponly" id="discountcodetext" autocomplete="off"></div>';
 			//var_dump($listofcontractid);
 			print '<script type="text/javascript" language="javascript">'."\n";
@@ -166,13 +171,21 @@ if ($outstandingTotalIncTax == 0) {
 		}
 		print '<br>';
 	} else {
-		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
+		if (count($amounttopayasfirstinvoicetinstances) > 0) {
+			// The amount to pay is 0 but there is at least one instance, it means all deployed instances are free.
+			print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoPayableInstanceYetOnlyFree").'</small></div>';
+		} else {
+			// There is no instance at all
+			print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("NoInstanceYet").'</small></div>';
+		}
 		print '<br><br>';
 	}
-} else {
-	print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("ThePaymentModeWillBeUseToPayYourDueAmount", join(', ', $outstandingRefs), price($outstandingTotalIncTax, 0, $langs, 1, -1, -1, $conf->currency));
-	print '</small></div>';
-	print '<br>';
+} else {	// There is already some invoices. This is already a customer.
+	if ($outstandingTotalIncTax) {
+		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("ThePaymentModeWillBeUseToPayYourDueAmount", join(', ', $outstandingRefs), price($outstandingTotalIncTax, 0, $langs, 1, -1, -1, $conf->currency));
+		print '</small></div>';
+		print '<br>';
+	}
 }
 
 print '
@@ -206,8 +219,8 @@ foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 	if ($companypaymentmodetemp->type == 'card') {
 		$foundcard++;
 		print '<hr>';
-		print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
-		print $langs->trans("CurrentCreditOrDebitCard").':<br>';
+		print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
+		print '<span class="opacitymedium">'.$langs->trans("CurrentCreditOrDebitCard").'</span></div>';
 		print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
 		print '....'.$companypaymentmodetemp->last_four;
 		print ' - ';
@@ -222,8 +235,8 @@ foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 }
 if ($foundcard) {
 	print '<hr>';
-	print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
-	print $langs->trans("NewCreditOrDebitCard").':<br>';
+	print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
+	print '<span class="opacitymedium">'.$langs->trans("NewCreditOrDebitCard").'</span></div>';
 }
 
 
@@ -427,8 +440,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 			});
 
 		<?php
-} else // Old method (not SCA ready)
-{
+} else { // Old method (not SCA ready)
 	print "
             	// Old code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION off and STRIPE_USE_NEW_CHECKOUT off
 
@@ -490,9 +502,8 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 							  stripeTokenHandler(result.token);
 							}
 						});
-			<?php
-	} else // Ask credit card with 3DS test
-			{
+		<?php
+	} else { // Ask credit card with 3DS test
 		?>
 						/* Use 3DS source */
 						stripe.createSource(card).then(function(result) {
@@ -505,9 +516,9 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 							  stripeSourceHandler(result.source);
 							}
 						});
-			<?php
+		<?php
 	}
-			print "
+	print "
     			});
 
 
@@ -564,27 +575,28 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
     			";
 }
 
-		print '</script>';
+print '</script>';
 
 
-		print '
-		</div>
+print '
+	</div>
 
-		<div class="linkpaypal" style="display: none;">';
-			print '<br>';
-			//print $langs->trans("PaypalPaymentModeAvailableForYealySubscriptionOnly");
-			print $langs->trans("PaypalPaymentModeNotYetAvailable");
-			print '<br><br>';
-			//print '<input type="submit" name="submitpaypal" value="'.$langs->trans("Continue").'" class="btn btn-info btn-circle">';
-			print ' ';
-			print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
 
-		print '
-		</div>';
+	<div class="linkpaypal" style="display: none;">';
+print '<br>';
+//print $langs->trans("PaypalPaymentModeAvailableForYealySubscriptionOnly");
+print $langs->trans("PaypalPaymentModeNotYetAvailable");
+print '<br><br>';
+//print '<input type="submit" name="submitpaypal" value="'.$langs->trans("Continue").'" class="btn btn-info btn-circle">';
+print ' ';
+print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
 
-		print '
+print '
+	</div>';
 
-		<div class="linksepa" style="display: none;">';
+print '
+	<div class="linksepa" style="display: none;">
+		<div class="center quatrevingtpercent center">';
 if ($mythirdpartyaccount->isInEEC()) {
 	$foundban=0;
 
@@ -596,10 +608,19 @@ if ($mythirdpartyaccount->isInEEC()) {
 			print $langs->trans("WithdrawalReceipt");
 			print '</span>';
 			print '<br>';*/
-			print $langs->trans("IBAN").': '.$companypaymentmodetemp->iban_prefix.'<br>';
-			if ($companypaymentmodetemp->rum) print $langs->trans("RUM").': '.$companypaymentmodetemp->rum;
+
+			print '<hr>';
+			print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
+			print '<span class="opacitymedium">'.$langs->trans("CurrentBAN").'</span></div>';
+			print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
+			print '<b>'.$langs->trans("IBAN").'</b>: '.$companypaymentmodetemp->iban.'<br>';
+			print '<b>'.$langs->trans("BIC").'</b>: '.$companypaymentmodetemp->bic.'<br>';
+			if ($companypaymentmodetemp->rum) {
+				print '<b>'.$langs->trans("RUM").'</b>: '.$companypaymentmodetemp->rum;
+			}
 			$foundban++;
-			print '<br>';
+
+			//print $langs->trans("FindYourSEPAMandate");
 
 			$companybankaccounttemp = new CompanyBankAccount($db);
 
@@ -618,20 +639,44 @@ if ($mythirdpartyaccount->isInEEC()) {
 				$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
 				//print img_mime('sepa.pdf').'  <a href="'.$urltouse.'" target="_download">'.$langs->trans("DownloadTheSEPAMandate").'</a><br>';
 			}
+
+			print '<hr>';
 		}
 	}
 
-	if (! $foundban) {
-		print '<br>';
-		//print $langs->trans("SEPAPaymentModeAvailableForYealyAndCeeSubscriptionOnly");
-		print $langs->trans("SEPAPaymentModeAvailableNotYetAvailable");
-	}
+	$enabledformtoentersepa = getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA');
+	//$enabledformtoentersepa = 1;
 
-	print '<br><br>';
-	//print '<input type="submit" name="submitpaypal" value="'.$langs->trans("Continue").'" class="btn btn-info btn-circle">';
-	print ' ';
-	//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
-	print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+	// To test by enabling only on a given thirdparty, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = id of thirparty.
+	if ($enabledformtoentersepa || $mythirdpartyaccount->id == getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID')) {
+		// Form to enter SEPA
+		print '<br>';
+		print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
+		print '<span class="opacitymedium">'.$langs->trans("NewBAN").'</div>';
+		print '<table class="center">';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BankName").' </td><td class="valignmiddle start"><input type="text" name="bankname" id="bankname" value="'.dol_escape_htmltag($bankname).'"></td></tr>';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("IBAN").' </td><td class="valignmiddle start"><input type="text" name="iban" id="iban" value="'.dol_escape_htmltag($iban).'"></td></tr>';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BIC").' </td><td class="valignmiddle start"><input type="text" name="bic" id="bic" value="'.dol_escape_htmltag($bic).'" class="maxwidth125"></td></tr>';
+		print '</table>';
+
+		print '<br><br>';
+		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
+		print ' ';
+		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+	}
+	else {
+		if (! $foundban) {
+			print '<br>';
+			//print $langs->trans("SEPAPaymentModeAvailableForYealyAndCeeSubscriptionOnly");
+			print $langs->trans("SEPAPaymentModeAvailableNotYetAvailable");
+		}
+
+		print '<br><br>';
+		//print '<input type="submit" name="submitsepa" value="'.$langs->trans("Continue").'" class="btn btn-info btn-circle">';
+		print ' ';
+		//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
+		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+	}
 } else {
 	print '<br>';
 	print $langs->trans("SEPAPaymentModeAvailableForCeeOnly", $mythirdpartyaccount->country);
@@ -640,8 +685,10 @@ if ($mythirdpartyaccount->isInEEC()) {
 	//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
 	print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 }
-		print '
+
+print '
 		</div>
+		</div>	<!-- end of div class="linksepa" -->
 
 		</form>
 		</div>
@@ -659,6 +706,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 				jQuery(".linkcard").show();
 				jQuery(".linkpaypal").hide();
 				jQuery(".linksepa").hide();
+				jQuery("#cardholder-name").focus();
 			});
 			jQuery("#linkpaypal").click(function() {
 				console.log("Click on linkpaypal");
@@ -671,7 +719,12 @@ if ($mythirdpartyaccount->isInEEC()) {
 				jQuery(".linkcard").hide();
 				jQuery(".linkpaypal").hide();
 				jQuery(".linksepa").show();
-			});
+				jQuery("#bankname").focus();
+			});';
+	if (GETPOST('type', 'aZ09') == 'SepaMandate') {
+		print 'jQuery("#linksepa").trigger("click");';
+	}
+	print '
 		});
 		</script>';
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 #echo "####################################### ${0} ${1}"
@@ -90,7 +90,7 @@ if [ "x$1" == "xconfirm" -o "x$1" == "xdns" ]; then
 	echo "----- Change DNS for entries into $scriptdir/filetomigrate.ok"
 	for instancename in `cat $scriptdir/filetomigrate.ok | sed -e 's!.on.dolicloud.com!!g' | grep -v '#'`
 	do
-		echo `date +%Y%m%d%H%M%S`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
 		cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
 	
 		if [[ "x$instancename" != "x" ]]; then
@@ -100,10 +100,10 @@ if [ "x$1" == "xconfirm" -o "x$1" == "xdns" ]; then
 			echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
 			cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
 	
-			echo `date +%Y%m%d%H%M%S`" ***** Add $instancename A $REMOTEIP into tmp host file /tmp/${ZONE}.$PID"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Add $instancename A $REMOTEIP into tmp host file /tmp/${ZONE}.$PID"
 			echo $instancename A $REMOTEIP >> /tmp/${ZONE}.$PID  
 	
-			echo `date +%Y%m%d%H%M%S`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
 	
 		fi

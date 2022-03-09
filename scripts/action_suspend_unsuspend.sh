@@ -9,7 +9,7 @@
 #www-data        ALL=(ALL) NOPASSWD: /usr/bin/action_suspend_unsuspend.sh
 
 
-export now=`date +%Y%m%d%H%M%S`
+export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo
@@ -111,7 +111,7 @@ export REMOTEIP=${23}
 export SELLYOURSAAS_ACCOUNT_URL=${24}
 export instancenameold=${25}
 export domainnameold=${26}
-export customurl=${27}
+export customurl=${27//£/ }
 if [ "x$customurl" == "x-" ]; then
 	customurl=""
 fi
@@ -170,7 +170,7 @@ if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 fi
 
 # For debug
-echo `date +%Y%m%d%H%M%S`" input params for $0:"
+echo `date +'%Y-%m-%d %H:%M:%S'`" input params for $0:"
 echo "mode = $mode"
 echo "osusername = $osusername"
 echo "ospassword = XXXXXX"
@@ -198,7 +198,7 @@ echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
-echo `date +%Y%m%d%H%M%S`" calculated params:"
+echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
 echo "instancedir = $instancedir"
 echo "fqn = $fqn"
 echo "fqnold = $fqnold"
@@ -214,7 +214,7 @@ testorconfirm="confirm"
 if [[ "$mode" == "rename" ]]; then
 
 	if [[ "$fqn" != "$fqnold" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, check if new virtual host $fqn exists"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, check if new virtual host $fqn exists"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
 		if [ -f $apacheconf ]; then
@@ -227,10 +227,10 @@ if [[ "$mode" == "rename" ]]; then
 	# Add DNS entry for $fqn
 
 
-	echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, create a new virtual name $fqn"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, create a new virtual name $fqn"
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
-	echo `date +%Y%m%d%H%M%S`" ***** Create a new apache conf $apacheconf from $vhostfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfile"
 
 	if [[ -s $apacheconf ]]
 	then
@@ -251,6 +251,7 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
@@ -267,6 +268,7 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
@@ -284,7 +286,7 @@ if [[ "$mode" == "rename" ]]; then
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 	if [[ "x$customurl" != "x" ]]; then
 	
-		echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, create a new custom virtual name $fqn.custom"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, create a new custom virtual name $fqn.custom"
 	
 		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
@@ -327,7 +329,7 @@ if [[ "$mode" == "rename" ]]; then
 		fi
 		
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
-		echo `date +%Y%m%d%H%M%S`" ***** Create a new apache conf $apacheconf from $vhostfile"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfile"
 	
 		if [[ -s $apacheconf ]]
 		then
@@ -347,6 +349,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
@@ -368,6 +371,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
@@ -397,23 +401,27 @@ if [[ "$mode" == "rename" ]]; then
 	fi 
 
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload
 			echo "Failed to unsuspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
 			sleep 1
 			exit 20
+		else
+			sleep 1
 		fi
 	else
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 	fi
 
+
+	# If we rename instance
 	if [[ "$fqn" != "$fqnold" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqnold.conf"
-		echo `date +%Y%m%d%H%M%S`" ***** Remove apache conf $apacheconf"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove apache conf $apacheconf"
 
 		if [ -f $apacheconf ]; then
 		
@@ -430,13 +438,16 @@ if [[ "$mode" == "rename" ]]; then
 				exit 3
 			fi
 			
-			echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload"
 			service apache2 reload
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running service apache2 reload 
 				echo "Failed to delete virtual host with old name instance $instancenameold.$domainnameold with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in rename" $EMAILTO
 				sleep 1
 				exit 4
+			#else
+			#   A sleep is already don at end of script
+			#	sleep 1			
 			fi
 		else
 			echo "Virtual host $apacheconf seems already disabled"
@@ -448,10 +459,11 @@ if [[ "$mode" == "rename" ]]; then
 
 fi
 
+
 # Suspend
 
 if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
-	echo `date +%Y%m%d%H%M%S`" ***** Suspend instance in $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Suspend instance in $targetdir/$osusername/$dbname"
 
 	export vhostfiletouse=$vhostfilesuspended;
 	if [[ $mode == "suspendmaintenance" ]]; then
@@ -479,6 +491,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 			  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
@@ -495,6 +508,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
@@ -530,6 +544,8 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
+				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
@@ -545,6 +561,8 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  	  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  	  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
+			  	  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
@@ -579,16 +597,19 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 	fi 
 	
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload."
 		service apache2 reload
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running service apache2 reload
 			echo "Failed to suspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Warning] Pb when suspending $instancename.$domainname" $EMAILTO
 			sleep 1 
 			exit 6
+		#else
+		#   A sleep is already don at end of script
+		#	sleep 1			
 		fi
 	else
-		echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. But we do not reload apache2 now to reduce reloading."
 	fi
 fi
 
@@ -596,7 +617,7 @@ fi
 # Unsuspend. Can also be used to force recreation of Virtual host.
 
 if [[ "$mode" == "unsuspend" ]]; then
-	echo `date +%Y%m%d%H%M%S`" ***** Unsuspend instance in $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Unsuspend instance in $targetdir/$osusername/$dbname"
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
 	echo "Create a new apache conf $apacheconf from $vhostfile"
@@ -619,6 +640,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 			  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
@@ -633,6 +655,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
@@ -665,7 +688,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e 's/__osGroupname__/$osusername/g' | \
 				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
-				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__AllowOverride__;$INCLUDEFROMCONTRACT;g' | \
+				  sed -e 's;__IncludeFromContract__;$ALLOWOVERRIDE;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
@@ -680,7 +704,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e "s/__osGroupname__/$osusername/g" | \
 				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
-				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__AllowOverride__;$INCLUDEFROMCONTRACT;g" | \
+				  sed -e "s;__IncludeFromContract__;$ALLOWOVERRIDE;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
@@ -712,13 +737,16 @@ if [[ "$mode" == "unsuspend" ]]; then
 		exit 7
 	fi 
 
-	echo `date +%Y%m%d%H%M%S`" ***** Apache tasks finished. service apache2 reload"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload"
 	service apache2 reload
 	if [[ "x$?" != "x0" ]]; then
 		echo Error when running service apache2 reload
 		echo "Failed to unsuspend instance $instancename.$domainname with: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in suspend" $EMAILTO 
 		sleep 1
 		exit 8
+	#else
+	#   A sleep is already don at end of script
+	#	sleep 1			
 	fi
 
 fi
@@ -728,7 +756,7 @@ fi
 
 if [[ "$mode" == "unsuspend" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Reinstall cron file $cronfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Reinstall cron file $cronfile"
 	if [[ -f /var/spool/cron/crontabs/$osusername ]]; then
 		echo merge existing $cronfile with existing /var/spool/cron/crontabs/$osusername
 		echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
@@ -749,7 +777,7 @@ fi
 
 if [[ "$mode" == "suspend" ]]; then
 
-	echo `date +%Y%m%d%H%M%S`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
 	if [ -s /var/spool/cron/crontabs/$osusername ]; then
 		mkdir -p /var/spool/cron/crontabs.disabled
 		rm -f /var/spool/cron/crontabs.disabled/$osusername
@@ -767,8 +795,9 @@ if [[ "$mode" == "suspend" ]]; then
 fi
 
 
-echo `date +%Y%m%d%H%M%S`" Process of action $mode of $instancename.$domainname for user $osusername finished"
+echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"
+sleep 1
+echo `date +'%Y-%m-%d %H:%M:%S'`" return 0"
 echo
 
-sleep 1
 exit 0

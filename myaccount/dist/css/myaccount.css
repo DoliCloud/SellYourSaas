@@ -1,7 +1,14 @@
 /* CSS myaccount */
 
+div.block header h1 {
+	margin-bottom: 0;
+}
+
 label {
     margin-bottom: .3rem;
+}
+label.nobold {
+	font-weight: normal;
 }
 
 .firstpaymentmessage {
@@ -19,10 +26,17 @@ span.pictowarning {
     color: #ff8800;
 }
 
+.start {
+	text-align: start;
+}
+
 .clearboth {
 	clear: both;
 }
 div.nowrap {
+    white-space: nowrap;
+}
+.nowraponall {
     white-space: nowrap;
 }
 .right {
@@ -50,6 +64,10 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
 .btnalreadyanaccount {
     -webkit-box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.25) !important;
     box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.25) !important;
+}
+a.btnalreadyanaccount {
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 
 .btn-transparent {
@@ -91,6 +109,10 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
 	text-align: center;
 }
 
+.paddingtop {
+	padding-top: 5px;	
+}
+
 .select2-container .select2-selection--single
 {
 	height: unset;	
@@ -102,11 +124,15 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
 	box-shadow: 0px 1px 5px #ddd;
 }
 
+.portlet input[type='submit'] {
+	width: auto;
+}
+
 @media only screen and (max-width: 400px) {	/* reduction 3 */
 	.portlet {
 	    border: 1px solid #aaa;
-	    padding: 15px;
-		margin-bottom: 30px;
+	    padding: 10px;
+		margin-bottom: 20px;
 	}
 }
 
@@ -238,6 +264,10 @@ ul.nav-tabs li a.active {
 	font-size: 1.8em;
 }
 
+select#tldid {
+    margin-top: 2px;
+}
+
 div.tab-content {
 	padding-top: 15px;	
 }
@@ -253,11 +283,13 @@ div.tab-content {
     border-radius: 5px;
     text-align: center;
 }
+
 @media only screen and (max-width: 400px)	/* reduction 3 */
 {
 	.boxresource { width: 120px; }
 	.hideonsmartphone { display: none; }
 }
+
 
 .jnotify-container .jnotify-notification .jnotify-background {
 	opacity: 1;	
@@ -278,6 +310,7 @@ div.tab-content {
 .width50  { width: 50px; }
 .width100 { width: 100px; }
 .width200 { width: 200px; }
+.width500 { width: 500px; }
 .maxwidth25  { max-width: 25px; }
 .maxwidth50  { max-width: 50px; }
 .maxwidth75  { max-width: 75px; }
@@ -303,7 +336,7 @@ div.tab-content {
 .width80p { width:80%; }
 .width100p { width:100%; }
 
-@media only screen and (min-width: 750px)
+@media only screen and (min-width: 769px)
 {
 	input#username {
     	width: 300px;
@@ -313,14 +346,15 @@ div.tab-content {
 /* Force values for small screen */
 @media only screen and (max-width: 560px)
 {
+	.width500 { width: 260px; }
 	.minwidth50  { min-width: 50px !important; }
     .minwidth75  { min-width: 75px !important; }
     .minwidth100 { min-width: 100px !important; }
     .minwidth200 { min-width: 200px !important; }
-    .minwidth300 { min-width: 280px !important; }
-    .minwidth400 { min-width: 280px !important; }
-    .minwidth500 { min-width: 280px !important; }
-    .minwidth600 { min-width: 280px !important; }
+    .minwidth300 { min-width: 260px !important; }
+    .minwidth400 { min-width: 260px !important; }
+    .minwidth500 { min-width: 260px !important; }
+    .minwidth600 { min-width: 260px !important; }
 	.maxwidth25  { max-width: 25px; }
 	.maxwidth50  { max-width: 50px; }
 	.maxwidth75  { max-width: 75px; }
@@ -339,15 +373,37 @@ div.tab-content {
 	.badge-myaccount-status {
 		display: inline-block;
 	}
+	
+	input[type='file'] {
+		width: inherit;
+	}
+
+	.home-page-url a.blue.btn-sm {
+	    font-size: 0.9em;
+	}
 }
 
+
+/* Force values for small screen (320-480 = smartphone) */
+@media only screen and (max-width: 480px)
+{
+	.home-page-url a.blue.btn-sm {
+	    font-size: 0.78em;
+	    padding-right: 0;
+	}
+}
 
 
 .boxresource .uppercase {
     text-transform: unset !important;
 }
 
-body { color: #333333; font-family: "Open Sans", sans-serif; padding:0px !important; margin: 0px !important; direction: ltr; }
+body { 
+	color: #333333; 
+	font-family: "Open Sans", sans-serif; 
+	padding: 0px !important; 
+	margin: 0px !important; 
+}
 
 
 ul.kmlist {
@@ -712,7 +768,9 @@ border-color: #f13e46;}.btn-danger .badge {color: #F3565D;
 background-color: #fff;}.btn > i {font-size: 14px;}.btn-lg {padding: 
 10px 16px;font-size: 18px;line-height: 1.33;vertical-align: middle;}.
 btn-lg > i {font-size: 18px;}
-.btn-sm,.btn-xs {padding: 4px 10px 5px 10px; line-height: 1.4em;}
+.btn-sm,.btn-xs {
+	padding: 5px 10px 5px 10px; line-height: 1.4em;
+}
 .btn-sm > i,.btn-xs > i {
 font-size: 13px;}.btn-xs {padding: 1px 5px;}.btn-xs > i {font-size: 
 12px;}.btn-group .input-sm .btn-default {padding-top: 3px;

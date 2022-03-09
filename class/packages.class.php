@@ -53,6 +53,9 @@ class Packages extends CommonObject
 	 */
 	public $picto = 'label';
 
+	const STATUS_DRAFT = 0;
+	const STATUS_ACTIVE = 1;
+
 
 	/**
 	 *  'type' field format ('integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter]]', 'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter]]]', 'varchar(x)', 'double(24,8)', 'real', 'price', 'text', 'text:none', 'html', 'date', 'datetime', 'timestamp', 'duration', 'mail', 'phone', 'url', 'password')
@@ -101,13 +104,13 @@ class Packages extends CommonObject
 		'conffile1' => array('type'=>'text:none', 'label'=>'Template of config file 1', 'visible'=>-1, 'enabled'=>1, 'position'=>57, 'notnull'=>-1, 'cssview'=>'wordbreak', 'help'=>'Template fo config file<br><br>Can use substitution vars like<br>__APPDOMAIN__<br>__INSTANCEDIR__<br>__DBNAME__<br>__DBUSER__<br>__DBPASSWORD__<br>__APPUNIQUEKEY__<br>__APPEMAIL__<br>...'),
 		'targetconffile1' => array('type'=>'varchar(255)', 'label'=>'Target relative file for config file 1', 'visible'=>-1, 'enabled'=>1, 'position'=>58, 'notnull'=>-1, 'css'=>'minwidth500', 'csslist'=>'tdoverflowmax400', 'cssview'=>'wordbreak'),
 		'datafile1' => array('type'=>'varchar(255)', 'label'=>'Dir with dump files', 'visible'=>-1, 'enabled'=>1, 'position'=>59, 'notnull'=>-1, 'css'=>'minwidth500', 'csslist'=>'tdoverflowmax400', 'help'=>'You can set here __DOL_DATA_ROOT__/sellyoursaas/packages/__PACKAGEREF__ so you can put the sql dump files from the tab "Linked files"'),
-		//'targetdatafile1' => array('type'=>'varchar(255)', 'label'=>'Target dir for data 1', 'visible'=>-1, 'enabled'=>1, 'position'=>55, 'notnull'=>-1, 'css'=>'minwidth500'),
 		'crontoadd' => array('type'=>'text', 'label'=>'Template of cron file', 'visible'=>3, 'enabled'=>1, 'position'=>60, 'notnull'=>-1, 'help'=>'Content will be used to add a file into /var/spool/cron/crontabs<br><br>Can use substitution vars like<br>__INSTALLMINUTES__<br>__INSTALLHOURS__<br>__INSTANCEDIR__<br>__OSUSERNAME__<br>...'),
-		'cliafter' => array('type'=>'text', 'label'=>'Shell after', 'visible'=>3, 'enabled'=>1, 'position'=>65, 'notnull'=>-1, 'help'=>"Cli shell executed after deployment.<br><br>For example, you can use the following shell sequence to enable a module:<br>rm -fr __INSTANCEDIR__/documents/install.lock;<br>cd __INSTANCEDIR__/htdocs/install/;<br>php __INSTANCEDIR__/htdocs/install/upgrade2.php 0.0.0 0.0.0 MAIN_MODULE_MYMODULE;<br>touch __INSTANCEDIR__/documents/install.lock;<br>chown -R __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents;"),
-		'sqlafter' => array('type'=>'text', 'label'=>'Sql after', 'visible'=>3, 'enabled'=>1, 'position'=>70, 'notnull'=>-1, 'help'=>'Sql executed after deployment.<br><br>Can use substitution vars like<br>__APPPASSWORD0__<br>__APPPASSWORD0SALTED__<br>__APPPASSWORDSHA256__<br>__APPPASSWORDSHA256SALTED__<br>__APPEMAIL__<br>__APPDOMAIN__<br>__OSUSERNAME__<br>...'),
+		'cliafter' => array('type'=>'text', 'label'=>'Shell after deployment', 'visible'=>3, 'enabled'=>1, 'position'=>65, 'notnull'=>-1, 'help'=>"Cli shell executed after deployment.<br><br>For example, you can use the following shell sequence to enable a module:<br>rm -fr __INSTANCEDIR__/documents/install.lock;<br>cd __INSTANCEDIR__/htdocs/install/;<br>php __INSTANCEDIR__/htdocs/install/upgrade2.php 0.0.0 0.0.0 MAIN_MODULE_MYMODULE;<br>touch __INSTANCEDIR__/documents/install.lock;<br>chown -R __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents;"),
+		'cliafterpaid' => array('type'=>'text', 'label'=>'Shell after switch to paid (not yet available)', 'visible'=>3, 'enabled'=>1, 'position'=>66, 'notnull'=>-1, 'help'=>"Cli shell executed after entering a payment (or on deployment if customer already a paying customer)."),
+		'sqlafter' => array('type'=>'text', 'label'=>'Sql after deployment', 'visible'=>3, 'enabled'=>1, 'position'=>70, 'notnull'=>-1, 'help'=>'Sql executed after deployment.<br><br>Can use substitution vars like<br>__APPORGNAME__<br>__APPEMAIL__<br>__APPDOMAIN__<br>__APPCOUNTRYIDCODELABEL__<br>__SMTP_SPF_STRING__<br>__OSUSERNAME__<br>__APPPASSWORD0__<br>__APPPASSWORD0SALTED__<br>__APPPASSWORDSHA256__<br>__APPPASSWORDSHA256SALTED__<br>...'),
+		'sqlafterpaid' => array('type'=>'text', 'label'=>'Sql after switch to paid (not yet available)', 'visible'=>3, 'enabled'=>1, 'position'=>71, 'notnull'=>-1, 'help'=>'Sql executed after entering a payement (or on deployment if customer already a paying customer)'),
 		'allowoverride' => array('type'=>'varchar(255)', 'label'=>'Option string for virtual host', 'visible'=>-1, 'enabled'=>1, 'position'=>75, 'notnull'=>-1, 'help'=>'Any string to add into the Apache virtual host file. For example, keep empty to not allow apache override<br>Use "AllowOverride All" to allow override.'),
 		'version_formula' => array('type'=>'text', 'label'=>"VersionFormula",  'visible'=>3, 'enabled'=>1, 'position'=>76, 'help'=>'VersionFormulaExamples', 'lang'=>'sellyoursaas@sellyoursaas'),
-		//'register_text' =>array('type'=>'varchar(255)',			'label'=>'RegisterText',	 'enabled'=>1, 'visible'=>-1,  'position'=>100, 'help'=>'EnterHereTranslationKeyToUseOnRegisterPage'),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'visible'=>-2, 'enabled'=>1, 'position'=>500, 'notnull'=>1,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'visible'=>-2, 'enabled'=>1, 'position'=>501, 'notnull'=>1,),
 		'fk_user_creat' => array('type'=>'integer', 'label'=>'UserAuthor', 'visible'=>-2, 'enabled'=>1, 'position'=>502, 'notnull'=>1,),
@@ -138,7 +141,9 @@ class Packages extends CommonObject
 	public $targetdatafile1;
 	public $crontoadd;
 	public $cliafter;
+	public $cliafterpaid;
 	public $sqlafter;
+	public $sqlafterpaid;
 	public $allowoverride;
 	public $register_text;
 	public $status;
@@ -481,5 +486,20 @@ class Packages extends CommonObject
 		// ...
 
 		return 0;
+	}
+
+	/**
+	 * Sets object to supplied categories.
+	 *
+	 * Deletes object from existing categories not supplied.
+	 * Adds it to non existing supplied categories.
+	 * Existing categories are left untouch.
+	 *
+	 * @param int[]|int $categories Category or categories IDs
+	 * @return void
+	 */
+	public function setCategories($categories)
+	{
+		// Do nothing
 	}
 }

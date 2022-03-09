@@ -16,7 +16,8 @@ echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
-cd /home
+# Go into a safe dir
+cd /tmp
 
 
 #echo "Remplacement user apache par www-data"
@@ -44,7 +45,16 @@ fi
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/packages
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp
+	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt
 fi
+
+echo Set owner and permission on /etc/sellyoursaas.conf
+chown -R root.admin /etc/sellyoursaas.conf
+chmod g-wx /etc/sellyoursaas.conf
+chmod o-rwx /etc/sellyoursaas.conf
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr
 chown -R admin.admin /home/admin/wwwroot/dolibarr
@@ -73,13 +83,16 @@ do
 	chmod o-rwx /etc/apache2/$fic
 done
 
-if [[ "x$instanceserver" == "x1" ]]; then
+if [[ "x$instanceserver" != "x0" ]]; then
+	IFS=$(echo -en "\n\b")
 	echo We are on a deployment server, so we clean log files 
 	echo "Clean web server _error logs"
-	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log`; do > $fic; done
+	for fic in `ls -Adp $targetdir/osu*/dbn*/*_error.log 2>/dev/null | grep -v '/$'`; do > "$fic"; done
 	echo "Clean applicative log files"
-	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
-	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
+	for fic in `ls -Adp $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null | grep -v '/$'`; do > "$fic"; done
+	for fic in `ls -Adp $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null | grep -v '/$'`; do > "$fic"; done
+	for fic in `ls -Adp $targetdir/osu*/dbn*/htdocs/files/_tmp/* 2>/dev/null | grep -v '/$'`; do rm "$fic"; done
+	for fic in `ls -Adp $targetdir/osu*/dbn*/glpi_files/_tmp/* 2>/dev/null | grep -v '/$'`; do rm "$fic"; done
 fi
 
 if [[ "x$masterserver" == "x1" ]]; then
@@ -88,4 +101,10 @@ if [[ "x$masterserver" == "x1" ]]; then
 fi
 
 echo "Nettoyage vieux fichiers log"
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+
+echo "Nettoyage vieux /tmp"
+echo find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+

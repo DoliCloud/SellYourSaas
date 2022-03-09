@@ -1,6 +1,13 @@
 <VirtualHost *:443 *:80>
         __VirtualHostHead__
         
+        <IfModule mod_apparmor.c>
+        AADefaultHatName sellyoursaas-instances
+        </IfModule>
+        
+        # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
+        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__webAppPath__/
+        
         ServerName __webAppDomain__
         ServerAdmin __webAdminEmail__
         ServerAlias __webAppAliases__
@@ -13,9 +20,14 @@
         AssignUserID __osUsername__ __osGroupname__
         </IfModule>
 
+		# _AllowOverride_ is defined into package.
+		# _IncludeFromContract_ is defined on contract. 
+		# For example: "Require ip 1.2.3.4"
+		# or "IncludeOptional /etc/apache2/sellyoursaas-online/__webAppDomain__-directory-options.conf"
         <Directory "__webAppPath__/htdocs">
         Require all granted
 		__AllowOverride__
+        __IncludeFromContract__
         Options -Indexes +FollowSymLinks
         </Directory>
 
