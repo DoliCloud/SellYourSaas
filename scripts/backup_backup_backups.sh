@@ -173,7 +173,7 @@ do
 		done
 	fi
 	
-	echo `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
+	echo -e `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
 	echo
 
 done
