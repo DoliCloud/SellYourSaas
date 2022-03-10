@@ -38,7 +38,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     network inet6,
     network unix dgram,
 
-	# Warning, this may create troubles with sending email from postfix on ubuntu 18.04
+	# Warning, this may create troubles with sending email from postfix
     deny /etc/group r,
     deny /etc/passwd r,
 
