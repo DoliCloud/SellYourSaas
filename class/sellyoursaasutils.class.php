@@ -3080,6 +3080,7 @@ class SellYourSaasUtils
 				$tmppackage->fetch($producttmp->array_options['options_package']);
 			}
 
+			// Set or not doremoteaction
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
@@ -3092,7 +3093,9 @@ class SellYourSaasUtils
 			// remoteaction = 'deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
 			if ($doremoteaction) {
 				dol_syslog("Enter into doremoteaction code, with contract id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
+
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+
 				$contract = new Contrat($this->db);
 				$contract->fetch($tmpobject->fk_contrat);
 				$contract->fetch_thirdparty();
@@ -3395,6 +3398,7 @@ class SellYourSaasUtils
 			}
 
 			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
+			// Here we are into a loop where $tmpobject and $tmpproduct are defined.
 			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				dol_syslog("Start refresh of nb of resources for a customer");
 
@@ -3685,7 +3689,7 @@ class SellYourSaasUtils
 
 					if (! $error && ! is_null($newqty)) {
 						if (($newqty != $currentqty) || ($newcommentonqty != $currentcommentonqty)) {
-							// tmpobject is contract line
+							// tmpobject is a contract line
 							$tmpobject->qty = $newqty;
 
 							// So update of contract line and template invoice lines qty are in same transaction.

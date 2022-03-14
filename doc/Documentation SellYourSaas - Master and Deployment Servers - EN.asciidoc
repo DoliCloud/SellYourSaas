@@ -5071,9 +5071,21 @@ Try to add the parameter --no-tablespaces into the mysqldump command.
 
 mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
 
-Try to read the max_execution_time of your database with:  show variables like '%max_execution_time%';
+Try to read the max_execution_time of your database with:  
 
-Then try to increase it with:  SET global max_execution_time = ...;    with millisecond 
+[source,sql]
+---------------
+show variables like '%max_execution_time%';
+---------------
+
+Then try to increase it with:  
+
+[source,sql]
+---------------
+SET global max_execution_time = ...;    with millisecond 
+---------------
+
+Note: The change will be effective on next SQL connection.
 
 
 ==== Error mysql when connecting to database
