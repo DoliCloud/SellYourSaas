@@ -24,6 +24,7 @@ fi
 if [ "x$2" == "x" ]; then
    echo "Usage:   $0  urlwhenoffline  test|offline|online"
    echo "Example: $0  https://myaccount.mydomain.com/offline.php  test"
+   echo "Example: $0  https://myaccount.mydomain.com/maintenance.php  test"
    exit 1
 fi
 
