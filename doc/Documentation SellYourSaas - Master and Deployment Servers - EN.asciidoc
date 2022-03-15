@@ -5087,7 +5087,7 @@ Then try to increase it with:
 SET global max_execution_time = ...;    with millisecond 
 ---------------
 
-Note: The change will be effective on next SQL connection.
+Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf/mysqld.conf*
 
 
 ==== Error mysql when connecting to database
