@@ -926,7 +926,8 @@ sudo apt update
 sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -943,7 +944,8 @@ sudo apt update
 sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -5071,9 +5073,21 @@ Try to add the parameter --no-tablespaces into the mysqldump command.
 
 mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
 
-Try to read the max_execution_time of your database with:  show variables like '%max_execution_time%';
+Try to read the max_execution_time of your database with:  
 
-Then try to increase it with:  SET global max_execution_time = ...;    with millisecond 
+[source,sql]
+---------------
+show variables like '%max_execution_time%';
+---------------
+
+Then try to increase it with:  
+
+[source,sql]
+---------------
+SET global max_execution_time = ...;    with millisecond 
+---------------
+
+Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf/mysqld.conf*
 
 
 ==== Error mysql when connecting to database

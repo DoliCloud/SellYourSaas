@@ -335,6 +335,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	// Excludes for Dolibarr
 	$param[]="--exclude '*/documents/admin/backup/'";		// Exclude backup of database
 	$param[]="--exclude '*/documents/admin/documents/'";	// Exclude backup of documents directory
+	$param[]="--exclude '*/documents/*/admin/backup/'";		// Exclude backup of database
+	$param[]="--exclude '*/documents/*/admin/documents/'";	// Exclude backup of documents directory
 	$param[]="--exclude '*/htdocs/install/filelist-*.xml*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*'";

@@ -123,14 +123,16 @@ do
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE1$i"
 		export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
-		export command="rsync -x --exclude-from=backup_backups.exclude $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE1$i $DIRDESTI1";
+		# Note for backup of backup of backup, we do not exclude backup_backups.exclude
+		# So image is like the backup server.
+		export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE1$i $DIRDESTI1";
 		echo "$command";
 
 		$command 2>&1
 		if [ "x$?" != "x0" ]; then
 		  	echo "ERROR Failed to make rsync for $DIRSOURCE1"
 		   	export ret1=$(($ret1 + 1));
-		   	export errstring="$errstring Dir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
+		   	export errstring="$errstring\nDir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
 		fi
 	done
 
@@ -155,21 +157,23 @@ do
 					#fi
 
 					export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
-			        export command="rsync -x --exclude-from=backup_backups.exclude $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE2$i $DIRDESTI2";
+					# Note for backup of backup of backup, we do not exclude backup_backups.exclude
+					# So image is like the backup server.
+			        export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE2$i $DIRDESTI2";
 		        	echo "$command";
 
 			        $command 2>&1
 			        if [ "x$?" != "x0" ]; then
 			        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
 			        	export ret2=$(($ret2 + 1));
-			        	export errstring="$errstring Dir osu$i "`date '+%Y-%m-%d %H:%M:%S'`
+			        	export errstring="$errstring\nDir $DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`
 			        fi
 
 				echo
 		done
 	fi
 	
-	echo `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
+	echo -e `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
 	echo
 
 done

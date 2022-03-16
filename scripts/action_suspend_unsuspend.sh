@@ -688,8 +688,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e 's/__osGroupname__/$osusername/g' | \
 				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
-				  sed -e 's;__AllowOverride__;$INCLUDEFROMCONTRACT;g' | \
-				  sed -e 's;__IncludeFromContract__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
@@ -704,8 +704,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e "s/__osGroupname__/$osusername/g" | \
 				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
-				  sed -e "s;__AllowOverride__;$INCLUDEFROMCONTRACT;g" | \
-				  sed -e "s;__IncludeFromContract__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
