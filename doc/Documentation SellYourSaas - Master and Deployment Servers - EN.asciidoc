@@ -376,15 +376,17 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 myunixlogin ALL=(ALL) ALL
 # You can also add this line to force user to re-enter its password to switch to root
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
+myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
 
-This allows you to switch to *admin* or any *osu...* user without typing your password too:
+This allows you to switch to *admin* or *osu...* without typing your password too:
 
 [source, bash]
 ---------------
 sudo su - admin
 sudo su - osu...
 ---------------
+
 
 And set the *root*.*root* and the permissions *r--r-----*
 
