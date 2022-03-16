@@ -20,6 +20,8 @@ _tmp/*
 
 */documents/admin/backup/*
 */documents/admin/documents/*
+*/documents/*/admin/backup/*
+*/documents/*/admin/documents/*
 */htdocs/install/filelist-*.xml*
 */htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*
 */htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*

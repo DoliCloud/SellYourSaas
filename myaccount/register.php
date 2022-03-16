@@ -197,12 +197,12 @@ $hookmanager->initHooks(array('sellyoursaas-register'));
 
 
 // Code to set cookie for first utm_source
-if (!empty($_GET["utm_source"])) {
+if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["partner"])) {
 	$cookiename = "utm_source_cookie";
-	$cookievalue = $_GET["utm_source"];
+	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? 'partner'.$_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
 	if (empty($_COOKIE[$cookiename]) && $domainname) {
 		$domain = $domainname;
-		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, (empty($dolibarr_main_force_https) ? false : true), true); // keep cookie 60 days and add tag httponly
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, false, true); // keep cookie 60 days and add tag httponly
 	}
 }
 
@@ -657,7 +657,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			}
 			if ($urlfortermofuse) {
 				?>
-			  <p class="termandcondition center" style="color:#444;margin:10px 0;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
+			  <p class="termandcondition small center" style="color:#444;margin:10px 0;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
 				<?php
 			}
 			?>

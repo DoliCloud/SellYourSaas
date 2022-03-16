@@ -122,7 +122,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 else
 	echo "Do a tar of config files"
@@ -167,7 +167,7 @@ else
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 		rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	else
-		echo "No sellyoursaas database found to backup (parameter in /etc/sellyoursaas.conf: database=$database, masterserver=$masterserver, webserver=$webserver)."
+		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 fi
 

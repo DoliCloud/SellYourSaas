@@ -1,4 +1,8 @@
   #Note: You must disable the rule DEFAULT_URI and HANDLING_UNTRUSTED_INPUT into the main usr.sbin.apache2
+  # and check the include if exists <local/usr.sbin.apache2> exists.
+
+  signal send set=usr1 peer=unconfined,
+
 
   ^DEFAULT_URI flags=(attach_disconnected) {
     #include <abstractions/apache2-common>
@@ -13,7 +17,7 @@
     network inet6,
     network unix dgram,
 
-	# Warning, this may create troubles with sending email from postfix on ubuntu 18.04
+	# Warning, this may create troubles with sending email from postfix
     deny /etc/group r,
     deny /etc/passwd r,
 
@@ -52,6 +56,7 @@
     /usr/share/zoneinfo-icu/** r,
     /usr/share/zoneinfo/ r,
     /usr/share/zoneinfo/** r,
+    /var/lib/letsencrypt/http_challenges/** r,
     /var/log/apache2/access.log w,
     /var/log/apache2/access_ssl.log w,
     /var/log/apache2/error.log w,
@@ -161,6 +166,7 @@
     /usr/share/zoneinfo-icu/** r,
     /usr/share/zoneinfo/ r,
     /usr/share/zoneinfo/** r,
+    /var/lib/letsencrypt/http_challenges/** r,
     /var/log/apache2/access.log w,
     /var/log/apache2/access_ssl.log w,
     /var/log/apache2/error.log w,

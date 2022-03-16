@@ -122,7 +122,9 @@ class SellYourSaasUtils
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-								if (! empty($draftinvoiceprocessed[$invoice->id])) continue;	// If already processed because of a previous contract line, do nothing more
+								if (! empty($draftinvoiceprocessed[$invoice->id])) {
+									continue;	// If already processed because of a previous contract line, do nothing more
+								}
 
 								// We ignore $contract->nbofserviceswait +  and $contract->nbofservicesclosed
 								$nbservice = $contract->nbofservicesopened + $contract->nbofservicesexpired;
@@ -134,6 +136,24 @@ class SellYourSaasUtils
 										$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
 									}
 
+									// Define output language
+									$outputlangs = $langs;
+									$newlang = '';
+									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang) && GETPOST('lang_id', 'aZ09')) $newlang = GETPOST('lang_id', 'aZ09');
+									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang)) $newlang = $invoice->thirdparty->default_lang;
+									if (!empty($newlang)) {
+										$outputlangs = new Translate("", $conf);
+										$outputlangs->setDefaultLang($newlang);
+									}
+									$outputlangs->loadLangs(array('main', 'bills', 'products', 'users', 'sellyoursaas@sellyoursaas'));
+
+									// Set notes with the $contract->array_options['options_commentonqty']
+									if (!empty($contract->array_options['options_commentonqty'])) {
+										$publicnoteofcontract = str_replace('User Accounts', $outputlangs->trans("ListOfUsers"), $contract->array_options['options_commentonqty']);
+										$newpublicnote = dol_concatdesc($invoice->note_public, $publicnoteofcontract);
+										$invoice->update_note($newpublicnote, '_public');
+									}
+
 									$result = $invoice->validate($user);
 									if ($result > 0) {
 										$draftinvoiceprocessed[$invoice->id]=$invoice->ref;
@@ -143,16 +163,6 @@ class SellYourSaasUtils
 										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
 
-										// Define output language
-										$outputlangs = $langs;
-										$newlang = '';
-										if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) $newlang = GETPOST('lang_id', 'aZ09');
-										if ($conf->global->MAIN_MULTILANGS && empty($newlang))	$newlang = $invoice->thirdparty->default_lang;
-										if (! empty($newlang)) {
-											$outputlangs = new Translate("", $conf);
-											$outputlangs->setDefaultLang($newlang);
-											$outputlangs->loadLangs(array('main','bills','products'));
-										}
 										$model_pdf = ($invoice->model_pdf ? $invoice->model_pdf : $invoice->modelpdf);
 										$ret = $invoice->fetch($id); // Reload to get new records
 
@@ -3070,6 +3080,7 @@ class SellYourSaasUtils
 				$tmppackage->fetch($producttmp->array_options['options_package']);
 			}
 
+			// Set or not doremoteaction
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
@@ -3082,7 +3093,9 @@ class SellYourSaasUtils
 			// remoteaction = 'deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
 			if ($doremoteaction) {
 				dol_syslog("Enter into doremoteaction code, with contract id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
+
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+
 				$contract = new Contrat($this->db);
 				$contract->fetch($tmpobject->fk_contrat);
 				$contract->fetch_thirdparty();
@@ -3385,6 +3398,7 @@ class SellYourSaasUtils
 			}
 
 			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
+			// Here we are into a loop where $tmpobject and $tmpproduct are defined.
 			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				dol_syslog("Start refresh of nb of resources for a customer");
 
@@ -3581,8 +3595,8 @@ class SellYourSaasUtils
 											}
 											$itmp++;
 										}
-										$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
-										$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
+										//$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+										$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
 									} else {
 										$error++;
 										$this->error = 'SQL to get resource return nothing';
@@ -3675,7 +3689,7 @@ class SellYourSaasUtils
 
 					if (! $error && ! is_null($newqty)) {
 						if (($newqty != $currentqty) || ($newcommentonqty != $currentcommentonqty)) {
-							// tmpobject is contract line
+							// tmpobject is a contract line
 							$tmpobject->qty = $newqty;
 
 							// So update of contract line and template invoice lines qty are in same transaction.

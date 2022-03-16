@@ -60,6 +60,7 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     #include <abstractions/nameservice>
     #include <abstractions/openssl>
     #include <abstractions/php>
+    #include <abstractions/postfix-common>
     #include <abstractions/ssl_certs>
     #include <abstractions/user-tmp>
     #include <local/php-fpm7.4>
@@ -75,8 +76,10 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     
     unix (connect),
 
+	# Warning, this may create troubles with sending email from postfix
     deny /etc/group r,
     deny /etc/passwd r,
+    
     deny /var/www/** r,
 
     /dev/tty rw,
@@ -98,6 +101,8 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
     #/home/dolibarr rwlk,
     #/home/dolibarr/** rw,
+    #/home/dolimed/demo.dolimed.com/** rix,
+    #/home/matomo/matomo.nltechno.com/** rwix,
     /proc/*/attr/current rw,
     /proc/loadavg r,
     /run/clamav/** rw,
@@ -139,6 +144,8 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
     @{PROC}/@{pid}/attr/{apparmor/,}current rw,
+    #owner /home/matomo/matomo.nltechno.com/ r,
+    #owner /home/matomo/matomo.nltechno.com/** rwk,
     owner /mnt/diskhome/home/osu*/** rw,
 	owner /run/php{,-fpm}/php*-fpm-*.sock w,
     owner /run/php{,-fpm}/php*-fpm*.pid rw,

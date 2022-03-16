@@ -52,7 +52,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * Ready-to-use showcase website (optional) to sell your application.
 * Dedicated customer area (invoicing, ticket, customer account).
 * Pre-wired for supervision via DataDog.
-* Pre-wired for performance analysis, conversion rate via Google Analytics.
+* Pre-wired for performance analysis, conversion rate via Web Analytics tools (Google Analytics, Matomo, ...).
 * Payment by credit or debit card via Stripe, SCA (Strong Customer Authentication) compliant.
 * Payment by SEPA direct debit (but no direct interface to submit SEPA files to the bank).
 * Anti-abuse systems for applications.
@@ -602,7 +602,7 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 === Addition of a filesystem for logs (optional)
 
-Add a new disk of 500 Mb and mount it on */mnt/disklog*
+Add a new disk of 500 Mb and mount it on */mnt/disklog* or create a virtual mount.
 
 Then modify the file */etc/apache2/envvars* to set *export APACHE_LOG_DIR=/mnt/disklog/*
 Delete the dir */home/admin/logs* and replace it with a symbolic link to */mnt/disklog*
@@ -928,7 +928,8 @@ sudo apt update
 sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -945,7 +946,8 @@ sudo apt update
 sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -1044,7 +1046,7 @@ Note: Reload of apache seems not enough.
 [source, conf]
 ---------------
 ErrorLogFormat "[%v] [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\ %a] %M% ,\ referer\ %{Referer}i"
-ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
+ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/other_vhosts_error.log 1G"
 ---------------
 
 
@@ -4826,27 +4828,31 @@ Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 == Annexes
 
-=== Some common URLs for Google Analytics objectives or DataDog Statistics
+=== Some common URLs for Web Analytics objectives or DataDog Statistics
 
-To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
+To activate Web Analytics statistics (Google Analytics, Matomo, ...), put the tag in the configuration of the sellyoursaas module. Check that the domain name of your web site (https://www.mysellyoursaasdomain.com) and the domain of the customer area (https://myaccount.sellyoursaasdomain.com) are enabled.
 
 To activate DataDog statistics, set the option into the module SellYourSaas:
 
 This is a detail of events or URL that can be tracked:
 
 * Page returned when we show the subscription form
-- URL: /register.php   (can be used as goal in *Google Analytics "Prospective client"*)                 
+- Name of event: Form to register
+- URL: /register.php   (example: can be used as goal in *Google Analytics "Prospective client"*)                 
 - Event DataDog: None
 
 * Page shown after a completed subscription
-- URL: /register.php   (can be used as goal in *Google Analytics "Subscribed client"*)                 
+- Name of event: Instance created
+- URL: /index.php?welcomecid=   (example: can be used as goal in *Google Analytics "Subscribed client"*)                 
 - Event DataDog: None
 
 * Page shown when a payment method is added for the first time = New client
-- URL: /register.php   (can be used as goal in *Google Analytics "Won client"*)                 
+- Name of event: Payment mode added
+- URL: /index.php?paymentrecorded=1   (example: can be used as goal in *Google Analytics "Won client"*)                 
 - Event Datadog: *sellyoursaas.paymentmodeadded*
 
 * Page shown when a payment method is modified with success
+- Name of event: Payment mode modified
 - URL: /index.php?paymentmodified=1
 - Event Datadog: *sellyoursaas.paymentmodemodified*
 
@@ -5058,11 +5064,32 @@ You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS
 Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
 
 
-==== Error when doing mysqldump
+==== Error when doing mysqldump (need PROCESS privileges)
 
 mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
 
 Try to add the parameter --no-tablespaces into the mysqldump command.
+
+
+==== Error when doing mysqldump (execution time exceeded)
+
+mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
+
+Try to read the max_execution_time of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_execution_time%';
+---------------
+
+Then try to increase it with:  
+
+[source,sql]
+---------------
+SET global max_execution_time = ...;    with millisecond 
+---------------
+
+Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf/mysqld.conf*
 
 
 ==== Error mysql when connecting to database

@@ -921,6 +921,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
@@ -937,6 +938,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
@@ -1010,6 +1012,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
@@ -1027,6 +1030,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
@@ -1061,6 +1065,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
@@ -1077,6 +1082,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
 				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \

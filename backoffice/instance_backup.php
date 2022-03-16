@@ -94,7 +94,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
@@ -112,7 +112,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
@@ -133,7 +133,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringfrombackupshort = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfrombackup = $conf->global->DOLICLOUD_SCRIPTS_PATH.'/restore_instance.php '.$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
@@ -151,7 +151,7 @@ if ($ispaid) {
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "sudo chmod -R a+rx ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
-		$restorestringpretoshow .= "su - admin"."\n";
+		$restorestringpretoshow .= "su - admin\n";
 
 		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
@@ -163,8 +163,9 @@ if ($ispaid) {
 $tmparray = explode('.', $object->ref_customer);
 
 $moveinstancestringtoshow .= "chmod a+r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
-$moveinstancestringtoshow .= "su - admin"."\n";
+$moveinstancestringtoshow .= "su - admin\n";
 $moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm|confirmredirect)';
+$moveinstancestringtoshow .= "chmod o-r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
 
 
 // Increase limit of time. Works only if we are not in safe mode
