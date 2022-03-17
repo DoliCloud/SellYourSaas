@@ -734,10 +734,13 @@ class SellYourSaasUtils
 
 		dol_syslog(__METHOD__." maxnbofinvoicetotry=".$maxnbofinvoicetotry." noemailtocustomeriferror=".$noemailtocustomeriferror, LOG_DEBUG);
 
+		$idpaiementcard = dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
+		$idpaiementstripe = dol_getIdFromCode($db, 'STRIPE', 'c_paiement', 'code', 'id', 1);
 
 		$sql = 'SELECT f.rowid, se.fk_object as socid, sr.rowid as companypaymentmodeid';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
 		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
+		$sql .= " AND (f.fk_mode_reglement IS NULL OR f.fk_mode_reglement IN (0, ".((int) $idpaiementcard).", ".((int) $idpaiementstripe)."))";
 		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql .= " AND sr.status = ".((int) $servicestatus);
