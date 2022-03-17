@@ -87,11 +87,13 @@ if ($fp) {
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
+	print "\n";
 	exit(-1);
 }
 
 if (empty($dolibarrdir)) {
 	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -205,6 +207,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "        maintenance to switch old instance in maintenance mode before the move.\n";
 	print "MYPRODUCTREF can be set to force the name of hosting application.\n";
 	print "Return code: 0 if success, <>0 if error\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -216,12 +219,14 @@ if (empty($newinstance) || empty($mode)) {
 } else {*/
 if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
+	print "\n";
 	exit(-1);
 }
 
 if (getDomainFromURL($oldinstance, 2) == getDomainFromURL($newinstance, 2)) {
 	echo "The domain of old instance (".getDomainFromURL($oldinstance, 2).") must differs from domain of new instance (".getDomainFromURL($newinstance, 2)."). ";
 	echo "If you need to change the name only staying on same server, just make a rename on instance from interface.\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -270,6 +275,7 @@ $oldobject->fetch_thirdparty();
 
 if (empty($oldinstance) || $result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
 	print "Error: the old instance to move with full name '".$oldinstance."' and a deployment status = 'done' was not found.\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -314,6 +320,7 @@ if (empty($productref)) {
 }
 if (empty($productref)) {
 	print "Error: Failed to get product ref of instance '".$oldinstance."'\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -324,6 +331,7 @@ $result=$newobject->fetch('', '', $newinstance);
 if ($mode == 'confirm' || $mode == 'confirmredirect') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
 	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
 		print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
+		print "\n";
 		exit(-1);
 	}
 }
@@ -338,6 +346,7 @@ $newobject->database_db  = $oldobject->array_options['options_database_db'];
 
 if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db)) {
 	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_web, password_web or database_db).\n";
+	print "\n";
 	exit(-3);
 }
 
@@ -368,6 +377,7 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 	$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', $comment, 300);
 	if ($result <= 0) {
 		print "Error calling sellyoursaasRemoteAction: ".$sellyoursaasutils->error."\n";
+		print "\n";
 		exit(-1);
 	}
 
@@ -375,6 +385,7 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 	$result = $oldobject->update($user);
 	if ($result < 0) {
 		print "Error updating contract with redirect url: ".$oldobject->error."\n";
+		print "\n";
 		exit(-1);
 	}
 }
@@ -434,6 +445,7 @@ if (! $error) {
 	}
 } else {
 	print '-> Failed to create a new instance with name '.$newinstance."\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -455,6 +467,7 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 	if ($mode == 'test') {
 		print " (it should have been created before but in test mode, the instance can't be created).\n";
 	}
+	print "\n";
 	exit(-1);
 }
 
