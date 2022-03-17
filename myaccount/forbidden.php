@@ -15,25 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * This page can be called when virtual host make a redirect due to not a
- * virtual host that has been set to offline.
+ * This page can be called when virtual host make a redirect due to not allowed
+ * conditions.
  */
 
-//if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER','1');
+if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
 //if (! defined('NOREQUIREDB'))    define('NOREQUIREDB','1');
 //if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC','1');
 //if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
 //if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test
 //if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
-//if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
-//if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
-//if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
-//if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
+if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', '1');
+if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');			// If there is no need to load and show top and left menu
+if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');			// If we don't need to load the html.form.class.php
+if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX', '1');
 if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
 if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');					// Do not check IP defined into conf $dolibarr_main_restrict_ip
 if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
-//if (! defined('NOSESSION'))      define('NOSESSION', '1');
+if (! defined('NOSESSION'))      define('NOSESSION', '1');					// On CLI mode, no need to use web sessions
 
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
@@ -58,13 +58,22 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance = GETPOST('instance');	// example: testldr3.with.dolicloud.com
-$messageonly = GETPOST('messageonly');	// offline.php?messageonly=1
+$instance = GETPOST('instance');	// example: 'testldr3.with.mysaasdomainname.com', 'myaccount'
 
-// Search instance
+// SEarch instance
 $contract = new Contrat($db);
 if ($instance) {
 	$result = $contract->fetch(0, '', $instance);
+	if ($result == 0) {
+		$sql = "SELECT fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE custom_url = '".$db->escape($instance)."' AND suspendmaintenance_message like 'http%'";
+		$resql = $db->query($sql);
+		if ($resql) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				$contract->fetch($obj->fk_object);
+			}
+		}
+	}
 	$contract->fetch_thirdparty();
 }
 
@@ -81,64 +90,46 @@ if ($langs->defaultlang == 'en_US') {
 }
 
 
+if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+	dol_syslog("Maintenance mode is on for ".$contract->ref_customer." with a redirect to ".$contract->array_options['options_suspendmaintenance_message']);
+	header("Location: ".$contract->array_options['options_suspendmaintenance_message']);
+	exit;
+}
+
 
 /*
  * View
  */
 
-if (empty($messageonly)) {
-	top_htmlhead('', 'OffLine Page');
+http_response_code(503);	// 503 Service Unavailable
 
-	print '
-    <body id="offline" style="font-size: 1.2em">
+top_htmlhead('', 'Forbidden Page');
 
-    <br><br><br>
-    <div style="text-align: center">
-    <span class="fa fa-desktop" style="font-size: 40px; opacity: 0.3"></span><br><br>
+?>
 
-    ';
+<body id="suspended" style="font-size: 1.2em">
+
+<br><br><br>
+<div style="text-align: center">
+<span class="fa fa-desktop" style="font-size: 40px; opacity: 0.3"></span><br><br>
+<?php
+if ($instance == 'myaccount') {
+	print $langs->trans("SorryServerForbidden");
+} else {
+	print $langs->trans("SorryInstanceForbidden", dol_escape_htmltag($instance));
 }
-
-// Show global announce
-if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
-	$sql = "SELECT tms from ".MAIN_DB_PREFIX."const where name = 'SELLYOURSAAS_ANNOUNCE'";
-	$resql=$db->query($sql);
-	if ($resql) {
-		$obj = $db->fetch_object($resql);
-		$datemessage = $db->jdate($obj->tms);
-
-		print '<div class="note note-warning">';
-		print '<b>'.dol_print_date($datemessage, 'dayhour').'</b> : ';
-		   $reg=array();
-		if (preg_match('/^\((.*)\)$/', $conf->global->SELLYOURSAAS_ANNOUNCE, $reg)) {
-			$texttoshow = $langs->trans($reg[1]);
-		} else {
-			$texttoshow = $conf->global->SELLYOURSAAS_ANNOUNCE;
-		}
-		print '<h4 class="block">'.$texttoshow.'</h4></div>';
-	} else {
-		dol_print_error($db);
-	}
+print '<br>';
+print '<br>';
+if ($instance && $instance != 'myaccount') {
+	print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
+	print '<br>';
 }
+print '<br>';
+print '<br>';
 
-// TODO Implement the SELLYOURSAAS_ANNOUNCE_ON_xxxx
+//print $langs->trans("GoOnYourDashboardToGetMoreInfo", $_SERVER['SERVER_NAME'], $_SERVER['SERVER_NAME']);
+?>
+<br><br>
+</div>
 
-
-if (empty($messageonly)) {
-	print $langs->trans("SorryInstancesAreOffLine", dol_escape_htmltag($instance)).'<br>';
-	print '<br>';
-	print '<br>';
-	if ($instance && $instance != 'myaccount') {
-		print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("RetryNow").'</a><br>';
-		print '<br>';
-	}
-	print '<br>';
-	print '<br>';
-
-	//print $langs->trans("GoOnYourDashboardToGetMoreInfo", $_SERVER['SERVER_NAME'], $_SERVER['SERVER_NAME']);
-	print '<br>'."\n";
-
-	print '</div>
-
-    </body>';
-}
+</body>
