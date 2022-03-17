@@ -328,7 +328,7 @@ $createthirdandinstance = 0;
 
 $newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
-if ($mode == 'confirm' || $mode == 'confirmredirect') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
 	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
 		print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
 		print "\n";
@@ -362,7 +362,7 @@ $oldwilddomain = join('.', $tmparray);
 
 
 // Switch old instance in maintenance mode
-if ($mode == 'maintenance' || $mode == 'confirmredirect') {
+if ($mode == 'confirmredirect' || $mode == 'maintenance') {
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 
@@ -475,7 +475,7 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 if (! empty($oldobject->array_options['options_custom_url'])) {
 	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
 	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
-	if ($mode == 'confirm' || $mode == 'confirmredirect') {
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 		$newobject->update($user, 1);
 	}
 }
@@ -811,7 +811,7 @@ if ($return_var) {
 
 print "\n";
 
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	print '-> Dump loaded into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	print "Finished.\n";
 } else {
@@ -822,7 +822,7 @@ print "\n";
 
 print "Move recurring invoice from old to new instance:\n";
 print $sqla."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$resql = $dbmaster->query($sqla);
 	if (!$resql) {
 		print 'ERROR '.$dbmaster->lasterror();
@@ -830,7 +830,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect') {
 }
 
 print $sqlb."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$resql = $dbmaster->query($sqlb);
 	if (!$resql) {
 		print 'ERROR '.$dbmaster->lasterror();
@@ -849,13 +849,13 @@ print $sql."\n";
 
 print "\n";
 
-if ($mode != 'confirmredirect') {
-	print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
+if ($mode != 'confirmredirect' && $mode != 'maintenance') {
+	print "DON'T FORGET TO REDIRECT INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
 	print "https://".$newobject->ref_customer."\n";
 	print "\n";
 }
 
-print "NOW YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
+print "NOW TO GET A FULL REDIRECT, YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
 print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
 print "THEN RELOAD DNS WITH rndc reload ".$oldwilddomain."\n";
 print "\n";
