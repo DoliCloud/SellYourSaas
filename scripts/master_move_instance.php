@@ -198,7 +198,12 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server.\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|maintenance|confirmredirect) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
+	print "Mode is test for a test mode.\n";
+	print "        confirm for real mode.\n";
+	print "        confirmredirect for real mode and set old instance as a redirect instance.\n";
+	print "        maintenance to switch old instance in maintenance mode before the move.\n";
+	print "MYPRODUCTREF can be set to force the name of hosting application.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -378,7 +383,7 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
 	print '--- Copy current wild certificate to use it as the certificate for the custom url of the new instance (for backward compatibility)'."\n";
-	foreach(array('.key', '.crt', '-intermediate.crt') as $ext) {
+	foreach (array('.key', '.crt', '-intermediate.crt') as $ext) {
 		$srcfile = '/etc/apache2/'.$oldwilddomain.$ext;
 		$destfile = $conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.$ext;
 		print 'Copy '.$srcfile.' into '.$destfile."\n";
@@ -402,7 +407,7 @@ $command.=" ".escapeshellarg($oldinstance);
 echo $command."\n";
 
 $return_val = 0;
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($command, $outputfile, 0);
 
@@ -422,7 +427,7 @@ if ($return_val != 0) {
 
 // Return
 if (! $error) {
-	if ($mode == 'confirm' || $mode == 'confirmredirect') {
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 		print '-> Creation of a new instance with name '.$newinstance." done.\n";
 	} else {
 		print '-> Creation of a new instance with name '.$newinstance." canceled (test mode)\n";
@@ -446,7 +451,10 @@ $newdatabasedb=$newobject->array_options['options_database_db'];
 
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
-	print "Error: Failed to find instance '".$newinstance."' (it should have been created before). Are you in test mode ?\n";
+	print "Error: Failed to find instance '".$newinstance."'";
+	if ($mode == 'test') {
+		print " (it should have been created before but in test mode, the instance can't be created).\n";
+	}
 	exit(-1);
 }
 
@@ -461,7 +469,7 @@ if (! empty($oldobject->array_options['options_custom_url'])) {
 
 // Set the date of end of period with same value than the source
 $dateendperiod = 0;
-foreach($oldobject->lines as $line) {
+foreach ($oldobject->lines as $line) {
 	if ($line->date_end && (empty($dateendperiod) || $line->date_end < $dateendperiod)) {
 		$dateendperiod = $line->date_end;
 	}
