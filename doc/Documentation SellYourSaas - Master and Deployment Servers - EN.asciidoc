@@ -2176,7 +2176,7 @@ sort_buffer_size=2M
 read_buffer_size=1M
 join_buffer_size=2M
 max_heap_table_size=32M
-max_allowed_packet=32M
+max_allowed_packet=100000000
 # Mysql: max_execution_time = 120000 (milliseconds) or Mariadb: max_statement_time = 120 (seconds)
 #max_execution_time = 120000
 
