@@ -12,6 +12,13 @@
   become_method: sudo
   become_user: root
   tasks:
+  - name: Switch to maintenance mode
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/make_instances_offline.sh maintenance.php offline
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
+      
   - name: Launch apt
     apt:
       upgrade: yes
@@ -26,3 +33,12 @@
       
   - debug:
       var: command_output.stdout_lines
+      
+  - name: Restore the production mode
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/make_instances_offline.sh maintenance.php online
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
+      
+   

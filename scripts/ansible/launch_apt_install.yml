@@ -36,7 +36,7 @@
       - php7.4-mbstring 
       - php7.4-dev 
     register: command_output
-  
+
   - debug:
     var: command_output.stdout_lines
     
