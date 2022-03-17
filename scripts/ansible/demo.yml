@@ -2,10 +2,10 @@
 # Script of demo for sellyoursaas ansible use.
 #
 # To run the script:
-# ansible-playbook update_sellyoursaas_conf.yml
+# ansible-playbook demo.yml
 #
 
-- name: Update an entry into sellyoursaas.conf
+- name: Demo task
   connection: ansible.netcommon.network_cli
   gather_facts: false
   hosts: all
