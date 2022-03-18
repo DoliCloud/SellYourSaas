@@ -770,7 +770,7 @@ vi /etc/default/saslauthd  pour mettre START=yes
 ---------------
 
 
-=== Installation de Open DKIM
+=== Installation de Open DKIM (port 12345)
 
 Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix or
 

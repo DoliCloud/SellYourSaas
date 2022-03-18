@@ -374,7 +374,7 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) ALL
-# You can also add this line to force user to re-enter its password to switch to root
+# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
