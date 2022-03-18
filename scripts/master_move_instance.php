@@ -752,6 +752,9 @@ $sqla .= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contra
 $sqlb = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
 $sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
 
+$sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newobject->id);
+$sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
+
 
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
@@ -805,6 +808,7 @@ if ($return_var) {
 	print "FIX LOAD OF DUMP THEN RUN MANUALLY\n";
 	print $sqla."\n";
 	print $sqlb."\n";
+	print $sqlc."\n";
 	exit(-1);
 }
 
@@ -837,7 +841,20 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	}
 }
 
+print $sqlc."\n";
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
+	$resql = $dbmaster->query($sqlc);
+	if (!$resql) {
+		print 'ERROR '.$dbmaster->lasterror();
+	}
+}
+
 print "Note: To revert the move of the recurring invoice, you can do:\n";
+
+$sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $oldobject->id);
+$sql.= ' WHERE fk_target = '.((int) $newobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
+print $sql."\n";
+
 $sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $oldobject->id);
 $sql.= ' WHERE fk_source = '.((int) $newobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
 print $sql."\n";
