@@ -365,8 +365,53 @@ if ($sellyoursaassupporturl) {
 				}
 			};
 
-			$("#ticketcategory_select").bind("change",function() { groupticketchange(); });
-
+			$("#ticketcategory_select").bind("change",function() { 
+				groupticketchange();';
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+			$stringtoprint .= '
+				tmp = $("#ticketcategory_select_child_id").val();
+				$("#ticketcategory_child_id_back").val(tmp);
+				tmp = $("#ticketcategory_select").val();
+				$("#ticketcategory_back").val(tmp);
+				';
+			$stringtoprint .= '
+				if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory_select").val()){
+					console.log("We hide for automigration");
+					$("#hideforautomigration").hide();
+					$("#showforautomigration").show();
+				}else{
+					if($("#hideforautomigration").attr("style") == "display: none;"){
+						console.log("We show full form");
+						$("#hideforautomigration").show();
+						$("#showforautomigration").hide();
+					}
+					$("#buttonforautomigrationwithhidden").hide();
+				}
+			});';
+			if (GETPOST('backfromautomigration','alpha')) {
+				$stringtoprint .= '
+				$("#hideforautomigration").show();
+				$("#showforautomigration").hide();
+				$("#buttonforautomigrationwithhidden").show();';
+			}
+			$stringtoprint .= 'if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory_select").val()){
+				console.log("We hide for automigration");
+				$("#hideforautomigration").show();
+				$("#showforautomigration").hide();
+				$("#buttonforautomigrationwithhidden").show();
+			}';
+			$stringtoprint .= '
+			$("#hideautomigrationdiv").on("click",function(){
+				$("#hideforautomigration").show();
+				$("#showforautomigration").hide();
+				$("#buttonforautomigrationwithhidden").show();
+			})';
+			$stringtoprint .= '
+			$("input[name=\'subject\']").on("change",function(){
+				$("#subject_back").val($(this).val());
+			})';
+		}
+		$stringtoprint .= '
 			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 			var trackChange = function(element) {
 			var observer = new MutationObserver(function(mutations, observer) {
@@ -385,11 +430,25 @@ if ($sellyoursaassupporturl) {
 		$stringtoprint .= '<div class="supportemailfield " id="KWwithajax"></div>';
 		$stringtoprint .= '<br>';
 		print $stringtoprint;
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+			print '<div id=showforautomigration style="display:none;">';
+			print '<div style="display:flex;justify-content: space-evenly;">';
+			print '<button type="submit" form="migrationForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutomigration").'</button>';
+			print '<button id="hideautomigrationdiv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("AutomigrationErrorOrNoAutomigration").'</button>';
+			print '</div>';
+			print '<br><br><br><br><br><br><br><br><br><br><br>';
+			print '</div>';
+			print '<div id="hideforautomigration"><div>';
+		}
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
 		print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
-
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+			print '<div class="center" id="buttonforautomigrationwithhidden" style="display:none;">';
+			print '<br><br><button type="submit" form="migrationForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutomigration").'</button>';
+			print '</div>';
+		}
 		print $out;
 		print '<br>';
 
@@ -405,7 +464,19 @@ if ($sellyoursaassupporturl) {
 		print ' ';
 		print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle marginleftonly">';
 		print '</center>';
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+			print '</div>';
+			print '</form>';
+			print '<form action="#Step1" method="post" id="migrationForm">';
+			print '<input type="hidden" name="mode" value="automigration">';
+			print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
+			print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
+			print '<input type="hidden" id="ticketcategory_child_id_back" name="ticketcategory_child_id_back" value="'.GETPOST('ticketcategory_child_id','alpha').'">';
+			print '<input type="hidden" id="ticketcategory_back" name="ticketcategory_back" value="'.GETPOST('ticketcategory','alpha').'">';
+			print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
+			print '<input type="hidden" name="action" value="view">';
 
+		}
 		print '</form>';
 	}
 

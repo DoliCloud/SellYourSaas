@@ -2824,6 +2824,7 @@ class SellYourSaasUtils
 	 * 													'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics
 	 * 													'refreshmetrics'=loop on each line and read remote data and update qty of metrics
 	 * 													'recreateauthorizedkeys', 'deletelock', 'recreatelock'
+	 * 													'migrate',
 	 * @param 	Contrat|ContratLigne	$object			Object contract or contract line
 	 * @param	string					$appusername	App login. Used for replacement of __APPUSERNAME__
 	 * @param	string					$email			Initial email. Used for replacement of __APPEMAIL__
@@ -3066,7 +3067,7 @@ class SellYourSaasUtils
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance','unsuspend', 'undeploy', 'undeployall')) &&
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance','unsuspend', 'undeploy', 'undeployall', 'migrate')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
 			if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
@@ -3257,39 +3258,41 @@ class SellYourSaasUtils
 				$tmppackage->targetsrcfile2 = make_substitutions($tmppackage->targetsrcfile2, $substitarray);
 				$tmppackage->targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
 
+				$automigrationtmpdir = $dirfortmpfiles."/automigration_".$object->socid.".tmp";
+				$automigrationdocumentarchivename = $object->array_options["automigrationdocumentarchivename"];
 				// get direct access value
 				$directaccess=0;
 				if ($producttmp->array_options['options_app_or_option'] == 'app') {
 					$directaccess=$producttmp->array_options['options_directaccess'];
 				}
+				if ($remoteaction != "migrate") {
+					dol_syslog("Create conf file ".$tmppackage->srcconffile1);
+					if ($tmppackage->srcconffile1 && $conffile) {
+						dol_delete_file($tmppackage->srcconffile1, 0, 1, 0, null, false, 0);
+						$result = file_put_contents($tmppackage->srcconffile1, str_replace("\r", '', $conffile));
+						@chmod($tmppackage->srcconffile1, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
+					} else {
+						dol_syslog("No conf file to create or no content");
+					}
 
-				dol_syslog("Create conf file ".$tmppackage->srcconffile1);
-				if ($tmppackage->srcconffile1 && $conffile) {
-					dol_delete_file($tmppackage->srcconffile1, 0, 1, 0, null, false, 0);
-					$result = file_put_contents($tmppackage->srcconffile1, str_replace("\r", '', $conffile));
-					@chmod($tmppackage->srcconffile1, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
-				} else {
-					dol_syslog("No conf file to create or no content");
+					dol_syslog("Create cron file ".$tmppackage->srccronfile);
+					if ($tmppackage->srccronfile && $cronfile) {
+						dol_delete_file($tmppackage->srccronfile, 0, 1, 0, null, false, 0);
+						$result = file_put_contents($tmppackage->srccronfile, str_replace("\r", '', $cronfile)."\n");  // A cron file must have at least one new line before end of file
+						@chmod($tmppackage->srccronfile, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
+					} else {
+						dol_syslog("No cron file to create or no content");
+					}
+
+					if ($tmppackage->srccliafter && $cliafter) {
+						dol_syslog("Create cli file ".$tmppackage->srccliafter);
+						dol_delete_file($tmppackage->srccliafter, 0, 1, 0, null, false, 0);
+						$result = file_put_contents($tmppackage->srccliafter, str_replace("\r", '', $cliafter));
+						@chmod($tmppackage->srccliafter, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
+					} else {
+						dol_syslog("No cli file to create or no content");
+					}
 				}
-
-				dol_syslog("Create cron file ".$tmppackage->srccronfile);
-				if ($tmppackage->srccronfile && $cronfile) {
-					dol_delete_file($tmppackage->srccronfile, 0, 1, 0, null, false, 0);
-					$result = file_put_contents($tmppackage->srccronfile, str_replace("\r", '', $cronfile)."\n");  // A cron file must have at least one new line before end of file
-					@chmod($tmppackage->srccronfile, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
-				} else {
-					dol_syslog("No cron file to create or no content");
-				}
-
-				if ($tmppackage->srccliafter && $cliafter) {
-					dol_syslog("Create cli file ".$tmppackage->srccliafter);
-					dol_delete_file($tmppackage->srccliafter, 0, 1, 0, null, false, 0);
-					$result = file_put_contents($tmppackage->srccliafter, str_replace("\r", '', $cliafter));
-					@chmod($tmppackage->srccliafter, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
-				} else {
-					dol_syslog("No cli file to create or no content");
-				}
-
 				// Parameters for remote action
 				$commandurl = $generatedunixlogin.'&'.$generatedunixpassword.'&'.$sldAndSubdomain.'&'.$domainname;
 				$commandurl.= '&'.$generateddbname.'&'.$generateddbport.'&'.$generateddbusername.'&'.$generateddbpassword;
@@ -3316,6 +3319,8 @@ class SellYourSaasUtils
 				$commandurl.= '&'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
 				$commandurl.= '&'.$directaccess;        // Param 38 in .sh
 				$commandurl.= '&'.$sshaccesstype;       // Param 39 in .sh
+				$commandurl.= '&'.$automigrationtmpdir;  //Param 40 in .sh
+				$commandurl.= '&'.$automigrationdocumentarchivename; //Param 41 in .sh
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 

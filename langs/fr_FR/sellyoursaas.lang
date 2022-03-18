@@ -582,3 +582,4 @@ ContactUs=Contactez-nous
 ToDisableEmailThatConfirmsRegistration=Pour désactiver l'email de confirmation vers le client client après son inscription
 NoEmailSentAfterRegistration=Aucun email n'a été envoyé au client après cette inscription
 WeWillContactYouForMandaSepate=Nous allons vous contacter afin de vous fournir le Mandat SEPA à signer
+MigrationInProgress=La migration automatique est en cours.
