@@ -5027,6 +5027,19 @@ The value for *max_execution_time* is too low or there is a table that has an ab
 - See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
 
 
+==== Error Cannot open datafile during start of mysql
+
+Example of logs:
+
+2022-03-20T12:17:26.825916Z 0 [ERROR] InnoDB: Operating system error number 2 in a file operation.
+2022-03-20T12:17:26.825955Z 0 [ERROR] InnoDB: The error means the system cannot find the path specified.
+2022-03-20T12:17:26.825961Z 0 [ERROR] InnoDB: If you are installing InnoDB, remember that you must create directories yourself, InnoDB does not create them.
+2022-03-20T12:17:26.825966Z 0 [ERROR] InnoDB: Cannot open datafile for read-only: './thedatabase/thefile.ibd' OS error: 71
+
+The directory of a database may have been removed when the databases was not dropped.
+Try to restart mysql. Once logged, do a CREATE DATABASE thedatabase; DROP DATABASE thedatabase;
+
+
 ==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
 
 - Check the temp directory is writable by the web server user.
