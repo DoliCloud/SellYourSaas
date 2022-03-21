@@ -150,6 +150,9 @@ export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
 export sshaccesstype=${39}
 export INCLUDEFROMCONTRACT=${40//£/ }
+if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
+	INCLUDEFROMCONTRACT=""
+fi
 
 export ErrorLog='#ErrorLog'
 
