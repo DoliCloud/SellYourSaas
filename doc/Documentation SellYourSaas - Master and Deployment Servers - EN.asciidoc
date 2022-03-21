@@ -1942,6 +1942,7 @@ postmap /etc/aliases
 echo >> /etc/postfix/access; postmap /etc/postfix/access
 echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
+echo >> /etc/postfix/virtual; postmap /etc/postfix/virtual
 ---------------
 
 Edit/Create the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
