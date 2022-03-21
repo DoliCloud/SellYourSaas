@@ -149,6 +149,7 @@ export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
 export sshaccesstype=${39}
+export INCLUDEFROMCONTRACT=${40//£/ }
 
 export ErrorLog='#ErrorLog'
 
