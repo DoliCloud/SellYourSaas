@@ -5016,17 +5016,6 @@ If it fails, you can fix path with this command
 	for file in *\\*; do target="${file//\\//}"; mkdir -p "${target%/*}"; mv -v "$file" "$target"; done
 	
 
-==== Error mysqldump: Error 3024: Query execution was interrupted, maximum statement execution time exceeded when dumping table `....` at row: ...
-
-The value for *max_execution_time* is too low or there is a table that has an abnormal number of records.
-- Check parameter *max_execution_time* into */etc/mysql/mysql.conf.d/mysqld.cnf* or similar files.
-- Try to run the mysqldump after increasing the *max_execution_time* dynamically from mysql with:
-    SHOW VARIABLES LIKE 'MAX_EXECUTION_TIME';
-    SET GLOBAL MAX_EXECUTION_TIME=120000;
-  Note: The change is effective for new sessions only. Exit and start a new session to see the change.
-- See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
-
-
 ==== Error Cannot open datafile during start of mysql
 
 Example of logs:
@@ -5105,6 +5094,8 @@ SET global max_execution_time = ...;    with millisecond
 ---------------
 
 Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf/mysqld.conf*
+
+See also chapter <<check_database_used>> to analyze the size of database. A table may be abnormaly large.
 
 
 ==== Error mysql when connecting to database
