@@ -3,8 +3,9 @@
 #
 # To run the script:
 # ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost'
-# ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost' --limit=*.mydomain.com
+# ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost php74=1' --limit=*.mydomain.com
 #
+
 
 - name: Apt install packages
   hosts: '{{target}}'
@@ -36,9 +37,11 @@
       - php7.4-mbstring 
       - php7.4-dev 
     register: command_output
+    when: 
+      - php74 is defined
 
   - debug:
-    var: command_output.stdout_lines
+      var: command_output.stdout_lines
     
   - name: Launch apt for GLPI packages
     apt:
@@ -46,6 +49,18 @@
       - php7.4-readline
       - php7.4-xmlrpc
     register: command_output
+    when: 
+      - php74 is defined
       
   - debug:
       var: command_output.stdout_lines
+
+      
+  - name: Launch apt for misc packages
+    apt:
+      pkg:
+      - snapd
+      - acl
+    register: command_output
+
+      
