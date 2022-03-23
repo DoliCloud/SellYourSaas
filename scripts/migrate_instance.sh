@@ -59,7 +59,7 @@ if [ "x$3" == "x" ]; then
 fi
 if [ "x$4" == "x" ]; then
 	echo "Missing parameter 4 - instancename" 1>&2
-	exit 40
+	exit 41
 fi
 if [ "x$5" == "x" ]; then
 	echo "Missing parameter 5 - domainname" 1>&2
@@ -77,12 +77,12 @@ if [ "x${23}" == "x" ]; then
 	echo "Missing parameter 23 - REMOTEIP" 1>&2
 	exit 23
 fi
-if [ "x$40" == "x"]; then
-        echo "Missing parameter 40 - automigrationtmpdir"
-        exit 400
-fi
 if [ "x$41" == "x"]; then
-        echo "Missing parameter 41 - automigrationdocumentarchivename"
+        echo "Missing parameter 41 - automigrationtmpdir"
+        exit 410
+fi
+if [ "x$42" == "x"]; then
+        echo "Missing parameter 42 - automigrationdocumentarchivename"
         exit 410
 fi
 
@@ -138,8 +138,8 @@ export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
 export sshaccesstype=${39}
 
-export automigrationtmpdir=${40}
-export automigrationdocumentarchivename=${41}
+export automigrationtmpdir=${41}
+export automigrationdocumentarchivename=${42}
 
 export ErrorLog='#ErrorLog'
 
@@ -234,7 +234,7 @@ if [[ "$mode" == "migrate" ]]; then
 									echo "Successfully file migration"
 							else
 									echo "Error on file migration"
-									exit 401
+									exit 411
 							fi
 							;;
 					*.tbz2|*.tar.bz2)
@@ -245,7 +245,7 @@ if [[ "$mode" == "migrate" ]]; then
 									echo "Successfully file migration"
 							else
 									echo "Error on file migration"
-									exit 402
+									exit 412
 							fi
 							;;
 					*.tgz|*.tar.gz)
@@ -256,7 +256,7 @@ if [[ "$mode" == "migrate" ]]; then
 									echo "Successfully file migration"
 							else
 									echo "Error on file migration"
-									exit 403
+									exit 413
 							fi
 							;;
 			esac
@@ -264,7 +264,7 @@ if [[ "$mode" == "migrate" ]]; then
             chown $osusername:$osusername $instancedir/documents
 	else
 			echo "File $automigrationdocumentarchivename not found"
-			exit 400
+			exit 410
 	fi
 fi
 
