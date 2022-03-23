@@ -79,11 +79,11 @@ if [ "x${23}" == "x" ]; then
 fi
 if [ "x$41" == "x"]; then
         echo "Missing parameter 41 - automigrationtmpdir"
-        exit 410
+        exit 41
 fi
 if [ "x$42" == "x"]; then
         echo "Missing parameter 42 - automigrationdocumentarchivename"
-        exit 410
+        exit 42
 fi
 
 
