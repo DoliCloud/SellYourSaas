@@ -409,6 +409,18 @@ border-radius: 0 4px 4px 0;
 	box-shadow: 0px 0px 10px #ccc;
 }
 
+.grid-wrapper-automigration {
+	display : grid;
+	grid-row : auto auto;
+	grid-template-columns : auto auto;
+	grid-row-gap : 20px;
+	grid-column-gap : 20px;
+}
+.grid-boxes-automigration-left {
+	display : flex;
+	justify-content : right;
+}
+
 /* For smartphones */
 
 @media (max-width: 760px) {
