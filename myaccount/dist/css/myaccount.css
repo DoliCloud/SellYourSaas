@@ -7,6 +7,9 @@ div.block header h1 {
 label {
     margin-bottom: .3rem;
 }
+label.nobold {
+	font-weight: normal;
+}
 
 .firstpaymentmessage {
     width: 80%;
@@ -106,6 +109,10 @@ a.btnalreadyanaccount {
 	text-align: center;
 }
 
+.paddingtop {
+	padding-top: 5px;	
+}
+
 .select2-container .select2-selection--single
 {
 	height: unset;	
@@ -115,6 +122,10 @@ a.btnalreadyanaccount {
     padding: 20px;
 	margin-bottom: 30px;
 	box-shadow: 0px 1px 5px #ddd;
+}
+
+.portlet input[type='submit'] {
+	width: auto;
 }
 
 @media only screen and (max-width: 400px) {	/* reduction 3 */

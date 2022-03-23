@@ -40,6 +40,21 @@ if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
 // Load Dolibarr environment
 include './mainmyaccount.inc.php';
 
+// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+$tmpdomain = preg_replace('/^https?:\/\//i', '', $_SERVER["SERVER_NAME"]); // Remove http(s)://
+$tmpdomain = preg_replace('/\/.*$/i', '', $tmpdomain); // Remove part after domain
+$tmpdomain = preg_replace('/^.*\.([^\.]+)\.([^\.]+)$/', '\1.\2', $tmpdomain); // Remove part 'www.abc.' before 'mydomain.com'
+
+// Code to set cookie for first utm_source
+// Must be before the main that make a redirect on login if not logged
+if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["partner"])) {
+	$cookiename = "utm_source_cookie";
+	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? 'partner'.$_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
+	if (empty($_COOKIE[$cookiename]) && $tmpdomain) {
+		$domain = $tmpdomain;
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, false, true); // keep cookie 60 days and add tag httponly
+	}
+}
 
 // Load Dolibarr environment
 $res=0;
@@ -182,8 +197,6 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 }
 
 
-include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-
 $urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
@@ -309,6 +322,7 @@ if (! empty($conf->paypal->enabled)) {
 }
 
 $initialaction = $action;
+
 
 
 /*
@@ -602,6 +616,8 @@ if ($action == 'updateurl') {
 } elseif ($action == 'updatemythirdpartylogin') {
 	$email = trim(GETPOST('email', 'nohtml'));
 	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
+	$emailccinvoice = trim(GETPOST('emailccinvoice', 'nohtml'));
+	$oldemailccinvoice = trim(GETPOST('oldemailccinvoice', 'nohtml'));
 	$firstname = trim(GETPOST('firstName', 'nohtml'));
 	$lastname = trim(GETPOST('lastName', 'nohtml'));
 	$phone = trim(GETPOST('phone', 'nohtml'));
@@ -609,49 +625,52 @@ if ($action == 'updateurl') {
 
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+		$error++;
 	}
-	if (! isValidEmail($email)) {
-		setEventMessages($langs->trans("ErrorBadValueForEmail"), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+	if ($email && ! isValidEmail($email)) {
+		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
+		$error++;
 	}
 	if ($oldemail != $email) {		// A request to change email was done.
 		// Test if email already exists
 		$tmpthirdparty = new Societe($db);
 		$tmpthirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $email);
 		if ($tmpthirdparty->id > 0) {
+			$error++;
 			setEventMessages($langs->trans("SorryEmailExistsforAnotherAccount", $email), null, 'errors');
-			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-			exit;
 		}
 	}
 	if (!empty($phone) && !isValidPhone($phone)) {
 		setEventMessages($langs->trans("ErrorBadValueForPhone"), null, 'errors');
-		header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
-		exit;
+		$error++;
 	}
 
-	$db->begin();	// Start transaction
+	if (! $error) {
+		$db->begin();	// Start transaction
 
-	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
-	$mythirdpartyaccount->email = $email;
-	$mythirdpartyaccount->phone = $phone;
-	$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
-	$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
-	$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
+		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+		$mythirdpartyaccount->email = $email;
+		$mythirdpartyaccount->phone = $phone;
+		$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
+		$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
+		$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
+		$mythirdpartyaccount->array_options['options_emailccinvoice'] = $emailccinvoice;
 
-	$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
+		$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
 
-	if ($result > 0) {
-		setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
-		$db->commit();
-	} else {
-		$langs->load("errors");
-		setEventMessages($langs->trans('ErrorFailedToSaveRecord'), null, 'errors');
-		setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
-		$db->rollback();
+		if ($result > 0) {
+			setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
+
+			$db->commit();
+
+			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
+			exit;
+		} else {
+			$langs->load("errors");
+			setEventMessages($langs->trans('ErrorFailedToSaveRecord'), null, 'errors');
+			setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
+			$db->rollback();
+		}
 	}
 } elseif ($action == 'updatepassword') {
 	$password = GETPOST('password', 'nohtml');
@@ -941,6 +960,9 @@ if ($action == 'updateurl') {
 					}
 				}
 
+				// We can a commit / begin here so we are sure the payment is recorded, even if payment later fails.
+				// But we prefer to have payment mode recorded only if payment is success.
+
 				$erroronstripecharge = 0;
 
 
@@ -955,6 +977,9 @@ if ($action == 'updateurl') {
 					if ($result != 0) {
 						$error++;
 						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+						dol_syslog("--- Error when taking payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+					} else {
+						dol_syslog("--- Success to take payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
 					}
 
 					// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
@@ -1317,18 +1342,17 @@ if ($action == 'updateurl') {
 								if ($result != 0) {
 									$error++;
 									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-									dol_syslog("--- Failed to take payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
-
-									//var_dump($sellyoursaasutils);exit;
-
-									// TODO Ask authentication
+									dol_syslog("--- Error when taking payment in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+								} else {
+									dol_syslog("--- Success to take payment in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
 								}
 
 								// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
 								if ($sellyoursaasutils->stripechargedone > 0) {
 									dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
 
-									$db->commit();
+									$rescommit = $db->commit();
+									dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
 
 									$db->begin();
 								}
@@ -1360,6 +1384,8 @@ if ($action == 'updateurl') {
 					if ($backurl) $url=$backurl;
 
 					if ($thirdpartyhadalreadyapaymentmode > 0) {
+						dol_syslog("PaymentModeHasBeenModified");
+
 						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 						$_SESSION['showconversiontracker']='paymentmodified';
 
@@ -1383,6 +1409,8 @@ if ($action == 'updateurl') {
 							}
 						}
 					} else {
+						dol_syslog("PaymentModeHasBeenAdded");
+
 						// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 						$_SESSION['showconversiontracker']='paymentrecorded';
 
@@ -1615,6 +1643,9 @@ if ($action == 'updateurl') {
 					}
 				}
 
+				// We can a commit / begin here so we are sure the payment is recorded, even if payment later fails.
+				// But we prefer to have payment mode recorded only if payment is success.
+
 				$erroronstripecharge = 0;
 
 
@@ -1629,13 +1660,17 @@ if ($action == 'updateurl') {
 					if ($result != 0) {
 						$error++;
 						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+						dol_syslog("--- Error when taking payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+					} else {
+						dol_syslog("--- Success to take payment", LOG_DEBUG, 0);
 					}
 
 					// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
 					if ($sellyoursaasutils->stripechargedone > 0) {
 						dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
 
-						$db->commit();
+						$rescommit = $db->commit();
+						dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
 
 						$db->begin();
 					}
@@ -1944,14 +1979,17 @@ if ($action == 'updateurl') {
 								if ($result != 0) {
 									$error++;
 									setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-									dol_syslog("--- Failed to take payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+									dol_syslog("--- Error when taking payment ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+								} else {
+									dol_syslog("--- Success to take payment", LOG_DEBUG, 0);
 								}
 
 								// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
 								if ($sellyoursaasutils->stripechargedone > 0) {
 									dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
 
-									$db->commit();
+									$rescommit = $db->commit();
+									dol_syslog("--- rescommit = ".$rescommit." transaction_opened is now ".$db->transaction_opened, LOG_DEBUG, 0);
 
 									$db->begin();
 								}
@@ -2398,10 +2436,9 @@ if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVIC
 
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
 $head.='<!-- Bootstrap core CSS -->
-<!--<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.css" rel="stylesheet">-->
-<link href="dist/css/bootstrap.css" rel="stylesheet">
-<link href="dist/css/myaccount.css" rel="stylesheet">
-<link href="dist/css/stripe.css" rel="stylesheet">';
+<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
+<link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">
+<link href="dist/css/stripe.css" type="text/css" rel="stylesheet">';
 $head.="
 <script>
 var select2arrayoflanguage = {
@@ -2515,20 +2552,20 @@ if ($mythirdpartyaccount->isareseller) {
              <ul class="dropdown-menu">
                  <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>';
 		// Reseler request
-		if (! $mythirdpartyaccount->isareseller) {
-			$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
-			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-					$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-					if (isset($conf->global->$newnamekey)) $allowresellerprogram = $conf->global->$newnamekey;
-				}
+if (! $mythirdpartyaccount->isareseller) {
+	$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
+	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+			if (isset($conf->global->$newnamekey)) $allowresellerprogram = $conf->global->$newnamekey;
+	}
 
-				// Check if there is at least one package with status resale ok
-				if ($allowresellerprogram) {
-					print '<li class="dropdown-divider"></li>';
-					print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=becomereseller"><i class="fa fa-briefcase pictofixedwidth"></i> '.$langs->trans("BecomeReseller").'</a></li>';
-				}
-		}
+		// Check if there is at least one package with status resale ok
+	if ($allowresellerprogram) {
+			print '<li class="dropdown-divider"></li>';
+			print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=becomereseller"><i class="fa fa-briefcase pictofixedwidth"></i> '.$langs->trans("BecomeReseller").'</a></li>';
+	}
+}
 		print '
 			<li class="dropdown-divider"></li>
 			<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=logout"><i class="fa fa-sign-out pictofixedwidth"></i> '.$langs->trans("Logout").'</a></li>
@@ -2747,7 +2784,6 @@ if ($mythirdpartyaccount->isareseller) {
 	print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);

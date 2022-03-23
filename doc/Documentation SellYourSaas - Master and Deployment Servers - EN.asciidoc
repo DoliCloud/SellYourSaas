@@ -52,7 +52,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * Ready-to-use showcase website (optional) to sell your application.
 * Dedicated customer area (invoicing, ticket, customer account).
 * Pre-wired for supervision via DataDog.
-* Pre-wired for performance analysis, conversion rate via Google Analytics.
+* Pre-wired for performance analysis, conversion rate via Web Analytics tools (Google Analytics, Matomo, ...).
 * Payment by credit or debit card via Stripe, SCA (Strong Customer Authentication) compliant.
 * Payment by SEPA direct debit (but no direct interface to submit SEPA files to the bank).
 * Anti-abuse systems for applications.
@@ -374,17 +374,19 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) ALL
-# You can also add this line to force user to re-enter its password to switch to root
+# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
+myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
 
-This allows you to switch to *admin* or any *osu...* user without typing your password too:
+This allows you to switch to *admin* or *osu...* without typing your password too:
 
 [source, bash]
 ---------------
 sudo su - admin
 sudo su - osu...
 ---------------
+
 
 And set the *root*.*root* and the permissions *r--r-----*
 
@@ -600,7 +602,7 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 
 === Addition of a filesystem for logs (optional)
 
-Add a new disk of 500 Mb and mount it on */mnt/disklog*
+Add a new disk of 500 Mb and mount it on */mnt/disklog* or create a virtual mount.
 
 Then modify the file */etc/apache2/envvars* to set *export APACHE_LOG_DIR=/mnt/disklog/*
 Delete the dir */home/admin/logs* and replace it with a symbolic link to */mnt/disklog*
@@ -926,7 +928,9 @@ sudo apt update
 sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt-install -y php-readline php-xmlrpc
+sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -943,7 +947,9 @@ sudo apt update
 sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli php-pear libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysql php-curl php-memcached php-imagick php-geoip php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt-install -y php-readline php-xmlrpc
+sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamav clamav-daemon
@@ -1042,7 +1048,7 @@ Note: Reload of apache seems not enough.
 [source, conf]
 ---------------
 ErrorLogFormat "[%v] [%{u}t] [%-m:%l] [pid %P:tid %T] %7F: %E: [client\ %a] %M% ,\ referer\ %{Referer}i"
-ErrorLog ${APACHE_LOG_DIR}/other_vhosts_error.log
+ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/other_vhosts_error.log 1G"
 ---------------
 
 
@@ -1213,10 +1219,14 @@ RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 Later, we will enable the virtual host and we will create also the virtual host for the HTTPS on port 443 by using letsencrypt.
 
 
-TODO: For a future use of php-fpm, add into /etc/php/7.4/fpm/pool.d/*.conf
+TODO: For a future use of php-fpm, add into */etc/php/7.4/fpm/pool.d/**.conf*
 
+[source, ini]
+---------------
 php_admin_value[open_basedir] = /tmp/:/home/dolibarr:/home/dolibarr/maxmind/:/usr/share/GeoIP/
+; a commenter si pb pour lancer php-fpm tourne en boucle
 apparmor_hat = sellyoursaas 
+---------------
 
 
 
@@ -1932,6 +1942,7 @@ postmap /etc/aliases
 echo >> /etc/postfix/access; postmap /etc/postfix/access
 echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
+echo >> /etc/postfix/virtual; postmap /etc/postfix/virtual
 ---------------
 
 Edit/Create the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
@@ -2166,7 +2177,7 @@ sort_buffer_size=2M
 read_buffer_size=1M
 join_buffer_size=2M
 max_heap_table_size=32M
-max_allowed_packet=32M
+max_allowed_packet=100000000
 # Mysql: max_execution_time = 120000 (milliseconds) or Mariadb: max_statement_time = 120 (seconds)
 #max_execution_time = 120000
 
@@ -2458,11 +2469,11 @@ Get content of the file into this repository in etc/apparmor.d/bin.secureBash
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/usr.sbin.apache2* with this content:
+Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.dusr.sbin.apache2/* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/usr.sbin.apache2
+Get content of the file into this repository, in etc/apparmor.d/local/usr.sbin.apache2 or etc/apparmor.d/usr.sbin.apache2
 ---------------
 
 
@@ -2500,11 +2511,18 @@ All the disabled profiles are visible into */etc/apparmor.d/disable*
 The log are visible into */var/log/kern.log* or */var/log/audit/audit.log*. You can use *aa-logprof* to know the log file used and convert its content into real rules into existing profiles.
 
 
-* Note: To unload ALL apparmor profiles and reload them:
+* Note: From Ubuntu 20.04, to unload ALL apparmor profiles and reload them:
 
 [source,bash]
 ---------------
 aa-teardown; /etc/init.d/apparmor restart;
+---------------
+
+* Note: Before Ubuntu 20.04, to unload ALL apparmor profiles and reload them:
+
+[source,bash]
+---------------
+/usr/sbin/service apparmor teardown; /etc/init.d/apparmor restart;
 ---------------
 
 
@@ -3176,6 +3194,9 @@ Choose:
 
 * Submit the *.csr* file to the SSL certificate provider.
 
+* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
+
+
 ===== Solution 2: From LetsEncrypt
 
 * To create a SSL certficate *on the master* :
@@ -3191,7 +3212,7 @@ Run cerbot with the following command line (you can test it beforehand by adding
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2"
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --expand
 ---------------
 
 For example, you can use *supervision@mysaasdomain.com* as the email for letsencrypt account.
@@ -3229,20 +3250,25 @@ You can use the same command as used originally (with --dry-run option first if 
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
 ---------------
 
 Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
 */etc/letsencrypt/renewal/withX.mysaasdomain.com.conf*
 
-To check that a DNS update is ok for a challenge, you can use this URL: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
+To check that a DNS update is ok for a challenge, you can use this URL: 
+https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
 or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
+* To remove completely a certificate, you can run
+
+[source,bash]
+---------------
+find /etc/letsencrypt/ -name "*with<X>.<your_domain>*" -exec rm -fr {} \;
+---------------
 
 
 ==== Install the certificates files
-
-* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
 
 * Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the certificate files:
 
@@ -3256,7 +3282,7 @@ ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/cert.pem with.sellyoursa
 ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/chain.pem with.sellyoursaas.com-intermediate.crt
 ---------------
 
-NOTE: This is the certificate that will be used for the client instances. Custom certificates for instances will be in */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
+NOTE: This is the wildcard certificate that will be used for the customer instances. Custom certificates for instances will be saved into */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
 * If the file */etc/apache2/sites-available/default-ssl.conf* exists, rename it into */etc/apache2/sites-available/000-default-ssl.conf*
 
@@ -3923,6 +3949,7 @@ crontab -e
 ---------------
 nameofserver
 ---------------
+
 
 Edit the file */etc/hosts* to get the entry of the new server:
 
@@ -4804,27 +4831,31 @@ Steps realized by the agent and the remote action *recreateauthorizedkeys* are:
 
 == Annexes
 
-=== Some common URLs for Google Analytics objectives or DataDog Statistics
+=== Some common URLs for Web Analytics objectives or DataDog Statistics
 
-To activate Google Analytics statistics, put the tag in the configuration of the sellyoursaas module.
+To activate Web Analytics statistics (Google Analytics, Matomo, ...), put the tag in the configuration of the sellyoursaas module. Check that the domain name of your web site (https://www.mysellyoursaasdomain.com) and the domain of the customer area (https://myaccount.sellyoursaasdomain.com) are enabled.
 
 To activate DataDog statistics, set the option into the module SellYourSaas:
 
 This is a detail of events or URL that can be tracked:
 
 * Page returned when we show the subscription form
-- URL: /register.php   (can be used as goal in *Google Analytics "Prospective client"*)                 
+- Name of event: Form to register
+- URL: /register.php   (example: can be used as goal in *Google Analytics "Prospective client"*)                 
 - Event DataDog: None
 
 * Page shown after a completed subscription
-- URL: /register.php   (can be used as goal in *Google Analytics "Subscribed client"*)                 
+- Name of event: Instance created
+- URL: /index.php?welcomecid=   (example: can be used as goal in *Google Analytics "Subscribed client"*)                 
 - Event DataDog: None
 
 * Page shown when a payment method is added for the first time = New client
-- URL: /register.php   (can be used as goal in *Google Analytics "Won client"*)                 
+- Name of event: Payment mode added
+- URL: /index.php?paymentrecorded=1   (example: can be used as goal in *Google Analytics "Won client"*)                 
 - Event Datadog: *sellyoursaas.paymentmodeadded*
 
 * Page shown when a payment method is modified with success
+- Name of event: Payment mode modified
 - URL: /index.php?paymentmodified=1
 - Event Datadog: *sellyoursaas.paymentmodemodified*
 
@@ -4928,7 +4959,8 @@ or
 nameserver 127.0.0.56
 
 If not, create it and restart postfix.
-     
+
+
 ==== php sessions files in /var/lib/php/sessions are not purged
 
 php session purge can be done by 
@@ -4985,15 +5017,17 @@ If it fails, you can fix path with this command
 	for file in *\\*; do target="${file//\\//}"; mkdir -p "${target%/*}"; mv -v "$file" "$target"; done
 	
 
-==== Error mysqldump: Error 3024: Query execution was interrupted, maximum statement execution time exceeded when dumping table `....` at row: ...
+==== Error Cannot open datafile during start of mysql
 
-The value for *max_execution_time* is too low or there is a table that has an abnormal number of records.
-- Check parameter *max_execution_time* into */etc/mysql/mysql.conf.d/mysqld.cnf* or similar files.
-- Try to run the mysqldump after increasing the *max_execution_time* dynamically from mysql with:
-    SHOW VARIABLES LIKE 'MAX_EXECUTION_TIME';
-    SET GLOBAL MAX_EXECUTION_TIME=120000;
-  Note: The change is effective for new sessions only. Exit and start a new session to see the change.
-- See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
+Example of logs:
+
+2022-03-20T12:17:26.825916Z 0 [ERROR] InnoDB: Operating system error number 2 in a file operation.
+2022-03-20T12:17:26.825955Z 0 [ERROR] InnoDB: The error means the system cannot find the path specified.
+2022-03-20T12:17:26.825961Z 0 [ERROR] InnoDB: If you are installing InnoDB, remember that you must create directories yourself, InnoDB does not create them.
+2022-03-20T12:17:26.825966Z 0 [ERROR] InnoDB: Cannot open datafile for read-only: './thedatabase/thefile.ibd' OS error: 71
+
+The directory of a database may have been removed when the databases was not dropped.
+Try to restart mysql. Once logged, do a CREATE DATABASE thedatabase; DROP DATABASE thedatabase;
 
 
 ==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
@@ -5035,11 +5069,34 @@ You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS
 Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
 
 
-==== Error when doing mysqldump
+==== Error when doing mysqldump (need PROCESS privileges)
 
 mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
 
 Try to add the parameter --no-tablespaces into the mysqldump command.
+
+
+==== Error when doing mysqldump (execution time exceeded)
+
+mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
+
+Try to read the *max_execution_time* of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_execution_time%';
+---------------
+
+Then try to increase it with:  
+
+[source,sql]
+---------------
+SET global max_execution_time = ...;    with millisecond 
+---------------
+
+Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf/mysqld.conf*
+
+See also chapter <<check_database_used>> to analyze the size of database. A table may be abnormaly large.
 
 
 ==== Error mysql when connecting to database
@@ -5142,7 +5199,22 @@ instances:
 
 ==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
 
-You can edit the section [mysqld] of the file *mysql.cnf* to increase limits
+Try to read the *max_allowed_packet* of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_allowed_packet%';
+---------------
+
+You can change this in live from mysql command tool:
+
+[source,bash]
+---------------
+set global net_buffer_length=100000;
+set global max_allowed_packet=100000000;
+---------------
+
+You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
 
 [source,bash]
 ---------------
@@ -5152,10 +5224,13 @@ net_buffer_length=100000
 max_allowed_packet=100000000
 ---------------
 
-You can also change this in live from mysql command tool:
+
+==== Web request are slow due to maximum number of child reached
+
+You may experience a too high number of child processed (reaching the maximum). You can see this on pahe https://withX.mysaasdomain.com/server-status
+If this child are in state R, then you can try to reduce this by enabling the module ReqTimeout and set
 [source,bash]
 ---------------
-set global net_buffer_length=100000;
-set global max_allowed_packet=100000000;
+RequestReadTimeout handshake=5 header=10 body=30
 ---------------
 

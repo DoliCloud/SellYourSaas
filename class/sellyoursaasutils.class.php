@@ -122,7 +122,9 @@ class SellYourSaasUtils
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-								if (! empty($draftinvoiceprocessed[$invoice->id])) continue;	// If already processed because of a previous contract line, do nothing more
+								if (! empty($draftinvoiceprocessed[$invoice->id])) {
+									continue;	// If already processed because of a previous contract line, do nothing more
+								}
 
 								// We ignore $contract->nbofserviceswait +  and $contract->nbofservicesclosed
 								$nbservice = $contract->nbofservicesopened + $contract->nbofservicesexpired;
@@ -134,6 +136,24 @@ class SellYourSaasUtils
 										$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
 									}
 
+									// Define output language
+									$outputlangs = $langs;
+									$newlang = '';
+									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang) && GETPOST('lang_id', 'aZ09')) $newlang = GETPOST('lang_id', 'aZ09');
+									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang)) $newlang = $invoice->thirdparty->default_lang;
+									if (!empty($newlang)) {
+										$outputlangs = new Translate("", $conf);
+										$outputlangs->setDefaultLang($newlang);
+									}
+									$outputlangs->loadLangs(array('main', 'bills', 'products', 'users', 'sellyoursaas@sellyoursaas'));
+
+									// Set notes with the $contract->array_options['options_commentonqty']
+									if (!empty($contract->array_options['options_commentonqty'])) {
+										$publicnoteofcontract = str_replace('User Accounts', $outputlangs->trans("ListOfUsers"), $contract->array_options['options_commentonqty']);
+										$newpublicnote = dol_concatdesc($invoice->note_public, $publicnoteofcontract);
+										$invoice->update_note($newpublicnote, '_public');
+									}
+
 									$result = $invoice->validate($user);
 									if ($result > 0) {
 										$draftinvoiceprocessed[$invoice->id]=$invoice->ref;
@@ -143,16 +163,6 @@ class SellYourSaasUtils
 										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
 
-										// Define output language
-										$outputlangs = $langs;
-										$newlang = '';
-										if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) $newlang = GETPOST('lang_id', 'aZ09');
-										if ($conf->global->MAIN_MULTILANGS && empty($newlang))	$newlang = $invoice->thirdparty->default_lang;
-										if (! empty($newlang)) {
-											$outputlangs = new Translate("", $conf);
-											$outputlangs->setDefaultLang($newlang);
-											$outputlangs->loadLangs(array('main','bills','products'));
-										}
 										$model_pdf = ($invoice->model_pdf ? $invoice->model_pdf : $invoice->modelpdf);
 										$ret = $invoice->fetch($id); // Reload to get new records
 
@@ -724,11 +734,13 @@ class SellYourSaasUtils
 
 		dol_syslog(__METHOD__." maxnbofinvoicetotry=".$maxnbofinvoicetotry." noemailtocustomeriferror=".$noemailtocustomeriferror, LOG_DEBUG);
 
-		$this->db->begin();
+		$idpaiementcard = dol_getIdFromCode($this->db, 'CB', 'c_paiement', 'code', 'id', 1);
+		$idpaiementstripe = dol_getIdFromCode($this->db, 'STRIPE', 'c_paiement', 'code', 'id', 1);
 
 		$sql = 'SELECT f.rowid, se.fk_object as socid, sr.rowid as companypaymentmodeid';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
 		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
+		$sql .= " AND (f.fk_mode_reglement IS NULL OR f.fk_mode_reglement IN (0, ".((int) $idpaiementcard).", ".((int) $idpaiementstripe)."))";
 		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql .= " AND sr.status = ".((int) $servicestatus);
@@ -749,6 +761,10 @@ class SellYourSaasUtils
 					if (! empty($invoiceprocessed[$obj->rowid])) {	// Invoice already processed
 						continue;
 					}
+
+					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->transaction_opened = ".$this->transaction_opened);
+
+					$this->db->begin();
 
 					$invoice = new Facture($this->db);
 					$result1 = $invoice->fetch($obj->rowid);
@@ -771,6 +787,8 @@ class SellYourSaasUtils
 						}
 					}
 
+					$this->db->commit();
+
 					$invoiceprocessed[$obj->rowid]=$invoice->ref;
 				}
 
@@ -787,8 +805,6 @@ class SellYourSaasUtils
 
 		$this->output = count($invoiceprocessedok).' invoice(s) paid among '.count($invoiceprocessed).' qualified invoice(s) with a valid Stripe default payment mode processed'.(count($invoiceprocessedok)>0 ? ' : '.join(',', $invoiceprocessedok) : '').' (ran in mode '.$servicestatus.') (search done on SellYourSaas customers only)';
 		$this->output .= ' - '.count($invoiceprocessedko).' discarded (missing Stripe customer/card id, payment error or other reason)'.(count($invoiceprocessedko)>0 ? ' : '.join(',', $invoiceprocessedko) : '');
-
-		$this->db->commit();
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
@@ -898,6 +914,10 @@ class SellYourSaasUtils
 		// Loop on each invoice to pay
 		foreach ($invoices as $invoice) {
 			$errorforinvoice = 0;     // We reset the $errorforinvoice at each invoice loop
+
+			// Note: The db->begin and commit has been started into the doTakePaymentStripe() that already contains a loop on each invoice,
+			// so adding a begin / commit here will be useless when called by doTakePaymentStripe().
+			// TODO Add the begin / commit for other cases
 
 			$invoice->fetch_thirdparty();
 
@@ -1081,8 +1101,9 @@ class SellYourSaasUtils
 								} else { // Using new SCA method
 									dol_syslog("* Create payment on card ".$stripecard->id.", amounttopay=".$amounttopay.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
-									// Create payment intent and charge payment (confirmnow = true)
-									$paymentintent = $stripe->getPaymentIntent($amounttopay, $currency, $FULLTAG, $description, $invoice, $customer->id, $stripeacc, $servicestatus, 0, 'automatic', true, $stripecard->id, 1);
+									// Create payment intent and charge payment (because of confirmnow = true)
+									$confirmnow = true;
+									$paymentintent = $stripe->getPaymentIntent($amounttopay, $currency, $FULLTAG, $description, $invoice, $customer->id, $stripeacc, $servicestatus, 0, 'automatic', $confirmnow, $stripecard->id, 1);
 
 									$charge = new stdClass();
 									if ($paymentintent->status === 'succeeded') {
@@ -1152,7 +1173,7 @@ class SellYourSaasUtils
 									$postactionmessages[]=$errmsg.' ('.$stripearrayofkeys['publishable_key'].')';
 									$this->errors[]=$errmsg;
 								} else {
-									dol_syslog('Successfuly charge card '.$stripecard->id);
+									dol_syslog('Successfuly charge card '.$stripecard->id.' for invoice '.$invoice->id);
 
 									$postactionmessages[]='Success to charge card ('.$charge->id.' with '.$stripearrayofkeys['publishable_key'].')';
 
@@ -1217,6 +1238,7 @@ class SellYourSaasUtils
 										dol_syslog('* Record payment for invoice id '.$invoice->id.'. It includes closing of invoice and regenerating document');
 
 										// This include closing invoices to 'paid' (and trigger including unsuspending) and regenerating document
+										// So this method can be very long if there is an unsuspend with timeout.
 										$paiement_id = $paiement->create($user, 1);
 										if ($paiement_id < 0) {
 											$postactionmessages[] = $paiement->error.($paiement->error?' ':'').join("<br>\n", $paiement->errors);
@@ -2131,7 +2153,6 @@ class SellYourSaasUtils
 							$listofcontractid = array($object);
 
 							foreach ($listofcontractid as $contract) {
-
 								dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
 								if ($contract->array_options['options_deployment_status'] != 'done') {
@@ -2404,7 +2425,6 @@ class SellYourSaasUtils
 						}
 
 						if ($wemustsuspendinstance) {
-
 							$conf->global->noapachereload = $noapachereload;	// Set a global variable that can be read later by trigger
 							$comment = "Closed by batch doSuspendInstances('".$mode.", ".$noapachereload.", ".$maxnbofinstances."') the ".dol_print_date($now, 'dayhourrfc').')';
 							$result = $object->closeAll($user, 0, $comment);			// This may execute trigger that make remote actions to suspend instance
@@ -3064,6 +3084,7 @@ class SellYourSaasUtils
 				$tmppackage->fetch($producttmp->array_options['options_package']);
 			}
 
+			// Set or not doremoteaction
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
@@ -3076,7 +3097,9 @@ class SellYourSaasUtils
 			// remoteaction = 'deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
 			if ($doremoteaction) {
 				dol_syslog("Enter into doremoteaction code, with contract id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
+
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+
 				$contract = new Contrat($this->db);
 				$contract->fetch($tmpobject->fk_contrat);
 				$contract->fetch_thirdparty();
@@ -3152,6 +3175,8 @@ class SellYourSaasUtils
 				$sshaccesstype         = (empty($contract->array_options['options_sshaccesstype'])?0:$contract->array_options['options_sshaccesstype']);
 				$customurl             = $contract->array_options['options_custom_url'];
 				$customvirtualhostline = $contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
+				$customvirtualhostdir  = $contract->array_options['options_custom_virtualhostdir'];
+
 				$SSLON='On';	// Is SSL enabled on the custom url virtual host ?
 
 				$CERTIFFORCUSTOMDOMAIN =$customurl;
@@ -3301,26 +3326,28 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->datafile1);
 				$commandurl.= '&'.$tmppackage->srcfile1.'&'.$tmppackage->targetsrcfile1.'&'.$tmppackage->srcfile2.'&'.$tmppackage->targetsrcfile2.'&'.$tmppackage->srcfile3.'&'.$tmppackage->targetsrcfile3;
 				$commandurl.= '&'.$tmppackage->srccronfile.'&'.$tmppackage->srccliafter.'&'.$targetdir;
-				$commandurl.= '&'.$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;	// Param 22 in .sh
+				$commandurl.= '&'.$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;		// Param 22 in .sh
 				$commandurl.= '&'.$serverdeployment;
-				$commandurl.= '&'.$urlforsellyoursaasaccount;			            // Param 24 in .sh
+				$commandurl.= '&'.$urlforsellyoursaasaccount;			            	// Param 24 in .sh
 				$commandurl.= '&'.$sldAndSubdomainold;
 				$commandurl.= '&'.$domainnameold;
 				$commandurl.= '&'.str_replace(' ', '£', $customurl);
 				$commandurl.= '&'.$tmpobject->id;		// ID of line of contract
-				$commandurl.= '&'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+				$commandurl.= '&'.str_replace(' ', '£', $conf->global->SELLYOURSAAS_NOREPLY_EMAIL);
 				$commandurl.= '&'.$CERTIFFORCUSTOMDOMAIN;
 				$commandurl.= '&'.$archivedir;
 				$commandurl.= '&'.$SSLON;
 				$commandurl.= '&'.(empty($conf->global->noapachereload)?'apachereload':'noapachereload');
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->allowoverride);
-				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);
+				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->allowoverride);	// Param 34 in .sh: Will replace __AllowOverride__ in virtual host
+				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);		// Param 35 in .sh: Will replace __VirtualHostHead__ in virtual host
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
 				$commandurl.= '&'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
 				$commandurl.= '&'.$directaccess;        // Param 38 in .sh
 				$commandurl.= '&'.$sshaccesstype;       // Param 39 in .sh
-				$commandurl.= '&'.$automigrationtmpdir;  //Param 40 in .sh
-				$commandurl.= '&'.$automigrationdocumentarchivename; //Param 41 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostdir);       	// Param 40 in .sh: Will replace __IncludeFromContract__ in virtual host
+        $commandurl.= '&'.$automigrationtmpdir;  //Param 41 in .sh
+				$commandurl.= '&'.$automigrationdocumentarchivename; //Param 42 in .sh
+
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 
@@ -3383,6 +3410,7 @@ class SellYourSaasUtils
 			}
 
 			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
+			// Here we are into a loop where $tmpobject and $tmpproduct are defined.
 			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				dol_syslog("Start refresh of nb of resources for a customer");
 
@@ -3530,7 +3558,7 @@ class SellYourSaasUtils
 								$this->errors = $dbinstance->errors;
 							}
 						} else {
-							dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we failed previously to connect with ssh", LOG_WARNING);
+							dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we already failed previously to connect with ssh", LOG_WARNING);
 
 							$dbinstance = null;
 
@@ -3579,8 +3607,8 @@ class SellYourSaasUtils
 											}
 											$itmp++;
 										}
-										$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
-										$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
+										//$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+										$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
 									} else {
 										$error++;
 										$this->error = 'SQL to get resource return nothing';
@@ -3673,7 +3701,7 @@ class SellYourSaasUtils
 
 					if (! $error && ! is_null($newqty)) {
 						if (($newqty != $currentqty) || ($newcommentonqty != $currentcommentonqty)) {
-							// tmpobject is contract line
+							// tmpobject is a contract line
 							$tmpobject->qty = $newqty;
 
 							// So update of contract line and template invoice lines qty are in same transaction.
@@ -3884,7 +3912,7 @@ class SellYourSaasUtils
 						&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 							$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 							if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
-						}
+					}
 
 					$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - Error on remote action for instance: '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name, 90);
 					$messageofevent.= 'Error on remote action for instance: '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";

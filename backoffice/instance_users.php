@@ -114,6 +114,8 @@ if (empty($reshook)) {
 
 	if ($action == "createsupportuser") {
 		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb->prefix_db = $prefix_db;
+
 		if (is_object($newdb)) {
 			$savMAIN_SECURITY_HASH_ALGO = $conf->global->MAIN_SECURITY_HASH_ALGO;
 			$savMAIN_SECURITY_SALT = $conf->global->MAIN_SECURITY_SALT;
@@ -136,7 +138,13 @@ if (empty($reshook)) {
 				setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
 			}
 
+			$loginforsupport = $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+
 			$password = $conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT;
+			if (empty($password)) {
+				require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
+				$password = getRandomPassword(false);
+			}
 
 			// Calculate hash with remote setup
 			$password_crypted_for_remote = dol_hash($password);
@@ -153,11 +161,12 @@ if (empty($reshook)) {
 			$emailsupport = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 			$signature = '--<br>Support team';
 
-			$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature)";
-			$sql .= " VALUES('".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."', '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."', 1,";
-			$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT)."'").",";
+			$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature, api_key)";
+			$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
+			$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
 			$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
-			$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."')";
+			$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
+			$sql .= " '".$newdb->escape($password)."')";
 			$resql=$newdb->query($sql);
 			if (! $resql) {
 				if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
@@ -175,6 +184,8 @@ if (empty($reshook)) {
 			if ($resaddright <= 0) {
 				setEventMessages('Failed to set all permissions : '.$edituser->error, $edituser->errors, 'warnings');
 			}
+
+			setEventMessages('Password for user <b>'.$loginforsupport.'</b> set to <b>'.$password.'</b>', null, 'warnings');
 		}
 	}
 	if ($action == "deletesupportuser") {
@@ -551,7 +562,7 @@ function print_user_table($newdb, $object)
 	foreach ($arrayfields as $key => $value) {
 		if ($key == 'statut') {
 			$cssforfield = ($cssforfield ? ' ' : '').'center';
-		}else{
+		} else {
 			$cssforfield = "";
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
@@ -608,31 +619,31 @@ function print_user_table($newdb, $object)
 				print '</td>';
 				foreach ($arrayfields as $key => $value) {
 					if (! empty($arrayfields[$key]['checked'])) {
-					    if ($key == 'statut') {
-					        if ($obj->statut) {
-					            print '<td class="center">';
-					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
-					            print '</td>';
-					        } else {
-					            print '<td class="center">';
-					            print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
-					            print '</td>';
-					        }
-					    } elseif ($key == 'pass') {
-					        $valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-					        print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
-					    } elseif ($key == 'login') {
-					        print '<td class="nowraponall">';
-					        print $obj->$key;
-					        print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
-					        print '</td>';
-					    } elseif ($key == 'email') {
-					        print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
-					    } elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
-					        print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
-					    } else {
-					        print '<td>'.$obj->$key.'</td>';
-					    }
+						if ($key == 'statut') {
+							if ($obj->statut) {
+								print '<td class="center">';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?action=disableuser&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-on marginleftonly valignmiddle" style="font-size: 2em; color: #227722;" alt="Activated" title="Activated"></span></a>';
+								print '</td>';
+							} else {
+								print '<td class="center">';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?action=enableuser&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'"><span class="fa fa-toggle-off marginleftonly valignmiddle" style="font-size: 2em; color: #888888;" alt="Disabled" title="Disabled"></span></a>';
+								print '</td>';
+							}
+						} elseif ($key == 'pass') {
+							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+							print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
+						} elseif ($key == 'login') {
+							print '<td class="nowraponall">';
+							print $obj->$key;
+							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
+							print '</td>';
+						} elseif ($key == 'email') {
+							print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
+						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
+							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
+						} else {
+							print '<td>'.$obj->$key.'</td>';
+						}
 					}
 				}
 				print '<td align="center">';

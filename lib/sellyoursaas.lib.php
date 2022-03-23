@@ -54,9 +54,9 @@ if (!function_exists('getDolGlobalInt')) {
 /**
  * To compare on date property
  *
- * @param date $a		Date A
- * @param date $b		Date B
- * @return boolean		Result of comparison
+ * @param 	int 	$a		Date A
+ * @param 	int 	$b		Date B
+ * @return 	boolean			Result of comparison
  */
 function cmp($a, $b)
 {
@@ -344,14 +344,14 @@ function getRootUrlForAccount($object)
 
 	$newobject = $object;
 
-	// If $object is a contract, we take ref_c
-	if (get_class($newobject) == 'Contrat') {
+	// If $object is a contract, we take ref_customer
+	if ($newobject && get_class($newobject) == 'Contrat') {
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 		$ret = 'https://myaccount.'.getDomainFromURL($newobject->ref_customer, 1);
 	}
 
 	// If $object is a product, we take package
-	if (get_class($newobject) == 'Product') {
+	if ($newobject && get_class($newobject) == 'Product') {
 		dol_include_once('/sellyoursaas/class/packages.class.php');
 
 		$newobject->fetch_optionals();
@@ -362,7 +362,7 @@ function getRootUrlForAccount($object)
 	}
 
 	// If $object is a package, we take first restrict and add account.
-	if (get_class($newobject) == 'Packages') {
+	if ($newobject && get_class($newobject) == 'Packages') {
 		$tmparray = explode(',', $newobject->restrict_domains);
 		if (is_array($tmparray)) {
 			foreach ($tmparray as $key => $val) {

@@ -20,10 +20,14 @@ export webSSLCertificateIntermediate=`grep '^websslcertificateintermediate=' /et
 if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
+export domainmyaccount=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 if [ "x$2" == "x" ]; then
    echo "Usage:   $0  urlwhenoffline  test|offline|online"
-   echo "Example: $0  https://myaccount.mydomain.com/offline.php  test"
+   echo "Example: $0  offline.php  test"
+   echo "Example: $0  maintenance.php  test"
+   echo "Example: $0  https://myaccount.mydomain.com/offline.php  test       (old syntax)"
+   echo "Example: $0  https://myaccount.mydomain.com/maintenance.php  test   (old syntax)"
    exit 1
 fi
 
@@ -31,6 +35,13 @@ if [ "x$2" != "xtest" -a "x$2" != "xoffline" -a "x$2" != "xonline" ]; then
    echo "Parameter 2 must be test|offline|online"
    exit 2
 fi
+
+export urlwhenoffline=$1
+if [[ $urlwhenoffline != http* ]]; then
+	export urlwhenoffline="https://myaccount.$domainmyaccount/$1"
+fi
+echo "Url to use for __webMyAccount__ is $urlwhenoffline"
+
 
 export scriptdir=$(dirname $(realpath ${0}))
 
@@ -61,12 +72,13 @@ if [ "x$2" != "xonline" ]; then
 				echo Create file /etc/apache2/sellyoursaas-offline/$fileshort for domain $domain
 				cat $vhostfileoffline | \
 					sed 's!__webAppDomain__!'${domain}'!g' | \
-					sed 's!__webMyAccount__!'$1'!g' | \
+					sed 's!__webMyAccount__!'${urlwhenoffline}'!g' | \
 			        sed 's!__webSSLCertificateCRT__!'$webSSLCertificateCRT'!g' | \
     	    	    sed 's!__webSSLCertificateKEY__!'$webSSLCertificateKEY'!g' | \
 	            	sed 's!__webSSLCertificateIntermediate__!'$webSSLCertificateIntermediate'!g' | \
 					sed 's!__VirtualHostHead__!'${virtualhosthead}'!g' | \
-					sed 's!__AllowOverride__!'${allowoverride}'!g' \
+					sed 's!__AllowOverride__!'${allowoverride}'!g' | \
+					sed 's!__IncludeFromContract__!'${includefromcontract}'!g' \
 					> /etc/apache2/sellyoursaas-offline/$fileshort
 			else
 		        rm -f /etc/apache2/sellyoursaas-offline/$domain.conf 2>/dev/null
@@ -74,12 +86,13 @@ if [ "x$2" != "xonline" ]; then
 				echo Create file /etc/apache2/sellyoursaas-offline/$fileshort for domain $domain
 				cat $vhostfileoffline | \
 					sed 's!__webAppDomain__!'${domain}'!g' | \
-					sed 's!__webMyAccount__!'$1'!g' | \
+					sed 's!__webMyAccount__!'${urlwhenoffline}'!g' | \
 		            sed 's!__webSSLCertificateCRT__!'$webSSLCertificateCRT'!g' | \
         		    sed 's!__webSSLCertificateKEY__!'$webSSLCertificateKEY'!g' | \
               		sed 's!__webSSLCertificateIntermediate__!'$webSSLCertificateIntermediate'!g' | \
 					sed 's!__VirtualHostHead__!'${virtualhosthead}'!g' | \
-					sed 's!__AllowOverride__!'${allowoverride}'!g' \
+					sed 's!__AllowOverride__!'${allowoverride}'!g' | \
+					sed 's!__IncludeFromContract__!'${includefromcontract}'!g' \
 					> /etc/apache2/sellyoursaas-offline/$fileshort
 			fi
 	done

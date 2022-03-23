@@ -161,14 +161,12 @@ if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON)) {
 	$enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
-print $langs->trans("AnnounceOnCustomerDashboard");
+print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
 print '<br>';
-print '<span class="opacitymedium">';
-print $langs->trans("Example").': (AnnounceMajorOutage), (AnnounceMinorOutage), (AnnounceMaintenanceInProgress), Any custom text...</span><br>';
 print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_6.'">';
 print $conf->global->SELLYOURSAAS_ANNOUNCE;
 print '</textarea>';
-print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button small" value="'.$langs->trans("Save").'"></center>';
+print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button small" value="'.$langs->trans("Save").'"></div>';
 print '</td></tr>';
 print "</table></form><br>";
 
