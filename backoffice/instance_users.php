@@ -463,11 +463,15 @@ if (!$error) {
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="id" value="'.$id.'">';
 	print '<input type="hidden" name="formfilteraction" id="formfilteraction" value="list">';
-	print '<table class="border" width="100%">';
+
+	print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+	print '<table class="border centpercent">';
 
 	print_user_table($dbcustomerinstance, $object);
 
-	print "</table><br>";
+	print "</table>";
+	print "</div>";
+	print "<br>";
 }
 print '</form>'."\n";
 
