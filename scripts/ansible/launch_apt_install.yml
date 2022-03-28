@@ -63,4 +63,3 @@
       - acl
     register: command_output
 
-      
