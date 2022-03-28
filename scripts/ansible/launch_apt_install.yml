@@ -3,7 +3,7 @@
 #
 # To run the script:
 # ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost'
-# ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost php74=1' --limit=*.mydomain.com
+# ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost php74=1'
 #
 
 

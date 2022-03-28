@@ -432,7 +432,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
-					// We process the instance
+					// We process the instance (ref_customer)
 					$instance = $obj->instance;
 
 					unset($object->linkedObjects);
