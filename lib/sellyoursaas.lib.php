@@ -286,7 +286,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 	global $cachefortmpprod;
 	if (! isset($cachefortmpprod) || ! is_array($cachefortmpprod)) $cachefortmpprod = array();
 
-	dol_sysog("sellyoursaasGetExpirationDate for contract id=".$contract->id." onlyexpirationdate=".$onlyexpirationdate);
+	dol_syslog("sellyoursaasGetExpirationDate for contract id=".$contract->id." onlyexpirationdate=".$onlyexpirationdate);
 
 	// Loop on each line to get lowest expiration date
 	foreach ($contract->lines as $line) {
