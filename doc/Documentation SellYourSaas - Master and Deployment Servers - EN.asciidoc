@@ -374,7 +374,7 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) ALL
-# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
+# You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
@@ -3873,12 +3873,12 @@ fdisk -l
 parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print all
 resizepart 
-Y
-999GB    (Don't input the default value but the max value of the disk that was shown by "print all")
+Y		  (the num of the part)
+999GB    (Don't input the default value but the max value in column "End" of the disk that was shown by "print all")
 q
 ---------------
 
-* Remount the disk for acknoledgement and resizing without erasing data.
+* Remount the disk for acknowledgement and resizing without erasing data.
 
 [source,bash]
 ---------------
