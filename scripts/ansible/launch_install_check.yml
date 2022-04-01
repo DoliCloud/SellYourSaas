@@ -2,8 +2,8 @@
 # Script to run apt install command on servers
 #
 # To run the script:
-# ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost'
-# ansible-playbook -K launch_apt_install.yml -i hosts-xxx -e 'target=targethost php74=1'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1'
 #
 
 
@@ -63,3 +63,19 @@
       - acl
     register: command_output
 
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: Removed unexpected apt packages
+    apt:
+      pkg:
+      - php7.3-fpm 
+      - php7.4-fpm 
+      - php8.0-fpm
+      state: absent 
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
+      
+     
