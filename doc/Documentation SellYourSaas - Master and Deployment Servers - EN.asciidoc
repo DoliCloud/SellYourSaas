@@ -1014,7 +1014,7 @@ a2enconf charset localized-error-pages other-vhosts-access-log security
 
 On the *Deployment servers*:
 
-* Creation of the directory of the configuration files of the virtual hosts of the instances.
+* Create the directory of the configuration files of the virtual hosts of the instances.
 
 [source, bash]
 ---------------
@@ -1035,15 +1035,15 @@ systemctl daemon-reload
 
 Note: Reload of apache seems not enough.
 
-* Addition of the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
+* Add the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
 
 [source, conf]
 ---------------
-	# Include virtual host for sellyoursaas instances:
-	IncludeOptional sellyoursaas-enabled/*.conf
+# Include virtual host for sellyoursaas instances:
+IncludeOptional sellyoursaas-enabled/*.conf
 ---------------
 
-* Added directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
+* Add directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
 
 [source, conf]
 ---------------

@@ -47,20 +47,21 @@ while ($line = fgets($pointer)) {
 		$nbto+=count($tmpto);
 	}
 	if (preg_match('/^cc:\s/i', $line) ) {
-				$ccline .= trim($line)."\n";
-				$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
+		$ccline .= trim($line)."\n";
+		$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
 		$tmpcc=preg_split("/[\s,]+/", $linetmp);
-				$nbcc+=count($tmpcc);
+		$nbcc+=count($tmpcc);
 	}
 	if (preg_match('/^bcc:\s/i', $line) ) {
-				$bccline .= trim($line)."\n";
-				$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
+		$bccline .= trim($line)."\n";
+		$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
 		$tmpbcc=preg_split("/[\s,]+/", $linetmp);
-				$nbbcc+=count($tmpbcc);
+		$nbbcc+=count($tmpbcc);
 	}
+
 	$reg = array();
 	if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg) ) {
-				$fromline .= trim($line)."\n";
+		$fromline .= trim($line)."\n";
 		$emailfrom = $reg[1];
 	} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg) ) {
 		$fromline .= trim($line)."\n";
@@ -68,9 +69,10 @@ while ($line = fgets($pointer)) {
 	}
 
 	if (preg_match('/^references:\s/i', $line) ) {
-				$referenceline .= trim($line)."\n";
+		$referenceline .= trim($line)."\n";
 	}
-		$mail .= $line;
+
+	$mail .= $line;
 }
 
 $tmpfile='/tmp/phpsendmail-'.posix_getuid().'-'.getmypid().'.tmp';
