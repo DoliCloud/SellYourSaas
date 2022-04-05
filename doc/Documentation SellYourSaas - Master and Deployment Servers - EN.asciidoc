@@ -1033,7 +1033,7 @@ systemctl daemon-reload
 /usr/sbin/apachectl start
 ---------------
 
-Note: Reload of apache seems not enough.
+Note: Reload of apache seems not enough so we stop/start it.
 
 * Add the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
 
