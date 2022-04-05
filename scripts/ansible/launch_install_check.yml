@@ -3,7 +3,7 @@
 #
 # To run the script:
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost'
-# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1 apache=1'
 #
 
 
@@ -13,6 +13,9 @@
   become_method: sudo
   become_user: root
   tasks:
+
+
+  ##### Misc packages
   - name: Launch apt for misc packages
     apt:
       pkg:
@@ -31,6 +34,7 @@
       var: command_output.stdout_lines
 
 
+  ##### For APACHE
   - name: Launch apt for apache packages
     apt:
       pkg:
@@ -45,6 +49,7 @@
       var: command_output.stdout_lines
 
 
+  ##### For PHP
   - name: Launch apt for php packages
     apt:
       pkg:
@@ -86,6 +91,157 @@
       
   - debug:
       var: command_output.stdout_lines
+
+  - name: Check or update upload_max_filesize php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: upload_max_filesize
+      value: 20M
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update post_max_size php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: post_max_size
+      value: 25M
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update max_input_vars php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: max_input_vars
+      value: 4000
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update memory_limit php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: memory_limit
+      value: 256M
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.gc_maxlifetime php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.gc_maxlifetime
+      value: 3600
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.use_strict_mode php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.use_strict_mode
+      value: 1
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.use_only_cookies php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.use_only_cookies
+      value: 1
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.cookie_httponly php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.cookie_httponly
+      value: 1
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.cookie_samesite php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.cookie_samesite
+      value: Lax
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update auto_prepend_file php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update sendmail_path php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update mail.log php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: mail.log
+      value: /var/log/phpmail.log
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update auto_prepend_file cli/php.ini
+    ini_file:
+      path: /etc/php/7.4/cli/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update sendmail_path cli/php.ini
+    ini_file:
+      path: /etc/php/7.4/cli/php.ini
+      section: PHP
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update mail.log cli/php.ini
+    ini_file:
+      path: /etc/php/7.4/cli/php.ini
+      section: PHP
+      option: mail.log
+      value: /var/log/phpmail.log
+      backup: yes
+    when: 
+      - php74 is defined
+
 
       
   - name: Removed unexpected apt packages

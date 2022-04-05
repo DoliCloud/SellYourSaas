@@ -2884,7 +2884,7 @@ session.cookie_samesite = Lax
 
 ==== Disable some functions (optionnal)
 
-Complete also the parameter *disable_functions* for the *apache* and *fpm* file (not for the *cli*) by adding:
+Complete also the parameter *disable_functions* for the *apache* and *fpm* file (NOT for the *cli*) by adding:
 
 [source,bash]
 ---------------
