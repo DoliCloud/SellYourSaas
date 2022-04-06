@@ -916,7 +916,7 @@ Host github.com
 
 === Installation of packages
 
-There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
+There are two scenarios depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
 
 * Installation of the 18.04- Ubuntu packages
 
@@ -967,7 +967,7 @@ apt remove unattended-upgrades
 
 === Max size increase UID
 
-On the deployment servers, modify */etc/login.defs* to put the
+On the deployment servers, modify */etc/login.defs* as follows:
 
 [source, conf]
 ---------------
@@ -1692,10 +1692,18 @@ fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-ru
 
 === Test spamassassin ===
 
-The process *spamd* must be running. Start it manually if it is not the case the first time.
+The process *spamd* must be running. Start it manually if it is not the case the first time. You can start it manually using this command:
+
+[source,bash]
+---------------
+/usr/sbin/spamd &
+disown
+---------------
 
 To test that spamassassin client is working, create a file */tmp/testspam* with content
 
+[source,text]
+---------------
     Subject: Test spam mail (GTUBE)
     Message-ID: <GTUBE1.1010101@example.net>
     Date: Wed, 23 Jul 2003 23:30:00 +0200
@@ -1721,6 +1729,7 @@ To test that spamassassin client is working, create a file */tmp/testspam* with 
     XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
 
     You should send this test mail from an account outside of your network.
+---------------
 
 Then test with:
 
@@ -1730,7 +1739,6 @@ spamc < /tmp/testspam
 spamc -c < /tmp/testspam
 echo $?
 ---------------
-
 
 === Test and setup of ClamAV
 
@@ -1749,6 +1757,8 @@ And to test *clamav* command line and daemon:
 ---------------
 clamdscan /tmp/testvirus --fdpass
 ---------------
+
+The output should have a line with the following content: *Infected files: 1*
 
 Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
 
@@ -2460,15 +2470,15 @@ Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/us
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/bin.secureBash
+include::repository_root/etc/apparmor.d/bin.secureBash[]
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.dusr.sbin.apache2/* with this content:
+Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.d/usr.sbin.apache2/* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository, in etc/apparmor.d/local/usr.sbin.apache2 or etc/apparmor.d/usr.sbin.apache2
+include::repository_root/etc/apparmor.d/local/usr.sbin.apache2-deployment[]
 ---------------
 
 
@@ -2476,7 +2486,7 @@ Create an apparmor file */etc/apparmor.d/php-fpm7.4* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/php-fpm7.4
+include::repository_root/etc/apparmor.d/php-fpm7.4[]
 ---------------
 
 
@@ -2543,6 +2553,8 @@ systemctl daemon-reload
 
 
 === Jailkit configuration (optional)
+
+On **deployment servers**:
 
 Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
 
@@ -2858,7 +2870,7 @@ chmod +t /dev/shm /var/lib/php/sessions
 
 ==== Define size of upload and session options
 
-Modify the file */etc/php/*.*/*/php.ini* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
+Modify the file *`+/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
@@ -4526,7 +4538,7 @@ scripts/make_instance_offline.sh  https://myaccount.mydomain.com/offline.php  te
 
 
 
-=== Clean rubish files
+=== Clean rubbish files
 
 Launch the script: 
 
@@ -4729,7 +4741,7 @@ Go to the menu *SellYourSaas - Subscription Pags* to get the URL for subscribing
 - By submitting on the subscription page, the following operations are triggered :
   * Check if third party exists or not. If not create the third party, if so tell to create the new instance from the customer dashboard.
   * Create a contract (main subscription) into database with status "DEPLOY_IN_PROGRESS" and with a Unix account name, pass, database account and pass, and other properties defined in the contract. The subscribed services are lines of contracts.
-  * Calls instance deployment listener (micro web server serving only *scripts/remote_server/index.php* and execfuting the "deploy" on the deployment server (1 of the 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") (in Dolibarr's case for instance, this calls the scripts *action_deploy_undeploy.sh* or *action_suspend_unsuspend.sh* according to the action code), to create/destroy or suspend/reactivate the client instance. See chapter <<remote_actions>>.
+  * Calls instance deployment listener (micro web server serving only *scripts/remote_server/index.php* and executing the "deploy" on the deployment server (1 of the 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") (in Dolibarr's case for instance, this calls the scripts *action_deploy_undeploy.sh* or *action_suspend_unsuspend.sh* according to the action code), to create/destroy or suspend/reactivate the client instance. See chapter <<remote_actions>>.
   * Edit contract/subscription with status "DEPLOYED" if result of remote action is OK.
   * Send an email to user: Show result to user and send en email (if subscriptions is done from backoffice, this option is off).
 
