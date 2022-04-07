@@ -164,7 +164,7 @@ print $enabledisableannounce;
 print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
 print '<br>';
 print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_6.'">';
-print $conf->global->SELLYOURSAAS_ANNOUNCE;
+print getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
 print '</textarea>';
 print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button small" value="'.$langs->trans("Save").'"></div>';
 print '</td></tr>';
@@ -228,16 +228,16 @@ if ($mode == 'refreshstats') {
 	$_SESSION['stats_totalinstances']=$totalinstances;
 	$_SESSION['stats_totalusers']=$totalusers;
 } else {
-	$total = $_SESSION['stats_total'];
-	$totalcommissions = $_SESSION['stats_totalcommissions'];
-	$totalinstancespaying = $_SESSION['stats_totalinstancespaying'];
-	$totalinstancespayingall = $_SESSION['stats_totalinstancespayingall'];
-	$totalinstancessuspendedfree = $_SESSION['stats_totalinstancessuspendedfree'];
-	$totalinstancesexpiredfree = $_SESSION['stats_totalinstancesexpiredfree'];
-	$totalinstancessuspendedpaying = $_SESSION['stats_totalinstancessuspendedpaying'];
-	$totalinstancesexpiredpaying = $_SESSION['stats_totalinstancesexpiredpaying'];
-	$totalinstances = $_SESSION['stats_totalinstances'];
-	$totalusers = $_SESSION['stats_totalusers'];
+	$total = isset($_SESSION['stats_total']) ? $_SESSION['stats_total'] : '';
+	$totalcommissions = isset($_SESSION['stats_totalcommissions']) ? $_SESSION['stats_totalcommissions'] : '';
+	$totalinstancespaying = isset($_SESSION['stats_totalinstancespaying']) ? $_SESSION['stats_totalinstancespaying'] : '';
+	$totalinstancespayingall = isset($_SESSION['stats_totalinstancespayingall']) ? $_SESSION['stats_totalinstancespayingall'] : '';
+	$totalinstancessuspendedfree = isset($_SESSION['stats_totalinstancessuspendedfree']) ? $_SESSION['stats_totalinstancessuspendedfree'] : '';
+	$totalinstancesexpiredfree = isset($_SESSION['stats_totalinstancesexpiredfree']) ? $_SESSION['stats_totalinstancesexpiredfree'] : '';
+	$totalinstancessuspendedpaying = isset($_SESSION['stats_totalinstancessuspendedpaying']) ? $_SESSION['stats_totalinstancessuspendedpaying'] : '';
+	$totalinstancesexpiredpaying = isset($_SESSION['stats_totalinstancesexpiredpaying']) ? $_SESSION['stats_totalinstancesexpiredpaying'] : '';
+	$totalinstances = isset($_SESSION['stats_totalinstances']) ? $_SESSION['stats_totalinstances'] : '';
+	$totalusers = isset($_SESSION['stats_totalusers']) ? $_SESSION['stats_totalusers'] : '';
 }
 
 $total = price2num($total, 'MT');
@@ -263,7 +263,7 @@ print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 $texthelp = $langs->trans("NbOfInstancesActivePayingDesc");
 $stringlistofinstancespayingwithoutrecinvoice = '';
 $nboflistofinstancespayingwithoutrecinvoice = 0;
-if (is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
+if (!empty($rep) && is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
 	$nboflistofinstancespayingwithoutrecinvoice = count($rep['listofinstancespayingwithoutrecinvoice']);
 	$rep['listofinstancespayingwithoutrecinvoice'] = dol_sort_array($rep['listofinstancespayingwithoutrecinvoice'], 'thirdparty_name');
 	foreach ($rep['listofinstancespayingwithoutrecinvoice'] as $arrayofcontract) {
@@ -278,7 +278,7 @@ print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstancespayingall.' | '.$totalinstances.'</font>';
 else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '<!-- List of instances : '."\n";
-if (is_array($rep['listofinstancespaying'])) {
+if (!empty($rep) && is_array($rep['listofinstancespaying'])) {
 	$rep['listofinstancespaying'] = dol_sort_array($rep['listofinstancespaying'], 'thirdparty_name');
 	foreach ($rep['listofinstancespaying'] as $arrayofcontract) {
 		print $arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
