@@ -68,6 +68,9 @@ $pagenext = $page + 1;
 // Security check
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
+if ($mode == 'refreshstats') {
+	ini_set('max_execution_time', '300'); //300 seconds = 5 minutes
+}
 
 
 /*

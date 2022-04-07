@@ -1,0 +1,260 @@
+---
+# Script to run apt install command on servers
+#
+# To run the script:
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1 apache=1'
+#
+
+
+- name: Apt install packages
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+
+
+  ##### Misc packages
+  - name: Launch apt for misc packages
+    apt:
+      pkg:
+      - ntp 
+      - git 
+      - gzip 
+      - zip 
+      - zstd 
+      - memcached 
+      - ncdu 
+      - acl
+      - snapd
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
+
+
+  ##### For APACHE
+  - name: Launch apt for apache packages
+    apt:
+      pkg:
+      - apache2
+      - apache2-bin
+      - lynx 
+    register: command_output
+    when: 
+      - apache is defined
+
+  - debug:
+      var: command_output.stdout_lines
+
+
+  ##### For PHP
+  - name: Launch apt for php packages
+    apt:
+      pkg:
+      - php7.4 
+      - php7.4-cli 
+      - libapache2-mod-php7.4 
+      - php7.4-fpm 
+      - php7.4-gd 
+      - php7.4-imap 
+      - php7.4-json 
+      - php7.4-ldap 
+      - php7.4-mysql 
+      - php7.4-curl 
+      - php7.4-memcached 
+      - php7.4-imagick 
+      - php7.4-geoip 
+      - php7.4-intl 
+      - php7.4-xml 
+      - php7.4-zip 
+      - php7.4-bz2 
+      - php7.4-ssh2 
+      - php7.4-mbstring 
+      - php7.4-dev
+    register: command_output
+    when: 
+      - php74 is defined
+
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: Launch apt for GLPI packages
+    apt:
+      pkg:
+      - php7.4-readline
+      - php7.4-xmlrpc
+    register: command_output
+    when: 
+      - php74 is defined
+      
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: Check or update upload_max_filesize php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: upload_max_filesize
+      value: 20M
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update post_max_size php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: post_max_size
+      value: 25M
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update max_input_vars php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: max_input_vars
+      value: 4000
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update memory_limit php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: memory_limit
+      value: 256M
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.gc_maxlifetime php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.gc_maxlifetime
+      value: 3600
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.use_strict_mode php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.use_strict_mode
+      value: 1
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.use_only_cookies php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.use_only_cookies
+      value: 1
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.cookie_httponly php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.cookie_httponly
+      value: 1
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update session.cookie_samesite php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: session.cookie_samesite
+      value: Lax
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update auto_prepend_file php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update sendmail_path php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update mail.log php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: mail.log
+      value: /var/log/phpmail.log
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update auto_prepend_file cli/php.ini
+    ini_file:
+      path: /etc/php/7.4/cli/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update sendmail_path cli/php.ini
+    ini_file:
+      path: /etc/php/7.4/cli/php.ini
+      section: PHP
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update mail.log cli/php.ini
+    ini_file:
+      path: /etc/php/7.4/cli/php.ini
+      section: PHP
+      option: mail.log
+      value: /var/log/phpmail.log
+      backup: yes
+    when: 
+      - php74 is defined
+
+
+      
+  - name: Removed unexpected apt packages
+    apt:
+      pkg:
+      - php7.3-fpm 
+      - php7.4-fpm 
+      - php8.0-fpm
+      - php8.1-fpm
+      state: absent 
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines
+      
+     

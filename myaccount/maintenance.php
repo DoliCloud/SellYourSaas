@@ -13,6 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * This page can be called when a virtual host has been set into a maintenance
+ * mode.
  */
 
 if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
@@ -21,7 +25,7 @@ if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER', '1');
 //if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
 //if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test
 //if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
-if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');
+if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', '1');
 if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU', '1');			// If there is no need to load and show top and left menu
 if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');			// If we don't need to load the html.form.class.php
 if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX', '1');
@@ -123,12 +127,14 @@ if (! empty($contract->array_options['options_suspendmaintenance_message']) && $
 print '<br>';
 if ($instance && $instance != 'myaccount') {
 	print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
+	print '<br>';
 }
 print '<br>';
 print '<br>';
+
 //print $langs->trans("GoOnYourDashboardToGetMoreInfo", $_SERVER['SERVER_NAME'], $_SERVER['SERVER_NAME']);
 ?>
-<br><br><br>
+<br><br>
 </div>
 
 </body>

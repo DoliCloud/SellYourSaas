@@ -20,14 +20,16 @@
         AssignUserID __osUsername__ __osGroupname__
         </IfModule>
 
-		# _AllowOverride_ is defined into package.
-		# _IncludeFromContract_ is defined on contract. 
+		# __ AllowOverride __ is defined into package.
+		# __ IncludeFromContract __ is defined on contract. 
 		# For example: "Require ip 1.2.3.4"
 		# or "IncludeOptional /etc/apache2/sellyoursaas-online/__webAppDomain__-directory-options.conf"
         <Directory "__webAppPath__/htdocs">
+        __AllowOverride__
+        <RequireAll>
         Require all granted
-		__AllowOverride__
         __IncludeFromContract__
+        </RequireAll>
         Options -Indexes +FollowSymLinks
         </Directory>
 

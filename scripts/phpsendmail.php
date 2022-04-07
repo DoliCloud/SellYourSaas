@@ -39,38 +39,46 @@ if (function_exists('shell_exec')) {
 
 $pointer = fopen('php://stdin', 'r');
 
+$headerend = 0;
 while ($line = fgets($pointer)) {
-	if (preg_match('/^to:\s/i', $line) ) {
-		$toline .= trim($line)."\n";
-		$linetmp = preg_replace('/^to:\s*/i', '', trim($line));
-		$tmpto=preg_split("/[\s,]+/", $linetmp);
-		$nbto+=count($tmpto);
-	}
-	if (preg_match('/^cc:\s/i', $line) ) {
-				$ccline .= trim($line)."\n";
-				$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
-		$tmpcc=preg_split("/[\s,]+/", $linetmp);
-				$nbcc+=count($tmpcc);
-	}
-	if (preg_match('/^bcc:\s/i', $line) ) {
-				$bccline .= trim($line)."\n";
-				$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
-		$tmpbcc=preg_split("/[\s,]+/", $linetmp);
-				$nbbcc+=count($tmpbcc);
-	}
-	$reg = array();
-	if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg) ) {
-				$fromline .= trim($line)."\n";
-		$emailfrom = $reg[1];
-	} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg) ) {
-		$fromline .= trim($line)."\n";
-		$emailfrom = trim($reg[1]);
+	if (empty($headerend)) {
+		if (preg_match('/^to:\s/i', $line)) {
+			$toline .= trim($line)."\n";
+			$linetmp = preg_replace('/^to:\s*/i', '', trim($line));
+			$tmpto=preg_split("/[\s,]+/", $linetmp);
+			$nbto+=count($tmpto);
+		} elseif (preg_match('/^cc:\s/i', $line)) {
+			$ccline .= trim($line)."\n";
+			$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
+			$tmpcc=preg_split("/[\s,]+/", $linetmp);
+			$nbcc+=count($tmpcc);
+		} elseif (preg_match('/^bcc:\s/i', $line)) {
+			$bccline .= trim($line)."\n";
+			$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
+			$tmpbcc=preg_split("/[\s,]+/", $linetmp);
+			$nbbcc+=count($tmpbcc);
+		}
+
+		$reg = array();
+		if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg)) {
+			$fromline .= trim($line)."\n";
+			$emailfrom = $reg[1];
+		} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg)) {
+			$fromline .= trim($line)."\n";
+			$emailfrom = trim($reg[1]);
+		}
+
+		if (preg_match('/^references:\s/i', $line)) {
+			$referenceline .= trim($line)."\n";
+		}
+
+		if (preg_match('/^\-\-/', $line)) {
+			// We found a symbol for a multipart section, so header is finished now, we can stop header analysis
+			$headerend = 1;
+		}
 	}
 
-	if (preg_match('/^references:\s/i', $line) ) {
-				$referenceline .= trim($line)."\n";
-	}
-		$mail .= $line;
+	$mail .= $line;
 }
 
 $tmpfile='/tmp/phpsendmail-'.posix_getuid().'-'.getmypid().'.tmp';

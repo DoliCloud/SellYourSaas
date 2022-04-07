@@ -374,7 +374,7 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) ALL
-# You can also add this line to force user to re-enter its password to switch to root
+# You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
@@ -928,7 +928,8 @@ sudo apt update
 sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring
+sudo apt-install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
@@ -946,7 +947,8 @@ sudo apt update
 sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysql php-curl php-memcached php-imagick php-geoip php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt-install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
@@ -1012,7 +1014,7 @@ a2enconf charset localized-error-pages other-vhosts-access-log security
 
 On the *Deployment servers*:
 
-* Creation of the directory of the configuration files of the virtual hosts of the instances.
+* Create the directory of the configuration files of the virtual hosts of the instances.
 
 [source, bash]
 ---------------
@@ -1031,17 +1033,17 @@ systemctl daemon-reload
 /usr/sbin/apachectl start
 ---------------
 
-Note: Reload of apache seems not enough.
+Note: Reload of apache seems not enough so we stop/start it.
 
-* Addition of the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
+* Add the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
 
 [source, conf]
 ---------------
-	# Include virtual host for sellyoursaas instances:
-	IncludeOptional sellyoursaas-enabled/*.conf
+# Include virtual host for sellyoursaas instances:
+IncludeOptional sellyoursaas-enabled/*.conf
 ---------------
 
-* Added directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
+* Add directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
 
 [source, conf]
 ---------------
@@ -1940,6 +1942,7 @@ postmap /etc/aliases
 echo >> /etc/postfix/access; postmap /etc/postfix/access
 echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
+echo >> /etc/postfix/virtual; postmap /etc/postfix/virtual
 ---------------
 
 Edit/Create the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
@@ -2174,7 +2177,7 @@ sort_buffer_size=2M
 read_buffer_size=1M
 join_buffer_size=2M
 max_heap_table_size=32M
-max_allowed_packet=32M
+max_allowed_packet=100000000
 # Mysql: max_execution_time = 120000 (milliseconds) or Mariadb: max_statement_time = 120 (seconds)
 #max_execution_time = 120000
 
@@ -2293,7 +2296,7 @@ Give permission, on the *Master server*, to the account *sellyoursaas* of each d
 
 [source,sql]
 ---------------
-CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf quitof the deployment server)
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf of the deployment server)
 
 GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
 
@@ -2881,7 +2884,7 @@ session.cookie_samesite = Lax
 
 ==== Disable some functions (optionnal)
 
-Complete also the parameter *disable_functions* for the *apache* and *fpm* file (not for the *cli*) by adding:
+Complete also the parameter *disable_functions* for the *apache* and *fpm* file (NOT for the *cli*) by adding:
 
 [source,bash]
 ---------------
@@ -3870,12 +3873,12 @@ fdisk -l
 parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print all
 resizepart 
-Y
-999GB    (Don't input the default value but the max value of the disk that was shown by "print all")
+Y		  (the num of the part)
+999GB    (Don't input the default value but the max value in column "End" of the disk that was shown by "print all")
 q
 ---------------
 
-* Remount the disk for acknoledgement and resizing without erasing data.
+* Remount the disk for acknowledgement and resizing without erasing data.
 
 [source,bash]
 ---------------
@@ -5014,15 +5017,17 @@ If it fails, you can fix path with this command
 	for file in *\\*; do target="${file//\\//}"; mkdir -p "${target%/*}"; mv -v "$file" "$target"; done
 	
 
-==== Error mysqldump: Error 3024: Query execution was interrupted, maximum statement execution time exceeded when dumping table `....` at row: ...
+==== Error Cannot open datafile during start of mysql
 
-The value for *max_execution_time* is too low or there is a table that has an abnormal number of records.
-- Check parameter *max_execution_time* into */etc/mysql/mysql.conf.d/mysqld.cnf* or similar files.
-- Try to run the mysqldump after increasing the *max_execution_time* dynamically from mysql with:
-    SHOW VARIABLES LIKE 'MAX_EXECUTION_TIME';
-    SET GLOBAL MAX_EXECUTION_TIME=120000;
-  Note: The change is effective for new sessions only. Exit and start a new session to see the change.
-- See chapter <<check_database_used>> to analyze size of database. A table may be abnormaly large.
+Example of logs:
+
+2022-03-20T12:17:26.825916Z 0 [ERROR] InnoDB: Operating system error number 2 in a file operation.
+2022-03-20T12:17:26.825955Z 0 [ERROR] InnoDB: The error means the system cannot find the path specified.
+2022-03-20T12:17:26.825961Z 0 [ERROR] InnoDB: If you are installing InnoDB, remember that you must create directories yourself, InnoDB does not create them.
+2022-03-20T12:17:26.825966Z 0 [ERROR] InnoDB: Cannot open datafile for read-only: './thedatabase/thefile.ibd' OS error: 71
+
+The directory of a database may have been removed when the databases was not dropped.
+Try to restart mysql. Once logged, do a CREATE DATABASE thedatabase; DROP DATABASE thedatabase;
 
 
 ==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
@@ -5075,7 +5080,7 @@ Try to add the parameter --no-tablespaces into the mysqldump command.
 
 mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
 
-Try to read the max_execution_time of your database with:  
+Try to read the *max_execution_time* of your database with:  
 
 [source,sql]
 ---------------
@@ -5090,6 +5095,8 @@ SET global max_execution_time = ...;    with millisecond
 ---------------
 
 Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf/mysqld.conf*
+
+See also chapter <<check_database_used>> to analyze the size of database. A table may be abnormaly large.
 
 
 ==== Error mysql when connecting to database
@@ -5192,7 +5199,22 @@ instances:
 
 ==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
 
-You can edit the section [mysqld] of the file *mysql.cnf* to increase limits
+Try to read the *max_allowed_packet* of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_allowed_packet%';
+---------------
+
+You can change this in live from mysql command tool:
+
+[source,bash]
+---------------
+set global net_buffer_length=100000;
+set global max_allowed_packet=100000000;
+---------------
+
+You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
 
 [source,bash]
 ---------------
@@ -5200,13 +5222,6 @@ You can edit the section [mysqld] of the file *mysql.cnf* to increase limits
 # avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
 net_buffer_length=100000 
 max_allowed_packet=100000000
----------------
-
-You can also change this in live from mysql command tool:
-[source,bash]
----------------
-set global net_buffer_length=100000;
-set global max_allowed_packet=100000000;
 ---------------
 
 
