@@ -2966,7 +2966,7 @@ if (empty($welcomecid)) {
 							<!-- TrialInstanceWasSuspended -->
 							<div class="note note-warning">
 							<h4 class="block">'.$langs->trans("TrialInstanceWasSuspended", $contract->ref_customer).' !</h4>';
-						if ($mode != 'registerpaymentmode') {
+						if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
 							print '
 								<p>
 								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
@@ -2989,7 +2989,7 @@ if (empty($welcomecid)) {
 						<!-- XDaysAfterEndOfTrial -->
 						<div class="note note-warning">
 						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrial", $contract->ref_customer, abs($delayindays)).' !</h4>';
-					if ($mode != 'registerpaymentmode') {
+					if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
 						print '
 							<p>
 							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
