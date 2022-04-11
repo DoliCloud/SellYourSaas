@@ -200,6 +200,6 @@ if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEN
 if (empty($ip)) file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
 
-time_nanosleep(0, 250000000);
+time_nanosleep(0, 200000000);
 
 return $resexec;
