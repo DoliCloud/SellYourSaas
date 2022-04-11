@@ -108,7 +108,6 @@
       section: PHP
       option: post_max_size
       value: 25M
-      backup: yes
     when: 
       - php74 is defined
 
@@ -118,7 +117,6 @@
       section: PHP
       option: max_input_vars
       value: 4000
-      backup: yes
     when: 
       - php74 is defined
 
@@ -128,57 +126,60 @@
       section: PHP
       option: memory_limit
       value: 256M
-      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update disable_functions php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: disable_functions
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
     when: 
       - php74 is defined
 
   - name: Check or update session.gc_maxlifetime php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.gc_maxlifetime
       value: 3600
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update session.use_strict_mode php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.use_strict_mode
       value: 1
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update session.use_only_cookies php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.use_only_cookies
       value: 1
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update session.cookie_httponly php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.cookie_httponly
       value: 1
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update session.cookie_samesite php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.cookie_samesite
       value: Lax
-      backup: yes
     when: 
       - php74 is defined
 
@@ -188,27 +189,24 @@
       section: PHP
       option: auto_prepend_file
       value: /usr/local/bin/phpsendmailprepend.php
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update sendmail_path php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: 'mail function'
       option: sendmail_path
       value: /usr/local/bin/phpsendmail.php
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update mail.log php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: 'mail function'
       option: mail.log
       value: /var/log/phpmail.log
-      backup: yes
     when: 
       - php74 is defined
 
@@ -228,7 +226,6 @@
       section: PHP
       option: sendmail_path
       value: /usr/local/bin/phpsendmail.php
-      backup: yes
     when: 
       - php74 is defined
 
@@ -238,7 +235,6 @@
       section: PHP
       option: mail.log
       value: /var/log/phpmail.log
-      backup: yes
     when: 
       - php74 is defined
 
@@ -247,6 +243,7 @@
   - name: Removed unexpected apt packages
     apt:
       pkg:
+      - php7.2-fpm 
       - php7.3-fpm 
       - php7.4-fpm 
       - php8.0-fpm

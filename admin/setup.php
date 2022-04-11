@@ -499,9 +499,8 @@ if ($allowresellerprogram) {
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium">100</span></td>';
+	print '<td><span class="opacitymedium">partner@mysaasdomainname.com</span></td>';
 	print '</tr>';
-
 }
 
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');
@@ -852,7 +851,7 @@ print '<td>';
 $array = array('0' => 'No', '1' => 'Yes', '2' => 'Yes with detail of remote action errors');
 print $form->selectarray('SELLYOURSAAS_DATADOG_ENABLED', $array, $conf->global->SELLYOURSAAS_DATADOG_ENABLED, 0);
 print '</td>';
-print '<td><span class="opacitymedium">If a datadog agent is running on each of your server, enable this option si SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';
+print '<td><span class="opacitymedium">If a datadog agent is running on each of your server, enable this option so SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_APPKEY").'</td>';
