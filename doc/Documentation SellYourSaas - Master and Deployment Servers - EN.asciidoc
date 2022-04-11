@@ -3244,9 +3244,11 @@ systemctl status snap.certbot.renew.timer
 
 [source,bash]
 ---------------
-certbot renew --manual
-ou
-certbot renew --manual --force-renewal
+certbot renew
+or
+certbot renew --force-renewal 
+or 
+certbot renew --cert-name admin.mysellyoursaasdomain.com --dry-run
 ---------------
 
 * To renew a certificate on the *deployment servers*:

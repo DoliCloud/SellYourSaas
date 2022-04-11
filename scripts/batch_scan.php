@@ -307,8 +307,13 @@ print "We found ".count($instances)." qualified instances including ".count($ins
 
 $fp = @fopen("/tmp/spam/blacklistcontent", "r");
 if ($fp) {
+	// Example of search with simple CLI
+	// IFS=$(echo -en "\n\b")
+	// for fic in `ls /home/jail/home/osu*/dbn*/htdocs/index.php`; do grep -l spamtext $fic; done
 	while (($buffer = fgets($fp, 4096)) !== false) {
 		echo 'Scan if if found the string '.$buffer.' into /home/jails/home/osu*/dbn*/htdocs/index.php'."\n";
+
+		// TODO
 	}
 	if (!feof($fp)) {
 		echo "Erreur: fgets() a échoué\n";
