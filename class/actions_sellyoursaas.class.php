@@ -88,8 +88,8 @@ class ActionsSellyoursaas
 			if ($user->admin && ! empty($object->array_options['options_dolicloud'])) {
 				$url = '';
 				if ($object->array_options['options_dolicloud'] == 'yesv2') {
-					$urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-					$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+					$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
+					$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 					if (! empty($object->array_options['options_domain_registration_page'])
 						&& $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 						$constforaltname = $object->array_options['options_domain_registration_page'];
@@ -106,7 +106,7 @@ class ActionsSellyoursaas
 						}
 					}
 
-					$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$object->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash to login is sha256 and is valid one day
+					$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH').$object->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash to login is sha256 and is valid one day
 					$url=$urlmyaccount.'?mode=logout_dashboard&action=login&actionlogin=login&username='.urlencode($object->email).'&password=&login_hash='.$dol_login_hash;
 				}
 
