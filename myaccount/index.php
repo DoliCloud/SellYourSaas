@@ -1011,6 +1011,10 @@ if ($action == 'updateurl') {
 					foreach ($listofcontractid as $contract) {
 						dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
+						if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+							dol_syslog("--- This contract is a redirection, we discard this contract", LOG_DEBUG, 0);
+							continue;							// If contract is a redirection, we discard check and creation of any recurring invoice
+						}
 						if ($contract->array_options['options_deployment_status'] != 'done') {
 							dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
 							continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
