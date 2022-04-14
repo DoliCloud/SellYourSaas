@@ -31,7 +31,7 @@ $emailfrom = '';
 // Main
 
 if (function_exists('shell_exec')) {
-	file_put_contents($logfile, "shell_exec is available. ok\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " shell_exec is available. ok\n", FILE_APPEND);
 } else {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . " The method shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
 	exit(1);
@@ -112,12 +112,12 @@ $MAXPERDAY = 500;
 
 // Count other existing file starting with '/tmp/phpsendmail-'.posix_getuid()
 // and return error if nb is higher than 500
-$command = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
+$commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
 
 // Execute the command
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
-$resexec =  shell_exec($command);
-file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$command." = ".$resexec, FILE_APPEND);
+$resexec =  shell_exec($commandcheck);
+file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$commandcheck." = ".$resexec, FILE_APPEND);
 if ($resexec > $MAXPERDAY) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of of '.$MAXPERDAY.".\n", FILE_APPEND);
 	exit(6);
