@@ -105,6 +105,6 @@ echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.lo
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
 
 echo "Nettoyage vieux /tmp"
-echo find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
-find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+echo find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
+find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
 

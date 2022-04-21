@@ -31,7 +31,7 @@ $emailfrom = '';
 // Main
 
 if (function_exists('shell_exec')) {
-	file_put_contents($logfile, "shell_exec is available. ok\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " shell_exec is available. ok\n", FILE_APPEND);
 } else {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . " The method shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
 	exit(1);
@@ -103,11 +103,25 @@ if (! $optionffound) {
 $ip = empty($_SERVER["REMOTE_ADDR"]) ? '' : $_SERVER["REMOTE_ADDR"];
 if (empty($ip)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
-	// exit(2);		// We do not exit, this can occurs sometime
+	// exit(7);		// We do not exit, this can occurs sometime
 }
 
 // Rules
 $MAXOK = 10;
+$MAXPERDAY = 500;
+
+// Count other existing file starting with '/tmp/phpsendmail-'.posix_getuid()
+// and return error if nb is higher than 500
+$commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
+
+// Execute the command
+// We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
+$resexec =  shell_exec($commandcheck);
+file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$commandcheck." = ".$resexec, FILE_APPEND);
+if ($resexec > $MAXPERDAY) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of of '.$MAXPERDAY.".\n", FILE_APPEND);
+	exit(6);
+}
 
 
 //* Write the log
@@ -185,5 +199,7 @@ $resexec =  shell_exec($command);
 if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
+
+time_nanosleep(0, 200000000);
 
 return $resexec;

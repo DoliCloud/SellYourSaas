@@ -1011,6 +1011,10 @@ if ($action == 'updateurl') {
 					foreach ($listofcontractid as $contract) {
 						dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
+						if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+							dol_syslog("--- This contract is a redirection, we discard this contract", LOG_DEBUG, 0);
+							continue;							// If contract is a redirection, we discard check and creation of any recurring invoice
+						}
 						if ($contract->array_options['options_deployment_status'] != 'done') {
 							dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
 							continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
@@ -2966,7 +2970,7 @@ if (empty($welcomecid)) {
 							<!-- TrialInstanceWasSuspended -->
 							<div class="note note-warning">
 							<h4 class="block">'.$langs->trans("TrialInstanceWasSuspended", $contract->ref_customer).' !</h4>';
-						if ($mode != 'registerpaymentmode') {
+						if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
 							print '
 								<p>
 								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
@@ -2989,7 +2993,7 @@ if (empty($welcomecid)) {
 						<!-- XDaysAfterEndOfTrial -->
 						<div class="note note-warning">
 						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrial", $contract->ref_customer, abs($delayindays)).' !</h4>';
-					if ($mode != 'registerpaymentmode') {
+					if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
 						print '
 							<p>
 							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';

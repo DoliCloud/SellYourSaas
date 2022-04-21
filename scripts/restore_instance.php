@@ -185,7 +185,7 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
-	print "Usage:   $script_file backup_dir  instance  autoscan|mysqldump_dbn...sql.zst|dayofmysqldump  [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
+	print "Usage:   $script_file backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmysqldump instance [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
 	print "Example: $script_file ".$conf->global->DOLICLOUD_BACKUP_PATH."/osu123456/dbn789012  myinstance  31  testrsync\n";
 	print "Note:    ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted user to have testrsync and confirmrsync working.\n";
 	print "Return code: 0 if success, <>0 if error\n";
