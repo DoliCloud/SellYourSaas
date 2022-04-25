@@ -173,6 +173,7 @@ $instancespaidnotsuspended=array();
 $instancespaidnotsuspendedpaymenterror=array();
 $instancesbackuperror=array();
 $instancesupdateerror=array();
+$instancesbackupsuccess=array();
 
 
 $instancefilter=(isset($argv[2])?$argv[2]:'');
@@ -344,8 +345,11 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 
 			$command = ($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
 			if ($action == 'backupdelete') {
-				$command .= ' delete';
+				$command .= ' --delete';
 			}
+			//$command .= " --notransaction";
+			$command .= " --quick";
+
 			echo $command."\n";
 
 			if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase') {
@@ -365,6 +369,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 			// Return
 			if (! $error) {
 				$nbofok++;
+				$instancesbackupsuccess[$instance] = array('date' => dol_now('gmt'));
 				print '-> Backup process success for '.$instance."\n";
 				sleep(2);	// On success, we wait 2 seconds
 			} else {
@@ -562,17 +567,17 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 } else {
 	$out.= "***** Summary for all deployment servers\n";
 }
-$out.= "** Nb of instances deployed: ".$nbofinstancedeployed."\n";
-$out.= "** Nb of paying instances (deployed with or without payment error): ".count($instances)."\n";	// $instance is qualified instances
+$out.= "** Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
+$out.= "** Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
 $out.= "** Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
-$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n":"");
+$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n\n":"\n");
 $out.= "** Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
-$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n":"");
-$out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n";
+$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n":"\n");
+$out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
 $out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
-$out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n":"");
+$out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
+
 if ($action != 'updatestatsonly') {
-	$out.= "** Nb of paying instances processed ok: ".$nbofok."\n";
 	$out.= "** Nb of paying instances processed ko: ".$nboferrors;
 }
 if (count($instancesbackuperror)) {
@@ -587,7 +592,20 @@ if (count($instancesupdateerror)) {
 		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
 	}
 }
-$out.= "\n";
+
+$out.= "\n\n";
+
+if ($action != 'updatestatsonly') {
+	$out.= "** Nb of paying instances processed ok: ".$nbofok;
+}
+if (count($instancesbackupsuccess)) {
+	$out.= ", success for backup on ";
+	foreach ($instancesbackupsuccess as $instance => $val) {
+		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
+	}
+}
+$out.= "\n\n";
+
 print $out;
 
 // Write instances into tmp file

@@ -113,10 +113,10 @@ else $placeholderforvat=$langs->trans("EnterVATHere");
 					print '
 						<br>
 	                  <input type="hidden" name="vatassuj_old" value="'.($mythirdpartyaccount->tva_assuj).'">
-	                  <input type="checkbox" style="vertical-align: top" class="inline-block"'.($mythirdpartyaccount->tva_assuj?' checked="checked"':'').'" id="vatassuj" name="vatassuj"> '.$langs->trans("IHaveAVATID").'
+	                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj?' checked="checked"':'').'" id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
 						<br>
 	                  <input type="hidden" name="vatnumber_old" value="'.$mythirdpartyaccount->tva_intra.'">
-	                  <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" placeholder="'.$placeholderforvat.'">
+	                  <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" id="vatnumber" placeholder="'.$placeholderforvat.'">
 	                    ';
 if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC() && (GETPOST('admin', 'alpha'))) {
 	if (! empty($conf->use_javascript_ajax)) {
@@ -139,7 +139,7 @@ if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC(
 	              </div>
 	              <!-- END FORM BODY -->
 
-	              <div>
+	              <div class="center">
 	                <input type="submit" name="submit" value="'.$langs->trans("Save").'" class="btn green-haze btn-circle">
 	              </div>
 
@@ -171,6 +171,7 @@ print '<script type="text/javascript" language="javascript">
 				console.log("Click on vatassuj "+jQuery("#vatassuj").is(":checked"));
 				jQuery(".hideifnonassuj").hide();
 				jQuery(".hideifnonassuj").show();
+				jQuery("#vatnumber").focus();
 			});
 		});
 		</script>';
@@ -192,12 +193,12 @@ print '
 
 	              <div class="form-body">
 	                <div class="form-group">
-	                  <label>'.$langs->trans("Email").'</label>
-	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->email.'" name="email">
+	                  <label>'.img_picto('', 'email', 'class="paddingright"').$langs->trans("Email").'</label>
+	                  <input type="text" class="form-control" value="'.((GETPOSTISSET('email') && GETPOST('email')) ? GETPOST('email') : $mythirdpartyaccount->email).'" name="email">
 	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->email.'" name="oldemail">
 					</div>
 					<div class="form-group">
-					  <label>'.$langs->trans("PhoneNumber").'</label>
+					  <label>'.img_picto('', 'phone', 'class="paddingright"').$langs->trans("PhoneNumber").'</label>
 	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->phone.'" name="phone">
 	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->phone.'" name="oldphone">
 					</div>
@@ -220,18 +221,24 @@ print '
 	                    </div>
 	                  </div>
 	                </div>
+	                <div class="form-group">
+	                  <label>'.img_picto('', 'email', 'class="paddingright opacitymedium"').$form->textwithpicto($langs->trans("EmailCCInvoices"), $langs->trans("KeepEmptyToUseMainEmail"), 1, 'help', 'opacitymedium').'</label>
+	                  <input type="text" class="form-control" value="'.(GETPOSTISSET('emailccinvoice') ? GETPOST('emailccinvoice') : $mythirdpartyaccount->array_options['options_emailccinvoice']).'" name="emailccinvoice">
+	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->array_options['options_emailccinvoice'].'" name="oldemailccinvoice">
+					</div>
+
 					';
 if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
 	print '
-		                <div class="form-group">
+		                <div class="form-group paddingtop">
 		                  <!--<label>'.$langs->trans("OptinForCommercialMessages").'</label><br>-->
-		                  <input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1" '.($mythirdpartyaccount->array_options['options_optinmessages'] ? ' checked' : '').' name="optinmessages">
-							<span class="inline valignmiddle opacitymedium">'.$langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname).'</span>
+		                  <input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1" '.($mythirdpartyaccount->array_options['options_optinmessages'] ? ' checked' : '').' id="optinmessages" name="optinmessages">
+							<label for="optinmessages" class="valignmiddle nobold inline"><span class="inline valignmiddle opacitymedium small">'.$langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname).'</span></label>
 		                </div>';
 }
 					print '
 	              </div>
-	              <div>
+	              <div class="center">
 	                <input type="submit" name="submit" value="'.$langs->trans("Save").'" class="btn green-haze btn-circle">
 	              </div>
 
@@ -262,7 +269,7 @@ if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
 	                  <input type="password" class="form-control" name="password2" maxlength="128">
 	                </div>
 	              </div>
-	              <div>
+	              <div class="center">
 	                <input type="submit" name="submit" value="'.$langs->trans("ChangePassword").'" class="btn green-haze btn-circle">
 	              </div>
 

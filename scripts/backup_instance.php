@@ -44,12 +44,38 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 // Global variables
 $version='1.0';
 $RSYNCDELETE=0;
+$NOTRANS=0;
+$QUICK=0;
 
 $instance=isset($argv[1])?$argv[1]:'';
 $dirroot=isset($argv[2])?$argv[2]:'';
 $mode=isset($argv[3])?$argv[3]:'';
-if (isset($argv[4]) && $argv[4] == 'delete') {
-	$RSYNCDELETE=1;
+if (isset($argv[4])) {
+	if ($argv[4] == '--delete') {
+		$RSYNCDELETE=1;
+	} elseif ($argv[4] == '--notransaction') {
+		$NOTRANS=1;
+	} elseif ($argv[4] == '--quick') {
+		$QUICK=1;
+	}
+}
+if (isset($argv[5])) {
+	if ($argv[5] == '--delete') {
+		$RSYNCDELETE=1;
+	} elseif ($argv[5] == '--notransaction') {
+		$NOTRANS=1;
+	} elseif ($argv[5] == '--quick') {
+		$QUICK=1;
+	}
+}
+if (isset($argv[6])) {
+	if ($argv[6] == '--delete') {
+		$RSYNCDELETE=1;
+	} elseif ($argv[6] == '--notransaction') {
+		$NOTRANS=1;
+	} elseif ($argv[6] == '--quick') {
+		$QUICK=1;
+	}
 }
 
 @set_time_limit(0);							// No timeout for this script
@@ -163,10 +189,13 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
-	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [delete]\n";
+	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick]\n";
 	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
+	print "         the parameter --delete run the rsync with the --delete option\n";
+	print "         the parameter --notransaction run the mysqldump without the --single-transaction\n";
+	print "         the parameter --quick run the mysqldump with the --quick option\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -306,6 +335,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	// Excludes for Dolibarr
 	$param[]="--exclude '*/documents/admin/backup/'";		// Exclude backup of database
 	$param[]="--exclude '*/documents/admin/documents/'";	// Exclude backup of documents directory
+	$param[]="--exclude '*/documents/*/admin/backup/'";		// Exclude backup of database
+	$param[]="--exclude '*/documents/*/admin/documents/'";	// Exclude backup of documents directory
 	$param[]="--exclude '*/htdocs/install/filelist-*.xml*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/ae_fonts_*'";
 	$param[]="--exclude '*/htdocs/includes/tecnickcom/tcpdf/font/dejavu-fonts-ttf-*'";
@@ -385,13 +416,17 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]='-p"'.str_replace(array('"','`'), array('\"','\`'), $object->password_db).'"';
 	$param[]="--compress";
 	$param[]="-l";
-	$param[]="--single-transaction";
+	if (empty($NOTRANS)) {
+		$param[]="--single-transaction";
+	}
 	$param[]="-K";
 	$param[]="--tables";
 	$param[]="--no-tablespaces";
 	$param[]="-c";
 	$param[]="-e";
-	//$param[]="-q";
+	if (!empty($QUICK)) {
+		$param[]="-q";
+	}
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 

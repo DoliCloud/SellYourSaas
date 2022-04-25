@@ -31,7 +31,7 @@ $emailfrom = '';
 // Main
 
 if (function_exists('shell_exec')) {
-	file_put_contents($logfile, "shell_exec is available. ok\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " shell_exec is available. ok\n", FILE_APPEND);
 } else {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . " The method shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
 	exit(1);
@@ -39,38 +39,46 @@ if (function_exists('shell_exec')) {
 
 $pointer = fopen('php://stdin', 'r');
 
+$headerend = 0;
 while ($line = fgets($pointer)) {
-	if (preg_match('/^to:\s/i', $line) ) {
-		$toline .= trim($line)."\n";
-		$linetmp = preg_replace('/^to:\s*/i', '', trim($line));
-		$tmpto=preg_split("/[\s,]+/", $linetmp);
-		$nbto+=count($tmpto);
-	}
-	if (preg_match('/^cc:\s/i', $line) ) {
-				$ccline .= trim($line)."\n";
-				$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
-		$tmpcc=preg_split("/[\s,]+/", $linetmp);
-				$nbcc+=count($tmpcc);
-	}
-	if (preg_match('/^bcc:\s/i', $line) ) {
-				$bccline .= trim($line)."\n";
-				$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
-		$tmpbcc=preg_split("/[\s,]+/", $linetmp);
-				$nbbcc+=count($tmpbcc);
-	}
-	$reg = array();
-	if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg) ) {
-				$fromline .= trim($line)."\n";
-		$emailfrom = $reg[1];
-	} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg) ) {
-		$fromline .= trim($line)."\n";
-		$emailfrom = trim($reg[1]);
+	if (empty($headerend)) {
+		if (preg_match('/^to:\s/i', $line)) {
+			$toline .= trim($line)."\n";
+			$linetmp = preg_replace('/^to:\s*/i', '', trim($line));
+			$tmpto=preg_split("/[\s,]+/", $linetmp);
+			$nbto+=count($tmpto);
+		} elseif (preg_match('/^cc:\s/i', $line)) {
+			$ccline .= trim($line)."\n";
+			$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
+			$tmpcc=preg_split("/[\s,]+/", $linetmp);
+			$nbcc+=count($tmpcc);
+		} elseif (preg_match('/^bcc:\s/i', $line)) {
+			$bccline .= trim($line)."\n";
+			$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
+			$tmpbcc=preg_split("/[\s,]+/", $linetmp);
+			$nbbcc+=count($tmpbcc);
+		}
+
+		$reg = array();
+		if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg)) {
+			$fromline .= trim($line)."\n";
+			$emailfrom = $reg[1];
+		} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg)) {
+			$fromline .= trim($line)."\n";
+			$emailfrom = trim($reg[1]);
+		}
+
+		if (preg_match('/^references:\s/i', $line)) {
+			$referenceline .= trim($line)."\n";
+		}
+
+		if (preg_match('/^\-\-/', $line)) {
+			// We found a symbol for a multipart section, so header is finished now, we can stop header analysis
+			$headerend = 1;
+		}
 	}
 
-	if (preg_match('/^references:\s/i', $line) ) {
-				$referenceline .= trim($line)."\n";
-	}
-		$mail .= $line;
+	$mail .= $line;
 }
 
 $tmpfile='/tmp/phpsendmail-'.posix_getuid().'-'.getmypid().'.tmp';
@@ -95,11 +103,25 @@ if (! $optionffound) {
 $ip = empty($_SERVER["REMOTE_ADDR"]) ? '' : $_SERVER["REMOTE_ADDR"];
 if (empty($ip)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
-	// exit(2);		// We do not exit, this can occurs sometime
+	// exit(7);		// We do not exit, this can occurs sometime
 }
 
 // Rules
 $MAXOK = 10;
+$MAXPERDAY = 500;
+
+// Count other existing file starting with '/tmp/phpsendmail-'.posix_getuid()
+// and return error if nb is higher than 500
+$commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
+
+// Execute the command
+// We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
+$resexec =  shell_exec($commandcheck);
+file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$commandcheck." = ".$resexec, FILE_APPEND);
+if ($resexec > $MAXPERDAY) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of of '.$MAXPERDAY.".\n", FILE_APPEND);
+	exit(6);
+}
 
 
 //* Write the log
@@ -177,5 +199,7 @@ $resexec =  shell_exec($command);
 if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
+
+time_nanosleep(0, 200000000);
 
 return $resexec;

@@ -30,7 +30,7 @@ echo $now" Try to detect lines 'wrote report /var/crash/_usr_sbin_apache2.0.cras
 export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [ "x$EMAILFROM" == "x" ]; then
-	export EMAILFROM=support@$DOMAIN
+	export EMAILFROM=noreply@$DOMAIN
 fi
 if [ "x$EMAILTO" == "x" ]; then
 	export EMAILTO=supervision@$DOMAIN

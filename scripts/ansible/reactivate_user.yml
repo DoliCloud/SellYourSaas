@@ -3,7 +3,7 @@
 #
 # To run the script:
 # ansible-playbook -K reactivate_user.yml -i hosts-xxx -e 'target=targethost login=username'
-# ansible-playbook -K reactivate_user.yml -i hosts-xxx -e 'target=targethost login=username' --limit=*.mydomain.com
+# ansible-playbook -K reactivate_user.yml -i hosts-xxx -e 'target=targethost login=username allowroot=1' --limit=*.mydomain.com
 #
 
 - name: Create user on target system(s)
@@ -12,9 +12,26 @@
   #become_method: sudo
   become_user: root
   tasks:
-  - name: Deactivate system user
+  - name: Reactivate system user
     command: "chage -E-1 {{login}}"
     register: command_output
 
   - debug:
       var: command_output.stdout_lines
+
+  - name: Add user {{login}} to the admin group
+    user: 
+      name: "{{login}}"
+      groups: sudo
+      append: yes     
+    when: 
+      - allowroot is defined
+      
+  - name: Remove user {{login}} of the admin group
+    become: true
+    command: "gpasswd -d {{login}} sudo"
+    register: command_result
+    changed_when: "not 'is not a member of' in command_result.stderr"
+    failed_when: false    
+    when: 
+      - disallowroot is defined

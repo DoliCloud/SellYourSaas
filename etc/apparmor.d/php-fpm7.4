@@ -15,6 +15,12 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   #include <abstractions/user-tmp>
   #include <local/php-fpm7.4>
 
+  capability chown,
+  capability dac_override,
+  capability kill,
+  capability setgid,
+  capability setuid,
+  
   signal send peer=@{profile_name}//*,
 
   unix (connect),
@@ -22,13 +28,20 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   deny /var/www/** r,
   
   /bin/dash mrix,
+  /proc/*/attr/current rw,
   /run/php{,-fpm}/php*-fpm-*.sock w,
   /run/php{,-fpm}/php*-fpm*.pid rw,
   /run/php{,-fpm}/php*-fpm*.sock rwlk,
   /usr/sbin/php-fpm* rix,
+  owner / rw,
+  owner /etc/ImageMagick*/** rw,
+  owner /etc/php/7.4/fpm/php-fpm.conf r,
+  owner /etc/php/7.4/fpm/pool.d/www.conf r,
+  owner /run/php/php*-fpm*.pid w,
   owner /run/systemd/notify w,
+  owner /usr/share/ImageMagick*/** r,
+  owner /var/log/php*-fpm*.log w,
 
-  
   # PHP-FPM use this to swith profile for virtual hosts
   # An entry must be added into the virtual host pool file /etc/php/7.4/fpm/pool.d/xxx.conf with content like 
   # listen = /run/php/php7.4-fpm-myvirtualhosts.sock
@@ -36,6 +49,7 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
   # listen.group = osu...
   # listen.mode = 0600
   # apparmor_hat = sellyoursaas
+  
   change_profile -> php-fpm7.4//*,
 
 
@@ -46,6 +60,7 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     #include <abstractions/nameservice>
     #include <abstractions/openssl>
     #include <abstractions/php>
+    #include <abstractions/postfix-common>
     #include <abstractions/ssl_certs>
     #include <abstractions/user-tmp>
     #include <local/php-fpm7.4>
@@ -54,15 +69,19 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     network inet6,
     network unix dgram,
 
+    signal receive set=kill peer=php-fpm7.4,
+    signal receive set=quit peer=php-fpm7.4,
+    signal receive set=term peer=php-fpm7.4,
 	signal send peer=@{profile_name}//*,
-
+    
     unix (connect),
 
+	# Warning, this may create troubles with sending email from postfix
     deny /etc/group r,
     deny /etc/passwd r,
+    
     deny /var/www/** r,
 
-    /bin/dash mrix,
     /dev/tty rw,
     /etc/ImageMagick*/** rw,
     /etc/clamav/clamd.conf r,
@@ -73,15 +92,23 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /etc/php{,5,7}/** r,
     /etc/postfix/dynamicmaps.cf.d/ r,
     /etc/ssl/openssl.cnf rw,
+    /home/admin/logs/** w,
+    /home/admin/wwwroot/** r,
+    /home/admin/wwwroot/dolibarr_documents/** rw,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
     #/home/dolibarr rwlk,
     #/home/dolibarr/** rw,
+    #/home/dolimed/demo.dolimed.com/** rix,
+    #/home/matomo/matomo.nltechno.com/** rwix,
     /proc/*/attr/current rw,
     /proc/loadavg r,
     /run/clamav/** rw,
+	/run/mysqld/mysqld.sock r,    
+    /tmp/spam/ rw,
+    /tmp/spam/** rw,
     /run/php{,-fpm}/php*-fpm-*.sock w,
     /run/php{,-fpm}/php*-fpm.pid rw,
     /run/php{,-fpm}/php*-fpm.sock rwlk,
@@ -101,6 +128,7 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /usr/share/zoneinfo/** r,
     /var/log/apache2/access.log w,
     /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error.log w,
     /var/log/apache2/error_ssl.log w,
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
@@ -109,17 +137,21 @@ profile php-fpm7.4 /usr/{bin,sbin}/php-fpm7.4 flags=(attach_disconnected) {
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
     /var/www/html/index.html r,
+    /{usr/,}bin/dash mrix,
     /{usr/,}bin/bash rix,
     /{usr/,}bin/cat rix,
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
     @{PROC}/@{pid}/attr/{apparmor/,}current rw,
+    #owner /home/matomo/matomo.nltechno.com/ r,
+    #owner /home/matomo/matomo.nltechno.com/** rwk,
     owner /mnt/diskhome/home/osu*/** rw,
 	owner /run/php{,-fpm}/php*-fpm-*.sock w,
     owner /run/php{,-fpm}/php*-fpm*.pid rw,
     owner /run/php{,-fpm}/php*-fpm*.sock rwlk,
     owner /run/systemd/notify w,
+    owner /var/log/fpm-php.www.log w,
     owner /var/spool/postfix/maildrop/ rw,
     owner /var/spool/postfix/maildrop/** rw,
 

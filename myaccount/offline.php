@@ -13,6 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * This page can be called when virtual host make a redirect due to not a
+ * virtual host that has been set to offline.
  */
 
 //if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER','1');
@@ -20,7 +24,6 @@
 //if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC','1');
 //if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
 //if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test
-//if (! defined('NOIPCHECK'))      define('NOIPCHECK','1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
 //if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
 //if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
 //if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
@@ -30,6 +33,7 @@ if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page 
 if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');					// Do not check IP defined into conf $dolibarr_main_restrict_ip
 if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
 if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+//if (! defined('NOSESSION'))      define('NOSESSION', '1');
 
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
@@ -55,13 +59,14 @@ require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
 $instance = GETPOST('instance');	// example: testldr3.with.dolicloud.com
-$messageonly = GETPOST('messageonly');	// example: testldr3.with.dolicloud.com
+$messageonly = GETPOST('messageonly');	// offline.php?messageonly=1
 
-// SEarch instance
+// Search instance
 $contract = new Contrat($db);
-$contract->fetch(0, '', $instance);
-$contract->fetch_thirdparty();
-
+if ($instance) {
+	$result = $contract->fetch(0, '', $instance);
+	$contract->fetch_thirdparty();
+}
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
@@ -75,6 +80,11 @@ if ($langs->defaultlang == 'en_US') {
 	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
 }
 
+
+
+/*
+ * View
+ */
 
 if (empty($messageonly)) {
 	top_htmlhead('', 'OffLine Page');
@@ -111,18 +121,22 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 	}
 }
 
+// TODO Implement the SELLYOURSAAS_ANNOUNCE_ON_xxxx
+
+
 if (empty($messageonly)) {
 	print $langs->trans("SorryInstancesAreOffLine", dol_escape_htmltag($instance)).'<br>';
 	print '<br>';
 	print '<br>';
-	if ($instance) {
+	if ($instance && $instance != 'myaccount') {
 		print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("RetryNow").'</a><br>';
 		print '<br>';
 	}
 	print '<br>';
+	print '<br>';
 
 	//print $langs->trans("GoOnYourDashboardToGetMoreInfo", $_SERVER['SERVER_NAME'], $_SERVER['SERVER_NAME']);
-	print '<br><br>'."\n";
+	print '<br>'."\n";
 
 	print '</div>
 

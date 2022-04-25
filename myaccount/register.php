@@ -86,16 +86,15 @@ $fromsocid = GETPOST('fromsocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
 $extcss=GETPOST('extcss', 'alpha');
 
+// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
+include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
+
 $productid=GETPOST('service', 'int');
 $productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):'');
 if (empty($productid) && empty($productref)) {
 	$productref = $plan;
 	if (empty($productref)) {
-		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-
-		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
-		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-
 		$suffix='_'.strtoupper(str_replace('.', '_', $domainname));
 		$constname="SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
 		$defaultproduct=(! empty($conf->global->$constname) ? $conf->global->$constname : $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT);
@@ -195,6 +194,18 @@ if ($socid > 0) {
 
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('sellyoursaas-register'));
+
+
+// Code to set cookie for first utm_source
+if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["partner"])) {
+	$cookiename = "utm_source_cookie";
+	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? 'partner'.$_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
+	if (empty($_COOKIE[$cookiename]) && $domainname) {
+		$domain = $domainname;
+		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 60)), '/', $domain, false, true); // keep cookie 60 days and add tag httponly
+	}
+}
+
 
 
 /*
@@ -370,7 +381,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					<div class="btn-sm home-page-url">
 					<span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="<?php echo $homepage ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
 					</div>
-					<?php } ?>
+						<?php } ?>
 				</div>
 			</div>
 		  <h1 class="defaultheader"><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
@@ -386,21 +397,21 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
 					print '<div class="customregisterinformation">'."\n";
 					print '<div class="register_text">'."\n";
-					if ($langs->trans($keytouse) != $keytouse) {
-						print $langs->trans($keytouse);
-					} else {	// We try english version
-						if ($langsen->trans($keytouse) != $keytouse) {
-							print $langsen->trans($keytouse);
-						}
+				if ($langs->trans($keytouse) != $keytouse) {
+					print $langs->trans($keytouse);
+				} else {	// We try english version
+					if ($langsen->trans($keytouse) != $keytouse) {
+						print $langsen->trans($keytouse);
 					}
+				}
 					print '</div>'."\n";
-					?>
+				?>
 					<div class="valignmiddle customcompanylogo">
 					<a href="<?php echo $homepage ?>"><img style="max-width:100%"src="<?php echo $linklogo; ?>" /></a><br>
 					</div>
 					<?php
 					print '</div>'."\n";
-				}
+			}
 			?>
 
 		  <form action="register_instance.php" method="post" id="formregister">
@@ -543,7 +554,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
 								$domainqualified = false;
 								$tmpdomains = explode('+', $reg[1]);
-								foreach($tmpdomains as $tmpdomain) {
+								foreach ($tmpdomains as $tmpdomain) {
 									if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
 										$domainqualified = true;
 										break;
@@ -646,7 +657,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			}
 			if ($urlfortermofuse) {
 				?>
-			  <p class="termandcondition center" style="color:#444;margin:10px 0;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
+			  <p class="termandcondition small center" style="color:#444;margin:10px 0;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
 				<?php
 			}
 			?>

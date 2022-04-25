@@ -38,7 +38,7 @@ export webserver=`grep '^webserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [ "x$EMAILFROM" == "x" ]; then
-	export EMAILFROM=support@$DOMAIN
+	export EMAILFROM=noreply@$DOMAIN
 fi
 if [ "x$EMAILTO" == "x" ]; then
 	export EMAILTO=supervision@$DOMAIN
@@ -122,7 +122,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 else
 	echo "Do a tar of config files"
@@ -147,12 +147,15 @@ else
 	rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	
     export foundmasterdatabase=0;  
-    if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
+    if [ "x$DATABASE" != "x" -a "x$masterserver" != "x" -a "x$masterserver" != "x0" ]; then
             foundmasterdatabase=1;
     fi
-    if [ "x$DATABASE" != "x" -a "x$webserver" == "x1" ]; then
+    if [ "x$DATABASE" != "x" -a "x$webserver" != "x" -a "x$webserver" != "x0" ]; then
             foundmasterdatabase=1;
     fi
+    
+    echo 
+    
     if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
 		rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
@@ -164,7 +167,7 @@ else
 		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
 		rm -f $targetdir/${dbname}_`date +%d`.sql.zst
 	else
-		echo "No sellyoursaas database found to backup."
+		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 fi
 

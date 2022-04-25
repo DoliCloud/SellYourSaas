@@ -70,6 +70,7 @@ function getPreviousInstanceInChain($object)
  * getListOfInstances
  *
  * @param	Contrat 	$object    	Instance
+ * @return	array					Array of instances
  */
 function getListOfInstancesInChain($object)
 {
@@ -111,6 +112,7 @@ function getListOfInstancesInChain($object)
  * @param	Object 	$object            	Object
  * @param	string 	$lastloginadmin    	Last login admin
  * @param	string 	$lastpassadmin     	Last pass admin
+ * @return	string						HTML content with links
  */
 function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 {
@@ -183,6 +185,8 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	$links.='<br>';
 
+	$ispaid = sellyoursaasIsPaidInstance($object);
+
 	// Home
 	//$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
 	$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os;
@@ -191,8 +195,16 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('homestring');
 	//$links.='<br>';
 
+	// BackupDir
+	$backupstring=$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->username_os;
+	$links .= ' &nbsp; ';
+	$links .= ' &nbsp; ';
+	$links.='Backup dir: ';
+	$links.='<input type="text" name="backupstring" id="backupstring" value="'.$backupstring.'" class="maxwidth250"> ';
+	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('backupstring');
+	//$links.='<br>';
+
 	// ArchiveDir
-	$ispaid = sellyoursaasIsPaidInstance($object);
 	$archivestring = $conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->username_os;
 	$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	if ($ispaid) {
@@ -200,11 +212,12 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	}
 	$links .= ' &nbsp; ';
+	$links .= ' &nbsp; ';
 	$links .= 'Archive dir: ';
 	$links .= '<input type="text" name="archivestring" id="archivestring" value="'.$archivestring.'" class="maxwidth250"><br>';
 	if ($conf->use_javascript_ajax) $links .= ajax_autoselect('archivestring');
 
-	// User
+	// User and Password
 	$userstring=$object->username_os;
 	$links.=$langs->trans("User").': ';
 	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" class="maxwidth200">';
@@ -213,6 +226,8 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links .= $langs->trans("Password").': ';
 	$links.='<input type="text" name="sshpassword" id="sshpassword" value="'.$object->password_os.'" class="maxwidth200">';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshpassword');
+	$links.='<br>'."\n";
+
 	$links.='<br>'."\n";
 
 	// SSH
@@ -270,7 +285,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlbackupcommand", 0);
 	$links.='<br>';
 
-	// Mysql Restore
+	// Mysql to Restore a dump
 	//$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/filetorestore.sql';
 	$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < filetorestore.sql';
 	$links.='<span class="fa fa-database"></span> ';
@@ -280,7 +295,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Rsync to Restore Program directory
-	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' '.$archivestringwithdb.'/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/';
+	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' htdocs/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite application dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
@@ -298,7 +313,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Rsync to Deploy module
-	$sftpdeploystring='rsync -n -v -a --exclude \'*.cache\' --exclude \'conf\.php\' pathtohtdocsmodule/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/custom/namemodule';
+	$sftpdeploystring='rsync -n -v -a --exclude \'*.cache\' --exclude \'conf\.php\' pathtohtdocsofmodule/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/custom/namemodule';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to install or overwrite module';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';

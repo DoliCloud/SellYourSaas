@@ -370,7 +370,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		exit(-26);
 	}
 	if (! isValidEmail($email)) {
-		setEventMessages($langs->trans("ErrorBadEMail"), null, 'errors');
+		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
 		header("Location: ".$newurl);
 		exit(-27);
 	}
@@ -385,7 +385,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		if (! empty($listofbanned)) {
 			foreach ($listofbanned as $banned) {
 				if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
-					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
+					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
 					header("Location: ".$newurl);
 					exit(-29);
 				}
@@ -830,7 +830,8 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_dolicloud'] = 'yesv2';
 	$tmpthirdparty->array_options['options_date_registration'] = dol_now();
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-	$tmpthirdparty->array_options['options_source']='REGISTERFORM'.($origin?'-'.$origin:'');
+	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin?'-'.$origin:'');
+	$tmpthirdparty->array_options['options_source_utm'] = $_COOKIE['utm_source_cookie'];
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
 

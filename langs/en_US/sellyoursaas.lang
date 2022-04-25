@@ -466,7 +466,7 @@ AccountToDelete=Account to delete
 PaymentDoneOnStripeTest=Payment on Stripe - Test (%s done)
 PaymentDoneOnStripeLive=Payment on Stripe - Live (%s done)
 PayBalance=Pay the balance
-QtyFormulaExamples=<u>Example of rules to calculate quantities:</u><br><br>SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login != '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'<br><br>BASH:du -ks --exclude=htdocs __INSTANCEDIR__ | cut -f 1 | php -r '$a=intval(fgets(STDIN))/1000000; print ($a>0?$a:0).chr(32).($a>5?($a-5):0);'
+QtyFormulaExamples=<u>Example of rules to calculate quantities:</u><br><br>SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login != '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'<br><br>BASH:du -ks --exclude=htdocs __INSTANCEDIR__ | cut -f 1 | php -r '$a=intval(fgets(STDIN))/1000000; print ($a>0?$a:0).chr(32).($a>5?($a-5):0);<br><br>PHPMETHOD:nameOfMethod;param1;param2  (paramX can be a substitution key, ie __CONTRACTREF__, __INSTANCEDBPREFIX__)
 VersionFormulaExamples=<u>Example of rules to get a version:</u><br><br>SQL:select field as version from __INSTANCEDBPREFIX__config where key = 'version'
 SourceURLOfEvent=Source URL of event
 SeeOnBackoffice=See on backoffice
@@ -495,8 +495,10 @@ SellYourSaasSubDomainsHelp=Enter full list (separated by a comma) of subdomains 
 DelayAutomaticPayment=Delay automatic payment
 DelayAutomaticPaymentDesc=Do not try to take payment automatically before this date
 DeploymentUserAgent=User agent requesting deployment
-CustomVirtualHostLine=Custom virtualhost line
-EnterAVirtualHostLine=Enter a line to add into the web server virtualhost. For example:<br>php_value date.timezone "Europe/Paris".<br>You must suspend and unsuspend the instance to have this effective.
+CustomVirtualHostLine=Custom virtualhost head line
+EnterAVirtualHostLine=Enter a line to add into the head of the web server virtualhost file. For example:<br>php_value date.timezone "Europe/Paris".<br>You must suspend and unsuspend the instance to have this effective.
+CustomVirtualHostDir=Custom virtualhost dir line
+EnterAVirtualHostDirLine=Enter a line to add into the directory section of the web server virtualhost file. For example:<br>Require ip 1.2.3.4/16<br>You must suspend and unsuspend the instance to have this effective.
 DomainOfRegistrationPage=Domain of registration page
 SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES=Nb days before stopping invoice payment try
 SELLYOURSAAS_NBHOURSBETWEENTRIES=Nb hours minium between each invoice payment try
@@ -514,7 +516,7 @@ PaymentChargedButReversedByBank=Payment was charged but was then canceled illegi
 StripeAccount=Stripe Account
 StripeAccountForCustomerHelp=The Stripe account to use to collect the customer invoices. Fill something here only if you need to collect money using another Stripe account than the default value.<br>Example: cus_ABCD@pk_test_1234567:sk_test_1234567:pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Max number of instances
-ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl<br>&disablecustomeremail=1 To disable the email to the customer for confirmation of registration
+ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl to use your own CSS (example: &extcss=myaccount.mysaasdomainname/dist/css/alt-myaccount-example.css)<br>&disablecustomeremail=1 To disable the email to the customer for confirmation of registration
 AFirstInvoiceOfWillBeDone=Taking into account the chosen plan and data of your existing instance(s), your subscription will start with a first invoice of <span class="nowrap bold">%s tax included</span>, discounts excluded
 SeeOurPrices=See prices for each plan <a href="%s" target="_blank">here</a>
 NoInstanceYet=It seems you don't have any available instances yet, so entering a payment mode now will have no effect. If you got some instances in the past, they probably were undeployed and data destroyed and can't be restored now. We recommand you to create a new instance before entering a payment mode.
@@ -595,6 +597,12 @@ EmailTemplateSuspendedTrialHelp=By default, the email template with code "Custom
 WeWillContactYouForMandaSepate=We will contact you to provide the SEPA Mandate to sign
 BankSaved=Your Bank Account Number to use for payment has been recorded
 ABankWithThisLabelAlreadyExists=A bank with this label already exists. Try to use a different label.
-CommentOnQty=Comments on quantites
+CommentOnQty=Comments on quantities
 CommentOnQtyDesc=This field is filled during a refresh of quantities of a contract and linked recurring invoices, to store the details of the count.
 DeploymentHostDesc=The ip of the server the instance was deployed to. You can set this value to "none" to say there is no more existing deployment server for this instance (for example if server was destroyed)
+KeepEmptyToUseMainEmail=This is an alternative email you want us to send your invoices to. Keep empty if sending to main email is enough.
+SourceUtm=Source (first access)
+SELLYOURSAAS_MINAMOUNT_TO_CLAIM=Minimum amount earned by reseller to be able to claim money
+SELLYOURSAAS_RESELLER_EMAIL=Contact email for reseller program
+SELLYOURSAAS_DATADOG_APPKEY=Datadog APP key (only if you want to use a different key than the one defined into Datadog agent)
+SELLYOURSAAS_DATADOG_APIKEY=Datadog API key (only if you want to use a different key than the one defined into Datadog agent)

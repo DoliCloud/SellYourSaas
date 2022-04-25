@@ -87,11 +87,13 @@ if ($fp) {
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
+	print "\n";
 	exit(-1);
 }
 
 if (empty($dolibarrdir)) {
 	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -198,8 +200,14 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server.\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|maintenance|confirmredirect) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
+	print "Mode is test for a test mode.\n";
+	print "        confirm for real mode.\n";
+	print "        confirmredirect for real mode and set old instance as a redirect instance.\n";
+	print "        maintenance to switch old instance in maintenance mode before the move.\n";
+	print "MYPRODUCTREF can be set to force the name of hosting application.\n";
 	print "Return code: 0 if success, <>0 if error\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -211,12 +219,14 @@ if (empty($newinstance) || empty($mode)) {
 } else {*/
 if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
+	print "\n";
 	exit(-1);
 }
 
 if (getDomainFromURL($oldinstance, 2) == getDomainFromURL($newinstance, 2)) {
 	echo "The domain of old instance (".getDomainFromURL($oldinstance, 2).") must differs from domain of new instance (".getDomainFromURL($newinstance, 2)."). ";
 	echo "If you need to change the name only staying on same server, just make a rename on instance from interface.\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -265,6 +275,7 @@ $oldobject->fetch_thirdparty();
 
 if (empty($oldinstance) || $result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
 	print "Error: the old instance to move with full name '".$oldinstance."' and a deployment status = 'done' was not found.\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -309,6 +320,7 @@ if (empty($productref)) {
 }
 if (empty($productref)) {
 	print "Error: Failed to get product ref of instance '".$oldinstance."'\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -316,9 +328,10 @@ $createthirdandinstance = 0;
 
 $newobject = new Contrat($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
-if ($mode == 'confirm' || $mode == 'confirmredirect') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
 	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
 		print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
+		print "\n";
 		exit(-1);
 	}
 }
@@ -333,6 +346,7 @@ $newobject->database_db  = $oldobject->array_options['options_database_db'];
 
 if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db)) {
 	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_web, password_web or database_db).\n";
+	print "\n";
 	exit(-3);
 }
 
@@ -348,7 +362,7 @@ $oldwilddomain = join('.', $tmparray);
 
 
 // Switch old instance in maintenance mode
-if ($mode == 'maintenance' || $mode == 'confirmredirect') {
+if ($mode == 'confirmredirect' || $mode == 'maintenance') {
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 
@@ -363,6 +377,7 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 	$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', $comment, 300);
 	if ($result <= 0) {
 		print "Error calling sellyoursaasRemoteAction: ".$sellyoursaasutils->error."\n";
+		print "\n";
 		exit(-1);
 	}
 
@@ -370,6 +385,7 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 	$result = $oldobject->update($user);
 	if ($result < 0) {
 		print "Error updating contract with redirect url: ".$oldobject->error."\n";
+		print "\n";
 		exit(-1);
 	}
 }
@@ -378,7 +394,7 @@ if ($mode == 'maintenance' || $mode == 'confirmredirect') {
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
 	print '--- Copy current wild certificate to use it as the certificate for the custom url of the new instance (for backward compatibility)'."\n";
-	foreach(array('.key', '.crt', '-intermediate.crt') as $ext) {
+	foreach (array('.key', '.crt', '-intermediate.crt') as $ext) {
 		$srcfile = '/etc/apache2/'.$oldwilddomain.$ext;
 		$destfile = $conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.$ext;
 		print 'Copy '.$srcfile.' into '.$destfile."\n";
@@ -402,7 +418,7 @@ $command.=" ".escapeshellarg($oldinstance);
 echo $command."\n";
 
 $return_val = 0;
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($command, $outputfile, 0);
 
@@ -422,13 +438,14 @@ if ($return_val != 0) {
 
 // Return
 if (! $error) {
-	if ($mode == 'confirm' || $mode == 'confirmredirect') {
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 		print '-> Creation of a new instance with name '.$newinstance." done.\n";
 	} else {
 		print '-> Creation of a new instance with name '.$newinstance." canceled (test mode)\n";
 	}
 } else {
 	print '-> Failed to create a new instance with name '.$newinstance."\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -446,7 +463,11 @@ $newdatabasedb=$newobject->array_options['options_database_db'];
 
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
-	print "Error: Failed to find instance '".$newinstance."' (it should have been created before). Are you in test mode ?\n";
+	print "Error: Failed to find instance '".$newinstance."'";
+	if ($mode == 'test') {
+		print " (it should have been created before but in test mode, the instance can't be created).\n";
+	}
+	print "\n";
 	exit(-1);
 }
 
@@ -454,14 +475,14 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 if (! empty($oldobject->array_options['options_custom_url'])) {
 	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
 	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
-	if ($mode == 'confirm' || $mode == 'confirmredirect') {
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 		$newobject->update($user, 1);
 	}
 }
 
 // Set the date of end of period with same value than the source
 $dateendperiod = 0;
-foreach($oldobject->lines as $line) {
+foreach ($oldobject->lines as $line) {
 	if ($line->date_end && (empty($dateendperiod) || $line->date_end < $dateendperiod)) {
 		$dateendperiod = $line->date_end;
 	}
@@ -509,7 +530,7 @@ print 'SFTP old password '.$oldospass."\n";
 
 $command="rsync";
 $param=array();
-//if (! in_array($mode, array('confirm', 'confirmredirect'))) $param[]="-n";
+//if (! in_array($mode, array('confirm', 'confirmredirect', 'maintenance'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
@@ -563,7 +584,7 @@ print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode, array('confirm', 'confirmredirect'))) $param[]="-n";
+if (! in_array($mode, array('confirm', 'confirmredirect', 'maintenance'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
@@ -655,7 +676,7 @@ if ($mode == 'confirmunlock')
 print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb."\n";
 $output=array();
 $return_varchmod=0;
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	if (empty($conf->global->DOLICLOUD_INSTANCES_PATH) || empty($newlogin) || empty($newdatabasedb)) {
 		print 'Bad value for data. We stop to avoid drama';
 		exit(-7);
@@ -731,6 +752,9 @@ $sqla .= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contra
 $sqlb = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
 $sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
 
+$sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newobject->id);
+$sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
+
 
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
@@ -739,7 +763,7 @@ $fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h'.$new
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropa."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
 
@@ -753,7 +777,7 @@ $fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h'.$news
 $output=array();
 $return_var=0;
 print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropb."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
 
@@ -765,7 +789,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect') {
 
 $fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$output=array();
 	$return_var=0;
 	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
@@ -784,13 +808,14 @@ if ($return_var) {
 	print "FIX LOAD OF DUMP THEN RUN MANUALLY\n";
 	print $sqla."\n";
 	print $sqlb."\n";
+	print $sqlc."\n";
 	exit(-1);
 }
 
 
 print "\n";
 
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	print '-> Dump loaded into database '.$newdatabasedb.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	print "Finished.\n";
 } else {
@@ -801,7 +826,7 @@ print "\n";
 
 print "Move recurring invoice from old to new instance:\n";
 print $sqla."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$resql = $dbmaster->query($sqla);
 	if (!$resql) {
 		print 'ERROR '.$dbmaster->lasterror();
@@ -809,14 +834,27 @@ if ($mode == 'confirm' || $mode == 'confirmredirect') {
 }
 
 print $sqlb."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect') {
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$resql = $dbmaster->query($sqlb);
 	if (!$resql) {
 		print 'ERROR '.$dbmaster->lasterror();
 	}
 }
 
+print $sqlc."\n";
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
+	$resql = $dbmaster->query($sqlc);
+	if (!$resql) {
+		print 'ERROR '.$dbmaster->lasterror();
+	}
+}
+
 print "Note: To revert the move of the recurring invoice, you can do:\n";
+
+$sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $oldobject->id);
+$sql.= ' WHERE fk_target = '.((int) $newobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
+print $sql."\n";
+
 $sql = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $oldobject->id);
 $sql.= ' WHERE fk_source = '.((int) $newobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
 print $sql."\n";
@@ -828,13 +866,13 @@ print $sql."\n";
 
 print "\n";
 
-if ($mode != 'confirmredirect') {
-	print "DON'T FORGET TO SUSPEND INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
+if ($mode != 'confirmredirect' && $mode != 'maintenance') {
+	print "DON'T FORGET TO REDIRECT INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
 	print "https://".$newobject->ref_customer."\n";
 	print "\n";
 }
 
-print "NOW YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
+print "NOW TO GET A FULL REDIRECT, YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
 print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
 print "THEN RELOAD DNS WITH rndc reload ".$oldwilddomain."\n";
 print "\n";

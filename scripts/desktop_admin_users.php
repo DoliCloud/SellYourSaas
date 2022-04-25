@@ -101,7 +101,7 @@ $hostfile = $argv[3];
 $userip = '';
 $userpublickey = '';
 $target = empty($argv[4]) ? '' : $argv[4];
-for($i = 4; $i <= 6; $i++) {
+for ($i = 4; $i <= 6; $i++) {
 	$moreparam = empty($argv[$i]) ? '' : $argv[$i];
 	//print $moreparam."\n";
 	if ($moreparam) {
@@ -120,14 +120,14 @@ for($i = 4; $i <= 6; $i++) {
 $scriptyaml = '';
 if ($action == 'create') {
 	$scriptyaml = 'create_user.yml';
+} elseif ($action == 'allowroot' || $action == 'disallowroot' || $action == 'reactivate') {
+	$scriptyaml = 'reactivate_user.yml';
 } elseif ($action == 'deactivate') {
 	$scriptyaml = 'deactivate_user.yml';
-} elseif ($action == 'reactivate') {
-	$scriptyaml = 'reactivate_user.yml';
 } elseif ($action == 'delete') {
 	$scriptyaml = 'delete_user.yml';
 } else {
-	echo "Error: Bad parameter action. Must be (create|deactivate|reactivate|remove).\n";
+	echo "Error: Bad parameter action. Must be (create|allowroot|disallowroot|deactivate|reactivate|remove).\n";
 	exit(-1);
 }
 
@@ -142,6 +142,12 @@ if ($userip) {
 if ($userpublickey) {
 	$command .= " userpublickey=\"".$userpublickey."\"";
 }
+if ($action == 'allowroot') {
+	$command .= " allowroot=1";
+}
+if ($action == 'disallowroot') {
+	$command .= " disallowroot=1";
+}
 $command .= "'";
 
 $ret = 0;
@@ -150,7 +156,7 @@ $resarray = array();
 print $command."\n";
 $result = exec($command, $resarray, $ret);
 
-foreach($resarray as $line) {
+foreach ($resarray as $line) {
 	print $line."\n";
 }
 
