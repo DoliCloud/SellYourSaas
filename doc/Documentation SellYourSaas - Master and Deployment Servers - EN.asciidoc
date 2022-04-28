@@ -3592,15 +3592,15 @@ Connect to Dolibarr's master server's user interface (https://admin.mysaasdomain
 
 * Create a *Package* to configure the applications to be deployed (files, config, database dump...)
 
-See "Packages configuration" chapter below.
+See "Setup of Packages" chapter below.
 
 * Create a *Service* with type *Application* to define the pricing of a subscription and choose the application *Package*.
 
-See "Services Configuration" for a description of the fields.
+See "Setup of Services" for a description of the fields.
 
 * Create *Metric* type *Services* if you want
 
-See "Services Configuration" for a description of the fields.
+See "Setup of Services" for a description of the fields.
 
 * Create *Options* type *Services* if you want
 
