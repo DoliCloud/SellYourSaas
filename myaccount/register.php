@@ -552,6 +552,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							$reg = array();
 							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+
 								$domainqualified = false;
 								$tmpdomains = explode('+', $reg[1]);
 								foreach ($tmpdomains as $tmpdomain) {
@@ -567,6 +568,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							}
 							// $newval is subdomain (with.mysaasdomainname.com for example)
 
+							// Restriction defined on package
 							if (! empty($tmppackage->restrict_domains)) {   // There is a restriction on some domains for this package
 								$restrictfound = false;
 								$tmparray=explode(',', $tmppackage->restrict_domains);
@@ -726,7 +728,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 	jQuery(document).ready(function() {
 
-		/* Autofill the domain */
+		/* Autofill the domain when filling the company */
 		jQuery("#formregister").on("change keyup", "#orgName", function() {
 			console.log("Update sldAndSubdomain in register.php");
 			$("#sldAndSubdomain").val( applyDomainConstraints( $(this).val() ) );
@@ -734,13 +736,13 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 		/* Apply constraints if sldAndSubdomain field is change */
 		jQuery("#formregister").on("change keyup", "#sldAndSubdomain", function() {
-			console.log("Update sldAndSubdomain field");
+			console.log("Update sldAndSubdomain field in register.php");
 			$(this).val( applyDomainConstraints( $(this).val() ) );
 		});
 
 		/* Sow hourglass */
 		$('#formregister').submit(function() {
-				console.log("We clicked on submit on register page")
+				console.log("We clicked on submit on register.php")
 
 				jQuery(document.body).css({ 'cursor': 'wait' });
 				jQuery("div#waitMask").show();

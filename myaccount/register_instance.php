@@ -241,7 +241,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.$reusecontractid;
 } elseif ($reusesocid) {		// When we use the "Add another instance" from myaccount dashboard
-	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we already load the $tmpproduct
+	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we have already load the $tmpproduct
 		$tmpproduct = new Product($db);
 		$tmpproduct->fetch($service, '', '', '', 1, 1, 1);
 		$productref = $tmpproduct->ref;
@@ -298,6 +298,15 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		}
 		exit(-13);
 	}
+	if ($productref != 'none' && empty($tldid)) {
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Subdomain")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Subdomain"))."\n";
+		}
+		exit(-14);
+	}
 	if (empty($password) || empty($password2)) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
@@ -305,7 +314,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		} else {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password"))."\n";
 		}
-		exit(-14);
+		exit(-15);
 	}
 	if ($password != $password2) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -314,7 +323,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		} else {
 			print $langs->trans("ErrorPasswordMismatch")."\n";
 		}
-		exit(-15);
+		exit(-16);
 	}
 } else { // When we deploy from the register.php page
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
@@ -501,7 +510,7 @@ dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontracti
 
 
 if (empty($remoteip)) {
-	dol_syslog("InstanceCreationBlockedForSecurityPurpose empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
+	dol_syslog("InstanceCreationBlockedForSecurityPurpose: empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
 	$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 	if (substr($sapi_type, 0, 3) != 'cli') {
 		setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
