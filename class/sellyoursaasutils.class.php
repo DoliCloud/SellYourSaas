@@ -1757,7 +1757,8 @@ class SellYourSaasUtils
 	/**
 	 * Action executed by scheduler
 	 * CAN BE A CRON TASK
-	 * Loop on each contract. If it is a paid contract, and there is no unpaid invoice for contract, and lines are not suspended and end date < today + 2 days (so expired or soon expired),
+	 * Loop on each contract.
+	 * If it is a paid contract, and there is no unpaid invoice for contract, and lines are not suspended and end date < today + 2 days (so expired or soon expired),
 	 * we make a refresh (update qty of contract + qty of linked template invoice) + we set the running contract service end date to end at next period.
 	 *
 	 * @param	int		$thirdparty_id			Thirdparty id
@@ -1774,7 +1775,7 @@ class SellYourSaasUtils
 
 		$now = dol_now();
 
-		$mode = 'paid';
+		$mode = 'paid';			// 'paid' is to renew 'paid' or 'redirect' contracts. 'test' instances are never renewed.
 		$delayindaysshort = 1;	// So we renew the resources 1 day after the invoice is generated and paid or in error (this means we have 2 chances to build invoice before renewal)
 		$enddatetoscan = dol_time_plus_duree($now, -1 * abs($delayindaysshort), 'd');		// $enddatetoscan = yesterday
 
@@ -1798,7 +1799,7 @@ class SellYourSaasUtils
 		$sql.= " AND date_format(cd.date_fin_validite, '%Y-%m-%d') <= date_format('".$this->db->idate($enddatetoscan)."', '%Y-%m-%d')";
 		$sql.= " AND cd.statut = 4";
 		$sql.= " AND c.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
-		if ($thirdparty_id > 0) $sql.=" AND c.fk_soc = ".$thirdparty_id;
+		if ($thirdparty_id > 0) $sql.=" AND c.fk_soc = ".((int) $thirdparty_id);
 		//print $sql;
 
 		$resql = $this->db->query($sql);
@@ -1835,9 +1836,9 @@ class SellYourSaasUtils
 						$contractignored[$object->id]=$object->ref;
 						continue;											// Discard if this is a paid instance when we are in test mode
 					}
-					if ($mode == 'paid' && ! $isAPayingContract) {
+					if ($mode == 'paid' && ! $isAPayingContract && !preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
 						$contractignored[$object->id]=$object->ref;
-						continue;											// Discard if this is a test instance when we are in paid mode
+						continue;											// Discard if this is a test instance and not a redirect instance when we are in paid mode
 					}
 
 					// Update expiration date of instance
@@ -1882,7 +1883,7 @@ class SellYourSaasUtils
 
 						if ($protecti < 1000) {	// If not, there is a pb
 							// We will update the end of date of contrat, so first we refresh contract data
-							dol_syslog("We will update the end of date of contract with newdate=".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
+							dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
 
 							$this->db->begin();
 
@@ -1957,7 +1958,7 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output .= count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only, including redirect contracts)';
+		$this->output .= count($contractprocessed).' contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only, including redirect contracts)';
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
