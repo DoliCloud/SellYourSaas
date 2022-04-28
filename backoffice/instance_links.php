@@ -529,7 +529,7 @@ if (empty($object->nbofusers)) {
 									$error++;
 									/*$this->error = 'SQL to get resource return nothing';
 									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('instance_links.php: SQL to get resource return nothing: '.$sqlformula, null, 'errors');
+									setEventMessages('instance_links.php: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 								}
 							} else {
 								// If request is a SELECT nb, fieldlogin as comment
@@ -557,7 +557,7 @@ if (empty($object->nbofusers)) {
 									$error++;
 									/*$this->error = 'SQL to get resource return nothing';
 									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('instance_links.php: SQL to get resource return nothing: '.$sqlformula, null, 'errors');
+									setEventMessages('instance_links.php: SQL to get resource list return empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 								}
 							}
 
