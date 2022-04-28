@@ -3579,8 +3579,8 @@ class SellYourSaasUtils
 										$newcommentonqty .= '';
 									} else {
 										$error++;
-										$this->error = 'SQL to get resource return nothing';
-										$this->errors[] = 'SQL to get resource return nothing';
+										$this->error = 'sellyoursaasRemoteAction: SQL to get resource return nothing';
+										$this->errors[] = $this->error;
 									}
 								} else {
 									// If request is a SELECT nb, fieldlogin as comment
@@ -3606,8 +3606,8 @@ class SellYourSaasUtils
 										$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
 									} else {
 										$error++;
-										$this->error = 'SQL to get resource return nothing';
-										$this->errors[] = 'SQL to get resource return nothing';
+										$this->error = 'sellyoursaasRemoteAction: SQL to get resource return nothing';
+										$this->errors[] = $this->error;
 									}
 								}
 
