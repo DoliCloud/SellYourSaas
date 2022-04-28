@@ -167,18 +167,40 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
  * Return if instance has a last payment in error or not
  *
  * @param 	Contrat 	$contract			Object contract
- * @return	int								>0 if this is a contract with current payment error
+ * @return	int								>0 if this is a contract with at least one link to an open invoice with a payment error
  */
 function sellyoursaasIsPaymentKo($contract)
 {
 	global $db;
 
-	// TODO Replace this with a direct select on actioncomm linked to open invoices of contract.
+	$paymenterror=0;
 
+	// Return number of invoice open with an event payment error on it
+	// Note: we suppose that if a payment as correctly done after the invoice has also been closed so the invoice will not be reported here.
+	$sql = "SELECT DISTINCT ee.fk_target as invoiceid";
+	$sql .= " FROM llx_element_element as ee";
+	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."facture as f ON ee.fk_target = f.rowid AND f.fk_statut = 1";
+	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."actioncomm as a ON ee.fk_target = a.fk_element AND a.elementtype = 'invoice' AND (a.code LIKE 'AC_PAYMENT_%_KO' OR a.label = 'Cancellation of payment by the bank')";
+	$sql .= " WHERE (ee.fk_source = ".((int) $contract->id)." AND ee.sourcetype = 'contrat' AND ee.targettype = 'facture')";
+	$sql .= " UNION ";
+	$sql .= "SELECT DISTINCT ee.fk_source as invoiceid";
+	$sql .= " FROM llx_element_element as ee";
+	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."facture as f ON ee.fk_source = f.rowid AND f.fk_statut = 1";
+	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."actioncomm as a ON ee.fk_source = a.fk_element AND a.elementtype = 'invoice' AND (a.code LIKE 'AC_PAYMENT_%_KO' OR a.label = 'Cancellation of payment by the bank')";
+	$sql .= " WHERE (ee.fk_target = ".((int) $contract->id)." AND ee.targettype = 'contrat' AND ee.sourcetype = 'facture')";
+
+	$resql=$db->query($sql);
+	if ($resql) {
+		$num = $db->num_rows($resql);
+		$db->free($resql);
+		return $num;
+	} else {
+		dol_print_error($db);
+	}
+
+	/* old method
 	$loadalsoobjects = 1;	// We nee the object 'facture' to test its status
 	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', $loadalsoobjects);
-
-	$paymenterror=0;
 
 	if (is_array($contract->linkedObjects['facture'])) {
 		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
@@ -203,6 +225,7 @@ function sellyoursaasIsPaymentKo($contract)
 			}
 		}
 	}
+	*/
 
 	return $paymenterror;
 }
@@ -239,7 +262,7 @@ function sellyoursaasHasOpenInvoices($contract)
  * For expiration date, it takes the lowest planed end date for services (whatever is service status)
  *
  * @param 	Contrat $contract				Object contract
- * @param	int		$onlyexpirationdate		1=Return only property 'expiration_date' (no need to load each product line properties to also set the 'nbofgbs', 'status', 'duration_value', ...)
+ * @param	int		$onlyexpirationdate		1=Return only property 'expiration_date' (no need to load each product line properties to also set the 'nbusers', 'nbofgbs', 'status', 'duration_value', ...)
  * @return	array							Array of data array(
  * 												'expirationdate'=>Timestamp of expiration date, or 0 if error or not found,
  * 												'status'=>Status of line of package app,
@@ -262,6 +285,8 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 
 	global $cachefortmpprod;
 	if (! isset($cachefortmpprod) || ! is_array($cachefortmpprod)) $cachefortmpprod = array();
+
+	dol_syslog("sellyoursaasGetExpirationDate for contract id=".$contract->id." onlyexpirationdate=".$onlyexpirationdate);
 
 	// Loop on each line to get lowest expiration date
 	foreach ($contract->lines as $line) {

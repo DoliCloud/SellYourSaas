@@ -17,21 +17,63 @@
  */
 
 /**
- * \file    test/unit/CompanyPaymentModeTest.php
+ * \file    test/unit/SellYourSaasLibTest.php
  * \ingroup sellyoursaas
- * \brief   PHPUnit test for CompanyPaymentMode class.
+ * \brief   PHPUnit test for sellyoursaas.lib.php functions.
  */
 
 
+global $conf,$user,$langs,$db;
+//define('TEST_DB_FORCE_TYPE','mysql');	// This is to force using mysql driver
+//require_once 'PHPUnit/Autoload.php';
+require_once dirname(__FILE__).'/../../../dolibarr/htdocs/master.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+
+if (empty($user->id)) {
+	print "Load permissions for admin user nb 1\n";
+	$user->fetch(1);
+	$user->getrights();
+}
+$conf->global->MAIN_DISABLE_ALL_MAILS=1;
+
+
 /**
- * Class CompanyPaymentModeTest
+ * Class SellYourSaasLibTest
  *
  * @backupGlobals disabled
  * @backupStaticAttributes enabled
  * @remarks	backupGlobals must be disabled to have db,conf,user and lang not erased.
  */
-class CompanyPaymentModeTest extends PHPUnit\Framework\TestCase
+class SellYourSaasLibTest extends PHPUnit\Framework\TestCase
 {
+	protected $savconf;
+	protected $savuser;
+	protected $savlangs;
+	protected $savdb;
+
+	/**
+	 * Constructor
+	 * We save global variables into local variables
+	 *
+	 * @return void
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		//$this->sharedFixture
+		global $conf,$user,$langs,$db;
+		$this->savconf=$conf;
+		$this->savuser=$user;
+		$this->savlangs=$langs;
+		$this->savdb=$db;
+
+		print __METHOD__." db->type=".$db->type." user->id=".$user->id;
+		//print " - db ".$db->db;
+		print "\n";
+	}
+
 	/**
 	 * Global test setup
 	 *
@@ -102,5 +144,36 @@ class CompanyPaymentModeTest extends PHPUnit\Framework\TestCase
 	public static function tearDownAfterClass()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
+	}
+
+	/**
+	 * testSellyoursaasIsPaymentKo
+	 *
+	 * @return  int
+	 */
+	public function testSellyoursaasIsPaymentKo()
+	{
+		global $conf,$user,$langs,$db;
+		$conf=$this->savconf;
+		$user=$this->savuser;
+		$langs=$this->savlangs;
+		$db=$this->savdb;
+
+		$result = 0;
+
+		$contract = new Contrat($db);
+
+		// TODO Create contract and invoice linked and enter 2 event payment error on invoice.
+		$contract->fetch(22);
+
+
+
+
+		$result = sellyoursaasIsPaymentKo($contract);
+
+		print __METHOD__." result=".$result."\n";
+		$this->assertEquals(2, $result);
+
+		return $result;
 	}
 }

@@ -1209,7 +1209,6 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 		cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 
-		#cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
 		#echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		#cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		echo rm -f /var/spool/cron/crontabs/$osusername

@@ -769,6 +769,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 		cat $cronfile >> /tmp/$dbname.tmp
 		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+		echo rm -f /tmp/$dbname.tmp
+		rm -f /tmp/$dbname.tmp
 	else
 		echo cron file /var/spool/cron/crontabs/$osusername does not exists yet
 		echo cp $cronfile /var/spool/cron/crontabs/$osusername
@@ -789,9 +791,10 @@ if [[ "$mode" == "suspend" ]]; then
 		cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 		echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
 		cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
-		#echo rm -f /var/spool/cron/crontabs/$osusername
 		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+		echo rm -f /tmp/$dbname.tmp
+		rm -f /tmp/$dbname.tmp
 	else
 		echo cron file /var/spool/cron/crontabs/$osusername already removed or empty
 	fi 

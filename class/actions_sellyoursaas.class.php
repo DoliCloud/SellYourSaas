@@ -88,8 +88,8 @@ class ActionsSellyoursaas
 			if ($user->admin && ! empty($object->array_options['options_dolicloud'])) {
 				$url = '';
 				if ($object->array_options['options_dolicloud'] == 'yesv2') {
-					$urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
-					$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+					$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
+					$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 					if (! empty($object->array_options['options_domain_registration_page'])
 						&& $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 						$constforaltname = $object->array_options['options_domain_registration_page'];
@@ -106,7 +106,7 @@ class ActionsSellyoursaas
 						}
 					}
 
-					$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$object->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash to login is sha256 and is valid one day
+					$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH').$object->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash to login is sha256 and is valid one day
 					$url=$urlmyaccount.'?mode=logout_dashboard&action=login&actionlogin=login&username='.urlencode($object->email).'&password=&login_hash='.$dol_login_hash;
 				}
 
@@ -472,6 +472,7 @@ class ActionsSellyoursaas
 
 			if ($action == 'confirm_changecustomer') {
 				$db->begin();
+				// $object is a contract
 
 				$newid = GETPOST('socid', 'int');
 
@@ -479,6 +480,7 @@ class ActionsSellyoursaas
 					$object->oldcopy = dol_clone($object);
 
 					$object->fk_soc = $newid;
+					$object->socid = $newid;
 
 					if (! $error) {
 						$result = $object->update($user, 1);
@@ -489,7 +491,6 @@ class ActionsSellyoursaas
 					}
 
 					if (! $error) {
-						// TODO Update fk_soc of linked objects template invoice too
 						$object->fetchObjectLinked();
 
 						if (is_array($object->linkedObjectsIds['facturerec'])) {
@@ -499,6 +500,8 @@ class ActionsSellyoursaas
 								if ($result > 0) {
 									$tmpfacturerec->oldcopy = dol_clone($tmpfacturerec);
 									$tmpfacturerec->fk_soc = $newid;
+									$tmpfacturerec->socid = $newid;
+
 									$result = $tmpfacturerec->update($user, 1);
 									if ($result < 0) {
 										$this->error = $tmpfacturerec->error;
@@ -1130,12 +1133,12 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'home';
 			$h++;
 
-			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php',1);
+			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
 			$head[$h][1] = $langs->trans("DeploymentServers");
 			$head[$h][2] = 'deploymentservers';
 			$h++;
 
-			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php',1);
+			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php', 1);
 			$head[$h][1] = $langs->trans("AntiSpam");
 			$head[$h][2] = 'antispam';
 			$h++;

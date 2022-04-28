@@ -22,16 +22,20 @@
  * \brief   PHPUnit test for Cancellation class.
  */
 
-namespace test\unit;
 
 /**
  * Class CancellationTest
- * @package Testsellyoursaas
+ *
+ * @backupGlobals disabled
+ * @backupStaticAttributes enabled
+ * @remarks	backupGlobals must be disabled to have db,conf,user and lang not erased.
  */
-class CancellationTest extends \PHPUnit_Framework_TestCase
+class CancellationTest extends PHPUnit\Framework\TestCase
 {
 	/**
 	 * Global test setup
+	 *
+	 * @return void
 	 */
 	public static function setUpBeforeClass()
 	{
@@ -40,6 +44,8 @@ class CancellationTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * Unit test setup
+	 *
+	 * @return void
 	 */
 	protected function setUp()
 	{
@@ -48,6 +54,8 @@ class CancellationTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * Verify pre conditions
+	 *
+	 * @return void
 	 */
 	protected function assertPreConditions()
 	{
@@ -56,6 +64,8 @@ class CancellationTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * A sample test
+	 *
+	 * @return void
 	 */
 	public function testSomething()
 	{
@@ -66,6 +76,8 @@ class CancellationTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * Verify post conditions
+	 *
+	 * @return void
 	 */
 	protected function assertPostConditions()
 	{
@@ -74,6 +86,8 @@ class CancellationTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * Unit test teardown
+	 *
+	 * @return void
 	 */
 	protected function tearDown()
 	{
@@ -82,21 +96,11 @@ class CancellationTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * Global test teardown
+	 *
+	 * @return void
 	 */
 	public static function tearDownAfterClass()
 	{
 		fwrite(STDOUT, __METHOD__ . "\n");
-	}
-
-	/**
-	 * Unsuccessful test
-	 *
-	 * @param  Exception $e    Exception
-	 * @throws Exception
-	 */
-	protected function onNotSuccessfulTest(Exception $e)
-	{
-		fwrite(STDOUT, __METHOD__ . "\n");
-		throw $e;
 	}
 }

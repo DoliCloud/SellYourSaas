@@ -374,7 +374,7 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) ALL
-# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
+# You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
 myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
@@ -651,7 +651,7 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 
 === Getting files of Dolibarr and SellYourSaas application
 
-On all servers (*Master and Deploiement*):
+On all servers (*Master and Deployment*):
 
 * Under the *root* login, install git tool:
 
@@ -705,7 +705,7 @@ subdomain=withX.mysaasdomainname.com
 allowed_hosts=127.0.0.1,ipofmasterserver
 
 # email from
-emailfrom=robot@mysaasdomainname.com
+emailfrom=noreply@mysaasdomainname.com
 # email supervision
 emailsupervision=supervision@mysaasdomainname.com
 
@@ -918,7 +918,7 @@ Host github.com
 
 === Installation of packages
 
-There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
+There are two scenarios depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
 
 * Installation of the 18.04- Ubuntu packages
 
@@ -971,7 +971,7 @@ apt remove unattended-upgrades
 
 === Max size increase UID
 
-On the deployment servers, modify */etc/login.defs* to put the
+On the deployment servers, modify */etc/login.defs* as follows:
 
 [source, conf]
 ---------------
@@ -1014,7 +1014,7 @@ a2enconf charset localized-error-pages other-vhosts-access-log security
 
 On the *Deployment servers*:
 
-* Creation of the directory of the configuration files of the virtual hosts of the instances.
+* Create the directory of the configuration files of the virtual hosts of the instances.
 
 [source, bash]
 ---------------
@@ -1033,17 +1033,17 @@ systemctl daemon-reload
 /usr/sbin/apachectl start
 ---------------
 
-Note: Reload of apache seems not enough.
+Note: Reload of apache seems not enough so we stop/start it.
 
-* Addition of the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
+* Add the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
 
 [source, conf]
 ---------------
-	# Include virtual host for sellyoursaas instances:
-	IncludeOptional sellyoursaas-enabled/*.conf
+# Include virtual host for sellyoursaas instances:
+IncludeOptional sellyoursaas-enabled/*.conf
 ---------------
 
-* Added directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
+* Add directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
 
 [source, conf]
 ---------------
@@ -1101,6 +1101,11 @@ Choose a password. You will need to give this couple login/password to anyone wh
         </Directory>
 
         #leaving /public, /api and /dav accessible to everyone
+        <Directory /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/public/>
+        AuthType None
+        Require all granted
+        Satisfy any
+        </Directory>        
         <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
         AuthType None
         Require all granted
@@ -1696,10 +1701,18 @@ fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-ru
 
 === Test spamassassin ===
 
-The process *spamd* must be running. Start it manually if it is not the case the first time.
+The process *spamd* must be running. Start it manually if it is not the case the first time. You can start it manually using this command:
+
+[source,bash]
+---------------
+/usr/sbin/spamd &
+disown
+---------------
 
 To test that spamassassin client is working, create a file */tmp/testspam* with content
 
+[source,text]
+---------------
     Subject: Test spam mail (GTUBE)
     Message-ID: <GTUBE1.1010101@example.net>
     Date: Wed, 23 Jul 2003 23:30:00 +0200
@@ -1725,6 +1738,7 @@ To test that spamassassin client is working, create a file */tmp/testspam* with 
     XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
 
     You should send this test mail from an account outside of your network.
+---------------
 
 Then test with:
 
@@ -1734,7 +1748,6 @@ spamc < /tmp/testspam
 spamc -c < /tmp/testspam
 echo $?
 ---------------
-
 
 === Test and setup of ClamAV
 
@@ -1753,6 +1766,8 @@ And to test *clamav* command line and daemon:
 ---------------
 clamdscan /tmp/testvirus --fdpass
 ---------------
+
+The output should have a line with the following content: *Infected files: 1*
 
 Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
 
@@ -1929,6 +1944,7 @@ Create a file */etc/postfix/generic* to add binding between email used to send e
 
 [source,bash]
 ---------------
+root@myshortservername						noreply@mysaasdomain.com
 root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
 admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
 ---------------
@@ -2296,7 +2312,7 @@ Give permission, on the *Master server*, to the account *sellyoursaas* of each d
 
 [source,sql]
 ---------------
-CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf quitof the deployment server)
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf of the deployment server)
 
 GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
 
@@ -2465,15 +2481,15 @@ Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/us
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/bin.secureBash
+include::repository_root/etc/apparmor.d/bin.secureBash[]
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.dusr.sbin.apache2/* with this content:
+Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.d/usr.sbin.apache2/* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository, in etc/apparmor.d/local/usr.sbin.apache2 or etc/apparmor.d/usr.sbin.apache2
+include::repository_root/etc/apparmor.d/local/usr.sbin.apache2-deployment[]
 ---------------
 
 
@@ -2481,7 +2497,7 @@ Create an apparmor file */etc/apparmor.d/php-fpm7.4* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/php-fpm7.4
+include::repository_root/etc/apparmor.d/php-fpm7.4[]
 ---------------
 
 
@@ -2548,6 +2564,8 @@ systemctl daemon-reload
 
 
 === Jailkit configuration (optional)
+
+On **deployment servers**:
 
 Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
 
@@ -2863,7 +2881,7 @@ chmod +t /dev/shm /var/lib/php/sessions
 
 ==== Define size of upload and session options
 
-Modify the file */etc/php/*.*/*/php.ini* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
+Modify the file *`+/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
@@ -2884,7 +2902,7 @@ session.cookie_samesite = Lax
 
 ==== Disable some functions (optionnal)
 
-Complete also the parameter *disable_functions* for the *apache* and *fpm* file (not for the *cli*) by adding:
+Complete also the parameter *disable_functions* for the *apache* and *fpm* file (NOT for the *cli*) by adding:
 
 [source,bash]
 ---------------
@@ -3239,9 +3257,11 @@ systemctl status snap.certbot.renew.timer
 
 [source,bash]
 ---------------
-certbot renew --manual
-ou
-certbot renew --manual --force-renewal
+certbot renew
+or
+certbot renew --force-renewal 
+or 
+certbot renew --cert-name admin.mysellyoursaasdomain.com --dry-run
 ---------------
 
 * To renew a certificate on the *deployment servers*:
@@ -3584,15 +3604,15 @@ Connect to Dolibarr's master server's user interface (https://admin.mysaasdomain
 
 * Create a *Package* to configure the applications to be deployed (files, config, database dump...)
 
-See "Packages configuration" chapter below.
+See "Setup of Packages" chapter below.
 
 * Create a *Service* with type *Application* to define the pricing of a subscription and choose the application *Package*.
 
-See "Services Configuration" for a description of the fields.
+See "Setup of Services" for a description of the fields.
 
 * Create *Metric* type *Services* if you want
 
-See "Services Configuration" for a description of the fields.
+See "Setup of Services" for a description of the fields.
 
 * Create *Options* type *Services* if you want
 
@@ -3873,12 +3893,12 @@ fdisk -l
 parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print all
 resizepart 
-Y
-999GB    (Don't input the default value but the max value of the disk that was shown by "print all")
+Y		  (the num of the part)
+999GB    (Don't input the default value but the max value in column "End" of the disk that was shown by "print all")
 q
 ---------------
 
-* Remount the disk for acknoledgement and resizing without erasing data.
+* Remount the disk for acknowledgement and resizing without erasing data.
 
 [source,bash]
 ---------------
@@ -4531,7 +4551,7 @@ scripts/make_instance_offline.sh  https://myaccount.mydomain.com/offline.php  te
 
 
 
-=== Clean rubish files
+=== Clean rubbish files
 
 Launch the script: 
 
@@ -4734,7 +4754,7 @@ Go to the menu *SellYourSaas - Subscription Pags* to get the URL for subscribing
 - By submitting on the subscription page, the following operations are triggered :
   * Check if third party exists or not. If not create the third party, if so tell to create the new instance from the customer dashboard.
   * Create a contract (main subscription) into database with status "DEPLOY_IN_PROGRESS" and with a Unix account name, pass, database account and pass, and other properties defined in the contract. The subscribed services are lines of contracts.
-  * Calls instance deployment listener (micro web server serving only *scripts/remote_server/index.php* and execfuting the "deploy" on the deployment server (1 of the 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") (in Dolibarr's case for instance, this calls the scripts *action_deploy_undeploy.sh* or *action_suspend_unsuspend.sh* according to the action code), to create/destroy or suspend/reactivate the client instance. See chapter <<remote_actions>>.
+  * Calls instance deployment listener (micro web server serving only *scripts/remote_server/index.php* and executing the "deploy" on the deployment server (1 of the 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") (in Dolibarr's case for instance, this calls the scripts *action_deploy_undeploy.sh* or *action_suspend_unsuspend.sh* according to the action code), to create/destroy or suspend/reactivate the client instance. See chapter <<remote_actions>>.
   * Edit contract/subscription with status "DEPLOYED" if result of remote action is OK.
   * Send an email to user: Show result to user and send en email (if subscriptions is done from backoffice, this option is off).
 

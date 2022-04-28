@@ -1681,5 +1681,9 @@ PidFile                 /run/opendkim/opendkim.pid
 The PIDFile is defined into the */lib/systemd/system/opendkim.service* but seems not taken into account correctly. You must force it into the /etc/opendkim.conf
 
 
+== Error postfix/cleanup[14215]: warning: connect to Milter service inet:localhost:12345: Connection refused
 
+We can see this error into */var/log/syslog.log*.
+
+Check the configuration file */etc/default/opendkim* and verify that the socket is SOCKET="inet:12345@localhost"
 
