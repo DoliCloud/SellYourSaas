@@ -2615,7 +2615,7 @@ class SellYourSaasUtils
 		$now = dol_now();
 		$datetotest = dol_time_plus_duree($now, -1 * abs($delayindays), 'd');
 
-		$sql = 'SELECT c.rowid, c.ref_customer, s.client, cd.rowid as lid';
+		$sql = 'SELECT c.rowid, c.ref_customer, ce.suspendmaintenance_message, s.client, cd.rowid as lid';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce, ';
 		$sql.= ' '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
@@ -2657,8 +2657,12 @@ class SellYourSaasUtils
 					}
 
 					$isAPayingContract = sellyoursaasIsPaidInstance($object);       // This make fetchObjectLinked and scan link on invoices or template invoices
-					if ($mode == 'test' && $isAPayingContract) continue;			// Discard if this is a paid instance when we are in test mode
-					if ($mode == 'paid' && ! $isAPayingContract) continue;			// Discard if this is a test instance when we are in paid mode
+					if ($mode == 'test' && $isAPayingContract) {
+						continue;			// Discard if this is a paid instance when we are in test mode
+					}
+					if ($mode == 'paid' && ! $isAPayingContract) {
+						continue;			// Discard if this is a test instance when we are in paid mode
+					}
 
 					// Undeploy now
 					$this->db->begin();
