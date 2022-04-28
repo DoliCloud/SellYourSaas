@@ -237,7 +237,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 										$error++;
 										/*$this->error = 'SQL to get resource return nothing';
 										 $this->errors[] = 'SQL to get resource return nothing';*/
-										setEventMessages('dolicloud_database_refresh: SQL to get resource return nothing: '.$sqlformula, null, 'errors');
+										setEventMessages('dolicloud_database_refresh: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 									}
 								} else {
 									// If request is a SELECT nb, fieldlogin as comment
@@ -265,7 +265,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 										$error++;
 										/*$this->error = 'SQL to get resource return nothing';
 										 $this->errors[] = 'SQL to get resource return nothing';*/
-										setEventMessages('dolicloud_database_refresh: SQL to get resource return nothing: '.$sqlformula, null, 'errors');
+										setEventMessages('dolicloud_database_refresh: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 									}
 								}
 
