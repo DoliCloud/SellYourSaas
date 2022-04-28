@@ -3579,7 +3579,7 @@ class SellYourSaasUtils
 										$newcommentonqty .= '';
 									} else {
 										$error++;
-										$this->error = 'sellyoursaasRemoteAction: SQL to get resource return nothing';
+										$this->error = 'sellyoursaasRemoteAction: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
 										$this->errors[] = $this->error;
 									}
 								} else {
@@ -3606,7 +3606,7 @@ class SellYourSaasUtils
 										$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
 									} else {
 										$error++;
-										$this->error = 'sellyoursaasRemoteAction: SQL to get resource return nothing';
+										$this->error = 'sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
 										$this->errors[] = $this->error;
 									}
 								}
