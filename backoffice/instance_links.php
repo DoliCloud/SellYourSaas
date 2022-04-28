@@ -658,7 +658,7 @@ print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 	print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
 
 	print '<div class="div-table-responsive-no-min">';
-	print '<table class="noborder" width="100%">';
+	print '<table class="noborder entpercent">';
 
 	print '<tr>';
 	print '<td>'.$langs->trans("Instance").'</td>';

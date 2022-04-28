@@ -14,7 +14,6 @@ DateEndCurrentPeriod=End current period
 DateLastCheck=Refresh
 NbOfUsers=Nb users
 LastLogin=Last login
-DateLastLogin=Date last login
 SFTPLogin=Login SFTP
 DatabaseLogin=Login database
 DatabaseLoginReadOnly=Login (read-only) database
