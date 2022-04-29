@@ -1112,7 +1112,7 @@ class SellYourSaasUtils
 										$charge->customer = $customer->id;
 									} elseif ($paymentintent->status === 'requires_action') {
 										//paymentintent->status may be => 'requires_action' (no error in such a case)
-										dol_syslog(var_export($paymentintent, true), LOG_DEBUG);
+										dol_syslog("paymentintent = ".var_export($paymentintent, true), LOG_DEBUG);
 
 										$charge->status = 'failed';
 										$charge->customer = $customer->id;
@@ -1123,7 +1123,7 @@ class SellYourSaasUtils
 										$stripefailuremessage = 'Action required. Contact the support at '.$conf->global->SELLYOURSAAS_MAIN_EMAIL;
 										$stripefailuredeclinecode = $stripe->declinecode;
 									} else {
-										dol_syslog(var_export($paymentintent, true), LOG_DEBUG);
+										dol_syslog("paymentintent = ".var_export($paymentintent, true), LOG_DEBUG);
 
 										$charge->status = 'failed';
 										$charge->customer = $customer->id;
@@ -1150,6 +1150,8 @@ class SellYourSaasUtils
 									$errorforinvoice++;
 									$errmsg=$langs->trans("FailedToChargeCard");
 									if (! empty($charge)) {
+										// Note: Sometimes $stripefailuredeclinecode is empty and we have text 'This transaction requires authentication' into $stripefailuremessage. It may be a case of
+										// SCA error not managed ?
 										if ($stripefailuredeclinecode == 'authentication_required') {
 											$errauthenticationmessage=$langs->trans("ErrSCAAuthentication");
 											$errmsg=$errauthenticationmessage;
@@ -1173,7 +1175,7 @@ class SellYourSaasUtils
 									$postactionmessages[]=$errmsg.' ('.$stripearrayofkeys['publishable_key'].')';
 									$this->errors[]=$errmsg;
 								} else {
-									dol_syslog('Successfuly charge card '.$stripecard->id.' for invoice '.$invoice->id);
+									dol_syslog('Successfuly charge card or payment mode '.$stripecard->id.' for invoice '.$invoice->id);
 
 									$postactionmessages[]='Success to charge card ('.$charge->id.' with '.$stripearrayofkeys['publishable_key'].')';
 
@@ -1238,7 +1240,9 @@ class SellYourSaasUtils
 										dol_syslog('* Record payment for invoice id '.$invoice->id.'. It includes closing of invoice and regenerating document');
 
 										// This include closing invoices to 'paid' (and trigger including unsuspending) and regenerating document
-										// So this method can be very long if there is an unsuspend with timeout.
+										// So this method can be very long if there is an unsuspend action ending with timeout.
+										// Note: If there is an error during generation of PDF, we received a payment error.
+										// $conf->global->MAIN_DISABLE_PDF_AUTOUPDATE
 										$paiement_id = $paiement->create($user, 1);
 										if ($paiement_id < 0) {
 											$postactionmessages[] = $paiement->error.($paiement->error?' ':'').join("<br>\n", $paiement->errors);
