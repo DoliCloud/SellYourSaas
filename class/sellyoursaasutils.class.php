@@ -457,7 +457,7 @@ class SellYourSaasUtils
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
-		$formmail=new FormMail($db);
+		$formmail=new FormMail($this->db);
 
 		$nextyear = $currentyear;
 		$nextmonth = $currentmonth + 1;
@@ -604,7 +604,7 @@ class SellYourSaasUtils
 		// Get warning email template
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		$formmail=new FormMail($db);
+		$formmail=new FormMail($this->db);
 
 		$nextyear = $currentyear;
 		$nextmonth = $currentmonth + 1;
