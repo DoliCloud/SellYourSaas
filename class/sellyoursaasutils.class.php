@@ -1241,8 +1241,8 @@ class SellYourSaasUtils
 
 										// This include closing invoices to 'paid' (and trigger including unsuspending) and regenerating document
 										// So this method can be very long if there is an unsuspend action ending with timeout.
-										// Note: If there is an error during generation of PDF, we received a payment error.
-										// $conf->global->MAIN_DISABLE_PDF_AUTOUPDATE
+										// Note: If there is an error during generation of PDF, we received a payment error. A solution may be to set $conf->global->MAIN_DISABLE_PDF_AUTOUPDATE and
+										// force regeneration of PDF outside of method create
 										$paiement_id = $paiement->create($user, 1);
 										if ($paiement_id < 0) {
 											$postactionmessages[] = $paiement->error.($paiement->error?' ':'').join("<br>\n", $paiement->errors);
