@@ -381,7 +381,8 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 
 
 /**
- * Calculate stats ('total', 'totalcommissions', 'totalinstancespaying', 'totalinstancessuspended', 'totalinstancesexpired', 'totalinstances' (nb instances included suspended), 'totalusers')
+ * Calculate stats ('total', 'totalcommissions', 'totalinstancespaying', 'totalinstancessuspended',
+ * 'totalinstancesexpiredfree', 'totalinstancesexpiredpaying', 'totalinstances' (nb instances included suspended), 'totalusers'
  * at date datelim (or realtime if date is empty)
  *
  * Rem: Comptage des users par status
@@ -600,7 +601,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 		'totalinstancessuspendedfree'=>(int) $totalinstancessuspendedfree,
 		'totalinstancessuspendedpaying'=>(int) $totalinstancessuspendedpaying,
 		'totalinstancesexpiredfree'=>(int) $totalinstancesexpiredfree,
-		'totalinstancesexpired'=>(int) $totalinstancesexpiredpaying,
+		'totalinstancesexpiredpaying'=>(int) $totalinstancesexpiredpaying,
 		'totalinstances'=>(int) $totalinstances,						// Total instances (trial + paid)
 		'totalusers'=>(int) $totalusers,								// Total users (trial + paid)
 		'totalcustomers'=>(int) count($listofcustomers),				// Trial only customers
