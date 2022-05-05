@@ -30,12 +30,27 @@ $emailfrom = '';
 
 // Main
 
+file_put_contents($logfile, date('Y-m-d H:i:s') . " php.ini file loaded is ".php_ini_loaded_file()."\n", FILE_APPEND);
+
 if (function_exists('shell_exec')) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . " shell_exec is available. ok\n", FILE_APPEND);
 } else {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " The method shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " The function shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
 	exit(1);
 }
+/*$disabledfunction = ini_get('disable_functions');
+if ($disabledfunction) {
+	if (strpos($disabledfunction, 'shell_exec') === false) {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " shell_exec is not disabled. ok\n", FILE_APPEND);
+	} else {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " The function shell_exec is disabled by disable_functions - exit 1\n", FILE_APPEND);
+		exit(1);
+	}
+} else {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " failed to get disable_functions.\n", FILE_APPEND);
+}
+*/
+
 
 $pointer = fopen('php://stdin', 'r');
 
@@ -45,17 +60,17 @@ while ($line = fgets($pointer)) {
 		if (preg_match('/^to:\s/i', $line)) {
 			$toline .= trim($line)."\n";
 			$linetmp = preg_replace('/^to:\s*/i', '', trim($line));
-			$tmpto=preg_split("/[\s,]+/", $linetmp);
+			$tmpto=preg_split("/[\s,;]+/", $linetmp);
 			$nbto+=count($tmpto);
 		} elseif (preg_match('/^cc:\s/i', $line)) {
 			$ccline .= trim($line)."\n";
 			$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
-			$tmpcc=preg_split("/[\s,]+/", $linetmp);
+			$tmpcc=preg_split("/[\s,;]+/", $linetmp);
 			$nbcc+=count($tmpcc);
 		} elseif (preg_match('/^bcc:\s/i', $line)) {
 			$bccline .= trim($line)."\n";
 			$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
-			$tmpbcc=preg_split("/[\s,]+/", $linetmp);
+			$tmpbcc=preg_split("/[\s,;]+/", $linetmp);
 			$nbbcc+=count($tmpbcc);
 		}
 
