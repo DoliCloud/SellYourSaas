@@ -339,11 +339,12 @@ print '</div></div></div>';
 
 //$servicetouse='old';
 $servicetouse=strtolower($conf->global->SELLYOURSAAS_NAME);
+$regs = array();
 
 // array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn))
 $data1 = array();
 $sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
-$sql.=" WHERE service = '".$servicetouse."' AND name IN ('total', 'totalcommissions')";
+$sql.=" WHERE service = '".$db->escape($servicetouse)."' AND name IN ('total', 'totalcommissions')";
 $sql.=" ORDER BY x, name";
 $resql=$db->query($sql);
 if ($resql) {
@@ -388,7 +389,7 @@ if ($resql) {
 
 $data2 = array();
 $sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
-$sql.=" WHERE service = '".$servicetouse."' AND name IN ('totalinstancespaying', 'totalinstancespayingall', 'totalinstances', 'totalusers')";
+$sql.=" WHERE service = '".$db->escape($servicetouse)."' AND name IN ('totalinstancespaying', 'totalinstancespayingall', 'totalinstances', 'totalusers')";
 $sql.=" ORDER BY x, name";
 $resql=$db->query($sql);
 if ($resql) {
@@ -430,6 +431,52 @@ if ($resql) {
 	}
 } else dol_print_error($db);
 
+// array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn))
+$data3 = array();
+$sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
+$sql.=" WHERE service = '".$db->escape($servicetouse)."' AND name IN ('total', 'totalinstancespayingall')";
+$sql.=" ORDER BY x, name";
+$resql=$db->query($sql);
+if ($resql) {
+	$num = $db->num_rows($resql);
+	$i=0;
+
+	$oldx='';
+	$absice=array();
+	while ($i < $num) {
+		$obj=$db->fetch_object($resql);
+		if ($obj->x < $startyear."01") { $i++; continue; }
+		if ($obj->x > $endyear."12") { $i++; continue; }
+
+		if ($oldx && $oldx != $obj->x) {
+			// break
+			preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
+			$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
+			$averagebasket=(empty($absice[2]) ? 0 : price2num($absice[1] / $absice[2], 'MT'));
+			$absice[1]=$averagebasket; unset($absice[2]);
+			ksort($absice);
+			$data3[]=$absice;
+			$absice=array();
+		}
+
+		$oldx=$obj->x;
+
+		if ($obj->name == 'total') $absice[1]=$obj->y;
+		if ($obj->name == 'totalinstancespayingall') $absice[2]=$obj->y;
+
+		$i++;
+	}
+
+	if ($oldx) {
+		preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
+		$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
+		$benefit=(empty($absice[2]) ? 0 : price2num($absice[1] / $absice[2], 'MT'));
+		$absice[1]=$averagebasket; unset($absice[2]);
+		ksort($absice);
+		$data3[]=$absice;
+	}
+} else dol_print_error($db);
+
 
 if (empty($conf->dol_optimize_smallscreen)) {
 	$WIDTH=600;
@@ -452,6 +499,11 @@ if (! $mesg) {
 	$legend[0]=$langs->trans("RevenuePerMonth").' ('.$langs->trans("HT").')';
 	$legend[1]=$langs->trans("CommissionPerMonth").' ('.$langs->trans("HT").')';
 	$legend[2]=$langs->trans("BenefitDoliCloud");
+	if (!empty($conf->dol_optimize_smallscreen)) {
+		foreach ($legend as $key => $value) {
+			$legend[$key] = dol_trunc($legend[$key], 20);
+		}
+	}
 
 	$px1->SetLegend($legend);
 	$px1->SetMaxValue($px1->GetCeilMaxValue());
@@ -479,6 +531,11 @@ if (! $mesg) {
 	$legend[1]=$langs->trans("NbOfInstancesActivePayingAll");
 	$legend[2]=$langs->trans("NbOfActiveInstances");
 	$legend[3]=$langs->trans("NbOfUsers");
+	if (!empty($conf->dol_optimize_smallscreen)) {
+		foreach ($legend as $key => $value) {
+			$legend[$key] = dol_trunc($legend[$key], 20);
+		}
+	}
 
 	$px2->SetLegend($legend);
 	$px2->SetMaxValue($px2->GetCeilMaxValue());
@@ -495,6 +552,31 @@ if (! $mesg) {
 	$px2->draw('dolicloudcustomersusers.png', $fileurlnb);
 }
 
+// Show graph
+$px3 = new DolGraph();
+$mesg = $px3->isGraphKo();
+if (! $mesg) {
+	$px3->SetData($data3);
+	$data3 = null;
+
+	$legend=array();
+	$legend[0]=$langs->trans("AverageBasket").' ('.$langs->trans("HT").')';
+
+	$px3->SetLegend($legend);
+	$px3->SetMaxValue($px3->GetCeilMaxValue());
+	$px3->SetWidth($WIDTH);
+	$px3->SetHeight($HEIGHT);
+	$px3->SetYLabel($langs->trans("Amount"));
+	$px3->SetShading(3);
+	$px3->SetHorizTickIncrement(1);
+	$px3->SetCssPrefix("cssboxes");
+	$px3->SetType(array('lines'));
+	$px3->mode='depth';
+	$px3->SetTitle($langs->trans("Other"));
+
+	$px3->draw('dolicloudaveragebasket.png', $fileurlnb);
+}
+
 print '<div class="fichecenter"><br></div>';
 
 //print '<hr>';
@@ -503,12 +585,14 @@ print '<div class="fichecenter"><br></div>';
 print '<div class="fichecenter center"><center>';
 print '<div class="inline-block nohover">';
 print $px1->show();
-//print '</div></div>';
-//print '<div class="fichecenter">';
 print '</div>';
 print '<div class="inline-block nohover">';
 print $px2->show();
-print '</div></center></div>';
+print '</div>';
+print '<div class="inline-block nohover">';
+print $px3->show();
+print '</div>';
+print '</center></div>';
 
 
 dol_fiche_end();
