@@ -305,8 +305,11 @@ print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("AverageRevenuePerInstance");
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.($totalinstancespaying?price(price2num($total/$totalinstancespaying, 'MT'), 1):'0').' </font>';
-else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+if (! empty($_SESSION['stats_totalusers'])) {
+	if ($totalinstancespayingall) {
+		print '<font size="+2">'.($totalinstancespaying?price(price2num($total/$totalinstancespayingall, 'MT'), 1):'0').' </font>';
+	}
+} else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("RevenuePerMonth").' ('.$langs->trans("HT").')';
@@ -560,7 +563,7 @@ if (! $mesg) {
 	$data3 = null;
 
 	$legend=array();
-	$legend[0]=$langs->trans("AverageBasket").' ('.$langs->trans("HT").')';
+	$legend[0]=$langs->trans("AverageRevenuePerInstance").' ('.$langs->trans("HT").')';
 
 	$px3->SetLegend($legend);
 	$px3->SetMaxValue($px3->GetCeilMaxValue());
