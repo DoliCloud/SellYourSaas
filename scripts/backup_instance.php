@@ -526,7 +526,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+		if (!empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && empty($NOSTATS)) {
 			try {
 				print "Send result of backup ok to DataDog\n";
 				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
