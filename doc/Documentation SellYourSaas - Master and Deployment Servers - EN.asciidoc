@@ -2790,7 +2790,8 @@ $ORIGIN withX.mysaasdomainname.com.
                 NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       ip.of.deployment.server		; set here the ip of deployment server that hosts the deployed applications
+@               IN      A       ip.of.deployment.server		; ip of deployment server that hosts the deployed applications
+*               IN      A       ip.of.deployment.server		; ip of deployment server that hosts the deployed applications
 
 $ORIGIN withX.mysaasdomainname.com.
 
