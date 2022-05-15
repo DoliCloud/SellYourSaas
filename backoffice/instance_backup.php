@@ -471,12 +471,12 @@ if ($restorestringfromarchive) {
 	print '<br>';
 }
 
-// Duplicate an instance
+// Duplicate an instance into another instance (already existing instance)
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(can be run on any server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
-	print $backupstringtoshow."\n";
+	print $backupstringtoshow." --nostats\n";
 	print $restorestringtoshow;
 	print '</textarea>';
 
@@ -484,7 +484,7 @@ if ($restorestringfrombackupshort) {
 	print '<br>';
 }
 
-// Migrate to another instance container
+// Move instance into another server (non existing target instance)
 if ($moveinstancestringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run on master server)</span><br>';
