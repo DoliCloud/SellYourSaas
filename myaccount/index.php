@@ -348,11 +348,11 @@ if (preg_match('/logout/', $mode)) {
 
 	session_destroy();
 	$param='';
-	if (GETPOSTISSET('username', 'alpha'))   $param.='&username='.urlencode(GETPOST('username', 'alpha'));
-	if (GETPOSTISSET('password', 'alpha'))   $param.='&password='.urlencode(GETPOST('password', 'alpha'));
-	if (GETPOSTISSET('login_hash', 'alpha')) $param.='&login_hash='.urlencode(GETPOST('login_hash', 'alpha'));
-	if (GETPOSTISSET('action', 'alpha'))     $param.='&action='.urlencode(GETPOST('action', 'alpha'));
-	if (GETPOSTISSET('actionlogin', 'alpha')) $param.='&actionlogin='.urlencode(GETPOST('actionlogin', 'alpha'));
+	if (GETPOSTISSET('username'))   $param.='&username='.urlencode(GETPOST('username', 'alpha'));
+	if (GETPOSTISSET('password'))   $param.='&password='.urlencode(GETPOST('password', 'alpha'));
+	if (GETPOSTISSET('login_hash')) $param.='&login_hash='.urlencode(GETPOST('login_hash', 'alpha'));
+	if (GETPOSTISSET('action'))     $param.='&action='.urlencode(GETPOST('action', 'alpha'));
+	if (GETPOSTISSET('actionlogin')) $param.='&actionlogin='.urlencode(GETPOST('actionlogin', 'alpha'));
 	if ($mode) $param.='&mode='.urlencode($mode);
 	header("Location: /index.php".($param?'?'.$param:''));
 	exit;
