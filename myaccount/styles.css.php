@@ -411,6 +411,20 @@ border-radius: 0 4px 4px 0;
 }
 
 
+.grid-wrapper-automigration {
+	display : grid;
+	grid-row : auto auto;
+	grid-template-columns : auto auto;
+	grid-row-gap : 20px;
+	grid-column-gap : 20px;
+}
+.grid-boxes-automigration-left {
+	display : flex;
+	justify-content : right;
+}
+
+
+
 input.input-field {
     padding: 8px;
     border: 1px solid #ccc;
@@ -427,7 +441,6 @@ input.input-field {
 .span-icon-user:before, .span-icon-password:before {
 	opacity: 0.4;
 }
-
 
 /* For smartphones */
 
