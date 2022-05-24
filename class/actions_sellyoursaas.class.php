@@ -1080,10 +1080,12 @@ class ActionsSellyoursaas
 		$pagecounttmp = $pdf->setSourceFile($file);
 		if ($pagecounttmp) {
 			try {
-				$tplidx = $pdf->ImportPage(1);
-				$s = $pdf->getTemplatesize($tplidx);
-				$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
-				$pdf->useTemplate($tplidx);
+				for ($i = 1; $i <= $pagecounttmp; $i++) {
+					$tplidx = $pdf->importPage($i);
+					$s = $pdf->getTemplatesize($tplidx);
+					$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
+					$pdf->useTemplate($tplidx);
+				}
 				$logo = $conf->mycompany->dir_output.'/logos/thumbs/'.$secondlogo;
 
 				$height=pdf_getHeightForLogo($logo);
