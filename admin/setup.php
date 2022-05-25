@@ -44,6 +44,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/images.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/geturl.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php";
+require_once DOL_DOCUMENT_ROOT."/core/class/html.formticket.class.php";
 require_once DOL_DOCUMENT_ROOT."/categories/class/categorie.class.php";
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
@@ -165,6 +166,8 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_DATADOG_ENABLED", GETPOST("SELLYOURSAAS_DATADOG_ENABLED", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_DATADOG_APIKEY", GETPOST("SELLYOURSAAS_DATADOG_APIKEY", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_DATADOG_APPKEY", GETPOST("SELLYOURSAAS_DATADOG_APPKEY", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		
+		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", GETPOST("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
@@ -300,6 +303,7 @@ if ($action == 'removelogoblack') {
 
 $formother=new FormOther($db);
 $form=new Form($db);
+$formticket = new FormTicket($db);
 
 $help_url="";
 llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
@@ -885,9 +889,14 @@ print '</td>';
 print '<td><span class="opacitymedium">45fdf4sds54fdf</span></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
+print '<td>';
+print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', '2');
+
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_SUPPORT_SHOW_MESSAGE" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE').'</textarea>';
+
 print '</td>';
 print '<td></td>';
 print '</tr>';
