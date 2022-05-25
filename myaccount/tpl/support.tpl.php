@@ -104,6 +104,9 @@ if ($sellyoursaassupporturl) {
 					if (!empty(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE'))) {
 						print '<span>'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE').'</span><br><br>';
 					}
+	// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
+	if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+					  
 					print '<!-- form to select channel -->'."\n";
 					print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 					print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -114,119 +117,119 @@ if ($sellyoursaassupporturl) {
 
 					print '<select id="supportchannel" name="supportchannel" class="minwidth600">';
 					print '<option value="">&nbsp;</option>';
-	if (count($listofcontractid) == 0) {
-		// Should not happen
-	} else {
-		$atleastonehigh=0;
-		$atleastonefound=0;
+		if (count($listofcontractid) == 0) {
+			// Should not happen
+		} else {
+			$atleastonehigh=0;
+			$atleastonefound=0;
 
-		foreach ($listofcontractid as $id => $contract) {
-							$planref = $contract->array_options['options_plan'];
-							$statuslabel = $contract->array_options['options_deployment_status'];
-							$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
+			foreach ($listofcontractid as $id => $contract) {
+								$planref = $contract->array_options['options_plan'];
+								$statuslabel = $contract->array_options['options_deployment_status'];
+								$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-							$dbprefix = $contract->array_options['options_db_prefix'];
-							if (empty($dbprefix)) $dbprefix = 'llx_';
+								$dbprefix = $contract->array_options['options_db_prefix'];
+								if (empty($dbprefix)) $dbprefix = 'llx_';
 
-			if ($statuslabel == 'undeployed') {
-				continue;
-			}
-
-							// Get info about PLAN of Contract
-							$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
-
-							$planid = 0;
-							$freeperioddays = 0;
-							$directaccess = 0;
-
-							$tmpproduct = new Product($db);
-			foreach ($contract->lines as $keyline => $line) {
-				if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
-									$statuslabel = 'suspended';
+				if ($statuslabel == 'undeployed') {
+					continue;
 				}
 
-				if ($line->fk_product > 0) {
-						$tmpproduct->fetch($line->fk_product);
-					if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
-						$planref = $tmpproduct->ref;			// Warning, ref is in language of user
-						$planlabel = $tmpproduct->label;		// Warning, label is in language of user
-						$planid = $tmpproduct->id;
-						$freeperioddays = $tmpproduct->array_options['options_freeperioddays'];
-						$directaccess = $tmpproduct->array_options['options_directaccess'];
-						break;
+								// Get info about PLAN of Contract
+								$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
+
+								$planid = 0;
+								$freeperioddays = 0;
+								$directaccess = 0;
+
+								$tmpproduct = new Product($db);
+				foreach ($contract->lines as $keyline => $line) {
+					if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
+										$statuslabel = 'suspended';
 					}
-				}
-			}
 
-			$ispaid = sellyoursaasIsPaidInstance($contract);
-
-			$color = "green";
-			if ($statuslabel == 'processing') { $color = 'orange'; }
-			if ($statuslabel == 'suspended') { $color = 'orange'; }
-			if ($statuslabel == 'undeployed') { $color = 'grey'; }
-			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
-
-			if ($tmpproduct->array_options['options_typesupport'] != 'none'
-				&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-				if (! $ispaid) {	// non paid instances
-					$priority = 'low';
-					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
-				} else {
-					if ($ispaid) {	// paid with level Premium
-						if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
-							$priority = 'high';
-							$prioritylabel = '<span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span>';
-							$atleastonehigh++;
-						} else {	// paid with level Basic
-							$priority = 'medium';
-							$prioritylabel = '<span class="prioritymedium">'.$langs->trans("Priority").' '.$langs->trans("Medium").'</span>';
+					if ($line->fk_product > 0) {
+							$tmpproduct->fetch($line->fk_product);
+						if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
+							$planref = $tmpproduct->ref;			// Warning, ref is in language of user
+							$planlabel = $tmpproduct->label;		// Warning, label is in language of user
+							$planid = $tmpproduct->id;
+							$freeperioddays = $tmpproduct->array_options['options_freeperioddays'];
+							$directaccess = $tmpproduct->array_options['options_directaccess'];
+							break;
 						}
 					}
 				}
 
-				$optionid = $priority.'_'.$id;
-				$labeltoshow = '';
-				$labeltoshow .= $langs->trans("Instance").' <strong>'.$contract->ref_customer.'</strong> ';
-				//$labeltoshow = $tmpproduct->label.' - '.$contract->ref_customer.' ';
-				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
-				//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
-				$labeltoshow .= ' - ';
-				$labeltoshow .= $prioritylabel;
+				$ispaid = sellyoursaasIsPaidInstance($contract);
 
-				print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
-				print dol_escape_htmltag($labeltoshow);
-				print '</option>';
-				//print ajax_combobox('supportchannel');
+				$color = "green";
+				if ($statuslabel == 'processing') { $color = 'orange'; }
+				if ($statuslabel == 'suspended') { $color = 'orange'; }
+				if ($statuslabel == 'undeployed') { $color = 'grey'; }
+				if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
-				$atleastonefound++;
+				if ($tmpproduct->array_options['options_typesupport'] != 'none'
+					&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+					if (! $ispaid) {	// non paid instances
+						$priority = 'low';
+						$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
+					} else {
+						if ($ispaid) {	// paid with level Premium
+							if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
+								$priority = 'high';
+								$prioritylabel = '<span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span>';
+								$atleastonehigh++;
+							} else {	// paid with level Basic
+								$priority = 'medium';
+								$prioritylabel = '<span class="prioritymedium">'.$langs->trans("Priority").' '.$langs->trans("Medium").'</span>';
+							}
+						}
+					}
+
+					$optionid = $priority.'_'.$id;
+					$labeltoshow = '';
+					$labeltoshow .= $langs->trans("Instance").' <strong>'.$contract->ref_customer.'</strong> ';
+					//$labeltoshow = $tmpproduct->label.' - '.$contract->ref_customer.' ';
+					//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
+					//$labeltoshow .= $tmpproduct->array_options['options_typesupport'];
+					$labeltoshow .= ' - ';
+					$labeltoshow .= $prioritylabel;
+
+					print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
+					print dol_escape_htmltag($labeltoshow);
+					print '</option>';
+					//print ajax_combobox('supportchannel');
+
+					$atleastonefound++;
+				}
 			}
 		}
+
+		// Add link other or miscellaneous
+		if (! $atleastonefound) {
+			$labelother = $langs->trans("Miscellaneous");
+		} else {
+			$labelother = $langs->trans("Other");
+		}
+
+		$labelother .= ' &nbsp; <span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span>';
+
+		print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
+		if (empty($atleastonehigh)) {
+			$labeltoshow = $langs->trans("PremiumSupport").' <span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span> ('.$langs->trans("NoPremiumPlan").')';
+			print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
+		}
+		print '</select>';
+		print ajax_combobox("supportchannel");
+
+		print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
+
+		print '</form>';
 	}
 
-	// Add link other or miscellaneous
-	if (! $atleastonefound) {
-		$labelother = $langs->trans("Miscellaneous");
-	} else {
-		$labelother = $langs->trans("Other");
-	}
-
-	$labelother .= ' &nbsp; <span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span>';
-
-	print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
-	if (empty($atleastonehigh)) {
-		$labeltoshow = $langs->trans("PremiumSupport").' <span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span> ('.$langs->trans("NoPremiumPlan").')';
-		print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
-	}
-	print '</select>';
-	print ajax_combobox("supportchannel");
-
-	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
-
-	print '</form>';
-
-	if ($action == 'presend' && GETPOST('supportchannel', 'alpha')) {
-		print '<br><br>';
-
+	if (($action == 'presend' && GETPOST('supportchannel', 'alpha')) || getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+		print !getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') ? '<br><br>' : '<br>';
 		$trackid = '';
 		dol_init_file_process($upload_dir, $trackid);
 
@@ -270,6 +273,8 @@ if ($sellyoursaassupporturl) {
 		print '</form>';
 		*/
 
+		// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
+		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 		print '<!-- form to send a ticket -->'."\n";
 		print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
 		print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -312,6 +317,7 @@ if ($sellyoursaassupporturl) {
 
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
+	}
 
 		// Combobox for Group of ticket
 		$formticket = new FormTicket($db);
@@ -443,6 +449,8 @@ if ($sellyoursaassupporturl) {
 			print '<div id="hideforautomigration"><div>';
 		}
 
+	// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
+	if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
 		print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
@@ -453,7 +461,6 @@ if ($sellyoursaassupporturl) {
 		}
 		print $out;
 		print '<br>';
-
 		// Description
 		print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
 
@@ -479,6 +486,7 @@ if ($sellyoursaassupporturl) {
 			print '<input type="hidden" name="action" value="view">';
 		}
 		print '</form>';
+		}
 	}
 
 				print ' 	</div></div>
