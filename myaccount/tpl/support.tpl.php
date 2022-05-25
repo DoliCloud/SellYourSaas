@@ -382,10 +382,12 @@ if ($sellyoursaassupporturl) {
 					$("#hideforautomigration").hide();
 					$("#showforautomigration").show();
 				}else{
-					if($("#hideforautomigration").attr("style") == "display: none;"){
+					if($("#ticketcategory_select").val() != "" && $("#hideforautomigration").attr("style") == "display: none;"){
 						console.log("We show full form");
 						$("#hideforautomigration").show();
 						$("#showforautomigration").hide();
+					}else if($("#ticketcategory_select").val() == ""){
+						$("#hideforautomigration").hide();
 					}
 					$("#buttonforautomigrationwithhidden").hide();
 				}
@@ -427,6 +429,7 @@ if ($sellyoursaassupporturl) {
 			}
 
 			trackChange($("#ticketcategory_select")[0]);
+			$("#hideforautomigration").hide();
 		});
 		</script>'."\n";
 		$stringtoprint .= '<div class="supportemailfield " id="KWwithajax"></div>';
