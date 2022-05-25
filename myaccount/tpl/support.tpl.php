@@ -101,7 +101,9 @@ if ($sellyoursaassupporturl) {
 
 				      <div class="portlet-title">
 				        <div class="caption">';
-
+					if (!empty(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE'))) {
+						print '<span>'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE').'</span><br><br>';
+					}
 					print '<!-- form to select channel -->'."\n";
 					print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 					print '<input type="hidden" name="token" value="'.newToken().'">';

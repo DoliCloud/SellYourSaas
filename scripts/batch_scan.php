@@ -20,7 +20,7 @@
 /**
  *      \file       sellyoursaas/scripts/batch_scan.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to detect bad instance
+ *      \brief      Script to detect evils instances by scanning inside its data for blacklist content
  */
 
 if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
@@ -136,6 +136,7 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
+	print "Script to detect evils instances by scanning inside its data for blacklist content.\n";
 	print "Usage on deployment servers: ".$script_file." (test) [instancefilter]\n";
 	print "\n";
 	print "- test          test scan\n";
@@ -311,7 +312,7 @@ if ($fp) {
 	// IFS=$(echo -en "\n\b")
 	// for fic in `ls /home/jail/home/osu*/dbn*/htdocs/index.php`; do grep -l spamtext $fic; done
 	while (($buffer = fgets($fp, 4096)) !== false) {
-		echo 'Scan if if found the string '.$buffer.' into /home/jails/home/osu*/dbn*/htdocs/index.php'."\n";
+		echo 'Scan if we found the string '.$buffer.' into /home/jails/home/osu*/dbn*/htdocs/index.php'."\n";
 
 		// TODO
 	}
