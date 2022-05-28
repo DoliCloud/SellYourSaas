@@ -306,7 +306,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 */
 	public function getNbOfRecipients($filter = 1, $option = '')
 	{
-		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email != ''");
+		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email <> ''");
 		if ($a < 0) return -1;
 		return $a;
 	}

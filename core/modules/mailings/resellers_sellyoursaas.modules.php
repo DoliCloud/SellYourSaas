@@ -23,7 +23,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 	public $desc = 'Resellers SellYourSaas';
 	public $require_admin = 0;
 
-	public $enabled = '$conf->sellyoursaas->enabled';
+	public $enabled = '$conf->sellyoursaas->enabled && !empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM)';
 
 	public $require_module = array();
 	public $picto = 'sellyoursaas@sellyoursaas';
@@ -104,66 +104,34 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		$cibles = array();
 		$j = 0;
 
-		if (GETPOSTISSET('lang_id') && is_array($_POST['lang_id'])) {
-			foreach ($_POST['lang_id'] as $key => $val) {
+		if (GETPOSTISSET('lang_id_reseller') && is_array($_POST['lang_id_reseller'])) {
+			foreach ($_POST['lang_id_reseller'] as $key => $val) {
 				if (empty($val)) {
-					unset($_POST['lang_id'][$key]);
+					unset($_POST['lang_id_reseller'][$key]);
 				}
 			}
 		}
-		if (GETPOSTISSET('not_lang_id') && is_array($_POST['not_lang_id'])) {
-			foreach ($_POST['not_lang_id'] as $key => $val) {
+		if (GETPOSTISSET('not_lang_id_reseller') && is_array($_POST['not_lang_id_reseller'])) {
+			foreach ($_POST['not_lang_id_reseller'] as $key => $val) {
 				if (empty($val)) {
-					unset($_POST['not_lang_id'][$key]);
+					unset($_POST['not_lang_id_reseller'][$key]);
 				}
 			}
 		}
 
 		$productid = GETPOST('productid', 'int');
 
-		$sql = " SELECT s.rowid as id, email, nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label,";
-		$sql .= " se.stripeaccount, se.domain_registration_page";
-		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
-			(! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
-			($productid > 0)) {
-				$sql .= ", coe.deployment_host";
-		}
+		$sql = " SELECT s.rowid as id, s.email, s.nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label";
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
-		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
-			(! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
-			($productid > 0)) {
-				$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
-				$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
-		}
 		$sql .= ", ".MAIN_DB_PREFIX."categorie_societe as cs";
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
-		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
-		/*if (! empty($_POST['options_dolicloud']) && $_POST['options_dolicloud'] != 'none')
-		{
-			$sql.= " AND se.dolicloud = '".$this->db->escape($_POST['options_dolicloud'])."'";
-		}*/
-		if (GETPOST('lang_id') && GETPOST('lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id', 'array')), 3);
-		if (GETPOST('not_lang_id') && GETPOST('not_lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id', 'array')), -3);
-		if (GETPOST('country_id') && GETPOST('country_id') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
-		if (GETPOST('filter') && GETPOST('filter') != 'none') {
-			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('filter'))."'";
-		}
-		if (GETPOST('filterip') && GETPOST('filterip') != 'none') {
-			$sql.= " AND coe.deployment_host = '".$this->db->escape(GETPOST('filterip'))."'";
-		}
-		if (GETPOST('client') && GETPOST('client') != '-1') {
-			$sql.= ' AND s.client IN ('.$this->db->sanitize(GETPOST('client', 'intcomma')).')';
-		}
-
-		if ($productid > 0) {
-			$sql .= ' AND co.rowid IN (SELECT fk_contrat FROM '.MAIN_DB_PREFIX.'contratdet as cd WHERE fk_product IN ('.$this->db->sanitize($this->db->escape($productid)).'))';
-		}
-
-		if (GETPOST('donotusedefaultstripeaccount')) {
-			$sql.= " AND se.stripeaccount IS NOT NULL AND se.stripeaccount <> ''";
-		}
+		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG);
+		$sql .= " AND s.status = ".((int) GETPOST('status_reseller', 'int'));
+		if (GETPOST('lang_id_reseller') && GETPOST('lang_id_reseller') != 'none') $sql.= natural_search('default_lang_reseller', join(',', GETPOST('lang_id_reseller', 'array')), 3);
+		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') $sql.= natural_search('default_lang_reseller', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
+		if (GETPOST('country_id_reseller') && GETPOST('country_id_reseller') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id_reseller', 'intcomma'), 1)."')";
 
 		$sql.= " ORDER BY email";
 		//print $sql;
@@ -174,7 +142,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 			$num = $this->db->num_rows($result);
 			$i = 0;
 
-			dol_syslog("mailinglist_sellyoursaas.modules.php: mailing $num target found");
+			dol_syslog("resellers_sellyoursaas.modules.php: mailing $num target found");
 
 			$old = '';
 			while ($i < $num) {
@@ -185,7 +153,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 						'lastname' => $obj->lastname,
 						'id' => $obj->id,
 						'firstname' => $obj->firstname,
-						'other' => 'lang='.$obj->default_lang.';country_code='.$obj->country_code.';domain_registration='.$obj->domain_registration_page.';host_instance='.$obj->deployment_host,
+						'other' => 'lang='.$obj->default_lang.';country_code='.$obj->country_code,
 						'source_url' => $this->url($obj->id),
 						'source_id' => $obj->id,
 						'source_type' => 'thirdparty'
@@ -245,7 +213,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 	 */
 	public function getNbOfRecipients($filter = 1, $option = '')
 	{
-		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email != ''");
+		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email <> ''");
 		if ($a < 0) return -1;
 		return $a;
 	}
