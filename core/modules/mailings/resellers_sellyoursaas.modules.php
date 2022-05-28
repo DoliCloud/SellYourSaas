@@ -15,12 +15,12 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 
 
 /**
- * mailing_mailinglist_sellyousaas
+ * mailing_resellers_sellyoursaas
  */
-class mailing_mailinglist_sellyoursaas extends MailingTargets
+class mailing_resellers_sellyoursaas extends MailingTargets
 {
-	public $name = 'mailinglist_sellyoursaas';
-	public $desc = 'Prospects or Customers SellYourSaas';
+	public $name = 'mailing_resellers';
+	public $desc = 'Resellers SellYourSaas';
 	public $require_admin = 0;
 
 	public $enabled = '$conf->sellyoursaas->enabled';
@@ -52,85 +52,24 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$langs->load("members");
 
 		$form=new Form($this->db);
-		$formcompany=new FormCompany($this->db);
+		$formother=new FormAdmin($this->db);
 
-		$arraystatus=array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed');
-
-		$s='';
-		$s.=$langs->trans("Type").': ';
-		$s.=$formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client');
-
-		$s.=' ';
+		$arraystatus=array('1'=>'Open', '0'=>'Closed');
+		$s.=$langs->trans("Status").': ';
+		$s.=$form->selectarray('status_reseller', $arraystatus, GETPOST('status_reseller', 'alpha'));
 
 		$s.=$langs->trans("Country").': ';
-		$formother=new FormAdmin($this->db);
-		$s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id');
+		$s.=$form->select_country(GETPOST('country_id_reseller', 'alpha'), 'country_id_reseller', '', 0, 'minwidth300', '', 1);
 
 		$s.='<br> ';
 
 		$s.=$langs->trans("Language").': ';
-		$formother=new FormAdmin($this->db);
 
-		$s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+		$s.=$formother->select_language(GETPOST('lang_id_reseller', 'array'), 'lang_id_reseller', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
 		$s.=$langs->trans("NotLanguage").': ';
 		$formother=new FormAdmin($this->db);
-		$s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
-
-		$s.='<br> ';
-
-		$s.=$langs->trans("DeploymentStatus").': ';
-		$s.='<select name="filter" class="flat">';
-		$s.='<option value="none">&nbsp;</option>';
-		foreach ($arraystatus as $key => $status) {
-			$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
-		}
-		$s.='</select>';
-
-		$s.=' ';
-
-		$listofipwithinstances=array();
-		$sql = "SELECT DISTINCT deployment_host";
-		$sql .= " FROM ".MAIN_DB_PREFIX."contrat_extrafields";
-		$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
-		$resql=$this->db->query($sql);
-		if ($resql) {
-			while ($obj = $this->db->fetch_object($resql)) {
-				$listofipwithinstances[]=$obj->deployment_host;
-			}
-			$this->db->free($resql);
-		} else dol_print_error($this->db);
-
-		$s.=$langs->trans("DeploymentHost").': ';
-		$s.='<select name="filterip" class="flat">';
-		$s.='<option value="none">&nbsp;</option>';
-		foreach ($listofipwithinstances as $val) {
-			$s.='<option value="'.$val.'"'.(GETPOST('filterip', 'alpha') == $val ? ' selected':'').'>'.$val.'</option>';
-		}
-		$s.='</select>';
-
-		$s.='<br> ';
-
-		$listofpackages=array();
-		$sql = "SELECT DISTINCT ref";
-		$sql .= " FROM ".MAIN_DB_PREFIX."packages";
-		//$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
-		$resql=$this->db->query($sql);
-		if ($resql) {
-			while ($obj = $this->db->fetch_object($resql)) {
-				$listofpackages[]=$obj->ref;
-			}
-			$this->db->free($resql);
-		} else dol_print_error($this->db);
-		//$s .= $langs->trans("Package").': ';
-
-		$s .= $langs->trans("Product").': ';
-		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
-
-		$s .= '<br>';
-
-		$s.=$langs->trans("DoNotUseDefaultStripeAccount").': ';
-		$s.='<input type="checkbox" value="1" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
+		$s.=$formother->select_language(GETPOST('not_lang_id_reseller', 'array'), 'not_lang_id_reseller', 0, 'null', 1, 0, 0, '', 0, 0, 1);
 
 		return $s;
 	}
