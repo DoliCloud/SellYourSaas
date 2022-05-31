@@ -529,13 +529,21 @@ if ($action == 'updateurl') {
 		if (! empty($conf->global->$newnamekey)) $sellyoursaasnoreplyemail = $conf->global->$newnamekey;
 	}
 
+	// Set email to use when applying for reseller program. Use SELLYOURSAAS_RESELLER_EMAIL and if not found backfall on SELLYOURSAAS_MAIN_EMAIL.
+	$emailto = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
+	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+			if (!empty($conf->global->$newnamekey)) $emailto = $conf->global->$newnamekey;
+	}
+
 	$emailfrom = $sellyoursaasnoreplyemail;
-	$emailto = GETPOST('to', 'alpha');
 	$replyto = GETPOST('from', 'alpha');
 	$topic = '['.$sellyoursaasname.'] - '.GETPOST('subject', 'none').' - '.$mythirdpartyaccount->name;
-	$content = GETPOST('content', 'none');
+	$content = GETPOST('content', 'restricthtml');
 	$content .= "<br><br>\n";
 	$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
+	$content .= 'ThirdParty ID: '.$mythirdpartyaccount->id."<br>\n";
 	$content .= 'Email: '.GETPOST('from', 'alpha')."<br>\n";
 
 	$trackid = 'thi'.$mythirdpartyaccount->id;
