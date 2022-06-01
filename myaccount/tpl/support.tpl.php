@@ -329,6 +329,7 @@ if ($sellyoursaassupporturl) {
 			}
 		}
 
+		//$atleastonepublicgroup = 0;
 		if ($atleastonepublicgroup) {
 			$stringtoprint = '<br>';
 			$stringtoprint .= $formticket->selectGroupTickets(GETPOST('ticketcategory', 'int'), 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
@@ -344,7 +345,7 @@ if ($sellyoursaassupporturl) {
 		$stringtoprint .= '
 		jQuery(document).ready(function() {
 			function groupticketchange(){
-				idgroupticket = $("#ticketcategory_select").val();
+				idgroupticket = $("#ticketcategory").val();
 				console.log("We called groupticketchange and have selected id="+idgroupticket+", so we try to load list KM linked to event");
 
 				$("#KWwithajax").html("");
@@ -366,6 +367,7 @@ if ($sellyoursaassupporturl) {
 								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul>\');
 								$("#KWwithajax").show();
 							}
+							$("#formsubject").focus();
 						 },
 						 error : function(output) {
 							console.log("error");
@@ -374,36 +376,36 @@ if ($sellyoursaassupporturl) {
 				}
 			};
 
-			$("#ticketcategory_select").bind("change",function() {
+			$("#ticketcategory").bind("change",function() {
+				console.log("We change group of ticket");
 				groupticketchange();';
+
 			$stringtoprint .= '
 				tmp = $("#ticketcategory_select_child_id").val();
 				$("#ticketcategory_child_id_back").val(tmp);
 				tmp = $("#ticketcategory_select").val();
 				$("#ticketcategory_back").val(tmp);
 				';
-		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
 			$stringtoprint .= '
-					if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory_select").val()){
+					if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
 						console.log("We hide for automigration");
 						$(".hideforautomigration").hide();
 						$(".showforautomigration").show();
 					} else {';
 
 			$stringtoprint .= '
-						if ($("#ticketcategory_select").val() != "" && $("#hideforautomigration").attr("style") == "display: none;") {
+						if ($("#ticketcategory").val() != "") {
 							console.log("We show full form");
 							$(".hideforautomigration").show();
 							$(".showforautomigration").hide();
 							$("#formsubject").focus();
-						} else if($("#ticketcategory_select").val() == "") {
+						} else if($("#ticketcategory").val() == "") {
 							console.log("We hide all");
 							$(".hideforautomigration").hide();
 							$(".showforautomigration").hide();
 						}
 						$("#buttonforautomigrationwithhidden").hide();
 					}';
-		}
 			$stringtoprint .= '
 			});';
 
@@ -415,7 +417,7 @@ if ($sellyoursaassupporturl) {
 				$(".showforautomigration").hide();
 				$("#buttonforautomigrationwithhidden").show();';
 			}
-			$stringtoprint .= 'if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory_select").val()){
+			$stringtoprint .= 'if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
 				console.log("We hide for automigration");
 				$(".hideforautomigration").show();
 				$(".showforautomigration").hide();
@@ -434,8 +436,11 @@ if ($sellyoursaassupporturl) {
 				$("#subject_back").val($(this).val());
 			})';
 		}
+
 		$stringtoprint .= "
+			/*
 			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
 			var trackChange = function(element) {
 				var observer = new MutationObserver(function(mutations, observer) {
 					if (mutations[0].attributeName == 'value') {
@@ -448,9 +453,9 @@ if ($sellyoursaassupporturl) {
 			}
 
 			trackChange($('#ticketcategory_select')[0]);
-
+			*/
 			/* If we have something selected */
-			if (preselectedticketcategory == '' || preselectedticketcategory == automigrationcode) {
+			if ('".GETPOST('supportchannel')."' != '' && ".$atleastonepublicgroup." > 0 && automigrationcode != '0' && (preselectedticketcategory == '' || preselectedticketcategory == automigrationcode)) {
 				$('.hideforautomigration').hide();
 			}
 		});
@@ -475,19 +480,13 @@ if ($sellyoursaassupporturl) {
 			print '<div class="hideforautomigration">';
 			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
 			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
-			print '</div>';
 
 			print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 			print ' ';
 			print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
-		}
-		/*if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
-			print '<div class="center" id="buttonforautomigrationwithhidden" style="display:none;">';
-			print '<br><br><button type="submit" form="migrationForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutomigration").'</button>';
-			print '</div>';
-		}*/
-		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+
 			print $out;
+
 			print '<br>';
 			// Description
 			print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
@@ -501,9 +500,12 @@ if ($sellyoursaassupporturl) {
 			print ' ';
 			print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle marginleftonly">';
 			print '</center>';
+
+			print '</div>';
+
+			print '</form>';
+
 			if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
-				print '</div>';
-				print '</form>';
 				print '<form action="#Step1" method="post" id="migrationForm">';
 				print '<input type="hidden" name="mode" value="automigration">';
 				print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
@@ -512,8 +514,8 @@ if ($sellyoursaassupporturl) {
 				print '<input type="hidden" id="ticketcategory_back" name="ticketcategory_back" value="'.GETPOST('ticketcategory', 'alpha').'">';
 				print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
 				print '<input type="hidden" name="action" value="view">';
+				print '</form>';
 			}
-			print '</form>';
 		}
 	}
 
