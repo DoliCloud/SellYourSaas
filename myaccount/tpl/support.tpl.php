@@ -364,7 +364,7 @@ if ($sellyoursaassupporturl) {
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul>\');
+								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul><br>\');
 								$("#KWwithajax").show();
 							}
 							$("#formsubject").focus();
@@ -455,7 +455,9 @@ if ($sellyoursaassupporturl) {
 			trackChange($('#ticketcategory_select')[0]);
 			*/
 			/* If we have something selected */
-			if ('".GETPOST('supportchannel')."' != '' && ".$atleastonepublicgroup." > 0 && automigrationcode != '0' && (preselectedticketcategory == '' || preselectedticketcategory == automigrationcode)) {
+			console.log('supportchannel = ".GETPOST('supportchannel', 'alpha')."');
+			console.log('ticketcategory = ".GETPOST('ticketcategory', 'alpha')."');
+			if (('".GETPOST('supportchannel', 'alpha')."' == '' || ('".GETPOST('ticketcategory')."' == '')) && (".$atleastonepublicgroup." > 0) && (preselectedticketcategory == '' || preselectedticketcategory == automigrationcode)) {
 				$('.hideforautomigration').hide();
 			}
 		});
