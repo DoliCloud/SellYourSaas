@@ -249,7 +249,12 @@ $listofcontractidresellerall = array();
 $listofcontractidreseller = array();
 $listofcustomeridreseller = array();
 
-if ($mythirdpartyaccount->isareseller) {
+// Load list of child instances for resellers
+// TODO: This may be very slow on large resellers
+if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'mycustomerbilling', 'mycustomerinstances'))) {
+	dol_syslog("Thirdparty is a reseller so we load the list of all child instances/contracts");
+
+	// Full list of ID (no loading of object)
 	$sql = 'SELECT DISTINCT c.rowid, c.fk_soc';
 	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
@@ -270,10 +275,7 @@ if ($mythirdpartyaccount->isareseller) {
 		$i++;
 	}
 
-	if (empty($lastrecord) || $lastrecord > $nbtotalofrecords) $lastrecord = $nbtotalofrecords;
-
-	if ($lastrecord > 0) $sql.= " LIMIT ".($firstrecord?$firstrecord:1).", ".(($lastrecord >= $firstrecord) ? ($lastrecord - $firstrecord + 1) : 5);
-
+	// List limited
 	$sql = 'SELECT c.rowid as rowid, c.fk_soc';
 	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
@@ -284,6 +286,14 @@ if ($mythirdpartyaccount->isareseller) {
 	$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 	if ($search_instance_name) $sql.=" AND c.ref_customer REGEXP '^[^\.]*".$db->escape($search_instance_name)."'";
 	if ($search_customer_name) $sql.=natural_search(array('s.nom','s.email'), $search_customer_name);
+
+	if (empty($lastrecord) || $lastrecord > $nbtotalofrecords) {
+		$lastrecord = $nbtotalofrecords;
+	}
+	if ($lastrecord > 0) {
+		$sql.= " LIMIT ".($firstrecord?$firstrecord:1).", ".(($lastrecord >= $firstrecord) ? ($lastrecord - $firstrecord + 1) : 5);
+	}
+
 	$resql=$db->query($sql);
 	if ($resql) {
 		$num_rows = $db->num_rows($resql);
@@ -294,7 +304,7 @@ if ($mythirdpartyaccount->isareseller) {
 				if (empty($listofcontractidreseller[$obj->rowid])) {
 					$contract=new Contrat($db);
 					$contract->fetch($obj->rowid);					// This load also lines
-					$listofcontractidreseller[$obj->rowid]=$contract;
+					$listofcontractidreseller[$obj->rowid] = $contract;
 				}
 			}
 			$i++;
@@ -2894,13 +2904,16 @@ foreach ($listofcontractid as $contractid => $contract) {
 		}
 	}
 }
+
 $nboftickets = $langs->trans("SoonAvailable");
-if ($mythirdpartyaccount->isareseller) {
+
+// Analyse list of child instances for resellers
+$nbofinstancesreseller = 0;
+$nbofinstancesinprogressreseller = 0;
+$nbofinstancesdonereseller = 0;
+$nbofinstancessuspendedreseller = 0;
+if ($mythirdpartyaccount->isareseller && count($listofcontractidreseller)) {
 	// Fill var to count nb of instances
-	$nbofinstancesreseller = 0;
-	$nbofinstancesinprogressreseller = 0;
-	$nbofinstancesdonereseller = 0;
-	$nbofinstancessuspendedreseller = 0;
 	foreach ($listofcontractidreseller as $contractid => $contract) {
 		if ($contract->array_options['options_deployment_status'] == 'undeployed') { continue; }
 		if ($contract->array_options['options_deployment_status'] == 'processing') { $nbofinstancesreseller++; $nbofinstancesinprogressreseller++; continue; }
@@ -3145,6 +3158,7 @@ if (empty($welcomecid)) {
 	} else dol_print_error($db);
 }
 
+
 // Include mode with php template
 if (! empty($mode)) {
 	$fullpath = dol_buildpath("/sellyoursaas/myaccount/tpl/".$mode.".tpl.php");
@@ -3152,6 +3166,7 @@ if (! empty($mode)) {
 		include $fullpath;
 	}
 }
+
 
 print '
 	</div>

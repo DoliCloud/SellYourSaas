@@ -398,7 +398,7 @@ if ($sellyoursaassupporturl) {
 							console.log("We show full form");
 							$(".hideforautomigration").show();
 							$(".showforautomigration").hide();
-							$("#formsubject").focus();
+							$("#from").focus();
 						} else if($("#ticketcategory").val() == "") {
 							console.log("We hide all");
 							$(".hideforautomigration").hide();
@@ -429,7 +429,7 @@ if ($sellyoursaassupporturl) {
 				$(".hideforautomigration").show();
 				$(".showforautomigration").hide();
 				$("#buttonforautomigrationwithhidden").show();
-				$("#formsubject").focus();
+				$("#form").focus();
 			})';
 			$stringtoprint .= '
 			$("input[name=\'subject\']").on("change",function(){
@@ -481,7 +481,7 @@ if ($sellyoursaassupporturl) {
 		// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
 		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 			print '<div class="hideforautomigration">';
-			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
+			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
 			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
 
 			print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
