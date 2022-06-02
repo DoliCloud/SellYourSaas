@@ -258,20 +258,7 @@ if ($sellyoursaassupporturl) {
 			}
 		} else {
 			$out .= '<br>';
-			//$out .= $langs->trans("NoAttachedFiles").'<br>';
 		}
-
-		/*
-		print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<input type="hidden" name="action" value="addfile">';
-		print $hiddeninputs;
-		print $out;
-		print '<input type="file" class="flat" id="addedfile" name="addedfile" value="'.$langs->trans("Upload").'" />';
-		print ' ';
-		print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
-		print '</form>';
-		*/
 
 		// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
 		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
@@ -329,6 +316,7 @@ if ($sellyoursaassupporturl) {
 				}
 			}
 		}
+		//$atleastonepublicgroup = 0;
 
 		//$atleastonepublicgroup = 0;
 		if ($atleastonepublicgroup && GETPOST('supportchannel', 'alpha')) {
