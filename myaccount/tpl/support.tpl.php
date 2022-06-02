@@ -103,19 +103,20 @@ if ($sellyoursaassupporturl) {
 				        <div class="caption">';
 	if (!empty(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE'))) {
 		print '<span>'.$langs->trans(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')).'</span><br><br>';
+	} else {
+		print '<span class="opacitymedium"><br>'.$langs->trans("AskForSupport").'...</span><br><br>';
 	}
-	// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
-	//if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
-					print '<!-- form to select channel -->'."\n";
-					print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-					print '<input type="hidden" name="token" value="'.newToken().'">';
-					print '<input type="hidden" name="mode" value="support">';
-					print '<input type="hidden" name="action" value="presend">';
 
-					print '<span class="opacitymedium"><br>'.$langs->trans("SelectYourSupportChannel").'</span><br>';
+	print '<!-- form to select channel -->'."\n";
+	print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
+	print '<input type="hidden" name="mode" value="support">';
+	print '<input type="hidden" name="action" value="presend">';
 
-					print '<select id="supportchannel" name="supportchannel" class="minwidth600">';
-					print '<option value="">&nbsp;</option>';
+	print '<span class="supportemailfield bold">'.$langs->trans("SupportChannel").'</span>'."\n";
+
+	print '<select id="supportchannel" name="supportchannel" class="minwidth600">';
+	print '<option value="">&nbsp;</option>';
 	if (count($listofcontractid) == 0) {
 		// Should not happen
 	} else {
@@ -205,27 +206,27 @@ if ($sellyoursaassupporturl) {
 		}
 	}
 
-		// Add link other or miscellaneous
+	// Add link other or miscellaneous
 	if (! $atleastonefound) {
 		$labelother = $langs->trans("Miscellaneous");
 	} else {
 		$labelother = $langs->trans("Other");
 	}
 
-		$labelother .= ' &nbsp; <span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span>';
+	$labelother .= ' &nbsp; <span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span>';
 
-		print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
+	print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
 	if (empty($atleastonehigh)) {
 		$labeltoshow = $langs->trans("PremiumSupport").' <span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span> ('.$langs->trans("NoPremiumPlan").')';
 		print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
 	}
-		print '</select>';
-		print ajax_combobox("supportchannel");
+	print '</select>';
+	print ajax_combobox("supportchannel");
 
-		print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">';
+	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">';
 
-		print '</form>';
-	//}
+	print '</form>';
+
 
 	if (($action == 'presend' && GETPOST('supportchannel', 'alpha')) || getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 		print getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') ? '<br>' : '<br><br>';
@@ -331,7 +332,7 @@ if ($sellyoursaassupporturl) {
 
 		//$atleastonepublicgroup = 0;
 		if ($atleastonepublicgroup && GETPOST('supportchannel', 'alpha')) {
-			$stringtoprint = '<br>';
+			//$stringtoprint = '<br>';
 			$stringtoprint .= $formticket->selectGroupTickets(GETPOST('ticketcategory', 'int'), 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
 			$stringtoprint .= '<br>';
 		}
@@ -438,22 +439,6 @@ if ($sellyoursaassupporturl) {
 		}
 
 		$stringtoprint .= "
-			/*
-			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-
-			var trackChange = function(element) {
-				var observer = new MutationObserver(function(mutations, observer) {
-					if (mutations[0].attributeName == 'value') {
-						$(element).trigger('change');
-					}
-				});
-				observer.observe(element, {
-					attributes: true
-				});
-			}
-
-			trackChange($('#ticketcategory_select')[0]);
-			*/
 			/* If we have something selected */
 			console.log('supportchannel = ".GETPOST('supportchannel', 'alpha')."');
 			console.log('ticketcategory = ".GETPOST('ticketcategory', 'alpha')."');

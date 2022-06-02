@@ -584,4 +584,5 @@ NoEmailSentAfterRegistration=Aucun email n'a été envoyé au client après cett
 WeWillContactYouForMandaSepate=Nous allons vous contacter afin de vous fournir le Mandat SEPA à signer
 MigrationInProgress=La migration automatique est en cours.
 SourceUtm=Origine (premier accès)
-
+SupportChannel=Canal d'assistance
+AskForSupport=Demander de l'aide
