@@ -262,11 +262,6 @@ if ($sellyoursaassupporturl) {
 
 		// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
 		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
-			print '<!-- form to send a ticket -->'."\n";
-			print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
-			print '<input type="hidden" name="token" value="'.newToken().'">';
-			print '<input type="hidden" name="action" value="send">';
-
 			$tmpcontractid = $id;	// The last contract id found
 			if (GETPOST('supportchannel', 'alpha')) {
 				$tmparray = explode('_', GETPOST('supportchannel', 'alpha'));
@@ -276,7 +271,11 @@ if ($sellyoursaassupporturl) {
 				}
 			}
 
-			// Add link to add file
+			print '<!-- form to send a ticket -->'."\n";
+			print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<input type="hidden" name="action" value="send">';
+			print '<input type="hidden" name="page_y" value="">';
 			print '<input type="hidden" name="mode" value="support">';
 			print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
 			print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
@@ -459,7 +458,7 @@ if ($sellyoursaassupporturl) {
 
 			print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 			print ' ';
-			print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
+			print '<input type="submit" class="btn green-haze btn-circle reposition" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
 
 			print $out;
 
@@ -468,7 +467,7 @@ if ($sellyoursaassupporturl) {
 			print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
 
 			// Button to send ticket/email
-			print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly"';
+			print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly reposition"';
 			if ($conf->use_javascript_ajax) {
 				print ' onClick="if (document.forms.mailform.addedfile.value != \'\') { alert(\''.dol_escape_js($langs->trans("FileWasNotUploaded")).'\'); return false; } else { return true; }"';
 			}
@@ -490,6 +489,7 @@ if ($sellyoursaassupporturl) {
 				print '<input type="hidden" id="ticketcategory_back" name="ticketcategory_back" value="'.GETPOST('ticketcategory', 'alpha').'">';
 				print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
 				print '<input type="hidden" name="action" value="view">';
+				print '<input type="hidden" name="page_y" value="">';
 				print '</form>';
 			}
 		}
