@@ -102,7 +102,7 @@ if ($sellyoursaassupporturl) {
 				      <div class="portlet-title">
 				        <div class="caption">';
 	if (!empty(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE'))) {
-		print '<span>'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE').'</span><br><br>';
+		print '<span>'.$langs->trans(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')).'</span><br><br>';
 	}
 	// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
 	//if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
