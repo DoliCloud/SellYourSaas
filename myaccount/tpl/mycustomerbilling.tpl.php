@@ -308,7 +308,7 @@ while ($i < min($num, $limit2)) {
 
 	print '
 						<tr>
-		              <td title="'.dol_escape_htmltag($tmpthirdparty->name).'" class="tdoverflowmax150">
+		              <td title="'.dol_escape_htmltag($tmpthirdparty->name).'" class="tdoverflowmax200">
 				         ';
 	print $tmpthirdparty->name;
 	//.' '.$form->textwithpicto('', $langs->trans("CurrentCommission").': '.($commissionpercent?$commissionpercent:0).'%', 1).'
