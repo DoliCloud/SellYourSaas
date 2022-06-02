@@ -521,7 +521,7 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium">Set to yes if you want only non profit orgnisatons</span></td>';
+print '<td><span class="opacitymedium">Set to yes if you want only non-profit orgnisations</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');
