@@ -291,7 +291,8 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 		$lastrecord = $nbtotalofrecords;
 	}
 	if ($lastrecord > 0) {
-		$sql.= " LIMIT ".($firstrecord?$firstrecord:1).", ".(($lastrecord >= $firstrecord) ? ($lastrecord - $firstrecord + 1) : 5);
+		// We disable this filter because we need all later to calculate the number of suspended instance from lines
+		//$sql.= " LIMIT ".($firstrecord?$firstrecord:1).", ".(($lastrecord >= $firstrecord) ? ($lastrecord - $firstrecord + 1) : 5);
 	}
 
 	$resql=$db->query($sql);

@@ -284,6 +284,14 @@ div.tab-content {
     text-align: center;
 }
 
+.tdoverflowmax100 {			/* For tdoverflow, the max-midth become a minimum ! */
+	max-width: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+
 @media only screen and (max-width: 400px)	/* reduction 3 */
 {
 	.boxresource { width: 120px; }
