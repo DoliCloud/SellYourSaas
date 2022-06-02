@@ -367,7 +367,7 @@ if ($sellyoursaassupporturl) {
 								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul><br>\');
 								$("#KWwithajax").show();
 							}
-							$("#formsubject").focus();
+							$("#form").focus();
 						 },
 						 error : function(output) {
 							console.log("error");
