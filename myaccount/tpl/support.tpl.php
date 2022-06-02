@@ -453,7 +453,8 @@ if ($sellyoursaassupporturl) {
 		// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
 		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 			print '<div class="hideforautomigration">';
-			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" autofocus id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
+
+			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
 			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
 
 			print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
@@ -610,6 +611,45 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
 	    </div>
 		</div>
     ';
+
+
+// Code to manage reposition
+print '<script>';
+print "\n/* JS CODE TO ENABLE reposition management (does not work if a redirect is done after action of submission) */\n";
+print '
+	jQuery(document).ready(function() {
+				/* If page_y set, we set scollbar with it */
+				page_y=getParameterByName(\'page_y\', 0);				/* search in GET parameter */
+				if (page_y == 0) page_y = jQuery("#page_y").text();		/* search in POST parameter that is filed at bottom of page */
+				if (page_y > 0)
+				{
+					console.log("page_y found is "+page_y);
+					$(\'html, body\').scrollTop(page_y);
+				}
+
+				/* Set handler to add page_y param on output (click on href links or submit button) */
+				jQuery(".reposition").click(function() {
+					var page_y = $(document).scrollTop();
+
+					if (page_y > 0)
+					{
+						if (this.href)
+						{
+							console.log("We click on tag with .reposition class. this.ref was "+this.href);
+							var hrefarray = this.href.split("#", 2);
+							hrefarray[0]=hrefarray[0].replace(/&page_y=(\d+)/, \'\');		/* remove page_y param if already present */
+							this.href=hrefarray[0]+\'&page_y=\'+page_y;
+							console.log("We click on tag with .reposition class. this.ref is now "+this.href);
+						}
+						else
+						{
+							console.log("We click on tag with .reposition class but element is not an <a> html tag, so we try to update input form field with name=page_y with value "+page_y);
+							jQuery("input[type=hidden][name=page_y]").val(page_y);
+						}
+					}
+				});
+	});
+	</script>'."\n";
 
 ?>
 <!-- END PHP TEMPLATE support.tpl.php -->
