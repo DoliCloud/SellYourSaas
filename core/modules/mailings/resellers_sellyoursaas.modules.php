@@ -56,7 +56,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 
 		$arraystatus=array('1'=>'Open', '0'=>'Closed');
 		$s.=$langs->trans("Status").': ';
-		$s.=$form->selectarray('status_reseller', $arraystatus, GETPOST('status_reseller', 'alpha'));
+		$s.=$form->selectarray('status_reseller', $arraystatus, GETPOST('status_reseller', 'alpha'), 1);
 
 		$s.=$langs->trans("Country").': ';
 		$s.=$form->select_country(GETPOST('country_id_reseller', 'alpha'), 'country_id_reseller', '', 0, 'minwidth300', '', 1);
@@ -125,10 +125,12 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
-		$sql .= ", ".MAIN_DB_PREFIX."categorie_societe as cs";
+		$sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cs";
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
 		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG);
-		$sql .= " AND s.status = ".((int) GETPOST('status_reseller', 'int'));
+		if ( GETPOST('status_reseller', 'int') >= 0) {
+			$sql .= " AND s.status = ".((int) GETPOST('status_reseller', 'int'));
+		}
 		if (GETPOST('lang_id_reseller') && GETPOST('lang_id_reseller') != 'none') $sql.= natural_search('default_lang_reseller', join(',', GETPOST('lang_id_reseller', 'array')), 3);
 		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') $sql.= natural_search('default_lang_reseller', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
 		if (GETPOST('country_id_reseller') && GETPOST('country_id_reseller') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id_reseller', 'intcomma'), 1)."')";
@@ -213,7 +215,12 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 	 */
 	public function getNbOfRecipients($filter = 1, $option = '')
 	{
-		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email <> ''");
+		global $conf;
+
+		$sql = "SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."categorie_fournisseur as cs WHERE s.email IS NOT NULL AND s.email <> ''";
+		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG);
+
+		$a = parent::getNbOfRecipients($sql);
 		if ($a < 0) return -1;
 		return $a;
 	}
