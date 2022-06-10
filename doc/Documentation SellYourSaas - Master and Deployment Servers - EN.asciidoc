@@ -1932,9 +1932,9 @@ Note: To get/see the current limits of OS and connected user:
 ulimit -a
 ---------------
 
-Note:
-On peut vérifier qu'il y a bien la ligne *session required pam_limits.so* dans les fichiers /etc/pam.d/system-auth ou /etc/pam.d/password-auth et/ou /etc/pam.d/sudo afin d’être certain de toujours fixer les seuils définis par l’administrateur lors de chaque connexion d’utilisateur au système. Si les limites définies dans ce fichier ne sont pas prises en compte le premier réflexe consiste à s’assurer que le module pam_limits.so est bien activé dans les fichiers de configuration de PAM.
-REMARQUE : sur certaines distributions les fichiers de configuration de PAM peuvent différer. On peut rencontrer la définition des limites dans les fichiers /etc/pam.d/common-session ou /etc/pam.d/login. Mais, le principe reste le même : s’assurer qu’à chaque connexion utilisateur les seuils des ressources du système sont bien appliqués.
+Note: 
+You can check that there is indeed the line *session required pam_limits.so* in the files /etc/pam.d/system-auth or /etc/pam.d/password-auth and/or /etc/pam.d/sudo to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
+NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files /etc/pam.d/common-session or /etc/pam.d/login. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
 
 
 
