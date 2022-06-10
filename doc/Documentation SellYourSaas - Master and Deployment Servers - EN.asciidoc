@@ -91,11 +91,11 @@ The first step is to make one (or more) server available. If we are going on sev
 
 * Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
-_Example with Amazon Standard Medium: _
+_Example with Amazon Standard Medium:_
 
 Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and bandwidth then switch to *m1.large* @ $ 0.18 per hour
 
-_Example with OVH Public Cloud: _
+_Example with OVH Public Cloud:_
  
 For the master server: VPS or B2-15 or more
 For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
