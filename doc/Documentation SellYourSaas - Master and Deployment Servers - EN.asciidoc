@@ -83,7 +83,7 @@ You need to acquire this domain name from a registrar.
 
 == Installation of the machine and OS
 
-The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be * Deployment servers * (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
+The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be *Deployment servers* (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
 
 === Choice of machine and OS and create it
 
