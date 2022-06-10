@@ -577,6 +577,8 @@ if ($action == 'view') {
 			$(".divstep").hide();
 			showStepAnchor(hash);
         }
+		step = "Step"+hash;
+		$("html, body").scrollTop($("#"+step).offset().top);
     })
     </script>';
 }
