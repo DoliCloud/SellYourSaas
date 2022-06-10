@@ -822,7 +822,7 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
-Note that you should have n lines per deployment server in this file.
+Note that you should have n lines (one per deployment server) in this file.
 
 Set a fixed port for mountd:
 
