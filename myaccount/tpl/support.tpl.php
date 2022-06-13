@@ -77,11 +77,13 @@ if ($urlfaq || $urlstatus) {
 	<!-- END PAGE HEAD -->
 	<!-- END PAGE HEADER-->';
 
-	$sellyoursaassupporturl = $conf->global->SELLYOURSAAS_SUPPORT_URL;
+	$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) $sellyoursaassupporturl = $conf->global->$newnamekey;
+	if (! empty($conf->global->$newnamekey)) {
+		$sellyoursaassupporturl = $conf->global->$newnamekey;
+	}
 }
 
 if ($sellyoursaassupporturl) {
@@ -240,6 +242,7 @@ if ($sellyoursaassupporturl) {
 		// List of files
 		$listofpaths = dol_dir_list($upload_dir, 'files', 0, '', '', 'name', SORT_ASC, 0);
 
+		$out = '';
 		$out .= '<input type="hidden" class="removedfilehidden" name="removedfile" value="">'."\n";
 		$out .= '<script type="text/javascript" language="javascript">';
 		$out .= 'jQuery(document).ready(function () {';
@@ -319,6 +322,7 @@ if ($sellyoursaassupporturl) {
 		//$atleastonepublicgroup = 0;
 		print getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') ? '<br>' : ($atleastonepublicgroup > 1 ? '<br>' : "");
 
+		$stringtoprint = '';
 		if ($atleastonepublicgroup > 1 && GETPOST('supportchannel', 'alpha')) {
 			//$stringtoprint = '<br>';
 			$stringtoprint .= $formticket->selectGroupTickets(GETPOST('ticketcategory', 'int'), 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
