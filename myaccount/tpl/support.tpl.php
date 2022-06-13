@@ -124,25 +124,25 @@ if ($sellyoursaassupporturl) {
 		$atleastonefound=0;
 
 		foreach ($listofcontractid as $id => $contract) {
-							$planref = $contract->array_options['options_plan'];
-							$statuslabel = $contract->array_options['options_deployment_status'];
-							$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
+			$planref = $contract->array_options['options_plan'];
+			$statuslabel = $contract->array_options['options_deployment_status'];
+			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-							$dbprefix = $contract->array_options['options_db_prefix'];
-							if (empty($dbprefix)) $dbprefix = 'llx_';
+			$dbprefix = empty($contract->array_options['options_db_prefix']) ? '' : $contract->array_options['options_db_prefix'];
+			if (empty($dbprefix)) $dbprefix = 'llx_';
 
 			if ($statuslabel == 'undeployed') {
 				continue;
 			}
 
-							// Get info about PLAN of Contract
-							$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
+			// Get info about PLAN of Contract
+			$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
 
-							$planid = 0;
-							$freeperioddays = 0;
-							$directaccess = 0;
+			$planid = 0;
+			$freeperioddays = 0;
+			$directaccess = 0;
 
-							$tmpproduct = new Product($db);
+			$tmpproduct = new Product($db);
 			foreach ($contract->lines as $keyline => $line) {
 				if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
 									$statuslabel = 'suspended';

@@ -96,14 +96,14 @@ $conf->global->SYSLOG_FILE_ONEPERSESSION=1;
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
-$langs->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+$langs->loadLangs(array("main", "companies", "sellyoursaas@sellyoursaas", "errors"));
 
 if ($langs->defaultlang == 'en_US') {
 	$langsen = $langs;
 } else {
 	$langsen=new Translate('', $conf);
 	$langsen->setDefaultLang('en_US');
-	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+	$langsen->loadLangs(array("main", "companies", "sellyoursaas@sellyoursaas", "errors"));
 }
 
 
@@ -847,7 +847,7 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_source_utm'] = $_COOKIE['utm_source_cookie'];
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
-	$tmpthirdparty->array_options['options_checkbosnonprofitorga'] = $checkbosnonprofitorga;
+	//$tmpthirdparty->array_options['options_checkbosnonprofitorga'] = $checkbosnonprofitorga;		// For the moment we don't save this info
 
 	if ($productref == 'none') {	// If reseller
 		$tmpthirdparty->fournisseur = 1;
@@ -1515,6 +1515,7 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
+$head = '';
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
 $head.='<!-- Bootstrap core CSS -->
 <link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
@@ -1546,7 +1547,7 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 		$constlogoalt = 'SELLYOURSAAS_LOGO_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 		$constlogosmallalt = 'SELLYOURSAAS_LOGO_SMALL_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 
-		if (! empty($conf->global->$constlogoalt)) {
+		if (getDolGlobalString($constlogoalt)) {
 			$constlogo=$constlogoalt;
 			$constlogosmall=$constlogosmallalt;
 		}
@@ -1560,7 +1561,7 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/'.$conf->global->$constlogo);
 			}
 		} else {
-			$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.$conf->global->SELLYOURSAAS_LOGO_SMALL);
+			$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.getDolGlobalString('SELLYOURSAAS_LOGO_SMALL', 'notdefined.png'));
 		}
 
 		if (GETPOST('partner', 'alpha')) {

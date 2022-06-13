@@ -3151,15 +3151,15 @@ class SellYourSaasUtils
 					break;
 				}
 
-				$tmpold=explode('.', $object->oldcopy->ref_customer, 2);
-				$sldAndSubdomainold=$tmpold[0];
-				$domainnameold=$tmpold[1];
+				$tmpold = explode('.', $object->oldcopy->ref_customer, 2);
+				$sldAndSubdomainold = $tmpold[0];
+				$domainnameold = (empty($tmpold[1]) ? '' :$tmpold[1]);
 
 				$orgname = $contract->thirdparty->name;
-				$countryid=0;
-				$countrycode='';
-				$countrylabel='';
-				$countryidcodelabel='';
+				$countryid = 0;
+				$countrycode = '';
+				$countrylabel = '';
+				$countryidcodelabel = '';
 				if ($contract->thirdparty->country_id > 0 && $contract->thirdparty->country_code && $contract->thirdparty->country) {
 					$countryidcodelabel=$contract->thirdparty->country_id.':'.$contract->thirdparty->country_code.':'.$contract->thirdparty->country;
 				}
@@ -3829,7 +3829,7 @@ class SellYourSaasUtils
 			$recordanevent = 1;
 			if (! $error) {
 				$prefixlabel = '';
-			} elseif (! empty($retarray['http_code'])) {
+			} elseif (!empty($retarray['http_code'])) {
 				$forceaddevent = dol_concatdesc("Error ".$retarray['http_code']." returned by the remote agent.", (is_numeric($forceaddevent)?'':$forceaddevent));
 				$prefixlabel = 'ERROR ';
 			} else {
@@ -3943,7 +3943,7 @@ class SellYourSaasUtils
 		}
 
 
-		dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." error=".$error." errorforsshconnect=".$errorforsshconnect." errorfordb=".$errorfordb." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".$retarray['http_code'].(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
+		dol_syslog("* sellyoursaasRemoteAction END (remoteaction=".$remoteaction." email=".$email." error=".$error." errorforsshconnect=".$errorforsshconnect." errorfordb=".$errorfordb." result=".($error ? 'ko' : 'ok')." retarray['http_code']=".(empty($retarray['http_code']) ? '' : $retarray['http_code']).(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '').")", LOG_DEBUG, -1);
 
 		if ($error) {
 			if ($errorforsshconnect && $errorfordb) {

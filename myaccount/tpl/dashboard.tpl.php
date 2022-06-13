@@ -206,7 +206,7 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 				$amountdue = 0;
 foreach ($listofcontractid as $id => $contract) {
 	$contract->fetchObjectLinked();
-	if (is_array($contract->linkedObjects['facture'])) {
+	if (isset($contract->linkedObjects['facture']) && is_array($contract->linkedObjects['facture'])) {
 		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 			print '<!--';
 			print dol_escape_htmltag($invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->statut."-paye=".$invoice->paye)."\n";

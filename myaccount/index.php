@@ -197,11 +197,13 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 }
 
 
-$urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
+$urlstatus = getDolGlobalString('SELLYOURSAAS_STATUS_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_STATUS_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) $urlstatus = $conf->global->$newnamekey;
+	if (!empty($conf->global->$newnamekey)) {
+		$urlstatus = $conf->global->$newnamekey;
+	}
 }
 
 $now =dol_now();
@@ -2458,6 +2460,7 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
+$head = '';
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
 $head.='<!-- Bootstrap core CSS -->
 <link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
@@ -2495,18 +2498,18 @@ llxHeader($head, $langs->trans("MyAccount"), '', '', 0, 0, '', '', '', 'myaccoun
 
 <?php
 
-$logoval = $conf->global->SELLYOURSAAS_LOGO_MINI;
-$logoblackval = $conf->global->SELLYOURSAAS_LOGO_MINI_BLACK;
+$logoval = getDolGlobalString('SELLYOURSAAS_LOGO_MINI');
+$logoblackval = getDolGlobalString('SELLYOURSAAS_LOGO_MINI_BLACK');
 if (is_object($mythirdpartyaccount) && $mythirdpartyaccount->array_options['options_domain_registration_page']) {
 	$domainforkey = strtoupper($mythirdpartyaccount->array_options['options_domain_registration_page']);
 	$domainforkey = preg_replace('/\./', '_', $domainforkey);
 
 	$constname = 'SELLYOURSAAS_LOGO_MINI_'.$domainforkey;
 	$constnameblack = 'SELLYOURSAAS_LOGO_MINI_BLACK_'.$domainforkey;
-	if (! empty($conf->global->$constname)) {
+	if (!empty($conf->global->$constname)) {
 		$logoval=$conf->global->$constname;
 	}
-	if (! empty($conf->global->$constnameblack)) {
+	if (!empty($conf->global->$constnameblack)) {
 		$logoblackval=$conf->global->$constnameblack;
 	}
 }

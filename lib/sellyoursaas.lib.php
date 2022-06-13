@@ -243,7 +243,7 @@ function sellyoursaasHasOpenInvoices($contract)
 	$contract->fetchObjectLinked();
 	$atleastoneopeninvoice=0;
 
-	if (is_array($contract->linkedObjects['facture'])) {
+	if (isset($contract->linkedObjects['facture']) && is_array($contract->linkedObjects['facture'])) {
 		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
 			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
 			if ($invoice->statut == Facture::STATUS_ABANDONED) continue;

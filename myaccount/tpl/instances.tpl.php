@@ -171,7 +171,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		$statuslabel = $contract->array_options['options_deployment_status'];
 		$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-		$dbprefix = $contract->array_options['options_db_prefix'];
+		$dbprefix = empty($contract->array_options['options_db_prefix']) ? '' : $contract->array_options['options_db_prefix'];
 		if (empty($dbprefix)) $dbprefix = 'llx_';
 
 		// Get info about PLAN of Contract
@@ -298,7 +298,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		$foundtemplate=0; $datenextinvoice='';
 		$pricetoshow = ''; $priceinvoicedht = 0;
 		$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
-		if (is_array($contract->linkedObjects['facturerec'])) {
+		if (isset($contract->linkedObjects['facturerec']) && is_array($contract->linkedObjects['facturerec'])) {
 			foreach ($contract->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
 				$foundtemplate++;
 				if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] == 'undeployed') $pricetoshow = '';
@@ -673,7 +673,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
                                 ';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
-			$ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
+			$ssh_server_port = (!empty($contract->array_options['options_port_os']) ? $contract->array_options['options_port_os'] : (empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? 22 : $conf->global->SELLYOURSAAS_SSH_SERVER_PORT));
 			print '
     				                <form class="form-horizontal" role="form">
                                     <input type="hidden" name="token" value="'.newToken().'">
