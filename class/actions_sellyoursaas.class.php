@@ -85,7 +85,7 @@ class ActionsSellyoursaas
 
 		if ($object->element == 'societe') {
 			// Dashboard
-			if ($user->admin && ! empty($object->array_options['options_dolicloud'])) {
+			if ($user->rights->sellyoursaas->read && ! empty($object->array_options['options_dolicloud'])) {
 				$url = '';
 				if ($object->array_options['options_dolicloud'] == 'yesv2') {
 					$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');

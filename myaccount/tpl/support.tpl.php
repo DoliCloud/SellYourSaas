@@ -229,7 +229,6 @@ if ($sellyoursaassupporturl) {
 
 
 	if (($action == 'presend' && GETPOST('supportchannel', 'alpha')) || getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
-		print getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') ? '<br>' : '<br><br>';
 		$trackid = '';
 		dol_init_file_process($upload_dir, $trackid);
 
@@ -318,7 +317,9 @@ if ($sellyoursaassupporturl) {
 		//$atleastonepublicgroup = 0;
 
 		//$atleastonepublicgroup = 0;
-		if ($atleastonepublicgroup && GETPOST('supportchannel', 'alpha')) {
+		print getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') ? '<br>' : ($atleastonepublicgroup > 1 ? '<br>' : "");
+
+		if ($atleastonepublicgroup > 1 && GETPOST('supportchannel', 'alpha')) {
 			//$stringtoprint = '<br>';
 			$stringtoprint .= $formticket->selectGroupTickets(GETPOST('ticketcategory', 'int'), 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
 			$stringtoprint .= '<br>';
@@ -429,7 +430,7 @@ if ($sellyoursaassupporturl) {
 			/* If we have something selected */
 			console.log('supportchannel = ".GETPOST('supportchannel', 'alpha')."');
 			console.log('ticketcategory = ".GETPOST('ticketcategory', 'alpha')."');
-			if (('".GETPOST('supportchannel', 'alpha')."' == '' || ('".GETPOST('ticketcategory')."' == '')) && (".$atleastonepublicgroup." > 0) && (preselectedticketcategory == '' || preselectedticketcategory == automigrationcode)) {
+			if (('".GETPOST('supportchannel', 'alpha')."' == '' || ('".GETPOST('ticketcategory')."' == '')) && (".$atleastonepublicgroup." > 1) && (preselectedticketcategory == '' || preselectedticketcategory == automigrationcode)) {
 				$('.hideforautomigration').hide();
 			}
 		});
