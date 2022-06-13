@@ -92,12 +92,13 @@ $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
 $productid=GETPOST('service', 'int');
 $productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):'');
+$defaultproduct = '';
 if (empty($productid) && empty($productref)) {
 	$productref = $plan;
 	if (empty($productref)) {
 		$suffix='_'.strtoupper(str_replace('.', '_', $domainname));
 		$constname="SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
-		$defaultproduct=(! empty($conf->global->$constname) ? $conf->global->$constname : $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT);
+		$defaultproduct=(empty($conf->global->$constname) ? $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT : $conf->global->$constname);
 
 		// Take first plan found
 		$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pa.restrict_domains';
@@ -114,7 +115,9 @@ if (empty($productid) && empty($productref)) {
 		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
 		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 		$sqlproducts.= ")";
-		if (! empty($defaultproduct)) $sqlproducts.= " AND p.rowid = ".((int) $defaultproduct);
+		if (! empty($defaultproduct)) {
+			$sqlproducts.= " AND p.rowid = ".((int) $defaultproduct);
+		}
 		$sqlproducts.= " ORDER BY p.datec";
 		//print $_SERVER["SERVER_NAME"].' - '.$sqlproducts;
 		$resqlproducts = $db->query($sqlproducts);
