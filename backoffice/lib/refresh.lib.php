@@ -425,6 +425,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 		$i = 0;
 		if ($num) {
 			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+			include_once DOL_DOCUMENT_ROOT.'/facture/class/facture-rec.class.php';
 			dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
 			$now = dol_now();
