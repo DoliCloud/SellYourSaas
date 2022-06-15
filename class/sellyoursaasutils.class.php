@@ -2368,6 +2368,7 @@ class SellYourSaasUtils
 									//$invoice_rec->note_public  = dol_concatdesc($contract->note_public, '__(Period)__ : __INVOICE_DATE_NEXT_INVOICE_BEFORE_GEN__ - __INVOICE_DATE_NEXT_INVOICE_AFTER_GEN__');
 									$invoice_rec->note_public  = $contract->note_public;
 									$invoice_rec->mode_reglement_id = $invoice_draft->mode_reglement_id;
+									$invoice_rec->cond_reglement_id = $invoice_draft->cond_reglement_id;
 
 									$invoice_rec->usenewprice = 0;
 
