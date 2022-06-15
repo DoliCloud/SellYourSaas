@@ -364,20 +364,6 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 	$price_instance = price2num(GETPOST("field_price_".$mythirdpartyaccount->id."_".$priceproductid));
 	$price_instance_per_user = price2num(GETPOST("field_priceuser_".$mythirdpartyaccount->id."_".$priceproductid));
 
-	if ($price_instance === "") {
-		setEventMessages($langs->trans("FixPriceMustBeNumeric"),null,'errors');
-		$errors++;
-	}else {
-		$price_instance = (float) $price_instance;
-	}
-
-	if ($price_instance_per_user === "") {
-		setEventMessages($langs->trans("PricePerUsersMustBeNumeric"),null,'errors');
-		$errors++;
-	}else {
-		$price_instance_per_user = (float) $price_instance_per_user;
-	}
-
 	$min_instance_price_reduction = getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION")/100;
 
 	if (!$errors) {
@@ -391,7 +377,8 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 		}
 
 		if (!$errors){
-			$priceinstance['user'] = 0;
+			$priceinstance['user'] = null;
+			$priceinstance['options'] = 0;
 			$priceinstance['fix'] =(float) price2num($product->price);
 			$product->sousprods = array();
 			$product->get_sousproduits_arbo();
@@ -401,35 +388,62 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 					$tmpprodchild->fetch($value['id']);
 					$prodchildprice = (float) price2num($tmpprodchild->price);
 					if (preg_match('/user/i', $tmpprodchild->ref) || preg_match('/user/i', $tmpprodchild->array_options['options_resource_label'])) {
-						$priceinstance['user'] .= $tmpprodchild->price;
-						$priceinstance_ttc['user'] .= $tmpprodchild->price_ttc;
+						if (!empty($priceinstance['user'])){
+							$priceinstance['user'].= $tmpprodchild->price;
+						}else {
+							$priceinstance['user'] = $tmpprodchild->price;
+						}
 					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
 						// Don't add system services to global price, these are options with calculated quantitie
 					} else {
+						if ($tmpprodchild->array_options['options_app_or_option'] == 'option') {
+							$priceinstance['options'] += $tmpprodchild->price;
+						}
 						$priceinstance['fix'] += $tmpprodchild->price;
-						$priceinstance_ttc['fix'] += $tmpprodchild->price_ttc;
 					}
 				}
 			}
+			if ($price_instance === "") {
+				setEventMessages($langs->trans("FixPriceMustBeNumeric"),null,'errors');
+				$errors++;
+			}else {
+				$price_instance = (float) $price_instance;
+			}
+		
+			if (isset($priceinstance['user'])) {
+				if ($price_instance_per_user === "") {
+					setEventMessages($langs->trans("PricePerUsersMustBeNumeric"),null,'errors');
+					$errors++;
+				}else {
+					$price_instance_per_user = (float) $price_instance_per_user;
+				}
+			}
 
-			$minfixprice = $priceinstance['fix'] - $min_instance_price_reduction * $priceinstance['fix'];
-			$minuserprice = $priceinstance['user'] - $min_instance_price_reduction * $priceinstance['user'];
-			if ($price_instance < $minfixprice) {
-				setEventMessages($langs->trans("FixPriceMustBeMoreThenMinFixPrice", $minfixprice, $langs->getCurrencySymbol($conf->currency)),null,'errors');
-				$errors++;
-			}
-			if ($price_instance_per_user < $minuserprice) {
-				setEventMessages($langs->trans("PricePerUsersMustBeMoreThenMinUserPrice", $minuserprice, $langs->getCurrencySymbol($conf->currency)),null,'errors');
-				$errors++;
-			}
 			if (!$errors) {
-				require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
+				$minfixprice = $priceinstance['fix'] - $min_instance_price_reduction * $priceinstance['fix'];
+				if (!empty($priceinstance['user'])) {
+					$minuserprice = $priceinstance['user'] - $min_instance_price_reduction * $priceinstance['user'];
+				}
+				if ($price_instance < $minfixprice) {
+					setEventMessages($langs->trans("FixPriceMustBeMoreThenMinFixPrice", $minfixprice, $langs->getCurrencySymbol($conf->currency)),null,'errors');
+					$errors++;
+				}
+				if (isset($priceinstance['user']) && $price_instance_per_user < $minuserprice) {
+					setEventMessages($langs->trans("PricePerUsersMustBeMoreThenMinUserPrice", $minuserprice, $langs->getCurrencySymbol($conf->currency)),null,'errors');
+					$errors++;
+				}
+				if (!$errors) {
+					require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 
-				$price_instance = price($price_instance);
-				$price_instance_per_user = price($price_instance_per_user);
-				dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$priceproductid, $price_instance, 'chaine', 0, '', $conf->entity);
-				dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$priceproductid, $price_instance_per_user, 'chaine', 0, '', $conf->entity);
+					$price_instance = price($price_instance);
+					dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$priceproductid, $price_instance, 'chaine', 0, '', $conf->entity);
+					if (isset($priceinstance['user'])) {
+						$price_instance_per_user = price($price_instance_per_user);
+						dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$priceproductid, $price_instance_per_user, 'chaine', 0, '', $conf->entity);
+					}
+				}
 			}
+			
 		}
 	}
 
@@ -441,12 +455,18 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 	}
 }
 
-if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $action == 'resetproperty') {
+if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $action == 'resetpropertyconfirm') {
 	if (!empty($propertykey) && !empty($mythirdpartyaccount->id)) {
 		require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
-		dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
-		dolibarr_del_const($db,"SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
-		setEventMessages($langs->trans("PricesSuccessfullyCleared"),null);
+		$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
+		if ($result > 0) {
+			$result = dolibarr_del_const($db,"SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
+		}
+		if ($result > 0) {
+			setEventMessages($langs->trans("PricesSuccessfullyCleared"),null);
+		}else {
+			setEventMessages($langs->trans("ErrorClearingPrice"),null,"errors");
+		}
 	}else {
 		setEventMessages($langs->trans("ErrorClearingPrice"),null,"errors");
 	}
@@ -2840,6 +2860,8 @@ if ($resqlproducts) {
 			$priceinstance_ttc['fix'] = $obj->price_ttc;
 			$priceinstance['user'] = 0;
 			$priceinstance_ttc['user'] = 0;
+			$priceinstance['options'] = 0;
+			$priceinstance_ttc['options'] = 0;
 
 			if (count($tmparray) > 0) {
 				foreach ($tmparray as $key => $value) {
@@ -2850,6 +2872,10 @@ if ($resqlproducts) {
 					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
 						// Don't add system services to global price, these are options with calculated quantities
 					} else {
+						if ($tmpprodchild->array_options['options_app_or_option'] == 'option') {
+							$priceinstance['options'] += $tmpprodchild->price;
+							$priceinstance_ttc['options'] += $tmpprodchild->price_ttc;
+						}
 						$priceinstance['fix'] += $tmpprodchild->price;
 						$priceinstance_ttc['fix'] += $tmpprodchild->price_ttc;
 					}
@@ -2860,7 +2886,7 @@ if ($resqlproducts) {
 			if (empty($pricetoshow)) $pricetoshow = 0;
 			$arrayofplans[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 			$arrayofplansmodifyprice[$obj->rowid]["label"] = $label;
-			$arrayofplansmodifyprice[$obj->rowid]["price"] = price2num($pricetoshow);
+			$arrayofplansmodifyprice[$obj->rowid]["price"] = price2num($priceinstance['fix'] - $priceinstance['options'],'MT');
 			if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
 			if ($priceinstance['user']) {
 				$arrayofplans[$obj->rowid].=' + '.price(price2num($priceinstance['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).'/'.$langs->trans("User");
@@ -2921,7 +2947,7 @@ if ($mythirdpartyaccount->isareseller) {
 	if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION")) {
 		print '<br><br>';
 		print $langs->trans("ForcePricesOfInstances");
-		print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyressellerprices" method="POST" >';
+		print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyresellerprices" method="POST" >';
 		print '<input type="hidden" name="action" value="updateforcepriceinstance">';
 		print '<div class="div-table-responsive">';
 		print '<table class="noborder small" style="min-width:100%">';
@@ -2938,6 +2964,7 @@ if ($mythirdpartyaccount->isareseller) {
 		print '</th>';
 		print '</tr>';
 
+		// Ajout Options price change
 		foreach ($arrayofplansmodifyprice as $key => $value) {
 			print '<tr class="field_'.$key.' oddeven"><td class="minwidth300">';
 			print $value["label"]."&nbsp;";
@@ -2948,7 +2975,9 @@ if ($mythirdpartyaccount->isareseller) {
 				print '<input class="flat field_price" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ? : $value["price"]).'"><span>'.$langs->getCurrencySymbol($conf->currency).'<span>';
 				print '</td>';
 				print '<td class="minwidth300">';
-				print '<input class="flat field_price" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? : $value["priceuser"]).'"><span>'.$langs->getCurrencySymbol($conf->currency).'</span>';
+				if (!empty($value["priceuser"])) {
+					print '<input class="flat field_price" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? :$value["priceuser"]).'"><span>'.$langs->getCurrencySymbol($conf->currency).'</span>';
+				}
 				print '</td>';
 				print '<td class="center maxwidth200">';
 				print '<input class="button smallpaddingimp btn green-haze btn-circle" type="submit" name="edit" value="'.$langs->trans("Save").'" style="margin: 2px;">';
@@ -2961,7 +2990,9 @@ if ($mythirdpartyaccount->isareseller) {
 				print '</span>';
 				print '</td>';
 				print '<td>';
-				print dol_escape_htmltag(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? : $value["priceuser"]).$langs->getCurrencySymbol($conf->currency);
+				if (!empty($value["priceuser"])) {
+					print dol_escape_htmltag(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? : $value["priceuser"]).$langs->getCurrencySymbol($conf->currency);
+				}
 				print '</td>';
 				print '<td class="center">';
 				print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
@@ -2976,6 +3007,11 @@ if ($mythirdpartyaccount->isareseller) {
 	print '
 		</div>
 	';
+
+	if ($action == 'resetproperty') {
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?propertykey='.$propertykey, $langs->trans('ResetForcedPrice'), $langs->trans('ConfirmResetForcedPrice'), 'resetpropertyconfirm', '', 0, 1);
+		print $formconfirm;
+	}
 }
 
 
