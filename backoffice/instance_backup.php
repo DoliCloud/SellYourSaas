@@ -309,7 +309,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	// Thirdparty
 	$morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . ($object->thirdparty ? $object->thirdparty->getNomUrl(1) : '');
 	// Project
-	if (! empty($conf->projet->enabled)) {
+	if (! empty($conf->project->enabled)) {
 		$langs->load("projects");
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {

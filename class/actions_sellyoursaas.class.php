@@ -57,6 +57,11 @@ class ActionsSellyoursaas
 	 */
 	public $resprints;
 
+	/**
+	 * @var int		Priority of hook (50 is used if value is not defined)
+	 */
+	public $priority;
+
 
 	/**
 	 *	Constructor
