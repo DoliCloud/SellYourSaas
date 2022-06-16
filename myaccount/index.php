@@ -420,7 +420,7 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 			}
 
 			if (!$errors) {
-				$minfixprice = $priceinstance['fix'] - $min_instance_price_reduction * $priceinstance['fix'];
+				$minfixprice = $priceinstance['fix'] - $priceinstance['options'] - $min_instance_price_reduction * $priceinstance['fix'];
 				if (!empty($priceinstance['user'])) {
 					$minuserprice = $priceinstance['user'] - $min_instance_price_reduction * $priceinstance['user'];
 				}
@@ -2975,7 +2975,7 @@ if ($mythirdpartyaccount->isareseller) {
 				print '<input class="flat field_price" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ? : $value["price"]).'"><span>'.$langs->getCurrencySymbol($conf->currency).'<span>';
 				print '</td>';
 				print '<td class="minwidth300">';
-				if (!empty($value["priceuser"])) {
+				if (isset($value["priceuser"])) {
 					print '<input class="flat field_price" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? :$value["priceuser"]).'"><span>'.$langs->getCurrencySymbol($conf->currency).'</span>';
 				}
 				print '</td>';
@@ -2990,7 +2990,7 @@ if ($mythirdpartyaccount->isareseller) {
 				print '</span>';
 				print '</td>';
 				print '<td>';
-				if (!empty($value["priceuser"])) {
+				if (isset($value["priceuser"])) {
 					print dol_escape_htmltag(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? : $value["priceuser"]).$langs->getCurrencySymbol($conf->currency);
 				}
 				print '</td>';
