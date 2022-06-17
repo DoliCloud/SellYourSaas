@@ -108,3 +108,11 @@ echo "Nettoyage vieux /tmp"
 echo find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
 find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
 
+echo "Check files for antispam system and create them if not found"
+mkdir /tmp/spam;
+[ -s /tmp/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
+[ -s /tmp/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
+[ -s /tmp/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
+[ -s /tmp/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
+chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
+

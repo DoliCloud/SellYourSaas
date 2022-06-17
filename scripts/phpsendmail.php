@@ -134,7 +134,7 @@ $commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
 $resexec =  shell_exec($commandcheck);
 file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$commandcheck." = ".$resexec, FILE_APPEND);
 if ($resexec > $MAXPERDAY) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of of '.$MAXPERDAY.".\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of '.$MAXPERDAY.".\n", FILE_APPEND);
 	exit(6);
 }
 
