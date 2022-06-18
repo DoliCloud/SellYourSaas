@@ -749,6 +749,10 @@ backupdir=/mnt/diskbackup/backup
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+
+# Options for antispam system
+maxemailperday=500
+
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
 

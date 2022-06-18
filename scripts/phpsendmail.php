@@ -28,6 +28,31 @@ $referenceline = '';
 $emailfrom = '';
 
 
+// Rules
+$MAXOK = 10;
+$MAXPERDAY = 500;
+
+
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Get $maxemailperday
+$maxemailperday = 0;
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'maxemailperday') {
+			$maxemailperday = $tmpline[1];
+		}
+	}
+} else {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " Failed to open /etc/sellyoursaas.conf file\n", FILE_APPEND);
+	exit(-1);
+}
+if (is_numeric($maxemailperday) && $maxemailperday > 0) {
+	$MAXPERDAY = (int) $maxemailperday;
+}
+
+
 // Main
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . " php.ini file loaded is ".php_ini_loaded_file()."\n", FILE_APPEND);
@@ -120,10 +145,6 @@ if (empty($ip)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
 	// exit(7);		// We do not exit, this can occurs sometime
 }
-
-// Rules
-$MAXOK = 10;
-$MAXPERDAY = 500;
 
 // Count other existing file starting with '/tmp/phpsendmail-'.posix_getuid()
 // and return error if nb is higher than 500
