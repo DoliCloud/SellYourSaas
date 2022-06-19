@@ -705,9 +705,6 @@ archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
 
-# Options for antispam system
-maxemailperday=500
-
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
 
@@ -740,6 +737,36 @@ remotebackupdir=/mnt/diskbackup
 Mettre *masterserver* à 1, *dnsserver* et *instanceserver* à 0 sur le Master
 Mettre *masterserver* à 0, *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 Ne pas oublier de définir une valeur pour *databasepass*. On réutilisera cette valeur plus tard.
+
+
+* Créer un fichier */etc/sellyoursaas-public.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas-public.conf
+chown root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
+---------------
+
+avec le contenu suivant:
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas-public.conf
+
+# Options for antispam system
+maxemailperday=500
+---------------
+
+
+* Créer aussi le répertoire vide:
+
+[source,conf]
+---------------
+mkdir -p /etc/sellyoursaas.d
+---------------
+
 
 
 === Installation du partage nfs

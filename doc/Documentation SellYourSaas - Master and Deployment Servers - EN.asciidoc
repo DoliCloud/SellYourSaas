@@ -750,9 +750,6 @@ archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
 
-# Options for antispam system
-maxemailperday=500
-
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
 
@@ -786,7 +783,29 @@ Put *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master
 Put *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on deployment servers.
 Do not forget to set a value for *databasepass*. We will reuse this value later.
 
-Create also an empty directory:
+
+* Create a file */etc/sellyoursaas-public.conf* on the server (on the server *Master* and the *Deployment servers*)
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas-public.conf
+chown root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
+---------------
+
+With the following content:
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas-public.conf
+
+# Options for antispam system
+maxemailperday=500
+---------------
+
+
+* Create also an empty directory:
 
 [source,conf]
 ---------------
