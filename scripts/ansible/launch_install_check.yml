@@ -255,3 +255,16 @@
       var: command_output.stdout_lines
       
      
+  ##### Set permissions by calling perms.ksh
+- name: Call perms.ksh
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Launch perms.sh
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh {{command}}"
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines  

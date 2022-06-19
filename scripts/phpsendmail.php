@@ -33,11 +33,11 @@ $MAXOK = 10;
 $MAXPERDAY = 500;
 
 
-$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+$fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Get $maxemailperday
 $maxemailperday = 0;
 if ($fp) {
-	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'maxemailperday') {
@@ -45,8 +45,8 @@ if ($fp) {
 		}
 	}
 } else {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " Failed to open /etc/sellyoursaas.conf file\n", FILE_APPEND);
-	exit(-1);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " Failed to open /etc/sellyoursaas-public.conf file\n", FILE_APPEND);
+	//exit(-1);
 }
 if (is_numeric($maxemailperday) && $maxemailperday > 0) {
 	$MAXPERDAY = (int) $maxemailperday;

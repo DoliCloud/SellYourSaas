@@ -52,9 +52,20 @@ if [[ "x$masterserver" == "x1" ]]; then
 fi
 
 echo Set owner and permission on /etc/sellyoursaas.conf
+if [ ! -s /etc/sellyoursaas.conf ]; then
+	echo > /etc/sellyoursaas.conf
+fi
 chown -R root.admin /etc/sellyoursaas.conf
 chmod g-wx /etc/sellyoursaas.conf
 chmod o-rwx /etc/sellyoursaas.conf
+
+echo Set owner and permission on /etc/sellyoursaas-pubic.conf
+if [ ! -s /etc/sellyoursaas-public.conf ]; then
+	echo > /etc/sellyoursaas-public.conf
+fi
+chown -R root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr
 chown -R admin.admin /home/admin/wwwroot/dolibarr
