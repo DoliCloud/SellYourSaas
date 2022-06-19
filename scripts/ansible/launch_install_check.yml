@@ -263,7 +263,7 @@
   become_user: root
   tasks:
   - name: Launch perms.sh
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh {{command}}"
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh confirm"
     register: command_output
 
   - debug:
