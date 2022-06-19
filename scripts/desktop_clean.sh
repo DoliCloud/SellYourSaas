@@ -26,7 +26,7 @@ export currentpath=$(dirname "$0")
 
 cd $currentpath/ansible
 
-echo "Execute ansible for host group $1 and targets $2"
+echo "Execute ansible for host group $1 and targets $target"
 pwd
 
 

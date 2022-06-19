@@ -8,7 +8,7 @@
 
 source /etc/lsb-release
 
-if [ "x$2" == "x" ]; then
+if [ "x$1" == "x" ]; then
    echo "Usage:   $0  hostfile  [hostgrouporname]  (php74)"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  master,deployment"
@@ -27,7 +27,7 @@ export currentpath=$(dirname "$0")
 
 cd $currentpath/ansible
 
-echo "Execute ansible for host group $1 and targets $2"
+echo "Execute ansible for host group $1 and targets $target"
 pwd
 
 
