@@ -652,3 +652,4 @@ ConfirmNonProfiitOrga=I confirm that I am a non-profit organization (Note: If yo
 SELLYOURSAAS_ONLY_NON_PROFIT_ORGA=Add a checkbox on registration form to validate non-profit organisation status
 SupportChannel=Support channel
 AskForSupport=Ask for support
+SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID=List of customers id with "experimental" SEPA payment enabled

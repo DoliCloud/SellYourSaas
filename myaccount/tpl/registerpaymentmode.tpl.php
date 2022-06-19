@@ -309,7 +309,7 @@ if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_
 	print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("Save").'</button>';
 }
 
-print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/working.gif'.'">';
+print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/working.gif">';
 print ' ';
 print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 
@@ -645,10 +645,10 @@ if ($mythirdpartyaccount->isInEEC()) {
 	}
 
 	$enabledformtoentersepa = getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA');
+	$enabledformtoentersepaforids = explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID'));	// To test by enabling only on a given thirdparty, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = id of thirparty.
 	//$enabledformtoentersepa = 1;
 
-	// To test by enabling only on a given thirdparty, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = id of thirparty.
-	if ($enabledformtoentersepa || $mythirdpartyaccount->id == getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID')) {
+	if ($enabledformtoentersepa || in_array($mythirdpartyaccount->id, $enabledformtoentersepaforids)) {
 		// Form to enter SEPA
 		print '<br>';
 		print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
@@ -663,8 +663,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
 		print ' ';
 		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
-	}
-	else {
+	} else {
 		if (! $foundban) {
 			print '<br>';
 			//print $langs->trans("SEPAPaymentModeAvailableForYealyAndCeeSubscriptionOnly");
@@ -721,9 +720,9 @@ print '
 				jQuery(".linksepa").show();
 				jQuery("#bankname").focus();
 			});';
-	if (GETPOST('type', 'aZ09') == 'SepaMandate') {
-		print 'jQuery("#linksepa").trigger("click");';
-	}
+if (GETPOST('type', 'aZ09') == 'SepaMandate') {
+	print 'jQuery("#linksepa").trigger("click");';
+}
 	print '
 		});
 		</script>';
