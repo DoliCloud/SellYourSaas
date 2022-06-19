@@ -3135,7 +3135,7 @@ chown syslog.adm /var/log/phpmail.log /var/log/phpsendmail.log
 chmod a+rw /var/log/phpmail.log /var/log/phpsendmail.log
 ---------------
 
-Create a directory for blacklist files used by *phpsendmail.php*
+Créer un répertoire pour le répertoire des fichiers blacklist utilisés par *phpsendmail.php*
 
 [source,bash]
 ---------------
@@ -3148,18 +3148,19 @@ Et copier les dans le répertoire local:
 
 [source,bash]
 ---------------
-mkdir /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp/spam;
-chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
-
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent;
-chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+chmod -R ug+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+
+
+mkdir /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
+chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
 ---------------
 
 === Configuration de logrotate

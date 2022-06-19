@@ -120,6 +120,14 @@ echo find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
 find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
 
 echo "Check files for antispam system and create them if not found"
+[ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
+chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+
 [ -d /tmp/spam ] || mkdir /tmp/spam;
 [ -s /tmp/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
 [ -s /tmp/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
