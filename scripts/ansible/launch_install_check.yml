@@ -239,7 +239,6 @@
       - php74 is defined
 
 
-      
   - name: Removed unexpected apt packages
     apt:
       pkg:

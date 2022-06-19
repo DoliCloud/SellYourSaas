@@ -12,7 +12,7 @@ if [ "x$1" == "x" ]; then
    echo "Usage:   $0  hostfile  [hostgrouporname]  (php74)"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  master,deployment"
-   echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com  reboot"
+   echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
    exit 1
 fi
 
@@ -21,7 +21,10 @@ if [ "x$target" == "x" ]; then
 	target="master"
 fi
 
-reboot=$3
+if [ "x$3" == "xphp74" ]; then
+	php74=1
+fi
+
 
 export currentpath=$(dirname "$0")
 
