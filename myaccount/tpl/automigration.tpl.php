@@ -28,6 +28,7 @@ if (empty($conf) || ! is_object($conf)) {
 $upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';
 $filenames = array();
 $fileverification = array();
+$stepautomigration = GETPOST("stepautomigration","int");
 
 if (!empty($_POST['addfile'])) {
 	// Set tmp user directory
@@ -302,8 +303,8 @@ if ($action == 'fileverification') {
         </script>';
 	} else {
 		$migrationerrormessage = $langs->trans("MigrationErrorContent");
-		$migrationerrormessage .= "\n\nMysqldump: ".$filetoverify["sql"];
-		$migrationerrormessage .= "\nDocumentDump: ".$filetoverify["dir"];
+		$migrationerrormessage .= "\n\nMysqldump: ".(!empty($filetoverify["sql"]) ? $filetoverify["sql"] : "null");
+		$migrationerrormessage .= "\nDocumentDump: ".(!empty($filetoverify["dir"]) ? $filetoverify["dir"] : "null");
 		$migrationerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
 		$migrationerrormessage .= "\nErrorsSql: ";
 		foreach ($fileverification[0]['error'] as $key => $errorcode) {
@@ -335,10 +336,12 @@ if ($action == 'fileverification') {
     <!-- END STEP5-->';
 }
 if ($action == 'view') {
-	print '<form name="formautomigration" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+	print '<form id="formautomigration" name="formautomigration" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="mode" value="automigration">';
-	print '<input type="hidden" name="action" value="fileverification">';
+	print '<input type="hidden" id="actionautomigration" name="action" value="view">';
+	print '<input type="hidden" id="stepautomigration" name="stepautomigration" value="2">';
+
 	print'<!-- BEGIN STEP1-->
         <div class="portlet light" id="Step1">
                 <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</small></h1><br>
@@ -360,7 +363,7 @@ if ($action == 'view') {
                 </small>
                 </div>
                 <div class="center">
-                <a href="#Step2"><button type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
+                <button id="buttonstep_2" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
                 <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
                 </div>
         </div>
@@ -376,7 +379,7 @@ if ($action == 'view') {
                     <img src="'.$linkstep2img.'">
                 </div><br>
                 <div class="center">
-                <a href="#Step3"><button type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
+                <button id="buttonstep_3" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
                 <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
                 </div>
         </div>
@@ -486,8 +489,8 @@ if ($action == 'view') {
             '.$langs->trans("AutomigrationStep3Warning").'
             </strong></h3>
             </div><br>
-            <div id="buttonstep4migration" class="center" style="display:none;">
-            <a href="#Step4" ><button type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
+            <div id="buttonstep4migration" class="center" '.($stepautomigration <= 3 && !GETPOST('instanceselect', 'alpha') ?'style="display:none;':'').'">
+            <button id="buttonstep_4" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
             <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
             </div>
         </div>
@@ -512,7 +515,7 @@ if ($action == 'view') {
             </div><br>
 
             <div class="center">
-                <input id="sumbmitfiles" style="display:none;" type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright btnstep">
+                <input id="sumbmitfiles" style="display:none;" type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
                 <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
             </div>
         </div>
@@ -561,12 +564,21 @@ if ($action == 'view') {
             }
         }
         $(".btnstep").on("click",function(){
-            showStepAnchor();
+            //showStepAnchor();
+			stepautomigration = $(this).attr("id").split("_")[1];
+			$("#stepautomigration").val(stepautomigration);
+			$("#formautomigration").submit();
         })
-        var hash = $(location).attr("hash").substr(5);
+		$("#sumbmitfiles").on("click",function(){
+			$("#actionautomigration").val(\'fileverification\');
+		})
+        var hash = '.$stepautomigration.';
         if(hash != "4"){
-            $(".divstep").hide();
+			$(".divstep").hide();
+			showStepAnchor(hash);
         }
+		step = "Step"+hash;
+		$("html, body").scrollTop($("#"+step).offset().top);
     })
     </script>';
 }
