@@ -1210,7 +1210,7 @@ if ($reusecontractid) {
 		//var_dump($tmpproduct->tva_tx);
 		//var_dump($vat);exit;
 
-		$price = getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$partner."_".$tmpproduct->id) ?: $tmpproduct->price;
+		$price = getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$partner."_".$tmpproduct->id) : $tmpproduct->price;
 		$discount = $tmpthirdparty->remise_percent;
 
 		$productidtocreate = $tmpproduct->id;
