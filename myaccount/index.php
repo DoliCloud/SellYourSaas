@@ -3029,6 +3029,7 @@ if ($mythirdpartyaccount->isareseller) {
 		print '<span class="opacitymedium small">'.$langs->trans("ForcePricesOfInstances").'</span>';
 		print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyresellerprices" method="POST" >';
 		print '<input type="hidden" name="action" value="updateforcepriceinstance">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<div class="div-table-responsive">';
 		print '<table class="noborder small centpercent background-white padding">';
 		print '<tr class="field_'.$key.' liste_titre"><th>';
