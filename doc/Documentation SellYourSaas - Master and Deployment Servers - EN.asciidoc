@@ -83,7 +83,7 @@ You need to acquire this domain name from a registrar.
 
 == Installation of the machine and OS
 
-The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be * Deployment servers * (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
+The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be *Deployment servers* (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
 
 === Choice of machine and OS and create it
 
@@ -91,11 +91,11 @@ The first step is to make one (or more) server available. If we are going on sev
 
 * Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
-_Example with Amazon Standard Medium: _
+_Example with Amazon Standard Medium:_
 
 Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and bandwidth then switch to *m1.large* @ $ 0.18 per hour
 
-_Example with OVH Public Cloud: _
+_Example with OVH Public Cloud:_
  
 For the master server: VPS or B2-15 or more
 For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
@@ -845,7 +845,7 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
-Note that you should have n lines per deployment server in this file.
+Note that you should have n lines (one per deployment server) in this file.
 
 Set a fixed port for mountd:
 
@@ -1955,9 +1955,9 @@ Note: To get/see the current limits of OS and connected user:
 ulimit -a
 ---------------
 
-Note:
-On peut vérifier qu'il y a bien la ligne *session required pam_limits.so* dans les fichiers /etc/pam.d/system-auth ou /etc/pam.d/password-auth et/ou /etc/pam.d/sudo afin d’être certain de toujours fixer les seuils définis par l’administrateur lors de chaque connexion d’utilisateur au système. Si les limites définies dans ce fichier ne sont pas prises en compte le premier réflexe consiste à s’assurer que le module pam_limits.so est bien activé dans les fichiers de configuration de PAM.
-REMARQUE : sur certaines distributions les fichiers de configuration de PAM peuvent différer. On peut rencontrer la définition des limites dans les fichiers /etc/pam.d/common-session ou /etc/pam.d/login. Mais, le principe reste le même : s’assurer qu’à chaque connexion utilisateur les seuils des ressources du système sont bien appliqués.
+Note: 
+You can check that there is indeed the line *session required pam_limits.so* in the files /etc/pam.d/system-auth or /etc/pam.d/password-auth and/or /etc/pam.d/sudo to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
+NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files /etc/pam.d/common-session or /etc/pam.d/login. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
 
 
 
@@ -3055,7 +3055,7 @@ rotate 365
 ---------------
 
 
-* Créer un fichier */etc/logrotate.d/logrotate_sellyoursaas_log*
+* Create a file */etc/logrotate.d/logrotate_sellyoursaas_log*
 
 [source,conf]
 ---------------
