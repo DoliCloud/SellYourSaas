@@ -1225,7 +1225,7 @@ if ($reusecontractid) {
 		//var_dump($tmpproduct->tva_tx);
 		//var_dump($vat);exit;
 
-		$price = $tmpproduct->price;
+		$price = getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$partner."_".$tmpproduct->id) : $tmpproduct->price;
 		$discount = $tmpthirdparty->remise_percent;
 
 		$productidtocreate = $tmpproduct->id;
@@ -1262,7 +1262,11 @@ if ($reusecontractid) {
 			$localtax1_tx = get_default_localtax($mysoc, $object, 1, $prodid);
 			$localtax2_tx = get_default_localtax($mysoc, $object, 2, $prodid);
 
-			$price = $tmpsubproduct->price;
+			if (preg_match('/user/i', $tmpsubproduct->ref) || preg_match('/user/i', $tmpsubproduct->array_options['options_resource_label'])) {
+				$price = getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$partner."_".$tmpproduct->id) : $tmpsubproduct->price;
+			} else {
+				$price = getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$tmpsubproduct->id."_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$tmpsubproduct->id."_".$partner."_".$tmpproduct->id) : $tmpsubproduct->price;
+			}
 			$desc = '';
 			if (empty($conf->global->SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT)) {
 				$desc = $tmpsubproduct->description;
