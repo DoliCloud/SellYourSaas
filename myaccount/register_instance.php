@@ -829,7 +829,8 @@ if ($reusecontractid) {
 	$generateddbport = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
 
-	// Create thirdparty
+
+	// Create the new thirdparty
 
 	$tmpthirdparty->oldcopy = dol_clone($tmpthirdparty);
 
@@ -844,7 +845,7 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_date_registration'] = dol_now();
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin?'-'.$origin:'');
-	$tmpthirdparty->array_options['options_source_utm'] = $_COOKIE['utm_source_cookie'];
+	$tmpthirdparty->array_options['options_source_utm'] = (empty($_COOKIE['utm_source_cookie']) ? '' : $_COOKIE['utm_source_cookie']);
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
 	//$tmpthirdparty->array_options['options_checkbosnonprofitorga'] = $checkbosnonprofitorga;		// For the moment we don't save this info
@@ -861,6 +862,14 @@ if ($reusecontractid) {
 		/*if (! in_array($tmparray[0], array('fr', 'es', 'en'))) {
 			$tmpthirdparty->default_lang = 'en_US';
 		}*/
+	}
+
+	$reg = array();
+	if (!empty($_COOKIE['utm_source_cookie']) && preg_match('/^partner(\d+)$/', $_COOKIE['utm_source_cookie'], $reg)) {
+		// The source is from a partner
+		if (getDolGlobalInt('SELLYOURSAAS_LINK_TO_PARTNER_IF_FIRST_SOURCE')) {
+			$tmpthirdparty->parent = ((int) $reg[1]);		// Add link to parent/reseller id with the id of first source in all web site
+		}
 	}
 
 
@@ -892,7 +901,7 @@ if ($reusecontractid) {
 			$tmpthirdparty->code_fournisseur = -1;
 		}
 		if ($partner > 0) {
-			$tmpthirdparty->parent = $partner;		// Add link to parent/reseller
+			$tmpthirdparty->parent = $partner;		// Add link to parent/reseller id with the id of partner explicitely into registration link
 		}
 
 		$result = $tmpthirdparty->create($user);
@@ -1020,6 +1029,7 @@ if ($reusecontractid) {
 		if (preg_match('/glpi|flyve/i', $productref) && GETPOST("tz_string")) {
 			$contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.GETPOST("tz_string").'"';
 		}
+
 		$contract->array_options['options_timezone'] = GETPOST("tz_string");
 		$contract->array_options['options_deployment_ip'] = $remoteip;
 		$contract->array_options['options_deployment_ua'] = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : dol_trunc($_SERVER["HTTP_USER_AGENT"], 250));
