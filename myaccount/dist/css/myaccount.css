@@ -112,6 +112,9 @@ a.btnalreadyanaccount {
 .paddingtop {
 	padding-top: 5px;	
 }
+.padding th, .padding td {
+	padding: 5px;	
+}
 
 .select2-container .select2-selection--single
 {
@@ -202,7 +205,9 @@ a.btnalreadyanaccount {
 .bold {
     font-weight: 700 !important;
 }
-
+.background-white {
+	background: white;
+}
 
 .tabbable-custom > .nav-tabs > li.active {
     border-top: 3px solid #F3565D;

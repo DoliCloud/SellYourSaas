@@ -3013,7 +3013,7 @@ if ($mythirdpartyaccount->isareseller) {
 	});
 		</script>';
 
-	print '<br><a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a>';
+	print '<br><a class="small" id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
 	print '<div id="divmorereselleroptions" style="display: hidden" class="small">';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
 		print '&plan=XXX : ';
@@ -3021,19 +3021,16 @@ if ($mythirdpartyaccount->isareseller) {
 	}
 	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'. An example is available with &extcss='.$sellyoursaasaccounturl.'/dist/css/alt-myaccount-example.css</span><br>';
 	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
-	print '</div>';
-	print '<br>';
 
-	$urformycustomerinstances = '<strong>'.$langs->transnoentitiesnoconv("MyCustomersBilling").'</strong>';
-	print str_replace('{s1}', $urformycustomerinstances, $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], '{s1}'));
+	print '</div>';
 
 	if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE")) {
-		print '<br><br>';
-		print $langs->trans("ForcePricesOfInstances");
+		print '<br>';
+		print '<span class="opacitymedium small">'.$langs->trans("ForcePricesOfInstances").'</span>';
 		print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyresellerprices" method="POST" >';
 		print '<input type="hidden" name="action" value="updateforcepriceinstance">';
 		print '<div class="div-table-responsive">';
-		print '<table class="noborder small" style="min-width:100%">';
+		print '<table class="noborder small centpercent background-white padding">';
 		print '<tr class="field_'.$key.' liste_titre"><th>';
 		print $langs->trans("Label");
 		print '</th>';
@@ -3054,8 +3051,9 @@ if ($mythirdpartyaccount->isareseller) {
 
 		// Ajout Options price change
 		foreach ($arrayofplansmodifyprice as $key => $value) {
-			print '<tr class="field_'.$key.' oddeven"><td class="maxwidth150">';
-			print $value["label"]."&nbsp;";
+			print '<tr class="field_'.$key.' oddeven">';
+			print '<td class="maxwidth150 tdoverflowmax200" title="'.dol_escape_htmltag($value['label']).'">';
+			print $value["label"];
 			print '</td> ';
 			if ($action == 'editproperty' && $key == $propertykey) {
 				print '<input type="hidden" name="priceproductid" value="'.$key.'">';
@@ -3111,9 +3109,16 @@ if ($mythirdpartyaccount->isareseller) {
 			}
 			print '</tr>';
 		}
-		print '</table></div><br>';
+		print '</table></div>';
+
 		print '</form>';
 	}
+
+	print '<br>';
+	$urformycustomerinstances = '<strong>'.$langs->transnoentitiesnoconv("MyCustomersBilling").'</strong>';
+	print str_replace('{s1}', $urformycustomerinstances, $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], '{s1}'));
+
+
 	print '
 		</div>
 	';
