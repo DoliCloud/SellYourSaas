@@ -805,7 +805,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		print '
 								<p class="center">
 									<input type="hidden" name="mode" value="instances"/>
-									<input type="hidden" name="action" value="undeploy" />
+									<input type="hidden" name="action" value="confirmundeploy" />
 									<input type="hidden" name="contractid" value="'.$contract->id.'" />
 									<input type="hidden" name="tab" value="danger_'.$contract->id.'" />
 									<input type="submit" '.($hasopeninvoices?' disabled="disabled"':'').' class="btn btn-danger'.($hasopeninvoices?' disabled':'').'" name="undeploy" value="'.$langs->trans("UndeployInstance").'">
@@ -829,7 +829,105 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			    </div> <!-- END ROW -->';
 	}		// End loop contract
 }
+if ($action == "confirmundeploy") {
+	$formquestion = array(
+		array(
+			"type"=>"other",
+			"value"=>$langs->trans('FillUndeployFormDestruction')
+		),
+		array(
+			"type"=>"hidden",
+			"name"=>"contractid",
+			"value"=>GETPOST('contractid', 'int')
+		),
+		array(
+			"type"=>"hidden",
+			"name"=>"urlofinstancetodestroy",
+			"value"=>GETPOST('urlofinstancetodestroy')
+		),
+		array(
+			"type"=>"hidden",
+			"name"=>"tab",
+			"value"=>GETPOST('tab')
+		)
+	);
 
+	// Radio part can be changed by a list of labels and a foreach
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"TechnicalIssue"=>$langs->trans("TechnicalIssue"),
+		),
+		"name"=>"reasonundeploy",
+		"default"=>"TechnicalIssue",
+		"morecss"=>"hideothertag",
+		"moreattr"=>"required"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"FonctionalProblem"=>$langs->trans("FonctionalProblem"),
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"PriceProblem"=>$langs->trans("PriceProblem")
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"ChangeSoftwareOrProvider"=>$langs->trans("ChangeSoftwareOrProvider")
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"SwitchToOnPremise"=>$langs->trans("SwitchToOnPremise"),
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+
+	$formquestion[] = array(
+		"type"=>"textarea",
+		"label"=>'<input type="radio" class="flat" id="reasonundeployotherradio" name="reasonundeploy" value="Other">&nbsp;<label for="reasonundeployOther">Autre</label>',
+		"name"=>"reasonundeployother",
+		"moreattr"=>'style="display:none;width:100%;border:solid 1px grey;"',
+	);
+	$formquestion[] = array(
+		"type"=>"onecolumn",
+		"value"=>"<br>"
+	);
+	$formquestion[] = array(
+		"type"=>"textarea",
+		"label"=>$langs->trans("AddACommentDestruction"),
+		"name"=>"commentundeploy",
+		"moreattr"=>'style="width:100%;border:solid 1px grey;"',
+	);
+
+	print $form->formconfirm($_SERVER["PHP_SELF"]."?mode=instances",$langs->trans('UndeployInstance'),"","undeploy",$formquestion,'',1,"510");
+	print '<script>
+	$("#reasonundeployotherradio").on("click",function(){
+		$("#reasonundeployother").css("display", "block");
+	})
+	$(".hideothertag").on("click",function(){
+		$("#reasonundeployother").hide();
+	})
+	</script>';
+	print '<style>
+	.margintoponly{
+		margin-top:0px
+	}
+	</style>';
+}
 
 	// Section to add/create a new instance
 	print '

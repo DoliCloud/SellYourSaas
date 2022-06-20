@@ -124,6 +124,9 @@ $firstrecord=GETPOST('firstrecord', 'int');
 $lastrecord=GETPOST('lastrecord', 'int');
 $search_instance_name=GETPOST('search_instance_name', 'alphanohtml');
 $search_customer_name=GETPOST('search_customer_name', 'alphanohtml');
+$reasonundeploy=GETPOST('reasonundeploy','alpha');
+$reasonundeployother=GETPOST('reasonundeployother','alpha');
+$commentundeploy=GETPOST('commentundeploy','alpha');
 
 // Var used to create a new BAN for SEPA payments
 $bankname = GETPOST('bankname', 'alphanohtml');
@@ -2197,6 +2200,17 @@ if ($action == 'updateurl') {
 				}
 			}
 
+			// Insert extrafields of uninstall
+			if (!$error) {
+				$object->array_options['options_reasonundeploy'] = $reasonundeploy;
+				$object->array_options['options_reasonundeployother'] = $reasonundeployother;
+				$object->array_options['options_commentundeploy'] = $commentundeploy;
+				$result = $object->insertExtraFields();
+				if ($result <= 0) {
+					$error++;
+					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+				}
+			}
 			// Finish undeploy
 
 			if (! $error) {
