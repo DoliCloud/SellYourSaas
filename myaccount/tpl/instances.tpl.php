@@ -400,7 +400,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 					$labelprod = $langs->trans("Users");
 				}
 
-				print '<span class="opacitymedium small">'.$labelprod.'</span><br>';
+				print '<span class="opacitymedium small labelprod">'.$labelprod.'</span><br>';
 
 				// Qty
 				$resourceformula = $tmpproduct->array_options['options_resource_formula'];

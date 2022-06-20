@@ -26,6 +26,12 @@ span.pictowarning {
     color: #ff8800;
 }
 
+span.labelprod {
+    overflow-y: hidden;
+    height: 20px;
+    display: block;
+}
+
 .start {
 	text-align: start;
 }
