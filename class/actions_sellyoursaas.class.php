@@ -771,7 +771,7 @@ class ActionsSellyoursaas
 		global $conf, $langs, $user;
 		global $object, $action;
 
-		if (in_array($parameters['currentcontext'], array('thirdpartycard','thirdpartycontact','thirdpartycomm','thirdpartyticket','thirdpartynote','thirdpartydocument','contactthirdparty','thirdpartypartnership','projectthirdparty','consumptionthirdparty','thirdpartybancard','thirdpartymargins','ticketlist','thirdpartynotification','agendathirdparty'))) {
+		if (in_array($parameters['currentcontext'], array('thirdpartycard','thirdpartycontact','thirdpartycomm','thirdpartysupplier','thirdpartyticket','thirdpartynote','thirdpartydocument','contactthirdparty','thirdpartypartnership','projectthirdparty','consumptionthirdparty','thirdpartybancard','thirdpartymargins','ticketlist','thirdpartynotification','agendathirdparty'))) {
 			$parameters['notiret']=1;
 			$this->getNomUrl($parameters, $object, $action);        // This is hook. It fills ->resprints
 			unset($parameters['notiret']);
