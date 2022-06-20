@@ -124,9 +124,9 @@ $firstrecord=GETPOST('firstrecord', 'int');
 $lastrecord=GETPOST('lastrecord', 'int');
 $search_instance_name=GETPOST('search_instance_name', 'alphanohtml');
 $search_customer_name=GETPOST('search_customer_name', 'alphanohtml');
-$reasonundeploy=GETPOST('reasonundeploy','alpha');
-$reasonundeployother=GETPOST('reasonundeployother','alpha');
-$commentundeploy=GETPOST('commentundeploy','alpha');
+$reasonundeploy=GETPOST('reasonundeploy', 'alpha');
+$reasonundeployother=GETPOST('reasonundeployother', 'alpha');
+$commentundeploy=GETPOST('commentundeploy', 'alpha');
 
 // Var used to create a new BAN for SEPA payments
 $bankname = GETPOST('bankname', 'alphanohtml');
@@ -377,7 +377,7 @@ if (preg_match('/logout/', $mode)) {
 if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $action == 'updateforcepriceinstance') {
 	$errors = 0;
 	$result = 1;
-	$priceproductid = GETPOST("priceproductid","alpha");
+	$priceproductid = GETPOST("priceproductid", "alpha");
 	$price_instance = price2num(GETPOST("field_price_".$mythirdpartyaccount->id."_".$priceproductid));
 	$price_instance_per_user = price2num(GETPOST("field_priceuser_".$mythirdpartyaccount->id."_".$priceproductid));
 
@@ -389,11 +389,11 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 
 		$res = $product->fetch($priceproductid);
 		if ($res <= 0) {
-			setEventMessages($langs->trans("ProductNotFound"), null,'errors');
+			setEventMessages($langs->trans("ProductNotFound"), null, 'errors');
 			$errors++;
 		}
 
-		if (!$errors){
+		if (!$errors) {
 			$priceinstance['user'] = null;
 			$priceinstance['options']["total"] = 0;
 			$priceinstance['fix'] = (float) price2num($product->price);
@@ -405,9 +405,9 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 					$tmpprodchild->fetch($value['id']);
 					$prodchildprice = (float) price2num($tmpprodchild->price);
 					if (preg_match('/user/i', $tmpprodchild->ref) || preg_match('/user/i', $tmpprodchild->array_options['options_resource_label'])) {
-						if (!empty($priceinstance['user'])){
+						if (!empty($priceinstance['user'])) {
 							$priceinstance['user'].= $prodchildprice;
-						}else {
+						} else {
 							$priceinstance['user'] = $prodchildprice;
 						}
 					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
@@ -423,17 +423,17 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 				}
 			}
 			if ($price_instance === "") {
-				setEventMessages($langs->trans("FixPriceMustBeNumeric"),null,'errors');
+				setEventMessages($langs->trans("FixPriceMustBeNumeric"), null, 'errors');
 				$errors++;
-			}else {
+			} else {
 				$price_instance = (float) $price_instance;
 			}
-		
+
 			if (isset($priceinstance['user'])) {
 				if ($price_instance_per_user === "") {
-					setEventMessages($langs->trans("PricePerUsersMustBeNumeric"),null,'errors');
+					setEventMessages($langs->trans("PricePerUsersMustBeNumeric"), null, 'errors');
 					$errors++;
-				}else {
+				} else {
 					$price_instance_per_user = (float) $price_instance_per_user;
 				}
 			}
@@ -444,11 +444,11 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 					$minuserprice = $priceinstance['user'] - $min_instance_price_reduction * $priceinstance['user'];
 				}
 				if ($price_instance < $minfixprice) {
-					setEventMessages($langs->trans("FixPriceMustBeMoreThenMinFixPrice", $minfixprice, $langs->getCurrencySymbol($conf->currency)),null,'errors');
+					setEventMessages($langs->trans("FixPriceMustBeMoreThenMinFixPrice", $minfixprice, $langs->getCurrencySymbol($conf->currency)), null, 'errors');
 					$errors++;
 				}
 				if (isset($priceinstance['user']) && $price_instance_per_user < $minuserprice) {
-					setEventMessages($langs->trans("PricePerUsersMustBeMoreThenMinUserPrice", $minuserprice, $langs->getCurrencySymbol($conf->currency)),null,'errors');
+					setEventMessages($langs->trans("PricePerUsersMustBeMoreThenMinUserPrice", $minuserprice, $langs->getCurrencySymbol($conf->currency)), null, 'errors');
 					$errors++;
 				}
 				if (!$errors) {
@@ -465,7 +465,7 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 						foreach ($priceinstance['options']["lines"] as $key => $value) {
 							$minoptionprice = $value["base"] - $min_instance_price_reduction * $value["base"];
 							if ($value["posted"] < $minoptionprice) {
-								setEventMessages($langs->trans("PriceOptionMustBeMoreThenMinOptionPrice", $cptoptions, $minoptionprice, $langs->getCurrencySymbol($conf->currency)),null,'errors');
+								setEventMessages($langs->trans("PriceOptionMustBeMoreThenMinOptionPrice", $cptoptions, $minoptionprice, $langs->getCurrencySymbol($conf->currency)), null, 'errors');
 								$errors++;
 							}
 							if (!$errors) {
@@ -479,15 +479,14 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 					}
 				}
 			}
-			
 		}
 	}
 
 	if ($result <= 0 || $errors) {
 		$action = "editproperty";
 		$propertykey = $priceproductid;
-	}else {
-		setEventMessages($langs->trans("PricesSuccessfullyUpdated"),null);
+	} else {
+		setEventMessages($langs->trans("PricesSuccessfullyUpdated"), null);
 	}
 }
 
@@ -496,14 +495,14 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 		require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 		$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
 		if ($result > 0) {
-			$result = dolibarr_del_const($db,"SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
+			$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
 		}
 		$product = new Product($db);
 		$tmpprodchild = new Product($db);
 
 		$result = $product->fetch($propertykey);
 		if ($result <= 0) {
-			setEventMessages($langs->trans("ProductNotFound"), null,'errors');
+			setEventMessages($langs->trans("ProductNotFound"), null, 'errors');
 			$errors++;
 		}
 		$product->sousprods = array();
@@ -514,8 +513,8 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 				$tmpprodchild->fetch($value["id"]);	// To load the product
 				if (preg_match('/user/i', $tmpprodchild->ref) || preg_match('/user/i', $tmpprodchild->array_options['options_resource_label'])) {
 					// Already deleted
-				}else {
-					$result = dolibarr_del_const($db,"SELLYOURSAAS_RESELLER_PRICE_OPTION_".$value["id"]."_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
+				} else {
+					$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_PRICE_OPTION_".$value["id"]."_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
 				}
 				if ($result <= 0) {
 					break;
@@ -523,12 +522,12 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 			}
 		}
 		if ($result > 0) {
-			setEventMessages($langs->trans("PricesSuccessfullyCleared"),null);
-		}else {
-			setEventMessages($langs->trans("ErrorClearingPrice"),null,"errors");
+			setEventMessages($langs->trans("PricesSuccessfullyCleared"), null);
+		} else {
+			setEventMessages($langs->trans("ErrorClearingPrice"), null, "errors");
 		}
-	}else {
-		setEventMessages($langs->trans("ErrorClearingPrice"),null,"errors");
+	} else {
+		setEventMessages($langs->trans("ErrorClearingPrice"), null, "errors");
 	}
 }
 
@@ -2965,12 +2964,12 @@ if ($resqlproducts) {
 					}
 				}
 			}
-			$maxcptoptions = max($maxcptoptions,$cptoptions);
+			$maxcptoptions = max($maxcptoptions, $cptoptions);
 			$pricetoshow = price2num($priceinstance['fix'], 'MT');
 			if (empty($pricetoshow)) $pricetoshow = 0;
 			$arrayofplans[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 			$arrayofplansmodifyprice[$obj->rowid]["label"] = $label;
-			$arrayofplansmodifyprice[$obj->rowid]["price"] = price2num($priceinstance['fix'] - $priceinstance['options'],'MT');
+			$arrayofplansmodifyprice[$obj->rowid]["price"] = price2num($priceinstance['fix'] - $priceinstance['options'], 'MT');
 			if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
 			if ($priceinstance['user']) {
 				$arrayofplans[$obj->rowid].=' + '.price(price2num($priceinstance['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).'/'.$langs->trans("User");
@@ -3044,9 +3043,9 @@ if ($mythirdpartyaccount->isareseller) {
 		print '<th>';
 		print $langs->trans("PricePerUsers");
 		print '</th>';
-		for ($i=0; $i < $maxcptoptions; $i++) { 
+		for ($i=0; $i < $maxcptoptions; $i++) {
 			print '<th>';
-			print $langs->trans("OptionForcePrice",$i+1);
+			print $langs->trans("OptionForcePrice", $i+1);
 			print '</th>';
 		}
 		print '<th>';
@@ -3074,8 +3073,8 @@ if ($mythirdpartyaccount->isareseller) {
 						print '<input class="flat field_price maxwidth150" type="text" id="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ? :$data["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
 						print '</td>';
 					}
-				}else {
-					for ($i=0; $i < $maxcptoptions; $i++) { 
+				} else {
+					for ($i=0; $i < $maxcptoptions; $i++) {
 						print '<td></td>';
 					}
 				}
@@ -3100,8 +3099,8 @@ if ($mythirdpartyaccount->isareseller) {
 						print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ? : $data["price"])).$langs->getCurrencySymbol($conf->currency);
 						print '</td>';
 					}
-				}else {
-					for ($i=0; $i < $maxcptoptions; $i++) { 
+				} else {
+					for ($i=0; $i < $maxcptoptions; $i++) {
 						print '<td></td>';
 					}
 				}

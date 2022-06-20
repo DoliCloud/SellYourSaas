@@ -913,7 +913,7 @@ if ($action == "confirmundeploy") {
 		"moreattr"=>'style="width:100%;border:solid 1px grey;"',
 	);
 
-	print $form->formconfirm($_SERVER["PHP_SELF"]."?mode=instances",$langs->trans('UndeployInstance'),"","undeploy",$formquestion,'',1,"510");
+	print $form->formconfirm($_SERVER["PHP_SELF"]."?mode=instances", $langs->trans('UndeployInstance'), "", "undeploy", $formquestion, '', 1, "510");
 	print '<script>
 	$("#reasonundeployotherradio").on("click",function(){
 		$("#reasonundeployother").css("display", "block");
