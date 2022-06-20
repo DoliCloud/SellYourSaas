@@ -117,7 +117,9 @@ border-top: none;border-left: none;border-right: none;
 -webkit-transition: border linear .2s, box-shadow linear .2s;-moz-transition: border linear .2s, box-shadow linear .2s;-o-transition: border linear .2s, box-shadow linear .2s;transition: border linear .2s, box-shadow linear .2s;
 }
 
-textarea:focus,input[type='text']:focus,input[type='password']:focus,input[type='datetime']:focus,input[type='datetime-local']:focus,input[type='date']:focus,input[type='month']:focus,input[type='time']:focus,input[type='week']:focus,input[type='number']:focus,input[type='email']:focus,input[type='url']:focus,input[type='search']:focus,input[type='tel']:focus,input[type='color']:focus,.uneditable-input:focus {border-color: rgba(82, 168, 236, 0.8);outline: 0;outline: thin dotted \9;}input[type='radio'],input[type='checkbox'] {margin: 4px 0 0;*margin-top: 0;margin-top: 1px \9;line-height: normal;cursor: pointer;}input[type='file'],input[type='image'],input[type='submit'],input[type='reset'],input[type='button'],input[type='radio'],input[type='checkbox'] {width: auto;}
+textarea:focus,input[type='text']:focus,input[type='password']:focus,input[type='datetime']:focus,input[type='datetime-local']:focus,input[type='date']:focus,input[type='month']:focus,input[type='time']:focus,input[type='week']:focus,input[type='number']:focus,input[type='email']:focus,input[type='url']:focus,input[type='search']:focus,input[type='tel']:focus,input[type='color']:focus,.uneditable-input:focus {border-color: rgba(82, 168, 236, 0.8);outline: 0;outline: thin dotted \9;}
+
+input[type='radio'],input[type='checkbox'] {margin: 4px 0 0; margin-top: 0; line-height: normal;cursor: pointer;}input[type='file'],input[type='image'],input[type='submit'],input[type='reset'],input[type='button'],input[type='radio'],input[type='checkbox'] {width: auto;}
 
 select {width: 220px;border: 1px solid #cccccc;background-color: #ffffff;}select[multiple],select[size] {height: auto;}
 

@@ -859,7 +859,6 @@ if ($action == "confirmundeploy") {
 			"TechnicalIssue"=>$langs->trans("TechnicalIssue"),
 		),
 		"name"=>"reasonundeploy",
-		"default"=>"TechnicalIssue",
 		"morecss"=>"hideothertag",
 		"moreattr"=>"required"
 	);
@@ -882,7 +881,7 @@ if ($action == "confirmundeploy") {
 	$formquestion[] = array(
 		"type"=>"radio",
 		"values"=>array(
-			"ChangeSoftwareOrProvider"=>$langs->trans("ChangeSoftwareOrProvider")
+			"ChangeSoftware"=>$langs->trans("ChangeSoftware")
 		),
 		"name"=>"reasonundeploy",
 		"morecss"=>"hideothertag"
@@ -890,17 +889,19 @@ if ($action == "confirmundeploy") {
 	$formquestion[] = array(
 		"type"=>"radio",
 		"values"=>array(
-			"SwitchToOnPremise"=>$langs->trans("SwitchToOnPremise"),
+			"SwitchToOnPremise"=>$langs->trans("SwitchHosting"),
 		),
 		"name"=>"reasonundeploy",
 		"morecss"=>"hideothertag"
 	);
 
 	$formquestion[] = array(
-		"type"=>"textarea",
-		"label"=>'<input type="radio" class="flat" id="reasonundeployotherradio" name="reasonundeploy" value="Other">&nbsp;<label for="reasonundeployOther">Autre</label>',
-		"name"=>"reasonundeployother",
-		"moreattr"=>'style="display:none;width:100%;border:solid 1px grey;"',
+		"type"=>"radio",
+		"values"=>array(
+			"other"=>$langs->trans("Other"),
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
 	);
 	$formquestion[] = array(
 		"type"=>"onecolumn",
@@ -910,18 +911,10 @@ if ($action == "confirmundeploy") {
 		"type"=>"textarea",
 		"label"=>$langs->trans("AddACommentDestruction"),
 		"name"=>"commentundeploy",
-		"moreattr"=>'style="width:100%;border:solid 1px grey;"',
+		"moreattr"=>'style="width:100%;border:solid 1px grey;" autofocus',
 	);
 
-	print $form->formconfirm($_SERVER["PHP_SELF"]."?mode=instances", $langs->trans('UndeployInstance'), "", "undeploy", $formquestion, '', 1, "510");
-	print '<script>
-	$("#reasonundeployotherradio").on("click",function(){
-		$("#reasonundeployother").css("display", "block");
-	})
-	$(".hideothertag").on("click",function(){
-		$("#reasonundeployother").hide();
-	})
-	</script>';
+	print $form->formconfirm($_SERVER["PHP_SELF"]."?mode=instances", $langs->trans('UndeployInstance'), "", "undeploy", $formquestion, '', 1, "510", "700", 0, 'ConfirmDestruction', 'Cancel');
 	print '<style>
 	.margintoponly{
 		margin-top:0px
