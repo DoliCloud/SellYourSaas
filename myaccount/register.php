@@ -658,8 +658,8 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				<label for="checkbosnonprofitorga" class="valignmiddle small inline"><?php
 					echo $langs->trans("ConfirmNonProfitOrga", $sellyoursaasname);
 					echo '. ';
-				if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL')) {
-					echo $langs->trans("ConfirmNonProfitOrgaBis", $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME, $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
+				if (getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL')) {
+					echo $langs->trans("ConfirmNonProfitOrgaBis", getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'), getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'));
 				}
 				?></label>
 			</div>
