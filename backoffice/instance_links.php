@@ -493,7 +493,7 @@ if (empty($object->nbofusers)) {
 				if ($tmparray[0] == 'SQL') {
 					$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
-					//$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
+					//$serverdeployment = $this->getRemoteServerDeploymentIp($domainname);
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 
 					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");

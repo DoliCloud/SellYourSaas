@@ -647,13 +647,13 @@ if ($reusecontractid) {
 	$sldAndSubdomain=$tmp[0];
 	$domainname=$tmp[1];
 	$sellyoursaasutils = new SellYourSaasUtils($db);
-	$serverdeployement = $sellyoursaasutils->getRemoveServerDeploymentIp($domainname);
+	$serverdeployement = $sellyoursaasutils->getRemoteServerDeploymentIp($domainname);
 
 	$nbofinstanceindeployment=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
 	$select .= " WHERE deployment_host = '".$db->escape($serverdeployement)."'";
 	$select .= " AND deployment_status IN ('processing')";
-	$select .= " AND deployment_date_start < DATE_SUB(NOW(), INTERVAL 1 DAY)";	// We ignore deployment started more that 24h before. They are finished even if not correctly.
+	$select .= " AND deployment_date_start < DATE_SUB(NOW(), INTERVAL 1 DAY)";	// We ignore deployment started more than 24h ago: They are finished even if not correctly flagged as 'done'.
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
@@ -720,7 +720,7 @@ if ($reusecontractid) {
 
 		$email = $tmpthirdparty->email;
 
-		// Check number of instances
+		// Check number of instances for the same thirdparty account
 		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
 
 		$listofcontractid = array();
@@ -960,6 +960,7 @@ if ($reusecontractid) {
 	$date_start = $now;
 	$date_end = dol_time_plus_duree($date_start, $freeperioddays, 'd');
 
+
 	// Create contract/instance
 
 	if (! $error && $productref != 'none') {
@@ -970,14 +971,24 @@ if ($reusecontractid) {
 		$contract->commercial_signature_id = $user->id;
 		$contract->commercial_suivi_id = $user->id;
 		$contract->date_contrat = $now;
-		$contract->note_private = 'Contract created from the online instance registration form.';
+		$contract->note_private = 'Contract created from the online instance registration form or the customer dashboard. forcesubdomain was '.(GETPOST('forcesubdomain')?GETPOST('forcesubdomain'):' empty').'.';
 
 		$tmp=explode('.', $contract->ref_customer, 2);
 		$sldAndSubdomain=$tmp[0];
 		$domainname=$tmp[1];
 
 		$sellyoursaasutils = new SellYourSaasUtils($db);
-		$serverdeployement = $sellyoursaasutils->getRemoveServerDeploymentIp($domainname);
+		$onlyifopen = 1;
+		if (GETPOST('forcesubdomain')) {
+			$onlyifopen = 0;
+		}
+		$serverdeployement = $sellyoursaasutils->getRemoteServerDeploymentIp($domainname, $onlyifopen);
+		if (empty($serverdeployement)) {
+			$db->rollback();
+
+			dol_print_error_email('BADDOMAIN', 'Trying to deploy on a not valid domain '.$domainname.' (not exists or closed).', null, 'alert alert-error');
+			exit(-94);
+		}
 
 		$contract->array_options['options_plan'] = $productref;
 		$contract->array_options['options_deployment_status'] = 'processing';

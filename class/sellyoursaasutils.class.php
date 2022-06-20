@@ -3129,7 +3129,7 @@ class SellYourSaasUtils
 				if (! empty($contract->array_options['options_deployment_host'])) {
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 				} else {
-					$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
+					$serverdeployment = $this->getRemoteServerDeploymentIp($domainname);
 				}
 				if (empty($serverdeployment)) {	// Failed to get remote ip
 					if (empty($this->error)) {
@@ -3545,7 +3545,7 @@ class SellYourSaasUtils
 					if ($tmparray[0] === 'SQL') {
 						$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
-						//$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
+						//$serverdeployment = $this->getRemoteServerDeploymentIp($domainname);
 						$serverdeployment = $contract->array_options['options_deployment_host'];
 
 						dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation");
@@ -3958,12 +3958,15 @@ class SellYourSaasUtils
 
 
 	/**
-	 * Return IP of server to deploy to
+	 * Return IP of server to deploy to, from its short host name
+	 * Note: SELLYOURSAAS_SUB_DOMAIN_NAMES has format  'withX.mysellyoursaasdomain.com,withY.mysellyoursaasdomain.com:closed,...'
+	 * Note: SELLYOURSAAS_SUB_DOMAIN_IP has format    '1.2.3.4,5.6.7.8,...'
 	 *
-	 * @param	string		$domainname		Domain name to select remote ip to deploy to (example: 'home.lan', 'dolicloud.com', ...)
+	 * @param	string		$domainname		Domain name to select remote ip to deploy to (example: 'home.lan', 'withX.mysellyoursaasdomain.com', ...)
+	 * @param	int			$onlyifopen		0
 	 * @return	string						'' if KO, IP if OK
 	 */
-	public function getRemoveServerDeploymentIp($domainname)
+	public function getRemoteServerDeploymentIp($domainname, $onlyifopen = 0)
 	{
 		global $conf;
 
@@ -3977,21 +3980,27 @@ class SellYourSaasUtils
 		foreach ($tmparray as $key => $val) {
 			$newval = preg_replace('/:.*$/', '', $val);
 			if ($newval == $domainname) {
+				if ($onlyifopen && preg_match('/:.*$/', $val)) {
+					// This enntry is closed.
+					continue;
+				}
 				$found = $key+1;
 				break;
 			}
 		}
 		//print 'Found domain at position '.$found;
 		if (! $found) {
-			$this->error="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
-			$this->errors[]="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
+			dol_syslog("Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES, LOG_WARNING);
+			$this->error="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
+			$this->errors[]="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
 			$error++;
 		} else {
 			$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
 			$REMOTEIPTODEPLOYTO=$tmparray[($found-1)];
 			if (! $REMOTEIPTODEPLOYTO) {
-				$this->error="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IPS=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
-				$this->errors[]="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IPS=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
+				dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP, LOG_WARNING);
+				$this->error="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
+				$this->errors[]="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
 				$error++;
 			}
 		}
