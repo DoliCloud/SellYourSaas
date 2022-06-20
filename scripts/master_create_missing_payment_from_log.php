@@ -1,5 +1,5 @@
--- TODO script to create missing payment after successful Stripe payement but no recording into database.
+-- TODO script to create missing payment after successful Stripe payment but no recording into database.
 
 
 Scan "Successfuly charge card pm_.... for invoice ...."
-and create payement for thos invoices.
+and create payment for those invoices.
