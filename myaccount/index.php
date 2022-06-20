@@ -374,14 +374,14 @@ if (preg_match('/logout/', $mode)) {
 	header("Location: /index.php".($param?'?'.$param:''));
 	exit;
 }
-if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $action == 'updateforcepriceinstance') {
+if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'updateforcepriceinstance') {
 	$errors = 0;
 	$result = 1;
 	$priceproductid = GETPOST("priceproductid", "alpha");
 	$price_instance = price2num(GETPOST("field_price_".$mythirdpartyaccount->id."_".$priceproductid));
 	$price_instance_per_user = price2num(GETPOST("field_priceuser_".$mythirdpartyaccount->id."_".$priceproductid));
 
-	$min_instance_price_reduction = getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION")/100;
+	$min_instance_price_reduction = getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION", 0) / 100;
 
 	if (!$errors) {
 		$product = new Product($db);
@@ -490,7 +490,7 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $ac
 	}
 }
 
-if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION") && $action == 'resetpropertyconfirm') {
+if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'resetpropertyconfirm') {
 	if (!empty($propertykey) && !empty($mythirdpartyaccount->id)) {
 		require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 		$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
@@ -3027,7 +3027,7 @@ if ($mythirdpartyaccount->isareseller) {
 	$urformycustomerinstances = '<strong>'.$langs->transnoentitiesnoconv("MyCustomersBilling").'</strong>';
 	print str_replace('{s1}', $urformycustomerinstances, $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], '{s1}'));
 
-	if (getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION")) {
+	if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE")) {
 		print '<br><br>';
 		print $langs->trans("ForcePricesOfInstances");
 		print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyresellerprices" method="POST" >';

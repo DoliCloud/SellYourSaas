@@ -117,6 +117,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_RESELLER_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_RESELLER_CATEG"), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_MINAMOUNT_TO_CLAIM", GETPOST("SELLYOURSAAS_MINAMOUNT_TO_CLAIM"), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_EMAIL", GETPOST("SELLYOURSAAS_RESELLER_EMAIL"), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE", GETPOST("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE"), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION", GETPOST("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_REFS_URL", GETPOST("SELLYOURSAAS_REFS_URL"), 'chaine', 0, '', $conf->entity);
@@ -509,28 +510,32 @@ if ($allowresellerprogram) {
 	print '<td><span class="opacitymedium">partner@mysaasdomainname.com</span></td>';
 	print '</tr>';
 
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION").'</td>';
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE").'</td>';
 	print '<td>';
-	print '<input class="maxwidth75" type="text" name="SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION" value="'.getDolGlobalString('SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION').'"> %';
-	print '</td>';
-	print '<td><span class="opacitymedium">30 %</span></td>';
-	print '</tr>';
-}
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', array(), null, 0, 0, 1);
-} else {
-	if (empty($conf->global->SELLYOURSAAS_ONLY_NON_PROFIT_ORGA)) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE', array(), null, 0, 0, 1);
 	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		if (empty($conf->global->SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE)) {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		} else {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		}
+	}
+	//print $form->selectyesno('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE', $allowresellerprogram, 1);
+	print '</td>';
+	print '<td></td>';
+	print '</tr>';
+
+	// If option to allow reseller custome prices is on, we can set a maximum for discount
+	if (getDolGlobalInt('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE')) {
+		print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION").'</td>';
+		print '<td>';
+		print '<input class="maxwidth50 right" type="text" name="SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION" value="'.getDolGlobalInt('SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION', 0).'"> %';
+		print '</td>';
+		print '<td><span class="opacitymedium">30 %</span></td>';
+		print '</tr>';
 	}
 }
-print '</td>';
-print '<td><span class="opacitymedium">Set to yes if you want only non-profit orgnisations</span></td>';
-print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');
 print '</td>';
@@ -757,6 +762,21 @@ print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_IPQUALITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY').'">';
 print '</td>';
 print '<td><span class="opacitymedium">1234567890123456</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', array(), null, 0, 0, 1);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ONLY_NON_PROFIT_ORGA)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium">Set to yes if you only want non-profit organisations as customers</span></td>';
 print '</tr>';
 
 
