@@ -32,6 +32,7 @@
     /etc/postfix/dynamicmaps.cf.d/ r,
     /etc/ssl/openssl.cnf rw,
     /home/admin/logs/** w,
+    /home/admin/tools/maxmind/** rix,
     /home/admin/wwwroot/** rix,
     /home/admin/wwwroot/dolibarr_documents/** rw,
     /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
