@@ -651,7 +651,7 @@ PriceOptionMustBeMoreThenMinOptionPrice= The price of option %s must be greater 
 ProductNotFound=Produt fetch error
 FixPriceMustBeNumeric=The fix price must be a number
 PricePerUsersMustBeNumeric=The price per users must be a number
-ForcePricesOfInstances=Force price of the products to create instances
+ForcePricesOfInstances=Use custom prices for the instances created from your personalized URL
 FixPrice=Fix price
 PricePerUsers=Price per users
 PricesSuccessfullyUpdated=Prices have been successfully updated
@@ -665,7 +665,8 @@ SELLYOURSAAS_DATADOG_APIKEY=Datadog API key (only if you want to use a different
 AverageBasket=Average basket
 SELLYOURSAAS_AUTOMIGRATION_CODE=Ticket group to enable auto-migration
 SELLYOURSAAS_SUPPORT_SHOW_MESSAGE=Show a message in the support page
-ConfirmNonProfiitOrga=I confirm that I am a non-profit organization (Note: If you are a commercial company, the same service is available for you on <a href="https://www.dolicloud.com" target="_blank" rel="noopener">https://www.dolicloud.com</a>)
+ConfirmNonProfitOrga=I confirm that I am a non-profit organization
+ConfirmNonProfitOrgaBis=Note: If you are a commercial company, the same service is available for you on <a href="https://%s" target="_blank" rel="noopener">https://%s</a>
 SELLYOURSAAS_ONLY_NON_PROFIT_ORGA=Add a checkbox on registration form to confirm "I am a non-profit organisation"
 AddACommentDestruction=Please explain the reason for uninstalling your instance:
 TechnicalIssue=Technical problem

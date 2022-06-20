@@ -3060,17 +3060,17 @@ if ($mythirdpartyaccount->isareseller) {
 			if ($action == 'editproperty' && $key == $propertykey) {
 				print '<input type="hidden" name="priceproductid" value="'.$key.'">';
 				print '<td>';
-				print '<input class="flat field_price maxwidth150" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ? : $value["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'<span>';
+				print '<input class="flat field_price maxwidth50" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ? : $value["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'<span>';
 				print '</td>';
 				print '<td>';
 				if (isset($value["priceuser"])) {
-					print '<input class="flat field_price maxwidth150" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? :$value["priceuser"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
+					print '<input class="flat field_price maxwidth50" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? :$value["priceuser"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
 				}
 				print '</td>';
 				if (isset($value["options"])) {
 					foreach ($value["options"] as $id => $data) {
 						print '<td>';
-						print '<input class="flat field_price maxwidth150" type="text" id="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ? :$data["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
+						print '<input class="flat field_price maxwidth50" type="text" id="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ? :$data["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
 						print '</td>';
 					}
 				} else {

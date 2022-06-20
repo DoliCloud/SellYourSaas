@@ -652,10 +652,16 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<?php if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) { ?>
 			<!-- Checkbox for non profit orga -->
 			<br>
-			<section id="checkbosnonprofitorga">
+			<section id="checkbosnonprofitorgaid">
 			<div class="group required">
 				<input type="checkbox" id="checkbosnonprofitorga" name="checkbosnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="1" required="">
-				<label for="checkbosnonprofitorga" class="valignmiddle small inline"><?php echo $langs->trans("ConfirmNonProfiitOrga", $sellyoursaasname); ?></label>
+				<label for="checkbosnonprofitorga" class="valignmiddle small inline"><?php
+					echo $langs->trans("ConfirmNonProfitOrga", $sellyoursaasname);
+					echo '. ';
+				if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL')) {
+					echo $langs->trans("ConfirmNonProfitOrgaBis", $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME, $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
+				}
+				?></label>
 			</div>
 			</section>
 			<?php } ?>
