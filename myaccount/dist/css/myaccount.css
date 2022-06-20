@@ -780,8 +780,8 @@ disabled] .btn-warning:active, fieldset[disabled] .btn-warning.active
 {background-color: #dfba49;border-color: #dbb233;}.btn-warning .
 badge {color: #dfba49;background-color: #fff;}
 
-.btn-danger {color: #fff;background-color: #f1353d;border-color: #f13e46;}
-.btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active {color: #fff;background-color: #f1353d;border-color: #ec111b;}
+.btn-danger {color: #fff;background-color: #bb353d;border-color: #bb3e46;}
+.btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active {color: #fff;background-color: #bb353d;border-color: #bb111b;}
 
 .open .btn-danger.dropdown-toggle {color: #fff;background-color: #f1353d;
 border-color: #ec111b;}.btn-danger:active, .btn-danger.active {
