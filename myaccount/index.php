@@ -125,7 +125,6 @@ $lastrecord=GETPOST('lastrecord', 'int');
 $search_instance_name=GETPOST('search_instance_name', 'alphanohtml');
 $search_customer_name=GETPOST('search_customer_name', 'alphanohtml');
 $reasonundeploy=GETPOST('reasonundeploy', 'alpha');
-$reasonundeployother=GETPOST('reasonundeployother', 'alpha');
 $commentundeploy=GETPOST('commentundeploy', 'alpha');
 
 // Var used to create a new BAN for SEPA payments
@@ -2360,7 +2359,6 @@ if ($action == 'updateurl') {
 			// Insert extrafields of uninstall
 			if (!$error) {
 				$object->array_options['options_reasonundeploy'] = $reasonundeploy;
-				$object->array_options['options_reasonundeployother'] = $reasonundeployother;
 				$object->array_options['options_commentundeploy'] = $commentundeploy;
 				$result = $object->insertExtraFields();
 				if ($result <= 0) {
@@ -3364,7 +3362,7 @@ if (empty($welcomecid)) {
 				if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 					$delayafterexpiration = ($now - $expirationdate);
 					$delayindays = round($delayafterexpiration / 3600 / 24);
-					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
+					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT') : getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT')) - $delayindays);
 
 					print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
 					print '<div class="note note-warning">'."\n";

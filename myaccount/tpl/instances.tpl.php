@@ -802,10 +802,16 @@ if (count($listofcontractid) == 0) {				// Should not happen
 										<input type="text" required="required" class="urlofinstancetodestroy" name="urlofinstancetodestroy" value="'.GETPOST('urlofinstancetodestroy', 'alpha').'" placeholder="'.$langs->trans("NameOfInstanceToDestroy").'" autofocus>
 									</p>';
 		}
+
+		$actiontoundeploy = 'undeploy';
+		if (getDolGlobalInt('SELLYOURSAAS_ASK_DESTROY_REASON')) {
+			$actiontoundeploy = 'confirmundeploy';
+		}
+
 		print '
 								<p class="center">
 									<input type="hidden" name="mode" value="instances"/>
-									<input type="hidden" name="action" value="confirmundeploy" />
+									<input type="hidden" name="action" value="'.$actiontoundeploy.'" />
 									<input type="hidden" name="contractid" value="'.$contract->id.'" />
 									<input type="hidden" name="tab" value="danger_'.$contract->id.'" />
 									<input type="submit" '.($hasopeninvoices?' disabled="disabled"':'').' class="btn btn-danger'.($hasopeninvoices?' disabled':'').'" name="undeploy" value="'.$langs->trans("UndeployInstance").'">

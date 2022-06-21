@@ -2608,8 +2608,8 @@ class SellYourSaasUtils
 		$this->error='';
 
 		$delayindays = 9999999;
-		if ($mode == 'test') $delayindays = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT;
-		if ($mode == 'paid') $delayindays = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT;
+		if ($mode == 'test') $delayindays = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT');
+		if ($mode == 'paid') $delayindays = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT');
 		if ($delayindays <= 1) {
 			$this->error='BadValueForDelayBeforeUndeploymentCheckSetup';
 			return -1;
