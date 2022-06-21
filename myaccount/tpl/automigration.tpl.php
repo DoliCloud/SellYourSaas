@@ -213,7 +213,7 @@ if ($action == 'automigration') {
 
 	if ($result["result"] != 0) {
 		$mysqlcommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$mysqlbackupfilename;
-		//$utils->executeCli($mysqlcommand,"",0,null,1);
+		$utils->executeCli($mysqlcommand,"",0,null,1);
 	}
 }
 
