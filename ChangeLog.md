@@ -2,7 +2,7 @@
 
 ## 1.2
 
-* Close #190 : Add form on uninstall.
+* Close #190 : Add form on uninstall. Enable on option SELLYOURSAAS_ASK_DESTROY_REASON.
 * First version of a process of automigration.
 * Exclude running installation from more than 24h into quota.
 * Add hidden option SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID
