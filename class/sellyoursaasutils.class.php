@@ -3981,8 +3981,8 @@ class SellYourSaasUtils
 		foreach ($tmparray as $key => $val) {
 			$newval = preg_replace('/:.*$/', '', $val);
 			if ($newval == $domainname) {
-				if ($onlyifopen && preg_match('/:.*$/', $val)) {
-					// This enntry is closed.
+				if ($onlyifopen && preg_match('/:closed/', $val)) {		// Can be 'withX.adomain.com:closed' or 'withX.adomain.com:closed:adomain.com'
+					// This entry is closed.
 					continue;
 				}
 				$found = $key+1;
