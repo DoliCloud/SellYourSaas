@@ -131,8 +131,8 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		if ( GETPOST('status_reseller', 'int') >= 0) {
 			$sql .= " AND s.status = ".((int) GETPOST('status_reseller', 'int'));
 		}
-		if (GETPOST('lang_id_reseller') && GETPOST('lang_id_reseller') != 'none') $sql.= natural_search('default_lang_reseller', join(',', GETPOST('lang_id_reseller', 'array')), 3);
-		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') $sql.= natural_search('default_lang_reseller', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
+		if (GETPOST('lang_id_reseller') && GETPOST('lang_id_reseller') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id_reseller', 'array')), 3);
+		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
 		if (GETPOST('country_id_reseller') && GETPOST('country_id_reseller') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id_reseller', 'intcomma'), 1)."')";
 
 		$sql.= " ORDER BY email";
