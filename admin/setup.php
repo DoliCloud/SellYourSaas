@@ -175,7 +175,12 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
-		dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", GETPOST("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_URL')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL", GETPOST("SELLYOURSAAS_SUPPORT_URL", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", GETPOST("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		}
 
 		$dir=GETPOST("DOLICLOUD_INSTANCES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
@@ -354,70 +359,70 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_FORCE_STRIPE_TEST")
 print '<td>';
 print ajax_constantonoff('SELLYOURSAAS_FORCE_STRIPE_TEST', array(), $conf->entity, 0, 0, 1);
 print '</td>';
-print '<td><span class="opacitymedium">1</span></td>';
+print '<td><span class="opacitymedium small">1</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasName").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_NAME" value="'.getDolGlobalString('SELLYOURSAAS_NAME').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">My SaaS service</span></td>';
+print '<td><span class="opacitymedium small">My SaaS service</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainDomain").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_DOMAIN_NAME" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">mysaasdomainname.com</span></td>';
+print '<td><span class="opacitymedium small">mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
+print '<td><span class="opacitymedium small">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_IP" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">192.168.0.1,123.456.789.012...</span></td>';
+print '<td><span class="opacitymedium small">192.168.0.1,123.456.789.012...</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">contact@mysaasdomainname.com</span></td>';
+print '<td><span class="opacitymedium small">contact@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainEmail").' (Premium)</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL_PREMIUM" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL_PREMIUM').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">contact+premium@mysaasdomainname.com</span></td>';
+print '<td><span class="opacitymedium small">contact+premium@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSupervisionEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SUPERVISION_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">supervision@mysaasdomainname.com</span></td>';
+print '<td><span class="opacitymedium small">supervision@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasNoReplyEmail").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_NOREPLY_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL').'" class="minwidth300">';
 print '</td>';
-print '<td><span class="opacitymedium">noreply@mysaasdomainname.com</span></td>';
+print '<td><span class="opacitymedium small">noreply@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("DirForScriptPath").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="DOLICLOUD_SCRIPTS_PATH" value="'.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'">';
 print '</td>';
-print '<td><span class="opacitymedium">'.dol_buildpath('sellyoursaas/scripts').'</span></td>';
+print '<td><span class="opacitymedium small">'.dol_buildpath('sellyoursaas/scripts').'</span></td>';
 print '</tr>';
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
@@ -430,7 +435,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	$defaultproductid = getDolGlobalString($constname);
 	print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix, '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500');
 	print '</td>';
-	print '<td><span class="opacitymedium">My SaaS service for instance</span></td>';
+	print '<td><span class="opacitymedium small">My SaaS service for instance</span></td>';
 	print '</tr>';
 }
 
@@ -448,7 +453,7 @@ print '<td>';
 $defaultproductcategid=getDolGlobalString('SELLYOURSAAS_DEFAULT_PRODUCT_CATEG');
 print $formother->select_categories(Categorie::TYPE_PRODUCT, $defaultproductcategid, 'SELLYOURSAAS_DEFAULT_PRODUCT_CATEG', 0, 1, 'miwidth300');
 print '</td>';
-print '<td><span class="opacitymedium">SaaS Products</span></td>';
+print '<td><span class="opacitymedium small">SaaS Products</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("DefaultCategoryForSaaSCustomers").'</td>';
@@ -456,7 +461,7 @@ print '<td>';
 $defaultcustomercategid=getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG');
 print $formother->select_categories(Categorie::TYPE_CUSTOMER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG', 0, 1, 'miwidth300');
 print '</td>';
-print '<td><span class="opacitymedium">SaaS Customers</span></td>';
+print '<td><span class="opacitymedium small">SaaS Customers</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM").'</td>';
@@ -472,7 +477,7 @@ if ($conf->use_javascript_ajax) {
 }
 //print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
-print '<td><span class="opacitymedium">Set to yes if you want your customers being able to apply to become resellers</span></td>';
+print '<td><span class="opacitymedium small">Set to yes if you want your customers being able to apply to become resellers</span></td>';
 print '</tr>';
 
 $allowresellerprogram = getDolGlobalInt('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM');
@@ -480,9 +485,9 @@ if ($allowresellerprogram) {
 	print '<tr class="oddeven"><td>'.$langs->trans("DefaultCommission");
 	print '</td>';
 	print '<td>';
-	print '<input class="maxwidth75" type="text" name="SELLYOURSAAS_DEFAULT_COMMISSION" value="'.getDolGlobalString('SELLYOURSAAS_DEFAULT_COMMISSION').'">';
+	print '<input class="width50 right" type="text" name="SELLYOURSAAS_DEFAULT_COMMISSION" value="'.getDolGlobalString('SELLYOURSAAS_DEFAULT_COMMISSION').'"> %';
 	print '</td>';
-	print '<td><span class="opacitymedium">25</span></td>';
+	print '<td><span class="opacitymedium small">25%</span></td>';
 	print '</tr>';
 
 	print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSResellers").'</td>';
@@ -490,28 +495,28 @@ if ($allowresellerprogram) {
 	$defaultcustomercategid = getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG');
 	print $formother->select_categories(Categorie::TYPE_SUPPLIER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_RESELLER_CATEG', 0, 1, 'miwidth300');
 	print '</td>';
-	print '<td><span class="opacitymedium">SaaS Resellers</span></td>';
+	print '<td><span class="opacitymedium small">SaaS Resellers</span></td>';
 	print '</tr>';
 
 	print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasResellerUrl").'</td>';
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_URL" value="'.getDolGlobalString('SELLYOURSAAS_RESELLER_URL').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium">https://www.mysaasdomainname.com/en-become-a-dolicloud-reseller.php</span></td>';
+	print '<td><span class="opacitymedium small">https://www.mysaasdomainname.com/en-become-a-dolicloud-reseller.php</span></td>';
 	print '</tr>';
 
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MINAMOUNT_TO_CLAIM").'</td>';
 	print '<td>';
-	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MINAMOUNT_TO_CLAIM" value="'.getDolGlobalString('SELLYOURSAAS_MINAMOUNT_TO_CLAIM').'">';
+	print '<input class="width50" type="text" name="SELLYOURSAAS_MINAMOUNT_TO_CLAIM" value="'.getDolGlobalString('SELLYOURSAAS_MINAMOUNT_TO_CLAIM').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium">100</span></td>';
+	print '<td><span class="opacitymedium small">100</span></td>';
 	print '</tr>';
 
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_EMAIL").'</td>';
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium">partner@mysaasdomainname.com</span></td>';
+	print '<td><span class="opacitymedium small">partner@mysaasdomainname.com</span></td>';
 	print '</tr>';
 
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE").'</td>';
@@ -536,7 +541,7 @@ if ($allowresellerprogram) {
 		print '<td>';
 		print '<input class="maxwidth50 right" type="text" name="SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION" value="'.getDolGlobalInt('SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION', 0).'"> %';
 		print '</td>';
-		print '<td><span class="opacitymedium">30 %</span></td>';
+		print '<td><span class="opacitymedium small">30 %</span></td>';
 		print '</tr>';
 	}
 }
@@ -546,28 +551,28 @@ print '</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_REFS_URL" value="'.getDolGlobalString('SELLYOURSAAS_REFS_URL').'">';
 print '</td>';
-print '<td><span class="opacitymedium">https://admin.mysaasdomainname.com/git</span></td>';
+print '<td><span class="opacitymedium small">https://admin.mysaasdomainname.com/git</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasAccountUrl").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_ACCOUNT_URL" value="'.getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL').'">';
 print '</td>';
-print '<td><span class="opacitymedium">https://myaccount.mysaasdomainname.com<br>Note: Virtual hosts for such domains must link to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></span></td>';
+print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com<br>Note: Virtual hosts for such domains must link to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasPricesUrl").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_PRICES_URL" value="'.getDolGlobalString('SELLYOURSAAS_PRICES_URL').'">';
 print '</td>';
-print '<td><span class="opacitymedium">https://myaccount.mysaasdomainname.com/prices.html</span></td>';
+print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com/prices.html</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_STATUS_URL" value="'.getDolGlobalString('SELLYOURSAAS_STATUS_URL').'">';
 print '</td>';
-print '<td><span class="opacitymedium">https://status.mysaasdomainname.com</span></td>';
+print '<td><span class="opacitymedium small">https://status.mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>';
@@ -582,14 +587,14 @@ print '<tr class="oddeven"><td>'.$langs->trans("FooterContent").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_MYACCOUNT_FOOTER" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER').'</textarea>';
 print '</td>';
-print '<td><span class="opacitymedium">&lt;script&gt;Your google analytics code&lt;/script&gt;</span></td>';
+print '<td><span class="opacitymedium small">&lt;script&gt;Your google analytics code&lt;/script&gt;</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("ConversionContent").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_CONVERSION_FOOTER" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER').'</textarea>';
 print '</td>';
-print '<td><span class="opacitymedium">&lt;script&gt;Your conversion trackers&lt;/script&gt;</span></td>';
+print '<td><span class="opacitymedium small">&lt;script&gt;Your conversion trackers&lt;/script&gt;</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("CSSForCustomerAndRegisterPages").'</td>';
@@ -603,7 +608,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").' <s
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_SECURITY_KEY').'">';
 print '</td>';
-print '<td><span class="opacitymedium">123456abcdef</span></td>';
+print '<td><span class="opacitymedium small">123456abcdef</span></td>';
 print '</tr>';
 
 
@@ -621,14 +626,14 @@ print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("AnonymousU
 print '<td>';
 print $form->select_dolusers(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'), 'SELLYOURSAAS_ANONYMOUSUSER', 1);
 print '</td>';
-print '<td><span class="opacitymedium">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
+print '<td><span class="opacitymedium small">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD').'">';
 print '</td>';
-print '<td><span class="opacitymedium">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
+print '<td><span class="opacitymedium small">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
 print '</tr>';
 
 if (empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) || $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
@@ -636,7 +641,7 @@ if (empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) || $conf->global->SEL
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium"></span></td>';
+	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
 }
 
@@ -644,56 +649,56 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT').'">';
 print '</td>';
-print '<td><span class="opacitymedium">7</span></td>';
+print '<td><span class="opacitymedium small">7</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT').'">';
 print '</td>';
-print '<td><span class="opacitymedium">1</span></td>';
+print '<td><span class="opacitymedium small">1</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND').'">';
 print '</td>';
-print '<td><span class="opacitymedium">2</span></td>';
+print '<td><span class="opacitymedium small">2</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND').'">';
 print '</td>';
-print '<td><span class="opacitymedium">12</span></td>';
+print '<td><span class="opacitymedium small">12</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT').'">';
 print '</td>';
-print '<td><span class="opacitymedium">30</span></td>';
+print '<td><span class="opacitymedium small">30</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBHOURSBETWEENTRIES").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBHOURSBETWEENTRIES" value="'.getDolGlobalString('SELLYOURSAAS_NBHOURSBETWEENTRIES').'">';
 print '</td>';
-print '<td><span class="opacitymedium">49</span></td>';
+print '<td><span class="opacitymedium small">49</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES').'">';
 print '</td>';
-print '<td><span class="opacitymedium">35</span></td>';
+print '<td><span class="opacitymedium small">35</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT').'">';
 print '</td>';
-print '<td><span class="opacitymedium">120</span></td>';
+print '<td><span class="opacitymedium small">120</span></td>';
 print '</tr>';
 
 // Security for subscription
@@ -709,63 +714,63 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIP"
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIP" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIP', 20).'">';
 print '</td>';
-print '<td><span class="opacitymedium">20</span></td>';
+print '<td><span class="opacitymedium small">20</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR', 5).'">';
 print '</td>';
-print '<td><span class="opacitymedium">5</span></td>';
+print '<td><span class="opacitymedium small">5</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPARALLEL" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 4).'">';
 print '</td>';
-print '<td><span class="opacitymedium">4</span></td>';
+print '<td><span class="opacitymedium small">4</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT" value="'.getDolGlobalInt('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', 4).'">';
 print '</td>';
-print '<td><span class="opacitymedium">4</span></td>';
+print '<td><span class="opacitymedium small">4</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_VPN_PROBA_REFUSED").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_VPN_PROBA_REFUSED" value="'.getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').'">';
 print '</td>';
-print '<td><span class="opacitymedium">0.9, 1, Keep empty for no filter on VPN probability</span></td>';
+print '<td><span class="opacitymedium small">0.9, 1, Keep empty for no filter on VPN probability</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_NAME_RESERVED" value="'.getDolGlobalString('SELLYOURSAAS_NAME_RESERVED').'">';
 print '</td>';
-print '<td><span class="opacitymedium">^mycompany[0-9]*\.</span></td>';
+print '<td><span class="opacitymedium small">^mycompany[0-9]*\.</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_EMAIL_ADDRESSES_BANNED" value="'.getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED').'">';
 print '</td>';
-print '<td><span class="opacitymedium">yopmail.com,hotmail.com,spammer@gmail.com</span></td>';
+print '<td><span class="opacitymedium small">yopmail.com,hotmail.com,spammer@gmail.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_GETIPINTEL_EMAIL").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_GETIPINTEL_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL').'">';
 print '</td>';
-print '<td><span class="opacitymedium">myemail@email.com</span></td>';
+print '<td><span class="opacitymedium small">myemail@email.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_IPQUALITY_KEY").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_IPQUALITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY').'">';
 print '</td>';
-print '<td><span class="opacitymedium">1234567890123456</span></td>';
+print '<td><span class="opacitymedium small">1234567890123456</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
@@ -780,7 +785,7 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium">Set to yes if you only want non-profit organisations as customers</span></td>';
+print '<td><span class="opacitymedium small">Set to yes if you only want non-profit organisations as customers</span></td>';
 print '</tr>';
 
 
@@ -798,21 +803,21 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA_FOR_THI
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
 print '</td>';
-print '<td><span class="opacitymedium">1,99,...</span></td>';
+print '<td><span class="opacitymedium small">1,99,...</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INFRA_COST").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_INFRA_COST" value="'.getDolGlobalString('SELLYOURSAAS_INFRA_COST', 0).'">';
 print '</td>';
-print '<td><span class="opacitymedium">50</span></td>';
+print '<td><span class="opacitymedium small">50</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PERCENTAGE_FEE").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_PERCENTAGE_FEE" value="'.getDolGlobalString('SELLYOURSAAS_PERCENTAGE_FEE', 0).'">';
 print '</td>';
-print '<td><span class="opacitymedium">0.02</span></td>';
+print '<td><span class="opacitymedium small">0.02</span></td>';
 print '</tr>';
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
@@ -871,7 +876,7 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
+print '<td><span class="opacitymedium small">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
 print '</tr>';
 
 // SELLYOURSAAS_ENABLE_OPTINMESSAGES
@@ -887,7 +892,7 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium">Set to yes to add a checkbox on register page to accept "Commercial offers".</td>';
+print '<td><span class="opacitymedium small">Set to yes to add a checkbox on register page to accept "Commercial offers".</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION").'</td>';
@@ -911,36 +916,49 @@ print '<td>';
 $array = array('0' => 'No', '1' => 'Yes', '2' => 'Yes with detail of remote action errors');
 print $form->selectarray('SELLYOURSAAS_DATADOG_ENABLED', $array, $conf->global->SELLYOURSAAS_DATADOG_ENABLED, 0);
 print '</td>';
-print '<td><span class="opacitymedium">If a datadog agent is running on each of your server, enable this option so SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';
+print '<td><span class="opacitymedium small">If a datadog agent is running on each of your server, enable this option so SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_APPKEY").'</td>';
 print '<td>';
 print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_DATADOG_APPKEY" value="'.getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY', '').'">';
 print '</td>';
-print '<td><span class="opacitymedium">MyApp</span></td>';
+print '<td><span class="opacitymedium small">MyApp</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_APIKEY").'</td>';
 print '<td>';
 print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_DATADOG_APIKEY" value="'.getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY', '').'">';
 print '</td>';
-print '<td><span class="opacitymedium">45fdf4sds54fdf</span></td>';
+print '<td><span class="opacitymedium small">45fdf4sds54fdf</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
 print '<td>';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', '2', 1);
+print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400');
 print '</td>';
 print '<td></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
+
+print '<tr class="oddeven"><td>';
+print $langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
 print '<td>';
-print '<textarea name="SELLYOURSAAS_SUPPORT_SHOW_MESSAGE" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE').'</textarea>';
+print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL').'">';
 print '</td>';
-print '<td></td>';
+print '<td>';
+print '<span class="opacitymedium small">'.$langs->trans("FillOnlyToUseAnExternalTicketSystem").'</span>';
+print '</td>';
 print '</tr>';
+
+if (empty($conf->global->SELLYOURSAAS_SUPPORT_URL)) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
+	print '<td>';
+	print '<textarea name="SELLYOURSAAS_SUPPORT_SHOW_MESSAGE" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE').'</textarea>';
+	print '</td>';
+	print '<td></td>';
+	print '</tr>';
+}
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ASK_DESTROY_REASON").'</td>';
 print '<td>';
@@ -954,7 +972,7 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium"></span></td>';
+print '<td><span class="opacitymedium small"></span></td>';
 print '</tr>';
 
 print '</table>';
@@ -977,7 +995,7 @@ print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("DirForDoli
 print '<td>';
 print '<input class="minwidth200" type="text" name="DOLICLOUD_INSTANCES_PATH" value="'.getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'">';
 print '</td>';
-print '<td><span class="opacitymedium">/home/jail/home</span></td>';
+print '<td><span class="opacitymedium small">/home/jail/home</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">';
@@ -996,7 +1014,7 @@ print $form->textwithpicto($langs->trans("DirForBackupInstances"), '').'</td>';
 print '<td>';
 print '<input class="minwidth200" type="text" name="DOLICLOUD_BACKUP_PATH" value="'.getDolGlobalString('DOLICLOUD_BACKUP_PATH').'">';
 print '</td>';
-print '<td><span class="opacitymedium">/home/jail/backup, /mnt/diskbackup/backup</span></td>';
+print '<td><span class="opacitymedium small">/home/jail/backup, /mnt/diskbackup/backup</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">';
@@ -1004,7 +1022,7 @@ print $form->textwithpicto($langs->trans("SELLYOURSAAS_TEST_ARCHIVES_PATH"), $la
 print '<td>';
 print '<input class="minwidth200" type="text" name="SELLYOURSAAS_TEST_ARCHIVES_PATH" value="'.getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'">';
 print '</td>';
-print '<td><span class="opacitymedium">/home/jail/archives-test, /mnt/diskbackup/archives-test</span></td>';
+print '<td><span class="opacitymedium small">/home/jail/archives-test, /mnt/diskbackup/archives-test</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">';
@@ -1012,7 +1030,7 @@ print $form->textwithpicto($langs->trans("SELLYOURSAAS_PAID_ARCHIVES_PATH"), $la
 print '<td>';
 print '<input class="minwidth200" type="text" name="SELLYOURSAAS_PAID_ARCHIVES_PATH" value="'.getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'">';
 print '</td>';
-print '<td><span class="opacitymedium">/home/jail/archives-paid, /mnt/diskbackup/archives-paid</span></td>';
+print '<td><span class="opacitymedium small">/home/jail/archives-paid, /mnt/diskbackup/archives-paid</span></td>';
 print '</tr>';
 
 // SSH public keys to deploy on authized_public file.
@@ -1020,21 +1038,21 @@ print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_PUBLIC_KEY" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_PUBLIC_KEY').'</textarea>';
 print '</td>';
-print '<td><span class="opacitymedium">'.$langs->trans("SSHPublicKeyDesc").'</span></td>';
+print '<td><span class="opacitymedium small">'.$langs->trans("SSHPublicKeyDesc").'</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("LoginForSupport").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_LOGIN_FOR_SUPPORT" value="'.getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT').'">';
 print '</td>';
-print '<td><span class="opacitymedium">'.$langs->trans("LoginSupportHelp").'</span></td>';
+print '<td><span class="opacitymedium small">'.$langs->trans("LoginSupportHelp").'</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("PasswordForSupport").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT').'">';
 print '</td>';
-print '<td><span class="opacitymedium">Password to use to create a support user account on customer instances</span></td>';
+print '<td><span class="opacitymedium small">Password to use to create a support user account on customer instances</span></td>';
 print '</tr>';
 
 print '</table>';
