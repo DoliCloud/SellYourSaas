@@ -649,29 +649,27 @@ print '<br>';
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 
-//if (! empty($object->array_options['options_cookieregister_previous_instance']))
-//{
-	// Get all instances in chain
-	$arraylistofinstances = getListOfInstancesInChain($object);
+// Get all instances in chain
+$arraylistofinstances = getListOfInstancesInChain($object);
 
-	print '<br>';
-	print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
+print '<br>';
+print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
 
-	print '<div class="div-table-responsive-no-min">';
-	print '<table class="noborder entpercent">';
+print '<div class="div-table-responsive-no-min">';
+print '<table class="noborder entpercent">';
 
-	print '<tr>';
-	print '<td>'.$langs->trans("Instance").'</td>';
-	print '<td>'.$langs->trans("RefCustomer").'</td>';
-	print '<td>'.$langs->trans("RegistrationCounter").'</td>';
-	print '<td>'.$langs->trans("IP").'</td>';
-	print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
-	print '<td>'.$langs->trans("Date").'</td>';
-	print '<td>'.$langs->trans("Status").'</td>';
-	print '<td></td>';
-	print '</tr>';
+print '<tr>';
+print '<td>'.$langs->trans("Instance").'</td>';
+print '<td>'.$langs->trans("RefCustomer").'</td>';
+print '<td>'.$langs->trans("RegistrationCounter").'</td>';
+print '<td>'.$langs->trans("IP").'</td>';
+print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
+print '<td>'.$langs->trans("Date").'</td>';
+print '<td>'.$langs->trans("Status").'</td>';
+print '<td></td>';
+print '</tr>';
 
-	$arrayofips=array();
+$arrayofips=array();
 
 foreach ($arraylistofinstances as $instance) {
 	$arrayofips[] = $instance->array_options['options_deployment_ip'];
@@ -699,22 +697,21 @@ foreach ($arraylistofinstances as $instance) {
 	print '</tr>';
 }
 
-	print '<tr class="liste_total">';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td>';
-	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
-	print '</td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '</tr>';
+print '<tr class="liste_total">';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '<td>';
+print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
+print '</td>';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '</tr>';
 
-	print '</table>';
-	print '</div>';
-//}
+print '</table>';
+print '</div>';
 
 
 llxFooter();
