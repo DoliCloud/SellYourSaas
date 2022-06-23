@@ -32,6 +32,7 @@ $emailfrom = '';
 $MAXOK = 10;
 $MAXPERDAY = 500;
 
+file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start phpsendmail.php\n", FILE_APPEND);
 
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Get $maxemailperday
