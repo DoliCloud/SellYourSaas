@@ -25,6 +25,7 @@ $toline = ''; $ccline = ''; $bccline = '';
 $nbto = 0; $nbcc = 0; $nbbcc = 0;
 $fromline = '';
 $referenceline = '';
+$messageidline = '';
 $emailfrom = '';
 
 
@@ -109,6 +110,10 @@ while ($line = fgets($pointer)) {
 			$emailfrom = trim($reg[1]);
 		}
 
+		if (preg_match('/^message-id:\s/i', $line)) {
+			$messageidline .= trim($line)."\n";
+		}
+
 		if (preg_match('/^references:\s/i', $line)) {
 			$referenceline .= trim($line)."\n";
 		}
@@ -168,6 +173,7 @@ if ($ccline)  file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ccline, F
 if ($bccline) file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $bccline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $fromline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' Email detected into From: '. $emailfrom."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $messageidline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - ".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
