@@ -10,7 +10,7 @@
 * Add Ansible scripts to update the sellyoursaas[-public].conf file.
 * Close #215: Add possibility to force a plan price for resselers
 * Add hidden option SELLYOURSAAS_LINK_TO_PARTNER_IF_FIRST_SOURCE to link a registration to a reseller when was just a first origin on
-  web site and even when reseller id was not explicitely into registration url.
+  web site and even when reseller id was not explicitely into registration url with utm_source=partnerXXX.
 * Add option SELLYOURSAAS_SUPPORT_URL
 * Fix the payment term of recurring invoice was not propagated on invoice created just after a fix of credit card.
 * Fix can not use a closed deployment server with html injection.
