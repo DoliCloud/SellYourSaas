@@ -259,65 +259,68 @@ else print $langs->trans("RemainderToPay");
 	          </div> <!-- END PORTLET-BODY -->
 
 	        </div> <!-- END PORTLET -->
-	      </div><!-- END COL -->
+	      </div><!-- END COL -->';
 
+			$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
+			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+					&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				$newnamekey = 'SELLYOURSAAS_SUPPORT_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				if (! empty($conf->global->$newnamekey)) {
+					$sellyoursaassupporturl = $conf->global->$newnamekey;
+				}
+			}
 
-			<!-- Box of tickets -->
-	      <div class="col-md-6">
-	        <div class="portlet light" id="boxOfTickets">
+			if (!$sellyoursaassupporturl) {
 
-	          <div class="portlet-title">
-	            <div class="caption">
-	              <i class="fa fa-hands-helping font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("SupportTickets").'</span>
-	            </div>
-	          </div>';
+		      $nboftickets = 0;
+				$nbofopentickets = 0;
 
-			$nboftickets = 0;
-			$nbofopentickets = 0;
-
-			print '
-	          <div class="portlet-body">
-
-	            <div class="row">
-	              <div class="col-md-9">
-					'.$langs->trans("NbOfTickets").'
-	              </div>
-	              <div class="col-md-3 right"><h2>
-	                '.$nboftickets.'
-	              </h2></div>
-	            </div> <!-- END ROW -->
-
-	            <div class="row">
-	              <div class="col-md-9">
-					'.$langs->trans("NbOfOpenTickets").'
-	              </div>
-	              <div class="col-md-3 right"><h2>';
-					if ($nbofopentickets > 0) print '<font style="color: orange;">';
-					print $nbofopentickets;
-					if ($nbofopentickets > 0) print '</font>';
-					print '</h2>
-	              </div>
-	            </div> <!-- END ROW -->
-
-				<div class="row">
-				<div class="center col-md-12">
-					<br>
-					<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'</a>
-				</div></div>
-
-	          </div> <!-- END PORTLET-BODY -->
-
-	        </div> <!-- END PORTLET -->
-	      </div><!-- END COL -->
-
-	    </div> <!-- END ROW -->
-	';
+	      	print '
+				<!-- Box of tickets -->
+				<div class="col-md-6">
+					<div class="portlet light" id="boxOfTickets">
+						<div class="portlet-title">
+							<div class="caption">
+								<i class="fa fa-hands-helping font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("SupportTickets").'</span>
+							</div>
+						</div>
+						<div class="portlet-body">
+							<div class="row">
+								<div class="col-md-9">
+									'.$langs->trans("NbOfTickets").'
+								</div>
+								<div class="col-md-3 right">
+									<h2>'.$nboftickets.'</h2>
+								</div>
+							</div> <!-- END ROW -->
+							<div class="row">
+								<div class="col-md-9">
+									'.$langs->trans("NbOfOpenTickets").'
+								</div>
+								<div class="col-md-3 right">
+									<h2>';
+									if ($nbofopentickets > 0) print '<font style="color: orange;">';
+									print $nbofopentickets;
+									if ($nbofopentickets > 0) print '</font>';
+									print '</h2>
+								</div>
+							</div> <!-- END ROW -->
+							<div class="row">
+								<div class="center col-md-12">
+									<br />
+									<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=support" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfTickets").'</a>
+								</div>
+							</div>
+						</div> <!-- END PORTLET-BODY -->
+					</div> <!-- END PORTLET boxOfTickets -->
+				</div><!-- END COL -->';
+			}
 
 	print '
+				</div> <!-- END ROW -->
+			</div>
 		</div>
-
-	    </div>
-		</div>
+	</div>
 	';
 ?>
 <!-- END PHP TEMPLATE dashboard.tpl.php -->
