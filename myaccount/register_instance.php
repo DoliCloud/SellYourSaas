@@ -598,6 +598,7 @@ if ($reusecontractid) {
 } else {
 	// Check number of instance with same IP deployed (Rem: for partners, ip are the one of their customer)
 	$MAXDEPLOYMENTPERIP = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP) ? 20 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP);
+	$MAXDEPLOYMENTPERIPVPN = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN);
 
 	$nbofinstancewithsameip=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
@@ -609,6 +610,25 @@ if ($reusecontractid) {
 	}
 	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("TooManyInstancesForSameIp")."\n";
+		}
+		exit(-70);
+	}
+
+	$nbofinstancewithsameipvpn=-1;
+	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."' AND deployment_vpn_proba = 1";
+	$select.= " AND deployment_status IN ('processing', 'done')";
+	$resselect = $db->query($select);
+	if ($resselect) {
+		$objselect = $db->fetch_object($resselect);
+		if ($objselect) $nbofinstancewithsameipvpn = $objselect->nb;
+	}
+	dol_syslog("nbofinstancewithsameipvpn = ".$nbofinstancewithsameipvpn." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPVPN." except if ip is 127.0.0.1)");
+	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameipvpn < 0) || ($nbofinstancewithsameipvpn > $MAXDEPLOYMENTPERIPVPN))) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
 			header("Location: ".$newurl);

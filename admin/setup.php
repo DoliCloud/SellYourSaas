@@ -154,6 +154,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", 'alpha'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAXDEPLOYMENTPERIP', GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIP", 'int'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN', GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR', GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', GETPOST("SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', GETPOST("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL", 'int'), 'chaine', 0, '', $conf->entity);
@@ -715,6 +716,13 @@ print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIP" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIP', 20).'">';
 print '</td>';
 print '<td><span class="opacitymedium small">20</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIP").' (VPN)</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN', 2).'">';
+print '</td>';
+print '<td><span class="opacitymedium small">2</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR").'</td>';
