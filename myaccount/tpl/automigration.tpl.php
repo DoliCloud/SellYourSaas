@@ -28,7 +28,7 @@ if (empty($conf) || ! is_object($conf)) {
 $upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';
 $filenames = array();
 $fileverification = array();
-$stepautomigration = GETPOST("stepautomigration","int");
+$stepautomigration = GETPOST("stepautomigration", "int");
 
 if (!empty($_POST['addfile'])) {
 	// Set tmp user directory
@@ -213,7 +213,7 @@ if ($action == 'automigration') {
 
 	if ($result["result"] != 0) {
 		$mysqlcommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$mysqlbackupfilename;
-		//$utils->executeCli($mysqlcommand,"",0,null,1);
+		$utils->executeCli($mysqlcommand, "", 0, null, 1);
 	}
 }
 
