@@ -12,6 +12,7 @@ if [ "x$3" == "x" ]; then
    echo "Usage:   $0  hostfile  param  value  [hostgrouporname]  [sellyoursaas|sellyoursaas-public]"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  usecompressformatforarchive  zstd  master,deployment"
+   echo "Example: $0  myhostfile  remotebackupserverport  22  master,deployment"
    echo "Example: $0  myhostfile  maxemailperday  500  withX.mysellyoursaasdomain.com  sellyoursaas-public"
    exit 1
 fi

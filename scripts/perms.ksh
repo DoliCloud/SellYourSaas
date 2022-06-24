@@ -1,5 +1,7 @@
 #!/bin/bash
 #--------------------------------------------------------#
+# Script to force permission on expected default values
+#--------------------------------------------------------#
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2

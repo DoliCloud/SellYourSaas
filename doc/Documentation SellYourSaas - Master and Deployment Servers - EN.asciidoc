@@ -322,6 +322,8 @@ For Ubuntu 18.04: you can concat the content into file *sshd_config* but be sure
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+Port 22
+
 # MaxAuthTries 6
 MaxAuthTries 10
 # MaxSessions 10

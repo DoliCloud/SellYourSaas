@@ -302,6 +302,10 @@ Pour ubuntu 18.04: il faut concaténner le contenu cité dans le *sshd_config* m
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+Port 22
+
+# MaxAuthTries 6
+MaxAuthTries 10
 # MaxSessions 10
 MaxSessions 25
 
