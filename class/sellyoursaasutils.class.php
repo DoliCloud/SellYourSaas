@@ -2141,13 +2141,15 @@ class SellYourSaasUtils
 					$expirationdate = $tmparray['expirationdate'];
 
 					if ($expirationdate && $expirationdate < $now) {	// If contract expired (we already had a test into main select, this is a security)
+						$this->db->begin();
+
 						$somethingdoneoncontract++;
 
 						$wemustsuspendinstance = false;
 
 						// If thirdparty has a default payment mode,
 						//   if no template invoice yet (for example a second instance for existing customer), we will create the template invoice (= test instance will move in a paid mode instead of being suspended).
-						//   if already a template invoice exists, we will suspend instance
+						//   if a template invoice already exists, we will suspend instance
 						$customerHasAPaymentMode = sellyoursaasThirdpartyHasPaymentMode($object->thirdparty->id);
 
 						if ($customerHasAPaymentMode) {
@@ -2426,7 +2428,8 @@ class SellYourSaasUtils
 									}
 								}
 							}
-						} else {// Third party has no payment mode defined, we suspend it.
+						} else {
+							// Third party has no payment mode defined, we suspend it.
 							$wemustsuspendinstance = true;
 						}
 
@@ -2503,6 +2506,12 @@ class SellYourSaasUtils
 									if (is_array($cmail->errors) && count($cmail->errors) > 0) $this->errors += $cmail->errors;
 								}
 							}
+						}
+
+						if (! $error) {
+							$this->db->commit();
+						} else {
+							$this->db->rollback();
 						}
 					}
 				}

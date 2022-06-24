@@ -28,9 +28,20 @@ cd /tmp
 #echo "Remplacement group apache par www-data"
 #find . -group apache -exec chgrp www-data {} \;
 
-# Owner root
-echo "Set owner and permission on logs directory"
+# Owner root on logs and backups dir
+echo "Set owner and permission on logs and backup directory"
 chown root.adm /home/admin/logs/
+[ -d /home/admin/logs ] || mkdir /home/admin/logs;
+[ -d /mnt/diskbackup ] || mkdir /mnt/diskbackup;
+[ -d /home/admin/backup ] || mkdir /home/admin/backup;
+[ -d /home/admin/backup/conf ] || mkdir /home/admin/backup/conf;
+[ -d /home/admin/backup/mysql ] || mkdir /home/admin/backup/mysql;
+[ -d /home/admin/wwwroot ] || mkdir /home/admin/wwwroot;
+chown root.adm /home/admin/logs; chmod 770 /home/admin/logs; 
+chown admin.admin /mnt/diskbackup; 
+chown admin.admin /home/admin/backup; chown admin.admin /home/admin/backup/conf; chown admin.admin /home/admin/backup/mysql; 
+chown admin.admin /home/admin/wwwroot
+
 
 echo "Set owner and permission on /home/admin/wwwroot/dolibarr_documents/ (except sellyoursaas)"
 chmod g+ws /home/admin/wwwroot/dolibarr_documents/

@@ -271,6 +271,9 @@ Create the user account *admin*. It will be used to install and administer the s
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/backup; chown admin.admin /home/admin/backup;
+mkdir /home/admin/backup/conf; chown admin.admin /home/admin/backup/conf;
+mkdir /home/admin/backup/mysql; chown admin.admin /home/admin/backup/mysql;
 mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
@@ -3854,7 +3857,7 @@ See chapter <<Cloning a server instance for an extra production server or a dev 
 
 ===== Local backup
 
-- Configuration of the server and paying instances is done locally via the cron task
+- The configuration of the server and the system database is done locally via the cron task
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* of *root* (see <<installing_cron_tasks>>) to the disks */home/admin/backup/conf* and */home/admin/backup/mysql*
 
