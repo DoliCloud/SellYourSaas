@@ -220,11 +220,13 @@ $documentstaticline=new ContratLigne($db);
 
 $listofcontractid = array();
 $sql = 'SELECT c.rowid as rowid';
-$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid, '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
-$sql.= " WHERE c.fk_soc = s.rowid AND s.rowid = ".$mythirdpartyaccount->id;
-$sql.= " AND d.fk_contrat = c.rowid";
-$sql.= " AND c.entity = ".$conf->entity;
-$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
+$sql .= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
+$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
+$sql .= ' '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
+$sql .= ' WHERE c.fk_soc = s.rowid AND s.rowid = '.((int) $mythirdpartyaccount->id);
+$sql .= ' AND d.fk_contrat = c.rowid';
+$sql .= ' AND c.entity = '.((int) $conf->entity);
+$sql .= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 $resql=$db->query($sql);
 if ($resql) {
 	$num_rows = $db->num_rows($resql);
@@ -234,7 +236,7 @@ if ($resql) {
 		if ($obj) {
 			$contract=new Contrat($db);
 			$contract->fetch($obj->rowid);					// This load also lines
-			$listofcontractid[$obj->rowid]=$contract;
+			$listofcontractid[$obj->rowid] = $contract;
 		}
 		$i++;
 	}
