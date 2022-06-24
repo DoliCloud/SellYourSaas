@@ -2070,7 +2070,7 @@ class SellYourSaasUtils
 		$now = dol_now();
 		$datetotest = dol_time_plus_duree($now, -1 * abs($gracedelay), 'd');
 
-		$this->db->begin();
+		//$this->db->begin();
 
 		$sql = 'SELECT c.rowid, c.ref_customer, ce.suspendmaintenance_message, cd.rowid as lid';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce,';
@@ -2524,14 +2524,14 @@ class SellYourSaasUtils
 		if (! $error) {
 			// TODO Disable the apache reload after each closing of actions and do it once here.
 
-			$this->db->commit();
+			//$this->db->commit();
 			$this->output = $numofexpiredcontractlines.' expired contract lines found'."\n";
 			$this->output.= 'Launch with noapachereload = '.$noapachereload.", maxnbofinstances = ".$maxnbofinstances."\n";
 			$this->output.= count($contractprocessed).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' suspended'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only).'."\n";
 			$this->output.= count($contractconvertedintemplateinvoice).' '.$mode.' running contract(s) with service end date before '.dol_print_date($datetotest, 'dayhourrfc').' converted into template invoice'.(count($contractconvertedintemplateinvoice)>0 ? ' : '.join(',', $contractconvertedintemplateinvoice) : '');
 			if ($erroremail) $this->output.='. Got errors when sending some email : '.$erroremail;
 		} else {
-			$this->db->rollback();
+			//$this->db->rollback();
 			$this->output = "Rollback after error\n";
 			$this->output.= 'Launch with noapachereload = '.$noapachereload.", maxnbofinstances = ".$maxnbofinstances."\n";
 			$this->output.= $numofexpiredcontractlines.' expired contract lines found'."\n";
