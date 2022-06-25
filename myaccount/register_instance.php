@@ -1056,8 +1056,22 @@ if ($reusecontractid) {
 
 		$contract->array_options['options_deployment_ipquality'] = 'remoteip='.$remoteip.';';
 
-		// Evaluate VPN probability with Getintel
+		$prefix=dol_getprefix('');
+		$cookieregistrationa='DOLREGISTERA_'.$prefix;
+		$cookieregistrationb='DOLREGISTERB_'.$prefix;
+		$nbregistration = (int) $_COOKIE[$cookieregistrationa];
+		if (! empty($_COOKIE[$cookieregistrationa])) {
+			$contract->array_options['options_cookieregister_counter'] = ($nbregistration ? $nbregistration : 1);
+		}
+		if (! empty($_COOKIE[$cookieregistrationb])) {
+			$contract->array_options['options_cookieregister_previous_instance'] = dol_decode($_COOKIE[$cookieregistrationb]);
+		}
+
+		// Add security controls
+		$abusetest = 0;
 		$vpnproba = '';
+
+		// Evaluate VPN probability with Getintel
 		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 		if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
 		$url = 'http://check.getipintel.net/check.php?ip='.urlencode($remoteip).'&contact='.urlencode($emailforvpncheck).'&flag=f';
@@ -1080,21 +1094,7 @@ if ($reusecontractid) {
 			$contract->array_options['options_deployment_vpn_proba'] = '';
 		}
 
-		$prefix=dol_getprefix('');
-		$cookieregistrationa='DOLREGISTERA_'.$prefix;
-		$cookieregistrationb='DOLREGISTERB_'.$prefix;
-		$nbregistration = (int) $_COOKIE[$cookieregistrationa];
-		if (! empty($_COOKIE[$cookieregistrationa])) {
-			$contract->array_options['options_cookieregister_counter'] = ($nbregistration ? $nbregistration : 1);
-		}
-		if (! empty($_COOKIE[$cookieregistrationb])) {
-			$contract->array_options['options_cookieregister_previous_instance'] = dol_decode($_COOKIE[$cookieregistrationb]);
-		}
-
-		// Add security controls
-		$abusetest = 0;
-
-		// Refused if VPN probability is too high
+		// Refused if VPN probability from GetIP is too high
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
 			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
 				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
@@ -1171,6 +1171,11 @@ if ($reusecontractid) {
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-recent_abuse='.($jsonreponse['recent_abuse'] ? 1 : 0).';';
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-fraud_score='.$jsonreponse['fraud_score'].';';
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-host='.$jsonreponse['host'].';';
+
+						if ($vpnproba === '') {
+							// If vpn proba was not found with getip, we use the one found from ipqualityscore
+							$vpnproba = (($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0);
+						}
 					} else {
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
 					}
@@ -1185,6 +1190,14 @@ if ($reusecontractid) {
 		$contract->array_options['options_deployment_ipquality'] = dol_trunc($contract->array_options['options_deployment_ipquality'], 250);
 
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
+
+		// Refused if VPN probability from IPQuality is too high
+		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
+				$abusetest = 1;
+			}
+		}
 
 		// Block for some IPs
 		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
