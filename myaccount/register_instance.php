@@ -1054,7 +1054,7 @@ if ($reusecontractid) {
 		$contract->array_options['options_deployment_ip'] = $remoteip;
 		$contract->array_options['options_deployment_ua'] = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : dol_trunc($_SERVER["HTTP_USER_AGENT"], 250));
 
-		$contract->array_options['options_deployment_ipquality'] = 'remoteip='.$remoteip.';';
+		$contract->array_options['options_deployment_ipquality'] = 'remoteip='.$remoteip.': ';
 
 		$prefix=dol_getprefix('');
 		$cookieregistrationa='DOLREGISTERA_'.$prefix;
