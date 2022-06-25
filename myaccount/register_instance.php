@@ -1054,13 +1054,13 @@ if ($reusecontractid) {
 		$contract->array_options['options_deployment_ip'] = $remoteip;
 		$contract->array_options['options_deployment_ua'] = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : dol_trunc($_SERVER["HTTP_USER_AGENT"], 250));
 
-		$contract->array_options['options_deployment_ipquality'] = '';
+		$contract->array_options['options_deployment_ipquality'] = 'remoteip='.$remoteip.';';
 
 		// Evaluate VPN probability with Getintel
 		$vpnproba = '';
 		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 		if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
-		$url = 'http://check.getipintel.net/check.php?ip='.$remoteip.'&contact='.urlencode($emailforvpncheck).'&flag=f';
+		$url = 'http://check.getipintel.net/check.php?ip='.urlencode($remoteip).'&contact='.urlencode($emailforvpncheck).'&flag=f';
 		$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
 		/* The proxy check system will return negative values on error. For standard format (non-json), an additional HTTP 400 status code is returned
 			-1 Invalid no input
