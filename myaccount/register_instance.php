@@ -669,11 +669,11 @@ if ($reusecontractid) {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$serverdeployement = $sellyoursaasutils->getRemoteServerDeploymentIp($domainname);
 
-	$nbofinstanceindeployment=-1;
+	$nbofinstanceindeployment = -1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
 	$select .= " WHERE deployment_host = '".$db->escape($serverdeployement)."'";
 	$select .= " AND deployment_status IN ('processing')";
-	$select .= " AND deployment_date_start < DATE_SUB(NOW(), INTERVAL 1 DAY)";	// We ignore deployment started more than 24h ago: They are finished even if not correctly flagged as 'done'.
+	$select .= " AND deployment_date_start >= DATE_SUB(NOW(), INTERVAL 1 DAY)";	// We ignore deployment started more than 24h ago: They are finished even if not correctly flagged as 'done'.
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
