@@ -1056,9 +1056,10 @@ ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 [source, bash]
 ---------------
 vi /etc/systemd/system/multi-user.target.wants/apache2.service
-systemctl daemon-reload
-/usr/sbin/apachectl stop
-/usr/sbin/apachectl start
+systemctl daemon-reload;
+/usr/sbin/apachectl stop;
+/usr/sbin/apachectl start;
+/usr/sbin/apachectl status;
 ---------------
 
 Note: Reload of apache seems not enough so we stop/start it.
