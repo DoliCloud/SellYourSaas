@@ -481,7 +481,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	}
 	if (empty($return_outputmysql)) {	// If no error detected previously, we try also to detect by getting size file
 		if ($mode == 'testdatabase' || $mode == 'test') {
-			$return_outputmysql = 1;
+			$return_outputmysql = 0;
 		} else {
 			if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
 				$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
