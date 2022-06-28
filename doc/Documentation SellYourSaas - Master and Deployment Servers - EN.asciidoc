@@ -706,13 +706,6 @@ domain=mysaasdomainname.com
 
 # If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
-# If deployment server: IPs allowed to request a deployment
-allowed_hosts=127.0.0.1,ipofmasterserver
-
-# email from
-emailfrom=noreply@mysaasdomainname.com
-# email supervision
-emailsupervision=supervision@mysaasdomainname.com
 
 # Set to 1 if this server is the master server, 
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
@@ -722,8 +715,19 @@ masterserver=1
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
+# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
+archivetestinstances=1
+
 # Set to its own IP if it is a deployment server. Keep empty for master only server.
 ipserverdeployment=ip.of.deployment.server
+
+# If deployment server: IPs allowed to request a deployment
+allowed_hosts=127.0.0.1,ipofmasterserver
+
+# email from
+emailfrom=noreply@mysaasdomainname.com
+# email supervision
+emailsupervision=supervision@mysaasdomainname.com
 
 # Set location of the master database
 databasehost=ipOfMasterServer or localhost if on master server
@@ -743,11 +747,11 @@ databaseportdeployment=3306
 databaseuserdeployment=sellyoursaas
 databasepassdeployment=xxxxx
 
-# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
-archivetestinstances=1
-
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+
 # Set directory where backup are stored
 backupdir=/mnt/diskbackup/backup
 # Set directory where archives of tests instances are stored
@@ -755,10 +759,11 @@ archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
 
-# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
-usecompressformatforarchive=gzip
 # Set option to exclude some tables for some instances in backup
 #backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
+
+# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+usecompressformatforarchive=gzip
 
 # Set remote server launcher ip (default is 0.0.0.0)
 remoteserverlistenip=0.0.0.0
@@ -766,20 +771,20 @@ remoteserverlistenip=0.0.0.0
 remoteserverlistenport=8080
 
 remotebackupserver=ip.of.remote.backup.ssh.server
+remotebackupuser=admin
 remotebackupdir=/mnt/diskbackup
 
-# Advanced Options to use a different paths in deployment server
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
 # Option to use different path for dataroot
 #olddoldataroot=/home/admin/wwwroot/dolibarr_documents
 #newdoldataroot=/new/path/of/documents
 # Options to change the directory of vhostfile templates
 #templatesdir=/path/of/vhostfile/templates
+
 # Options to change the SSL certificates names in Apache virtualhost
 #websslcertificatecrt=with.sellyoursaas.com.crt
 #websslcertificatekey=with.sellyoursaas.com.key
 #websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+
 # Options for Jailkit
 #chrootdir=/home/jail/chroot
 #privatejailtemplatename=privatejail
