@@ -714,6 +714,8 @@ archivedirpaid=/mnt/diskbackup/archives-paid
 
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
+# Set option to exclude some tables for some instances in backup
+#backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
 
 # Set remote server launcher ip (default is 0.0.0.0)
 remoteserverlistenip=0.0.0.0

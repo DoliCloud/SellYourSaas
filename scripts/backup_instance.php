@@ -79,6 +79,7 @@ $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
+$backupignoretables='';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -111,6 +112,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupignoretables') {
+			$backupignoretables = $tmpline[1];
 		}
 	}
 } else {
@@ -221,8 +225,8 @@ if ($num_rows > 1) {
 	if ($obj) $idofinstancefound = $obj->rowid;
 }
 
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object = new Contrat($dbmaster);
+dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
+$object = new SellYourSaasContract($dbmaster);
 $result=0;
 if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
 
@@ -421,6 +425,22 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 
+	if ($backupignoretables) {
+		$listofignoretables = dolExplodeIntoArray($backupignoretables, ',', ':');
+		if (array_key_exists($object->instance, $listofignoretables)) {
+			$listofignoretablesforinstance = explode('+', $listofignoretables[$object->instance]);
+			foreach ($listofignoretablesforinstance as $key => $val) {
+				$param[]='--ignore-table='.$object->database_db.'.'.$val;
+			}
+		}
+		if (array_key_exists('all', $listofignoretables)) {
+			$listofignoretablesforinstance = explode('+', $listofignoretables['all']);
+			foreach ($listofignoretablesforinstance as $key => $val) {
+				$param[]='--ignore-table='.$object->database_db.'.'.$val;
+			}
+		}
+	}
+
 	$prefixdumptemp = 'temp';
 
 	$fullcommand=$command." ".join(" ", $param);
@@ -443,6 +463,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.bz2');
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.zst');
 	}
+
+	// Execute command
 	$output=array();
 	$return_outputmysql=0;
 	$datebeforemysqldump = strftime("%Y%m%d-%H%M%S");
@@ -458,13 +480,17 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		$return_outputmysql = strpos($outputerr, ' Error ');
 	}
 	if (empty($return_outputmysql)) {	// If no error detected previously, we try also to detect by getting size file
-		if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
-			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
-		} else {
-			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz');
-		}
-		if ($filesizeofsql < 100) {
+		if ($mode == 'testdatabase' || $mode == 'test') {
 			$return_outputmysql = 1;
+		} else {
+			if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
+				$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
+			} else {
+				$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz');
+			}
+			if ($filesizeofsql < 100) {
+				$return_outputmysql = 1;
+			}
 		}
 	}
 
