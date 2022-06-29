@@ -606,7 +606,9 @@ if ($reusecontractid) {
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
-		if ($objselect) $nbofinstancewithsameip = $objselect->nb;
+		if ($objselect) {
+			$nbofinstancewithsameip = $objselect->nb;
+		}
 	}
 	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
@@ -625,7 +627,9 @@ if ($reusecontractid) {
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
-		if ($objselect) $nbofinstancewithsameipvpn = $objselect->nb;
+		if ($objselect) {
+			$nbofinstancewithsameipvpn = $objselect->nb;
+		}
 	}
 	dol_syslog("nbofinstancewithsameipvpn = ".$nbofinstancewithsameipvpn." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPVPN." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameipvpn < 0) || ($nbofinstancewithsameipvpn > $MAXDEPLOYMENTPERIPVPN))) {
@@ -1175,6 +1179,7 @@ if ($reusecontractid) {
 						if ($vpnproba === '') {
 							// If vpn proba was not found with getip, we use the one found from ipqualityscore
 							$vpnproba = (($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0);
+							$contract->array_options['options_deployment_vpn_proba'] = round($vpnproba, 2);
 						}
 					} else {
 						$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';

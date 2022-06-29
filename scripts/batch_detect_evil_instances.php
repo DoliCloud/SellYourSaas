@@ -137,9 +137,9 @@ $langs->load("main");				// To load language file for default language
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
 	print "Script to detect evils instances by scanning inside its data for blacklist content.\n";
-	print "Usage on deployment servers: ".$script_file." (test) [instancefilter]\n";
-	print "\n";
-	print "- test          test scan\n";
+	print "Usage on deployment servers: ".$script_file." (test|remove) [instancefilter]\n";
+	//print "\n";
+	//print "- test          test scan\n";
 	exit(-1);
 }
 print '--- start script with mode '.$argv[1]."\n";
@@ -174,8 +174,9 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 	$instancefiltercomplete = $instancefiltercomplete.".".$tmpstring;   // Automatically concat first domain name
 }
 
+$return_var = 0;
 
-//print "----- Start loop for backup_instance\n";
+print "----- Start loop for spam keys in /tmp/spam/blacklistcontent into index.php\n";
 
 $fp = @fopen("/tmp/spam/blacklistcontent", "r");
 if ($fp) {
@@ -183,14 +184,37 @@ if ($fp) {
 	// IFS=$(echo -en "\n\b")
 	// for fic in `ls /home/jail/home/osu*/dbn*/htdocs/index.php`; do grep -l spamtext $fic; done
 	while (($buffer = fgets($fp, 4096)) !== false) {
-		echo 'Scan if we found the string '.$buffer.' into /home/jails/home/osu*/dbn*/htdocs/index.php'."\n";
-
-		// TODO
+		echo 'Scan if we found the string '.$buffer.' into /home/jail/home/osu*/dbn*/htdocs/index.php'."\n";
+		$command = "grep -l '".str_replace("'", ".", $buffer)."' /home/jail/home/osu*/dbn*/htdocs/index.php";
+		$fullcommand=$command;
+		$output=array();
+		echo $command."\n";
+		exec($fullcommand, $output, $return_var);
+		if ($return_var > 0) {
+			// We found an evil string
+			print "ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
+		}
 	}
 	if (!feof($fp)) {
 		echo "Erreur: fgets() a échoué\n";
 	}
 	fclose($fp);
+}
+
+$fp = @fopen("/tmp/spam/blacklistdir", "r");
+if ($fp) {
+	while (($buffer = fgets($fp, 4096)) !== false) {
+		echo 'Scan if we found the blacklist dir '.$buffer.' in /home/jail/home/osu*/dbn*/htdocs/'."\n";
+		$command = "find /home/jail/home/osu*/dbn*/htdocs/".$buffer;
+		$fullcommand=$command;
+		$output=array();
+		echo $command."\n";
+		exec($fullcommand, $output, $return_var);
+		if ($return_var > 0) {
+			// We found an evil string
+			print "ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
+		}
+	}
 }
 
 

@@ -968,7 +968,7 @@ sudo apt-install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
-sudo apt install -y spamc spamassassin clamav clamav-daemon
+sudo apt install -y spamc spamassassin clamdscan clamav-daemon
 sudo apt install -y fail2ban
 sudo apt install -y soffice libreoffice-common libreoffice-writer
 sudo apt install -y mailutils postfix
