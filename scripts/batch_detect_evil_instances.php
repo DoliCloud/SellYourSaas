@@ -185,15 +185,19 @@ if ($fp) {
 	// for fic in `ls /home/jail/home/osu*/dbn*/htdocs/index.php`; do grep -l spamtext $fic; done
 	while (($buffer = fgets($fp, 4096)) !== false) {
 		$buffer = dol_sanitizePathName(trim($buffer));
-		echo 'Scan if we found the string '.$buffer.' into /home/jail/home/osu*/dbn*/htdocs/index.php'."\n";
-		$command = "grep -l '".str_replace("'", ".", $buffer)."' /home/jail/home/osu*/dbn*/htdocs/index.php";
-		$fullcommand=$command;
-		$output=array();
-		echo $command."\n";
-		exec($fullcommand, $output, $return_var);
-		if ($return_var > 0) {
-			// We found an evil string
-			print "ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
+		if ($buffer) {
+			echo 'Scan if we found the string '.$buffer.' into /home/jail/home/osu*/dbn*/htdocs/index.php'."\n";
+			$command = "grep -l '".str_replace("'", ".", $buffer)."' /home/jail/home/osu*/dbn*/htdocs/index.php";
+			$fullcommand=$command;
+			$output=array();
+			echo $command."\n";
+			exec($fullcommand, $output, $return_var);
+			if ($return_var == 0) {		// grep -l return 0 if something was found
+				// We found an evil string
+				print "ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
+			} else {
+				print "No alert found for blacklistcontent\n";
+			}
 		}
 	}
 	if (!feof($fp)) {
@@ -206,15 +210,19 @@ $fp = @fopen("/tmp/spam/blacklistdir", "r");
 if ($fp) {
 	while (($buffer = fgets($fp, 4096)) !== false) {
 		$buffer = dol_sanitizePathName(trim($buffer));
-		echo 'Scan if we found the blacklist dir '.$buffer.' in /home/jail/home/osu*/dbn*/htdocs/'."\n";
-		$command = "find /home/jail/home/osu*/dbn*/htdocs/".$buffer;
-		$fullcommand=$command;
-		$output=array();
-		echo $command."\n";
-		exec($fullcommand, $output, $return_var);
-		if ($return_var > 0) {
-			// We found an evil string
-			print "ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
+		if ($buffer) {
+			echo 'Scan if we found the blacklist dir '.$buffer.' in /home/jail/home/osu*/dbn*/htdocs/'."\n";
+			$command = "find /home/jail/home/osu*/dbn*/htdocs/".$buffer;
+			$fullcommand=$command;
+			$output=array();
+			echo $command."\n";
+			exec($fullcommand, $output, $return_var);
+			if ($return_var == 0) {		// find return 0 if something was found
+				// We found an evil string
+				print "ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
+			} else {
+				print "No alert found for blacklistdir\n";
+			}
 		}
 	}
 	if (!feof($fp)) {
