@@ -29,7 +29,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 /**
  * Class for Blacklistto
  */
-class Blacklistfrom extends CommonObject
+class Blacklistto extends CommonObject
 {
 	/**
 	 * @var string ID of module.

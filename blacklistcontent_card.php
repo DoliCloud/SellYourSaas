@@ -17,9 +17,9 @@
  */
 
 /**
- *   	\file       blacklistmail_card.php
+ *   	\file       blacklistcontent_card.php
  *		\ingroup    sellyoursaas
- *		\brief      Page to create/edit/view blacklistmail
+ *		\brief      Page to create/edit/view blacklistcontent
  */
 
 //if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');				// Do not create database handler $db
@@ -78,7 +78,7 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-dol_include_once('/sellyoursaas/class/blacklistmail.class.php');
+dol_include_once('/sellyoursaas/class/blacklistcontent.class.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("sellyoursaas@sellyoursaas", "other"));
@@ -97,7 +97,7 @@ $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 $dol_openinpopup = GETPOST('dol_openinpopup', 'aZ09');
 
 // Initialize technical objects
-$object = new Blacklistmail($db);
+$object = new Blacklistcontent($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->sellyoursaas->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('blacklistmailcard', 'globalcard')); // Note that conf->hooks_modules contains array
@@ -164,14 +164,14 @@ if ($reshook < 0) {
 if (empty($reshook)) {
 	$error = 0;
 
-	$backurlforlist = dol_buildpath('/sellyoursaas/blacklistmail_list.php', 1);
+	$backurlforlist = dol_buildpath('/sellyoursaas/blacklistcontent_list.php', 1);
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
 			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
 				$backtopage = $backurlforlist;
 			} else {
-				$backtopage = dol_buildpath('/sellyoursaas/blacklistmail_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
+				$backtopage = dol_buildpath('/sellyoursaas/blacklistcontent_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
 			}
 		}
 	}
@@ -201,9 +201,9 @@ if (empty($reshook)) {
 	}
 
 	// Actions to send emails
-	$triggersendname = 'SELLYOURSAAS_BLACKLISTMAIL_SENTBYMAIL';
-	$autocopy = 'MAIN_MAIL_AUTOCOPY_BLACKLISTMAIL_TO';
-	$trackid = 'blacklistmail'.$object->id;
+	$triggersendname = 'SELLYOURSAAS_BLACKLISTCONTENT_SENTBYMAIL';
+	$autocopy = 'MAIN_MAIL_AUTOCOPY_BLACKLISTCONTENT_TO';
+	$trackid = 'blacklistcontent'.$object->id;
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 }
 
@@ -220,7 +220,7 @@ $form = new Form($db);
 $formfile = new FormFile($db);
 $formproject = new FormProjets($db);
 
-$title = $langs->trans("Blacklistmail");
+$title = $langs->trans("Blacklistcontent");
 $help_url = '';
 llxHeader('', $title, $help_url);
 
@@ -247,7 +247,7 @@ if ($action == 'create') {
 		exit;
 	}
 
-	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("Blacklistmail")), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("Blacklistcontent")), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';

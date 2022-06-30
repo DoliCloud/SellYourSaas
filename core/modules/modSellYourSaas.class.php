@@ -312,18 +312,18 @@ class modSellYourSaas extends DolibarrModules
 		$r++;
 
 		$this->menu[$r]=array(
-		'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_packages',
-		'type'=>'left',
-		'titre'=>'LiveRefsInstances',
-		'mainmenu'=>'sellyoursaas',
-		'leftmenu'=>'mysaas_live',
-		'url'=>'__[SELLYOURSAAS_REFS_URL]__',
-		'langs'=>'sellyoursaas@sellyoursaas',
-		'position'=>212,
-		'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-		'perms'=>'$user->rights->sellyoursaas->read',
-		'target'=>'_refs',
-		'user'=>0);
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_packages',
+			'type'=>'left',
+			'titre'=>'LiveRefsInstances',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_live',
+			'url'=>'__[SELLYOURSAAS_REFS_URL]__',
+			'langs'=>'sellyoursaas@sellyoursaas',
+			'position'=>212,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->read',
+			'target'=>'_refs',
+			'user'=>0);
 		$r++;
 
 
@@ -563,6 +563,128 @@ class modSellYourSaas extends DolibarrModules
 			'position'=>602,
 			'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->rights->sellyoursaas->write',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+
+		// Blacklists
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas',
+			'type'=>'left',
+			'titre'=>'Blacklists',
+			'prefix' => img_picto('', 'fa-ban', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_blacklist',
+			'url'=>'',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'BlacklistIP',
+			'prefix' => '',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_blacklistip',
+			'url'=>'/sellyoursaas/blacklistip_list.php',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'BlacklistFrom',
+			'prefix' => '',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_blacklistfrom',
+			'url'=>'/sellyoursaas/blacklistfrom_list.php',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'BlacklistTo',
+			'prefix' => '',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_blacklistto',
+			'url'=>'/sellyoursaas/blacklistto_list.php',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'BlacklistDir',
+			'prefix' => '',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_blacklistdir',
+			'url'=>'/sellyoursaas/blacklistdir_list.php',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'BlacklistContent',
+			'prefix' => '',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_blacklistcontent',
+			'url'=>'/sellyoursaas/blacklistcontent_list.php',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'BlacklistMails',
+			'prefix' => '',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_blacklistmails',
+			'url'=>'/sellyoursaas/blacklistmail_list.php',
+			'langs'=>'',
+			'position'=>601,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);
