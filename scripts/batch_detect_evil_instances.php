@@ -176,7 +176,7 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 
 $return_var = 0;
 
-get_cwd('/home/jail/home/');
+chdir('/home/jail/home/');
 
 print "----- Start loop for spam keys in /tmp/spam/blacklistcontent into index.php\n";
 
