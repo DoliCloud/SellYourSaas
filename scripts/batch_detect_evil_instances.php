@@ -69,6 +69,8 @@ if (! $res) {
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
+include_once dol_buildpath("/sellyoursaas/class/blacklistcontent.class.php");
+include_once dol_buildpath("/sellyoursaas/class/blacklistdir.class.php");
 
 
 // Read /etc/sellyoursaas.conf file
@@ -142,7 +144,7 @@ if (! isset($argv[1])) {	// Check parameters
 	//print "- test          test scan\n";
 	exit(-1);
 }
-print '--- start script with mode '.$argv[1]."\n";
+print '-- Start script with mode '.$argv[1]."\n";
 //print 'Argument 1='.$argv[1]."\n";
 //print 'Argument 2='.$argv[2]."\n";
 
@@ -176,19 +178,22 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 
 $return_var = 0;
 
+print "----- Go into dir /home/jail/home\n";
 chdir('/home/jail/home/');
 
-print "----- Start loop for spam keys in /tmp/spam/blacklistcontent into index.php\n";
+print "----- Loop for spam keys in blacklistcontent into index.php\n";
 
-$fp = @fopen("/tmp/spam/blacklistcontent", "r");
-if ($fp) {
-	// Example of search with simple CLI
-	// IFS=$(echo -en "\n\b")
-	// for fic in `ls /home/jail/home/osu*/dbn*/htdocs/index.php`; do grep -l spamtext $fic; done
-	while (($buffer = fgets($fp, 4096)) !== false) {
-		$buffer = dol_sanitizePathName(trim($buffer));
+$tmpblacklistcontent = new Blacklistcontent($db);
+$tmparray = $tmpblacklistcontent->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistcontent elements.\n";
+}
+
+if (!empty($tmparray)) {
+	foreach ($tmparray as $val) {
+		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			echo 'Scan if we found the string '.$buffer.' into osu*/dbn*/htdocs/index.php';
+			echo 'Scan if we found the string '.$buffer.' into osu*/dbn*/htdocs/index.php ';
 			$command = "grep -l '".str_replace("'", ".", $buffer)."' osu*/dbn*/htdocs/index.php";
 			$fullcommand=$command;
 			$output=array();
@@ -196,24 +201,28 @@ if ($fp) {
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// grep -l returns 0 if something was found
 				// We found an evil string
-				print " - ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
+				print "- ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
 			} else {
-				print " - OK\n";
+				print "- OK\n";
 			}
 		}
 	}
-	if (!feof($fp)) {
-		echo "Erreur: fgets() a échoué\n";
-	}
-	fclose($fp);
 }
 
-$fp = @fopen("/tmp/spam/blacklistdir", "r");
-if ($fp) {
-	while (($buffer = fgets($fp, 4096)) !== false) {
-		$buffer = dol_sanitizePathName(trim($buffer));
+
+print "----- Loop for spam keys in blacklistcontent into index.php\n";
+
+$tmpblacklistdir = new Blacklistdir($db);
+$tmparray = $tmpblacklistdir->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistdir elements.\n";
+}
+
+if (!empty($tmparray)) {
+	foreach ($tmparray as $val) {
+		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			echo 'Scan if we found the blacklist dir '.$buffer.' in osu*/dbn*/htdocs/';
+			echo 'Scan if we found the blacklist dir '.$buffer.' in osu*/dbn*/htdocs/ ';
 			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d | grep '".str_replace("'", ".", $buffer)."'";
 			$fullcommand=$command;
 			$output=array();
@@ -221,16 +230,12 @@ if ($fp) {
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// command returns 0 if something was found
 				// We found an evil string
-				print " - ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
+				print "- ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
 			} else {
-				print " - OK\n";
+				print "- OK\n";
 			}
 		}
 	}
-	if (!feof($fp)) {
-		echo "Erreur: fgets() a échoué\n";
-	}
-	fclose($fp);
 }
 
 
