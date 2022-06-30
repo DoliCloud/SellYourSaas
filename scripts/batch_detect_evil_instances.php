@@ -194,7 +194,7 @@ if ($fp) {
 			$output=array();
 			//echo $command."\n";
 			exec($fullcommand, $output, $return_var);
-			if ($return_var == 0) {		// grep -l return 0 if something was found
+			if ($return_var == 0) {		// grep -l returns 0 if something was found
 				// We found an evil string
 				print " - ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
 			} else {
@@ -214,12 +214,12 @@ if ($fp) {
 		$buffer = dol_sanitizePathName(trim($buffer));
 		if ($buffer) {
 			echo 'Scan if we found the blacklist dir '.$buffer.' in osu*/dbn*/htdocs/';
-			$command = "find osu*/dbn*/htdocs/".$buffer." -type d";
+			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d | grep -l '".str_replace("'", ".", $buffer)."'";
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
 			exec($fullcommand, $output, $return_var);
-			if ($return_var == 0) {		// find return 0 if something was found
+			if ($return_var == 0) {		// command returns 0 if something was found
 				// We found an evil string
 				print " - ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
 			} else {
