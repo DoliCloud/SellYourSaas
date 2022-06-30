@@ -708,10 +708,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('rsapublicmain', 	    	     "PublicRSAKey",  'text',     100,    '2000', 'user', 0, 0,  '',      '', 1, '',  1, 'PublicRSAKeyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('ippublicmain', 	    	     "IPPublicMain",  'varchar',  105,     '255', 'user', 0, 0,  '',      '', 1, '',  1, 'IPPublicMainDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
-		// Create/import website called 'sellyoursaas'
-		//include_once DOL_DOCUMENT_ROOT.'/website/class/website.class.php';
-		//$tmpwebsite = new WebSite($this->db);
-		//$result = $tmpwebsite->importWebSite('website_sellyoursaas-demo.zip');
+
 		$sql = array();
 		return $this->_init($sql, $options);
 	}

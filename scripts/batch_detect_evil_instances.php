@@ -176,6 +176,8 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 
 $return_var = 0;
 
+get_cwd('/home/jail/home/');
+
 print "----- Start loop for spam keys in /tmp/spam/blacklistcontent into index.php\n";
 
 $fp = @fopen("/tmp/spam/blacklistcontent", "r");
@@ -186,8 +188,8 @@ if ($fp) {
 	while (($buffer = fgets($fp, 4096)) !== false) {
 		$buffer = dol_sanitizePathName(trim($buffer));
 		if ($buffer) {
-			echo 'Scan if we found the string '.$buffer.' into /home/jail/home/osu*/dbn*/htdocs/index.php';
-			$command = "grep -l '".str_replace("'", ".", $buffer)."' /home/jail/home/osu*/dbn*/htdocs/index.php";
+			echo 'Scan if we found the string '.$buffer.' into osu*/dbn*/htdocs/index.php';
+			$command = "grep -l '".str_replace("'", ".", $buffer)."' osu*/dbn*/htdocs/index.php";
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
@@ -211,8 +213,8 @@ if ($fp) {
 	while (($buffer = fgets($fp, 4096)) !== false) {
 		$buffer = dol_sanitizePathName(trim($buffer));
 		if ($buffer) {
-			echo 'Scan if we found the blacklist dir '.$buffer.' in /home/jail/home/osu*/dbn*/htdocs/';
-			$command = "find /home/jail/home/osu*/dbn*/htdocs/".$buffer;
+			echo 'Scan if we found the blacklist dir '.$buffer.' in osu*/dbn*/htdocs/';
+			$command = "find osu*/dbn*/htdocs/".$buffer." -type d";
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";

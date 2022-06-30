@@ -180,7 +180,7 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(em
 
 $blacklistofips = @file_get_contents($pathtospamdir.'/blacklistip');
 if ($blacklistofips === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofips can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofip can't be read.\n", FILE_APPEND);
 } elseif (! empty($ip)) {
 	$blacklistofipsarray = explode("\n", $blacklistofips);
 	if (is_array($blacklistofipsarray) && in_array($ip, $blacklistofipsarray)) {
@@ -191,7 +191,7 @@ if ($blacklistofips === false) {
 
 $blacklistoffroms = @file_get_contents($pathtospamdir.'/blacklistfrom');
 if ($blacklistoffroms === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistoffroms can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistfrom can't be read.\n", FILE_APPEND);
 } elseif (! empty($emailfrom)) {
 	$blacklistoffromsarray = explode("\n", $blacklistoffroms);
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
@@ -202,7 +202,7 @@ if ($blacklistoffroms === false) {
 
 $blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
 if ($blacklistofcontents === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofcontents can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistcontent can't be read.\n", FILE_APPEND);
 } elseif (! empty($mail)) {
 	//file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents = ".$blacklistofcontents."\n", FILE_APPEND);
 	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);
