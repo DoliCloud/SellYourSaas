@@ -18,7 +18,7 @@
  */
 
 /**
- *      \file       sellyoursaas/scripts/batch_scan.php
+ *      \file       sellyoursaas/scripts/batch_detect_evil_instances.php
  *		\ingroup    sellyoursaas
  *      \brief      Script to detect evils instances by scanning inside its data for blacklist content
  */
