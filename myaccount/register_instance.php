@@ -89,6 +89,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/packages.class.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
+dol_include_once('/sellyoursaas/class/blacklistip.class.php');
 
 // Re set variables specific to new environment
 $conf->global->SYSLOG_FILE_ONEPERSESSION=1;
@@ -522,9 +523,30 @@ if (empty($remoteip)) {
 	exit(-60);
 }
 
+$tmpblacklistip = new Blacklistip($db);
+$tmparray = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistip elements.\n";
+	exit(-61);
+}
+
+if (!empty($tmparray)) {
+	foreach ($tmparray as $val) {
+		if ($val->content == $remoteip) {
+			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip is in blacklistip", LOG_WARNING);	// Should not happen, ip should always be defined.
+			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Evil usage detected'), null, 'errors');
+				header("Location: ".$newurl);
+			} else {
+				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Evil usage detected')."\n";
+			}
+			exit(-62);
+		}
+	}
+}
+
 // TODO Move other check on abuse here
-
-
 
 
 

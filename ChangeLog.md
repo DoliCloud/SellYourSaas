@@ -16,6 +16,7 @@
 * Fix the payment term of recurring invoice was not propagated on invoice created just after a fix of credit card.
 * Fix can not use a closed deployment server with html injection.
 * NEW Add option backupignoretables in sellyoursaas.conf to exclude some tables from backup
+* NEW Add protection against blacklisted ip on registration
 
 
 ## 1.1
