@@ -214,7 +214,7 @@ if ($fp) {
 		$buffer = dol_sanitizePathName(trim($buffer));
 		if ($buffer) {
 			echo 'Scan if we found the blacklist dir '.$buffer.' in osu*/dbn*/htdocs/';
-			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d | grep -l '".str_replace("'", ".", $buffer)."'";
+			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d | grep '".str_replace("'", ".", $buffer)."'";
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
