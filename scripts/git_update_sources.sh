@@ -18,6 +18,11 @@ export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/se
 
 export currentpath=$(dirname "$0")
 
+if [ "$(id -u)" == "0" ]; then
+   echo "This script must be run as admin (on master server), not as root" 1>&2
+   exit 1
+fi
+
 echo "Update git dirs found into $1 and generate the tgz image."
 
 for dir in $(find "$1" -mindepth 1 -maxdepth 1 -type d)
