@@ -28,7 +28,24 @@ if (empty($conf) || ! is_object($conf)) {
 $upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';
 $filenames = array();
 $fileverification = array();
-$stepautomigration = GETPOST("stepautomigration", "int");
+$stepautomigration = 0;
+$backtopagesupport = $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautomigration=backfromautomigration&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'&subject'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha'));
+
+print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormbacksupport">';
+	print '<input type="hidden" name="action" value="presend">';
+	print '<input type="hidden" name="mode" value="support">';
+	print '<input type="hidden" name="contractid" value="'.GETPOST('contractid', 'alpha').'">';
+	print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
+	print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
+	print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'">';
+	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
+	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
+	print '</form>';
+if ($action == 'redirectautomigrationget') {
+	print '<script>
+	window.location.href = "'.$_SERVER["PHP_SELF"].'?mode='.GETPOST("mode", 'alpha').'&action=view'.(GETPOST("instanceselect")?'&instanceselect='.GETPOST("instanceselect"):"").'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&backfromautomigration=backfromautomigration&ticketcategory_child_id='.GETPOST('ticketcategory_child_id', 'alpha').'&ticketcategory='.GETPOST('ticketcategory', 'alpha').(GETPOST('subject', 'alpha')?'&subject='.GETPOST('subject', 'alpha'):"").'#Step4"
+	</script>';
+}
 
 if (!empty($_POST['addfile'])) {
 	// Set tmp user directory
@@ -89,7 +106,7 @@ if ($action == 'fileverification') {
 			}
 		} else {
 			if ($types[$key] != 'application/sql') {
-				$error = array("error"=>array("errorcode" =>"WrongFileExtension","errorextension" => $types[$key]));
+				$error = array("error"=>array("errorcode" =>"WrongFileExtension","errorextension" => $types[$key],"errorfilename" => $pathinfo['basename']));
 			} else {
 				$filetoverify["sql"] = $pathinfo['basename'];
 			}
@@ -220,13 +237,14 @@ if ($action == 'automigration') {
 $linkstep1img="img/sellyoursaas_automigration_step1.png";
 $linkstep2img="img/sellyoursaas_automigration_step2.png";
 print '
+<div id="Step1"></div>
 <div class="page-content-wrapper">
     <div class="page-content">
     <!-- BEGIN PAGE HEADER-->
     <!-- BEGIN PAGE HEAD -->
         <div class="page-head">
         <!-- BEGIN PAGE TITLE -->
-            <div class="page-title">
+            <div class="page-title topmarginstep">
             <h1>'.$langs->trans("Automigration").' <small>'.$langs->trans("AutomigrationDesc").'</small></h1>
             </div>
         <!-- END PAGE TITLE -->
@@ -269,7 +287,7 @@ if ($action == 'fileverification') {
 			print '<ul style="list-style-type:\'-\';">';
 			foreach ($fileverification[$i]['error'] as $key => $errorcode) {
 				print '<li>';
-				print $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"");
+				print $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"", !empty($errorcode["errorfilename"])?$errorcode["errorfilename"]:"");
 				print '</li>';
 			}
 			print '</ul>';
@@ -292,7 +310,7 @@ if ($action == 'fileverification') {
             '.$langs->trans("AutomigrationStep3Warning").'
             </strong></h3><br>
         <input id="confirmmigration" type="submit" class="btn green-haze btn-circle" value="'.$langs->trans("ConfirmMigration").'" onclick="applywaitMask()">
-        <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
+		<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
         </div>';
 		print '<script>
         function applywaitMask(){
@@ -308,13 +326,13 @@ if ($action == 'fileverification') {
 		$migrationerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
 		$migrationerrormessage .= "\nErrorsSql: ";
 		foreach ($fileverification[0]['error'] as $key => $errorcode) {
-			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"")." ";
+			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"", !empty($errorcode["errorfilename"])?$errorcode["errorfilename"]:"")." ";
 		}
 		$migrationerrormessage .= "\nErrorsDocument: ";
 		foreach ($fileverification[1]['error'] as $key => $errorcode) {
-			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"")." ";
+			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"", !empty($errorcode["errorfilename"])?$errorcode["errorfilename"]:"")." ";
 		}
-		print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+		print '<form action="'.$_SERVER["PHP_SELF"].'" method="GET">';
 		print '<input type="hidden" name="action" value="presend">';
 		print '<div class="center">';
 		print '<h3 style="color:red;"><strong>'.$langs->trans("ErrorOnMigration").'</strong></h3><br>';
@@ -339,11 +357,10 @@ if ($action == 'view') {
 	print '<form id="formautomigration" name="formautomigration" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="mode" value="automigration">';
-	print '<input type="hidden" id="actionautomigration" name="action" value="view">';
-	print '<input type="hidden" id="stepautomigration" name="stepautomigration" value="2">';
+	print '<input type="hidden" id="actionautomigration" name="action" value="redirectautomigrationget">';
 
 	print'<!-- BEGIN STEP1-->
-        <div class="portlet light" id="Step1">
+        <div class="portlet light" id="step1">
                 <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</small></h1><br>
                 <div>
                     '.$langs->trans("AutomigrationStep1Text").'
@@ -362,15 +379,20 @@ if ($action == 'view') {
                 </div>
                 </small>
                 </div>
-                <div class="center">
-                <button id="buttonstep_2" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
-                <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
+                <div class="containerflexautomigration">
+					<div class="right" style="width:30%;margin-right:10px">
+						<a href="'.$_SERVER["REQUEST_URI"].'#Step2"><button id="buttonstep_2" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
+					</div>
+					<div>
+						<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
+					</div>
                 </div>
         </div>
         <!-- END STEP1-->';
 
 		print '<!-- BEGIN STEP2-->
-        <div class="portlet light divstep" id="Step2">
+		<div id="Step2"></div>
+        <div class="portlet light divstep topmarginstep" id="step2">
                 <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</small></h1><br>
                 <div>
                     '.$langs->trans("AutomigrationStep2Text").' 
@@ -379,15 +401,20 @@ if ($action == 'view') {
                     <img src="'.$linkstep2img.'">
                 </div><br>
                 <div class="center">
-                <button id="buttonstep_3" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
-                <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
-                </div>
+                <div class="containerflexautomigration">
+					<div class="right" style="width:30%;margin-right:10px">	
+						<a href="'.$_SERVER["REQUEST_URI"].'#Step3"><button id="buttonstep_3" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
+					</div>
+					<div>
+						<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
+					</div>
+				</div>
         </div>
         <!-- END STEP2-->';
 
 		print '<!-- BEGIN STEP3-->
-        <div class="portlet light divstep" id="Step3">
-                <h2>'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
+        <div class="portlet light divstep topmarginstep" id="step3">
+                <h2 id="Step3">'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
                 <div style="padding-left:25px">
                 '.$langs->trans("AutomigrationStep3Text").'<br><br>           
                 </div>
@@ -489,35 +516,43 @@ if ($action == 'view') {
             '.$langs->trans("AutomigrationStep3Warning").'
             </strong></h3>
             </div><br>
-            <div id="buttonstep4migration" class="center" '.($stepautomigration <= 3 && !GETPOST('instanceselect', 'alpha') ?'style="display:none;':'').'">
-            <button id="buttonstep_4" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
-            <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
-            </div>
+			<div id="buttonstep4migration" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ?'style="display:none;"':'').'>
+				<div class="right" style="width:30%;margin-right:10px">
+					<button id="buttonstep_4" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
+				</div>
+				<div>
+					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
+				</div>
+			</div>
         </div>
         <!-- END STEP3-->';
 
 		print '<!-- BEGIN STEP4-->
-        <div class="portlet light divstep" id="Step4">
-            <h2>'.$langs->trans("Step", 4).' - '.$langs->trans("FileUpload").'</small></h1><br>
+        <div class="portlet light divstep topmarginstep" id="step4">
+            <h2 id="Step4">'.$langs->trans("Step", 4).' - '.$langs->trans("FileUpload").'</small></h1><br>
             <div class="grid-wrapper-automigration">
                 <div class="grid-boxes-automigration-left">
                 <h4>Upload here your database data :</h4>
                 </div>
                 <div class="grid-boxes-automigration">
-                    <input type="file" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz" required="required">
+                    <input type="file" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">
                 </div>
                 <div class="grid-boxes-automigration-left">
                 <h4>Upload here your document directory data :</h4>
                 </div>
                 <div class="grid-boxes-automigration">
-                    <input type="file" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2" required="required">
+                    <input type="file" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">
                 </div>
             </div><br>
 
-            <div class="center">
-                <input id="sumbmitfiles" style="display:none;" type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
-                <button type="submit" form="migrationFormbacksupport" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</button>
-            </div>
+			<div id="sumbmitfiles" class="containerflexautomigration" style="display:none;">
+				<div class="right" style="width:30%;margin-right:10px">
+                	<input type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
+				</div>
+				<div>
+					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
+				</div>
+			</div>
         </div>
         <!-- END STEP4-->';
 	print '<input type="hidden" name="contractid" value="'.GETPOST('contractid', 'alpha').'">';
@@ -550,37 +585,48 @@ if ($action == 'view') {
 
         function showStepAnchor(hash = 0){
             if(hash == 0){
+				console.log($(location).attr("hash"));
                 var hash = $(location).attr("hash").substr(5);
-                hash = parseInt(hash) +1;
+                hash = parseInt(hash) + 1;
             }
             if(hash > 0 && hash < 5){
                 let i = 1;
                 while(i<=hash){
-                    step = "Step"+i;
-                    console.log($(step));
+                    step = "step"+i;
+                    console.log($("#"+step).attr("id"));
                     $("#"+step).show();
                     i++;
                 }
             }
         }
         $(".btnstep").on("click",function(){
-            //showStepAnchor();
-			stepautomigration = $(this).attr("id").split("_")[1];
-			$("#stepautomigration").val(stepautomigration);
-			$("#formautomigration").submit();
+			hash = $(this).attr("id").split("_")[1];
+            showStepAnchor(hash);
         })
 		$("#sumbmitfiles").on("click",function(){
 			$("#actionautomigration").val(\'fileverification\');
 		})
-        var hash = '.$stepautomigration.';
+        var hash = $(location).attr("hash").substr(5);
         if(hash != "4"){
 			$(".divstep").hide();
 			showStepAnchor(hash);
         }
 		step = "Step"+hash;
-		$("html, body").scrollTop($("#"+step).offset().top);
     })
     </script>';
+
+	print "<style>
+	* {
+		scroll-behavior: smooth !important;
+	}
+	.topmarginstep{
+		margin-top:100px;
+	}
+	.containerflexautomigration {
+		display: flex;
+		justify-content:center;
+	}
+	</style>";
 }
 if ($action == "automigration") {
 	print '<div class="portlet light">';
@@ -625,22 +671,11 @@ if ($action == "automigration") {
 		print'</small></div>';
 	}
 	print'</div>';
-} else {
-	print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormbacksupport">';
-	print '<input type="hidden" name="action" value="presend">';
-	print '<input type="hidden" name="mode" value="support">';
-	print '<input type="hidden" name="contractid" value="'.GETPOST('contractid', 'alpha').'">';
-	print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
-	print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
-	print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'">';
-	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
-	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
-	print '</form>';
 }
-	print'
-    </div>
-    </div>
-    </div>
+print'
+</div>
+</div>
+</div>
 </div>
 </div>';
 ?>
