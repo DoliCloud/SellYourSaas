@@ -121,7 +121,7 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "Update an instance on remote server with new ref version.\n";
-	print "Usage: $script_file source_root_dir sellyoursaas_instance (test|confirm|confirmunlock|confirmwithtestdir|diff|diffadd|diffchange|clean|confirmclean)\n";
+	print "Usage: $script_file source_root_dir sellyoursaas_instance (test|confirm|confirmunlock|diff|diffadd|diffchange|testclean|confirmclean|confirmwithtestdir)\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -186,7 +186,7 @@ print 'SFTP password '.$object->password_web."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode, array('confirm','confirmunlock','confirmclean'))) $param[]="-n";
+if (! in_array($mode, array('confirm','confirmunlock','confirmwithtestdir','confirmclean'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
@@ -219,7 +219,7 @@ if ($mode != 'confirmwithtestdir') {
 $param[]="--exclude htdocs/conf/conf.php*";
 $param[]="--exclude htdocs/custom";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
-if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
+if (in_array($mode, array('testclean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -p ".$server_port." -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 $param[]=$dirroot.'/';
