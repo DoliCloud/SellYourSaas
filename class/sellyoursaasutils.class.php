@@ -3018,7 +3018,7 @@ class SellYourSaasUtils
 
 								if (! $result) {
 									$error++;
-									$this->errors[] = $langs->transnoentitiesnoconv("DeleteFails");
+									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
 								} else {
 									$object->array_options['options_filelock'] = '';
 								}

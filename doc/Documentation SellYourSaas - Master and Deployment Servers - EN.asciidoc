@@ -4345,6 +4345,8 @@ or
 sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" <package-name>
 ---------------
 
+Example when missing /etc/apparmor/severity.db, run sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" apparmor-utils
+
 
 === Using OpenStack to manage server images
 
