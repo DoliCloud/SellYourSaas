@@ -487,17 +487,17 @@ if ($sellyoursaassupporturl) {
 			print '</form>';
 
 			if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
-				print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="post" id="migrationForm">';
+				print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="migrationForm">';
 				print '<input type="hidden" name="mode" value="automigration">';
 				print '<input type="hidden" name="token" value="'.newToken().'">';
 				print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
 				print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
 				print '<input type="hidden" id="ticketcategory_child_id_back" name="ticketcategory_child_id_back" value="'.GETPOST('ticketcategory_child_id', 'alpha').'">';
 				print '<input type="hidden" id="ticketcategory_back" name="ticketcategory_back" value="'.GETPOST('ticketcategory', 'alpha').'">';
-				print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
+				if (!empty($subject)) {
+					print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
+				}
 				print '<input type="hidden" name="action" value="view">';
-				print '<input type="hidden" name="page_y" value="">';
-				print '<input type="hidden" name="stepautomigration" value="1">';
 				print '</form>';
 			}
 		}
