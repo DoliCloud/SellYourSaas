@@ -2585,6 +2585,16 @@ aa-teardown; /etc/init.d/apparmor restart;
 ps fauxZ
 ---------------
 
+* Once the apparmor is enabled for apache2, we must enable the module "apparmor" for apache, so Apache will switch to the profile *sellyoursaas-instances* 
+when a instance is opened (and if the entry <IfModule mod_apparmor.c>AADefaultHatName sellyoursaas-instances</IfModule> is added into virtual host).
+For this run:
+
+[source,bash]
+---------------
+a2enmode apparmor
+/etc/init.d/apache2 restart;
+---------------
+
 
 * To avoid to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no* (Still require ????)
 
