@@ -677,7 +677,7 @@ if (! $nboferrors) {
 		if (empty($instancefilter)) {
 			$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 			$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-			// Supervision tools are generic for all domain. No ay to target a specific supervision email.
+			// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
 			$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".strftime("%Y%m%d-%H%M%S").")\n\n".$out;
 
