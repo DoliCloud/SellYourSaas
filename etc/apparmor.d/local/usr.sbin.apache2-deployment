@@ -127,7 +127,7 @@
 
     signal receive set=term peer=apache2,
 
-	# Warning, this may create troubles with sending email from postfix on ubuntu 18.04
+    # Warning, this may create troubles with sending email from postfix on ubuntu 18.04
     deny /etc/group r,
     deny /etc/passwd r,
 
