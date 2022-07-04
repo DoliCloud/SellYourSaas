@@ -151,8 +151,10 @@ With OVH Public Cloud:
 
 * Create the data disk. On a deployment server, you can imagine to reserve 250MB for each customer instance so choose a size in consideration.
 
+
 * Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
 Note, the disk becomes visible with *fdisk -l* and *lsblk*
+
 
 * If the disk is not partitioned, add the partition on the disk (Linux type) and format it by doing:
 
@@ -168,7 +170,10 @@ fsck -N /dev/vdxY
 mkfs.ext4 /dev/vdxY
 ---------------
 
+@TODO Use mkfs.btrfs /dev/vdxY
+
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
+
 
 * Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
 
@@ -177,13 +182,14 @@ Whether the disk has just been formatted or whether it is an added disk already 
 blkid
 ---------------
 
-If the disk was created by cloning another one, you msut change the UUID of the new disk to avoid to have twice the same UUID on 2 differents disks.
+If the disk was created by cloning another one, you must change the UUID of the new disk to avoid to have twice the same UUID on 2 differents disks.
 
 [source, bash]
 ---------------
 tune2fs -U $(uuidgen) /dev/vdxY
 blkid
 ---------------
+
 
 * Declare the mount point for an automatic mounting at each reboot by adding a line in */etc/fstab*
 
@@ -193,6 +199,7 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 or
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0     #does not block the server from starting
 ---------------
+
 
 * Mount disk
 
@@ -209,6 +216,7 @@ blkid
 ---------------
 
 Note: A reboot may be required if disk or mount is not visible.
+
 
 * Optimize the filesystem by removing the update of the "atime" read access
 
@@ -243,6 +251,26 @@ To check:
 ---------------
 cat /proc/mounts | grep diskX
 ---------------
+
+
+* Optimize the memory for a lot of inode and dentry
+
+You can run *slabtop* to get information on number of inodes/dentries and *cat /proc/sys/vm/vfs_cache_pressure* to see cache pressure.
+We want to reduce cache pressure to 50 instead of 100 to increase priority in memory use for inodes versus page contents.
+
+[source, bash]
+---------------
+vi /etc/sysctl.conf
+
+#fs.inotify.max_user_watches=1024000
+vm.vfs_cache_pressure=50
+
+sysctl -w vm.vfs_cache_pressure=50
+
+cat /proc/sys/vm/vfs_cache_pressure
+---------------
+
+
 
 Note: If you need to recover data files from another source disk, use:
 
