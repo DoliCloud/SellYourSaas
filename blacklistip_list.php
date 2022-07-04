@@ -265,7 +265,6 @@ $title = $langs->trans("Blacklistip");
 $morejs = array();
 $morecss = array();
 
-
 // Build and execute select
 // --------------------------------------------------------------------
 $sql = 'SELECT ';
@@ -507,6 +506,8 @@ $newcardbutton = '';
 $newcardbutton .= dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/sellyoursaas/blacklistip_card.php', 1).'?action=create&backtopage='.urlencode($_SERVER['PHP_SELF']), '', $permissiontoadd);
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'object_'.$object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
+
+print '<span class="opacitymedium">'.$langs->trans("BlacklistipDesc").'</span><br><br>';
 
 // Add code for pre mass action (confirmation or email presend form)
 $topicmail = "SendBlacklistmailRef";

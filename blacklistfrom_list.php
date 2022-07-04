@@ -507,6 +507,8 @@ $newcardbutton .= dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'object_'.$object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 
+print '<span class="opacitymedium">'.$langs->trans("BlacklistXDesc", "from").'</span><br><br>';
+
 // Add code for pre mass action (confirmation or email presend form)
 $topicmail = "SendBlacklistmailRef";
 $modelmail = "blacklistfrom";
