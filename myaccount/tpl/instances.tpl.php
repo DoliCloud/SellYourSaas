@@ -146,7 +146,7 @@ print '
 	<!-- END PAGE HEADER-->';
 
 
-if (count($listofcontractid) == 0) {				// Should not happen
+if (count($listofcontractid) == 0) {				// If all contracts were removed
 	print '<span class="opacitymedium">'.$langs->trans("None").'</span>';
 } else {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
@@ -839,7 +839,7 @@ if ($action == "confirmundeploy") {
 	$formquestion = array(
 		array(
 			"type"=>"other",
-			"value"=>$langs->trans('FillUndeployFormDestruction')
+			"value"=> (empty($errortoshowinconfirm) ? '<div class="opacitymedium margintop">'.$langs->trans('FillUndeployFormDestruction').'</div>' : '<div class="error paddingall marginbottom">'.$errortoshowinconfirm.'</div>')
 		),
 		array(
 			"type"=>"hidden",
@@ -1006,8 +1006,9 @@ if ($action == "confirmundeploy") {
 	//var_dump($arrayofplans);
 	//natcasesort($arrayofplans);
 
-	$MAXINSTANCES = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
-if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
+	$MAXINSTANCESPERACCOUNT = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
+
+if ($MAXINSTANCESPERACCOUNT && count($listofcontractid) < $MAXINSTANCESPERACCOUNT) {
 	if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 		print '<!-- RegistrationSuspendedForTheMomentPleaseTryLater -->'."\n";
 		print '<div class="alert alert-warning" style="margin-bottom: 0px">';
@@ -1025,27 +1026,27 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 
 		print '
 
-	        			<div class="horizontal-fld clearboth margintoponly">
-	        			<div class="control-group required">
-	        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required />
-	        			</div>
-	        			</div>
-	        			<div class="horizontal-fld margintoponly">
-	        			<div class="control-group required">
-	        			<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
-	        			</div>
-	        			</div>
-	        			</div> <!-- end group -->';
+		        			<div class="horizontal-fld clearboth margintoponly">
+		        			<div class="control-group required">
+		        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required />
+		        			</div>
+		        			</div>
+		        			<div class="horizontal-fld margintoponly">
+		        			<div class="control-group required">
+		        			<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
+		        			</div>
+		        			</div>
+		        			</div> <!-- end group -->';
 
 		print '
-						<!-- Selection of domain to create instance -->
-	        			<section id="selectDomain" style="margin-top: 20px;">
-	        			<div class="fld select-domain required">
-	        			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
-	        			<div class="linked-flds">
-	        			<span class="opacitymedium">https://</span>
-	        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-	        			<select name="tldid" id="tldid">';
+							<!-- Selection of domain to create instance -->
+		        			<section id="selectDomain" style="margin-top: 20px;">
+		        			<div class="fld select-domain required">
+		        			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
+		        			<div class="linked-flds">
+		        			<span class="opacitymedium">https://</span>
+		        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
+		        			<select name="tldid" id="tldid">';
 		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
@@ -1108,34 +1109,34 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		}
 
 		print '</select>
-	        			<br class="unfloat" />
-	        			</div>
-	        			</div>
-	        			</section>'."\n";
+		        			<br class="unfloat" />
+		        			</div>
+		        			</div>
+		        			</section>'."\n";
 
 		// Add code to make constraints on deployment servers
 		print '<!-- JS Code to force plan -->';
 		print '<script type="text/javascript" language="javascript">
-				function disable_combo_if_not(s) {
-					console.log("Disable combo choice except if s="+s);
-					$("#tldid > option").each(function() {
-						if (this.value.endsWith(s)) {
-							console.log("We enable the option "+this.value);
-							$(this).removeAttr("disabled");
-							$(this).attr("selected", "selected");
-						} else {
-							console.log("We disable the option "+this.value);
-							$(this).attr("disabled", "disabled");
-							$(this).removeAttr("selected");
-						}
-					});
-				}
+					function disable_combo_if_not(s) {
+						console.log("Disable combo choice except if s="+s);
+						$("#tldid > option").each(function() {
+							if (this.value.endsWith(s)) {
+								console.log("We enable the option "+this.value);
+								$(this).removeAttr("disabled");
+								$(this).attr("selected", "selected");
+							} else {
+								console.log("We disable the option "+this.value);
+								$(this).attr("disabled", "disabled");
+								$(this).removeAttr("selected");
+							}
+						});
+					}
 
-	    		jQuery(document).ready(function() {
-					jQuery("#service").change(function () {
-						var pid = jQuery("#service option:selected").val();
-						console.log("We select product id = "+pid);
-					';
+		    		jQuery(document).ready(function() {
+						jQuery("#service").change(function () {
+							var pid = jQuery("#service option:selected").val();
+							console.log("We select product id = "+pid);
+						';
 		foreach ($arrayofplansfull as $key => $plan) {
 			if (!empty($plan['restrict_domains'])) {
 				$restrict_domains = explode(",", $plan['restrict_domains']);
@@ -1150,9 +1151,9 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		}
 
 		print '
-					});
-					jQuery("#service").trigger("change");
-				});'."\n";
+						});
+						jQuery("#service").trigger("change");
+					});'."\n";
 
 		foreach ($arrayofplansfull as $key => $plan) {
 			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
@@ -1178,7 +1179,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
 	}
 
-	print '<div class="warning">'.$langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail).'</div>';
+	print '<div class="warning">'.$langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCESPERACCOUNT, $sellyoursaasemail).'</div>';
 }
 
 	print '</div></div></div>';

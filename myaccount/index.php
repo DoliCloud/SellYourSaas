@@ -219,12 +219,14 @@ $documentstatic=new Contrat($db);
 $documentstaticline=new ContratLigne($db);
 
 $listofcontractid = array();
-$sql = 'SELECT c.rowid as rowid';
+$listofcontractidopen = array();
+$sql = 'SELECT c.rowid as rowid, ce.deployment_status';
 $sql .= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
 $sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
-$sql .= ' '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
+//$sql .= ' '.MAIN_DB_PREFIX.'contratdet as d,';
+$sql .= ' '.MAIN_DB_PREFIX.'societe as s';
 $sql .= ' WHERE c.fk_soc = s.rowid AND s.rowid = '.((int) $mythirdpartyaccount->id);
-$sql .= ' AND d.fk_contrat = c.rowid';
+//$sql .= ' AND d.fk_contrat = c.rowid';
 $sql .= ' AND c.entity = '.((int) $conf->entity);
 $sql .= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 $resql=$db->query($sql);
@@ -237,9 +239,14 @@ if ($resql) {
 			$contract=new Contrat($db);
 			$contract->fetch($obj->rowid);					// This load also lines
 			$listofcontractid[$obj->rowid] = $contract;
+			if (in_array($obj->deployment_status, array('processing', 'done'))) {
+				$listofcontractidopen[$obj->rowid] = $contract;
+			}
 		}
 		$i++;
 	}
+} else {
+	dol_print_error($db);
 }
 
 $mythirdpartyaccount->isareseller = 0;
@@ -2324,6 +2331,14 @@ if ($action == 'updateurl') {
 		// Send confirmation email
 		if ($action == 'undeploy') {
 			$object = $contract;
+
+			if (getDolGlobalInt('SELLYOURSAAS_ASK_DESTROY_REASON') && empty($reasonundeploy)) {
+				// If reason was not provided
+				//setEventMessages($langs->trans("AReasonForUndeploymentIsRequired"), null, 'errors');
+				$errortoshowinconfirm = $langs->trans('AReasonForUndeploymentIsRequired');
+				$error++;
+				$action = 'confirmundeploy';
+			}
 
 			// SAME CODE THAN INTO ACTION_SELLYOURSAAS.CLASS.PHP
 

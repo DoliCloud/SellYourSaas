@@ -770,12 +770,16 @@ if ($reusecontractid) {
 		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
 
 		$listofcontractid = array();
-		$sql = 'SELECT c.rowid as rowid';
-		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid, '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
-		$sql.= " WHERE c.fk_soc = s.rowid AND s.rowid = ".((int) $tmpthirdparty->id);
-		$sql.= " AND d.fk_contrat = c.rowid";
-		$sql.= " AND c.entity = ".((int) $conf->entity);
-		$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
+		$listofcontractidopen = array();
+		$sql = 'SELECT c.rowid as rowid, ce.deployment_status';
+		$sql .= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
+		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
+		//$sql .= ' '.MAIN_DB_PREFIX.'contratdet as d,';
+		$sql .= ' '.MAIN_DB_PREFIX.'societe as s';
+		$sql .= " WHERE c.fk_soc = s.rowid AND s.rowid = ".((int) $tmpthirdparty->id);
+		//$sql .= " AND d.fk_contrat = c.rowid";
+		$sql .= " AND c.entity = ".((int) $conf->entity);
+		$sql .= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 		$resql=$db->query($sql);
 		if ($resql) {
 			$num_rows = $db->num_rows($resql);
@@ -784,6 +788,9 @@ if ($reusecontractid) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
 					$listofcontractid[$obj->rowid]=$obj->rowid;
+					if (in_array($obj->deployment_status, array('processing', 'done'))) {
+						$listofcontractidopen[$obj->rowid] = $obj->rowid;
+					}
 				}
 				$i++;
 			}

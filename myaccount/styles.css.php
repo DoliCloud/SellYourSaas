@@ -318,6 +318,9 @@ margin-top: 20px;
     padding-top: 0px;
 }
 
+.paddingall {
+    padding: 5px;
+}
 .paddingleft {
     padding-left: 5px;
 }
