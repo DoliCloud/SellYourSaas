@@ -2857,13 +2857,13 @@ if ($welcomecid > 0) {
 		'.$langs->trans("YouCanAccessYourInstance", $productlabel).'&nbsp:
 		</p>
 		<p class="well">
-		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank">'.$contract->ref_customer.'</a>';
+		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank" rel="noopener">'.$contract->ref_customer.'</a>';
 
 		print '<br> '.$langs->trans("Username").' : '.($_SESSION['initialapplogin']?'<strong>'.$_SESSION['initialapplogin'].'</strong>':'NA').'
 		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
 		</p>
 		<p>
-		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).' <span class="fa fa-external-link-alt"></span></a>
+		<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).' <span class="fa fa-external-link-alt"></span></a>
 		</p>
 
 		</div>';
@@ -3012,7 +3012,7 @@ if ($mythirdpartyaccount->isareseller) {
 	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
-	//print '<a class="wordbreak" href="'.$urlforpartner.'" target="_blankinstance">';
+	//print '<a class="wordbreak" href="'.$urlforpartner.'" target="_blankinstance" rel="noopener">';
 	print '<input type="text" class="quatrevingtpercent" id="urlforpartner" name="urlforpartner" value="'.$urlforpartner.'">';
 	print ajax_autoselect("urlforpartner");
 	//print $urlforpartner;
@@ -3282,7 +3282,7 @@ if (empty($welcomecid)) {
 							print $langs->trans("AddAPaymentMode");
 							print '</a>';
 
-							print ' &nbsp; <a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).' <span class="fa fa-external-link-alt"></span></a>';
+							print ' &nbsp; <a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
 
 							print '</p>';
 						}

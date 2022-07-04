@@ -161,6 +161,7 @@ InstallationComplete=Installation complete
 YouCanAccessYourInstance=You can access your new instance '%s' using the following information
 YourCredentialToAccessYourInstanceHasBeenSentByEmail=Your credentials to access your instance has been sent by email to %s
 TakeMeTo=Take me to my %s
+TakeMeToApp=Go to the application
 MyAccount=My account
 MyBilling=My billing
 Billing=Billing
