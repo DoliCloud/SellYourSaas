@@ -321,7 +321,7 @@ foreach ($filesToProcess as $fileToProcess) {
 
 	print "Output can be found at $output.\n";
 
-	print "To rename all .delta files, you can do:\n";
+	print "To rename all .delta files, we do:\n";
 	print '> for fic in `ls langs/'.$lSecondary.'/*.delta`; do f=`echo $fic | sed -e \'s/\.delta//\'`; echo $f; mv $f.delta $f; done'."\n";
 }
 
