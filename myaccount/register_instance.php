@@ -796,7 +796,7 @@ if ($reusecontractid) {
 			}
 		}
 
-		if (count($listofcontractid) >= $MAXINSTANCESPERACCOUNT) {
+		if (count($listofcontractidopen) >= $MAXINSTANCESPERACCOUNT) {
 			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
