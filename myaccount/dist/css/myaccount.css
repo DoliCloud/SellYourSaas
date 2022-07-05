@@ -18,8 +18,12 @@ label.nobold {
 }
 
 .jnotify-container .jnotify-notification .jnotify-message {
-	box-shadow: 5px 5px 5px #eee;
+	box-shadow: 2px 3px 6px #eee;
     border-radius: 10px;
+}
+
+.jnotify-notification-warning .jnotify-message {
+    border: 1px solid #efe7c1;
 }
 
 span.pictowarning {

@@ -914,13 +914,30 @@ if ($action == "confirmundeploy") {
 		"value"=>"<br>"
 	);
 	$formquestion[] = array(
+		"type"=>"hidden",
+		"name"=>"dummyhiddenfield",
+		"value"=>"",
+		"moreattr"=>"autofocus"
+	);
+	$formquestion[] = array(
 		"type"=>"textarea",
 		"label"=>$langs->trans("AddACommentDestruction"),
 		"name"=>"commentundeploy",
-		"moreattr"=>'style="width:100%;border:solid 1px grey;" autofocus',
+		"moreattr"=>'style="width:100%;border:solid 1px grey;"',
 	);
 
 	print $form->formconfirm($_SERVER["PHP_SELF"]."?mode=instances", $langs->trans('UndeployInstance'), "", "undeploy", $formquestion, '', 1, "510", "700", 0, 'ConfirmDestruction', 'Cancel');
+	print '
+	<script type="text/javascript" language="javascript">
+    	jQuery(document).ready(function() {
+			/* Code to toggle the show of form */
+    		jQuery("input[name=\'reasonundeploy\']").click(function() {
+				console.log("We select a reason of uninstallation");
+				jQuery("#commentundeploy").focus();
+			});
+		});
+	</script>';
+
 	print '<style>
 	.margintoponly{
 		margin-top:0px
@@ -938,8 +955,7 @@ if ($action == "confirmundeploy") {
 	print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
 	print '</a>';
 
-	print '
-<script type="text/javascript" language="javascript">
+	print '<script type="text/javascript" language="javascript">
         function applyDomainConstraints( domain )
         {
             domain = domain.replace(/ /g, "");
@@ -985,8 +1001,8 @@ if ($action == "confirmundeploy") {
 				return true;	/* Use return false to show the hourglass without submitting the page (for debug) */
             });
     	});
-</script>
-';
+	</script>
+	';
 
 	print '<br>';
 
