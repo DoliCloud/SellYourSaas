@@ -150,8 +150,14 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		$conf->global->SELLYOURSAAS_NOREPLY_EMAIL      = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_NOREPLY_EMAIL);
 		$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL  = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_SUPERVISION_EMAIL);
 
-		// TODO Replace url inside var $substitutionarray['__ONLINE_PAYMENT_URL__'] to use options_domain_registration_page instead of SELLYOURSAAS_MAIN_DOMAIN_NAME
 		dol_syslog("substitutionarray['__ONLINE_PAYMENT_URL__'] = ".$substitutionarray['__ONLINE_PAYMENT_URL__']);
+
+		// Replace url inside var $substitutionarray['__ONLINE_PAYMENT_URL__'] to use options_domain_registration_page instead of SELLYOURSAAS_MAIN_DOMAIN_NAME
+		// A common value looks like  https://admin.mysellyoursaasdomain.com/public/payment/newpayment.php?source=invoice&ref=XXXX&securekey=zzzzzzz
+		$newsubstiturl = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $substitutionarray['__ONLINE_PAYMENT_URL__']);
+		dol_syslog("newsubstiturl = ".$newsubstiturl);
+		// TODO Enable this line
+		//$substitutionarray['__ONLINE_PAYMENT_URL__'] = $newsubstiturl;
 
 		dol_syslog("savconf has now savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
 	}
