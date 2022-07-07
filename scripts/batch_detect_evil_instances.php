@@ -113,6 +113,7 @@ if ($fp) {
 	exit(-1);
 }
 
+$pathtospamdir = '/tmp/spam';
 
 
 /*
@@ -187,7 +188,7 @@ $return_var = 0;
 print "----- Go into dir /home/jail/home\n";
 chdir('/home/jail/home/');
 
-dol_mkdir('/tmp/spam');
+dol_mkdir($pathtospamdir);
 
 
 print "----- Loop for blacklistip\n";
@@ -199,15 +200,17 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 }
 
 if (!empty($tmparray)) {
+	//home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam
+
 	// Generate the file balcklistip
-	$filetobuild = '/tmp/spam/blacklistip';
+	$filetobuild = $pathtospamdir.'/blacklistip';
 	$fh = fopen($filetobuild, "w");
 	foreach ($tmparray as $val) {
 		$buffer = trim($val->content);
 		fwrite($fh, $buffer."\n");
 	}
 	fclose($fh);
-	$newmask = '0664';
+	$newmask = '0666';
 	@chmod($filetobuild, octdec($newmask));
 	print 'File '.$filetobuild.' has been updated'."\n";
 }
@@ -223,7 +226,7 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 
 if (!empty($tmparray)) {
 	// Generate the file balcklistfrom
-	$filetobuild = '/tmp/spam/blacklistfrom';
+	$filetobuild = $pathtospamdir.'/blacklistfrom';
 	$fh = fopen($filetobuild, "w");
 	foreach ($tmparray as $val) {
 		$buffer = trim($val->content);
@@ -232,6 +235,7 @@ if (!empty($tmparray)) {
 	fclose($fh);
 	$newmask = '0664';
 	@chmod($filetobuild, octdec($newmask));
+
 	print 'File '.$filetobuild.' has been updated'."\n";
 }
 
@@ -246,7 +250,7 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 
 if (!empty($tmparray)) {
 	// Generate the file balcklistip
-	$filetobuild = '/tmp/spam/blacklistto';
+	$filetobuild = $pathtospamdir.'/blacklistto';
 	$fh = fopen($filetobuild, "w");
 	foreach ($tmparray as $val) {
 		$buffer = trim($val->content);
@@ -269,7 +273,7 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 
 if (!empty($tmparray)) {
 	// Generate the file balcklistcontent
-	$filetobuild = '/tmp/spam/blacklistcontent';
+	$filetobuild = $pathtospamdir.'/blacklistcontent';
 	$fh = fopen($filetobuild, "w");
 	foreach ($tmparray as $val) {
 		$buffer = trim($val->content);
@@ -310,7 +314,7 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 
 if (!empty($tmparray)) {
 	// Generate the file balcklistdir
-	$filetobuild = '/tmp/spam/blacklistdir';
+	$filetobuild = $pathtospamdir.'/blacklistdir';
 	$fh = fopen($filetobuild, "w");
 	foreach ($tmparray as $val) {
 		$buffer = trim($val->content);
