@@ -69,6 +69,9 @@ if (! $res) {
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
+include_once dol_buildpath("/sellyoursaas/class/blacklistip.class.php");
+include_once dol_buildpath("/sellyoursaas/class/blacklistfrom.class.php");
+include_once dol_buildpath("/sellyoursaas/class/blacklistto.class.php");
 include_once dol_buildpath("/sellyoursaas/class/blacklistcontent.class.php");
 include_once dol_buildpath("/sellyoursaas/class/blacklistdir.class.php");
 
@@ -184,6 +187,78 @@ $return_var = 0;
 print "----- Go into dir /home/jail/home\n";
 chdir('/home/jail/home/');
 
+dol_mkdir('/tmp/spam');
+
+
+print "----- Loop for blacklistip\n";
+
+$tmpblacklistip = new Blacklistip($db);
+$tmparray = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistip elements.\n";
+}
+
+if (!empty($tmparray)) {
+	// Generate the file balcklistip
+	$filetobuild = '/tmp/spam/blacklistip';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+}
+
+
+print "----- Loop for blacklistfrom\n";
+
+$tmpblacklistfrom = new Blacklistfrom($db);
+$tmparray = $tmpblacklistfrom->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistfrom elements.\n";
+}
+
+if (!empty($tmparray)) {
+	// Generate the file balcklistfrom
+	$filetobuild = '/tmp/spam/blacklistfrom';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+}
+
+
+print "----- Loop for blacklistto\n";
+
+$tmpblacklistto = new Blacklistto($db);
+$tmparray = $tmpblacklistto->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistto elements.\n";
+}
+
+if (!empty($tmparray)) {
+	// Generate the file balcklistip
+	$filetobuild = '/tmp/spam/blacklistto';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+}
+
+
 print "----- Loop for spam keys into index.php using blacklistcontent\n";
 
 $tmpblacklistcontent = new Blacklistcontent($db);
@@ -193,6 +268,18 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 }
 
 if (!empty($tmparray)) {
+	// Generate the file balcklistcontent
+	$filetobuild = '/tmp/spam/blacklistcontent';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
@@ -222,6 +309,18 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 }
 
 if (!empty($tmparray)) {
+	// Generate the file balcklistdir
+	$filetobuild = '/tmp/spam/blacklistdir';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
@@ -276,7 +375,9 @@ if (!empty($tmparray)) {
 
 $dbmaster->close();	// Close database opened handler
 
+
 print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+
 
 if ($nboferrors) {
 	if ($action == 'testemail') {
