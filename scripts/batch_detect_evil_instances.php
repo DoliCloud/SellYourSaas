@@ -379,9 +379,11 @@ if (!empty($tmparray)) {
 
 $dbmaster->close();	// Close database opened handler
 
-
-print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
-
+if ($nboferrors) {
+	print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+} else {
+	print '--- end OK with no error - '.strftime("%Y%m%d-%H%M%S")."\n";
+}
 
 if ($nboferrors) {
 	if ($action == 'testemail') {
