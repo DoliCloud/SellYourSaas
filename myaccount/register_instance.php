@@ -553,10 +553,10 @@ if (!$whitelisted && !empty($tmparrayblacklist)) {
 			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip is in blacklistip", LOG_WARNING);	// Should not happen, ip should always be defined.
 			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 			if (substr($sapi_type, 0, 3) != 'cli') {
-				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Evil usage detected'), null, 'errors');
+				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'IP already included for legal action'), null, 'errors');
 				header("Location: ".$newurl);
 			} else {
-				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Evil usage detected')."\n";
+				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'IP already included for legal action')."\n";
 			}
 			exit(-62);
 		}
