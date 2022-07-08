@@ -90,6 +90,7 @@ dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/packages.class.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 dol_include_once('/sellyoursaas/class/blacklistip.class.php');
+dol_include_once('/sellyoursaas/class/whitelistip.class.php');
 
 // Re set variables specific to new environment
 $conf->global->SYSLOG_FILE_ONEPERSESSION=1;
@@ -524,14 +525,30 @@ if (empty($remoteip)) {
 }
 
 $tmpblacklistip = new Blacklistip($db);
-$tmparray = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
-if (is_numeric($tmparray) && $tmparray < 0) {
+$tmparrayblacklist = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparrayblacklist) && $tmparrayblacklist < 0) {
 	echo "Erreur: failed to get blacklistip elements.\n";
 	exit(-61);
 }
+$tmpwhitelistip = new Whitelistip($db);
+$tmparraywhitelist = $tmpwhitelistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
+	echo "Erreur: failed to get whitelistip elements.\n";
+	exit(-61);
+}
 
-if (!empty($tmparray)) {
-	foreach ($tmparray as $val) {
+$whitelisted = false;
+if (!empty($tmparraywhitelist)) {
+	foreach ($tmparraywhitelist as $val) {
+		if ($val->content == $remoteip) {
+			$whitelisted = true;
+			break;
+		}
+	}
+}
+
+if (!$whitelisted && !empty($tmparrayblacklist)) {
+	foreach ($tmparrayblacklist as $val) {
 		if ($val->content == $remoteip) {
 			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip is in blacklistip", LOG_WARNING);	// Should not happen, ip should always be defined.
 			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
@@ -1083,9 +1100,12 @@ if ($reusecontractid) {
 			$contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.GETPOST("tz_string").'"';
 		}
 
+		$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
+		$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
+
 		$contract->array_options['options_timezone'] = GETPOST("tz_string");
 		$contract->array_options['options_deployment_ip'] = $remoteip;
-		$contract->array_options['options_deployment_ua'] = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : dol_trunc($_SERVER["HTTP_USER_AGENT"], 250));
+		$contract->array_options['options_deployment_ua'] = (($user_agent || $user_language) ? '' : dol_trunc($user_agent.(($user_agent && $user_language) ? ' - ' : '').$user_language, 250));
 
 		$contract->array_options['options_deployment_ipquality'] = 'remoteip='.$remoteip.': ';
 
@@ -1128,7 +1148,7 @@ if ($reusecontractid) {
 		}
 
 		// Refused if VPN probability from GetIP is too high
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
 			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
 				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
 				$abusetest = 1;
@@ -1140,8 +1160,8 @@ if ($reusecontractid) {
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 
 			// Retrieve additional (optional) data points which help us enhance fraud scores.
-			$user_agent = $_SERVER['HTTP_USER_AGENT'];
-			$user_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+			$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
+			$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
 
 			// Set the strictness for this query. (0 (least strict) - 3 (most strict))
 			$strictness = 1;
@@ -1226,7 +1246,7 @@ if ($reusecontractid) {
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 
 		// Refused if VPN probability from IPQuality is too high
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
 			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
 				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
 				$abusetest = 1;
@@ -1234,7 +1254,7 @@ if ($reusecontractid) {
 		}
 
 		// Block for some IPs
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
+		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
 			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
 			foreach ($arrayofblacklistips as $blacklistip) {
 				if ($remoteip == $blacklistip) {
@@ -1245,7 +1265,7 @@ if ($reusecontractid) {
 		}
 
 		// Block for some IPs if VPN proba is higher that an threshold
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
+		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
 			if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
 				$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
 				foreach ($arrayofblacklistips as $blacklistip) {
