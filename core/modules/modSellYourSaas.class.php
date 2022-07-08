@@ -554,7 +554,7 @@ class modSellYourSaas extends DolibarrModules
 		$r++;
 
 		$this->menu[$r]=array(
-			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_whitelist',
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
 			'type'=>'left',
 			'titre'=>'WhitelistIP',
 			'prefix' => '',
