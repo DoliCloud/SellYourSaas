@@ -689,6 +689,7 @@ SELLYOURSAAS_SUPPORT_URL=External URL for ticket/help desk service
 FillOnlyToUseAnExternalTicketSystem=Fill only if you don't want to use the internal ticket system and prefer to use an external help desk
 ResetToRecommendedValue=Reset to recommended price
 AReasonForUndeploymentIsRequired=A reason for uninstallation is required. Please choose "Other" if you do not wish to communicate it.
+DateUse=Date usage
 BlacklistipDesc=Adding IP in this list will block any creation of new instances from this IP. The list of IP is also used as the global source to generate the local file of blacklisted IP used by the PHP wrapper to send emails.
 BlacklistXDesc=The list of emails listed here are used as the global source to generate the local file of blacklisted emails used in the <b>%s</b> header for emails sent by the PHP wrapper.
 BlacklistdirDesc=List of directories that are not allowed into the root of an instance. The script batch_detect_evil_instances.php will use it to report warnings.

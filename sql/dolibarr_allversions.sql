@@ -75,5 +75,6 @@ CREATE TABLE llx_sellyoursaas_blacklistto(
 
 ALTER TABLE llx_sellyoursaas_blacklistto ADD INDEX idx_sellyoursaas_blacklistto_content (content);
 
+ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN date_use datetime;
 
 
