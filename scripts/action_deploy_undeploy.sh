@@ -793,17 +793,19 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			echo The target archive directory $archivedir/$osusername/$dbname already exists, so we overwrite files into existing archive
 			echo cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
 			cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
+			
 			if [[ $testorconfirm == "confirm" ]]
 			then
 				rm -fr $targetdir/$osusername/$dbname
 			fi
 		else														# This is the common case of archiving after an undeploy
-			#echo mv -f $targetdir/$osusername/$dbname $archivedir/$osusername/$dbname
 			echo `date +'%Y-%m-%d %H:%M:%S'`
 			if [[ $testorconfirm == "confirm" ]]
 			then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
+				
+				
 				if [[ "x$ispaidinstance" == "x1" ]]; then
 					if [[ "x$archivepaidinstances" == "x0" ]]; then
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -820,14 +822,6 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 						fi
 					fi
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo rm -fr $targetdir/$osusername/$dbname
-					rm -fr $targetdir/$osusername/$dbname
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo chown -R root $archivedir/$osusername
-					chown -R root $archivedir/$osusername
-					echo chmod -R o-rwx $archivedir/$osusername
-					chmod -R o-rwx $archivedir/$osusername
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -844,15 +838,16 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 						fi
 					fi
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo rm -fr $targetdir/$osusername/$dbname
-					rm -fr $targetdir/$osusername/$dbname
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo chown -R root $archivedir/$osusername
-					chown -R root $archivedir/$osusername
-					echo chmod -R o-rwx $archivedir/$osusername
-					chmod -R o-rwx $archivedir/$osusername
 				fi
+
+				echo `date +'%Y-%m-%d %H:%M:%S'`
+				echo rm -fr $targetdir/$osusername/$dbname
+				rm -fr $targetdir/$osusername/$dbname
+				echo `date +'%Y-%m-%d %H:%M:%S'`
+				echo chown -R root $archivedir/$osusername
+				chown -R root $archivedir/$osusername
+				echo chmod -R o-rwx $archivedir/$osusername
+				chmod -R o-rwx $archivedir/$osusername
 			fi
 		fi
 	else

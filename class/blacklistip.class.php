@@ -103,7 +103,7 @@ class Blacklistip extends CommonObject
 		'rowid' => array('type'=>'integer', 'label'=>'Ref', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>2, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
 		'content' => array('type'=>'varchar(128)', 'label'=>'Content', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>1,),
-		'date_use' => array('type'=>'datetime', 'label'=>'DateUse', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>1,),
+		'date_use' => array('type'=>'datetime', 'label'=>'DateUse', 'enabled'=>'1', 'position'=>500, 'notnull'=>0, 'visible'=>1,),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
 		'status' => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>2000, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled')),
