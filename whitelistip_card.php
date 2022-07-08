@@ -17,9 +17,9 @@
  */
 
 /**
- *   	\file       blacklistip_card.php
+ *   	\file       whitelistip_card.php
  *		\ingroup    sellyoursaas
- *		\brief      Page to create/edit/view blacklistip
+ *		\brief      Page to create/edit/view whitelistip
  */
 
 //if (! defined('NOREQUIREDB'))              define('NOREQUIREDB', '1');				// Do not create database handler $db
@@ -78,8 +78,8 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-dol_include_once('/sellyoursaas/class/blacklistip.class.php');
-dol_include_once('/sellyoursaas/lib/sellyoursaas_blacklistip.lib.php');
+dol_include_once('/sellyoursaas/class/whitelistip.class.php');
+dol_include_once('/sellyoursaas/lib/sellyoursaas_whitelistip.lib.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("sellyoursaas@sellyoursaas", "other"));
@@ -98,10 +98,10 @@ $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 $dol_openinpopup = GETPOST('dol_openinpopup', 'aZ09');
 
 // Initialize technical objects
-$object = new Blacklistip($db);
+$object = new Whitelistip($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->sellyoursaas->dir_output.'/temp/massgeneration/'.$user->id;
-$hookmanager->initHooks(array('blacklistipcard', 'globalcard')); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks(array('whitelistipcard', 'globalcard')); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -128,11 +128,11 @@ include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be includ
 // Set $enablepermissioncheck to 1 to enable a minimum low level of checks
 $enablepermissioncheck = 0;
 if ($enablepermissioncheck) {
-	$permissiontoread = $user->rights->sellyoursaas->blacklistip->read;
-	$permissiontoadd = $user->rights->sellyoursaas->blacklistip->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->rights->sellyoursaas->blacklistip->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-	$permissionnote = $user->rights->sellyoursaas->blacklistip->write; // Used by the include of actions_setnotes.inc.php
-	$permissiondellink = $user->rights->sellyoursaas->blacklistip->write; // Used by the include of actions_dellink.inc.php
+	$permissiontoread = $user->rights->sellyoursaas->whitelistip->read;
+	$permissiontoadd = $user->rights->sellyoursaas->whitelistip->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+	$permissiontodelete = $user->rights->sellyoursaas->whitelistip->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+	$permissionnote = $user->rights->sellyoursaas->whitelistip->write; // Used by the include of actions_setnotes.inc.php
+	$permissiondellink = $user->rights->sellyoursaas->whitelistip->write; // Used by the include of actions_dellink.inc.php
 } else {
 	$permissiontoread = 1;
 	$permissiontoadd = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
@@ -141,7 +141,7 @@ if ($enablepermissioncheck) {
 	$permissiondellink = 1;
 }
 
-$upload_dir = $conf->sellyoursaas->multidir_output[isset($object->entity) ? $object->entity : 1].'/blacklistip';
+$upload_dir = $conf->sellyoursaas->multidir_output[isset($object->entity) ? $object->entity : 1].'/whitelistip';
 
 // Security check (enable the most restrictive one)
 //if ($user->socid > 0) accessforbidden();
@@ -165,14 +165,14 @@ if ($reshook < 0) {
 if (empty($reshook)) {
 	$error = 0;
 
-	$backurlforlist = dol_buildpath('/sellyoursaas/blacklistip_list.php', 1);
+	$backurlforlist = dol_buildpath('/sellyoursaas/whitelistip_list.php', 1);
 
 	if (empty($backtopage) || ($cancel && empty($id))) {
 		if (empty($backtopage) || ($cancel && strpos($backtopage, '__ID__'))) {
 			if (empty($id) && (($action != 'add' && $action != 'create') || $cancel)) {
 				$backtopage = $backurlforlist;
 			} else {
-				$backtopage = dol_buildpath('/sellyoursaas/blacklistip_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
+				$backtopage = dol_buildpath('/sellyoursaas/whitelistip_card.php', 1).'?id='.((!empty($id) && $id > 0) ? $id : '__ID__');
 			}
 		}
 	}
@@ -204,7 +204,7 @@ if (empty($reshook)) {
 	// Actions to send emails
 	$triggersendname = 'SELLYOURSAAS_BLACKLISTIP_SENTBYMAIL';
 	$autocopy = 'MAIN_MAIL_AUTOCOPY_BLACKLISTIP_TO';
-	$trackid = 'blacklistip'.$object->id;
+	$trackid = 'whitelistip'.$object->id;
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
 }
 
@@ -221,7 +221,7 @@ $form = new Form($db);
 $formfile = new FormFile($db);
 $formproject = new FormProjets($db);
 
-$title = $langs->trans("Blacklistip");
+$title = $langs->trans("Whitelistip");
 $help_url = '';
 llxHeader('', $title, $help_url);
 
@@ -248,7 +248,7 @@ if ($action == 'create') {
 		exit;
 	}
 
-	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("Blacklistip")), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("Whitelistip")), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -286,7 +286,7 @@ if ($action == 'create') {
 
 // Part to edit record
 if (($id || $ref) && $action == 'edit') {
-	print load_fiche_titre($langs->trans("Blacklistip"), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("Whitelistip"), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -322,14 +322,14 @@ if (($id || $ref) && $action == 'edit') {
 if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'create'))) {
 	$res = $object->fetch_optionals();
 
-	$head = blacklistipPrepareHead($object);
-	print dol_get_fiche_head($head, 'card', $langs->trans("Blacklistip"), -1, $object->picto);
+	$head = whitelistipPrepareHead($object);
+	print dol_get_fiche_head($head, 'card', $langs->trans("Whitelistip"), -1, $object->picto);
 
 	$formconfirm = '';
 
 	// Confirmation to delete
 	if ($action == 'delete') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteBlacklistip'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteWhitelistip'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
 	}
 	// Confirmation to delete line
 	if ($action == 'deleteline') {
@@ -345,7 +345,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Confirmation of action xxxx (You can use it for xxx = 'close', xxx = 'reopen', ...)
 	if ($action == 'xxx') {
-		$text = $langs->trans('ConfirmActionBlacklistip', $object->ref);
+		$text = $langs->trans('ConfirmActionWhitelistip', $object->ref);
 		/*if (! empty($conf->notification->enabled))
 		{
 			require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
@@ -383,7 +383,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.dol_buildpath('/sellyoursaas/blacklistip_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.dol_buildpath('/sellyoursaas/whitelistip_list.php', 1).'?restore_lastsearch_values=1'.(!empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	/*
@@ -580,11 +580,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			$urlsource = $_SERVER["PHP_SELF"]."?id=".$object->id;
 			$genallowed = $permissiontoread; // If you can read, you can build the PDF to read content
 			$delallowed = $permissiontoadd; // If you can create/edit, you can remove a file on card
-			print $formfile->showdocuments('sellyoursaas:Blacklistip', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
+			print $formfile->showdocuments('sellyoursaas:Whitelistip', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
 
 		// Show links to link elements
-		$linktoelem = $form->showLinkToObjectBlock($object, null, array('blacklistip'));
+		$linktoelem = $form->showLinkToObjectBlock($object, null, array('whitelistip'));
 		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
 		*/
 
@@ -593,7 +593,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		/*
 		$MAXEVENT = 10;
 
-		$morehtmlcenter = dolGetButtonTitle($langs->trans('SeeAll'), '', 'fa fa-bars imgforviewmode', dol_buildpath('/sellyoursaas/blacklistip_agenda.php', 1).'?id='.$object->id);
+		$morehtmlcenter = dolGetButtonTitle($langs->trans('SeeAll'), '', 'fa fa-bars imgforviewmode', dol_buildpath('/sellyoursaas/whitelistip_agenda.php', 1).'?id='.$object->id);
 
 		// List of actions on element
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
@@ -610,10 +610,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	}
 
 	// Presend form
-	$modelmail = 'blacklistip';
+	$modelmail = 'whitelistip';
 	$defaulttopic = 'InformationMessage';
 	$diroutput = $conf->sellyoursaas->dir_output;
-	$trackid = 'blacklistip'.$object->id;
+	$trackid = 'whitelistip'.$object->id;
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/card_presend.tpl.php';
 }
