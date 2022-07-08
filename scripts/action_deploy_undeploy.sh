@@ -289,6 +289,7 @@ if [[ ! -d $archivedir ]]; then
 fi
 
 archivetestinstances=`grep '^archivetestinstances=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+archivepaidinstances=1
 
 testorconfirm="confirm"
 
@@ -804,12 +805,20 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-						echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-						tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-					else
-						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
-						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+					if [[ "x$archivepaidinstances" == "x0" ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+							echo "Archive of test instances are disabled. We discard the tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
+						else
+							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
+						fi
+					else 
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+							echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+							tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+						else
+							echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+						fi
 					fi
 					echo `date +'%Y-%m-%d %H:%M:%S'`
 					echo rm -fr $targetdir/$osusername/$dbname
