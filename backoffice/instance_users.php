@@ -646,7 +646,7 @@ function print_user_table($newdb, $object)
 						} elseif ($key == 'email') {
 							print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
 						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
-							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour').'</td>';
+							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
 						} else {
 							print '<td>'.$obj->$key.'</td>';
 						}
