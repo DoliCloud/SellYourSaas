@@ -2362,7 +2362,7 @@ if ($action == 'updateurl') {
 				}
 			}
 
-			$comment = 'Services for '.$contract->ref.' closed after an undeploy request from Customer dashboard. Current status when receiving request is '.$contract->array_options['options_deployment_status'];
+			$comment = 'Services for '.$contract->ref.' closed after an undeploy request from Customer dashboard. Status of instance when request has been received was '.$contract->array_options['options_deployment_status'];
 
 			if (! $error) {
 				$sellyoursaasutils = new SellYourSaasUtils($db);
