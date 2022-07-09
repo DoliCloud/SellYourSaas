@@ -326,7 +326,7 @@ do
 		echo List of found virtualhost instance pointing to this user home:
 		grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf
 		echo Check that there is no bug on script and you can delete user with
-		echo deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername
+		echo mkdir $archivedirtest/$osusername; deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername
 		echo
 		exit 9
 	fi
