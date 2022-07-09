@@ -100,7 +100,8 @@ fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
-	echo "Usage: ${0} [test|confirm] (keeptempdirs)"
+	echo "Usage: ${0} [test|confirm] (oldtempinarchive)"
+	echo "With mode test, the /temp/... files are not deleted at end of script" 
 	exit 6
 fi
 
@@ -314,55 +315,58 @@ if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
 	done < /tmp/instancefound-activedbinsellyoursaas
 fi
 
-echo "***** Search home in $targetdir without instance active (should never happen)"
-echo "ls -d $targetdir/osu*";
-for osusername in `ls -d $targetdir/osu* 2>/dev/null`
-do
-	export osusername=`basename $osusername`
-	if ! grep "$osusername" /tmp/instancefound-activedbinsellyoursaas > /dev/null; then
-		echo --- User $osusername has a home in $targetdir but is not inside /tmp/instancefound-activedbinsellyoursaas. Should not happen.
-		echo List of documents in dir /home/jail/home/$osusername/dbn*:
-		ls /home/jail/home/$osusername/dbn*
-		echo List of found virtualhost instance pointing to this user home:
-		export vhfile=`grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf`
-		echo $vhfile
-		export vhfile2=`grep -l $osusername /etc/apache2/sellyoursaas-enabled/*.conf`
-		echo $vhfile2
-		echo Check that there is no bug on script and you can delete user with
-		if [ "x$vhfile" != "x" ]; then
-			echo "rm $vhfile; "
+
+if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
+	echo "***** Search home in $targetdir without instance active (should never happen)"
+	echo "ls -d $targetdir/osu*";
+	for osusername in `ls -d $targetdir/osu* 2>/dev/null`
+	do
+		export osusername=`basename $osusername`
+		if ! grep "$osusername" /tmp/instancefound-dbinsellyoursaas > /dev/null; then
+			echo --- User $osusername has a home in $targetdir but is not inside /tmp/instancefound-dbinsellyoursaas. Should not happen.
+			echo List of documents in dir /home/jail/home/$osusername/dbn*:
+			ls /home/jail/home/$osusername/dbn*
+			echo List of found virtualhost instance pointing to this user home:
+			export vhfile=`grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf`
+			echo $vhfile
+			export vhfile2=`grep -l $osusername /etc/apache2/sellyoursaas-enabled/*.conf`
+			echo $vhfile2
+			echo Check that there is no bug on script and you can delete user with
+			if [ "x$vhfile" != "x" ]; then
+				echo "rm $vhfile; "
+			fi
+			if [ "x$vhfile2" != "x" ]; then
+				echo "rm $vhfile2; "
+			fi
+			echo "mkdir $archivedirtest/$osusername; deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername; deluser --group $osusername"
+			echo
+			exit 9
 		fi
-		if [ "x$vhfile2" != "x" ]; then
-			echo "rm $vhfile2; "
-		fi
-		echo "mkdir $archivedirtest/$osusername; deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername; deluser --group $osusername"
-		echo
-		exit 9
-	fi
-done
+	done
+fi
 
 
 # We disable this because when we undeploy, user is kept and we want to remove it only 1 month after undeployment date (processed by next point)
-# TODO For contracts deleted from database, we must found something else: 
-#echo "***** Search from /tmp/instancefound: osu unix account with record in /etc/passwd but not in instancefound" 
-#cat /tmp/instancefound | awk '{ if ($2 != "username_os" && $2 != "unknown" && $2 != "NULL") print $2":" }' > /tmp/osusernamefound
+# TODO Build the file /tmp/instancefound-olduninstalleddbinsellyoursaas
+#echo "***** Search from /tmp/instancefound-olduninstalleddbinsellyoursaas: osu unix account with record in /etc/passwd but not in instancefound-olduninstalleddbinsellyoursaas" 
+#cat /tmp/instancefound-dbinsellyoursaas | awk '{ if ($2 != "username_os" && $2 != "unknown" && $2 != "NULL") print $2":" }' > /tmp/osusernamefound
 #if [ -s /tmp/osusernamefound ]; then
 #	for osusername in `grep -v /etc/passwd -f /tmp/osusernamefound | grep '^osu'`
 #	do
 #		tmpvar1=`echo $osusername | awk -F ":" ' { print $1 } '`
-#		echo User $tmpvar1 is an ^osu user in /etc/passwd but has no available instance in /tmp/instancefound
+#		echo User $tmpvar1 is an ^osu user in /etc/passwd but has no active instance in /tmp/instancefound-olduninstalleddbinsellyoursaas
 #		exit 9
 #	done
 #fi
 
 
 if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
-	echo "***** Save osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
+	echo "***** Search osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
 	Q1="use $database; "
 	Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.deployment_host = '$IPSERVERDEPLOYMENT' AND c.rowid IN ";
 	Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";
 	SQL="${Q1}${Q2}${Q3}"
-	
+
 	echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e $SQL"
 	$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
 	if [ -s /tmp/osutoclean-oldundeployed ]; then
@@ -419,8 +423,8 @@ if [ -s /tmp/osutoclean ]; then
 				fi	
 			fi
 		fi
-		
-		
+
+
 		# If osusername is known, remove user and archive dir (Note: archive with clean.sh is always done in test !!!!!!!)
 		if [[ "x$osusername" != "x" ]]; then	
 			if [[ "x$osusername" != "xNULL" ]]; then
@@ -645,15 +649,15 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
 fi
 
+
 # Clean archives 
-if [ "x$2" != "xkeeptempdirs" ]; then
+if [ "x$2" == "xoldtempinarchive" ]; then
 	echo "Clean archives dir from not expected files (should not be required anymore). Archives are no more tree of files but an archive since 1st of july 2019".
 	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
 	find "$archivedirpaid" -type d -path '*/osu*/temp' -exec rm -fr {} \;
 	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
 	find "$archivedirtest" -type d -path '*/osu*/temp' -exec rm -fr {} \;
 fi
-
 
 if [[ $testorconfirm == "confirm" ]]; then
 	echo "***** Clean temporary files"

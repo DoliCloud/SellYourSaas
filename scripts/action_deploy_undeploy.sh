@@ -1355,7 +1355,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			. $cliafter
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running the CLI script $cliafter 
-				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
+				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 				exit 26
 			fi
 		fi

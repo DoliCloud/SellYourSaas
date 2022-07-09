@@ -2693,7 +2693,7 @@ class SellYourSaasUtils
 						if ($mode == 'test') $remotetouse = 'undeployall';
 
 						$conf->global->noapachereload = 1;       // Set a global variable that can be read later
-						$comment = "Undeploy instance by doUndeployOldSuspendedInstances('".$mode."') the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
+						$comment = "Undeploy instance by doUndeployOldSuspendedInstances('".$mode."') so remotetouse=".$remotetouse.", the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
 						$result = $this->sellyoursaasRemoteAction($remotetouse, $object, 'admin', '', '', '0', $comment, 300);
 						$conf->global->noapachereload = null;    // unset a global variable that can be read later
 						if ($result <= 0) {
