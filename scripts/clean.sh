@@ -321,7 +321,7 @@ do
 	export osusername=`basename $osusername`
 	if ! grep "$osusername" /tmp/instancefound-activedbinsellyoursaas > /dev/null; then
 		echo --- User $osusername has a home in $targetdir but is not inside /tmp/instancefound-activedbinsellyoursaas. Should not happen.
-		echo List of documents dir:
+		echo List of documents in dir /home/jail/home/$osusername/dbn*:
 		ls /home/jail/home/$osusername/dbn*
 		echo List of found virtualhost instance pointing to this user home:
 		grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf
