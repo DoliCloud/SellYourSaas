@@ -723,11 +723,13 @@ do
 			echo "rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 		else
 			echo "# ----- $fic - $noyoungfile" >> /tmp/deletedirs.sh
-			echo "# ALERT Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with:" >> /tmp/deletedirs.sh
+			echo "# NOTE Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with:" >> /tmp/deletedirs.sh
 			echo "# mv $backupdir/$osusername $archivedirpaid/$osusername; chown -R root.root $archivedirpaid/$osusername" >> /tmp/deletedirs.sh
 		fi
 	else
         echo "# ----- $fic - $noyoungfile - backup dir $dirtoscan exists with a very old last_mysqldump* file but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
+        echo "# ALTERT This may happen when an instance is renamed so mysqldump of old name is old and the one of new name is new >> /tmp/deletedirs.sh
+		echo "#rm $dirtoscan/$fic >> /tmp/deletedirs.sh
         echo "#rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 	fi
 done
