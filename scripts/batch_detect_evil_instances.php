@@ -333,7 +333,7 @@ if (!empty($tmparray)) {
 				$tmpdirarray = explode('|', $val->noblacklistif);
 				foreach ($tmpdirarray as $tmpdir) {
 					if ($tmpdir) {
-						$command .= " ! -path '".escapeshellcmd(preg_replace('/[^a-z]/', '', $tmpdir))."/*'";
+						$command .= " ! -path '".escapeshellcmd(preg_replace('/[^a-z0-9]/', '', $tmpdir))."/*'";
 					}
 				}
 			}
