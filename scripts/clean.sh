@@ -619,7 +619,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 fi
 
 # Clean archives 
-if [ "x$2" == "xkeeptempdirs" ]; then
+if [ "x$2" != "xkeeptempdirs" ]; then
 	echo "Clean archives dir from not expected files (should not be required anymore). Archives are no more tree of files but an archive since 1st of july 2019".
 	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
 	find "$archivedirpaid" -type d -path '*/osu*/temp' -exec rm -fr {} \;
