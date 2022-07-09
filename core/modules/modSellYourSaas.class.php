@@ -534,12 +534,12 @@ class modSellYourSaas extends DolibarrModules
 		$r++;
 
 
-		// Blacklists
+		// Security tools
 
 		$this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=sellyoursaas',
 			'type'=>'left',
-			'titre'=>'Blacklists',
+			'titre'=>'SecurityTools',
 			'prefix' => img_picto('', 'fa-ban', 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_blacklist',
@@ -548,6 +548,23 @@ class modSellYourSaas extends DolibarrModules
 			'position'=>601,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'EvilInstances',
+			'prefix' => img_picto('', 'contract', 'class="paddingright pictofixedwidth"'),
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_evilinstances',
+			'url'=>'/contrat/list.php?leftmenu=contracts&contextpage=sellyoursaasevilinstances&ef.spammer=1&search_product_category=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__&sortfield=c.tms&sortorder=desc',
+			'langs'=>'sellyoursaas@sellyoursaas',
+			'position'=>240,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->rights->sellyoursaas->read',
 			'target'=>'',
 			'user'=>0
 		);

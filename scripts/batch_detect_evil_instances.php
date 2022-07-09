@@ -287,7 +287,7 @@ if (!empty($tmparray)) {
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			$command = "grep -l '".str_replace("'", ".", $buffer)."' osu*/dbn*/htdocs/index.php";
+			$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu*/dbn*/htdocs/index.php";
 			echo 'Scan if we found the string '.$buffer.' with '.$command.' ';
 			$fullcommand=$command;
 			$output=array();
@@ -328,14 +328,24 @@ if (!empty($tmparray)) {
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d | grep '".str_replace("'", ".", $buffer)."'";
+			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d";
 			if (!empty($val->noblacklistif)) {
-				$command .= " | grep -v '".str_replace("'", ".", $val->noblacklistif)."'";
+				$tmpdirarray = explode('|', $buffer);
+				foreach ($tmpdirarray as $tmpdir) {
+					if ($tmpdir) {
+						$command .= " ! -path '".escapeshellcmd(preg_replace('/[^a-z]/', '', $tmpdir))."/*'";
+					}
+				}
 			}
+			$command .= " | grep '".escapeshellcmd($buffer)."'";
+			/*if (!empty($val->noblacklistif)) {
+				$command .= " | grep -v '".str_replace("'", ".", $val->noblacklistif)."'";
+			}*/
 			echo 'Scan if we found the blacklist dir '.$buffer.' with '.$command.' ';
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
+
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// command returns 0 if something was found
 				// We found an evil string
@@ -366,7 +376,7 @@ if (!empty($tmparray)) {
 	}
 
 	echo 'Scan if we found a non whitelistdir dir '.$buffer.' in osuSTAR/dbnSTAR/htdocs/ ';
-	$command = "find osuSTAR/dbnSTAR/htdocs/ -maxdepth 1 -type d | grep -v '".str_replace("'", ".", $buffer)."'";
+	$command = "find osuSTAR/dbnSTAR/htdocs/ -maxdepth 1 -type d | grep -v '".escapeshellcmd(str_replace("'", ".", $buffer))."'";
 	$fullcommand=$command;
 	$output=array();
 	//echo $command."\n";
