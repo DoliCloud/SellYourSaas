@@ -3,9 +3,11 @@
 
 ## 1.3
 
- * NEW Add blacklist tables
- * NEW Add a whitelist table 
+ * NEW Add some blacklist tables
+ * NEW Add a whitelist table. Any IP in his table is allawed to create instance whatever are other checks.
  * NEW Add evil picto on instances flagged as evil
+ * NEW Add a page to list all evil instances
+ * NEW Enhance the clean.sh script
 
 
 ## 1.2
