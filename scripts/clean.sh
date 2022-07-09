@@ -318,12 +318,13 @@ echo "***** Search home in $targetdir without instance active (should never happ
 echo "ls -d $targetdir/osu*";
 for osusername in `ls -d $targetdir/osu* 2>/dev/null`
 do
-	export osusernameshort=`basename $osusername`
+	export osusername=`basename $osusername`
 	if ! grep "$osusername" /tmp/instancefound-activedbinsellyoursaas > /dev/null; then
 		echo User $osusername has a home in $targetdir but is not inside /tmp/instancefound-activedbinsellyoursaas. Should not happen.
 		exit 9
 	fi
 done
+
 
 # We disable this because when we undeploy, user is kept and we want to remove it only 1 month after undeployment date (processed by next point)
 # TODO For contracts deleted from database, we must found something else: 
