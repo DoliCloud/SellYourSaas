@@ -16,18 +16,18 @@
  */
 
 /**
- * \file    lib/sellyoursaas_blacklistto.lib.php
+ * \file    lib/sellyoursaas_whitelistip.lib.php
  * \ingroup test
- * \brief   Library files with common functions for Blacklistto
+ * \brief   Library files with common functions for Whitelistip
  */
 
 /**
- * Prepare array of tabs for Blacklistto
+ * Prepare array of tabs for Whitelistip
  *
- * @param	Blacklistto			$object		Blacklistto
+ * @param	Whitelistip			$object		Whitelistip
  * @return 	array							Array of tabs
  */
-function blacklisttoPrepareHead($object)
+function whitelistipPrepareHead($object)
 {
 	global $db, $langs, $conf;
 
@@ -36,7 +36,7 @@ function blacklisttoPrepareHead($object)
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath("/sellyoursaas/blacklistto_card.php", 1).'?id='.$object->id;
+	$head[$h][0] = dol_buildpath("/sellyoursaas/whitelistip_card.php", 1).'?id='.$object->id;
 	$head[$h][1] = $langs->trans("Card");
 	$head[$h][2] = 'card';
 	$h++;
@@ -49,7 +49,7 @@ function blacklisttoPrepareHead($object)
 		if (!empty($object->note_public)) {
 			$nbNote++;
 		}
-		$head[$h][0] = dol_buildpath('/sellyoursaas/blacklistto_note.php', 1).'?id='.$object->id;
+		$head[$h][0] = dol_buildpath('/sellyoursaas/whitelistip_note.php', 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans('Notes');
 		if ($nbNote > 0) {
 			$head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">'.$nbNote.'</span>' : '');
@@ -86,9 +86,9 @@ function blacklisttoPrepareHead($object)
 	//$this->tabs = array(
 	//	'entity:-tabname:Title:@test:/test/mypage.php?id=__ID__'
 	//); // to remove a tab
-	complete_head_from_modules($conf, $langs, $object, $head, $h, 'blacklistto@sellyoursaas');
+	complete_head_from_modules($conf, $langs, $object, $head, $h, 'whitelistip@sellyoursaas');
 
-	complete_head_from_modules($conf, $langs, $object, $head, $h, 'blacklistto@sellyoursaas', 'remove');
+	complete_head_from_modules($conf, $langs, $object, $head, $h, 'whitelistip@sellyoursaas', 'remove');
 
 	return $head;
 }

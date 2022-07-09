@@ -18,13 +18,13 @@
 /**
  * \file    lib/sellyoursaas_blacklistmail.lib.php
  * \ingroup test
- * \brief   Library files with common functions for Blacklistcontent
+ * \brief   Library files with common functions for Blacklistmail
  */
 
 /**
- * Prepare array of tabs for Blacklistcontent
+ * Prepare array of tabs for Blacklistmail
  *
- * @param	Blacklistcontent	$object		Blacklistcontent
+ * @param	Blacklistmail		$object		Blacklistmail
  * @return 	array							Array of tabs
  */
 function blacklistmailPrepareHead($object)

@@ -18,13 +18,13 @@
 /**
  * \file    lib/sellyoursaas_blacklistip.lib.php
  * \ingroup test
- * \brief   Library files with common functions for Blacklistcontent
+ * \brief   Library files with common functions for Blacklistip
  */
 
 /**
- * Prepare array of tabs for Blacklistcontent
+ * Prepare array of tabs for Blacklistip
  *
- * @param	Blacklistcontent	$object		Blacklistcontent
+ * @param	Blacklistip			$object		Blacklistip
  * @return 	array							Array of tabs
  */
 function blacklistipPrepareHead($object)
