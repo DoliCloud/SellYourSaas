@@ -433,7 +433,7 @@ if [ -s /tmp/osutoclean ]; then
 				echo rm -f $targetdir/$osusername/$dbname/*.log.*
 				rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1 
 				
-				echo "clean $instancename" >> $archivedirtest/$osusername/clean-$instancename.txt
+				echo "clean $instancename (a clean means archive user dir and delete user, group and cron)" >> $archivedirtest/$osusername/clean-$instancename.txt
 				
 				echo crontab -r -u $osusername
 				crontab -r -u $osusername
