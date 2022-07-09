@@ -465,7 +465,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			if (empty($mythirdparty->id)) {
 				?>
 			<div class="control-group  required">
-				<label class="control-label" for="username" trans="1"><?php echo $langs->trans("Email") ?></label>
+				<label class="control-label" for="username" trans="1"><span class="fas fa-at opacityhigh"></span> <?php echo $langs->trans("Email") ?></label>
 				<div class="controls">
 					<input type="text"<?php echo $disabled; ?> name="username" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="" id="username" />
 
@@ -473,7 +473,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			</div>
 
 			<div class="control-group  required">
-				<label class="control-label" for="orgName" trans="1"><?php echo $langs->trans("NameOfCompany") ?></label>
+				<label class="control-label" for="orgName" trans="1"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
 				<div class="controls">
 					<input type="text"<?php echo $disabled; ?> name="orgName" maxlength="250" value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" id="orgName" />
 				</div>
@@ -486,7 +486,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				<div class="horizontal-fld">
 
 				<div class="control-group  required">
-					<label class="control-label" for="password" trans="1"><?php echo $langs->trans("Password") ?></label>
+					<label class="control-label" for="password" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
 						<input<?php echo $disabled; ?> name="password" type="password" maxlength="128" required />
@@ -497,7 +497,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				</div>
 				<div class="horizontal-fld">
 				  <div class="control-group required">
-					<label class="control-label" for="password2" trans="1"><?php echo $langs->trans("ConfirmPassword") ?></label>
+					<label class="control-label" for="password2" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("ConfirmPassword") ?></label>
 					<div class="controls">
 					  <input<?php echo $disabled; ?> name="password2" type="password" maxlength="128" required />
 					</div>
@@ -512,7 +512,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				?>
 
 			<div class="control-group  ">
-				<label class="control-label" for="address_country"><?php echo $langs->trans("Country") ?></label>
+				<label class="control-label" for="address_country"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 				<?php
 				$countryselected=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
@@ -645,7 +645,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<br>
 			<section id="optinmessagesid">
 				<input type="checkbox" id="optinmessages" name="optinmessages" class="valignmiddle inline" style="margin-top: 0" value="1">
-				<label for="optinmessages" class="valignmiddle small inline"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>
+				<label for="optinmessages" class="valignmiddle small inline opacitymedium"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>
 			</section>
 			<?php } ?>
 
