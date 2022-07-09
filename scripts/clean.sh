@@ -326,9 +326,14 @@ do
 		echo List of found virtualhost instance pointing to this user home:
 		export vhfile=`grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf`
 		echo $vhfile
+		export vhfile2=`grep -l $osusername /etc/apache2/sellyoursaas-enabled/*.conf`
+		echo $vhfile2
 		echo Check that there is no bug on script and you can delete user with
 		if [ "x$vhfile" != "x" ]; then
 			echo "rm $vhfile; "
+		fi
+		if [ "x$vhfile2" != "x" ]; then
+			echo "rm $vhfile2; "
 		fi
 		echo "mkdir $archivedirtest/$osusername; deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername; deluser --group $osusername"
 		echo
