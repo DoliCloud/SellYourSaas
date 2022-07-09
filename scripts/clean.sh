@@ -324,8 +324,12 @@ do
 		echo List of documents in dir /home/jail/home/$osusername/dbn*:
 		ls /home/jail/home/$osusername/dbn*
 		echo List of found virtualhost instance pointing to this user home:
-		grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf
+		export vhfile=`grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf`
+		echo $vhfile
 		echo Check that there is no bug on script and you can delete user with
+		if [ "x$vhfile" != "x" ]; then
+			echo "rm $vhfile; "
+		fi
 		echo "mkdir $archivedirtest/$osusername; deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername; deluser --group $osusername"
 		echo
 		exit 9
