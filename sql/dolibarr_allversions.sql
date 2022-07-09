@@ -77,4 +77,4 @@ ALTER TABLE llx_sellyoursaas_blacklistto ADD INDEX idx_sellyoursaas_blacklistto_
 
 ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN date_use datetime;
 
-
+ALTER TABLE llx_sellyoursaas_blacklistdir ADD COLUMN noblacklistif varchar(255);

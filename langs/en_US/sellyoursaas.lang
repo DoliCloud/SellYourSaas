@@ -696,3 +696,4 @@ BlacklistXDesc=The list of emails listed here are used as the global source to g
 BlacklistdirDesc=List of directories that are not allowed into the root of an instance. The script batch_detect_evil_instances.php will use it to report warnings.
 BlacklistcontentDesc=List of keywords that are used as the global source to generate the local file of blacklisted keywords checked by the PHP wrapper to send emails. Check is done both in header and body email.
 Searchkeys=Search keys
+NoBlackListIf=No blacklist for path

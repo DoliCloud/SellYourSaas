@@ -287,15 +287,15 @@ if (!empty($tmparray)) {
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			echo 'Scan if we found the string '.$buffer.' into osu*/dbn*/htdocs/index.php ';
 			$command = "grep -l '".str_replace("'", ".", $buffer)."' osu*/dbn*/htdocs/index.php";
+			echo 'Scan if we found the string '.$buffer.' with '.$command.' ';
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// grep -l returns 0 if something was found
 				// We found an evil string
-				print "- ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
+				print "- ALERT: the evil string '".$buffer."' was found\n";
 			} else {
 				print "- OK\n";
 			}
@@ -328,15 +328,18 @@ if (!empty($tmparray)) {
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			echo 'Scan if we found the blacklist dir '.$buffer.' in osu*/dbn*/htdocs/ ';
 			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d | grep '".str_replace("'", ".", $buffer)."'";
+			if (!empty($val->noblacklistif)) {
+				$command .= " | grep -v '".str_replace("'", ".", $val->noblacklistif)."'";
+			}
+			echo 'Scan if we found the blacklist dir '.$buffer.' with '.$command.' ';
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// command returns 0 if something was found
 				// We found an evil string
-				print "- ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
+				print "- ALERT: the evil dir '".$buffer."' was found\n";
 			} else {
 				print "- OK\n";
 			}
