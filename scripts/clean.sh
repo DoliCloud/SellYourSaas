@@ -677,7 +677,7 @@ echo
 echo TODO Manually...
 
 # Clean database users
-echo "***** We should also clean mysql record for permission on old databases and old users"
+echo "***** We should also clean mysql db and user table (used for permission) for deleted databases and deleted users"
 SQL="use mysql; delete from db where Db NOT IN (SELECT schema_name FROM information_schema.schemata) and Db like 'dbn%';"
 echo You can execute
 echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -e \"$SQL\" -pxxxxxx"
@@ -701,7 +701,7 @@ if [[ $testorconfirm == "test" ]]; then
 		echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass $database
 		echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -pxxxxxx -h $databasehost $database"
 		echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
-		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
+		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of database master.
 		echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
 	fi
 fi
@@ -737,5 +737,7 @@ if [ -s /tmp/deletedirs.sh ]; then
 	echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
 	echo You can execute commands into file /tmp/deletedirs.sh
 fi
+
+echo 
 
 exit 0
