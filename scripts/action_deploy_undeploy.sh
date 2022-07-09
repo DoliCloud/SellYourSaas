@@ -1363,10 +1363,12 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 fi
 
 
-if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
-	
+if [[ "$mode" == "undeploy" ]]; then
+	echo "$mode $instancename.$domainname" >> $targetdir/$osusername/$mode-$instancename.$domainname.txt
 	echo "$mode $instancename.$domainname" >> $archivedir/$osusername/$mode-$instancename.$domainname.txt
-
+fi
+if [[ "$mode" == "undeployall" ]]; then
+	echo "$mode $instancename.$domainname" >> $archivedir/$osusername/$mode-$instancename.$domainname.txt
 fi
 
 
