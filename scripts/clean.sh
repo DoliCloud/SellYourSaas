@@ -320,7 +320,14 @@ for osusername in `ls -d $targetdir/osu* 2>/dev/null`
 do
 	export osusername=`basename $osusername`
 	if ! grep "$osusername" /tmp/instancefound-activedbinsellyoursaas > /dev/null; then
-		echo User $osusername has a home in $targetdir but is not inside /tmp/instancefound-activedbinsellyoursaas. Should not happen.
+		echo --- User $osusername has a home in $targetdir but is not inside /tmp/instancefound-activedbinsellyoursaas. Should not happen.
+		echo List of documents dir:
+		ls /home/jail/home/$osusername/dbn*
+		echo List of found virtualhost instance pointing to this user home:
+		grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf
+		echo Check that there is no bug on script and you can delete user with
+		echo deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername
+		echo
 		exit 9
 	fi
 done
