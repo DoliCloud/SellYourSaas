@@ -257,7 +257,7 @@ class modSellYourSaas extends DolibarrModules
 								'langs'=>'',
 								'position'=>200,
 								'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-								'perms'=>'$user->rights->sellyoursaas->liens->voir',
+								'perms'=>'$user->hasRight("sellyoursaas", "liens", "voir")',
 								'target'=>'',
 								'user'=>0);
 		$r++;
@@ -274,7 +274,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',  // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 			'position'=>100,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',           // Use 'perms'=>'$user->rights->NewsSubmitter->level1->level2' if you want your menu with a permission rules
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',           // Use 'perms'=>'$user->rights->NewsSubmitter->level1->level2' if you want your menu with a permission rules
 			'target'=>'',
 			'user'=>0);             // 0=Menu for internal users, 1=external users, 2=both
 		$r++;
@@ -291,7 +291,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'',
 			'position'=>210,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0);
 		$r++;
@@ -306,7 +306,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>211,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->write',
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0);
 		$r++;
@@ -321,7 +321,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>212,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'_refs',
 			'user'=>0);
 		$r++;
@@ -339,7 +339,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'',
 			'position'=>220,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -355,7 +355,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'',
 			'position'=>221,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->write',
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -374,7 +374,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>229,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0);
 		$r++;
@@ -392,7 +392,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'',
 			'position'=>230,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -407,7 +407,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>231,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->write',
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -423,7 +423,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'',
 			'position'=>233,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->write',
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -439,7 +439,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'',
 			'position'=>234,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->write',
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -458,7 +458,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>240,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -473,7 +473,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>241,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->write',
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -491,7 +491,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>501,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'_sellyoursaas_customer',
 			'user'=>0
 		);
@@ -512,7 +512,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'',
 			'position'=>601,
 			'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -527,7 +527,7 @@ class modSellYourSaas extends DolibarrModules
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>602,
 			'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->write',
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0
 		);
@@ -557,14 +557,14 @@ class modSellYourSaas extends DolibarrModules
 			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
 			'type'=>'left',
 			'titre'=>'EvilInstances',
-			'prefix' => img_picto('', 'contract', 'class="paddingright pictofixedwidth"'),
+			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_evilinstances',
 			'url'=>'/contrat/list.php?leftmenu=contracts&contextpage=sellyoursaasevilinstances&ef.spammer=1&search_product_category=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__&sortfield=c.tms&sortorder=desc',
 			'langs'=>'sellyoursaas@sellyoursaas',
-			'position'=>240,
+			'position'=>651,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->rights->sellyoursaas->read',
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);

@@ -1,6 +1,13 @@
 # CHANGELOG SELLYOURSAAS FOR <a href="https://www.dolibarr.org">DOLIBARR ERP CRM</a>
 
 
+## 1.3
+
+ * NEW Add blacklist tables
+ * NEW Add a whitelist table 
+ * NEW Add evil picto on instances flagged as evil
+
+
 ## 1.2
 
 * NEW #190 : Add form on uninstall. Enable on option SELLYOURSAAS_ASK_DESTROY_REASON.

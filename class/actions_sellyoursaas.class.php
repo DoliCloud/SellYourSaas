@@ -132,6 +132,11 @@ class ActionsSellyoursaas
 					$newtitle .= dol_escape_htmltag('<br><b>'.$langs->trans("Redirection").'</b> : '.(empty($object->array_options['options_suspendmaintenance_message']) ? '' : $object->array_options['options_suspendmaintenance_message']), 1);
 				}
 				$this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
+
+				if (!empty($object->array_options['options_spammer'])) {
+					$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+				}
+
 				return 1;
 			}
 		}
