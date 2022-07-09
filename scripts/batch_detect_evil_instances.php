@@ -330,7 +330,7 @@ if (!empty($tmparray)) {
 		if ($buffer) {
 			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d";
 			if (!empty($val->noblacklistif)) {
-				$tmpdirarray = explode('|', $buffer);
+				$tmpdirarray = explode('|', $val->noblacklistif);
 				foreach ($tmpdirarray as $tmpdir) {
 					if ($tmpdir) {
 						$command .= " ! -path '".escapeshellcmd(preg_replace('/[^a-z]/', '', $tmpdir))."/*'";
