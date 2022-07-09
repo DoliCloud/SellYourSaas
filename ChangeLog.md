@@ -8,6 +8,7 @@
  * NEW Add evil picto on instances flagged as evil
  * NEW Add a page to list all evil instances
  * NEW Enhance the clean.sh script
+ * FIX Timezone filled also for instances created from customer dashboard
 
 
 ## 1.2
