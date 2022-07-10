@@ -427,7 +427,9 @@ ResourceUnitLabelDesc=Enter the translation key to use for the resource unit.<br
 DeploymentIPVPNProba=Probability of using a VPN
 DeploymentIPVPNProbaDesc=When a subscription is done, a check is done on subscriber IP to http://check.getipintel.net/check.php?ip=IP&contact=%s&flag=f
 DeploymentIPQuality=IP Quality score
-DeploymentIPQualityDesc=When a subscription is done, a check is done on subscriber IP to:<br>- http://check.getipintel.net/check.php?ip=IP&contact=&flag=f<br>- https://www.ipqualityscore.com
+DeploymentIPQualityDesc=When a registration is done, a check is done on subscriber IP to:<br>- http://check.getipintel.net/check.php?ip=IP&contact=&flag=f<br>and/or<br>- https://www.ipqualityscore.com
+DeploymentEmailQuality=Email Quality score
+DeploymentEmailQualityDesc=When a registration is done, a check is done on subscriber Email to:<br><br>- https://www.ipqualityscore.com<br>and/or<br>- https://disposableemail.com
 ListOfRegistrationLinks=List of registration links
 EnterVATHere=Enter your VAT or Sale tax number here...
 CreateMyAccount=Create my account

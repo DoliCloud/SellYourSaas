@@ -1129,7 +1129,7 @@ if ($reusecontractid) {
 		$vpnproba = '';
 
 
-		// TODO Insert evaluation by disposalemail here
+		// TODO Insert evaluation by disposablemail here
 
 
 		// Evaluate VPN probability with Getintel
