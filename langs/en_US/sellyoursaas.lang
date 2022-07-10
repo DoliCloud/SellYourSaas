@@ -704,3 +704,4 @@ Searchkeys=Search keys
 NoBlackListIf=No blacklist for path
 SecurityTools=Security tools
 EvilInstances=Instances (flagged as evil)
+SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE=Maximum amount of invoice (monthly). Payment tries will be canceled if amount is higher. 

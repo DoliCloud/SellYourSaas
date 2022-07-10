@@ -8,6 +8,7 @@
  * NEW Add evil picto on instances flagged as evil
  * NEW Add a page to list all evil instances
  * NEW Enhance the clean.sh script
+ * NEW Add option SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
  * FIX Timezone filled also for instances created from customer dashboard
 
 
