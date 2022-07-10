@@ -3,13 +3,17 @@
 
 ## 1.3
 
- * NEW Add some blacklist tables
- * NEW Add a whitelist table. Any IP in his table is allawed to create instance whatever are other checks.
- * NEW Add evil picto on instances flagged as evil
- * NEW Add a page to list all evil instances
+ * NEW Add some blacklist tables et page to edit them.
+ * NEW Add a whitelist table and page to edit it. Any IP in this table is allowed to create instance whatever are other checks.
+ * NEW Add an evil picto on instances flagged as evil
+ * NEW Add a page to list all evil instances (with filter predefined for this)
  * NEW Enhance the clean.sh script
  * NEW Add option SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
- * FIX Timezone filled also for instances created from customer dashboard
+ * NEW Add a parameter "Max number of deployement per IP (VPN)" (default 1) that is specific on VPN usage so different
+       than the paramater "Max number of deployement per IP" (default 4)
+ * NEW Can enablde/disable external service to validate IP or email in a simple click into SellYourSaas module setup.
+ * Prepare code for service to validate email quality (like done for IP validation)
+ * FIX Timezone is filled also for instances created from customer dashboard
 
 
 ## 1.2
