@@ -147,8 +147,23 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT", GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT", GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
 
-		dolibarr_set_const($db, "SELLYOURSAAS_GETIPINTEL_EMAIL", GETPOST("SELLYOURSAAS_GETIPINTEL_EMAIL", 'alpha'), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_IPQUALITY_KEY", GETPOST("SELLYOURSAAS_IPQUALITY_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
+		if (GETPOSTISSET("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
+
+		if (GETPOSTISSET("SELLYOURSAAS_GETIPINTEL_ON")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_GETIPINTEL_ON", GETPOST("SELLYOURSAAS_GETIPINTEL_ON", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET("SELLYOURSAAS_GETIPINTEL_EMAIL")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_GETIPINTEL_EMAIL", GETPOST("SELLYOURSAAS_GETIPINTEL_EMAIL", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET("SELLYOURSAAS_IPQUALITY_ON")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_IPQUALITY_ON", GETPOST("SELLYOURSAAS_IPQUALITY_ON", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET("SELLYOURSAAS_IPQUALITY_KEY")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_IPQUALITY_KEY", GETPOST("SELLYOURSAAS_IPQUALITY_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
+
 
 		dolibarr_set_const($db, "SELLYOURSAAS_HASHALGOFORPASSWORD", GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", 'alpha'), 'chaine', 0, '', $conf->entity);
@@ -200,7 +215,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_PAID_ARCHIVES_PATH", GETPOST("SELLYOURSAAS_PAID_ARCHIVES_PATH"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_NAME_RESERVED", GETPOST("SELLYOURSAAS_NAME_RESERVED"), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_EMAIL_ADDRESSES_BANNED", GETPOST("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED"), 'chaine', 0, '', $conf->entity);
+		//dolibarr_set_const($db, "SELLYOURSAAS_EMAIL_ADDRESSES_BANNED", GETPOST("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED"), 'chaine', 0, '', $conf->entity);
 
 		// Save images
 		$dirforimage=$conf->mycompany->dir_output.'/logos/';
@@ -718,13 +733,6 @@ print '</td>';
 print '<td><span class="opacitymedium small">20</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIP").' (VPN)</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN', 2).'">';
-print '</td>';
-print '<td><span class="opacitymedium small">2</span></td>';
-print '</tr>';
-
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR', 5).'">';
@@ -746,13 +754,6 @@ print '</td>';
 print '<td><span class="opacitymedium small">4</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_VPN_PROBA_REFUSED").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_VPN_PROBA_REFUSED" value="'.getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">0.9, 1, Keep empty for no filter on VPN probability</span></td>';
-print '</tr>';
-
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_NAME_RESERVED" value="'.getDolGlobalString('SELLYOURSAAS_NAME_RESERVED').'">';
@@ -760,26 +761,105 @@ print '</td>';
 print '<td><span class="opacitymedium small">^mycompany[0-9]*\.</span></td>';
 print '</tr>';
 
+/*
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED").'</td>';
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_EMAIL_ADDRESSES_BANNED" value="'.getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED').'">';
 print '</td>';
 print '<td><span class="opacitymedium small">yopmail.com,hotmail.com,spammer@gmail.com</span></td>';
 print '</tr>';
+*/
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_GETIPINTEL_EMAIL").'</td>';
+// Enable DisposableEmail service
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED"), 'This is a usefull component to fight against spam instances').'</td>';
 print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_GETIPINTEL_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL').'">';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED', array(), null, 0, 0, 1);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
 print '</td>';
-print '<td><span class="opacitymedium small">myemail@email.com</span></td>';
+print '<td></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_IPQUALITY_KEY").'</td>';
+if (!empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED)) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_API_KEY", "DispoableEmail").'</td>';
+	print '<td>';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY" value="'.getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">1234567890123456</span></td>';
+	print '</tr>';
+}
+
+// Enable GetIPIntel
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_GETIPINTEL_ON"), 'This is a usefull component to fight against spam instances').'</td>';
 print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_IPQUALITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY').'">';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_GETIPINTEL_ON', array(), null, 0, 0, 1);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_GETIPINTEL_ON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_GETIPINTEL_ON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
 print '</td>';
-print '<td><span class="opacitymedium small">1234567890123456</span></td>';
+print '<td></td>';
 print '</tr>';
+
+if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON)) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_GETIPINTEL_EMAIL").'</td>';
+	print '<td>';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_GETIPINTEL_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">myemail@email.com</span></td>';
+	print '</tr>';
+}
+
+// Enable IPQualityScore
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_IPQUALITY_ON"), 'This is a very important component to fight against spam instances').'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_IPQUALITY_ON', array(), null, 0, 0, 1);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_IPQUALITY_ON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_IPQUALITY_ON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
+if (!empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_API_KEY", "IPQualityScore").'</td>';
+	print '<td>';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_IPQUALITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">1234567890123456</span></td>';
+	print '</tr>';
+}
+
+if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON) || !empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_VPN_PROBA_REFUSED").'</td>';
+	print '<td>';
+	print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_VPN_PROBA_REFUSED" value="'.getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">0.9, 1, Keep empty for no filter on VPN probability</span></td>';
+	print '</tr>';
+
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIP").' (VPN)</td>';
+	print '<td>';
+	print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN', 2).'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">2</span></td>';
+	print '</tr>';
+}
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';
@@ -787,9 +867,9 @@ if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', array(), null, 0, 0, 1);
 } else {
 	if (empty($conf->global->SELLYOURSAAS_ONLY_NON_PROFIT_ORGA)) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
 print '</td>';
