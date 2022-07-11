@@ -162,17 +162,29 @@ class SellYourSaasUtils
 											include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
 											$tmpinvoicerec = new FactureRec($this->db);
 											$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
-											// TODO Set monthfactor
+											if ($tmpinvoicerec->unit_frequency == 'y') {
+												$monthfactor *= 12;
+											}
+											if ($tmpinvoicerec->frequency > 1) {
+												$monthfactor *=  $tmpinvoicerec->frequency;
+											}
 										}
 										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
-										// TODO Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
+										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
+										if ($amountofinvoice >= ($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE * $monthfactor)) {
+											$error++;
+											$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".$conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE." * ".$monthfactor;
+											$this->errors[] = $this->error;
+											break;
+										}
 									}
 
 									$result = $invoice->validate($user);
+
 									if ($result > 0) {
 										$draftinvoiceprocessed[$invoice->id]=$invoice->ref;
 
-										// Now we build the invoice
+										// Now we build the PDF invoice
 										$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
 										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
@@ -906,10 +918,21 @@ class SellYourSaasUtils
 										include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
 										$tmpinvoicerec = new FactureRec($this->db);
 										$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
-										// TODO Set monthfactor
+										if ($tmpinvoicerec->unit_frequency == 'y') {
+											$monthfactor *= 12;
+										}
+										if ($tmpinvoicerec->frequency > 1) {
+											$monthfactor *=  $tmpinvoicerec->frequency;
+										}
 									}
 									dol_syslog("doTakePaymentStripeForThirdparty The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
-									// TODO Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
+									// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
+									if ($amountofinvoice >= ($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE * $monthfactor)) {
+										$error++;
+										$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".$conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE." * ".$monthfactor;
+										$this->errors[] = $this->error;
+										break;
+									}
 								}
 
 								$result = $invoice->validate($user);
