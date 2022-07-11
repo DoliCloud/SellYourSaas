@@ -160,7 +160,7 @@ class SellYourSaasUtils
 										$monthfactor = 1;
 										if ($invoice->fk_fac_rec_source > 0) {
 											include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
-											$tmpinvoicerec = new FactureRec($db);
+											$tmpinvoicerec = new FactureRec($this->db);
 											$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
 											// TODO Set monthfactor
 										}
@@ -904,7 +904,7 @@ class SellYourSaasUtils
 									$monthfactor = 1;
 									if ($invoice->fk_fac_rec_source > 0) {
 										include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
-										$tmpinvoicerec = new FactureRec($db);
+										$tmpinvoicerec = new FactureRec($this->db);
 										$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
 										// TODO Set monthfactor
 									}
