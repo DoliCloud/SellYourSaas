@@ -164,7 +164,7 @@ class SellYourSaasUtils
 											$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
 											// TODO Set monthfactor
 										}
-										dol_syslog("The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
+										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
 										// TODO Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 									}
 
@@ -896,6 +896,20 @@ class SellYourSaasUtils
 
 								if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
 									$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
+								}
+
+								// Check amount
+								if (!empty($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE)) {
+									$amountofinvoice = $invoice->total_ht;
+									$monthfactor = 1;
+									if ($invoice->fk_fac_rec_source > 0) {
+										include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
+										$tmpinvoicerec = new FactureRec($db);
+										$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
+										// TODO Set monthfactor
+									}
+									dol_syslog("doTakePaymentStripeForThirdparty The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
+									// TODO Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 								}
 
 								$result = $invoice->validate($user);
