@@ -42,15 +42,16 @@ ufw allow out 8080/tcp
 ufw allow out 443/tcp
 # Mysql/Mariadb
 ufw allow out 3306/tcp
-# Mail
-ufw allow out 25/tcp
-ufw allow out 2525/tcp
-ufw allow out 465/tcp
-ufw allow out 587/tcp
-ufw allow out 110/tcp
+# Send Mail
+ufw allow out log 25/tcp
+ufw allow out log 2525/tcp
+ufw allow out log 465/tcp
+ufw allow out log 587/tcp
 # LDAP LDAPS
 ufw allow out 389/tcp
 ufw allow out 636/tcp
+# POP
+ufw allow out 110/tcp
 # IMAP
 ufw allow out 143/tcp
 ufw allow out 993/tcp
