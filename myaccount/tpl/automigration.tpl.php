@@ -395,14 +395,14 @@ if ($action == 'view') {
         <div class="portlet light divstep topmarginstep" id="step2">
                 <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</small></h1><br>
                 <div>
-                    '.$langs->trans("AutomigrationStep2Text").' 
+                    '.$langs->trans("AutomigrationStep2Text").'
                 </div>
                 <div class="center" style="padding-top:10px">
                     <img src="'.$linkstep2img.'">
                 </div><br>
                 <div class="center">
                 <div class="containerflexautomigration">
-					<div class="right" style="width:30%;margin-right:10px">	
+					<div class="right" style="width:30%;margin-right:10px">
 						<a href="'.$_SERVER["REQUEST_URI"].'#Step3"><button id="buttonstep_3" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
 					</div>
 					<div>
@@ -416,7 +416,7 @@ if ($action == 'view') {
         <div class="portlet light divstep topmarginstep" id="step3">
                 <h2 id="Step3">'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
                 <div style="padding-left:25px">
-                '.$langs->trans("AutomigrationStep3Text").'<br><br>           
+                '.$langs->trans("AutomigrationStep3Text").'<br><br>
                 </div>
                 <div class="center" style="padding-top:10px">';
 				print '<select id="instanceselect" name="instanceselect" class="minwidth600" required="required">';
@@ -428,32 +428,32 @@ if ($action == 'view') {
 		$atleastonefound=0;
 
 		foreach ($listofcontractid as $id => $contract) {
-							$planref = $contract->array_options['options_plan'];
-							$statuslabel = $contract->array_options['options_deployment_status'];
-							$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
+			$planref = $contract->array_options['options_plan'];
+			$statuslabel = $contract->array_options['options_deployment_status'];
+			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-							$dbprefix = $contract->array_options['options_db_prefix'];
-							if (empty($dbprefix)) $dbprefix = 'llx_';
+			$dbprefix = $contract->array_options['options_db_prefix'];
+			if (empty($dbprefix)) $dbprefix = 'llx_';
 
 			if ($statuslabel == 'undeployed') {
 				continue;
 			}
 
-							// Get info about PLAN of Contract
-							$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
+			// Get info about PLAN of Contract
+			$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
 
-							$planid = 0;
-							$freeperioddays = 0;
-							$directaccess = 0;
+			$planid = 0;
+			$freeperioddays = 0;
+			$directaccess = 0;
 
-							$tmpproduct = new Product($db);
+			$tmpproduct = new Product($db);
 			foreach ($contract->lines as $keyline => $line) {
 				if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
-									$statuslabel = 'suspended';
+					$statuslabel = 'suspended';
 				}
 
 				if ($line->fk_product > 0) {
-						$tmpproduct->fetch($line->fk_product);
+					$tmpproduct->fetch($line->fk_product);
 					if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
 						$planref = $tmpproduct->ref;			// Warning, ref is in language of user
 						$planlabel = $tmpproduct->label;		// Warning, label is in language of user
@@ -473,8 +473,7 @@ if ($action == 'view') {
 			if ($statuslabel == 'undeployed') { $color = 'grey'; }
 			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
-			if ($tmpproduct->array_options['options_typesupport'] != 'none'
-				&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			if ($tmpproduct->array_options['options_typesupport'] != 'none' && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				if (! $ispaid) {	// non paid instances
 					$priority = 'low';
 					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';

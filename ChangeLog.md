@@ -12,6 +12,7 @@
  * NEW Add a parameter "Max number of deployement per IP (VPN)" (default 1) that is specific on VPN usage so different
        than the paramater "Max number of deployement per IP" (default 4)
  * NEW Can enablde/disable external service to validate IP or email in a simple click into SellYourSaas module setup.
+ * NEW Add option Direct SFTP/mysql access "On demand only"
  * Prepare code for service to validate email quality (like done for IP validation)
  * FIX Timezone is filled also for instances created from customer dashboard
 
