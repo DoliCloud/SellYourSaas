@@ -178,7 +178,7 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $fromline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' Email detected into From: '. $emailfrom."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $messageidline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APPEND);
-file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - ".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' PWD=' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - REQUEST_URI=".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
 
 $blacklistofips = @file_get_contents($pathtospamdir.'/blacklistip');
@@ -200,6 +200,21 @@ if ($blacklistoffroms === false) {
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 3. Blacklisted from '.$emailfrom." found into file blacklistfrom\n", FILE_APPEND);
 		exit(4);
+	}
+}
+
+$blacklistofdirs = @file_get_contents($pathtospamdir.'/blacklistdir');
+if ($blacklistofdirs === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistdir can't be read.\n", FILE_APPEND);
+} elseif (! empty($_SERVER["REQUEST_URI"])) {
+	$blacklistofdirsarray = explode("\n", $blacklistofdirs);
+	if (is_array($blacklistofdirsarray)) {
+		foreach ($blacklistofdirsarray as $blacklistofdir) {
+			if (preg_match('/'.preg_quote(trim($blacklistofdir), '/').'/', $_SERVER["REQUEST_URI"])) {
+				file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 7. Blacklisted url '.$_SERVER["REQUEST_URI"]." found into file blacklistdir\n", FILE_APPEND);
+				exit(7);
+			}
+		}
 	}
 }
 
@@ -246,6 +261,6 @@ if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEN
 if (empty($ip)) file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
 
-time_nanosleep(0, 200000000);
+time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
 
 return $resexec;
