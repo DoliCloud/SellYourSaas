@@ -129,11 +129,11 @@ while read -r line ; do
 
 	# Build file for this email
 	if [ "x$processid" == "x" ]; then
-		rm "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+		rm "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp" >/dev/null 2>&1
 		> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 		chmod ug+rw "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	else
-		rm "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+		rm "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp" >/dev/null 2>&1
 		> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	fi
 
