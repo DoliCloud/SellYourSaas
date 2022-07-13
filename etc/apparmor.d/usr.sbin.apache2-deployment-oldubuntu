@@ -66,6 +66,8 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
     /proc/loadavg r,
     /run/clamav/** rw,
 	/run/mysqld/mysqld.sock r,
+    /tmp/spam/ rw,
+    /tmp/spam/** rw,
     /usr/bin/clamdscan rix,
     /usr/bin/free rix,
     /usr/bin/id rix,

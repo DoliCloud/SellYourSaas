@@ -43,6 +43,8 @@
     /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
     /proc/*/attr/current rw,
     /proc/loadavg r,
+    /tmp/spam/ rw,
+    /tmp/spam/** rw,
     /run/clamav/** rw,
     /run/mysqld/mysqld.sock r,
     /usr/bin/clamdscan rix,

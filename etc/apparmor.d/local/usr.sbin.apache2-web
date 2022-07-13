@@ -44,6 +44,8 @@
     /proc/loadavg r,
     /run/clamav/** rw,
     /run/mysqld/mysqld.sock r,
+    /tmp/spam/ rw,
+    /tmp/spam/** rw,
     /usr/bin/clamdscan rix,
     /usr/bin/id rix,
     /usr/bin/mysqldump mrix,
