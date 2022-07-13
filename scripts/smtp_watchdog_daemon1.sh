@@ -68,7 +68,7 @@ while read -r line ; do
 	result=""
 	if [ "x$smtpportcalled" != "x" ]; then
 		if [ "x$smtpipcalled" != "x" ]; then
-			export command="ss --oneline -e -H -p -t state all dport $smtpportcalled dst $smtpipcalled"
+			export command="ss --oneline -e -H -p -t state all dport $smtpportcalled dst [$smtpipcalled]"
 			echo "Execute command $command" >> /var/log/phpsendmail.log 2>&1
 			result=`$command`
 			if [ "x$result" != "x" ]; then
@@ -77,18 +77,18 @@ while read -r line ; do
 				export processid=`echo "$result" | grep ESTAB | sed 's/.*pid=//' | sed 's/,.*//'`
 				export processownerid=`echo "$result" | grep ESTAB | sed 's/.*uid://' | sed 's/\s.*//'`
 
-				echo "We got processid=$processid" >> /var/log/phpsendmail.log 2>&1
-				echo "We got processownerid=$processownerid" >> /var/log/phpsendmail.log 2>&1
+				echo "We got processid=${processid}, processownerid=${processownerid}" >> /var/log/phpsendmail.log 2>&1
 				
 				if [ "x$processownerid" != "x" ]; then
-					if [[ $processownerid == ?(-)+([[:digit:]]) ]]; then
+					re='^[0-9]+$'
+					if [[ $processownerid =~ $re ]] ; then
 						echo "We try to get the usernamestring" >> /var/log/phpsendmail.log 2>&1
 						# And now try to find the username of process id
 						#echo "Execute command ps fauxwZ | grep $processid" >> /var/log/phpsendmail.log 2>&1
 						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/phpsendmail.log 2>&1
 						#ps fauxwZ >> /var/log/phpsendmail.log 2>&1
 						
-						export usernamestring=`grep 'x:$processownerid:' /etc/passwd | cut -f1 -d:`
+						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
 					fi
 				fi				
 			fi
@@ -99,7 +99,7 @@ while read -r line ; do
 	echo "Emails were sent using SMTP by process $processownerid" > "/tmp/phpsendmail-$processowner-$processid-smtpsocket.tmp"
 	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
-	echo "$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	echo "usernamestring=$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	
 	# Complete log /var/log/phpsendmail.log of all emails
 	if [ "x$smtpportcalled" != "x" ]; then
