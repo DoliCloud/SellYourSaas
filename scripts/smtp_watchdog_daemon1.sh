@@ -54,16 +54,32 @@ while read -r line ; do
 	export smtpipcalled=`echo $line | sed 's/.*DST=//' | sed 's/\s.*//'`
 	export smtpportcaller=`echo $line | sed 's/.*SPT=//' | sed 's/\s.*//'`
 	export smtpportcalled=`echo $line | sed 's/.*DPT=//' | sed 's/\s.*//'`
-	
-	command="ss -p -t -a state all dport = $smtpportcalled dst = $smtpipcalled"
-	result=`$command`
-	
+
 	export processid="smtpsocket"
 	export processownerid="xxxx"
+	
+	result=""
+	if [ "x$smtpportcalled" != "x" ]; then
+		if [ "x$smtpipcalled" != "x" ]; then
+			command="ss -e -H -p -t -o state all dport = $smtpportcalled dst = $smtpipcalled"
+			result=`$command`
+			if [ "x$result" != "x" ]; then
+				export processid=`echo "$result" | sed 's/.*pid=//' | sed 's/,.*//'`
+				
+				if [ "x$processid" != "x" ]; then
+					# And now try to find the username of process id
+					$command="ps fauxwwZ | grep $processid"
+					export usernamestring=`$command`
+				fi				
+			fi
+		fi
+	fi
+
 	
 	echo "Emails were sent using SMTP by process $processowner" > /tmp/phpsendmail-$processowner-$processid.tmp
 	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> /tmp/phpsendmail-$processowner-$processid.tmp
 	echo $result >> /tmp/phpsendmail-$processowner-$processid.tmp
+	echo $usernamestring >> /tmp/phpsendmail-$processowner-$processid.tmp
 	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 	#sleep 5
 	export now=`date '+%Y%m%d%H%M%S'`
