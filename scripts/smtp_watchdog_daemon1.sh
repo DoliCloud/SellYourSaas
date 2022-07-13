@@ -86,10 +86,10 @@ while read -r line ; do
 	fi
 
 	
-	echo "Emails were sent using SMTP by process $processownerid" > "/tmp/phpsendmail-$processowner-$processid.tmp"
-	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid.tmp"
-	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid.tmp"
-	echo "$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid.tmp"
+	echo "Emails were sent using SMTP by process $processownerid" > "/tmp/phpsendmail-$processowner-$processid-smtpsocket.tmp"
+	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	echo "$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 	#sleep 5
 	export now=`date '+%Y%m%d%H%M%S'`
