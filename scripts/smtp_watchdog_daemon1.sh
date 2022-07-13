@@ -68,25 +68,28 @@ while read -r line ; do
 				echo "Extract processid from line" >> /var/log/smtp_watchdog1.log 2>&1
 				echo "$result" >> /var/log/smtp_watchdog1.log 2>&1
 				export processid=`echo "$result" | sed 's/.*pid=//' | sed 's/,.*//'`
-				
+				export processownerid=`echo "$result" | sed 's/.*uid=//' | sed 's/,.*//'`
+
 				if [ "x$processid" != "x" ]; then
 					# And now try to find the username of process id
-					echo "Try to find username from processid=$processid" >> /var/log/smtp_watchdog1.log 2>&1
-					export command="ps fauxwZ | grep $processid"
-					echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
-					ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/smtp_watchdog1.log 2>&1
-					ps fauxwZ >> /var/log/smtp_watchdog1.log 2>&1
-					#usernamestring=`$command`
+					echo "Try to find username from processid=$processid processownerid=$processownerid" >> /var/log/smtp_watchdog1.log 2>&1
+					#export command="ps fauxwZ | grep $processid"
+					#echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
+					#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/smtp_watchdog1.log 2>&1
+					#ps fauxwZ >> /var/log/smtp_watchdog1.log 2>&1
+					
+					export command="grep 'x:$processownerid:' /etc/passwd"
+					export usernamestring=`$command`
 				fi				
 			fi
 		fi
 	fi
 
 	
-	echo "Emails were sent using SMTP by process $processowner" > "/tmp/phpsendmail-$processowner-$processid.tmp"
-	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processowner-$processid.tmp"
-	echo "$result" >> "/tmp/phpsendmail-$processowner-$processid.tmp"
-	echo "$usernamestring" >> "/tmp/phpsendmail-$processowner-$processid.tmp"
+	echo "Emails were sent using SMTP by process $processownerid" > "/tmp/phpsendmail-$processowner-$processid.tmp"
+	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid.tmp"
+	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid.tmp"
+	echo "$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid.tmp"
 	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 	#sleep 5
 	export now=`date '+%Y%m%d%H%M%S'`
