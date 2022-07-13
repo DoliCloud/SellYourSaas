@@ -79,6 +79,7 @@ while read -r line ; do
 				export processownerid=`echo "$result" | grep ESTAB | sed 's/.*uid://' | sed 's/\s.*//'`
 
 				echo "We got processid=${processid}, processownerid=${processownerid}" >> /var/log/phpsendmail.log 2>&1
+				#ps fauxw >> /var/log/phpsendmail.log 2>&1
 				
 				if [ "x$processid" != "x" ]; then
 					re='^[0-9]+$'
@@ -96,25 +97,28 @@ while read -r line ; do
 				
 						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
 						echo "usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
-					else 
+					else
 						echo "processownerid not valid, we can't find $usernamestring" >> "/var/log/phpsendmail.log"
-					if
+					fi
 						
 					if [[ $processid =~ $re ]] ; then
 						echo "We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
+						#echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
+						echo "tail -n 200 /var/log/apache2/other_vhosts_pid_log | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
 						
-						export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep " $processid "`
+						#export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep " $processid "`
+						export apachestring=`tail -n 200 /var/log/apache2/other_vhosts_pid_log | grep " $processid "`
                         echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
 
                         # Try to guess remoteip
                         if [[ "x$apachestring" != "x" ]] ; then
-                        	export remoteip=`echo $apachestring | awk '{print $12}'`
+                        	export remoteip=`echo $apachestring | awk '{print $2}'`
                             echo "remoteip=$remoteip" >> "/var/log/phpsendmail.log"
                         fi
                     else 
                     	echo "processid not valid, we can't find apache and remoteip data" >> "/var/log/phpsendmail.log"
 					fi
-				fi				
+				fi
 			fi
 		fi
 	fi
