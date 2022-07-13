@@ -61,13 +61,16 @@ while read -r line ; do
 	result=""
 	if [ "x$smtpportcalled" != "x" ]; then
 		if [ "x$smtpipcalled" != "x" ]; then
-			command="ss -e -H -p -t -o state all dport = $smtpportcalled dst = $smtpipcalled"
+			command="ss -e -H -p -t -o state all dport = $smtpportcalled dst = $smtpipcalled | head -n 1"
+			echo "Execute command $command"
 			result=`$command`
 			if [ "x$result" != "x" ]; then
+				echo "Extract processid from line"
 				export processid=`echo "$result" | sed 's/.*pid=//' | sed 's/,.*//'`
 				
 				if [ "x$processid" != "x" ]; then
 					# And now try to find the username of process id
+					echo "Try to find username from processid"
 					$command="ps fauxwwZ | grep $processid"
 					export usernamestring=`$command`
 				fi				
