@@ -53,7 +53,7 @@ echo "Now event captured will be logged into /var/log/phpsendmail.log" >> /var/l
 tail -F $WDLOGFILE | grep --line-buffered 'UFW ALLOW' | 
 while read -r line ; do
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
-	echo "$now ----- start smtp_watchdog_daemon1" >> /var/log/phpsendmail.log 2>&1
+	echo "$now ----- start smtp_watchdog_daemon1.sh" >> /var/log/phpsendmail.log 2>&1
 	echo "Found a UFW ALLOW, in $WDLOGFILE, now try to find process owner..." >> /var/log/phpsendmail.log 2>&1
 	echo "$line" >> /var/log/phpsendmail.log 2>&1
 
@@ -74,8 +74,8 @@ while read -r line ; do
 			if [ "x$result" != "x" ]; then
 				echo "Extract processid from line" >> /var/log/phpsendmail.log 2>&1
 				echo "$result" >> /var/log/phpsendmail.log 2>&1
-				export processid=`echo "$result" | sed 's/.*pid=//' | sed 's/,.*//'`
-				export processownerid=`echo "$result" | sed 's/.*uid://' | sed 's/\s.*//'`
+				export processid=`echo "$result" | grep ESTAB | sed 's/.*pid=//' | sed 's/,.*//'`
+				export processownerid=`echo "$result" | grep ESTAB | sed 's/.*uid://' | sed 's/\s.*//'`
 
 				echo "We got processid=$processid" >> /var/log/phpsendmail.log 2>&1
 				echo "We got processownerid=$processownerid" >> /var/log/phpsendmail.log 2>&1
@@ -105,7 +105,7 @@ while read -r line ; do
 	# Complete log /var/log/phpsendmail.log of all emails
 	if [ "x$smtpportcalled" != "x" ]; then
 		if [ "x$smtpipcalled" != "x" ]; then
-			echo "$usernamestring" >> "/var/log/phpsendmail.log"
+			echo "usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
 			#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 			#sleep 5
 			export now=`date '+%Y%m%d%H%M%S'`
