@@ -210,7 +210,7 @@ if ($blacklistofdirs === false) {
 	$blacklistofdirsarray = explode("\n", $blacklistofdirs);
 	if (is_array($blacklistofdirsarray)) {
 		foreach ($blacklistofdirsarray as $blacklistofdir) {
-			if (preg_match('/'.preg_quote(trim($blacklistofdir), '/').'/', $_SERVER["REQUEST_URI"])) {
+			if ($blacklistofdir && preg_match('/'.preg_quote(trim($blacklistofdir), '/').'/', $_SERVER["REQUEST_URI"])) {
 				file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 7. Blacklisted dir '.$_SERVER["REQUEST_URI"]." contains blacklistdir key ".$blacklistofdir."\n", FILE_APPEND);
 				exit(7);
 			}
