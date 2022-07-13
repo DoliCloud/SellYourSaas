@@ -143,7 +143,9 @@ while read -r line ; do
 	echo "usernamestring=$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "apachestring=$apachestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "remoteip=$remoteip" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
-
+	
+	echo "The file /tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp has been generated" >> "/var/log/phpsendmail.log"
+	
 	if [[ "x$usernamestring" =~ ^xosu.* ]]; then
 		chown $usernamestring.$usernamestring "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp" 2>&1
 	fi
