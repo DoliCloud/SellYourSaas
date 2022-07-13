@@ -96,8 +96,8 @@ while read -r line ; do
 	fi
 
 	# Build file for this email
-	echo "Emails were sent using SMTP by process $processownerid" > "/tmp/phpsendmail-$processowner-$processid-smtpsocket.tmp"
-	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	echo "Emails were sent using SMTP by process $processownerid" > "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	echo "SMTP connection from $smtpipcaller:$smtpportcaller -> $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "usernamestring=$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	
