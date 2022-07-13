@@ -61,7 +61,7 @@ while read -r line ; do
 	result=""
 	if [ "x$smtpportcalled" != "x" ]; then
 		if [ "x$smtpipcalled" != "x" ]; then
-			command="ss -e -H -p -t -o state all dport = $smtpportcalled dst = $smtpipcalled | head -n 1"
+			command="ss --oneline -e -H -p -t state all dport $smtpportcalled dst $smtpipcalled | head -n 1"
 			echo "Execute command $command"
 			result=`$command`
 			if [ "x$result" != "x" ]; then
