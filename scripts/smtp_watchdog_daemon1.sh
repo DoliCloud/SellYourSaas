@@ -50,6 +50,8 @@ echo "EMAILTO=$EMAILTO" >> /var/log/smtp_watchdog1.log
 echo "PID=$PID" >> /var/log/smtp_watchdog1.log
 echo "Now event captured will be logged into /var/log/phpsendmail.log" >> /var/log/smtp_watchdog1.log
 
+re='^[0-9]+$'
+
 tail -F $WDLOGFILE | grep --line-buffered 'UFW ALLOW' | 
 while read -r line ; do
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
@@ -82,7 +84,6 @@ while read -r line ; do
 				#ps fauxw >> /var/log/phpsendmail.log 2>&1
 				
 				if [ "x$processid" != "x" ]; then
-					re='^[0-9]+$'
 					if [[ $processownerid =~ $re ]] ; then
 						echo "We got the processownerid from the ss command, surely a web access" >> /var/log/phpsendmail.log 2>&1
 					else
@@ -135,12 +136,16 @@ while read -r line ; do
 	fi
 	
 	# Complete log /var/log/phpsendmail.log of all emails
-	if [ "x$remoteip" != "x" ]; then
+	if [[ $processownerid =~ $re ]] ; then
 		export now=`date '+%Y%m%d%H%M%S'`
-
+	
 		# Test if we reached quota, if yes, discard the email and log it for fail2ban
 		export resexec=`find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l`
 		echo "$now nb of process found with find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l = $resexec (we accept $MAXPERDAY)" >> /var/log/phpsendmail.log
+		
+		if [ "x$remoteip" == "x" ]; then
+			remoteip="unknown"
+		fi
 		if [[ $resexec -gt $MAXPERDAY ]]; then
 			echo "$now $remoteip sellyoursaas rules ko daily quota reached. User has reached its daily quota of $MAXPERDAY" >> /var/log/phpsendmail.log
 		else
