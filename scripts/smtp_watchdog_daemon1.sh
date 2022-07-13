@@ -140,9 +140,9 @@ while read -r line ; do
 
 		# Test if we reached quota, if yes, discard the email and log it for fail2ban
 		export resexec=`find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l`
-		echo "$now nb of process found with find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l = $resexec" >> /var/log/phpsendmail.log
+		echo "$now nb of process found with find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l = $resexec (we accept ".$MAXPERDAY.")" >> /var/log/phpsendmail.log
 		if [[ $resexec -gt $MAXPERDAY ]]; then
-			echo "$now $remoteip sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of $MAXPERDAY" >> /var/log/phpsendmail.log
+			echo "$now $remoteip sellyoursaas rules ko daily quota reached. User has reached its daily quota of $MAXPERDAY" >> /var/log/phpsendmail.log
 		else
 			echo "$now $remoteip sellyoursaas rules ok" >> /var/log/phpsendmail.log
 		fi
