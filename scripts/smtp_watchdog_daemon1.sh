@@ -56,8 +56,9 @@ tail -F $WDLOGFILE | grep --line-buffered 'UFW ALLOW' |
 while read -r line ; do
 	export remoteip='unknown'
 	export usernamestring=""
-	export processid="smtpsocket"
-	export processownerid="xxxx"
+	export processownerid=""
+	export processid=""
+	export apachestring=""
 
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
 	echo "$now ----- start smtp_watchdog_daemon1.sh" >> /var/log/phpsendmail.log 2>&1
@@ -78,8 +79,8 @@ while read -r line ; do
 			if [ "x$result" != "x" ]; then
 				echo "Extract processid from line" >> /var/log/phpsendmail.log 2>&1
 				echo "$result" >> /var/log/phpsendmail.log 2>&1
-				export processid=`echo "$result" | grep ESTAB | sed 's/.*pid=//' | sed 's/,.*//'`
 				export processownerid=`echo "$result" | grep ESTAB | sed 's/.*uid://' | sed 's/\s.*//'`
+				export processid=`echo "$result" | grep ESTAB | sed 's/.*pid=//' | sed 's/,.*//'`
 
 				export now=`date '+%Y-%m-%d %H:%M:%S'`
 				echo "$now We got processid=${processid}, processownerid=${processownerid}" >> /var/log/phpsendmail.log 2>&1
