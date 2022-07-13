@@ -83,13 +83,11 @@ while read -r line ; do
 				if [ "x$processownerid" != "x" ]; then
 					if [[ $processownerid == ?(-)+([[:digit:]]) ]]; then
 						# And now try to find the username of process id
-						#export command="ps fauxwZ | grep $processid"
-						#echo "Execute command $command" >> /var/log/phpsendmail.log 2>&1
+						#echo "Execute command ps fauxwZ | grep $processid" >> /var/log/phpsendmail.log 2>&1
 						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/phpsendmail.log 2>&1
 						#ps fauxwZ >> /var/log/phpsendmail.log 2>&1
 						
-						export command="grep 'x:$processownerid:' /etc/passwd"
-						export usernamestring=`$command`
+						export usernamestring=`grep 'x:$processownerid:' /etc/passwd | cut -f1 -d:`
 					fi
 				fi				
 			fi
