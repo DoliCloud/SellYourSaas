@@ -46,11 +46,11 @@ echo "PID=$PID" >> /var/log/smtp_watchdog1.log
 tail -F $WDLOGFILE | grep --line-buffered 'UFW ALLOW' | 
 while read -r line ; do
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
-	echo "$now ----- start smtp_watchdog_daemon1" 
+	echo "$now ----- start smtp_watchdog_daemon1" >> /var/log/smtp_watchdog1.log 2>&1
 	echo "Found a UFW ALLOW, in $WDLOGFILE, now try to find process owner..." >> /var/log/smtp_watchdog1.log 2>&1
 	echo "$line" >> /var/log/smtp_watchdog1.log 2>&1
 	
-	echo "Send email using SMTP by process xxx" > /var/log/phpsendmail-xxxx-smtpsocket.tmp
+	echo "Emails were sent using SMTP by process xxx" > /var/log/phpsendmail-xxxx-smtpsocket.tmp
 	echo "SMTP used is zzzz" >> /var/log/phpsendmail-xxxx-smtpsocket.tmp
 	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 	#sleep 5
