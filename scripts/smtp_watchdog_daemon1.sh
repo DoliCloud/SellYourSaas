@@ -129,20 +129,27 @@ while read -r line ; do
 	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "usernamestring=$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "apachestring=$apachestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
-	
-	# Complete log /var/log/phpsendmail.log of all emails
-	if [ "x$smtpportcalled" != "x" ]; then
-		if [ "x$smtpipcalled" != "x" ]; then
-			#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
-			#sleep 5
-			export now=`date '+%Y%m%d%H%M%S'`
-
-			# Test if we reached quota, if yes, ban SMTP port for IP
-			echo "$now $remoteip sellyoursaas rules ok" >> /var/log/phpsendmail.log
-			#echo "$now $remoteip sellyoursaas rules ko daily quota reached - we block SMTP ports. User has reached its daily quota of '.$MAXPERDAY >> /var/log/phpsendmail.log;
-		fi
+	echo "remoteip=$remoteip" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	if [[ "x$usernamestring" =~ ^xosu.* ]]; then
+		chown $usernamestring.$usernamestring "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp" 2>&1
 	fi
 	
+	# Complete log /var/log/phpsendmail.log of all emails
+	if [ "x$remoteip" != "x" ]; then
+		export now=`date '+%Y%m%d%H%M%S'`
+
+		# Test if we reached quota, if yes, discard the email and log it for fail2ban
+		export resexec=`find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l`
+		echo "$now nb of process found with find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l = $resexec" >> /var/log/phpsendmail.log
+		if [[ $resexec -gt $MAXPERDAY ]]; then
+			echo "$now $remoteip sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of $MAXPERDAY" >> /var/log/phpsendmail.log
+		else
+			echo "$now $remoteip sellyoursaas rules ok" >> /var/log/phpsendmail.log
+		fi
+	fi
+
+	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
+
 done
 
 # This script never end
