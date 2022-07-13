@@ -70,8 +70,8 @@ while read -r line ; do
 				
 				if [ "x$processid" != "x" ]; then
 					# And now try to find the username of process id
-					echo "Try to find username from processid"
-					$command="ps fauxwwZ | grep $processid"
+					echo "Try to find username from processid=$processid"
+					export command="ps fauxwwZ | grep $processid"
 					export usernamestring=`$command`
 				fi				
 			fi
