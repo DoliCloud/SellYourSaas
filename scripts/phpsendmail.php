@@ -34,6 +34,8 @@ $MAXOK = 10;
 $MAXPERDAY = 500;
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start phpsendmail.php\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " SERVER_NAME = ".$_SERVER["SERVER_NAME"]."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " DOCUMENT_ROOT = ".$_SERVER["DOCUMENT_ROOT"]."\n", FILE_APPEND);
 
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Get $maxemailperday
@@ -48,7 +50,7 @@ if ($fp) {
 		}
 	}
 } else {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " Failed to open /etc/sellyoursaas-public.conf file\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR Failed to open /etc/sellyoursaas-public.conf file\n", FILE_APPEND);
 	//exit(-1);
 }
 if (is_numeric($maxemailperday) && $maxemailperday > 0) {
