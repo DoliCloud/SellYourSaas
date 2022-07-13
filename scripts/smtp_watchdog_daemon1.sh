@@ -104,10 +104,10 @@ while read -r line ; do
 					if [[ $processid =~ $re ]] ; then
 						echo "We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
 						#echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
-						echo "tail -n 200 /var/log/apache2/other_vhosts_pid_log | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
+						echo "tail -n 200 /var/log/apache2/other_vhosts_pid_log | grep -m 1 \" $processid \"" >> /var/log/phpsendmail.log 2>&1
 						
-						#export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep " $processid "`
-						export apachestring=`tail -n 200 /var/log/apache2/other_vhosts_pid_log | grep " $processid "`
+						#export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep -m 1 " $processid "`
+						export apachestring=`tail -n 200 /var/log/apache2/other_vhosts_pid_log | grep -m 1 " $processid "`
                         echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
 
                         # Try to guess remoteip
