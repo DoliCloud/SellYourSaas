@@ -103,13 +103,14 @@ while read -r line ; do
 						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/phpsendmail.log 2>&1
 						#ps fauxwZ >> /var/log/phpsendmail.log 2>&1
 						
-						export apachestring=`apachectl fullstatus | grep "x:$processownerid:"`
-						echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
-						
-						# Try to guess remoteid
-						if [[ "x$apachestring" != "x" ]] ; then
-							echo "aaaa"
-						fi
+						export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-statuss | grep " $processid "`
+                        echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
+
+                        # Try to guess remoteid
+                        if [[ "x$apachestring" != "x" ]] ; then
+                        	export remoteip=`echo $apachestring | awk '{print $12}'`
+                            echo "remoteip=$remoteip" >> "/var/log/phpsendmail.log"
+                        fi
 					fi
 				fi				
 			fi
