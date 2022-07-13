@@ -65,7 +65,8 @@ while read -r line ; do
 			echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
 			result=`$command`
 			if [ "x$result" != "x" ]; then
-				echo "Extract processid from line"
+				echo "Extract processid from line" >> /var/log/smtp_watchdog1.log 2>&1
+				echo "$result" >> /var/log/smtp_watchdog1.log 2>&1
 				export processid=`echo "$result" | sed 's/.*pid=//' | sed 's/,.*//'`
 				
 				if [ "x$processid" != "x" ]; then
@@ -82,10 +83,10 @@ while read -r line ; do
 	fi
 
 	
-	echo "Emails were sent using SMTP by process $processowner" > /tmp/phpsendmail-$processowner-$processid.tmp
-	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> /tmp/phpsendmail-$processowner-$processid.tmp
-	echo "$result" >> /tmp/phpsendmail-$processowner-$processid.tmp
-	echo "$usernamestring" >> /tmp/phpsendmail-$processowner-$processid.tmp
+	echo "Emails were sent using SMTP by process $processowner" > "/tmp/phpsendmail-$processowner-$processid.tmp"
+	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processowner-$processid.tmp"
+	echo "$result" >> "/tmp/phpsendmail-$processowner-$processid.tmp"
+	echo "$usernamestring" >> "/tmp/phpsendmail-$processowner-$processid.tmp"
 	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 	#sleep 5
 	export now=`date '+%Y%m%d%H%M%S'`
