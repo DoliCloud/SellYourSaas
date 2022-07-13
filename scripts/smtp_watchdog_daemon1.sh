@@ -96,21 +96,23 @@ while read -r line ; do
 				
 						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
 						echo "usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
+					else 
+						echo "processownerid not valid, we can't find $usernamestring" >> "/var/log/phpsendmail.log"
+					if
 						
+					if [[ $processid =~ $re ]] ; then
 						echo "We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
-						# And now try to find the username of process id
-						#echo "Execute command ps fauxwZ | grep $processid" >> /var/log/phpsendmail.log 2>&1
-						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/phpsendmail.log 2>&1
-						#ps fauxwZ >> /var/log/phpsendmail.log 2>&1
 						
-						export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-statuss | grep " $processid "`
+						export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep " $processid "`
                         echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
 
-                        # Try to guess remoteid
+                        # Try to guess remoteip
                         if [[ "x$apachestring" != "x" ]] ; then
                         	export remoteip=`echo $apachestring | awk '{print $12}'`
                             echo "remoteip=$remoteip" >> "/var/log/phpsendmail.log"
                         fi
+                    else 
+                    	echo "processid not valid, we can't find apache and remoteip data" >> "/var/log/phpsendmail.log"
 					fi
 				fi				
 			fi
