@@ -68,18 +68,22 @@ while read -r line ; do
 				echo "Extract processid from line" >> /var/log/smtp_watchdog1.log 2>&1
 				echo "$result" >> /var/log/smtp_watchdog1.log 2>&1
 				export processid=`echo "$result" | sed 's/.*pid=//' | sed 's/,.*//'`
-				export processownerid=`echo "$result" | sed 's/.*uid=//' | sed 's/,.*//'`
+				export processownerid=`echo "$result" | sed 's/.*uid://' | sed 's/\s.*//'`
 
-				if [ "x$processid" != "x" ]; then
-					# And now try to find the username of process id
-					echo "Try to find username from processid=$processid processownerid=$processownerid" >> /var/log/smtp_watchdog1.log 2>&1
-					#export command="ps fauxwZ | grep $processid"
-					#echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
-					#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/smtp_watchdog1.log 2>&1
-					#ps fauxwZ >> /var/log/smtp_watchdog1.log 2>&1
-					
-					export command="grep 'x:$processownerid:' /etc/passwd"
-					export usernamestring=`$command`
+				echo "We got processid=$processid" >> /var/log/smtp_watchdog1.log 2>&1
+				echo "We got processownerid=$processownerid" >> /var/log/smtp_watchdog1.log 2>&1
+				
+				if [ "x$processownerid" != "x" ]; then
+					if [[ $processownerid == ?(-)+([[:digit:]]) ]]; then
+						# And now try to find the username of process id
+						#export command="ps fauxwZ | grep $processid"
+						#echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
+						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/smtp_watchdog1.log 2>&1
+						#ps fauxwZ >> /var/log/smtp_watchdog1.log 2>&1
+						
+						export command="grep 'x:$processownerid:' /etc/passwd"
+						export usernamestring=`$command`
+					fi
 				fi				
 			fi
 		fi
