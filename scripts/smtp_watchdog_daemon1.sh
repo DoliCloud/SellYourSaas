@@ -74,8 +74,8 @@ while read -r line ; do
 					echo "Try to find username from processid=$processid" >> /var/log/smtp_watchdog1.log 2>&1
 					export command="ps fauxwZ | grep $processid"
 					echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
+					ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/smtp_watchdog1.log 2>&1
 					ps fauxwZ >> /var/log/smtp_watchdog1.log 2>&1
-					ps fauxwZ | grep $processid | grep apache2 >> /var/log/smtp_watchdog1.log 2>&1
 					#usernamestring=`$command`
 				fi				
 			fi
