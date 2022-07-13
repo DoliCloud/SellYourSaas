@@ -82,6 +82,7 @@ while read -r line ; do
 				
 				if [ "x$processownerid" != "x" ]; then
 					if [[ $processownerid == ?(-)+([[:digit:]]) ]]; then
+						echo "We try to get the usernamestring" >> /var/log/phpsendmail.log 2>&1
 						# And now try to find the username of process id
 						#echo "Execute command ps fauxwZ | grep $processid" >> /var/log/phpsendmail.log 2>&1
 						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/phpsendmail.log 2>&1
