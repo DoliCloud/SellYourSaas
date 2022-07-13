@@ -126,8 +126,15 @@ while read -r line ; do
 	fi
 
 	# Build file for this email
-	echo "Emails were sent using SMTP by process $processownerid" > "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
-	echo "SMTP connection from $smtpipcaller:$smtpportcaller -> $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	if [ "x$processid" == "x" ]; then
+		chmod a+rw "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	else
+		> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	fi
+
+	echo "Emails were sent using SMTP by process $processownerid" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+		echo "SMTP connection from $smtpipcaller:$smtpportcaller -> $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "usernamestring=$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "apachestring=$apachestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
