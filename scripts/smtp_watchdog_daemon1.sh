@@ -56,7 +56,7 @@ tail -F $WDLOGFILE | grep --line-buffered 'UFW ALLOW' |
 while read -r line ; do
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
 	echo "$now ----- start smtp_watchdog_daemon1.sh" >> /var/log/phpsendmail.log 2>&1
-	echo "Found a UFW ALLOW, in $WDLOGFILE, now try to find process owner..." >> /var/log/phpsendmail.log 2>&1
+	echo "$now Found a UFW ALLOW, in $WDLOGFILE, now try to find process IP and ports..." >> /var/log/phpsendmail.log 2>&1
 	echo "$line" >> /var/log/phpsendmail.log 2>&1
 
 	export remoteip='unknown'
@@ -80,7 +80,8 @@ while read -r line ; do
 				export processid=`echo "$result" | grep ESTAB | sed 's/.*pid=//' | sed 's/,.*//'`
 				export processownerid=`echo "$result" | grep ESTAB | sed 's/.*uid://' | sed 's/\s.*//'`
 
-				echo "We got processid=${processid}, processownerid=${processownerid}" >> /var/log/phpsendmail.log 2>&1
+				export now=`date '+%Y-%m-%d %H:%M:%S'`
+				echo "$now We got processid=${processid}, processownerid=${processownerid}" >> /var/log/phpsendmail.log 2>&1
 				#ps fauxw >> /var/log/phpsendmail.log 2>&1
 				
 				if [ "x$processid" != "x" ]; then
