@@ -59,7 +59,7 @@ fi
 
 if [ "x$1" == "xstop" ]; then
 		# Kill the tail process launched by the daemon
-        pid=`ps ax | grep 'tail' | grep '/var/log/syslog' | grep -v grep | awk ' { print $1 } '`
+        pid=`ps ax | grep 'tail' | grep '/var/log/ufw.log' | grep -v grep | awk ' { print $1 } '`
         if [ "x$pid" == "x" ]; then
                 echo smtp_watchdog_daemon1 "tail" process not started
         else

@@ -5,7 +5,7 @@
 #
 
 export now=`date '+%Y-%m-%d %H:%M:%S'`
-export WDLOGFILE='/var/log/syslog'
+export WDLOGFILE='/var/log/ufw.log'
 
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
@@ -55,8 +55,15 @@ while read -r line ; do
 	export smtpportcaller=`echo $line | sed 's/.*SPT=//' | sed 's/\s.*//'`
 	export smtpportcalled=`echo $line | sed 's/.*DPT=//' | sed 's/\s.*//'`
 	
-	echo "Emails were sent using SMTP by process xxx" > /tmp/phpsendmail-xxxx-smtpsocket.tmp
-	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> /tmp/phpsendmail-xxxx-smtpsocket.tmp
+	command="ss -p -t -a state all dport = $smtpportcalled dst = $smtpipcalled"
+	result=`$command`
+	
+	export processid="smtpsocket"
+	export processownerid="xxxx"
+	
+	echo "Emails were sent using SMTP by process $processowner" > /tmp/phpsendmail-$processowner-$processid.tmp
+	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> /tmp/phpsendmail-$processowner-$processid.tmp
+	echo $result >> /tmp/phpsendmail-$processowner-$processid.tmp
 	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 	#sleep 5
 	export now=`date '+%Y%m%d%H%M%S'`
