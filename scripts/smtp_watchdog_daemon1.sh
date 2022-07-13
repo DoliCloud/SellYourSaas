@@ -49,9 +49,14 @@ while read -r line ; do
 	echo "$now ----- start smtp_watchdog_daemon1" >> /var/log/smtp_watchdog1.log 2>&1
 	echo "Found a UFW ALLOW, in $WDLOGFILE, now try to find process owner..." >> /var/log/smtp_watchdog1.log 2>&1
 	echo "$line" >> /var/log/smtp_watchdog1.log 2>&1
+
+	export smtpipcaller=`echo $line | sed 's/.*SRC=//' | sed 's/\s.*//'`
+	export smtpipcalled=`echo $line | sed 's/.*DST=//' | sed 's/\s.*//'`
+	export smtpportcaller=`echo $line | sed 's/.*SPT=//' | sed 's/\s.*//'`
+	export smtpportcalled=`echo $line | sed 's/.*DPT=//' | sed 's/\s.*//'`
 	
-	echo "Emails were sent using SMTP by process xxx" > /var/log/phpsendmail-xxxx-smtpsocket.tmp
-	echo "SMTP used is zzzz" >> /var/log/phpsendmail-xxxx-smtpsocket.tmp
+	echo "Emails were sent using SMTP by process xxx" > /tmp/phpsendmail-xxxx-smtpsocket.tmp
+	echo "SMTP server called by $smtpipcaller:$smtpportcaller is $smtpipcalled:$smtpportcalled" >> /tmp/phpsendmail-xxxx-smtpsocket.tmp
 	#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 	#sleep 5
 	export now=`date '+%Y%m%d%H%M%S'`
