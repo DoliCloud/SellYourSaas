@@ -62,7 +62,7 @@ while read -r line ; do
 	if [ "x$smtpportcalled" != "x" ]; then
 		if [ "x$smtpipcalled" != "x" ]; then
 			export command="ss --oneline -e -H -p -t state all dport $smtpportcalled dst $smtpipcalled"
-			echo "Execute command $command"
+			echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
 			result=`$command`
 			if [ "x$result" != "x" ]; then
 				echo "Extract processid from line"
@@ -70,9 +70,9 @@ while read -r line ; do
 				
 				if [ "x$processid" != "x" ]; then
 					# And now try to find the username of process id
-					echo "Try to find username from processid=$processid"
-					export command="ps fauxwZ | grep $processid"
-					echo "Execute command $command"
+					echo "Try to find username from processid=$processid" >> /var/log/smtp_watchdog1.log 2>&1
+					export command="ps -fauxwZ | grep $processid"
+					echo "Execute command $command" >> /var/log/smtp_watchdog1.log 2>&1
 					usernamestring=`$command`
 				fi				
 			fi
