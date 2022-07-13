@@ -80,15 +80,20 @@ while read -r line ; do
 
 				echo "We got processid=${processid}, processownerid=${processownerid}" >> /var/log/phpsendmail.log 2>&1
 				
-				if [ "x$processownerid" != "x" ]; then
+				if [ "x$processid" != "x" ]; then
 					re='^[0-9]+$'
 					if [[ $processownerid =~ $re ]] ; then
-						echo "We try to get the usernamestring" >> /var/log/phpsendmail.log 2>&1
-						# And now try to find the username of process id
-						#echo "Execute command ps fauxwZ | grep $processid" >> /var/log/phpsendmail.log 2>&1
-						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/phpsendmail.log 2>&1
-						#ps fauxwZ >> /var/log/phpsendmail.log 2>&1
-						
+						echo "We got the processownerid from the ss command, surely a web access" >> /var/log/phpsendmail.log 2>&1
+					else
+						echo "We did not get the processownerid from the ss command. We try to get the processownerid using the processid from ps" >> /var/log/phpsendmail.log 2>&1
+
+						export processownerid=`ps -faxW -o "uid,pid,cpu,start,time,cmd" | grep --color=never " $processid " | grep -n "color=never" | awk '{ print $1 }'`
+						echo "processownerid=$processownerid" >> "/var/log/phpsendmail.log"
+					fi
+										
+					if [[ $processownerid =~ $re ]] ; then
+						echo "We try to get the usernamestring from processownerid" >> /var/log/phpsendmail.log 2>&1
+				
 						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
 						echo "usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
 						
@@ -100,6 +105,11 @@ while read -r line ; do
 						
 						export apachestring=`apachectl fullstatus | grep "x:$processownerid:"`
 						echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
+						
+						# Try to guess remoteid
+						if [[ "x$apachestring" != "x" ]] ; then
+							echo "aaaa"
+						fi
 					fi
 				fi				
 			fi
