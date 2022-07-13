@@ -40,6 +40,7 @@ $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 $maxemailperday = 0;
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
+	fclose($fp);
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'maxemailperday') {
