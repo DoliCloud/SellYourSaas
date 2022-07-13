@@ -57,6 +57,7 @@ while read -r line ; do
 	echo "Found a UFW ALLOW, in $WDLOGFILE, now try to find process owner..." >> /var/log/phpsendmail.log 2>&1
 	echo "$line" >> /var/log/phpsendmail.log 2>&1
 
+	export remoteip='unknown'
 	export smtpipcaller=`echo $line | sed 's/.*SRC=//' | sed 's/\s.*//'`
 	export smtpipcalled=`echo $line | sed 's/.*DST=//' | sed 's/\s.*//'`
 	export smtpportcaller=`echo $line | sed 's/.*SPT=//' | sed 's/\s.*//'`
@@ -89,6 +90,16 @@ while read -r line ; do
 						#ps fauxwZ >> /var/log/phpsendmail.log 2>&1
 						
 						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
+						echo "usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
+						
+						echo "We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
+						# And now try to find the username of process id
+						#echo "Execute command ps fauxwZ | grep $processid" >> /var/log/phpsendmail.log 2>&1
+						#ps fauxwZ | grep "$processid" | grep apache2 >> /var/log/phpsendmail.log 2>&1
+						#ps fauxwZ >> /var/log/phpsendmail.log 2>&1
+						
+						export apachestring=`apachectl fullstatus | grep "x:$processownerid:"`
+						echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
 					fi
 				fi				
 			fi
@@ -100,18 +111,18 @@ while read -r line ; do
 	echo "SMTP connection from $smtpipcaller:$smtpportcaller -> $smtpipcalled:$smtpportcalled" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "$result" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "usernamestring=$usernamestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
+	echo "apachestring=$apachestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	
 	# Complete log /var/log/phpsendmail.log of all emails
 	if [ "x$smtpportcalled" != "x" ]; then
 		if [ "x$smtpipcalled" != "x" ]; then
-			echo "usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
 			#echo "smtp_watchdog_daemon1 has found an abusive smtp usage." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 			#sleep 5
 			export now=`date '+%Y%m%d%H%M%S'`
-			
+
 			# Test if we reached quota, if yes, ban SMTP port for IP
-			echo "$now $smtpipcalled sellyoursaas rules ok" >> /var/log/phpsendmail.log
-			#echo "$now $smtpipcalled sellyoursaas rules ko daily quota reached - we block SMTP ports. User has reached its daily quota of '.$MAXPERDAY >> /var/log/phpsendmail.log;
+			echo "$now $remoteip sellyoursaas rules ok" >> /var/log/phpsendmail.log
+			#echo "$now $remoteip sellyoursaas rules ko daily quota reached - we block SMTP ports. User has reached its daily quota of '.$MAXPERDAY >> /var/log/phpsendmail.log;
 		fi
 	fi
 	
