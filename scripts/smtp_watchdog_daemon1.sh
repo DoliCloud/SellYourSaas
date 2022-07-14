@@ -74,11 +74,12 @@ while read -r line ; do
 	if [ "x$smtpportcalled" != "x" ]; then
 		if [ "x$smtpipcalled" != "x" ]; then
 			export command="ss --oneline -e -H -p -t state all dport $smtpportcalled dst [$smtpipcalled]"
-			echo "Execute command $command" >> /var/log/phpsendmail.log 2>&1
+			echo "$now Execute command $command" >> /var/log/phpsendmail.log 2>&1
 			result=`$command`
 			if [ "x$result" != "x" ]; then
-				echo "Extract processid from line" >> /var/log/phpsendmail.log 2>&1
-				echo "$result" >> /var/log/phpsendmail.log 2>&1
+				export now=`date '+%Y-%m-%d %H:%M:%S'`
+				echo "$now Extract processid from line" >> /var/log/phpsendmail.log 2>&1
+				echo "$now $result" >> /var/log/phpsendmail.log 2>&1
 				export processownerid=`echo "$result" | grep -m 1 'ESTAB\|SYN-SENT' | sed 's/.*uid://' | sed 's/\s.*//'`
 				export processid=`echo "$result" | grep -m 1 'ESTAB\|SYN-SENT' | sed 's/.*pid=//' | sed 's/,.*//'`
 
