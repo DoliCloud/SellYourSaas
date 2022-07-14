@@ -161,9 +161,10 @@ $commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
 
 // Execute the command
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
-$resexec = shell_exec("uid");
-file_put_contents($logfile, date('Y-m-d H:i:s')." uid = ".$resexec."\n", FILE_APPEND);
+//$resexec = shell_exec("id");
+//file_put_contents($logfile, date('Y-m-d H:i:s')." id = ".$resexec."\n", FILE_APPEND);
 $resexec = shell_exec($commandcheck);
+$resexec = (int) (empty($resexec) ? 0 : trim($resexec));
 file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$commandcheck." = ".$resexec." (we accept ".$MAXPERDAY.")\n", FILE_APPEND);
 if ($resexec > $MAXPERDAY) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of '.$MAXPERDAY.".\n", FILE_APPEND);
