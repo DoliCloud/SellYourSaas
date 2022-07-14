@@ -15,6 +15,6 @@
 
 
 -- BEGIN MODULEBUILDER INDEXES
-ALTER TABLE llx_sellyoursaas_whitelistip ADD INDEX idx_sellyoursaas_whitelistip_content (content);
+ALTER TABLE llx_sellyoursaas_whitelistip ADD UNIQUE INDEX uk_sellyoursaas_whitelistip_content (content);
 -- END MODULEBUILDER INDEXES
 

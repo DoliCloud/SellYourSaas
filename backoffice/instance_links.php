@@ -56,7 +56,8 @@ $id			= GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
 $refold     = GETPOST('refold', 'alpha');
 
-$error=0; $errors=array();
+$error = 0;
+$errors=array();
 
 $object = new Contrat($db);
 
@@ -88,21 +89,49 @@ if (empty($reshook)) {
 		exit;
 	}
 
-	// Add action to create file, etc...
+	// Manage action 'addauthorizedkey', 'addinstalllock', etc...
 	require 'refresh_action.inc.php';
 
 	if ($action == 'markasspamandclose') {
+		$db->begin();
+
 		$idtoclose = GETPOST('idtoclose', 'int');
 		$tmpcontract = new Contrat($db);
 		$tmpcontract->fetch($idtoclose);
-		$tmpcontract->array_options['spammer'] = 1;
+		$tmpcontract->array_options['options_spammer'] = 1;
 		$tmpcontract->update($user, 1);
 
 		$result = $tmpcontract->closeAll($user, 0, 'Closed by spammer inspector.');
 		if ($result > 0) {
-			setEventMessages("OK", null, 'mesgs');
+			dol_include_once("/sellyoursaas/class/blacklistip.class.php");
+
+			$blacklistip = new Blacklistip($db);
+			$result = $blacklistip->fetch(0, $tmpcontract->array_options['options_deployment_ip']);
+			if ($result == 0) {
+				// If record does not exist yet
+				$blacklistip->status = Blacklistip::STATUS_ENABLED;
+				$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
+				$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
+
+				$result2 = $blacklistip->create($user);
+				if ($result2 <= 0) {
+					setEventMessages($blacklistip->error, $blacklistip->errors, 'errors');
+					$error++;
+				}
+			}
+
+			if (!$error) {
+				setEventMessages("Suspended", null, 'mesgs');
+			}
 		} else {
+			$error++;
 			setEventMessages($tmpcontract->error, $tmpcontract->errors, 'errors');
+		}
+
+		if ($error) {
+			$db->rollback();
+		} else {
+			$db->commit();
 		}
 	}
 
@@ -676,10 +705,10 @@ foreach ($arraylistofinstances as $instance) {
 
 	// Nb of users
 	print '<tr>';
-	print '<td>'.$instance->getNomUrl(1).'</td>';
+	print '<td class="nowraponall">'.$instance->getNomUrl(1).'</td>';
 	print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
 	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
-	print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
+	print '<td>'.dol_print_ip($instance->array_options['options_deployment_ip']).'</td>';
 	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
 	print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';
