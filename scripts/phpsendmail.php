@@ -251,7 +251,7 @@ if (empty($fromline) && empty($emailfrom)) {
 
 
 
-file_put_contents($logfile, $command."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' .$command."\n", FILE_APPEND);
 
 // Execute the command
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
