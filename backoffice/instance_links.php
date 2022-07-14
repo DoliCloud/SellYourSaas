@@ -118,6 +118,8 @@ if (empty($reshook)) {
 					setEventMessages($blacklistip->error, $blacklistip->errors, 'errors');
 					$error++;
 				}
+			} elseif ($result > 0) {
+				setEventMessages("IP was already blacklisted", null, 'mesgs');
 			}
 
 			if (!$error) {
