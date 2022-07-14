@@ -88,39 +88,40 @@ while read -r line ; do
 				
 				if [ "x$processid" != "x" ]; then
 					if [[ $processownerid =~ $re ]] ; then
-						echo "We got the processownerid from the ss command, surely a web access" >> /var/log/phpsendmail.log 2>&1
+						echo "$now We got the processownerid from the ss command, surely a web access" >> /var/log/phpsendmail.log 2>&1
 					else
-						echo "We did not get the processownerid from the ss command. We try to get the processownerid using the processid from ps" >> /var/log/phpsendmail.log 2>&1
+						echo "$now We did not get the processownerid from the ss command. We try to get the processownerid using the processid from ps" >> /var/log/phpsendmail.log 2>&1
 
 						export processownerid=`ps -faxW -o "uid,pid,cpu,start,time,cmd" | grep --color=never " $processid " | grep -n "color=never" | awk '{ print $1 }'`
-						echo "processownerid=$processownerid" >> "/var/log/phpsendmail.log"
+						echo "$now processownerid=$processownerid" >> "/var/log/phpsendmail.log"
 					fi
 										
 					if [[ $processownerid =~ $re ]] ; then
-						echo "We try to get the usernamestring from processownerid" >> /var/log/phpsendmail.log 2>&1
+						echo "$now We try to get the usernamestring from processownerid" >> /var/log/phpsendmail.log 2>&1
 				
 						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
-						echo "usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
+						echo "$now usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
 					else
-						echo "processownerid not valid, we can't find $usernamestring" >> "/var/log/phpsendmail.log"
+						echo "$now processownerid not valid, we can't find $usernamestring" >> "/var/log/phpsendmail.log"
 					fi
 						
 					if [[ $processid =~ $re ]] ; then
-						echo "We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
+						echo "$now We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
 						#echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
-						echo "tail -n 200 /var/log/apache2/other_vhosts_pid.log | grep -m 1 \" $processid \"" >> /var/log/phpsendmail.log 2>&1
+						echo "$now tail -n 200 /var/log/apache2/other_vhosts_pid.log | grep -m 1 \" $processid \"" >> /var/log/phpsendmail.log 2>&1
 						
 						#export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep -m 1 " $processid "`
 						export apachestring=`tail -n 200 /var/log/apache2/other_vhosts_pid.log | grep -m 1 " $processid "`
-                        echo "apachestring=$apachestring" >> "/var/log/phpsendmail.log"
+                        export now=`date '+%Y-%m-%d %H:%M:%S'`
+                        echo "$now apachestring=$apachestring" >> "/var/log/phpsendmail.log"
 
                         # Try to guess remoteip
                         if [[ "x$apachestring" != "x" ]] ; then
                         	export remoteip=`echo $apachestring | awk '{print $2}'`
-                            echo "remoteip=$remoteip" >> "/var/log/phpsendmail.log"
+                            echo "$now remoteip=$remoteip" >> "/var/log/phpsendmail.log"
                         fi
                     else 
-                    	echo "processid not valid, we can't find apache and remoteip data" >> "/var/log/phpsendmail.log"
+                    	echo "$now processid not valid, we can't find apache and remoteip data" >> "/var/log/phpsendmail.log"
 					fi
 				fi
 			fi
@@ -144,7 +145,8 @@ while read -r line ; do
 	echo "apachestring=$apachestring" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	echo "remoteip=$remoteip" >> "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp"
 	
-	echo "The file /tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp has been generated" >> "/var/log/phpsendmail.log"
+	export now=`date '+%Y-%m-%d %H:%M:%S'`
+	echo "$now The file /tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp has been generated" >> "/var/log/phpsendmail.log"
 	
 	if [[ "x$usernamestring" =~ ^xosu.* ]]; then
 		chown $usernamestring.$usernamestring "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp" 2>&1
@@ -152,10 +154,11 @@ while read -r line ; do
 	
 	# Complete log /var/log/phpsendmail.log of all emails
 	if [[ $processownerid =~ $re ]] ; then
-		export now=`date '+%Y%m%d%H%M%S'`
 	
 		# Test if we reached quota, if yes, discard the email and log it for fail2ban
 		export resexec=`find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l`
+
+		export now=`date '+%Y-%m-%d %H:%M:%S'`
 		echo "$now nb of process found with find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l = $resexec (we accept $MAXPERDAY)" >> /var/log/phpsendmail.log
 		
 		if [ "x$remoteip" == "x" ]; then
