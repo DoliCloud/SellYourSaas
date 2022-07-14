@@ -183,7 +183,11 @@ class ActionsSellyoursaas
 					{
 						$this->results['objref'] .= ' &nbsp; <a href="/aa">'.$langs->trans("SeeChain").'</a>';
 					}*/
-					if (! empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
+					if (!empty($object->array_options['options_spammer'])) {
+						$this->results['objref'] .= ' '.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+					}
+
+					if (!empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
 						$this->results['objref'] .= ' '.img_warning($langs->trans('ActiveInstanceOfASpammer'));
 					}
 				}
