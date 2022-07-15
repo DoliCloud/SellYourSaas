@@ -166,7 +166,7 @@ while read -r line ; do
 			remoteip="unknown"
 		fi
 		
-		$blacklistfile="/tmp/spam/blacklistip"
+		blacklistfile="/tmp/spam/blacklistip"
 		
 		if [ "x$remoteip" != "xunknown" ]; then
 			if [ -s $blacklistfile ]; then
