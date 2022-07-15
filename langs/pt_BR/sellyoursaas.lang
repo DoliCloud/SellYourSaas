@@ -2,17 +2,27 @@
 Authorized_keyInstalled=Arquivo authorized_keys_support instalado
 ConversionContent=Conteúdo do rodapé na "página de conversão" (apenas uma vez registrado um primeiro modo de pagamento)
 AccountAlreadyExistsForEmail=Já existe uma conta para este email. Se você já é um usuário registrado e deseja criar outra instância para sua conta, faça logon no <a href="%s" target="_myaccount">painel do cliente</a> para criar outra instância.
+DeploymentIP=IP do solicitante
 OldTickets=Ingressos antigos
 OldTicketsDesc=Lista de seus antigos tickets fechados ou abertos
 DeploymentDate=Data de implantação
 SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT=Número máximo de instâncias por padrão para novo cliente em potencial ou cliente
+SELLYOURSAAS_VPN_PROBA_REFUSED=Probabilidade mínima de usar uma VPN abusiva para negar o registro
 PleaseReadFAQFirst=Antes de enviar qualquer ticket de suporte, verifique se a resposta ainda não está disponível aqui: <br> <br> <center> <a href="%s" target="_faq"> FAQs (Perguntas Frequentes) </a> </center>
 RecreateAuthorizedKey=Criar arquivo allowed_keys
 DeploymentIPQuality=Índice de qualidade de IP
-DeploymentIPQualityDesc=Quando uma assinatura é feita, é feita uma verificação no IP do assinante para: <br> - http://check.getipintel.net/check.php?ip=IP&contact=&flag=f <br> - https://www.ipqualityscore.com
+DeploymentIPQualityDesc=Quando um cadastro é feito, é feita uma verificação no IP do assinante para: <br> - http://check.getipintel.net/check.php?ip=IP&contact=&flag=f <br> e/ou <br> - https://www. ipqualityscore.com
+DeploymentEmailQuality=Índice de qualidade de e-mail
+DeploymentEmailQualityDesc=Quando um cadastro é feito, uma verificação é feita no e-mail do assinante para: <br> <br> - https://www.ipqualityscore.com <br> e/ou <br> - https://disposableemail.com
 MyAcountDesc=Esta área é dedicada ao gerenciamento de suas assinaturas para <a href="%s" target="dolicloud"> %s </a> . Você pode criar novas instâncias de aplicativos, escolher opções, obter suas faturas de assinatura, entrar em contato com a equipe de suporte ou cancelar sua conta.
 ClosingAccountIsTemporarlyDisabledTryLater=A exclusão de instâncias existentes é suspensa temporariamente para fins de manutenção. Por favor tente mais tarde...
 SSHPublicKeyDesc=Todas as chaves públicas SSH implantadas em cada nova instância. As chaves são implantadas no arquivo .ssh/authorized_keys_support. Você pode incluir aqui o conteúdo do arquivo /home/admin/.ssh/id_rsa_sellyoursaas.pub e as chaves públicas da equipe de administradores de TI.
+MarkAsSpamAndClose=Sinalizar como spammer e fechar
+SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED=Use o serviço DisposableEmail para detectar e-mails maliciosos
+SELLYOURSAAS_GETIPINTEL_ON=Use o serviço gratuito GetIPIntel para detectar VPN
+SELLYOURSAAS_GETIPINTEL_EMAIL=Chave de API (e-mail) para usar GetIPIntelservice
+SELLYOURSAAS_IPQUALITY_ON=Use o serviço IPQualityScore para detectar TOR, VPN maléfica ou e-mails maléficos
+SELLYOURSAAS_API_KEY=Chave de API para usar %s
 ErrorEMailAddressBannedForSecurityReasons=Este tipo de endereço de e-mail foi banido por motivos de segurança. Use outro endereço de e-mail ou entre em contato conosco se não puder fazer o contrário.
 RegistrationURLDesc=Para obter uma URL para registrar uma instância, você deve ter criado um serviço na categoria boa e com o tipo "Aplicativo".
 SecurityOfRegistrations=Segurança do registro
@@ -30,4 +40,20 @@ SELLYOURSAAS_SALTFORPASSWORDENCRYPTION=Salt use para construir a chave de substi
 InstanceMoveInProgress=Sua instância está atualmente em um processo de atualização de hardware. Se você não recuperou o acesso após 1 hora, entre em contato com o suporte no painel do cliente.
 ActiveInstanceOfASpammer=Instância de um usuário malvado (hacker, spammer). Ainda não implantado.
 ConfirmMaintenance=Tem certeza de que deseja alternar esta instância para o modo de manutenção? O acesso não será possível para usuários comuns. <br> Nota: Se um navegador incluir a string <b> %s </b> em seu User-Agent, ele poderá ignorar o bloqueio de mensagem de manutenção.
+Automigration=Assistente de migração
+AutomigrationDesc=Assistente de migração de uma instância Dolibarr
+AutomigrationErrorOrNoAutomigration=Se houver erro ou se você não quiser migrar, clique aqui
 MigrationSuccessNote=Aviso: Para acessar sua instância, você precisa usar o login e a senha do seu antigo Dolibarr, onde você salvou seus dados
+MigrationErrorSubject=Erro no assistente de migração
+MigrationErrorContent=Ocorreu um erro ao tentar usar o assistente de migração:\n&#60;adicione sua mensagem aqui&#62;
+CancelAutomigrationAndBacktoSupportPage=Cancele o processo do assistente de migração e volte para a página de suporte
+SELLYOURSAAS_AUTOMIGRATION_CODE=Grupo de tickets para sugerir o assistente de migração
+DateUse=Data de uso
+WhitelistipDesc=Adicione endereços IP que devem ter permissão para registrar uma nova conta ou instância, quaisquer que sejam as outras regras de filtragem.
+BlacklistipDesc=Adicione IP nesta lista para bloquear qualquer criação de nova conta ou instâncias deste IP. A lista de IP também é usada como fonte global para gerar o arquivo local de IP na lista negra usado pelo wrapper do PHP para enviar e-mails.
+Searchkeys=Chaves de pesquisa
+NoBlackListIf=Nenhuma lista negra para o caminho
+SecurityTools=Ferramentas de segurança
+EvilInstances=Instâncias (marcadas como malignas)
+SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE=Valor máximo da fatura (mensal). As tentativas de pagamento serão canceladas se o valor for maior.
+PleaseOpenATicketToRequestYourCredential=Esse acesso não é habilitado por padrão. Por favor, abra um ticket para solicitar suas credenciais.
