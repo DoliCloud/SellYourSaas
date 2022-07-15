@@ -553,7 +553,7 @@ if (!empty($tmparraywhitelist)) {
 if (!$whitelisted && !empty($tmparrayblacklist)) {
 	foreach ($tmparrayblacklist as $val) {
 		if ($val->content == $remoteip) {
-			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip is in blacklistip", LOG_WARNING);	// Should not happen, ip should always be defined.
+			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip ".$remoteip." is in blacklistip", LOG_WARNING);
 			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'IP already included for legal action'), null, 'errors');
@@ -1211,7 +1211,7 @@ if ($reusecontractid) {
 				$url = sprintf(
 					'https://www.ipqualityscore.com/api/json/ip/%s/%s?%s',
 					$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
-					$remoteip,
+					urlencode($remoteip),
 					$formatted_parameters
 				);
 
@@ -1228,6 +1228,7 @@ if ($reusecontractid) {
 								$abusetest = 2;
 							}
 							if ($jsonreponse['tor'] || $jsonreponse['active_tor']) {
+								// So recommanded that is it enabled always, no option to disable this
 								dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP - host=".$jsonreponse['host']);
 								$abusetest = 3;
 							}
@@ -1265,11 +1266,10 @@ if ($reusecontractid) {
 
 
 				// Create API URL for Email Check
-				/*
 				$url = sprintf(
 					'https://www.ipqualityscore.com/api/json/email/%s/%s?%s',
 					$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
-					$email,
+					urlencode($email),
 					$formatted_parameters
 					);
 
@@ -1279,10 +1279,13 @@ if ($reusecontractid) {
 					try {
 						dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
 						$jsonreponse = json_decode($result['content'], true);
-						dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
+						dol_syslog("For ".$remoteip.", valid=".$jsonreponse['valid']." - disposable=".$jsonreponse['disposable']." - dns_valid=".$jsonreponse['dns_valid']." - timed_out=".$jsonreponse['timed_out']);
 						if ($jsonreponse['success']) {
-							$contract->array_options['options_deployment_ipquality'] .= 'ipq-host='.$jsonreponse['host'].';';
-							$fraudscore = (int) $jsonreponse['fraud_score'];
+							$contract->array_options['options_deployment_emailquality'] .= 'ipq-valid='.$jsonreponse['valid'].';';
+							$contract->array_options['options_deployment_emailquality'] .= 'ipq-disposable='.$jsonreponse['disposable'].';';
+							$contract->array_options['options_deployment_emailquality'] .= 'ipq-dns_valid='.$jsonreponse['dns_valid'].';';
+							$contract->array_options['options_deployment_emailquality'] .= 'ipq-timed_out='.$jsonreponse['timed_out'].';';
+							$contract->array_options['options_deployment_emailquality'] .= 'ipq-recent_abuse='.$jsonreponse['recent_abuse'].';';
 						} else {
 							$contract->array_options['options_deployment_emailquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
 						}
@@ -1295,14 +1298,14 @@ if ($reusecontractid) {
 
 				// Refused if Email fraud probability is too high
 				if (!$whitelisted && empty($abusetest)) {
-					$conf->global->SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED = 85;
-
-					if (is_numeric($fraudscore) && $fraudscore >= $conf->global->SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED) {
+					if ($jsonreponse['recent_abuse'] === false && ($jsonreponse['valid'] === true || ($jsonreponse['timed_out'] === true && $jsonreponse['disposable'] === false && $jsonreponse['dns_valid'] === true))) {
+						// Email valid
+					} else {
 						dol_syslog("Instance creation blocked for email ".$email." - Email fraud probability ".$fraudscore." is higher or equal than ".$conf->global->SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED);
-						$abusetest = 1;
+						// TODO Enable this
+						// $abusetest = 6;
 					}
 				}
-				*/
 			}
 		}
 
@@ -1312,6 +1315,8 @@ if ($reusecontractid) {
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 		//dol_syslog("options_deployment_emailquality = ".$contract->array_options['options_deployment_emailquality'], LOG_DEBUG);
 
+		// SELLYOURSAAS_BLACKLIST_IP_MASKS and SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN are hidden constants.
+		// Deprecated. Use instead the List of blacklist ips into menu. This is done a begin of page
 
 		// Block for some IPs
 		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
@@ -1324,7 +1329,7 @@ if ($reusecontractid) {
 			}
 		}
 
-		// Block for some IPs if VPN proba is higher that an threshold
+		// Block for some IPs if VPN proba is higher that a threshold
 		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
 			if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
 				$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);

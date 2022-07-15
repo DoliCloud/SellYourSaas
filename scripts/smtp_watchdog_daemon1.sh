@@ -153,7 +153,7 @@ while read -r line ; do
 		chown $usernamestring.$usernamestring "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp" 2>&1
 	fi
 	
-	# Complete log /var/log/phpsendmail.log of all emails
+	# Complete log /var/log/phpsendmail.log for this smtp email
 	if [[ $processownerid =~ $re ]] ; then
 	
 		# Test if we reached quota, if yes, discard the email and log it for fail2ban
@@ -165,6 +165,20 @@ while read -r line ; do
 		if [ "x$remoteip" == "x" ]; then
 			remoteip="unknown"
 		fi
+		
+		if [ "x$remoteip" != "xunknown" ]; then
+			if [ -s /tmp/spam/blacklistip ]; then
+				# If this looks an IP, we check if it is in blacklist
+				export resexec2=`grep -m 1 "^$remoteip\$" /tmp/spam/blacklistip`
+				if [[ "x$resexec" == "x$remoteip" ]]; then
+					# We found the ip into the blacklistip
+					echo "$now We found the IP $remoteip into blacklist file" >> /var/log/phpsendmail.log
+					# TODO Enable this
+					# echo "$new $remoteip sellyoursaas rules ko blacklist" >> /var/log/phpsendmail.log
+				fi
+			fi			
+		fi
+		
 		if [[ $resexec -gt $MAXPERDAY ]]; then
 			echo "$now $remoteip sellyoursaas rules ko daily quota reached. User has reached its daily quota of $MAXPERDAY" >> /var/log/phpsendmail.log
 		else
