@@ -166,15 +166,19 @@ while read -r line ; do
 			remoteip="unknown"
 		fi
 		
+		$blacklistfile="/tmp/spam/blacklistip"
+		
 		if [ "x$remoteip" != "xunknown" ]; then
-			if [ -s /tmp/spam/blacklistip ]; then
+			if [ -s $blacklistfile ]; then
 				# If this looks an IP, we check if it is in blacklist
-				export resexec2=`grep -m 1 "^$remoteip\$" /tmp/spam/blacklistip`
+				export resexec2=`grep -m 1 "^$remoteip\$" $blacklistfile`
 				if [[ "x$resexec" == "x$remoteip" ]]; then
 					# We found the ip into the blacklistip
-					echo "$now We found the IP $remoteip into blacklist file" >> /var/log/phpsendmail.log
+					echo "$now We found the IP $remoteip into blacklistip file $blacklistipfile" >> /var/log/phpsendmail.log
 					# TODO Enable this
-					# echo "$new $remoteip sellyoursaas rules ko blacklist" >> /var/log/phpsendmail.log
+					# echo "$new $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip file" >> /var/log/phpsendmail.log
+				else 
+					echo "$now IP $remoteip not found into blacklistip file $blacklistipfile" >> /var/log/phpsendmail.log
 				fi
 			fi			
 		fi
