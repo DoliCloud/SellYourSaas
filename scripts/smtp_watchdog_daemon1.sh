@@ -166,10 +166,10 @@ while read -r line ; do
 			remoteip="unknown"
 		fi
 		
-		blacklistfile="/tmp/spam/blacklistip"
+		blacklistipfile="/tmp/spam/blacklistip"
 		
 		if [ "x$remoteip" != "xunknown" ]; then
-			if [ -s $blacklistfile ]; then
+			if [ -s $blacklistipfile ]; then
 				# If this looks an IP, we check if it is in blacklist
 				export resexec2=`grep -m 1 "^$remoteip\$" $blacklistfile`
 				if [[ "x$resexec" == "x$remoteip" ]]; then
