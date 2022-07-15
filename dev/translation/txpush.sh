@@ -24,7 +24,7 @@ fi
 
 if [ ! -d ".tx" ]
 then
-	echo "Script must be ran from root directory of project with command ./dev/translation/txpush.sh"
+	echo "Script must be ran from the root directory of the project with command ./dev/translation/txpush.sh"
 	exit
 fi
 
