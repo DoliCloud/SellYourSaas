@@ -109,6 +109,9 @@ while read -r line ; do
 					if [[ $processid =~ $re ]] ; then
 						echo "$now We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
 						#echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
+						
+						# Add a sleep to increase hope to have line "... client ip - pid ..." written into other_vhosts_pid.log file
+						sleep 1
 						echo "$now tail -n 200 /var/log/apache2/other_vhosts_pid.log | grep -m 1 \" $processid \"" >> /var/log/phpsendmail.log 2>&1
 						
 						#export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep -m 1 " $processid "`
@@ -166,17 +169,17 @@ while read -r line ; do
 			remoteip="unknown"
 		fi
 		
-		blacklistipfile="/tmp/spam/blacklistip"
+		export blacklistipfile="/tmp/spam/blacklistip"
 		
 		if [ "x$remoteip" != "xunknown" ]; then
 			if [ -s $blacklistipfile ]; then
 				# If this looks an IP, we check if it is in blacklist
-				export resexec2=`grep -m 1 "^$remoteip\$" $blacklistfile`
-				if [[ "x$resexec" == "x$remoteip" ]]; then
+				export resexec2=`grep -m 1 "^$remoteip\$" $blacklistipfile`
+				if [[ "x$resexec2" == "x$remoteip" ]]; then
 					# We found the ip into the blacklistip
 					echo "$now We found the IP $remoteip into blacklistip file $blacklistipfile" >> /var/log/phpsendmail.log
 					# TODO Enable this
-					# echo "$new $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip file" >> /var/log/phpsendmail.log
+					# echo "$new $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip file $blacklistipfile" >> /var/log/phpsendmail.log
 				else 
 					echo "$now IP $remoteip not found into blacklistip file $blacklistipfile" >> /var/log/phpsendmail.log
 				fi
