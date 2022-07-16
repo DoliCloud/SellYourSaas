@@ -1011,7 +1011,7 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_ENABLED").'</td>';
 print '<td>';
 $array = array('0' => 'No', '1' => 'Yes', '2' => 'Yes with detail of remote action errors');
-print $form->selectarray('SELLYOURSAAS_DATADOG_ENABLED', $array, $conf->global->SELLYOURSAAS_DATADOG_ENABLED, 0);
+print $form->selectarray('SELLYOURSAAS_DATADOG_ENABLED', $array, getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED'), 0);
 print '</td>';
 print '<td><span class="opacitymedium small">If a datadog agent is running on each of your server, enable this option so SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';
 print '</tr>';
