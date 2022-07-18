@@ -328,12 +328,12 @@ if (!empty($tmparray)) {
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d";
+			$command = "find osu*/dbn*/htdocs/ -maxdepth 2";
 			if (!empty($val->noblacklistif)) {
 				$tmpdirarray = explode('|', $val->noblacklistif);
 				foreach ($tmpdirarray as $tmpdir) {
 					if ($tmpdir) {
-						$command .= " ! -path '".escapeshellcmd(preg_replace('/[^a-z0-9]/', '', $tmpdir))."/*'";
+						$command .= " ! -path '*".escapeshellcmd(preg_replace('/[^a-z0-9\.\-]/', '', $tmpdir))."*'";
 					}
 				}
 			}
