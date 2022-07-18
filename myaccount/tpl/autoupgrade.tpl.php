@@ -26,12 +26,14 @@ if (empty($conf) || ! is_object($conf)) {
 <?php
 
 $upload_dir = $conf->sellyoursaas->dir_temp."/autoupgrade_".$mythirdpartyaccount->id.'.tmp';
-$backtopagesupport = GETPOST("backtopagesupport",'alpha') ? GETPOST("backtopagesupport",'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'&subject'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha'));
+$backtopagesupport = GETPOST("backtopagesupport",'alpha') ? GETPOST("backtopagesupport",'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'&subject='.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha'));
+$arraybacktopage=explode("&",$backtopagesupport);
+$ticketcategory_child_id = "";
+$ticketcategory = "";
 $stepautoupgrade = GETPOST("stepautoupgrade") ? GETPOST("stepautoupgrade") : 1;
 $errortab = array();
 $errors = 0;
 $stringoflistofmodules = "";
-
 if ($action == "instanceverification") {
 	$confinstance = 0;
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
@@ -120,6 +122,27 @@ if ($action == "instanceverification") {
 	}
 
 }
+if ($action == "autoupgrade") {
+	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+
+	// If error occurs this is usefull to redirect to support page
+	$keyticketcategory_child_id = array_keys(preg_grep('/ticketcategory_child_id.*/',$arraybacktopage))[0];
+	$keyticketcategory = array_keys(preg_grep('/ticketcategory=.*/',$arraybacktopage))[0];
+	$ticketcategory_child_id = explode("=",$arraybacktopage[$keyticketcategory_child_id])[1];
+	$ticketcategory = explode("=",$arraybacktopage[$keyticketcategory])[1];
+	
+	$object = new Contrat($db);
+	$instanceselect = GETPOST("instanceselect", "alpha");
+	$instanceselect = explode("_", $instanceselect);
+	$idcontract = $instanceselect[1];
+	if ($idcontract > 0) {
+		$result=$object->fetch($idcontract);
+		if ($result < 0){
+			$errortab[] = $langs->trans("InstanceNotFound");
+			$errors ++;
+		}
+	}
+}
 
 print '
 <div class="page-content-wrapper">
@@ -190,11 +213,41 @@ if ($action == "instanceverification") {
 	print '<!-- BEGIN STEP4-->';
 	print '<div class="portlet light divstep " id="Step4">';
 	if ($error) {
-		# code...
-	}else {
+		$upgradeerrormessage = $langs->trans("UpgradeErrorContent");
+		$upgradeerrormessage .= "\n\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
+		$upgradeerrormessage .= "\nErrorTab: ".implode(",",$errortab);
+		print '<h2 class="center" style="color:red">';
+		print $langs->trans("AutoupgradeError");
+		print '</h2><br>';
+		print '<div>';
+		print $langs->trans("AutoupgradeErrorText");
+		print '<br><br><br><form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 		print '<div class="center">';
-		print $langs->trans("AutoupgradeSuccess");
-		print '</div">';
+		print '<input type="submit" class="btn green-haze btn-circle" value="'.$langs->trans("BackToSupport").'">';
+		print '</div>';
+		print '<input type="hidden" name="action" value="presend">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<input type="hidden" name="mode" value="support">';
+		print '<input type="hidden" name="contractid" value="'.$object->id.'">';
+		print '<input type="hidden" name="supportchannel" value="'.GETPOST('instanceselect', 'alpha').'">';
+		print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
+		print '<input type="hidden" name="ticketcategory_child_id" value="'.(!empty($ticketcategory_child_id) ? $ticketcategory_child_id : GETPOST('ticketcategory_child_id', 'alpha')).'">';
+		print '<input type="hidden" name="ticketcategory" value="'.(!empty($ticketcategory) ? $ticketcategory : GETPOST('ticketcategory', 'alpha')).'">';
+		print '<input type="hidden" name="subject" value="'.$langs->trans("UpgradeErrorSubject").'">';
+		print '<input type="hidden" name="content" value="'.$upgradeerrormessage.'">';
+		print '</form>';
+		print '</div>';
+	}else {
+		print '<h2 class="center" style="color:green">';
+		print $langs->trans("AutoupgradeSucess");
+		print '</h2><br>';
+		print '<div>';
+		print $langs->trans("AutoupgradeSucessText");
+		print '&nbsp;<a href="https://'.$object->ref_customer.'">'.$object->ref_customer.'</a>';
+		print '</div><br>';
+		print '<div style="color:#bbaf01">';
+		print $langs->trans("AutoupgradeSucessNote");
+		print '</div>';
 	}
 	print '</div>';
 	print '<!-- END STEP4-->';
