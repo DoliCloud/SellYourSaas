@@ -185,6 +185,9 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 
 $return_var = 0;
 
+
+// Preparation
+
 print "----- Go into dir /home/jail/home\n";
 chdir('/home/jail/home/');
 
@@ -263,6 +266,10 @@ if (!empty($tmparray)) {
 }
 
 
+// TODO Loop on each free instance not yet suspended (or only $instancefiltercomplete if defined)
+// Use same code than batch_customers.php
+
+
 print "----- Loop for spam keys into index.php using blacklistcontent\n";
 
 $tmpblacklistcontent = new Blacklistcontent($db);
@@ -295,7 +302,8 @@ if (!empty($tmparray)) {
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// grep -l returns 0 if something was found
 				// We found an evil string
-				print "- ALERT: the evil string '".$buffer."' was found\n";
+				print "- ALERT: the evil string '".$buffer."' was found in content of index.php\n";
+				$nboferrors = 1;
 			} else {
 				print "- OK\n";
 			}
@@ -349,7 +357,8 @@ if (!empty($tmparray)) {
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// command returns 0 if something was found
 				// We found an evil string
-				print "- ALERT: the evil dir '".$buffer."' was found\n";
+				print "- ALERT: the evil dir/file '".$buffer."' was found\n";
+				$nboferrors = 2;
 			} else {
 				print "- OK\n";
 			}
@@ -389,6 +398,8 @@ if (!empty($tmparray)) {
 	}
 }
 */
+
+
 
 $dbmaster->close();	// Close database opened handler
 
