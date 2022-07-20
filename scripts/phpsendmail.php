@@ -16,7 +16,22 @@ $logfile = '/var/log/phpsendmail.log';
 
 // The directory $pathtospamdir must have permission rwxrwxrwx and not rwxrwxrwt
 //$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Get $pathtospamdir
 $pathtospamdir = '/tmp/spam';
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	fclose($fp);
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'pathtospamdir') {
+			$pathtospamdir = $tmpline[1];
+		}
+	}
+} else {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR Failed to open /etc/sellyoursaas.conf file\n", FILE_APPEND);
+	//exit(-1);
+}
 
 
 //* Get the email content
