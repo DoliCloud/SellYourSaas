@@ -1,7 +1,11 @@
 #!/bin/bash
 
 verbose=true
+echo ----- letsencrypt_authenticator.sh -----
+echo "CERTBOT_DOMAIN=$CERTBOT_DOMAIN"
+echo "CERTBOT_ALL_DOMAINS=$CERTBOT_ALL_DOMAINS"
 export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+#export subdomain=$CERTBOT_DOMAIN
 zone_file="/etc/bind/${subdomain}.hosts"
 #current_certificates="/etc/letsencrypt/live/with1.doliasso.org/*pem"
 

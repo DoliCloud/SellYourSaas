@@ -2,7 +2,7 @@
 #
 # This script can be ran when installing a new server from an image as a post installation script
 # so the new server does not executes scheduled task automatically (resulting of a duplicate task
-# with the tasks exexuted by original server). 
+# with the tasks already executed by the original server). 
 #
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`

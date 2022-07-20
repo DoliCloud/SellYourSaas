@@ -64,6 +64,21 @@ function cmp($a, $b)
 }
 
 /**
+ * To compare on date property (reverse)
+ *
+ * @param 	int 	$a		Date A
+ * @param 	int 	$b		Date B
+ * @return 	boolean			Result of comparison
+ */
+function cmpr_invoice_object_date_desc($a, $b)
+{
+	if ($a->date == $b->date) {
+		return strcmp($b->id, $a->id);
+	}
+	return strcmp($b->date, $a->date);
+}
+
+/**
  * Return if a thirdparty has a payment mode set as a default payment mode.
  *
  * @param 	int	$thirdpartyidtotest		Third party id
@@ -243,7 +258,7 @@ function sellyoursaasHasOpenInvoices($contract)
 	$contract->fetchObjectLinked();
 	$atleastoneopeninvoice=0;
 
-	if (is_array($contract->linkedObjects['facture'])) {
+	if (isset($contract->linkedObjects['facture']) && is_array($contract->linkedObjects['facture'])) {
 		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
 			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
 			if ($invoice->statut == Facture::STATUS_ABANDONED) continue;

@@ -239,7 +239,6 @@
       - php74 is defined
 
 
-      
   - name: Removed unexpected apt packages
     apt:
       pkg:
@@ -255,3 +254,16 @@
       var: command_output.stdout_lines
       
      
+  ##### Set permissions by calling perms.ksh
+- name: Call perms.ksh
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Launch perms.sh
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh confirm"
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines  

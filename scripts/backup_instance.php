@@ -46,37 +46,27 @@ $version='1.0';
 $RSYNCDELETE=0;
 $NOTRANS=0;
 $QUICK=0;
+$NOSTATS=0;
 
 $instance=isset($argv[1])?$argv[1]:'';
 $dirroot=isset($argv[2])?$argv[2]:'';
 $mode=isset($argv[3])?$argv[3]:'';
-if (isset($argv[4])) {
-	if ($argv[4] == '--delete') {
-		$RSYNCDELETE=1;
-	} elseif ($argv[4] == '--notransaction') {
-		$NOTRANS=1;
-	} elseif ($argv[4] == '--quick') {
-		$QUICK=1;
+
+$keystocheck = array(4, 5, 6, 7);
+foreach ($keystocheck as $keytocheck) {
+	if (isset($argv[$keytocheck])) {
+		if ($argv[$keytocheck] == '--delete') {
+			$RSYNCDELETE=1;
+		} elseif ($argv[$keytocheck] == '--notransaction') {
+			$NOTRANS=1;
+		} elseif ($argv[$keytocheck] == '--quick') {
+			$QUICK=1;
+		} elseif ($argv[$keytocheck] == '--nostats') {
+			$NOSTATS=1;
+		}
 	}
 }
-if (isset($argv[5])) {
-	if ($argv[5] == '--delete') {
-		$RSYNCDELETE=1;
-	} elseif ($argv[5] == '--notransaction') {
-		$NOTRANS=1;
-	} elseif ($argv[5] == '--quick') {
-		$QUICK=1;
-	}
-}
-if (isset($argv[6])) {
-	if ($argv[6] == '--delete') {
-		$RSYNCDELETE=1;
-	} elseif ($argv[6] == '--notransaction') {
-		$NOTRANS=1;
-	} elseif ($argv[6] == '--quick') {
-		$QUICK=1;
-	}
-}
+
 
 @set_time_limit(0);							// No timeout for this script
 define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
@@ -89,6 +79,7 @@ $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
+$backupignoretables='';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -121,6 +112,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupignoretables') {
+			$backupignoretables = $tmpline[1];
 		}
 	}
 } else {
@@ -189,13 +183,14 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
-	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick]\n";
+	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick] [--nostats]\n";
 	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
 	print "         the parameter --delete run the rsync with the --delete option\n";
 	print "         the parameter --notransaction run the mysqldump without the --single-transaction\n";
 	print "         the parameter --quick run the mysqldump with the --quick option\n";
+	print "         the parameter --nostats disable send of statistics to the external supervision platform\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -230,8 +225,8 @@ if ($num_rows > 1) {
 	if ($obj) $idofinstancefound = $obj->rowid;
 }
 
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object = new Contrat($dbmaster);
+dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
+$object = new SellYourSaasContract($dbmaster);
 $result=0;
 if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
 
@@ -430,6 +425,22 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$param[]="--hex-blob";
 	$param[]="--default-character-set=utf8";
 
+	if ($backupignoretables) {
+		$listofignoretables = dolExplodeIntoArray($backupignoretables, ',', ':');
+		if (array_key_exists($object->instance, $listofignoretables)) {
+			$listofignoretablesforinstance = explode('+', $listofignoretables[$object->instance]);
+			foreach ($listofignoretablesforinstance as $key => $val) {
+				$param[]='--ignore-table='.$object->database_db.'.'.$val;
+			}
+		}
+		if (array_key_exists('all', $listofignoretables)) {
+			$listofignoretablesforinstance = explode('+', $listofignoretables['all']);
+			foreach ($listofignoretablesforinstance as $key => $val) {
+				$param[]='--ignore-table='.$object->database_db.'.'.$val;
+			}
+		}
+	}
+
 	$prefixdumptemp = 'temp';
 
 	$fullcommand=$command." ".join(" ", $param);
@@ -452,6 +463,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.bz2');
 		dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.zst');
 	}
+
+	// Execute command
 	$output=array();
 	$return_outputmysql=0;
 	$datebeforemysqldump = strftime("%Y%m%d-%H%M%S");
@@ -467,13 +480,17 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		$return_outputmysql = strpos($outputerr, ' Error ');
 	}
 	if (empty($return_outputmysql)) {	// If no error detected previously, we try also to detect by getting size file
-		if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
-			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
+		if ($mode == 'testdatabase' || $mode == 'test') {
+			$return_outputmysql = 0;
 		} else {
-			$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz');
-		}
-		if ($filesizeofsql < 100) {
-			$return_outputmysql = 1;
+			if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
+				$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
+			} else {
+				$filesizeofsql = filesize($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz');
+			}
+			if ($filesizeofsql < 100) {
+				$return_outputmysql = 1;
+			}
 		}
 	}
 
@@ -535,7 +552,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+		if (!empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && empty($NOSTATS)) {
 			try {
 				print "Send result of backup ok to DataDog\n";
 				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
@@ -566,7 +583,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+		if (!empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && empty($NOSTATS)) {
 			try {
 				print "Send result of backup ko to DataDog\n";
 				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');

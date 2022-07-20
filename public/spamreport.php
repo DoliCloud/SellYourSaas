@@ -139,6 +139,7 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 			$arraytags=null;
 
 			// Add metric in Datadog
+			file_put_contents($tmpfile, "Ping metric spamreported ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog\n", FILE_APPEND);
 			if ($mode != 'test' && $mode != 'nodatadog') {
 				$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
 			}
@@ -169,10 +170,9 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 				);
 			}
 
-			file_put_contents($tmpfile, "Ping ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog\n", FILE_APPEND);
+			file_put_contents($tmpfile, "Ping event ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog\n", FILE_APPEND);
 			echo "Ping ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog<br>\n";
 		} catch (Exception $e) {
-
 		}
 	} else {
 		file_put_contents($tmpfile, "Datadog ping not sent (datadog ping on spamreport disabled)\n", FILE_APPEND);

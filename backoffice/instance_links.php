@@ -56,7 +56,8 @@ $id			= GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
 $refold     = GETPOST('refold', 'alpha');
 
-$error=0; $errors=array();
+$error = 0;
+$errors=array();
 
 $object = new Contrat($db);
 
@@ -88,21 +89,51 @@ if (empty($reshook)) {
 		exit;
 	}
 
-	// Add action to create file, etc...
+	// Manage action 'addauthorizedkey', 'addinstalllock', etc...
 	require 'refresh_action.inc.php';
 
 	if ($action == 'markasspamandclose') {
+		$db->begin();
+
 		$idtoclose = GETPOST('idtoclose', 'int');
 		$tmpcontract = new Contrat($db);
 		$tmpcontract->fetch($idtoclose);
-		$tmpcontract->array_options['spammer'] = 1;
+		$tmpcontract->array_options['options_spammer'] = 1;
 		$tmpcontract->update($user, 1);
 
 		$result = $tmpcontract->closeAll($user, 0, 'Closed by spammer inspector.');
 		if ($result > 0) {
-			setEventMessages("OK", null, 'mesgs');
+			dol_include_once("/sellyoursaas/class/blacklistip.class.php");
+
+			$blacklistip = new Blacklistip($db);
+			$result = $blacklistip->fetch(0, $tmpcontract->array_options['options_deployment_ip']);
+			if ($result == 0) {
+				// If record does not exist yet
+				$blacklistip->status = Blacklistip::STATUS_ENABLED;
+				$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
+				$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
+
+				$result2 = $blacklistip->create($user);
+				if ($result2 <= 0) {
+					setEventMessages($blacklistip->error, $blacklistip->errors, 'errors');
+					$error++;
+				}
+			} elseif ($result > 0) {
+				setEventMessages("IP was already blacklisted", null, 'mesgs');
+			}
+
+			if (!$error) {
+				setEventMessages("Suspended", null, 'mesgs');
+			}
 		} else {
+			$error++;
 			setEventMessages($tmpcontract->error, $tmpcontract->errors, 'errors');
+		}
+
+		if ($error) {
+			$db->rollback();
+		} else {
+			$db->commit();
 		}
 	}
 
@@ -350,7 +381,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// Thirdparty
 	$morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . $object->thirdparty->getNomUrl(1);
 	// Project
-	if (! empty($conf->projet->enabled)) {
+	if (! empty($conf->project->enabled)) {
 		$langs->load("projects");
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
@@ -459,8 +490,8 @@ if (empty($object->nbofusers)) {
 					/*'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,*/
 					'__INSTANCEDBPREFIX__'=>$generateddbprefix,
 					'__DOL_DATA_ROOT__'=>DOL_DATA_ROOT,
-					'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
-					'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
+					'__INSTALLHOURS__'=>dol_print_date($now, '%H'),			// GMT
+					'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),		// GMT
 					'__OSHOSTNAME__'=>$generatedunixhostname,
 					'__OSUSERNAME__'=>$generatedunixlogin,
 					'__OSPASSWORD__'=>$generatedunixpassword,
@@ -493,7 +524,7 @@ if (empty($object->nbofusers)) {
 				if ($tmparray[0] == 'SQL') {
 					$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
-					//$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
+					//$serverdeployment = $this->getRemoteServerDeploymentIp($domainname);
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 
 					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
@@ -529,7 +560,7 @@ if (empty($object->nbofusers)) {
 									$error++;
 									/*$this->error = 'SQL to get resource return nothing';
 									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('SQL to get resource return nothing', null, 'errors');
+									setEventMessages('instance_links.php: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 								}
 							} else {
 								// If request is a SELECT nb, fieldlogin as comment
@@ -557,7 +588,7 @@ if (empty($object->nbofusers)) {
 									$error++;
 									/*$this->error = 'SQL to get resource return nothing';
 									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('SQL to get resource return nothing', null, 'errors');
+									setEventMessages('instance_links.php: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 								}
 							}
 
@@ -609,7 +640,7 @@ print '</tr>';
 
 // Authorized key file
 print '<tr>';
-print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
+print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No"));
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
@@ -618,7 +649,7 @@ print '</tr>';
 
 // Install.lock file
 print '<tr>';
-print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
+print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No"));
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
@@ -649,41 +680,39 @@ print '<br>';
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 
-//if (! empty($object->array_options['options_cookieregister_previous_instance']))
-//{
-	// Get all instances in chain
-	$arraylistofinstances = getListOfInstancesInChain($object);
+// Get all instances in chain
+$arraylistofinstances = getListOfInstancesInChain($object);
 
-	print '<br>';
-	print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
+print '<br>';
+print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
 
-	print '<div class="div-table-responsive-no-min">';
-	print '<table class="noborder" width="100%">';
+print '<div class="div-table-responsive-no-min">';
+print '<table class="noborder entpercent">';
 
-	print '<tr>';
-	print '<td>'.$langs->trans("Instance").'</td>';
-	print '<td>'.$langs->trans("RefCustomer").'</td>';
-	print '<td>'.$langs->trans("RegistrationCounter").'</td>';
-	print '<td>'.$langs->trans("IP").'</td>';
-	print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
-	print '<td>'.$langs->trans("Date").'</td>';
-	print '<td>'.$langs->trans("Status").'</td>';
-	print '<td></td>';
-	print '</tr>';
+print '<tr>';
+print '<td>'.$langs->trans("Instance").'</td>';
+print '<td>'.$langs->trans("RefCustomer").'</td>';
+print '<td>'.$langs->trans("RegistrationCounter").'</td>';
+print '<td>'.$langs->trans("IP").'</td>';
+print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
+print '<td>'.$langs->trans("Date").'</td>';
+print '<td>'.$langs->trans("Status").'</td>';
+print '<td></td>';
+print '</tr>';
 
-	$arrayofips=array();
+$arrayofips=array();
 
 foreach ($arraylistofinstances as $instance) {
 	$arrayofips[] = $instance->array_options['options_deployment_ip'];
 
 	// Nb of users
 	print '<tr>';
-	print '<td>'.$instance->getNomUrl(1).'</td>';
+	print '<td class="nowraponall">'.$instance->getNomUrl(1).'</td>';
 	print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
 	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
-	print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
+	print '<td>'.dol_print_ip($instance->array_options['options_deployment_ip']).'</td>';
 	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
-	print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
+	print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';
 	print '<td align="right">';
 	if ($user->rights->sellyoursaas->write) {
@@ -699,22 +728,21 @@ foreach ($arraylistofinstances as $instance) {
 	print '</tr>';
 }
 
-	print '<tr class="liste_total">';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td>';
-	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
-	print '</td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '</tr>';
+print '<tr class="liste_total">';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '<td>';
+print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
+print '</td>';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '</tr>';
 
-	print '</table>';
-	print '</div>';
-//}
+print '</table>';
+print '</div>';
 
 
 llxFooter();

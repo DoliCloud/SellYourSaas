@@ -318,7 +318,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			}
 			// Chart
 			if ((empty($conf->global->MAIN_JS_GRAPH) || $conf->global->MAIN_JS_GRAPH == 'chart') && !defined('DISABLE_JS_GRAPH')) {
-				print '<script src="'.DOL_URL_ROOT.'/includes/nnnick/chartjs/dist/Chart.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+				print '<script src="'.DOL_URL_ROOT.'/includes/nnnick/chartjs/dist/chart.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			}
 			if (!defined('DISABLE_SELECT2') && (!empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {
 				// jQuery plugin "mutiselect", "multiple-select", "select2", ...
@@ -561,15 +561,20 @@ if (! function_exists('dol_getprefix')) {
 			global $conf;
 
 			if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID)) {	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
-				if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
-				elseif (isset($_SERVER["SERVER_NAME"])) return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
+				if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') {
+					return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
+				} elseif (isset($_SERVER["SERVER_NAME"])) {
+					return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
+				}
 			}
 
 			// The recommended value (may be not defined for old versions)
-			if (! empty($conf->file->instance_unique_id)) return 'sellyoursaas'.$conf->file->instance_unique_id;
+			if (! empty($conf->file->instance_unique_id)) {
+				return sha1('sellyoursaas'.$conf->file->instance_unique_id);
+			}
 
 			// For backward compatibility
-			return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+			return sha1('sellyoursaas'.DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
 		}
 
 		// If prefix is for session (no need to have $conf loaded)
@@ -578,15 +583,15 @@ if (! function_exists('dol_getprefix')) {
 
 		// The recommended value (may be not defined for old versions)
 		if (!empty($tmp_instance_unique_id)) {
-			return 'sellyoursaas'.$tmp_instance_unique_id;
+			return sha1('sellyoursaas'.$tmp_instance_unique_id);
 		}
 
 		// For backward compatibility
 		if (isset($_SERVER["SERVER_NAME"]) && isset($_SERVER["DOCUMENT_ROOT"])) {
-			return 'sellyoursaas'.dol_hash($_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+			return sha1('sellyoursaas'.$_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
 		}
 
-		return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+		return sha1('sellyoursaas'.DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
 	}
 }
 

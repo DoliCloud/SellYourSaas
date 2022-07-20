@@ -19,13 +19,14 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
  */
 class mailing_mailinglist_sellyoursaas extends MailingTargets
 {
-	public $name='mailinglist_sellyoursaas';
+	public $name = 'mailinglist_sellyoursaas';
 	public $desc = 'Prospects or Customers SellYourSaas';
-	public $require_admin=0;
+	public $require_admin = 0;
 
-	public $enabled=0;
-	public $require_module=array();
-	public $picto='sellyoursaas@sellyoursaas';
+	public $enabled = '$conf->sellyoursaas->enabled';
+
+	public $require_module = array();
+	public $picto = 'sellyoursaas@sellyoursaas';
 	public $db;
 
 
@@ -36,12 +37,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 */
 	public function __construct($db)
 	{
-		global $conf;
-
 		$this->db=$db;
-		if (is_array($conf->modules)) {
-			$this->enabled=in_array('sellyoursaas', $conf->modules);
-		}
 	}
 
 
@@ -310,7 +306,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 */
 	public function getNbOfRecipients($filter = 1, $option = '')
 	{
-		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email != ''");
+		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email <> ''");
 		if ($a < 0) return -1;
 		return $a;
 	}

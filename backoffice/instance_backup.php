@@ -130,7 +130,8 @@ if ($ispaid) {
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 		$restorestringpretoshow .= "sudo rm -fr ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/home'."\n";
 		$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
-		$restorestringpretoshow .= "or sudo tar -I zstd -xf ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.zst'."\n";
+		$restorestringpretoshow .= "or\n";
+		$restorestringpretoshow .= "sudo tar -I zstd -xvf ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.zst'."\n";
 		$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 		$restorestringpretoshow .= "\n";
 		$restorestringpretoshow .= "sudo chown -R admin.root ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
@@ -148,7 +149,8 @@ if ($ispaid) {
 		$restorestringpretoshow .= 'sudo rm -fr '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].'; sudo rm -fr '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 		$restorestringpretoshow .= 'sudo rm -fr '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/home; sudo rm -fr '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/home'."\n";
 		$restorestringpretoshow .= "sudo tar -xvf ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.gz'."\n";
-		$restorestringpretoshow .= "or sudo tar -I zstd -vf ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.zst'."\n";
+		$restorestringpretoshow .= "or\n";
+		$restorestringpretoshow .= "sudo tar -I zstd -xvf ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_username_os'].'.tar.zst'."\n";
 		$restorestringpretoshow .= "sudo mv ".$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' '.$conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."\n";
 		$restorestringpretoshow .= 'sudo mkdir '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db']."; sudo chown ".$object->array_options['options_username_os'].".".$object->array_options['options_username_os'].' '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os']."\n";
 
@@ -307,7 +309,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	// Thirdparty
 	$morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . ($object->thirdparty ? $object->thirdparty->getNomUrl(1) : '');
 	// Project
-	if (! empty($conf->projet->enabled)) {
+	if (! empty($conf->project->enabled)) {
 		$langs->load("projects");
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
@@ -469,12 +471,12 @@ if ($restorestringfromarchive) {
 	print '<br>';
 }
 
-// Duplicate an instance
+// Duplicate an instance into another instance (already existing instance)
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(can be run on any server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
-	print $backupstringtoshow."\n";
+	print $backupstringtoshow." --nostats\n";
 	print $restorestringtoshow;
 	print '</textarea>';
 
@@ -482,7 +484,7 @@ if ($restorestringfrombackupshort) {
 	print '<br>';
 }
 
-// Migrate to another instance container
+// Move instance into another server (non existing target instance)
 if ($moveinstancestringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run on master server)</span><br>';

@@ -1,5 +1,7 @@
 #!/bin/bash
 #--------------------------------------------------------#
+# Script to force permission on expected default values
+#--------------------------------------------------------#
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
@@ -26,9 +28,24 @@ cd /tmp
 #echo "Remplacement group apache par www-data"
 #find . -group apache -exec chgrp www-data {} \;
 
-# Owner root
-echo "Set owner and permission on logs directory"
+# Owner root on logs and backups dir
+echo "Set owner and permission on logs and backup directory"
 chown root.adm /home/admin/logs/
+[ -d /home/admin/logs ] || mkdir /home/admin/logs;
+[ -d /mnt/diskbackup ] || mkdir /mnt/diskbackup;
+[ -d /home/admin/backup ] || mkdir /home/admin/backup;
+[ -d /home/admin/backup/conf ] || mkdir /home/admin/backup/conf;
+[ -d /home/admin/backup/mysql ] || mkdir /home/admin/backup/mysql;
+[ -d /home/admin/wwwroot ] || mkdir /home/admin/wwwroot;
+chown root.adm /home/admin/logs; chmod 770 /home/admin/logs; 
+chown admin.admin /mnt/diskbackup; 
+chown admin.admin /home/admin/backup; chown admin.admin /home/admin/backup/conf; chown admin.admin /home/admin/backup/mysql; 
+chown admin.admin /home/admin/wwwroot
+
+# Permissions on private key files
+[ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas
+
 
 echo "Set owner and permission on /home/admin/wwwroot/dolibarr_documents/ (except sellyoursaas)"
 chmod g+ws /home/admin/wwwroot/dolibarr_documents/
@@ -52,9 +69,20 @@ if [[ "x$masterserver" == "x1" ]]; then
 fi
 
 echo Set owner and permission on /etc/sellyoursaas.conf
+if [ ! -s /etc/sellyoursaas.conf ]; then
+	echo > /etc/sellyoursaas.conf
+fi
 chown -R root.admin /etc/sellyoursaas.conf
 chmod g-wx /etc/sellyoursaas.conf
 chmod o-rwx /etc/sellyoursaas.conf
+
+echo Set owner and permission on /etc/sellyoursaas-pubic.conf
+if [ ! -s /etc/sellyoursaas-public.conf ]; then
+	echo > /etc/sellyoursaas-public.conf
+fi
+chown -R root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr
 chown -R admin.admin /home/admin/wwwroot/dolibarr
@@ -108,3 +136,19 @@ echo "Nettoyage vieux /tmp"
 echo find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
 find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
 
+echo "Check files for antispam system and create them if not found"
+[ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
+chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+
+[ -d /tmp/spam ] || mkdir /tmp/spam;
+[ -s /tmp/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
+[ -s /tmp/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
+[ -s /tmp/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
+[ -s /tmp/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
+chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
+chown admin.www-data /tmp/spam/*

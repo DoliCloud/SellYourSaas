@@ -42,6 +42,7 @@ echo "# scriptdir-------> $scriptdir"
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupserver=`grep '^remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export remotebackupserverport=`grep '^remotebackupserverport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export testorconfirm=$2
 export USER=$1
@@ -75,9 +76,12 @@ fi
 if [ "x$backupdir" == "x" ]; then
 	export backupdir=/mnt/diskbackup/backup
 fi
-
+if [ "x$remotebackupserverport" == "x" ]; then
+	export remotebackupserverport="22"
+fi
 echo "remotebackupdir=$remotebackupdir"
 echo "remotebackuserver=$remotebackupserver"
+echo "remotebackuserverport=$remotebackupserverport"
 echo "backupdir=$backupdir"
 echo "USER=$USER"
 echo "DIRSOURCE1=$DIRSOURCE1"
@@ -89,7 +93,7 @@ echo "testorconfirm=$testorconfirm"
 
 # Source
 export SERVSOURCE=$remotebackupserver
-export SERVPORTSOURCE="22"
+export SERVPORTSOURCE=$remotebackupserverport
 export DIRSOURCE1="$remotebackupdir/home*";
 export DIRSOURCE2="$remotebackupdir/backup*";
 

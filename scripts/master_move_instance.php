@@ -541,6 +541,7 @@ $param[]="--exclude .git";
 $param[]="--exclude .gitignore";
 $param[]="--exclude .settings";
 $param[]="--exclude .project";
+$param[]="--exclude *.pdf_preview.png";
 $param[]="--exclude htdocs/conf/conf.php";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";

@@ -44,11 +44,10 @@ if ($action == 'addauthorizedkey') {
 			$dircreated=0;
 			$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh');
 			if ($result) {
-				$dircreated=1;
-			}	// Created
-			else {
-				$dircreated=0;
-			}	// Creation fails or already exists
+				$dircreated=1;	// Created
+			} else {
+				$dircreated=0;	// Creation fails or already exists
+			}
 
 			// Check if authorized_key exists
 			//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/.ssh/authorized_keys_support';
@@ -170,7 +169,7 @@ if ($action == 'delauthorizedkey') {
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("DeleteFails"), 'warnings');
+			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_web.'/.ssh/authorized_keys_support'), 'warnings');
 
 			$object->fileauthorizedkey='';
 			$object->array_options['options_fileauthorizekey']='';
@@ -215,7 +214,7 @@ if ($action == 'delinstalllock') {
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("DeleteFails"), 'warnings');
+			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_web.'/'.$dir.'/documents/install.lock'), 'warnings');
 
 			$object->filelock='';
 			$object->array_options['options_filelock']='';

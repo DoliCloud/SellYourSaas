@@ -124,6 +124,8 @@ $firstrecord=GETPOST('firstrecord', 'int');
 $lastrecord=GETPOST('lastrecord', 'int');
 $search_instance_name=GETPOST('search_instance_name', 'alphanohtml');
 $search_customer_name=GETPOST('search_customer_name', 'alphanohtml');
+$reasonundeploy=GETPOST('reasonundeploy', 'alpha');
+$commentundeploy=GETPOST('commentundeploy', 'alpha');
 
 // Var used to create a new BAN for SEPA payments
 $bankname = GETPOST('bankname', 'alphanohtml');
@@ -145,6 +147,7 @@ $pagenext = $page + 1;
 //if (! $sortfield) $sortfield="p.date_fin";
 //if (! $sortorder) $sortorder="DESC";
 
+$propertykey = GETPOST('propertykey', 'int');
 $firstrecord = GETPOSTISSET('firstrecord')?GETPOST('firstrecord', 'int'):($page * $limit) + 1;
 $lastrecord = GETPOSTISSET('lastrecord')?GETPOST('lastrecord', 'int'):(($page+1)*$limit);
 if ($firstrecord < 1) $firstrecord=1;
@@ -197,11 +200,13 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 }
 
 
-$urlstatus=$conf->global->SELLYOURSAAS_STATUS_URL;
+$urlstatus = getDolGlobalString('SELLYOURSAAS_STATUS_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_STATUS_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) $urlstatus = $conf->global->$newnamekey;
+	if (!empty($conf->global->$newnamekey)) {
+		$urlstatus = $conf->global->$newnamekey;
+	}
 }
 
 $now =dol_now();
@@ -214,12 +219,16 @@ $documentstatic=new Contrat($db);
 $documentstaticline=new ContratLigne($db);
 
 $listofcontractid = array();
-$sql = 'SELECT c.rowid as rowid';
-$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid, '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
-$sql.= " WHERE c.fk_soc = s.rowid AND s.rowid = ".$mythirdpartyaccount->id;
-$sql.= " AND d.fk_contrat = c.rowid";
-$sql.= " AND c.entity = ".$conf->entity;
-$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
+$listofcontractidopen = array();
+$sql = 'SELECT c.rowid as rowid, ce.deployment_status';
+$sql .= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
+$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
+//$sql .= ' '.MAIN_DB_PREFIX.'contratdet as d,';
+$sql .= ' '.MAIN_DB_PREFIX.'societe as s';
+$sql .= ' WHERE c.fk_soc = s.rowid AND s.rowid = '.((int) $mythirdpartyaccount->id);
+//$sql .= ' AND d.fk_contrat = c.rowid';
+$sql .= ' AND c.entity = '.((int) $conf->entity);
+$sql .= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 $resql=$db->query($sql);
 if ($resql) {
 	$num_rows = $db->num_rows($resql);
@@ -229,10 +238,15 @@ if ($resql) {
 		if ($obj) {
 			$contract=new Contrat($db);
 			$contract->fetch($obj->rowid);					// This load also lines
-			$listofcontractid[$obj->rowid]=$contract;
+			$listofcontractid[$obj->rowid] = $contract;
+			if (in_array($obj->deployment_status, array('processing', 'done'))) {
+				$listofcontractidopen[$obj->rowid] = $contract;
+			}
 		}
 		$i++;
 	}
+} else {
+	dol_print_error($db);
 }
 
 $mythirdpartyaccount->isareseller = 0;
@@ -249,7 +263,12 @@ $listofcontractidresellerall = array();
 $listofcontractidreseller = array();
 $listofcustomeridreseller = array();
 
-if ($mythirdpartyaccount->isareseller) {
+// Load list of child instances for resellers
+// TODO: This may be very slow on large resellers
+if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'mycustomerbilling', 'mycustomerinstances'))) {
+	dol_syslog("Thirdparty is a reseller so we load the list of all child instances/contracts");
+
+	// Full list of ID (no loading of object)
 	$sql = 'SELECT DISTINCT c.rowid, c.fk_soc';
 	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
@@ -270,10 +289,7 @@ if ($mythirdpartyaccount->isareseller) {
 		$i++;
 	}
 
-	if (empty($lastrecord) || $lastrecord > $nbtotalofrecords) $lastrecord = $nbtotalofrecords;
-
-	if ($lastrecord > 0) $sql.= " LIMIT ".($firstrecord?$firstrecord:1).", ".(($lastrecord >= $firstrecord) ? ($lastrecord - $firstrecord + 1) : 5);
-
+	// List limited
 	$sql = 'SELECT c.rowid as rowid, c.fk_soc';
 	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
@@ -284,6 +300,15 @@ if ($mythirdpartyaccount->isareseller) {
 	$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 	if ($search_instance_name) $sql.=" AND c.ref_customer REGEXP '^[^\.]*".$db->escape($search_instance_name)."'";
 	if ($search_customer_name) $sql.=natural_search(array('s.nom','s.email'), $search_customer_name);
+
+	if (empty($lastrecord) || $lastrecord > $nbtotalofrecords) {
+		$lastrecord = $nbtotalofrecords;
+	}
+	if ($lastrecord > 0) {
+		// We disable this filter because we need all later to calculate the number of suspended instance from lines
+		//$sql.= " LIMIT ".($firstrecord?$firstrecord:1).", ".(($lastrecord >= $firstrecord) ? ($lastrecord - $firstrecord + 1) : 5);
+	}
+
 	$resql=$db->query($sql);
 	if ($resql) {
 		$num_rows = $db->num_rows($resql);
@@ -294,7 +319,7 @@ if ($mythirdpartyaccount->isareseller) {
 				if (empty($listofcontractidreseller[$obj->rowid])) {
 					$contract=new Contrat($db);
 					$contract->fetch($obj->rowid);					// This load also lines
-					$listofcontractidreseller[$obj->rowid]=$contract;
+					$listofcontractidreseller[$obj->rowid] = $contract;
 				}
 			}
 			$i++;
@@ -348,14 +373,170 @@ if (preg_match('/logout/', $mode)) {
 
 	session_destroy();
 	$param='';
-	if (GETPOSTISSET('username', 'alpha'))   $param.='&username='.urlencode(GETPOST('username', 'alpha'));
-	if (GETPOSTISSET('password', 'alpha'))   $param.='&password='.urlencode(GETPOST('password', 'alpha'));
-	if (GETPOSTISSET('login_hash', 'alpha')) $param.='&login_hash='.urlencode(GETPOST('login_hash', 'alpha'));
-	if (GETPOSTISSET('action', 'alpha'))     $param.='&action='.urlencode(GETPOST('action', 'alpha'));
-	if (GETPOSTISSET('actionlogin', 'alpha')) $param.='&actionlogin='.urlencode(GETPOST('actionlogin', 'alpha'));
+	if (GETPOSTISSET('username'))   $param.='&username='.urlencode(GETPOST('username', 'alpha'));
+	if (GETPOSTISSET('password'))   $param.='&password='.urlencode(GETPOST('password', 'alpha'));
+	if (GETPOSTISSET('login_hash')) $param.='&login_hash='.urlencode(GETPOST('login_hash', 'alpha'));
+	if (GETPOSTISSET('action'))     $param.='&action='.urlencode(GETPOST('action', 'alpha'));
+	if (GETPOSTISSET('actionlogin')) $param.='&actionlogin='.urlencode(GETPOST('actionlogin', 'alpha'));
 	if ($mode) $param.='&mode='.urlencode($mode);
 	header("Location: /index.php".($param?'?'.$param:''));
 	exit;
+}
+if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'updateforcepriceinstance') {
+	$errors = 0;
+	$result = 1;
+	$priceproductid = GETPOST("priceproductid", "alpha");
+	$price_instance = price2num(GETPOST("field_price_".$mythirdpartyaccount->id."_".$priceproductid));
+	$price_instance_per_user = price2num(GETPOST("field_priceuser_".$mythirdpartyaccount->id."_".$priceproductid));
+
+	$min_instance_price_reduction = getDolGlobalInt("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION", 0) / 100;
+
+	if (!$errors) {
+		$product = new Product($db);
+		$tmpprodchild = new Product($db);
+
+		$res = $product->fetch($priceproductid);
+		if ($res <= 0) {
+			setEventMessages($langs->trans("ProductNotFound"), null, 'errors');
+			$errors++;
+		}
+
+		if (!$errors) {
+			$priceinstance['user'] = null;
+			$priceinstance['options']["total"] = 0;
+			$priceinstance['fix'] = (float) price2num($product->price);
+			$product->sousprods = array();
+			$product->get_sousproduits_arbo();
+			$tmparraysousproduct = $product->get_arbo_each_prod();
+			if (count($tmparraysousproduct) > 0) {
+				foreach ($tmparraysousproduct as $key => $value) {
+					$tmpprodchild->fetch($value['id']);
+					$prodchildprice = (float) price2num($tmpprodchild->price);
+					if (preg_match('/user/i', $tmpprodchild->ref) || preg_match('/user/i', $tmpprodchild->array_options['options_resource_label'])) {
+						if (!empty($priceinstance['user'])) {
+							$priceinstance['user'].= $prodchildprice;
+						} else {
+							$priceinstance['user'] = $prodchildprice;
+						}
+					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
+						// Don't add system services to global price, these are options with calculated quantitie
+					} else {
+						if ($tmpprodchild->array_options['options_app_or_option'] == 'option') {
+							$priceinstance['options']["lines"][$tmpprodchild->id]["posted"] = (float) price2num(GETPOST("field_price_option_".$tmpprodchild->id."_".$mythirdpartyaccount->id."_".$priceproductid));
+							$priceinstance['options']["lines"][$tmpprodchild->id]["base"] = $prodchildprice;
+							$priceinstance['options']["total"] += $prodchildprice;
+						}
+						$priceinstance['fix'] += $prodchildprice;
+					}
+				}
+			}
+			if ($price_instance === "") {
+				setEventMessages($langs->trans("FixPriceMustBeNumeric"), null, 'errors');
+				$errors++;
+			} else {
+				$price_instance = (float) $price_instance;
+			}
+
+			if (isset($priceinstance['user'])) {
+				if ($price_instance_per_user === "") {
+					setEventMessages($langs->trans("PricePerUsersMustBeNumeric"), null, 'errors');
+					$errors++;
+				} else {
+					$price_instance_per_user = (float) $price_instance_per_user;
+				}
+			}
+
+			if (!$errors) {
+				$minfixprice = $priceinstance['fix'] - $priceinstance['options']["total"] - $min_instance_price_reduction * $priceinstance['fix'];
+				if (!empty($priceinstance['user'])) {
+					$minuserprice = $priceinstance['user'] - $min_instance_price_reduction * $priceinstance['user'];
+				}
+				if ($price_instance < $minfixprice) {
+					setEventMessages($langs->trans("FixPriceMustBeMoreThenMinFixPrice", $minfixprice, $langs->getCurrencySymbol($conf->currency)), null, 'errors');
+					$errors++;
+				}
+				if (isset($priceinstance['user']) && $price_instance_per_user < $minuserprice) {
+					setEventMessages($langs->trans("PricePerUsersMustBeMoreThenMinUserPrice", $minuserprice, $langs->getCurrencySymbol($conf->currency)), null, 'errors');
+					$errors++;
+				}
+				if (!$errors) {
+					require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
+
+					$price_instance = price($price_instance);
+					$result = dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$priceproductid, price2num($price_instance), 'chaine', 0, '', $conf->entity);
+					if ($result > 0 && isset($priceinstance['user'])) {
+						$price_instance_per_user = price($price_instance_per_user);
+						$result = dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$priceproductid, price2num($price_instance_per_user), 'chaine', 0, '', $conf->entity);
+					}
+					if (isset($priceinstance['options']["lines"])) {
+						$cptoptions = 1;
+						foreach ($priceinstance['options']["lines"] as $key => $value) {
+							$minoptionprice = $value["base"] - $min_instance_price_reduction * $value["base"];
+							if ($value["posted"] < $minoptionprice) {
+								setEventMessages($langs->trans("PriceOptionMustBeMoreThenMinOptionPrice", $cptoptions, $minoptionprice, $langs->getCurrencySymbol($conf->currency)), null, 'errors');
+								$errors++;
+							}
+							if (!$errors) {
+								$result = dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_PRICE_OPTION_".$key."_".$mythirdpartyaccount->id."_".$priceproductid, price2num($value["posted"]), 'chaine', 0, '', $conf->entity);
+								if ($result <= 0) {
+									break;
+								}
+							}
+							$cptoptions ++;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if ($result <= 0 || $errors) {
+		$action = "editproperty";
+		$propertykey = $priceproductid;
+	} else {
+		setEventMessages($langs->trans("PricesSuccessfullyUpdated"), null);
+	}
+}
+
+if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'resetpropertyconfirm') {
+	if (!empty($propertykey) && !empty($mythirdpartyaccount->id)) {
+		require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
+		$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
+		if ($result > 0) {
+			$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
+		}
+		$product = new Product($db);
+		$tmpprodchild = new Product($db);
+
+		$result = $product->fetch($propertykey);
+		if ($result <= 0) {
+			setEventMessages($langs->trans("ProductNotFound"), null, 'errors');
+			$errors++;
+		}
+		$product->sousprods = array();
+		$product->get_sousproduits_arbo();
+		$tmparraysousproduct = $product->get_arbo_each_prod();
+		if (count($tmparraysousproduct) > 0) {
+			foreach ($tmparraysousproduct as $key => $value) {
+				$tmpprodchild->fetch($value["id"]);	// To load the product
+				if (preg_match('/user/i', $tmpprodchild->ref) || preg_match('/user/i', $tmpprodchild->array_options['options_resource_label'])) {
+					// Already deleted
+				} else {
+					$result = dolibarr_del_const($db, "SELLYOURSAAS_RESELLER_PRICE_OPTION_".$value["id"]."_".$mythirdpartyaccount->id."_".$propertykey, $conf->entity);
+				}
+				if ($result <= 0) {
+					break;
+				}
+			}
+		}
+		if ($result > 0) {
+			setEventMessages($langs->trans("PricesSuccessfullyCleared"), null);
+		} else {
+			setEventMessages($langs->trans("ErrorClearingPrice"), null, "errors");
+		}
+	} else {
+		setEventMessages($langs->trans("ErrorClearingPrice"), null, "errors");
+	}
 }
 
 if ($action == 'updateurl') {
@@ -529,13 +710,21 @@ if ($action == 'updateurl') {
 		if (! empty($conf->global->$newnamekey)) $sellyoursaasnoreplyemail = $conf->global->$newnamekey;
 	}
 
+	// Set email to use when applying for reseller program. Use SELLYOURSAAS_RESELLER_EMAIL and if not found backfall on SELLYOURSAAS_MAIN_EMAIL.
+	$emailto = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
+	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+			if (!empty($conf->global->$newnamekey)) $emailto = $conf->global->$newnamekey;
+	}
+
 	$emailfrom = $sellyoursaasnoreplyemail;
-	$emailto = GETPOST('to', 'alpha');
 	$replyto = GETPOST('from', 'alpha');
 	$topic = '['.$sellyoursaasname.'] - '.GETPOST('subject', 'none').' - '.$mythirdpartyaccount->name;
-	$content = GETPOST('content', 'none');
+	$content = GETPOST('content', 'restricthtml');
 	$content .= "<br><br>\n";
 	$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
+	$content .= 'ThirdParty ID: '.$mythirdpartyaccount->id."<br>\n";
 	$content .= 'Email: '.GETPOST('from', 'alpha')."<br>\n";
 
 	$trackid = 'thi'.$mythirdpartyaccount->id;
@@ -1261,6 +1450,7 @@ if ($action == 'updateurl') {
 							//$invoice_rec->note_public  = dol_concatdesc($contract->note_public, '__(Period)__ : __INVOICE_DATE_NEXT_INVOICE_BEFORE_GEN__ - __INVOICE_DATE_NEXT_INVOICE_AFTER_GEN__');
 							$invoice_rec->note_public  = $contract->note_public;
 							$invoice_rec->mode_reglement_id = $invoice_draft->mode_reglement_id;
+							$invoice_rec->cond_reglement_id = $invoice_draft->cond_reglement_id;
 
 							$invoice_rec->usenewprice = 0;
 
@@ -2142,6 +2332,14 @@ if ($action == 'updateurl') {
 		if ($action == 'undeploy') {
 			$object = $contract;
 
+			if (getDolGlobalInt('SELLYOURSAAS_ASK_DESTROY_REASON') && empty($reasonundeploy)) {
+				// If reason was not provided
+				//setEventMessages($langs->trans("AReasonForUndeploymentIsRequired"), null, 'errors');
+				$errortoshowinconfirm = $langs->trans('AReasonForUndeploymentIsRequired');
+				$error++;
+				$action = 'confirmundeploy';
+			}
+
 			// SAME CODE THAN INTO ACTION_SELLYOURSAAS.CLASS.PHP
 
 			// Disable template invoice
@@ -2164,7 +2362,7 @@ if ($action == 'updateurl') {
 				}
 			}
 
-			$comment = 'Services for '.$contract->ref.' closed after an undeploy request from Customer dashboard. Current status when receiving request is '.$contract->array_options['options_deployment_status'];
+			$comment = 'Services for '.$contract->ref.' closed after an undeploy request from Customer dashboard. Status of instance when request has been received was '.$contract->array_options['options_deployment_status'];
 
 			if (! $error) {
 				$sellyoursaasutils = new SellYourSaasUtils($db);
@@ -2175,6 +2373,16 @@ if ($action == 'updateurl') {
 				}
 			}
 
+			// Insert extrafields of uninstall
+			if (!$error) {
+				$object->array_options['options_reasonundeploy'] = $reasonundeploy;
+				$object->array_options['options_commentundeploy'] = $commentundeploy;
+				$result = $object->insertExtraFields();
+				if ($result <= 0) {
+					$error++;
+					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+				}
+			}
 			// Finish undeploy
 
 			if (! $error) {
@@ -2438,6 +2646,15 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
+$arrayofcss = array();
+// Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
+$arrayofjs=array(
+	'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile)?'':'?version='.urlencode(DOL_VERSION)),
+	'/core/js/dst.js'.(empty($conf->dol_use_jmobile)?'':'?version='.urlencode(DOL_VERSION))
+);
+
+
+$head = '';
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
 $head.='<!-- Bootstrap core CSS -->
 <link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
@@ -2463,7 +2680,7 @@ var select2arrayoflanguage = {
 
 
 
-llxHeader($head, $langs->trans("MyAccount"), '', '', 0, 0, '', '', '', 'myaccount');
+llxHeader($head, $langs->trans("MyAccount"), '', '', 0, 0, $arrayofjs, $arrayofcss, '', 'myaccount');
 
 
 ?>
@@ -2475,18 +2692,18 @@ llxHeader($head, $langs->trans("MyAccount"), '', '', 0, 0, '', '', '', 'myaccoun
 
 <?php
 
-$logoval = $conf->global->SELLYOURSAAS_LOGO_MINI;
-$logoblackval = $conf->global->SELLYOURSAAS_LOGO_MINI_BLACK;
+$logoval = getDolGlobalString('SELLYOURSAAS_LOGO_MINI');
+$logoblackval = getDolGlobalString('SELLYOURSAAS_LOGO_MINI_BLACK');
 if (is_object($mythirdpartyaccount) && $mythirdpartyaccount->array_options['options_domain_registration_page']) {
 	$domainforkey = strtoupper($mythirdpartyaccount->array_options['options_domain_registration_page']);
 	$domainforkey = preg_replace('/\./', '_', $domainforkey);
 
 	$constname = 'SELLYOURSAAS_LOGO_MINI_'.$domainforkey;
 	$constnameblack = 'SELLYOURSAAS_LOGO_MINI_BLACK_'.$domainforkey;
-	if (! empty($conf->global->$constname)) {
+	if (!empty($conf->global->$constname)) {
 		$logoval=$conf->global->$constname;
 	}
-	if (! empty($conf->global->$constnameblack)) {
+	if (!empty($conf->global->$constnameblack)) {
 		$logoblackval=$conf->global->$constnameblack;
 	}
 }
@@ -2648,13 +2865,13 @@ if ($welcomecid > 0) {
 		'.$langs->trans("YouCanAccessYourInstance", $productlabel).'&nbsp:
 		</p>
 		<p class="well">
-		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank">'.$contract->ref_customer.'</a>';
+		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank" rel="noopener">'.$contract->ref_customer.'</a>';
 
 		print '<br> '.$langs->trans("Username").' : '.($_SESSION['initialapplogin']?'<strong>'.$_SESSION['initialapplogin'].'</strong>':'NA').'
 		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
 		</p>
 		<p>
-		<a class="btn btn-primary wordbreak" target="_blank" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).'</a>
+		<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).' <span class="fa fa-external-link-alt"></span></a>
 		</p>
 
 		</div>';
@@ -2713,6 +2930,7 @@ if ($resqlproducts) {
 	$tmpprod = new Product($db);
 	$tmpprodchild = new Product($db);
 	$i=0;
+	$maxcptoptions = 0;
 	while ($i < $num) {
 		$obj = $db->fetch_object($resqlproducts);
 		if ($obj) {
@@ -2745,6 +2963,9 @@ if ($resqlproducts) {
 			$priceinstance_ttc['fix'] = $obj->price_ttc;
 			$priceinstance['user'] = 0;
 			$priceinstance_ttc['user'] = 0;
+			$priceinstance['options'] = 0;
+			$priceinstance_ttc['options'] = 0;
+			$cptoptions = 0;
 
 			if (count($tmparray) > 0) {
 				foreach ($tmparray as $key => $value) {
@@ -2755,19 +2976,27 @@ if ($resqlproducts) {
 					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
 						// Don't add system services to global price, these are options with calculated quantities
 					} else {
+						if ($tmpprodchild->array_options['options_app_or_option'] == 'option') {
+							$priceinstance['options'] += $tmpprodchild->price;
+							$priceinstance_ttc['options'] += $tmpprodchild->price_ttc;
+							$arrayofplansmodifyprice[$obj->rowid]["options"][$tmpprodchild->id]["price"] = price2num($tmpprodchild->price, 'MT');
+							$cptoptions++;
+						}
 						$priceinstance['fix'] += $tmpprodchild->price;
 						$priceinstance_ttc['fix'] += $tmpprodchild->price_ttc;
 					}
 				}
 			}
-
+			$maxcptoptions = max($maxcptoptions, $cptoptions);
 			$pricetoshow = price2num($priceinstance['fix'], 'MT');
 			if (empty($pricetoshow)) $pricetoshow = 0;
 			$arrayofplans[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
-
+			$arrayofplansmodifyprice[$obj->rowid]["label"] = $label;
+			$arrayofplansmodifyprice[$obj->rowid]["price"] = price2num($priceinstance['fix'] - $priceinstance['options'], 'MT');
 			if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
 			if ($priceinstance['user']) {
 				$arrayofplans[$obj->rowid].=' + '.price(price2num($priceinstance['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).'/'.$langs->trans("User");
+				$arrayofplansmodifyprice[$obj->rowid]["priceuser"] = price2num($priceinstance['user'], 'MT');
 				if ($tmpprod->duration) $arrayofplans[$obj->rowid].=' / '.($tmpprod->duration == '1m' ? $langs->trans("Month") : '');
 			}
 			$arrayofplans[$obj->rowid].=')';
@@ -2791,7 +3020,7 @@ if ($mythirdpartyaccount->isareseller) {
 	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
-	//print '<a class="wordbreak" href="'.$urlforpartner.'" target="_blankinstance">';
+	//print '<a class="wordbreak" href="'.$urlforpartner.'" target="_blankinstance" rel="noopener">';
 	print '<input type="text" class="quatrevingtpercent" id="urlforpartner" name="urlforpartner" value="'.$urlforpartner.'">';
 	print ajax_autoselect("urlforpartner");
 	//print $urlforpartner;
@@ -2807,7 +3036,7 @@ if ($mythirdpartyaccount->isareseller) {
 	});
 		</script>';
 
-	print '<br><a id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a>';
+	print '<br><a class="small" id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
 	print '<div id="divmorereselleroptions" style="display: hidden" class="small">';
 	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
 		print '&plan=XXX : ';
@@ -2815,15 +3044,113 @@ if ($mythirdpartyaccount->isareseller) {
 	}
 	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'. An example is available with &extcss='.$sellyoursaasaccounturl.'/dist/css/alt-myaccount-example.css</span><br>';
 	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
-	print '</div>';
-	print '<br>';
 
+	print '</div>';
+
+	if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE")) {
+		print '<br>';
+		print '<span class="opacitymedium small">'.$langs->trans("ForcePricesOfInstances").'</span>';
+		print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyresellerprices" method="POST" >';
+		print '<input type="hidden" name="action" value="updateforcepriceinstance">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<div class="div-table-responsive">';
+		print '<table class="noborder small centpercent background-white padding">';
+		print '<tr class="field_'.$key.' liste_titre"><th>';
+		print $langs->trans("Label");
+		print '</th>';
+		print '<th>';
+		print $langs->trans("FixPrice");
+		print '</th>';
+		print '<th>';
+		print $langs->trans("PricePerUsers");
+		print '</th>';
+		for ($i=0; $i < $maxcptoptions; $i++) {
+			print '<th>';
+			print $langs->trans("OptionForcePrice", $i+1);
+			print '</th>';
+		}
+		print '<th>';
+		print '</th>';
+		print '</tr>';
+
+		// Ajout Options price change
+		foreach ($arrayofplansmodifyprice as $key => $value) {
+			print '<tr class="field_'.$key.' oddeven">';
+			print '<td class="maxwidth150 tdoverflowmax200" title="'.dol_escape_htmltag($value['label']).'">';
+			print $value["label"];
+			print '</td> ';
+			if ($action == 'editproperty' && $key == $propertykey) {
+				print '<input type="hidden" name="priceproductid" value="'.$key.'">';
+				print '<td>';
+				print '<input class="flat field_price maxwidth50" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ? : $value["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'<span>';
+				print '</td>';
+				print '<td>';
+				if (isset($value["priceuser"])) {
+					print '<input class="flat field_price maxwidth50" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? :$value["priceuser"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
+				}
+				print '</td>';
+				if (isset($value["options"])) {
+					foreach ($value["options"] as $id => $data) {
+						print '<td>';
+						print '<input class="flat field_price maxwidth50" type="text" id="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ? :$data["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
+						print '</td>';
+					}
+				} else {
+					for ($i=0; $i < $maxcptoptions; $i++) {
+						print '<td></td>';
+					}
+				}
+				print '<td class="center maxwidth100">';
+				print '<input class="button smallpaddingimp btn green-haze btn-circle" type="submit" name="edit" value="'.$langs->trans("Save").'" style="margin: 2px;">';
+				print '<input class="button button-cancel smallpaddingimp btn green-haze btn-circle" type="submit" name="cancel" value="'.$langs->trans("Cancel").'">';
+				print '</td>';
+			} else {
+				print '<td>';
+				print '<span>';
+				print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ? : $value["price"])).$langs->getCurrencySymbol($conf->currency).'&nbsp;';
+				print '</span>';
+				print '</td>';
+				print '<td>';
+				if (isset($value["priceuser"])) {
+					print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ? : $value["priceuser"])).$langs->getCurrencySymbol($conf->currency);
+				}
+				print '</td>';
+				if (isset($value["options"])) {
+					foreach ($value["options"] as $id => $data) {
+						print '<td>';
+						print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ? : $data["price"])).$langs->getCurrencySymbol($conf->currency);
+						print '</td>';
+					}
+				} else {
+					for ($i=0; $i < $maxcptoptions; $i++) {
+						print '<td></td>';
+					}
+				}
+				print '<td class="center">';
+				print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
+				print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
+				print '</td>';
+			}
+			print '</tr>';
+		}
+		print '</table></div>';
+
+		print '</form>';
+	}
+
+	print '<br>';
 	$urformycustomerinstances = '<strong>'.$langs->transnoentitiesnoconv("MyCustomersBilling").'</strong>';
 	print str_replace('{s1}', $urformycustomerinstances, $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], '{s1}'));
+
 
 	print '
 		</div>
 	';
+
+	if ($action == 'resetproperty') {
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?propertykey='.$propertykey, $langs->trans('ResetForcedPrice'), $langs->trans('ConfirmResetForcedPrice'), 'resetpropertyconfirm', '', 0, 1);
+		print $formconfirm;
+	}
 }
 
 
@@ -2885,13 +3212,16 @@ foreach ($listofcontractid as $contractid => $contract) {
 		}
 	}
 }
+
 $nboftickets = $langs->trans("SoonAvailable");
-if ($mythirdpartyaccount->isareseller) {
+
+// Analyse list of child instances for resellers
+$nbofinstancesreseller = 0;
+$nbofinstancesinprogressreseller = 0;
+$nbofinstancesdonereseller = 0;
+$nbofinstancessuspendedreseller = 0;
+if ($mythirdpartyaccount->isareseller && count($listofcontractidreseller)) {
 	// Fill var to count nb of instances
-	$nbofinstancesreseller = 0;
-	$nbofinstancesinprogressreseller = 0;
-	$nbofinstancesdonereseller = 0;
-	$nbofinstancessuspendedreseller = 0;
 	foreach ($listofcontractidreseller as $contractid => $contract) {
 		if ($contract->array_options['options_deployment_status'] == 'undeployed') { continue; }
 		if ($contract->array_options['options_deployment_status'] == 'processing') { $nbofinstancesreseller++; $nbofinstancesinprogressreseller++; continue; }
@@ -2958,8 +3288,11 @@ if (empty($welcomecid)) {
 							print '<p>
 								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentMode");
-							print '</a>
-								</p>';
+							print '</a>';
+
+							print ' &nbsp; <a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
+
+							print '</p>';
 						}
 						print '
 							</div>
@@ -3057,7 +3390,7 @@ if (empty($welcomecid)) {
 				if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 					$delayafterexpiration = ($now - $expirationdate);
 					$delayindays = round($delayafterexpiration / 3600 / 24);
-					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT : $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT) - $delayindays);
+					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT') : getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT')) - $delayindays);
 
 					print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
 					print '<div class="note note-warning">'."\n";
@@ -3136,6 +3469,7 @@ if (empty($welcomecid)) {
 	} else dol_print_error($db);
 }
 
+
 // Include mode with php template
 if (! empty($mode)) {
 	$fullpath = dol_buildpath("/sellyoursaas/myaccount/tpl/".$mode.".tpl.php");
@@ -3143,6 +3477,7 @@ if (! empty($mode)) {
 		include $fullpath;
 	}
 }
+
 
 print '
 	</div>

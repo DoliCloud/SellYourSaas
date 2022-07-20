@@ -24,8 +24,8 @@
 /**
  * getNextInstanceInChain
  *
- * @param Contrat  $object  Instance
- * @return NULL|Contrat
+ * @param 	Contrat  		$object  	Instance
+ * @return 	Contrat|null				Next contract if found
  */
 function getNextInstanceInChain($object)
 {
@@ -51,8 +51,8 @@ function getNextInstanceInChain($object)
 /**
  * getPreviousInstanceInChain
  *
- * @param Contrat   $object     Instance
- * @return NULL|Contrat
+ * @param 	Contrat   		$object     Instance
+ * @return 	Contrat|null				Previous contract if found
  */
 function getPreviousInstanceInChain($object)
 {
@@ -76,29 +76,47 @@ function getListOfInstancesInChain($object)
 {
 	global $conf, $langs, $user, $db;
 
+	$MAXPROTECTION = 100;
+
 	$arrayofinstances = array();
 	$arrayofinstances[$object->id] = $object;
 
 	// Get next contracts
 	$nextcontract = getNextInstanceInChain($object);
-	if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
+	if ($nextcontract) {
+		$arrayofinstances[$nextcontract->id] = $nextcontract;
+	}
 	$i = 0;
-	while ($nextcontract && $i < 1000) {
+	while ($nextcontract && $i < $MAXPROTECTION) {
 		$i++;
-		if (array_key_exists($nextcontract->id, $arrayofinstances)) continue;
 		$nextcontract = getNextInstanceInChain($nextcontract);
-		if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
+		if ($nextcontract) {
+			if (!array_key_exists($nextcontract->id, $arrayofinstances)) {
+				$arrayofinstances[$nextcontract->id] = $nextcontract;
+			}
+		}
+	}
+	if ($i == $MAXPROTECTION) {
+		dol_syslog("getNextInstanceInChain We reach loop of ".$MAXPROTECTION, LOG_WARNING);
 	}
 
 	// Get previous contracts
 	$previouscontract = getPreviousInstanceInChain($object);
-	if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
+	if ($previouscontract) {
+		$arrayofinstances[$previouscontract->id] = $previouscontract;
+	}
 	$i = 0;
-	while ($previouscontract && $i < 1000) {
+	while ($previouscontract && $i < $MAXPROTECTION) {
 		$i++;
-		if (array_key_exists($previouscontract->id, $arrayofinstances)) continue;
 		$previouscontract = getPreviousInstanceInChain($previouscontract);
-		if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
+		if ($previouscontract) {
+			if (!array_key_exists($previouscontract->id, $arrayofinstances)) {
+				$arrayofinstances[$previouscontract->id] = $previouscontract;
+			}
+		}
+	}
+	if ($i == $MAXPROTECTION) {
+		dol_syslog("getPreviousInstanceInChain We reach loop of ".$MAXPROTECTION, LOG_WARNING);
 	}
 
 	$arrayofinstances = dol_sort_array($arrayofinstances, 'date_creation', 'asc');

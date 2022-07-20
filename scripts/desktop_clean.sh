@@ -12,7 +12,7 @@ source /etc/lsb-release
 if [ "x$2" == "x" ]; then
    echo "Usage:   $0  hostfile  [hostgrouporname]"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
-   echo "Example: $0  myhostfile  master,deployment"
+   echo "Example: $0  myhostfile  deployment"
    echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
    exit 1
 fi
@@ -26,7 +26,7 @@ export currentpath=$(dirname "$0")
 
 cd $currentpath/ansible
 
-echo "Execute ansible for host group $1 and targets $2"
+echo "Execute ansible for host group $1 and targets $target"
 pwd
 
 

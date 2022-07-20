@@ -36,6 +36,7 @@ if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main
 if (! $res) die("Include of main fails");
 
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php";
@@ -121,7 +122,10 @@ print '<tr class="oddeven nohover">';
 print '<td>';
 $filemaster = $dirforspam.'/blacklistfrom';
 $file = $filemaster;
-$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>'.dol_htmlentitiesbr(file_get_contents($filemaster));
+$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>';
+if (dol_is_file($filemaster)) {
+	$htmltext .= dol_htmlentitiesbr(file_get_contents($filemaster));
+}
 print $form->textwithpicto($langs->trans("FileFor", 'blacklistfrom').' <span class="opacitymedium">('.$langs->trans("FileToEditedManually").')</span>', '', 1, 'help', '', 0, 3, 'blacklistfrom');
 print '</td>';
 print '<td>';
@@ -133,7 +137,10 @@ print '<tr class="oddeven nohover">';
 print '<td>';
 $filemaster = $dirforspam.'/blacklistcontent';
 $file = $filemaster;
-$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>'.dol_htmlentitiesbr(file_get_contents($filemaster));
+$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>';
+if (dol_is_file($filemaster)) {
+	$htmltext .= dol_htmlentitiesbr(file_get_contents($filemaster));
+}
 print $form->textwithpicto($langs->trans("FileFor", 'blacklistcontent').' <span class="opacitymedium">('.$langs->trans("FileToEditedManually").')</span>', '', 1, 'help', '', 0, 3, 'blacklistcontent');
 print '</td>';
 print '<td>';
@@ -145,7 +152,10 @@ print '<tr class="oddeven nohover">';
 print '<td>';
 $filemaster = $dirforspam.'/blacklistip';
 $file = $filemaster;
-$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>'.dol_htmlentitiesbr(file_get_contents($filemaster));
+$htmltext = $langs->trans("ExampleContentOfFileOnMaster", $file).'<br>';
+if (dol_is_file($filemaster)) {
+	$htmltext .= dol_htmlentitiesbr(file_get_contents($filemaster));
+}
 print $form->textwithpicto($langs->trans("FileFor", 'blacklistip'), $langs->trans("FileEditedAutomaticallyByMailWrapperOnAbuseDetection"), 1, 'help', '', 0, 3, 'blacklistip');
 print '</td>';
 print '<td>';
@@ -182,7 +192,7 @@ dol_fiche_end();
 print '<br>';
 
 $message='';
-$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'&mode=test" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'[&mode=test]</a>';
+$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')?urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')):'...').'&mode=test" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')?urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')):'KEYNOTDEFINED').'[&mode=test]</a>';
 $message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "WebHook SpamReport", '{s1}');
 $message = str_replace('{s1}', $url, $message);
 print $message;

@@ -83,7 +83,7 @@ You need to acquire this domain name from a registrar.
 
 == Installation of the machine and OS
 
-The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be * Deployment servers * (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
+The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be *Deployment servers* (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
 
 === Choice of machine and OS and create it
 
@@ -91,11 +91,11 @@ The first step is to make one (or more) server available. If we are going on sev
 
 * Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
-_Example with Amazon Standard Medium: _
+_Example with Amazon Standard Medium:_
 
 Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and bandwidth then switch to *m1.large* @ $ 0.18 per hour
 
-_Example with OVH Public Cloud: _
+_Example with OVH Public Cloud:_
  
 For the master server: VPS or B2-15 or more
 For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
@@ -151,8 +151,10 @@ With OVH Public Cloud:
 
 * Create the data disk. On a deployment server, you can imagine to reserve 250MB for each customer instance so choose a size in consideration.
 
+
 * Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
 Note, the disk becomes visible with *fdisk -l* and *lsblk*
+
 
 * If the disk is not partitioned, add the partition on the disk (Linux type) and format it by doing:
 
@@ -168,7 +170,10 @@ fsck -N /dev/vdxY
 mkfs.ext4 /dev/vdxY
 ---------------
 
+@TODO Use mkfs.btrfs /dev/vdxY
+
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
+
 
 * Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
 
@@ -177,13 +182,14 @@ Whether the disk has just been formatted or whether it is an added disk already 
 blkid
 ---------------
 
-If the disk was created by cloning another one, you msut change the UUID of the new disk to avoid to have twice the same UUID on 2 differents disks.
+If the disk was created by cloning another one, you must change the UUID of the new disk to avoid to have twice the same UUID on 2 differents disks.
 
 [source, bash]
 ---------------
 tune2fs -U $(uuidgen) /dev/vdxY
 blkid
 ---------------
+
 
 * Declare the mount point for an automatic mounting at each reboot by adding a line in */etc/fstab*
 
@@ -193,6 +199,7 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
 or
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0     #does not block the server from starting
 ---------------
+
 
 * Mount disk
 
@@ -209,6 +216,7 @@ blkid
 ---------------
 
 Note: A reboot may be required if disk or mount is not visible.
+
 
 * Optimize the filesystem by removing the update of the "atime" read access
 
@@ -244,6 +252,26 @@ To check:
 cat /proc/mounts | grep diskX
 ---------------
 
+
+* Optimize the memory for a lot of inode and dentry
+
+You can run *slabtop* to get information on number of inodes/dentries and *cat /proc/sys/vm/vfs_cache_pressure* to see cache pressure.
+We want to reduce cache pressure to 50 instead of 100 to increase priority in memory use for inodes versus page contents.
+
+[source, bash]
+---------------
+vi /etc/sysctl.conf
+
+#fs.inotify.max_user_watches=1024000
+vm.vfs_cache_pressure=50
+
+sysctl -w vm.vfs_cache_pressure=50
+
+cat /proc/sys/vm/vfs_cache_pressure
+---------------
+
+
+
 Note: If you need to recover data files from another source disk, use:
 
 [source, bash]
@@ -271,6 +299,9 @@ Create the user account *admin*. It will be used to install and administer the s
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/backup; chown admin.admin /home/admin/backup;
+mkdir /home/admin/backup/conf; chown admin.admin /home/admin/backup/conf;
+mkdir /home/admin/backup/mysql; chown admin.admin /home/admin/backup/mysql;
 mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
@@ -321,6 +352,8 @@ For Ubuntu 18.04: you can concat the content into file *sshd_config* but be sure
 #UsePrivilegeSeparation yes
 # Permissions on files must be correct to allow login
 StrictModes yes
+
+Port 22
 
 # MaxAuthTries 6
 MaxAuthTries 10
@@ -651,7 +684,7 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 
 === Getting files of Dolibarr and SellYourSaas application
 
-On all servers (*Master and Deploiement*):
+On all servers (*Master and Deployment*):
 
 * Under the *root* login, install git tool:
 
@@ -701,13 +734,6 @@ domain=mysaasdomainname.com
 
 # If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
-# If deployment server: IPs allowed to request a deployment
-allowed_hosts=127.0.0.1,ipofmasterserver
-
-# email from
-emailfrom=noreply@mysaasdomainname.com
-# email supervision
-emailsupervision=supervision@mysaasdomainname.com
 
 # Set to 1 if this server is the master server, 
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
@@ -717,8 +743,19 @@ masterserver=1
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
+# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
+archivetestinstances=1
+
 # Set to its own IP if it is a deployment server. Keep empty for master only server.
 ipserverdeployment=ip.of.deployment.server
+
+# If deployment server: IPs allowed to request a deployment
+allowed_hosts=127.0.0.1,ipofmasterserver
+
+# email from
+emailfrom=noreply@mysaasdomainname.com
+# email supervision
+emailsupervision=supervision@mysaasdomainname.com
 
 # Set location of the master database
 databasehost=ipOfMasterServer or localhost if on master server
@@ -738,17 +775,21 @@ databaseportdeployment=3306
 databaseuserdeployment=sellyoursaas
 databasepassdeployment=xxxxx
 
-# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
-archivetestinstances=1
-
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+
 # Set directory where backup are stored
 backupdir=/mnt/diskbackup/backup
 # Set directory where archives of tests instances are stored
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+
+# Set option to exclude some tables for some instances in backup
+#backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
+
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
 
@@ -758,20 +799,20 @@ remoteserverlistenip=0.0.0.0
 remoteserverlistenport=8080
 
 remotebackupserver=ip.of.remote.backup.ssh.server
+remotebackupuser=admin
 remotebackupdir=/mnt/diskbackup
 
-# Advanced Options to use a different paths in deployment server
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
 # Option to use different path for dataroot
 #olddoldataroot=/home/admin/wwwroot/dolibarr_documents
 #newdoldataroot=/new/path/of/documents
 # Options to change the directory of vhostfile templates
 #templatesdir=/path/of/vhostfile/templates
+
 # Options to change the SSL certificates names in Apache virtualhost
 #websslcertificatecrt=with.sellyoursaas.com.crt
 #websslcertificatekey=with.sellyoursaas.com.key
 #websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+
 # Options for Jailkit
 #chrootdir=/home/jail/chroot
 #privatejailtemplatename=privatejail
@@ -782,7 +823,29 @@ Put *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master
 Put *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on deployment servers.
 Do not forget to set a value for *databasepass*. We will reuse this value later.
 
-Create also an empty directory:
+
+* Create a file */etc/sellyoursaas-public.conf* on the server (on the server *Master* and the *Deployment servers*)
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas-public.conf
+chown root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
+---------------
+
+With the following content:
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas-public.conf
+
+# Options for antispam system
+maxemailperday=500
+---------------
+
+
+* Create also an empty directory:
 
 [source,conf]
 ---------------
@@ -822,7 +885,7 @@ vi /etc/exports
 /home/admin/wwwroot/dolibarr_documents/sellyoursaas i.p.deployment.serverN(ro,no_root_squash,sync,no_subtree_check)
 ---------------
 
-Note that you should have n lines per deployment server in this file.
+Note that you should have n lines (one per deployment server) in this file.
 
 Set a fixed port for mountd:
 
@@ -918,7 +981,7 @@ Host github.com
 
 === Installation of packages
 
-There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
+There are two scenarios depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
 
 * Installation of the 18.04- Ubuntu packages
 
@@ -933,7 +996,7 @@ sudo apt-install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
-sudo apt install -y spamc spamassassin clamav clamav-daemon
+sudo apt install -y spamc spamassassin clamdscan clamav-daemon
 sudo apt install -y fail2ban
 sudo apt install -y soffice libreoffice-common libreoffice-writer
 sudo apt install -y mailutils postfix
@@ -971,7 +1034,7 @@ apt remove unattended-upgrades
 
 === Max size increase UID
 
-On the deployment servers, modify */etc/login.defs* to put the
+On the deployment servers, modify */etc/login.defs* as follows:
 
 [source, conf]
 ---------------
@@ -1028,9 +1091,10 @@ ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 [source, bash]
 ---------------
 vi /etc/systemd/system/multi-user.target.wants/apache2.service
-systemctl daemon-reload
-/usr/sbin/apachectl stop
-/usr/sbin/apachectl start
+systemctl daemon-reload;
+/usr/sbin/apachectl stop;
+/usr/sbin/apachectl start;
+/usr/sbin/apachectl status;
 ---------------
 
 Note: Reload of apache seems not enough so we stop/start it.
@@ -1322,6 +1386,7 @@ On the *Deployment servers* :
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher1.sh /etc/init.d/apache_watchdog_launcher1
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher2.sh /etc/init.d/apache_watchdog_launcher2
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher3.sh /etc/init.d/apache_watchdog_launcher3
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/smtp_watchdog_launcher1.sh /etc/init.d/smtp_watchdog_launcher1
 systemctl daemon-reload
 
 systemctl enable apache_watchdog_launcher1;
@@ -1335,6 +1400,10 @@ systemctl status apache_watchdog_launcher2;
 systemctl enable apache_watchdog_launcher3;
 systemctl is-enabled apache_watchdog_launcher3;
 systemctl status apache_watchdog_launcher3;
+
+systemctl enable smtp_watchdog_launcher1;
+systemctl is-enabled smtp_watchdog_launcher1;
+systemctl status smtp_watchdog_launcher1;
 ---------------
 
 
@@ -1701,10 +1770,18 @@ fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-ru
 
 === Test spamassassin ===
 
-The process *spamd* must be running. Start it manually if it is not the case the first time.
+The process *spamd* must be running. Start it manually if it is not the case the first time. You can start it manually using this command:
+
+[source,bash]
+---------------
+/usr/sbin/spamd &
+disown
+---------------
 
 To test that spamassassin client is working, create a file */tmp/testspam* with content
 
+[source,text]
+---------------
     Subject: Test spam mail (GTUBE)
     Message-ID: <GTUBE1.1010101@example.net>
     Date: Wed, 23 Jul 2003 23:30:00 +0200
@@ -1730,6 +1807,7 @@ To test that spamassassin client is working, create a file */tmp/testspam* with 
     XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
 
     You should send this test mail from an account outside of your network.
+---------------
 
 Then test with:
 
@@ -1739,7 +1817,6 @@ spamc < /tmp/testspam
 spamc -c < /tmp/testspam
 echo $?
 ---------------
-
 
 === Test and setup of ClamAV
 
@@ -1758,6 +1835,8 @@ And to test *clamav* command line and daemon:
 ---------------
 clamdscan /tmp/testvirus --fdpass
 ---------------
+
+The output should have a line with the following content: *Infected files: 1*
 
 Remove the apparmor profile for *usr.sbin.clamd*. It is required to be called from web process (otherwise error on "getattr").
 
@@ -1922,9 +2001,9 @@ Note: To get/see the current limits of OS and connected user:
 ulimit -a
 ---------------
 
-Note:
-On peut vérifier qu'il y a bien la ligne *session required pam_limits.so* dans les fichiers /etc/pam.d/system-auth ou /etc/pam.d/password-auth et/ou /etc/pam.d/sudo afin d’être certain de toujours fixer les seuils définis par l’administrateur lors de chaque connexion d’utilisateur au système. Si les limites définies dans ce fichier ne sont pas prises en compte le premier réflexe consiste à s’assurer que le module pam_limits.so est bien activé dans les fichiers de configuration de PAM.
-REMARQUE : sur certaines distributions les fichiers de configuration de PAM peuvent différer. On peut rencontrer la définition des limites dans les fichiers /etc/pam.d/common-session ou /etc/pam.d/login. Mais, le principe reste le même : s’assurer qu’à chaque connexion utilisateur les seuils des ressources du système sont bien appliqués.
+Note: 
+You can check that there is indeed the line *session required pam_limits.so* in the files /etc/pam.d/system-auth or /etc/pam.d/password-auth and/or /etc/pam.d/sudo to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
+NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files /etc/pam.d/common-session or /etc/pam.d/login. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
 
 
 
@@ -2471,15 +2550,15 @@ Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/us
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/bin.secureBash
+include::repository_root/etc/apparmor.d/bin.secureBash[]
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.dusr.sbin.apache2/* with this content:
+Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.d/usr.sbin.apache2/* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository, in etc/apparmor.d/local/usr.sbin.apache2 or etc/apparmor.d/usr.sbin.apache2
+include::repository_root/etc/apparmor.d/local/usr.sbin.apache2-deployment[]
 ---------------
 
 
@@ -2487,7 +2566,7 @@ Create an apparmor file */etc/apparmor.d/php-fpm7.4* with this content:
 
 [source,bash]
 ---------------
-Get content of the file into this repository in etc/apparmor.d/php-fpm7.4
+include::repository_root/etc/apparmor.d/php-fpm7.4[]
 ---------------
 
 
@@ -2539,6 +2618,16 @@ aa-teardown; /etc/init.d/apparmor restart;
 ps fauxZ
 ---------------
 
+* Once the apparmor is enabled for apache2, we must enable the module "apparmor" for apache, so Apache will switch to the profile *sellyoursaas-instances* 
+when a instance is opened (and if the entry <IfModule mod_apparmor.c>AADefaultHatName sellyoursaas-instances</IfModule> is added into virtual host).
+For this run:
+
+[source,bash]
+---------------
+a2enmode apparmor
+/etc/init.d/apache2 restart;
+---------------
+
 
 * To avoid to have apparmor relaunched after a manual stop, modify */lib/systemd/system/apparmor.service* to set *RemainAfterExit=no* (Still require ????)
 
@@ -2554,6 +2643,8 @@ systemctl daemon-reload
 
 
 === Jailkit configuration (optional)
+
+On **deployment servers**:
 
 Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
 
@@ -2778,7 +2869,8 @@ $ORIGIN withX.mysaasdomainname.com.
                 NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       ip.of.deployment.server		; set here the ip of deployment server that hosts the deployed applications
+@               IN      A       ip.of.deployment.server		; ip of deployment server that hosts the deployed applications
+*               IN      A       ip.of.deployment.server		; ip of deployment server that hosts the deployed applications
 
 $ORIGIN withX.mysaasdomainname.com.
 
@@ -2869,7 +2961,7 @@ chmod +t /dev/shm /var/lib/php/sessions
 
 ==== Define size of upload and session options
 
-Modify the file */etc/php/*.*/*/php.ini* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
+Modify the file *`+/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
@@ -2966,18 +3058,19 @@ And copy them on local directory:
 
 [source,bash]
 ---------------
-mkdir /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp/spam/;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp/spam/;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp/spam/;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp/spam/;
-chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
-
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent;
-chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
+
+
+mkdir /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
+chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
 ---------------
 
 
@@ -3018,7 +3111,7 @@ rotate 365
 ---------------
 
 
-* Créer un fichier */etc/logrotate.d/logrotate_sellyoursaas_log*
+* Create a file */etc/logrotate.d/logrotate_sellyoursaas_log*
 
 [source,conf]
 ---------------
@@ -3418,8 +3511,9 @@ You must have inside the cron of user *root*
 # cron master and deployment root
 #47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
-30 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
+00 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
+#00 * * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test > /home/admin/logs/batch_detect_evil_instances.log 2>&1
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
@@ -3815,7 +3909,7 @@ See chapter <<Cloning a server instance for an extra production server or a dev 
 
 ===== Local backup
 
-- Configuration of the server and paying instances is done locally via the cron task
+- The configuration of the server and the system database is done locally via the cron task
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* of *root* (see <<installing_cron_tasks>>) to the disks */home/admin/backup/conf* and */home/admin/backup/mysql*
 
@@ -4294,6 +4388,8 @@ or
 sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" <package-name>
 ---------------
 
+Example when missing /etc/apparmor/severity.db, run sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" apparmor-utils
+
 
 === Using OpenStack to manage server images
 
@@ -4539,7 +4635,7 @@ scripts/make_instance_offline.sh  https://myaccount.mydomain.com/offline.php  te
 
 
 
-=== Clean rubish files
+=== Clean rubbish files
 
 Launch the script: 
 
@@ -4742,7 +4838,7 @@ Go to the menu *SellYourSaas - Subscription Pags* to get the URL for subscribing
 - By submitting on the subscription page, the following operations are triggered :
   * Check if third party exists or not. If not create the third party, if so tell to create the new instance from the customer dashboard.
   * Create a contract (main subscription) into database with status "DEPLOY_IN_PROGRESS" and with a Unix account name, pass, database account and pass, and other properties defined in the contract. The subscribed services are lines of contracts.
-  * Calls instance deployment listener (micro web server serving only *scripts/remote_server/index.php* and execfuting the "deploy" on the deployment server (1 of the 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") (in Dolibarr's case for instance, this calls the scripts *action_deploy_undeploy.sh* or *action_suspend_unsuspend.sh* according to the action code), to create/destroy or suspend/reactivate the client instance. See chapter <<remote_actions>>.
+  * Calls instance deployment listener (micro web server serving only *scripts/remote_server/index.php* and executing the "deploy" on the deployment server (1 of the 6 remotes actions: "deploy" "undeploy", "suspend", "unsuspend", "refresh", "recreateauthorizedkeys") (in Dolibarr's case for instance, this calls the scripts *action_deploy_undeploy.sh* or *action_suspend_unsuspend.sh* according to the action code), to create/destroy or suspend/reactivate the client instance. See chapter <<remote_actions>>.
   * Edit contract/subscription with status "DEPLOYED" if result of remote action is OK.
   * Send an email to user: Show result to user and send en email (if subscriptions is done from backoffice, this option is off).
 

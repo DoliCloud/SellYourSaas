@@ -422,7 +422,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
 		exec($fullcommand, $output, $return_varmysql);
 	}
-	print strftime("%Y%m%d-%H%M%S").' mysqldump done (return='.$return_varmysql.')'."\n";
+	print strftime("%Y%m%d-%H%M%S").' mysql load done (return='.$return_varmysql.')'."\n";
 
 	// Output result
 	foreach ($output as $outputline) {

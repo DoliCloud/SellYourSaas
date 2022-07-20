@@ -251,6 +251,9 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
 mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/backup; chown admin.admin /home/admin/backup;
+mkdir /home/admin/backup/conf; chown admin.admin /home/admin/backup/conf;
+mkdir /home/admin/backup/mysql; chown admin.admin /home/admin/backup/mysql;
 mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
@@ -302,6 +305,10 @@ Pour ubuntu 18.04: il faut concaténner le contenu cité dans le *sshd_config* m
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+Port 22
+
+# MaxAuthTries 6
+MaxAuthTries 10
 # MaxSessions 10
 MaxSessions 25
 
@@ -704,8 +711,11 @@ backupdir=/mnt/diskbackup/backup
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
+# Set option to exclude some tables for some instances in backup
+#backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
 
 # Set remote server launcher ip (default is 0.0.0.0)
 remoteserverlistenip=0.0.0.0
@@ -736,6 +746,36 @@ remotebackupdir=/mnt/diskbackup
 Mettre *masterserver* à 1, *dnsserver* et *instanceserver* à 0 sur le Master
 Mettre *masterserver* à 0, *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 Ne pas oublier de définir une valeur pour *databasepass*. On réutilisera cette valeur plus tard.
+
+
+* Créer un fichier */etc/sellyoursaas-public.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas-public.conf
+chown root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
+---------------
+
+avec le contenu suivant:
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas-public.conf
+
+# Options for antispam system
+maxemailperday=500
+---------------
+
+
+* Créer aussi le répertoire vide:
+
+[source,conf]
+---------------
+mkdir -p /etc/sellyoursaas.d
+---------------
+
 
 
 === Installation du partage nfs
@@ -2937,7 +2977,8 @@ $ORIGIN withX.mysaasdomainname.com.
                 NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       ip.of.deployment.server		; mettre ip du serveur de déploiement qui héberge les applications déployées
+@               IN      A       ip.of.deployment.server		; ip du serveur de déploiement qui héberge les applications déployées
+*               IN      A       ip.of.deployment.server		; ip du serveur de déploiement qui héberge les applications déployées
 
 $ORIGIN withX.mysaasdomainname.com.
 
@@ -3103,7 +3144,7 @@ chown syslog.adm /var/log/phpmail.log /var/log/phpsendmail.log
 chmod a+rw /var/log/phpmail.log /var/log/phpsendmail.log
 ---------------
 
-Create a directory for blacklist files used by *phpsendmail.php*
+Créer un répertoire pour le répertoire des fichiers blacklist utilisés par *phpsendmail.php*
 
 [source,bash]
 ---------------
@@ -3116,18 +3157,18 @@ Et copier les dans le répertoire local:
 
 [source,bash]
 ---------------
-mkdir /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp/spam;
-chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
-
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent;
-chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
+
+mkdir /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
+chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
 ---------------
 
 === Configuration de logrotate

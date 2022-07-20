@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import os
 from os import path
 
@@ -7,7 +7,7 @@ from os import path
 made_dirs = set()
 
 for root, dir_names, file_names in os.walk('.'):
-    for file_name in file_names:
+    for dir_names in dir_names:
         if '\\' not in file_name:
             continue
         alt_file_name = file_name.replace('\\', '/')

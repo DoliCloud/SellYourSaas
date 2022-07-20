@@ -18,12 +18,22 @@ label.nobold {
 }
 
 .jnotify-container .jnotify-notification .jnotify-message {
-	box-shadow: 5px 5px 5px #eee;
+	box-shadow: 2px 3px 6px #eee;
     border-radius: 10px;
+}
+
+.jnotify-notification-warning .jnotify-message {
+    border: 1px solid #efe7c1;
 }
 
 span.pictowarning {
     color: #ff8800;
+}
+
+span.labelprod {
+    overflow-y: hidden;
+    height: 20px;
+    display: block;
 }
 
 .start {
@@ -111,6 +121,9 @@ a.btnalreadyanaccount {
 
 .paddingtop {
 	padding-top: 5px;	
+}
+.padding th, .padding td {
+	padding: 5px;	
 }
 
 .select2-container .select2-selection--single
@@ -202,7 +215,9 @@ a.btnalreadyanaccount {
 .bold {
     font-weight: 700 !important;
 }
-
+.background-white {
+	background: white;
+}
 
 .tabbable-custom > .nav-tabs > li.active {
     border-top: 3px solid #F3565D;
@@ -283,6 +298,26 @@ div.tab-content {
     border-radius: 5px;
     text-align: center;
 }
+
+.tdoverflowmax100 {			/* For tdoverflow, the max-midth become a minimum ! */
+	max-width: 100px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.tdoverflowmax150 {			/* For tdoverflow, the max-midth become a minimum ! */
+	max-width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.tdoverflowmax200 {			/* For tdoverflow, the max-midth become a minimum ! */
+	max-width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 
 @media only screen and (max-width: 400px)	/* reduction 3 */
 {
@@ -749,8 +784,8 @@ disabled] .btn-warning:active, fieldset[disabled] .btn-warning.active
 {background-color: #dfba49;border-color: #dbb233;}.btn-warning .
 badge {color: #dfba49;background-color: #fff;}
 
-.btn-danger {color: #fff;background-color: #f1353d;border-color: #f13e46;}
-.btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active {color: #fff;background-color: #f1353d;border-color: #ec111b;}
+.btn-danger {color: #fff;background-color: #bb353d;border-color: #bb3e46;}
+.btn-danger:hover, .btn-danger:focus, .btn-danger:active, .btn-danger.active {color: #fff;background-color: #bb353d;border-color: #bb111b;}
 
 .open .btn-danger.dropdown-toggle {color: #fff;background-color: #f1353d;
 border-color: #ec111b;}.btn-danger:active, .btn-danger.active {

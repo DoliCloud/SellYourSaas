@@ -38,6 +38,8 @@
 
         #ErrorLog __osUserPath__/__webAppLogName___error.log
         #TransferLog /var/log/apache2/__webAppLogName___access_log
+        CustomLog ${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined
+        CustomLog /var/log/apache2/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
         
         # Compress returned resources of type php pages, text file export, css and javascript
         AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript

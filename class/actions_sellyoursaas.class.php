@@ -57,6 +57,11 @@ class ActionsSellyoursaas
 	 */
 	public $resprints;
 
+	/**
+	 * @var int		Priority of hook (50 is used if value is not defined)
+	 */
+	public $priority;
+
 
 	/**
 	 *	Constructor
@@ -85,7 +90,7 @@ class ActionsSellyoursaas
 
 		if ($object->element == 'societe') {
 			// Dashboard
-			if ($user->admin && ! empty($object->array_options['options_dolicloud'])) {
+			if ($user->rights->sellyoursaas->read && ! empty($object->array_options['options_dolicloud'])) {
 				$url = '';
 				if ($object->array_options['options_dolicloud'] == 'yesv2') {
 					$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
@@ -127,6 +132,11 @@ class ActionsSellyoursaas
 					$newtitle .= dol_escape_htmltag('<br><b>'.$langs->trans("Redirection").'</b> : '.(empty($object->array_options['options_suspendmaintenance_message']) ? '' : $object->array_options['options_suspendmaintenance_message']), 1);
 				}
 				$this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
+
+				if (!empty($object->array_options['options_spammer'])) {
+					$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+				}
+
 				return 1;
 			}
 		}
@@ -173,7 +183,11 @@ class ActionsSellyoursaas
 					{
 						$this->results['objref'] .= ' &nbsp; <a href="/aa">'.$langs->trans("SeeChain").'</a>';
 					}*/
-					if (! empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
+					if (!empty($object->array_options['options_spammer'])) {
+						$this->results['objref'] .= ' '.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+					}
+
+					if (!empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
 						$this->results['objref'] .= ' '.img_warning($langs->trans('ActiveInstanceOfASpammer'));
 					}
 				}
@@ -630,7 +644,9 @@ class ActionsSellyoursaas
 
 		if ($action == 'changecustomer') {
 			// Change customer confirmation
-			$formquestion = array(array('type' => 'other','name' => 'socid','label' => $langs->trans("SelectThirdParty"),'value' => $form->select_company($object->thirdparty->id, 'socid', '(s.client=1 OR s.client=2 OR s.client=3)')));
+			$showtype = 1;
+			$showcode = 0;
+			$formquestion = array(array('type' => 'other','name' => 'socid','label' => $langs->trans("SelectThirdParty"),'value' => $form->select_company($object->thirdparty->id, 'socid', '(s.client=1 OR s.client=2 OR s.client=3)', '', $showtype, 0, null, 0, 'minwidth100', '', '', 1, array(), false, array(), $showcode)));
 			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ChangeCustomer'), '', 'confirm_changecustomer', $formquestion, 'yes', 1);
 			$this->resprints = $formconfirm;
 		}
@@ -736,11 +752,11 @@ class ActionsSellyoursaas
 						$ret .= '<span class="badge badge-status5 badge-status valignmiddle inline-block" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
 						// nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
 						if (! $object->nbofservicesclosed) {
-							$daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND;
+							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND');
 							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Test services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 						if ($object->nbofservicesclosed) {
-							$daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT;
+							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT');
 							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Test instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 					}
@@ -766,7 +782,7 @@ class ActionsSellyoursaas
 		global $conf, $langs, $user;
 		global $object, $action;
 
-		if (in_array($parameters['currentcontext'], array('thirdpartycard','thirdpartycontact','thirdpartycomm','thirdpartyticket','thirdpartynote','thirdpartydocument','contactthirdparty','thirdpartypartnership','projectthirdparty','consumptionthirdparty','thirdpartybancard','thirdpartymargins','ticketlist','thirdpartynotification','agendathirdparty'))) {
+		if (in_array($parameters['currentcontext'], array('thirdpartycard','thirdpartycontact','thirdpartycomm','thirdpartysupplier','thirdpartyticket','thirdpartynote','thirdpartydocument','contactthirdparty','thirdpartypartnership','projectthirdparty','consumptionthirdparty','thirdpartybancard','thirdpartymargins','ticketlist','thirdpartynotification','agendathirdparty'))) {
 			$parameters['notiret']=1;
 			$this->getNomUrl($parameters, $object, $action);        // This is hook. It fills ->resprints
 			unset($parameters['notiret']);
@@ -1080,10 +1096,12 @@ class ActionsSellyoursaas
 		$pagecounttmp = $pdf->setSourceFile($file);
 		if ($pagecounttmp) {
 			try {
-				$tplidx = $pdf->ImportPage(1);
-				$s = $pdf->getTemplatesize($tplidx);
-				$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
-				$pdf->useTemplate($tplidx);
+				for ($i = 1; $i <= $pagecounttmp; $i++) {
+					$tplidx = $pdf->importPage($i);
+					$s = $pdf->getTemplatesize($tplidx);
+					$pdf->AddPage($s['h'] > $s['w'] ? 'P' : 'L');
+					$pdf->useTemplate($tplidx);
+				}
 				$logo = $conf->mycompany->dir_output.'/logos/thumbs/'.$secondlogo;
 
 				$height=pdf_getHeightForLogo($logo);

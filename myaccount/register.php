@@ -92,12 +92,13 @@ $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
 $productid=GETPOST('service', 'int');
 $productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):'');
+$defaultproduct = '';
 if (empty($productid) && empty($productref)) {
 	$productref = $plan;
 	if (empty($productref)) {
 		$suffix='_'.strtoupper(str_replace('.', '_', $domainname));
 		$constname="SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
-		$defaultproduct=(! empty($conf->global->$constname) ? $conf->global->$constname : $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT);
+		$defaultproduct=(empty($conf->global->$constname) ? $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT : $conf->global->$constname);
 
 		// Take first plan found
 		$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pa.restrict_domains';
@@ -114,7 +115,9 @@ if (empty($productid) && empty($productref)) {
 		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
 		$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 		$sqlproducts.= ")";
-		if (! empty($defaultproduct)) $sqlproducts.= " AND p.rowid = ".((int) $defaultproduct);
+		if (! empty($defaultproduct)) {
+			$sqlproducts.= " AND p.rowid = ".((int) $defaultproduct);
+		}
 		$sqlproducts.= " ORDER BY p.datec";
 		//print $_SERVER["SERVER_NAME"].' - '.$sqlproducts;
 		$resqlproducts = $db->query($sqlproducts);
@@ -229,6 +232,7 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
+$head = '';
 if ($favicon) {
 	$href = 'img/'.$favicon;
 	if (preg_match('/^http/i', $favicon)) $href = $favicon;
@@ -279,7 +283,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 		$linklogo = '';
 		$homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
-		if ($partnerthirdparty->id > 0) {     // Show logo of partner
+		if (isset($partnerthirdparty) && $partnerthirdparty->id > 0) {     // Show logo of partner
 			require_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
 			$ecmfile=new EcmFiles($db);
 			$relativepath = $conf->societe->multidir_output[$conf->entity]."/".$partnerthirdparty->id."/logos/".$partnerthirdparty->logo;
@@ -430,7 +434,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			  <input type="hidden" name="fromsocid" value="<?php echo dol_escape_htmltag($fromsocid); ?>" />
 			  <input type="hidden" name="origin" value="<?php echo dol_escape_htmltag($origin); ?>" />
 			  <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
-			  <!-- thirdpartyidinsession = <?php echo $_SESSION['dol_loginsellyoursaas']; ?> -->
+			  <!-- _SESSION['dol_loginsellyoursaas'] = <?php echo empty($_SESSION['dol_loginsellyoursaas']) ? '' : $_SESSION['dol_loginsellyoursaas']; ?> -->
 
 			  <section id="enterUserAccountDetails">
 
@@ -461,7 +465,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			if (empty($mythirdparty->id)) {
 				?>
 			<div class="control-group  required">
-				<label class="control-label" for="username" trans="1"><?php echo $langs->trans("Email") ?></label>
+				<label class="control-label" for="username" trans="1"><span class="fas fa-at opacityhigh"></span> <?php echo $langs->trans("Email") ?></label>
 				<div class="controls">
 					<input type="text"<?php echo $disabled; ?> name="username" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="" id="username" />
 
@@ -469,7 +473,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			</div>
 
 			<div class="control-group  required">
-				<label class="control-label" for="orgName" trans="1"><?php echo $langs->trans("NameOfCompany") ?></label>
+				<label class="control-label" for="orgName" trans="1"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
 				<div class="controls">
 					<input type="text"<?php echo $disabled; ?> name="orgName" maxlength="250" value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" id="orgName" />
 				</div>
@@ -482,7 +486,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				<div class="horizontal-fld">
 
 				<div class="control-group  required">
-					<label class="control-label" for="password" trans="1"><?php echo $langs->trans("Password") ?></label>
+					<label class="control-label" for="password" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
 						<input<?php echo $disabled; ?> name="password" type="password" maxlength="128" required />
@@ -493,7 +497,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				</div>
 				<div class="horizontal-fld">
 				  <div class="control-group required">
-					<label class="control-label" for="password2" trans="1"><?php echo $langs->trans("ConfirmPassword") ?></label>
+					<label class="control-label" for="password2" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("ConfirmPassword") ?></label>
 					<div class="controls">
 					  <input<?php echo $disabled; ?> name="password2" type="password" maxlength="128" required />
 					</div>
@@ -508,7 +512,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				?>
 
 			<div class="control-group  ">
-				<label class="control-label" for="address_country"><?php echo $langs->trans("Country") ?></label>
+				<label class="control-label" for="address_country"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 				<?php
 				$countryselected=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
@@ -552,6 +556,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							$reg = array();
 							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+
 								$domainqualified = false;
 								$tmpdomains = explode('+', $reg[1]);
 								foreach ($tmpdomains as $tmpdomain) {
@@ -567,6 +572,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							}
 							// $newval is subdomain (with.mysaasdomainname.com for example)
 
+							// Restriction defined on package
 							if (! empty($tmppackage->restrict_domains)) {   // There is a restriction on some domains for this package
 								$restrictfound = false;
 								$tmparray=explode(',', $tmppackage->restrict_domains);
@@ -639,10 +645,26 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<br>
 			<section id="optinmessagesid">
 				<input type="checkbox" id="optinmessages" name="optinmessages" class="valignmiddle inline" style="margin-top: 0" value="1">
-				<label for="optinmessages" class="valignmiddle small inline"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>
+				<label for="optinmessages" class="valignmiddle small inline opacitymedium"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>
 			</section>
 			<?php } ?>
 
+			<?php if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) { ?>
+			<!-- Checkbox for non profit orga -->
+			<br>
+			<section id="checkbosnonprofitorgaid">
+			<div class="group required">
+				<input type="checkbox" id="checkbosnonprofitorga" name="checkbosnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="1" required="">
+				<label for="checkbosnonprofitorga" class="valignmiddle small inline"><?php
+					echo $langs->trans("ConfirmNonProfitOrga", $sellyoursaasname);
+					echo '. ';
+				if (getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL')) {
+					echo $langs->trans("ConfirmNonProfitOrgaBis", getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'), getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'));
+				}
+				?></label>
+			</div>
+			</section>
+			<?php } ?>
 			<br>
 
 	   </div>
@@ -726,7 +748,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 	jQuery(document).ready(function() {
 
-		/* Autofill the domain */
+		/* Autofill the domain when filling the company */
 		jQuery("#formregister").on("change keyup", "#orgName", function() {
 			console.log("Update sldAndSubdomain in register.php");
 			$("#sldAndSubdomain").val( applyDomainConstraints( $(this).val() ) );
@@ -734,13 +756,13 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 		/* Apply constraints if sldAndSubdomain field is change */
 		jQuery("#formregister").on("change keyup", "#sldAndSubdomain", function() {
-			console.log("Update sldAndSubdomain field");
+			console.log("Update sldAndSubdomain field in register.php");
 			$(this).val( applyDomainConstraints( $(this).val() ) );
 		});
 
 		/* Sow hourglass */
 		$('#formregister').submit(function() {
-				console.log("We clicked on submit on register page")
+				console.log("We clicked on submit on register.php")
 
 				jQuery(document.body).css({ 'cursor': 'wait' });
 				jQuery("div#waitMask").show();

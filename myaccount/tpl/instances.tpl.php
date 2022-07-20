@@ -146,7 +146,7 @@ print '
 	<!-- END PAGE HEADER-->';
 
 
-if (count($listofcontractid) == 0) {				// Should not happen
+if (count($listofcontractid) == 0) {				// If all contracts were removed
 	print '<span class="opacitymedium">'.$langs->trans("None").'</span>';
 } else {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
@@ -171,7 +171,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		$statuslabel = $contract->array_options['options_deployment_status'];
 		$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-		$dbprefix = $contract->array_options['options_db_prefix'];
+		$dbprefix = empty($contract->array_options['options_db_prefix']) ? '' : $contract->array_options['options_db_prefix'];
 		if (empty($dbprefix)) $dbprefix = 'llx_';
 
 		// Get info about PLAN of Contract
@@ -298,7 +298,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 		$foundtemplate=0; $datenextinvoice='';
 		$pricetoshow = ''; $priceinvoicedht = 0;
 		$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
-		if (is_array($contract->linkedObjects['facturerec'])) {
+		if (isset($contract->linkedObjects['facturerec']) && is_array($contract->linkedObjects['facturerec'])) {
 			foreach ($contract->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
 				$foundtemplate++;
 				if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] == 'undeployed') $pricetoshow = '';
@@ -400,7 +400,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
 					$labelprod = $langs->trans("Users");
 				}
 
-				print '<span class="opacitymedium small">'.$labelprod.'</span><br>';
+				print '<span class="opacitymedium small labelprod">'.$labelprod.'</span><br>';
 
 				// Qty
 				$resourceformula = $tmpproduct->array_options['options_resource_formula'];
@@ -673,7 +673,7 @@ if (count($listofcontractid) == 0) {				// Should not happen
                                 ';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
-			$ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
+			$ssh_server_port = (!empty($contract->array_options['options_port_os']) ? $contract->array_options['options_port_os'] : (empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? 22 : $conf->global->SELLYOURSAAS_SSH_SERVER_PORT));
 			print '
     				                <form class="form-horizontal" role="form">
                                     <input type="hidden" name="token" value="'.newToken().'">
@@ -703,6 +703,9 @@ if (count($listofcontractid) == 0) {				// Should not happen
 
     				                </form>
                                     ';
+		} elseif ($directaccess == 4) {
+			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+			print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
@@ -771,6 +774,9 @@ if (count($listofcontractid) == 0) {				// Should not happen
 
     				                </form>
                                     ';
+		} elseif ($directaccess == 4) {
+				print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
@@ -802,10 +808,16 @@ if (count($listofcontractid) == 0) {				// Should not happen
 										<input type="text" required="required" class="urlofinstancetodestroy" name="urlofinstancetodestroy" value="'.GETPOST('urlofinstancetodestroy', 'alpha').'" placeholder="'.$langs->trans("NameOfInstanceToDestroy").'" autofocus>
 									</p>';
 		}
+
+		$actiontoundeploy = 'undeploy';
+		if (getDolGlobalInt('SELLYOURSAAS_ASK_DESTROY_REASON')) {
+			$actiontoundeploy = 'confirmundeploy';
+		}
+
 		print '
 								<p class="center">
 									<input type="hidden" name="mode" value="instances"/>
-									<input type="hidden" name="action" value="undeploy" />
+									<input type="hidden" name="action" value="'.$actiontoundeploy.'" />
 									<input type="hidden" name="contractid" value="'.$contract->id.'" />
 									<input type="hidden" name="tab" value="danger_'.$contract->id.'" />
 									<input type="submit" '.($hasopeninvoices?' disabled="disabled"':'').' class="btn btn-danger'.($hasopeninvoices?' disabled':'').'" name="undeploy" value="'.$langs->trans("UndeployInstance").'">
@@ -829,7 +841,115 @@ if (count($listofcontractid) == 0) {				// Should not happen
 			    </div> <!-- END ROW -->';
 	}		// End loop contract
 }
+if ($action == "confirmundeploy") {
+	$formquestion = array(
+		array(
+			"type"=>"other",
+			"value"=> (empty($errortoshowinconfirm) ? '<div class="opacitymedium margintop">'.$langs->trans('FillUndeployFormDestruction').'</div>' : '<div class="error paddingall marginbottom">'.$errortoshowinconfirm.'</div>')
+		),
+		array(
+			"type"=>"hidden",
+			"name"=>"contractid",
+			"value"=>GETPOST('contractid', 'int')
+		),
+		array(
+			"type"=>"hidden",
+			"name"=>"urlofinstancetodestroy",
+			"value"=>GETPOST('urlofinstancetodestroy')
+		),
+		array(
+			"type"=>"hidden",
+			"name"=>"tab",
+			"value"=>GETPOST('tab')
+		)
+	);
 
+	// Radio part can be changed by a list of labels and a foreach
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"TechnicalIssue"=>$langs->trans("TechnicalIssue"),
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag",
+		"moreattr"=>"required"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"FonctionalProblem"=>$langs->trans("FonctionalProblem"),
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"PriceProblem"=>$langs->trans("PriceProblem")
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"ChangeSoftware"=>$langs->trans("ChangeSoftware")
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"SwitchToOnPremise"=>$langs->trans("SwitchHosting"),
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+
+	$formquestion[] = array(
+		"type"=>"radio",
+		"values"=>array(
+			"other"=>$langs->trans("Other"),
+		),
+		"name"=>"reasonundeploy",
+		"morecss"=>"hideothertag"
+	);
+	$formquestion[] = array(
+		"type"=>"onecolumn",
+		"value"=>"<br>"
+	);
+	$formquestion[] = array(
+		"type"=>"hidden",
+		"name"=>"dummyhiddenfield",
+		"value"=>"",
+		"moreattr"=>"autofocus"
+	);
+	$formquestion[] = array(
+		"type"=>"textarea",
+		"label"=>$langs->trans("AddACommentDestruction"),
+		"name"=>"commentundeploy",
+		"moreattr"=>'style="width:100%;border:solid 1px grey;"',
+	);
+
+	print $form->formconfirm($_SERVER["PHP_SELF"]."?mode=instances", $langs->trans('UndeployInstance'), "", "undeploy", $formquestion, '', 1, "510", "700", 0, 'ConfirmDestruction', 'Cancel');
+	print '
+	<script type="text/javascript" language="javascript">
+    	jQuery(document).ready(function() {
+			/* Code to toggle the show of form */
+    		jQuery("input[name=\'reasonundeploy\']").click(function() {
+				console.log("We select a reason of uninstallation");
+				jQuery("#commentundeploy").focus();
+			});
+		});
+	</script>';
+
+	print '<style>
+	.margintoponly{
+		margin-top:0px
+	}
+	</style>';
+}
 
 	// Section to add/create a new instance
 	print '
@@ -860,30 +980,35 @@ if (count($listofcontractid) == 0) {				// Should not happen
             }
             return domain
         }
+
     	jQuery(document).ready(function() {
-            /* Apply constraints in sldAndSubdomain field */
-            jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {
-                console.log("Update sldAndSubdomain field in instances.tpl.php");
-        	    $(this).val( applyDomainConstraints( $(this).val() ) );
-            });
+
+			/* Code to toggle the show of form */
     		jQuery("#addanotherinstance").click(function() {
     			console.log("Click on addanotherinstance");
     			jQuery("#formaddanotherinstance").toggle();
     		});
 
+            /* Apply constraints if sldAndSubdomain field is change */
+            jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {
+                console.log("Update sldAndSubdomain field in instances.tpl.php");
+        	    $(this).val( applyDomainConstraints( $(this).val() ) );
+            });
 
+			/* Sow hourglass */
             jQuery("#formaddanotherinstance").submit(function() {
                 console.log("We clicked on submit on instance.tpl.php")
 
                 jQuery(document.body).css({ \'cursor\': \'wait\' });
                 jQuery("div#waitMask").show();
                 jQuery("#waitMask").css("opacity"); // must read it first
-                jQuery("#waitMask").css("opacity", "0.7");
+                jQuery("#waitMask").css("opacity", "0.6");
 
 				return true;	/* Use return false to show the hourglass without submitting the page (for debug) */
             });
     	});
-    		</script>';
+	</script>
+	';
 
 	print '<br>';
 
@@ -893,6 +1018,17 @@ if (count($listofcontractid) == 0) {				// Should not happen
 	print '<input type="hidden" name="action" value="deployall" />';
 	print '<input type="hidden" name="fromsocid" value="0" />';
 	print '<input type="hidden" name="reusesocid" value="'.((int) $socid).'" />';
+	print '
+	<!-- Add fields to send local user information -->
+	<input type="hidden" name="tz" id="tz" value="">
+	<input type="hidden" name="tz_string" id="tz_string" value="">
+	<input type="hidden" name="dst_observed" id="dst_observed" value="">
+	<input type="hidden" name="dst_first" id="dst_first" value="">
+	<input type="hidden" name="dst_second" id="dst_second" value="">
+	<!-- Add fields to send other param on browsing environment -->
+	<input type="hidden" name="screenwidth" id="screenwidth" value="">
+	<input type="hidden" name="screenheight" id="screenheight" value="">
+	';
 	print '<!-- thirdpartyidinsession = '.dol_escape_htmltag($_SESSION['dol_loginsellyoursaas']).' -->';
 
 	print '<div class="row">
@@ -903,8 +1039,9 @@ if (count($listofcontractid) == 0) {				// Should not happen
 	//var_dump($arrayofplans);
 	//natcasesort($arrayofplans);
 
-	$MAXINSTANCES = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
-if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
+	$MAXINSTANCESPERACCOUNT = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
+
+if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERACCOUNT) {
 	if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 		print '<!-- RegistrationSuspendedForTheMomentPleaseTryLater -->'."\n";
 		print '<div class="alert alert-warning" style="margin-bottom: 0px">';
@@ -922,29 +1059,33 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 
 		print '
 
-	        			<div class="horizontal-fld clearboth margintoponly">
-	        			<div class="control-group required">
-	        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required />
-	        			</div>
-	        			</div>
-	        			<div class="horizontal-fld margintoponly">
-	        			<div class="control-group required">
-	        			<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
-	        			</div>
-	        			</div>
-	        			</div> <!-- end group -->
+		        			<div class="horizontal-fld clearboth margintoponly">
+		        			<div class="control-group required">
+		        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required />
+		        			</div>
+		        			</div>
+		        			<div class="horizontal-fld margintoponly">
+		        			<div class="control-group required">
+		        			<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
+		        			</div>
+		        			</div>
+		        			</div> <!-- end group -->';
 
-	        			<section id="selectDomain" style="margin-top: 20px;">
-	        			<div class="fld select-domain required">
-	        			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
-	        			<div class="linked-flds">
-	        			<span class="opacitymedium">https://</span>
-	        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-	        			<select name="tldid" id="tldid">';
+		print '
+							<!-- Selection of domain to create instance -->
+		        			<section id="selectDomain" style="margin-top: 20px;">
+		        			<div class="fld select-domain required">
+		        			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
+		        			<div class="linked-flds">
+		        			<span class="opacitymedium">https://</span>
+		        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
+		        			<select name="tldid" id="tldid">';
 		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
-		// listofdomain can be:  with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
+		$tldid=GETPOST('tldid', 'alpha');
+
+		$domainstosuggest = array();   // This is list of all sub domains to show into combo list. Can be: with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
 		$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 		foreach ($listofdomain as $val) {
 			$newval=$val;
@@ -956,6 +1097,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 					continue;
 				}
 				$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
+
 				$domainqualified = false;
 				$tmpdomains = explode('+', $reg[1]);
 				foreach ($tmpdomains as $tmpdomain) {
@@ -965,47 +1107,69 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 					}
 				}
 				if (! $domainqualified) {
+					print '<!-- '.$newval.' disabled. Allowed only if main domain of registration page is '.$reg[1].' -->';
 					continue;
 				}
 			}
 			// $newval is subdomain (with.mysaasdomainname.com for example)
 
+			// Restriction defined on package
+			// Managed later with the "optionvisible..." css
+
 			if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+
+			$domainstosuggest[] = $newval;
+		}
+
+		// Defined a preselected domain
+		$randomselect = ''; $randomindex = 0;
+		if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
+			$maxforrandom = (count($domainstosuggest) - 1);
+			$randomindex = mt_rand(0, $maxforrandom);
+			$randomselect = $domainstosuggest[$randomindex];
+		}
+		// Force selection with no way to change value if SELLYOURSAAS_FORCE_RANDOM_SELECTION is set
+		if (!empty($conf->global->SELLYOURSAAS_FORCE_RANDOM_SELECTION) && !empty($randomselect)) {
+			$domainstosuggest = array();
+			$domainstosuggest[] = $randomselect;
+		}
+		foreach ($domainstosuggest as $val) {
 			print '<option class="optionfordomain';
 			foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
 				print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 			}
-			print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
+			print '" value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
 		}
+
 		print '</select>
-	        			<br class="unfloat" />
-	        			</div>
-	        			</div>
-	        			</section>'."\n";
+		        			<br class="unfloat" />
+		        			</div>
+		        			</div>
+		        			</section>'."\n";
 
 		// Add code to make constraints on deployment servers
 		print '<!-- JS Code to force plan -->';
 		print '<script type="text/javascript" language="javascript">
-				function disable_combo_if_not(s) {
-					console.log("Disable combo choice except if s="+s);
-					$("#tldid > option").each(function() {
-						if (this.value.endsWith(s)) {
-							console.log("We enable the option "+this.value);
-							$(this).removeAttr("disabled");
-							$(this).attr("selected", "selected");
-						} else {
-							console.log("We disable the option "+this.value);
-							$(this).attr("disabled", "disabled");
-							$(this).removeAttr("selected");
-						}
-					});
-				}
+					function disable_combo_if_not(s) {
+						console.log("Disable combo choice except if s="+s);
+						$("#tldid > option").each(function() {
+							if (this.value.endsWith(s)) {
+								console.log("We enable the option "+this.value);
+								$(this).removeAttr("disabled");
+								$(this).attr("selected", "selected");
+							} else {
+								console.log("We disable the option "+this.value);
+								$(this).attr("disabled", "disabled");
+								$(this).removeAttr("selected");
+							}
+						});
+					}
 
-	    		jQuery(document).ready(function() {
-					jQuery("#service").change(function () {
-						var pid = jQuery("#service option:selected").val();
-						console.log("We select product id = "+pid);
-					';
+		    		jQuery(document).ready(function() {
+						jQuery("#service").change(function () {
+							var pid = jQuery("#service option:selected").val();
+							console.log("We select product id = "+pid);
+						';
 		foreach ($arrayofplansfull as $key => $plan) {
 			if (!empty($plan['restrict_domains'])) {
 				$restrict_domains = explode(",", $plan['restrict_domains']);
@@ -1022,9 +1186,9 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		}
 
 		print '
-					});
-					jQuery("#service").trigger("change");
-				});'."\n";
+						});
+						jQuery("#service").trigger("change");
+					});'."\n";
 
 		foreach ($arrayofplansfull as $key => $plan) {
 			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
@@ -1050,7 +1214,7 @@ if ($MAXINSTANCES && count($listofcontractid) < $MAXINSTANCES) {
 		if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
 	}
 
-	print '<div class="warning">'.$langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCES, $sellyoursaasemail).'</div>';
+	print '<div class="warning">'.$langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCESPERACCOUNT, $sellyoursaasemail).'</div>';
 }
 
 	print '</div></div></div>';
