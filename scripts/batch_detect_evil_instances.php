@@ -83,6 +83,7 @@ $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
 $ipserverdeployment='';
+$pathtospamdir = '/tmp/spam';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -107,13 +108,14 @@ if ($fp) {
 		if ($tmpline[0] == 'ipserverdeployment') {
 			$ipserverdeployment = $tmpline[1];
 		}
+		if ($tmpline[0] == 'pathtospamdir') {
+			$pathtospamdir = $tmpline[1];
+		}
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit(-1);
 }
-
-$pathtospamdir = '/tmp/spam';
 
 
 /*
