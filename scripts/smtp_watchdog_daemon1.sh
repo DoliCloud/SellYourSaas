@@ -41,6 +41,11 @@ if [ "x$EMAILTO" == "x" ]; then
 	export EMAILTO=supervision@$DOMAIN
 fi
 
+export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [ "x$pathtospamdir" == "x" ]; then
+	export pathtospamdir="/tmp/spam"
+fi
+
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 
@@ -173,7 +178,7 @@ while read -r line ; do
 		    # TODO Make a check of IP and URL from 
 		    # $remoteip, $usernamestring, $smtpportcalled, $smtpipcalled, $apachestring
 		
-            export blacklistipfile="/tmp/spam/blacklistip"
+            export blacklistipfile="$pathtospamdir/blacklistip"
 			if [ -s $blacklistipfile ]; then
 				# If this looks an IP, we check if it is in blacklist
 				export resexec2=`grep -m 1 "^$remoteip\$" $blacklistipfile`
