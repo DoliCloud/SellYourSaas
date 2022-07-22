@@ -224,7 +224,7 @@ testorconfirm="confirm"
 
 # Upgrade
 
-if [[ "$mode" == "upgrade" ]]; then
+if [[ "$mode" == "upgrade" ]];then
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** upgrade dolibarr instance"
 	if [ -f "$dirforexampleforsources" ]
 	then

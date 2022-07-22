@@ -179,7 +179,7 @@ if (in_array($tmparray[0], array('upgrade'))) {
 	else fwrite($fh, date('Y-m-d H:i:s').' sudo -u admin ./upgrade_instance.sh '.$tmparray[0].'.'.$paramspace." \n");
 	fwrite($fh, "getcwd() = ".getcwd()."\n");
 
-	exec('./upgrade_instance.sh '.$tmparray[0].'.'.$paramspace.' 2>&1', $output, $return_var);
+	exec('./upgrade_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
 	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
 	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output)."\n");
