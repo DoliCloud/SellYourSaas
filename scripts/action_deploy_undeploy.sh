@@ -289,6 +289,7 @@ if [[ ! -d $archivedir ]]; then
 fi
 
 archivetestinstances=`grep '^archivetestinstances=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+archivepaidinstances=1
 
 testorconfirm="confirm"
 
@@ -792,33 +793,35 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			echo The target archive directory $archivedir/$osusername/$dbname already exists, so we overwrite files into existing archive
 			echo cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
 			cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
+			
 			if [[ $testorconfirm == "confirm" ]]
 			then
 				rm -fr $targetdir/$osusername/$dbname
 			fi
 		else														# This is the common case of archiving after an undeploy
-			#echo mv -f $targetdir/$osusername/$dbname $archivedir/$osusername/$dbname
 			echo `date +'%Y-%m-%d %H:%M:%S'`
 			if [[ $testorconfirm == "confirm" ]]
 			then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
+				
+				
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-						echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-						tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-					else
-						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
-						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+					if [[ "x$archivepaidinstances" == "x0" ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+							echo "Archive of test instances are disabled. We discard the tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
+						else
+							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
+						fi
+					else 
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+							echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+							tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+						else
+							echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+						fi
 					fi
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo rm -fr $targetdir/$osusername/$dbname
-					rm -fr $targetdir/$osusername/$dbname
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo chown -R root $archivedir/$osusername
-					chown -R root $archivedir/$osusername
-					echo chmod -R o-rwx $archivedir/$osusername
-					chmod -R o-rwx $archivedir/$osusername
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -835,15 +838,16 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 						fi
 					fi
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo rm -fr $targetdir/$osusername/$dbname
-					rm -fr $targetdir/$osusername/$dbname
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo chown -R root $archivedir/$osusername
-					chown -R root $archivedir/$osusername
-					echo chmod -R o-rwx $archivedir/$osusername
-					chmod -R o-rwx $archivedir/$osusername
 				fi
+
+				echo `date +'%Y-%m-%d %H:%M:%S'`
+				echo rm -fr $targetdir/$osusername/$dbname
+				rm -fr $targetdir/$osusername/$dbname
+				echo `date +'%Y-%m-%d %H:%M:%S'`
+				echo chown -R root $archivedir/$osusername
+				chown -R root $archivedir/$osusername
+				echo chmod -R o-rwx $archivedir/$osusername
+				chmod -R o-rwx $archivedir/$osusername
 			fi
 		fi
 	else
@@ -1351,7 +1355,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			. $cliafter
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running the CLI script $cliafter 
-				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
+				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 				exit 26
 			fi
 		fi
@@ -1359,10 +1363,12 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 fi
 
 
-if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
-	
+if [[ "$mode" == "undeploy" ]]; then
+	echo "$mode $instancename.$domainname" >> $targetdir/$osusername/$mode-$instancename.$domainname.txt
 	echo "$mode $instancename.$domainname" >> $archivedir/$osusername/$mode-$instancename.$domainname.txt
-
+fi
+if [[ "$mode" == "undeployall" ]]; then
+	echo "$mode $instancename.$domainname" >> $archivedir/$osusername/$mode-$instancename.$domainname.txt
 fi
 
 

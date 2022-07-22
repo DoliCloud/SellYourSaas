@@ -97,6 +97,7 @@ $(document).ready(function () {
 <input type="hidden" name="dst_observed" id="dst_observed" value="">
 <input type="hidden" name="dst_first" id="dst_first" value="">
 <input type="hidden" name="dst_second" id="dst_second" value="">
+<!-- Add fields to send other param on browsing environment -->
 <input type="hidden" name="screenwidth" id="screenwidth" value="">
 <input type="hidden" name="screenheight" id="screenheight" value="">
 <input type="hidden" name="dol_hide_topmenu" id="dol_hide_topmenu" value="<?php echo $dol_hide_topmenu; ?>">

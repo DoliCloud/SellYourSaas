@@ -22,6 +22,7 @@ if (preg_match('/^send_/', $tmpactionprepend) || in_array($tmpactionprepend, arr
 $envVars = array(
 	'HTTP_HOST',
 	'SCRIPT_NAME',
+	'SERVER_NAME',
 	'DOCUMENT_ROOT',
 	'REMOTE_ADDR',
 	'REQUEST_URI'

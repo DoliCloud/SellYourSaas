@@ -100,7 +100,8 @@ fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
-	echo "Usage: ${0} [test|confirm] (tempdirs)"
+	echo "Usage: ${0} [test|confirm] (oldtempinarchive)"
+	echo "With mode test, the /temp/... files are not deleted at end of script" 
 	exit 6
 fi
 
@@ -273,7 +274,6 @@ if [ "x$?" != "x0" ]; then
 fi
 
 
-
 echo "***** Search osu unix account without home in $targetdir (should never happen)"
 echo grep '^osu' /etc/passwd | cut -f 1 -d ':'
 for osusername in `grep '^osu' /etc/passwd | cut -f 1 -d ':'`
@@ -315,27 +315,58 @@ if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
 	done < /tmp/instancefound-activedbinsellyoursaas
 fi
 
+
+if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
+	echo "***** Search home in $targetdir without instance active (should never happen)"
+	echo "ls -d $targetdir/osu*";
+	for osusername in `ls -d $targetdir/osu* 2>/dev/null`
+	do
+		export osusername=`basename $osusername`
+		if ! grep "$osusername" /tmp/instancefound-dbinsellyoursaas > /dev/null; then
+			echo --- User $osusername has a home in $targetdir but is not inside /tmp/instancefound-dbinsellyoursaas. Should not happen.
+			echo List of documents in dir /home/jail/home/$osusername/dbn*:
+			ls /home/jail/home/$osusername/dbn*
+			echo List of found virtualhost instance pointing to this user home:
+			export vhfile=`grep -l $osusername /etc/apache2/sellyoursaas-available/*.conf`
+			echo $vhfile
+			export vhfile2=`grep -l $osusername /etc/apache2/sellyoursaas-enabled/*.conf`
+			echo $vhfile2
+			echo Check that there is no bug on script and you can delete user with
+			if [ "x$vhfile" != "x" ]; then
+				echo "rm $vhfile; "
+			fi
+			if [ "x$vhfile2" != "x" ]; then
+				echo "rm $vhfile2; "
+			fi
+			echo "mkdir $archivedirtest/$osusername; deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername; deluser --group $osusername"
+			echo
+			exit 9
+		fi
+	done
+fi
+
+
 # We disable this because when we undeploy, user is kept and we want to remove it only 1 month after undeployment date (processed by next point)
-# TODO For contracts deleted from database, we must found something else: 
-#echo "***** Search from /tmp/instancefound: osu unix account with record in /etc/passwd but not in instancefound" 
-#cat /tmp/instancefound | awk '{ if ($2 != "username_os" && $2 != "unknown" && $2 != "NULL") print $2":" }' > /tmp/osusernamefound
+# TODO Build the file /tmp/instancefound-olduninstalleddbinsellyoursaas
+#echo "***** Search from /tmp/instancefound-olduninstalleddbinsellyoursaas: osu unix account with record in /etc/passwd but not in instancefound-olduninstalleddbinsellyoursaas" 
+#cat /tmp/instancefound-dbinsellyoursaas | awk '{ if ($2 != "username_os" && $2 != "unknown" && $2 != "NULL") print $2":" }' > /tmp/osusernamefound
 #if [ -s /tmp/osusernamefound ]; then
 #	for osusername in `grep -v /etc/passwd -f /tmp/osusernamefound | grep '^osu'`
 #	do
 #		tmpvar1=`echo $osusername | awk -F ":" ' { print $1 } '`
-#		echo User $tmpvar1 is an ^osu user in /etc/passwd but has no available instance in /tmp/instancefound
+#		echo User $tmpvar1 is an ^osu user in /etc/passwd but has no active instance in /tmp/instancefound-olduninstalleddbinsellyoursaas
 #		exit 9
 #	done
 #fi
 
 
 if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
-	echo "***** Save osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
+	echo "***** Search osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
 	Q1="use $database; "
 	Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.deployment_host = '$IPSERVERDEPLOYMENT' AND c.rowid IN ";
 	Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";
 	SQL="${Q1}${Q2}${Q3}"
-	
+
 	echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e $SQL"
 	$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
 	if [ -s /tmp/osutoclean-oldundeployed ]; then
@@ -392,8 +423,8 @@ if [ -s /tmp/osutoclean ]; then
 				fi	
 			fi
 		fi
-		
-		
+
+
 		# If osusername is known, remove user and archive dir (Note: archive with clean.sh is always done in test !!!!!!!)
 		if [[ "x$osusername" != "x" ]]; then	
 			if [[ "x$osusername" != "xNULL" ]]; then
@@ -402,7 +433,7 @@ if [ -s /tmp/osutoclean ]; then
 				echo rm -f $targetdir/$osusername/$dbname/*.log.*
 				rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1 
 				
-				echo "clean $instancename" >> $archivedirtest/$osusername/clean-$instancename.txt
+				echo "clean $instancename (a clean means archive user dir and delete user, group and cron)" >> $archivedirtest/$osusername/clean-$instancename.txt
 				
 				echo crontab -r -u $osusername
 				crontab -r -u $osusername
@@ -618,15 +649,15 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
 fi
 
+
 # Clean archives 
-if [ "x$2" == "xtempdirs" ]; then
+if [ "x$2" == "xoldtempinarchive" ]; then
 	echo "Clean archives dir from not expected files (should not be required anymore). Archives are no more tree of files but an archive since 1st of july 2019".
 	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
 	find "$archivedirpaid" -type d -path '*/osu*/temp' -exec rm -fr {} \;
 	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
 	find "$archivedirtest" -type d -path '*/osu*/temp' -exec rm -fr {} \;
 fi
-
 
 if [[ $testorconfirm == "confirm" ]]; then
 	echo "***** Clean temporary files"
@@ -646,7 +677,7 @@ echo
 echo TODO Manually...
 
 # Clean database users
-echo "***** We should also clean mysql record for permission on old databases and old users"
+echo "***** We should also clean mysql db and user table (used for permission) for deleted databases and deleted users"
 SQL="use mysql; delete from db where Db NOT IN (SELECT schema_name FROM information_schema.schemata) and Db like 'dbn%';"
 echo You can execute
 echo "$MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -e \"$SQL\" -pxxxxxx"
@@ -670,7 +701,7 @@ if [[ $testorconfirm == "test" ]]; then
 		echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass $database
 		echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -pxxxxxx -h $databasehost $database"
 		echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
-		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of databasehost.
+		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of database master.
 		echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
 	fi
 fi
@@ -692,11 +723,13 @@ do
 			echo "rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 		else
 			echo "# ----- $fic - $noyoungfile" >> /tmp/deletedirs.sh
-			echo "# ALERT Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with:" >> /tmp/deletedirs.sh
+			echo "# NOTE Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with:" >> /tmp/deletedirs.sh
 			echo "# mv $backupdir/$osusername $archivedirpaid/$osusername; chown -R root.root $archivedirpaid/$osusername" >> /tmp/deletedirs.sh
 		fi
 	else
         echo "# ----- $fic - $noyoungfile - backup dir $dirtoscan exists with a very old last_mysqldump* file but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
+        echo "# ALTERT This may happen when an instance is renamed so mysqldump of old name is old and the one of new name is new." >> /tmp/deletedirs.sh
+		echo "#rm $fic" >> /tmp/deletedirs.sh
         echo "#rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 	fi
 done
@@ -704,5 +737,7 @@ if [ -s /tmp/deletedirs.sh ]; then
 	echo "***** We should also clean backup of paying instances in $backupdir/osusername/ that are no more saved since a long time (last_mysqldump > 90days) and that are archived" 
 	echo You can execute commands into file /tmp/deletedirs.sh
 fi
+
+echo 
 
 exit 0

@@ -154,11 +154,37 @@ class SellYourSaasUtils
 										$invoice->update_note($newpublicnote, '_public');
 									}
 
+									// Check amount
+									if (!empty($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE)) {
+										$amountofinvoice = $invoice->total_ht;
+										$monthfactor = 1;
+										if ($invoice->fk_fac_rec_source > 0) {
+											include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
+											$tmpinvoicerec = new FactureRec($this->db);
+											$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
+											if ($tmpinvoicerec->unit_frequency == 'y') {
+												$monthfactor *= 12;
+											}
+											if ($tmpinvoicerec->frequency > 1) {
+												$monthfactor *=  $tmpinvoicerec->frequency;
+											}
+										}
+										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
+										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
+										if ($amountofinvoice >= ($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE * $monthfactor)) {
+											$error++;
+											$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".$conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE." * ".$monthfactor;
+											$this->errors[] = $this->error;
+											break;
+										}
+									}
+
 									$result = $invoice->validate($user);
+
 									if ($result > 0) {
 										$draftinvoiceprocessed[$invoice->id]=$invoice->ref;
 
-										// Now we build the invoice
+										// Now we build the PDF invoice
 										$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
 										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
@@ -882,6 +908,31 @@ class SellYourSaasUtils
 
 								if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
 									$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
+								}
+
+								// Check amount
+								if (!empty($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE)) {
+									$amountofinvoice = $invoice->total_ht;
+									$monthfactor = 1;
+									if ($invoice->fk_fac_rec_source > 0) {
+										include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
+										$tmpinvoicerec = new FactureRec($this->db);
+										$tmpinvoicerec->fetch($invoice->fk_fac_rec_source);
+										if ($tmpinvoicerec->unit_frequency == 'y') {
+											$monthfactor *= 12;
+										}
+										if ($tmpinvoicerec->frequency > 1) {
+											$monthfactor *=  $tmpinvoicerec->frequency;
+										}
+									}
+									dol_syslog("doTakePaymentStripeForThirdparty The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
+									// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
+									if ($amountofinvoice >= ($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE * $monthfactor)) {
+										$error++;
+										$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".$conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE." * ".$monthfactor;
+										$this->errors[] = $this->error;
+										break;
+									}
 								}
 
 								$result = $invoice->validate($user);
@@ -2693,7 +2744,7 @@ class SellYourSaasUtils
 						if ($mode == 'test') $remotetouse = 'undeployall';
 
 						$conf->global->noapachereload = 1;       // Set a global variable that can be read later
-						$comment = "Undeploy instance by doUndeployOldSuspendedInstances('".$mode."') the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
+						$comment = "Undeploy instance by doUndeployOldSuspendedInstances('".$mode."') so remotetouse=".$remotetouse.", the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
 						$result = $this->sellyoursaasRemoteAction($remotetouse, $object, 'admin', '', '', '0', $comment, 300);
 						$conf->global->noapachereload = null;    // unset a global variable that can be read later
 						if ($result <= 0) {

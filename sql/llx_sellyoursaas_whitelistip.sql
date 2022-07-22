@@ -14,12 +14,11 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 
-CREATE TABLE llx_sellyoursaas_blacklistip(
+CREATE TABLE llx_sellyoursaas_whitelistip(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	entity integer DEFAULT 1 NOT NULL, 
 	content varchar(128) NOT NULL, 
-	date_use datetime NULL, 
 	date_creation datetime NOT NULL, 
 	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
 	status integer DEFAULT 1 NOT NULL

@@ -16,9 +16,9 @@
  */
 
 /**
- * \file        class/blacklistmail.class.php
+ * \file        class/whitelistip.class.php
  * \ingroup     sellyoursaas
- * \brief       This file is a CRUD class file for Blacklistmail (Create/Read/Update/Delete)
+ * \brief       This file is a CRUD class file for Whitelistip (Create/Read/Update/Delete)
  */
 
 // Put here all includes required by your class file
@@ -27,9 +27,9 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 //require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 /**
- * Class for Blacklistmail
+ * Class for Whitelistip
  */
-class Blacklistmail extends CommonObject
+class Whitelistip extends CommonObject
 {
 	/**
 	 * @var string ID of module.
@@ -39,12 +39,12 @@ class Blacklistmail extends CommonObject
 	/**
 	 * @var string ID to identify managed object.
 	 */
-	public $element = 'blacklistmail';
+	public $element = 'whitelistip';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
 	 */
-	public $table_element = 'sellyoursaas_blacklistmail';
+	public $table_element = 'sellyoursaas_whitelistip';
 
 	/**
 	 * @var int  Does this object support multicompany module ?
@@ -58,7 +58,7 @@ class Blacklistmail extends CommonObject
 	public $isextrafieldmanaged = 0;
 
 	/**
-	 * @var string String with name of icon for blacklistmail. Must be the part after the 'object_' into object_blacklistmail.png
+	 * @var string String with name of icon for whitelistip. Must be the part after the 'object_' into object_whitelistip.png
 	 */
 	public $picto = 'fa-ban';
 
@@ -102,7 +102,7 @@ class Blacklistmail extends CommonObject
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'Ref', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>2, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
-		'content' => array('type'=>'text', 'label'=>'Searchkeys', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>1,),
+		'content' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>1,),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
 		'status' => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>2000, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled')),
@@ -121,17 +121,17 @@ class Blacklistmail extends CommonObject
 	// /**
 	//  * @var string    Name of subtable line
 	//  */
-	// public $table_element_line = 'sellyoursaas_blacklistmailline';
+	// public $table_element_line = 'sellyoursaas_whitelistipline';
 
 	// /**
 	//  * @var string    Field with ID of parent key if this object has a parent
 	//  */
-	// public $fk_element = 'fk_blacklistmail';
+	// public $fk_element = 'fk_whitelistip';
 
 	// /**
 	//  * @var string    Name of subtable class that manage subtable lines
 	//  */
-	// public $class_element_line = 'Blacklistmailline';
+	// public $class_element_line = 'Whitelistipline';
 
 	// /**
 	//  * @var array	List of child tables. To test if we can delete object.
@@ -143,10 +143,10 @@ class Blacklistmail extends CommonObject
 	//  *               If name matches '@ClassNAme:FilePathClass;ParentFkFieldName' it will
 	//  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
 	//  */
-	// protected $childtablesoncascade = array('sellyoursaas_blacklistmaildet');
+	// protected $childtablesoncascade = array('sellyoursaas_whitelistipdet');
 
 	// /**
-	//  * @var BlacklistmailLine[]     Array of subtable lines
+	//  * @var WhitelistipLine[]     Array of subtable lines
 	//  */
 	// public $lines = array();
 
@@ -171,7 +171,7 @@ class Blacklistmail extends CommonObject
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->sellyoursaas->blacklistmail->read) {
+		/*if ($user->rights->sellyoursaas->whitelistip->read) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
@@ -533,14 +533,14 @@ class Blacklistmail extends CommonObject
 
 		$result = '';
 
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("Blacklistmail").'</u>';
+		$label = img_picto('', $this->picto).' <u>'.$langs->trans("Whitelistip").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}
 		$label .= '<br>';
 		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
 
-		$url = dol_buildpath('/sellyoursaas/blacklistmail_card.php', 1).'?id='.$this->id;
+		$url = dol_buildpath('/sellyoursaas/whitelistip_card.php', 1).'?id='.$this->id;
 
 		if ($option != 'nolink') {
 			// Add param to save lastsearch_values or not
@@ -556,7 +556,7 @@ class Blacklistmail extends CommonObject
 		$linkclose = '';
 		if (empty($notooltip)) {
 			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-				$label = $langs->trans("ShowBlacklistmail");
+				$label = $langs->trans("ShowWhitelistip");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
 			$linkclose .= ' title="'.dol_escape_htmltag($label, 1).'"';
@@ -616,7 +616,7 @@ class Blacklistmail extends CommonObject
 		//if ($withpicto != 2) $result.=(($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
 
 		global $action, $hookmanager;
-		$hookmanager->initHooks(array('blacklistmaildao'));
+		$hookmanager->initHooks(array('whitelistipdao'));
 		$parameters = array('id'=>$this->id, 'getnomurl' => &$result);
 		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 		if ($reshook > 0) {
@@ -739,8 +739,8 @@ class Blacklistmail extends CommonObject
 	{
 		$this->lines = array();
 
-		$objectline = new BlacklistmailLine($this->db);
-		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_blacklistmail = '.((int) $this->id)));
+		$objectline = new WhitelistipLine($this->db);
+		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_whitelistip = '.((int) $this->id)));
 
 		if (is_numeric($result)) {
 			$this->error = $objectline->error;
@@ -763,7 +763,7 @@ class Blacklistmail extends CommonObject
 		$langs->load("sellyoursaas@sellyoursaas");
 
 		if (empty($conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON)) {
-			$conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON = 'mod_blacklistmail_standard';
+			$conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON = 'mod_whitelistip_standard';
 		}
 
 		if (!empty($conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON)) {
@@ -828,7 +828,7 @@ class Blacklistmail extends CommonObject
 		$langs->load("sellyoursaas@sellyoursaas");
 
 		if (!dol_strlen($modele)) {
-			$modele = 'standard_blacklistmail';
+			$modele = 'standard_whitelistip';
 
 			if (!empty($this->model_pdf)) {
 				$modele = $this->model_pdf;
@@ -879,27 +879,3 @@ class Blacklistmail extends CommonObject
 
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
-
-/**
- * Class BlacklistmailLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class BlacklistmailLine extends CommonObjectLine
-{
-	// To complete with content of an object BlacklistmailLine
-	// We should have a field rowid, fk_blacklistmail and position
-
-	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-	 */
-	public $isextrafieldmanaged = 0;
-
-	/**
-	 * Constructor
-	 *
-	 * @param DoliDb $db Database handler
-	 */
-	public function __construct(DoliDB $db)
-	{
-		$this->db = $db;
-	}
-}

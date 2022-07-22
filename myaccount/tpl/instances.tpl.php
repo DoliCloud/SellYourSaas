@@ -703,6 +703,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
     				                </form>
                                     ';
+		} elseif ($directaccess == 4) {
+			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+			print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
@@ -771,6 +774,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
     				                </form>
                                     ';
+		} elseif ($directaccess == 4) {
+				print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
@@ -1012,6 +1018,17 @@ if ($action == "confirmundeploy") {
 	print '<input type="hidden" name="action" value="deployall" />';
 	print '<input type="hidden" name="fromsocid" value="0" />';
 	print '<input type="hidden" name="reusesocid" value="'.((int) $socid).'" />';
+	print '
+	<!-- Add fields to send local user information -->
+	<input type="hidden" name="tz" id="tz" value="">
+	<input type="hidden" name="tz_string" id="tz_string" value="">
+	<input type="hidden" name="dst_observed" id="dst_observed" value="">
+	<input type="hidden" name="dst_first" id="dst_first" value="">
+	<input type="hidden" name="dst_second" id="dst_second" value="">
+	<!-- Add fields to send other param on browsing environment -->
+	<input type="hidden" name="screenwidth" id="screenwidth" value="">
+	<input type="hidden" name="screenheight" id="screenheight" value="">
+	';
 	print '<!-- thirdpartyidinsession = '.dol_escape_htmltag($_SESSION['dol_loginsellyoursaas']).' -->';
 
 	print '<div class="row">

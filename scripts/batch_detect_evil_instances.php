@@ -69,6 +69,9 @@ if (! $res) {
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
+include_once dol_buildpath("/sellyoursaas/class/blacklistip.class.php");
+include_once dol_buildpath("/sellyoursaas/class/blacklistfrom.class.php");
+include_once dol_buildpath("/sellyoursaas/class/blacklistto.class.php");
 include_once dol_buildpath("/sellyoursaas/class/blacklistcontent.class.php");
 include_once dol_buildpath("/sellyoursaas/class/blacklistdir.class.php");
 
@@ -110,6 +113,7 @@ if ($fp) {
 	exit(-1);
 }
 
+$pathtospamdir = '/tmp/spam';
 
 
 /*
@@ -181,8 +185,90 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 
 $return_var = 0;
 
+
+// Preparation
+
 print "----- Go into dir /home/jail/home\n";
 chdir('/home/jail/home/');
+
+dol_mkdir($pathtospamdir);
+
+
+print "----- Loop for blacklistip\n";
+
+$tmpblacklistip = new Blacklistip($db);
+$tmparray = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistip elements.\n";
+}
+
+if (!empty($tmparray)) {
+	//home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam
+
+	// Generate the file balcklistip
+	$filetobuild = $pathtospamdir.'/blacklistip';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0666';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+}
+
+
+print "----- Loop for blacklistfrom\n";
+
+$tmpblacklistfrom = new Blacklistfrom($db);
+$tmparray = $tmpblacklistfrom->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistfrom elements.\n";
+}
+
+if (!empty($tmparray)) {
+	// Generate the file balcklistfrom
+	$filetobuild = $pathtospamdir.'/blacklistfrom';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+
+	print 'File '.$filetobuild.' has been updated'."\n";
+}
+
+
+print "----- Loop for blacklistto\n";
+
+$tmpblacklistto = new Blacklistto($db);
+$tmparray = $tmpblacklistto->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparray) && $tmparray < 0) {
+	echo "Erreur: failed to get blacklistto elements.\n";
+}
+
+if (!empty($tmparray)) {
+	// Generate the file balcklistip
+	$filetobuild = $pathtospamdir.'/blacklistto';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+}
+
+
+// TODO Loop on each free instance not yet suspended (or only $instancefiltercomplete if defined)
+// Use same code than batch_customers.php
+
 
 print "----- Loop for spam keys into index.php using blacklistcontent\n";
 
@@ -193,18 +279,31 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 }
 
 if (!empty($tmparray)) {
+	// Generate the file balcklistcontent
+	$filetobuild = $pathtospamdir.'/blacklistcontent';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			echo 'Scan if we found the string '.$buffer.' into osu*/dbn*/htdocs/index.php ';
-			$command = "grep -l '".str_replace("'", ".", $buffer)."' osu*/dbn*/htdocs/index.php";
+			$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu*/dbn*/htdocs/index.php";
+			echo 'Scan if we found the string '.$buffer.' with '.$command.' ';
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// grep -l returns 0 if something was found
 				// We found an evil string
-				print "- ALERT: the evil string '".$buffer."' was found into a file using the command: ".$command."\n";
+				print "- ALERT: the evil string '".$buffer."' was found in content of index.php\n";
+				$nboferrors = 1;
 			} else {
 				print "- OK\n";
 			}
@@ -222,18 +321,44 @@ if (is_numeric($tmparray) && $tmparray < 0) {
 }
 
 if (!empty($tmparray)) {
+	// Generate the file balcklistdir
+	$filetobuild = $pathtospamdir.'/blacklistdir';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparray as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+
 	foreach ($tmparray as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
-			echo 'Scan if we found the blacklist dir '.$buffer.' in osu*/dbn*/htdocs/ ';
-			$command = "find osu*/dbn*/htdocs/ -maxdepth 2 -type d | grep '".str_replace("'", ".", $buffer)."'";
+			$command = "find osu*/dbn*/htdocs/ -maxdepth 2";
+			if (!empty($val->noblacklistif)) {
+				$tmpdirarray = explode('|', $val->noblacklistif);
+				foreach ($tmpdirarray as $tmpdir) {
+					if ($tmpdir) {
+						$command .= " ! -path '*".escapeshellcmd(preg_replace('/[^a-z0-9\.\-]/', '', $tmpdir))."*'";
+					}
+				}
+			}
+			$command .= " | grep '".escapeshellcmd($buffer)."'";
+			/*if (!empty($val->noblacklistif)) {
+				$command .= " | grep -v '".str_replace("'", ".", $val->noblacklistif)."'";
+			}*/
+			echo 'Scan if we found the blacklist dir '.$buffer.' with '.$command.' ';
 			$fullcommand=$command;
 			$output=array();
 			//echo $command."\n";
+
 			exec($fullcommand, $output, $return_var);
 			if ($return_var == 0) {		// command returns 0 if something was found
 				// We found an evil string
-				print "- ALERT: the evil dir '".$buffer."' was found using the command: ".$command."\n";
+				print "- ALERT: the evil dir/file '".$buffer."' was found\n";
+				$nboferrors = 2;
 			} else {
 				print "- OK\n";
 			}
@@ -260,7 +385,7 @@ if (!empty($tmparray)) {
 	}
 
 	echo 'Scan if we found a non whitelistdir dir '.$buffer.' in osuSTAR/dbnSTAR/htdocs/ ';
-	$command = "find osuSTAR/dbnSTAR/htdocs/ -maxdepth 1 -type d | grep -v '".str_replace("'", ".", $buffer)."'";
+	$command = "find osuSTAR/dbnSTAR/htdocs/ -maxdepth 1 -type d | grep -v '".escapeshellcmd(str_replace("'", ".", $buffer))."'";
 	$fullcommand=$command;
 	$output=array();
 	//echo $command."\n";
@@ -274,9 +399,15 @@ if (!empty($tmparray)) {
 }
 */
 
+
+
 $dbmaster->close();	// Close database opened handler
 
-print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+if ($nboferrors) {
+	print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+} else {
+	print '--- end OK with no error - '.strftime("%Y%m%d-%H%M%S")."\n";
+}
 
 if ($nboferrors) {
 	if ($action == 'testemail') {

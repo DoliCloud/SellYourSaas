@@ -34,12 +34,15 @@ $MAXOK = 10;
 $MAXPERDAY = 500;
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start phpsendmail.php\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " SERVER_NAME = ".(empty($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'])."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " DOCUMENT_ROOT = ".(empty($_SERVER['DOCUMENT_ROOT']) ? '' : $_SERVER['DOCUMENT_ROOT'])."\n", FILE_APPEND);
 
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Get $maxemailperday
 $maxemailperday = 0;
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
+	fclose($fp);
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'maxemailperday') {
@@ -47,7 +50,7 @@ if ($fp) {
 		}
 	}
 } else {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " Failed to open /etc/sellyoursaas-public.conf file\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR Failed to open /etc/sellyoursaas-public.conf file\n", FILE_APPEND);
 	//exit(-1);
 }
 if (is_numeric($maxemailperday) && $maxemailperday > 0) {
@@ -158,8 +161,11 @@ $commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
 
 // Execute the command
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
-$resexec =  shell_exec($commandcheck);
-file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$commandcheck." = ".$resexec, FILE_APPEND);
+//$resexec = shell_exec("id");
+//file_put_contents($logfile, date('Y-m-d H:i:s')." id = ".$resexec."\n", FILE_APPEND);
+$resexec = shell_exec($commandcheck);
+$resexec = (int) (empty($resexec) ? 0 : trim($resexec));
+file_put_contents($logfile, date('Y-m-d H:i:s')." nb of process found with ".$commandcheck." = ".$resexec." (we accept ".$MAXPERDAY.")\n", FILE_APPEND);
 if ($resexec > $MAXPERDAY) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko daily quota reached - exit 6. User has reached its daily quota of '.$MAXPERDAY.".\n", FILE_APPEND);
 	exit(6);
@@ -175,7 +181,7 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $fromline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' Email detected into From: '. $emailfrom."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $messageidline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APPEND);
-file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - ".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' PWD=' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - REQUEST_URI=".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
 
 $blacklistofips = @file_get_contents($pathtospamdir.'/blacklistip');
@@ -197,6 +203,21 @@ if ($blacklistoffroms === false) {
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 3. Blacklisted from '.$emailfrom." found into file blacklistfrom\n", FILE_APPEND);
 		exit(4);
+	}
+}
+
+$blacklistofdirs = @file_get_contents($pathtospamdir.'/blacklistdir');
+if ($blacklistofdirs === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistdir can't be read.\n", FILE_APPEND);
+} elseif (! empty($_SERVER["REQUEST_URI"])) {
+	$blacklistofdirsarray = explode("\n", $blacklistofdirs);
+	if (is_array($blacklistofdirsarray)) {
+		foreach ($blacklistofdirsarray as $blacklistofdir) {
+			if ($blacklistofdir && preg_match('/'.preg_quote(trim($blacklistofdir), '/').'/', $_SERVER["REQUEST_URI"])) {
+				file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 7. Blacklisted dir '.$_SERVER["REQUEST_URI"]." contains blacklistdir key ".$blacklistofdir."\n", FILE_APPEND);
+				exit(7);
+			}
+		}
 	}
 }
 
@@ -233,7 +254,7 @@ if (empty($fromline) && empty($emailfrom)) {
 
 
 
-file_put_contents($logfile, $command."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' .$command."\n", FILE_APPEND);
 
 // Execute the command
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
@@ -243,6 +264,6 @@ if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEN
 if (empty($ip)) file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
 
-time_nanosleep(0, 200000000);
+time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
 
 return $resexec;

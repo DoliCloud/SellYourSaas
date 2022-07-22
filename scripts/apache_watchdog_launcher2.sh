@@ -1,12 +1,12 @@
 #!/bin/bash
 ### BEGIN INIT INFO
-# Provides:          apache_watchdog
+# Provides:          apache_watchdog2
 # Required-Start:    $local_fs $remote_fs $network $syslog $named
 # Required-Stop:     $local_fs $remote_fs $network $syslog $named
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start/stop apache_watchdog
-# Description:       Start/stop apache_watchdog, a watch dog for apache.
+# Short-Description: Start/stop apache_watchdog2
+# Description:       Start/stop apache_watchdog2, a watch dog for apache.
 ### END INIT INFO
 
 #
@@ -58,7 +58,7 @@ if [ "x$1" == "xstart" ]; then
 fi
 
 if [ "x$1" == "xstop" ]; then
-	
+		# Kill the tail process launched by the daemon
         pid=`ps ax | grep 'tail' | grep '/var/log/apport.log' | grep -v grep | awk ' { print $1 } '`
         if [ "x$pid" == "x" ]; then
                 echo apache_watchdog_daemon2 "tail" process not started
@@ -66,6 +66,7 @@ if [ "x$1" == "xstop" ]; then
                 echo Launch kill to stop "tail" process with PID $pid
                 kill $pid
         fi
+        # Kill the process of daemon
         pid=`ps ax | grep 'apache_watchdog_daemon2' | grep -v grep | awk ' { print $1 } '`
         if [ "x$pid" == "x" ]; then
                 echo apache_watchdog_daemon2 not started

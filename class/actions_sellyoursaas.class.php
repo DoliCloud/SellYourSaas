@@ -132,6 +132,11 @@ class ActionsSellyoursaas
 					$newtitle .= dol_escape_htmltag('<br><b>'.$langs->trans("Redirection").'</b> : '.(empty($object->array_options['options_suspendmaintenance_message']) ? '' : $object->array_options['options_suspendmaintenance_message']), 1);
 				}
 				$this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
+
+				if (!empty($object->array_options['options_spammer'])) {
+					$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+				}
+
 				return 1;
 			}
 		}
@@ -178,7 +183,11 @@ class ActionsSellyoursaas
 					{
 						$this->results['objref'] .= ' &nbsp; <a href="/aa">'.$langs->trans("SeeChain").'</a>';
 					}*/
-					if (! empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
+					if (!empty($object->array_options['options_spammer'])) {
+						$this->results['objref'] .= ' '.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+					}
+
+					if (!empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
 						$this->results['objref'] .= ' '.img_warning($langs->trans('ActiveInstanceOfASpammer'));
 					}
 				}

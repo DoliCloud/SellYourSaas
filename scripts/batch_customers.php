@@ -20,10 +20,9 @@
 /**
  *      \file       sellyoursaas/scripts/batch_customers.php
  *		\ingroup    sellyoursaas
- *      \brief      Main SellYourSaas batch (to run on master hosts for action updatedatabase|updatecountsonly|updatestatsonly, on deployment hosts for other actions)
- *      			backup_instance.php (payed customers rsync + databases backup)
- *      			update database info for customer
- *      			update statistics
+ *      \brief      Main SellYourSaas batch:
+ *      			- to run on master hosts for action updatedatabase|updatecountsonly|updatestatsonly
+ *      			- to run on deployment hosts for action backup* (payed customers rsync + databases backup)
  */
 
 if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db

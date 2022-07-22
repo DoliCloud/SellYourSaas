@@ -1386,6 +1386,7 @@ On the *Deployment servers* :
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher1.sh /etc/init.d/apache_watchdog_launcher1
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher2.sh /etc/init.d/apache_watchdog_launcher2
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/apache_watchdog_launcher3.sh /etc/init.d/apache_watchdog_launcher3
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/smtp_watchdog_launcher1.sh /etc/init.d/smtp_watchdog_launcher1
 systemctl daemon-reload
 
 systemctl enable apache_watchdog_launcher1;
@@ -1399,6 +1400,10 @@ systemctl status apache_watchdog_launcher2;
 systemctl enable apache_watchdog_launcher3;
 systemctl is-enabled apache_watchdog_launcher3;
 systemctl status apache_watchdog_launcher3;
+
+systemctl enable smtp_watchdog_launcher1;
+systemctl is-enabled smtp_watchdog_launcher1;
+systemctl status smtp_watchdog_launcher1;
 ---------------
 
 
