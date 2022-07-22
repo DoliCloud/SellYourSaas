@@ -59,6 +59,9 @@ $langs->loadLangs(array("admin", "errors", "install", "sellyoursaas@sellyoursaas
 
 //exit;
 
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks(array('sellyoursaas-setup'));
+
 $tmpservices=array();
 $tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 foreach ($tmpservicessub as $key => $tmpservicesub) {
@@ -217,7 +220,9 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_PAID_ARCHIVES_PATH", GETPOST("SELLYOURSAAS_PAID_ARCHIVES_PATH"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_NAME_RESERVED", GETPOST("SELLYOURSAAS_NAME_RESERVED"), 'chaine', 0, '', $conf->entity);
-		//dolibarr_set_const($db, "SELLYOURSAAS_EMAIL_ADDRESSES_BANNED", GETPOST("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED"), 'chaine', 0, '', $conf->entity);
+		if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_EMAIL_ADDRESSES_BANNED", GETPOST("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED"), 'chaine', 0, '', $conf->entity);
+		}
 
 		// Save images
 		$dirforimage=$conf->mycompany->dir_output.'/logos/';
@@ -764,14 +769,14 @@ print '</td>';
 print '<td><span class="opacitymedium small">^mycompany[0-9]*\.</span></td>';
 print '</tr>';
 
-/*
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED").'</td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_EMAIL_ADDRESSES_BANNED" value="'.getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">yopmail.com,hotmail.com,spammer@gmail.com</span></td>';
-print '</tr>';
-*/
+if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EMAIL_ADDRESSES_BANNED").'</td>';
+	print '<td>';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_EMAIL_ADDRESSES_BANNED" value="'.getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">yopmail.com,hotmail.com,spammer@gmail.com</span></td>';
+	print '</tr>';
+}
 
 // Enable DisposableEmail service
 print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED"), 'This is a usefull component to fight against spam instances').'</td>';

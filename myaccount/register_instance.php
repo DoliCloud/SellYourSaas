@@ -393,20 +393,22 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		exit(-28);
 	}
 
-	/* No more used, use instead SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED and SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED
-	if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
-		$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
-		if (! empty($listofbanned)) {
-			foreach ($listofbanned as $banned) {
-				if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
-					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
-					header("Location: ".$newurl);
-					exit(-29);
+	// Possibility to block email adresses not blocked by DisposableEmail
+	if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
+		if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
+			$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
+			if (! empty($listofbanned)) {
+				foreach ($listofbanned as $banned) {
+					if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
+						setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
+						header("Location: ".$newurl);
+						exit(-29);
+					}
 				}
 			}
 		}
 	}
-	*/
+
 	if (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED) && ! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY)) {
 		$allowed = false;
 		$disposable = false;
