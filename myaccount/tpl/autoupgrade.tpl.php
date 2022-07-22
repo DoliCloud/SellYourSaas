@@ -154,6 +154,7 @@ if ($action == "autoupgrade") {
 	}
 
 	if (!$error) {
+		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];
 		$password_db  = $object->array_options['options_password_db'];
@@ -192,8 +193,8 @@ if ($action == "autoupgrade") {
 		if (is_object($newdb) && $newdb->connected) {
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
-			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? $confinstance->global->MAIN_VERSION_LAST_INSTALL : "0";
-			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? $confinstance->global->MAIN_VERSION_LAST_UPGRADE : "0";
+			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? explode(".",$confinstance->global->MAIN_VERSION_LAST_INSTALL)[0] : "0";
+			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? explode(".",$confinstance->global->MAIN_VERSION_LAST_UPGRADE)[0] : "0";
 			$lastversiondolibarrinstance = max($lastinstallinstance,$lastupgradeinstance);
 		}
 	
