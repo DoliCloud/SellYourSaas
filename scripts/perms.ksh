@@ -18,6 +18,11 @@ echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
+export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [ "x$pathtospamdir" == "x" ]; then
+	export pathtospamdir="/tmp/spam"
+fi
+
 # Go into a safe dir
 cd /tmp
 
@@ -145,10 +150,10 @@ echo "Check files for antispam system and create them if not found"
 chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
 chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
 
-[ -d /tmp/spam ] || mkdir /tmp/spam;
-[ -s /tmp/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
-[ -s /tmp/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
-[ -s /tmp/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
-[ -s /tmp/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
-chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
-chown admin.www-data /tmp/spam/*
+[ -d $pathtospamdir ] || mkdir $pathtospamdir;
+[ -s $pathtospamdir/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail $pathtospamdir/;
+[ -s $pathtospamdir/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip $pathtospamdir/;
+[ -s $pathtospamdir/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom $pathtospamdir/;
+[ -s $pathtospamdir/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
+chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/*
+chown admin.www-data $pathtospamdir/*
