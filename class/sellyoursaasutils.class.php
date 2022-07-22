@@ -3355,6 +3355,9 @@ class SellYourSaasUtils
 
 				$automigrationtmpdir = $dirfortmpfiles."/automigration_".$object->socid.".tmp";
 				$automigrationdocumentarchivename = (empty($object->array_options["automigrationdocumentarchivename"]) ? '' : $object->array_options["automigrationdocumentarchivename"]);
+				$dirforexampleforsources = (empty($object->array_options["dirforexampleforsources"]) ? '' : $object->array_options["dirforexampleforsources"]);
+				$laststableupgradeversion = (empty($object->array_options["laststableupgradeversion"]) ? '' : $object->array_options["laststableupgradeversion"]);
+				$lastversiondolibarrinstance = (empty($object->array_options["lastversiondolibarrinstance"]) ? '' : $object->array_options["lastversiondolibarrinstance"]);
 				// get direct access value
 				$directaccess=0;
 				if ($producttmp->array_options['options_app_or_option'] == 'app') {
@@ -3417,6 +3420,9 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostdir);       	// Param 40 in .sh: Will replace __IncludeFromContract__ in virtual host
 				$commandurl.= '&'.str_replace(' ', '£', $automigrationtmpdir);			// Param 41 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $automigrationdocumentarchivename); //Param 42 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $dirforexampleforsources); //Param 43 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $laststableupgradeversion); //Param 44 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $lastversiondolibarrinstance); //Param 45 in .sh
 
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 

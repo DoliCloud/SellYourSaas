@@ -34,6 +34,7 @@ $stepautoupgrade = GETPOST("stepautoupgrade") ? GETPOST("stepautoupgrade") : 1;
 $errortab = array();
 $errors = 0;
 $stringoflistofmodules = "";
+
 if ($action == "instanceverification") {
 	$confinstance = 0;
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
@@ -78,6 +79,7 @@ if ($action == "instanceverification") {
 						$errors++;
 					}
 				}else {
+					require_once DOL_DOCUMENT_ROOT."/product/class/product.class.php";
 					dol_include_once('sellyoursaas/class/packages.class.php');
 					$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
 					$tmpproduct = new Product($db);
@@ -122,8 +124,16 @@ if ($action == "instanceverification") {
 	}
 
 }
+
 if ($action == "autoupgrade") {
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+	require_once DOL_DOCUMENT_ROOT."/product/class/product.class.php";
+	include_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
+	dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
+	dol_include_once('sellyoursaas/class/packages.class.php');
+
+	$utils = new Utils($db);
+	$sellyoursaasutils = new SellYourSaasUtils($db);
 
 	// If error occurs this is usefull to redirect to support page
 	$keyticketcategory_child_id = array_keys(preg_grep('/ticketcategory_child_id.*/',$arraybacktopage))[0];
@@ -140,6 +150,80 @@ if ($action == "autoupgrade") {
 		if ($result < 0){
 			$errortab[] = $langs->trans("InstanceNotFound");
 			$errors ++;
+		}
+	}
+
+	if (!$error) {
+		$hostname_db  = $object->array_options['options_hostname_db'];
+		$username_db  = $object->array_options['options_username_db'];
+		$password_db  = $object->array_options['options_password_db'];
+		$database_db  = $object->array_options['options_database_db'];
+		$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+		$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+		$hostname_os  = $object->array_options['options_hostname_os'];
+		$username_os  = $object->array_options['options_username_os'];
+		$password_os  = $object->array_options['options_password_os'];
+		$username_web = $object->thirdparty->email;
+		$password_web = $object->thirdparty->array_options['options_password'];
+
+		$tmp = explode('.', $object->ref_customer, 2);
+		$object->instance = $tmp[0];
+
+		$object->hostname_db  = $hostname_db;
+		$object->username_db  = $username_db;
+		$object->password_db  = $password_db;
+		$object->database_db  = $database_db;
+		$object->port_db      = $port_db;
+		$object->prefix_db    = $prefix_db;
+		$object->username_os  = $username_os;
+		$object->password_os  = $password_os;
+		$object->hostname_os  = $hostname_os;
+		$object->username_web = $username_web;
+		$object->password_web = $password_web;
+		$object->hostname_web = $hostname_os;
+
+		$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
+		$tmpproduct = new Product($db);
+		$tmppackage = new Packages($db);
+
+		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb->prefix_db = $prefix_db;
+		$lastversiondolibarrinstance = "";
+		if (is_object($newdb) && $newdb->connected) {
+			$confinstance = new Conf();
+			$confinstance->setValues($newdb);
+			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? $confinstance->global->MAIN_VERSION_LAST_INSTALL : "0";
+			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? $confinstance->global->MAIN_VERSION_LAST_UPGRADE : "0";
+			$lastversiondolibarrinstance = max($lastinstallinstance,$lastupgradeinstance);
+		}
+	
+		if ($dataofcontract['appproductid'] > 0) {
+			$tmpproduct->fetch($dataofcontract['appproductid']);
+			$tmppackage->fetch($tmpproduct->array_options['options_package']);
+			$dirforexampleforsources = preg_replace('/__DOL_DATA_ROOT__/', DOL_DATA_ROOT, preg_replace('/\/htdocs\/?$/', '', $tmppackage->srcfile1));
+			$dirforexampleforsourcesinstalldir = $dirforexampleforsources.'/htdocs/install/mysql/migration/';
+			$filelist = dol_dir_list($dirforexampleforsourcesinstalldir, 'files');
+			$laststableupgradeversion = 0;
+			foreach ($filelist as $key => $value) {
+				$version = explode("-",$value["name"])[1];
+				$version = explode(".",$version)[0];
+				$laststableupgradeversion = max($laststableupgradeversion,$version);
+			}
+			$object->array_options["dirforexampleforsources"] = $dirforexampleforsources;
+			$object->array_options["laststableupgradeversion"] = $laststableupgradeversion;
+			$object->array_options["lastversiondolibarrinstance"] = $lastversiondolibarrinstance;
+		}else {
+			$errortab[] = $langs->trans("ErrorFetchingProductOrPackage");
+			$errors ++;
+		}
+	}
+
+	if (!$errors) {
+		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object);
+		if ($exitcode < 0) {
+			$errors++;
+			$errortab[] = $langs->trans("ErrorOnUpgradeScript");
+			setEventMessages($langs->trans("ErrorOnUpgradeScript"), null, "errors");
 		}
 	}
 }
@@ -163,6 +247,7 @@ print'
     <div class="page-body">
     <div class="row" id="choosechannel">
     <div class="col-md-12">';
+
 if ($action == "instanceverification") {
 	print '<!-- BEGIN STEP3-->
 		<div class="portlet light divstep " id="Step3">
@@ -212,7 +297,7 @@ if ($action == "instanceverification") {
 } elseif ($action == "autoupgrade") {
 	print '<!-- BEGIN STEP4-->';
 	print '<div class="portlet light divstep " id="Step4">';
-	if ($error) {
+	if ($errors) {
 		$upgradeerrormessage = $langs->trans("UpgradeErrorContent");
 		$upgradeerrormessage .= "\n\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
 		$upgradeerrormessage .= "\nErrorTab: ".implode(",",$errortab);
