@@ -440,7 +440,7 @@ EvilUser=Utilisateur déloyal ou spammeur
 DisableEmailToCustomer=Ne pas envoyer d'e-mail au client
 CommissionsOnOldSystem=Commissions sur l'ancienne plateforme
 InvoiceBeforeAreAvailableOnDemandAt=Les factures d'avant le %s sont disponibles par demande email à %s
-MyAcountDesc=Cet espace est dédié à la gestion de vos abonnements à <a href="%s" target="dolicloud"> %s </a> . Vous pouvez créer de nouvelles instances d'applications, choisir des options, obtenir vos factures d'abonnement, contacter l'équipe de support ou annuler votre compte.
+MyAcountDesc=Cet espace est dédié à la gestion de vos abonnements à <a href="%s" target="dolicloud">%s</a>. Vous pouvez créer de nouvelles instances d'applications, choisir des options, obtenir vos factures d'abonnement, contacter l'équipe de support ou annuler votre compte.
 YourCustomUrl=Votre URL personnalisée
 CustomURL=URL personnalisée
 NextInvoice=Prochaine facture
