@@ -1969,7 +1969,8 @@ Ignore if you have error when sending emails, sending emails is setup later.
 
 [source,conf]
 ---------------
-cpulimit launched with script  cpulimit --exe=apache2 --limit=20
+#cpulimit launched with script
+cpulimit --exe=apache2 --limit=20
 ---------------
 
 See script *cpulimit_daemon* to put into */etc/init.d*.
@@ -1982,16 +1983,16 @@ Note: Some global quotas can be set with the *ulimit* tool in */etc/security/lim
 
 === Setup of /etc/security/limits.conf (optional)
 
-* Create a file */etc/security/limits.d/sellyoursaas.conf* (or edit file */etc/security/limits.conf* if ot does not work) for example to increase the max number of files open by a process and set the max filesize for users with ID > 1000
+* Create a file */etc/security/limits.d/sellyoursaas.conf* (or edit file */etc/security/limits.conf* if ot does not work) for example to increase the max number of files open by a process and set the max filesize for users with ID >= 65535 (See "man limits.conf" for possible syntaxes)
 
 [source,conf]
 ---------------
 mysql           soft     nofile           4096
 mysql           hard     nofile           32768
 
-# Set max size of block (4096 B) for files
-1000:           soft     fsize            1000000
-1000:           hard     fsize            1000000
+# Set max size of block written into a file (domain is UIDstart:UIDend with UIDend empty)
+#65535:           soft     fsize            1000000
+#65535:           hard     fsize            1000000
 ---------------
 
 Note: To get/see the current limits of OS and connected user:
@@ -2002,8 +2003,8 @@ ulimit -a
 ---------------
 
 Note: 
-You can check that there is indeed the line *session required pam_limits.so* in the files /etc/pam.d/system-auth or /etc/pam.d/password-auth and/or /etc/pam.d/sudo to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
-NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files /etc/pam.d/common-session or /etc/pam.d/login. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
+You can check that there is indeed the line *session required pam_limits.so* in the files */etc/pam.d/system-auth* or */etc/pam.d/password-auth* and/or */etc/pam.d/sudo* to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
+NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files */etc/pam.d/common-session* or */etc/pam.d/login*. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
 
 
 

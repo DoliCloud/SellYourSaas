@@ -1798,7 +1798,8 @@ Ignore if you have error when sending emails, sending emails is setup later.
 
 [source,conf]
 ---------------
-cpulimit launched with script  cpulimit --exe=apache2 --limit=20
+#cpulimit launched with script  
+cpulimit --exe=apache2 --limit=20
 ---------------
 
 Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
@@ -1813,6 +1814,10 @@ Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 ---------------
 mysql           soft     nofile           4096
 mysql           hard     nofile           32768
+
+# Set max size of block written into a file (domain is UIDstart:UIDend with UIDend empty)
+#65535:           soft     fsize            1000000
+#65535:           hard     fsize            1000000
 ---------------
 
 Pour voir les limites:
