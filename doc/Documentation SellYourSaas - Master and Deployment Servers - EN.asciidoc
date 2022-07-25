@@ -846,7 +846,7 @@ With the following content:
 # Options for antispam system
 maxemailperday=500
 
-# Option to use a different path for spam (for admin script)
+# Option to use a different path for spam (for public script)
 #pathtospamdir=/tmp/spam
 ---------------
 
