@@ -818,7 +818,7 @@ remotebackupdir=/mnt/diskbackup
 #privatejailtemplatename=privatejail
 #commonjailtemplatename=commonjail
 
-# Option to use a different path for spam
+# Option to use a different path for spam (for admin script)
 #pathtospamdir=/tmp/spam
 ---------------
 
@@ -845,6 +845,9 @@ With the following content:
 
 # Options for antispam system
 maxemailperday=500
+
+# Option to use a different path for spam (for admin script)
+#pathtospamdir=/tmp/spam
 ---------------
 
 
