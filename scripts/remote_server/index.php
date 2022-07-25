@@ -180,6 +180,11 @@ if (in_array($tmparray[0], array('upgrade'))) {
 	fwrite($fh, "getcwd() = ".getcwd()."\n");
 
 	exec('./upgrade_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
+	
+	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
+	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output)."\n");
+	fclose($fh);
+
 	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
 	if ($return_var == 0) {
 		$httpresponse = 200;
