@@ -241,6 +241,9 @@ if [[ "$mode" == "upgrade" ]];then
 			exit 431
 		fi
 
+		echo "cd $instancedir/"
+        cd $instancedir/
+
 		if [ -f "documents/install.lock" ]
 		then
 			echo "rm documents/install.lock"
@@ -265,6 +268,14 @@ if [[ "$mode" == "upgrade" ]];then
 
 				if [ $? -eq 0 ]
 				then
+					echo "cd $instancedir/"
+					cd $instancedir/
+
+					if [ ! -f "documents/install.lock" ]
+					then
+						echo "touch documents/install.lock"
+						touch documents/install.lock
+					fi
 					echo "Successfully upgraded instance"
 				else
 					echo "Error on step5.php"
