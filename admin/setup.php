@@ -1152,7 +1152,8 @@ print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("PasswordForSupport").'</td>';
 print '<td>';
-print '<input type="text" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT').'">';
+print '<input type="password" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT').'">';
+print showValueWithClipboardCPButton(getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT'), 0, 'none');
 print '</td>';
 print '<td><span class="opacitymedium small">Password to use to create a support user account on customer instances</span></td>';
 print '</tr>';
