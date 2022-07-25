@@ -18,7 +18,7 @@ echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
+echo "# PWD ------------> $PWD"
 echo "# arguments ------> ${@}"
 echo "# parent path ----> ${0%/*}"
 echo "# realname name --> $(basename $(realpath ${0}))"
@@ -191,11 +191,11 @@ echo "fileforconfig1 = $fileforconfig1"
 echo "targetdir = $targetdir"
 echo "EMAILTO = $EMAILTO"
 echo "REMOTEIP = $REMOTEIP"
-echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL" 
-echo "instancenameold = $instancenameold" 
+echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL"
+echo "instancenameold = $instancenameold"
 echo "domainnameold = $domainnameold"
 echo "customurl = $customurl"
-echo "contractlineid = $contractlineid" 
+echo "contractlineid = $contractlineid"
 echo "EMAILFROM = $EMAILFROM"
 echo "CERTIFFORCUSTOMDOMAIN = $CERTIFFORCUSTOMDOMAIN"
 echo "archivedir = $archivedir"
@@ -228,8 +228,8 @@ if [[ "$mode" == "upgrade" ]];then
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** upgrade dolibarr instance"
 	if [ -d "$dirforexampleforsources" ]
 	then
-		echo "cd $dirforexampleforsources"
-		cd $dirforexampleforsources
+		echo "cd $dirforexampleforsources/.."
+		cd $dirforexampleforsources/..
 		echo "cp -r dolibarr/* $instancedir/"
 		cp -r dolibarr/* $instancedir/
 
@@ -241,7 +241,7 @@ if [[ "$mode" == "upgrade" ]];then
 			exit 431
 		fi
 
-		if [ -f "documents/install.lock" ] 
+		if [ -f "documents/install.lock" ]
 		then
 			echo "rm documents/install.lock"
 			rm documents/install.lock
@@ -280,7 +280,7 @@ if [[ "$mode" == "upgrade" ]];then
 			exit 432
 		fi
 	fi
-    
+
 fi
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"
