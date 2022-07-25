@@ -283,13 +283,20 @@ if ($action == "instanceverification") {
 			print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'</h4>';
 			print '<br><div class="containerflexautomigration">
 					<div class="right" style="width:30%;margin-right:10px">	
-						<button id="" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("ConfirmAutoupgrade").'</button>
+						<button id="" type="submit" class="btn green-haze btn-circle btnstep" onclick="applywaitMask()">'.$langs->trans("ConfirmAutoupgrade").'</button>
 					</div>
 					<div>
 						<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a>
 					</div>
 				</div>';
 			print '</form>';
+			print '<script>
+			function applywaitMask(){
+				$(\'#waitMask\').children().first().contents()[0].nodeValue = "'.$langs->trans("MigrationInProgress").'"
+				$(\'#waitMask\').show();
+				$(\'#waitMask\').attr(\'style\',\'opacity:0.8\');
+			}
+			</script>';
 		}
 	print '</div>';
 	print'</div>';
