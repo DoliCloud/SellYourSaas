@@ -728,7 +728,7 @@ do
 		fi
 	else
         echo "# ----- $fic - $noyoungfile - backup dir $dirtoscan exists with a very old last_mysqldump* file but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
-        echo "# ALTERT This may happen when an instance is renamed so mysqldump of old name is old and the one of new name is new." >> /tmp/deletedirs.sh
+        echo "# ALERT This may happen when an instance is renamed so mysqldump of old name is old and the one of new name is new." >> /tmp/deletedirs.sh
 		echo "#rm $fic" >> /tmp/deletedirs.sh
         echo "#rm -fr "`dirname $fic` >> /tmp/deletedirs.sh
 	fi
