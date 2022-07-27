@@ -387,7 +387,7 @@ if ($sellyoursaassupporturl) {
 						$(".showforautoupgrade").hide();
 						$(".showforautomigration").show();
 						$("#modeforchangemmode").val("automigration")
-					} else if ("'.getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE','0').'" == $("#ticketcategory").val()){
+					} else if ("'.getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE', '0').'" == $("#ticketcategory").val()){
 						console.log("We hide for autoupgrade");
 						$(".hideforautomigration").hide();
 						$(".showforautomigration").hide();
@@ -443,7 +443,7 @@ if ($sellyoursaassupporturl) {
 				$(".showforautoupgrade").hide();
 				$("#form").focus();
 			})';
-			
+
 			$stringtoprint .= '
 			$("input[name=\'subject\']").on("change",function(){
 				$("#subject_back").val($(this).val());
