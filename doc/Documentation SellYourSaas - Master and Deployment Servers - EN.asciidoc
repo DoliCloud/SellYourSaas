@@ -1993,6 +1993,9 @@ mysql           hard     nofile           32768
 # Set max size of block written into a file (domain is UIDstart:UIDend with UIDend empty)
 #65535:           soft     fsize            1000000
 #65535:           hard     fsize            1000000
+#65535:           hard     nproc            50
+#65535:           hard     maxlogins        10
+#65535:           hard     cpu              5000
 ---------------
 
 Note: To get/see the current limits of OS and connected user:

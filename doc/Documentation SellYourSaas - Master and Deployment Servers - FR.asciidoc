@@ -1792,20 +1792,6 @@ Test que l'exécution par la crontab fonctionne correctement en lançant sous ro
 Ignore if you have error when sending emails, sending emails is setup later.
 
 
-=== Configuration de cpulimit (optionnel)
-
-* Lancement de cpulimit au démarrage pour exécuter:
-
-[source,conf]
----------------
-#cpulimit launched with script  
-cpulimit --exe=apache2 --limit=20
----------------
-
-Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
-
-
-
 === Configuration de /etc/security/limits.conf (optionnel)
 
 * Editer le fichier */etc/security/limits.conf* par exemple pour augmenter le nombre de fichiers max ouvert par processus
