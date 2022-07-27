@@ -377,13 +377,22 @@ if ($sellyoursaassupporturl) {
 				tmp = $("#ticketcategory_select_child_id").val();
 				$("#ticketcategory_child_id_back").val(tmp);
 				tmp = $("#ticketcategory_select").val();
+				console.log($("#ticketcategory_back"));
 				$("#ticketcategory_back").val(tmp);
 				';
 			$stringtoprint .= '
 					if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
 						console.log("We hide for automigration");
 						$(".hideforautomigration").hide();
+						$(".showforautoupgrade").hide();
 						$(".showforautomigration").show();
+						$("#modeforchangemmode").val("automigration")
+					} else if ("'.getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE','0').'" == $("#ticketcategory").val()){
+						console.log("We hide for autoupgrade");
+						$(".hideforautomigration").hide();
+						$(".showforautomigration").hide();
+						$(".showforautoupgrade").show();
+						$("#modeforchangemmode").val("autoupgrade")
 					} else {';
 
 			$stringtoprint .= '
@@ -391,11 +400,15 @@ if ($sellyoursaassupporturl) {
 							console.log("We show full form");
 							$(".hideforautomigration").show();
 							$(".showforautomigration").hide();
+							$(".hideforautoupgrade").show();
+							$(".showforautoupgrade").hide();
 							$("#from").focus();
 						} else if($("#ticketcategory").val() == "") {
 							console.log("We hide all");
 							$(".hideforautomigration").hide();
 							$(".showforautomigration").hide();
+							$(".hideforautoupgrade").hide();
+							$(".showforautoupgrade").hide();
 						}
 						$("#buttonforautomigrationwithhidden").hide();
 					}';
@@ -423,7 +436,14 @@ if ($sellyoursaassupporturl) {
 				$(".showforautomigration").hide();
 				$("#buttonforautomigrationwithhidden").show();
 				$("#form").focus();
+			})
+			$("#hideautoupgradediv").on("click",function(){
+				console.log("We cancel the automigration");
+				$(".hideforautomigration").show();
+				$(".showforautoupgrade").hide();
+				$("#form").focus();
 			})';
+			
 			$stringtoprint .= '
 			$("input[name=\'subject\']").on("change",function(){
 				$("#subject_back").val($(this).val());
@@ -447,11 +467,25 @@ if ($sellyoursaassupporturl) {
 			print '<div id="showforautomigration" class="showforautomigration" style="display:none;">';
 			print '<br><br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
-			print '<button id="hideautomigrationgoto" type="submit" form="migrationForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutomigration").'</button>';
+			print '<button id="hideautomigrationgoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutomigration").'</button>';
 			print '<button id="hideautomigrationdiv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("AutomigrationErrorOrNoAutomigration").'</button>';
 			print '</div>';
 			print '<br>';
 			print '</div>';
+		}
+
+		if (!empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+			print '<div id="showforautoupgrade" class="showforautoupgrade" style="display:none;">';
+			print '<br><br>';
+			print '<div style="display:flex;justify-content: space-evenly;">';
+			print '<button id="hideautoupgradegoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutoUpgrade").'</button>';
+			print '<button id="hideautoupgradediv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("AutoupgradeErrorOrNoAutoupgrade").'</button>';
+			print '</div>';
+			print '<br>';
+			print '</div>';
+		}
+
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
 			print '<div id="hideforautomigration" class="hideforautomigration"><div>';
 		}
 
@@ -486,9 +520,9 @@ if ($sellyoursaassupporturl) {
 
 			print '</form>';
 
-			if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
-				print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="migrationForm">';
-				print '<input type="hidden" name="mode" value="automigration">';
+			if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+				print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="changemodeForm">';
+				print '<input type="hidden" id="modeforchangemmode" name="mode" value="automigration">';
 				print '<input type="hidden" name="token" value="'.newToken().'">';
 				print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
 				print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
