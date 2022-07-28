@@ -26,8 +26,8 @@ if (empty($conf) || ! is_object($conf)) {
 <?php
 
 $upload_dir = $conf->sellyoursaas->dir_temp."/autoupgrade_".$mythirdpartyaccount->id.'.tmp';
-$backtopagesupport = GETPOST("backtopagesupport",'alpha') ? GETPOST("backtopagesupport",'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'&subject='.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha'));
-$arraybacktopage=explode("&",$backtopagesupport);
+$backtopagesupport = GETPOST("backtopagesupport", 'alpha') ? GETPOST("backtopagesupport", 'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'&subject='.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha'));
+$arraybacktopage=explode("&", $backtopagesupport);
 $ticketcategory_child_id = "";
 $ticketcategory = "";
 $stepautoupgrade = GETPOST("stepautoupgrade") ? GETPOST("stepautoupgrade") : 1;
@@ -46,7 +46,7 @@ if ($action == "instanceverification") {
 
 	if ($idcontract > 0) {
 		$result=$object->fetch($idcontract);
-		if ($result < 0){
+		if ($result < 0) {
 			$errortab[] = $langs->trans("InstanceNotFound");
 			$errors ++;
 		}
@@ -75,11 +75,11 @@ if ($action == "instanceverification") {
 				$laststableupgradeversion = getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR");
 				if (!empty($laststableupgradeversion)) {
 					$match = '/^'.getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").'.*/';
-					if (preg_match($match,$lastinstallinstance ) || preg_match($match,$lastupgradelinstance)) {
+					if (preg_match($match, $lastinstallinstance) || preg_match($match, $lastupgradelinstance)) {
 						$errortab[] = $langs->trans("ErrorAlreadyLastStableVersion");
 						$errors++;
 					}
-				}else {
+				} else {
 					require_once DOL_DOCUMENT_ROOT."/product/class/product.class.php";
 					dol_include_once('sellyoursaas/class/packages.class.php');
 					$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
@@ -95,12 +95,12 @@ if ($action == "instanceverification") {
 					$filelist = dol_dir_list($dirforexampleforsourcesinstalldir, 'files');
 					$laststableupgradeversion = 0;
 					foreach ($filelist as $key => $value) {
-						$version = explode("-",$value["name"])[1];
-						$version = explode(".",$version)[0];
-						$laststableupgradeversion = max($laststableupgradeversion,$version);
+						$version = explode("-", $value["name"])[1];
+						$version = explode(".", $version)[0];
+						$laststableupgradeversion = max($laststableupgradeversion, $version);
 					}
 					$match = '/^'.$laststableupgradeversion.'.*/';
-					if (preg_match($match,$lastinstallinstance ) || preg_match($match,$lastupgradelinstance)) {
+					if (preg_match($match, $lastinstallinstance) || preg_match($match, $lastupgradelinstance)) {
 						$errortab[] = $langs->trans("ErrorAlreadyLastStableVersion");
 						$errors++;
 					}
@@ -139,11 +139,10 @@ if ($action == "instanceverification") {
 				$errors ++;
 			}
 		}
-	}else {
+	} else {
 		$errortab[] = $langs->trans("InstanceNotFound");
 		$errors ++;
 	}
-
 }
 
 if ($action == "autoupgrade") {
@@ -157,18 +156,18 @@ if ($action == "autoupgrade") {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 
 	// If error occurs this is usefull to redirect to support page
-	$keyticketcategory_child_id = array_keys(preg_grep('/ticketcategory_child_id.*/',$arraybacktopage))[0];
-	$keyticketcategory = array_keys(preg_grep('/ticketcategory=.*/',$arraybacktopage))[0];
-	$ticketcategory_child_id = explode("=",$arraybacktopage[$keyticketcategory_child_id])[1];
-	$ticketcategory = explode("=",$arraybacktopage[$keyticketcategory])[1];
-	
+	$keyticketcategory_child_id = array_keys(preg_grep('/ticketcategory_child_id.*/', $arraybacktopage))[0];
+	$keyticketcategory = array_keys(preg_grep('/ticketcategory=.*/', $arraybacktopage))[0];
+	$ticketcategory_child_id = explode("=", $arraybacktopage[$keyticketcategory_child_id])[1];
+	$ticketcategory = explode("=", $arraybacktopage[$keyticketcategory])[1];
+
 	$object = new Contrat($db);
 	$instanceselect = GETPOST("instanceselect", "alpha");
 	$instanceselect = explode("_", $instanceselect);
 	$idcontract = $instanceselect[1];
 	if ($idcontract > 0) {
 		$result=$object->fetch($idcontract);
-		if ($result < 0){
+		if ($result < 0) {
 			$errortab[] = $langs->trans("InstanceNotFound");
 			$errors ++;
 		}
@@ -214,11 +213,11 @@ if ($action == "autoupgrade") {
 		if (is_object($newdb) && $newdb->connected) {
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
-			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? explode(".",$confinstance->global->MAIN_VERSION_LAST_INSTALL)[0] : "0";
-			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? explode(".",$confinstance->global->MAIN_VERSION_LAST_UPGRADE)[0] : "0";
-			$lastversiondolibarrinstance = max($lastinstallinstance,$lastupgradeinstance);
+			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_INSTALL)[0] : "0";
+			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_UPGRADE)[0] : "0";
+			$lastversiondolibarrinstance = max($lastinstallinstance, $lastupgradeinstance);
 		}
-	
+
 		if ($dataofcontract['appproductid'] > 0) {
 			$tmpproduct->fetch($dataofcontract['appproductid']);
 			$tmppackage->fetch($tmpproduct->array_options['options_package']);
@@ -227,14 +226,14 @@ if ($action == "autoupgrade") {
 			$filelist = dol_dir_list($dirforexampleforsourcesinstalldir, 'files');
 			$laststableupgradeversion = 0;
 			foreach ($filelist as $key => $value) {
-				$version = explode("-",$value["name"])[1];
-				$version = explode(".",$version)[0];
-				$laststableupgradeversion = max($laststableupgradeversion,$version);
+				$version = explode("-", $value["name"])[1];
+				$version = explode(".", $version)[0];
+				$laststableupgradeversion = max($laststableupgradeversion, $version);
 			}
 			$object->array_options["dirforexampleforsources"] = $dirforexampleforsources;
 			$object->array_options["laststableupgradeversion"] = $laststableupgradeversion;
 			$object->array_options["lastversiondolibarrinstance"] = $lastversiondolibarrinstance;
-		}else {
+		} else {
 			$errortab[] = $langs->trans("ErrorFetchingProductOrPackage");
 			$errors ++;
 		}
@@ -258,7 +257,7 @@ print '
         <div class="page-head">
         <!-- BEGIN PAGE TITLE -->
             <div class="page-title">
-            <h1>'.$langs->trans("Autoupgrade").' <small>'.$langs->trans("AutoupgradeDesc",(!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).'</small></h1>
+            <h1>'.$langs->trans("Autoupgrade").' <small>'.$langs->trans("AutoupgradeDesc", (!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).'</small></h1>
             </div>
         <!-- END PAGE TITLE -->
         </div>
@@ -276,11 +275,11 @@ if ($action == "instanceverification") {
 		<h2>'.$langs->trans("Step", 3).' - '.$langs->trans("UpgradeVerification").'</small></h2><br>';
 		print '<div class="center">';
 		print '<h3>'.$langs->trans('UpgradeVerification').' : ';
-		if ($errors) {
-			print '<span style="color:red">'.$langs->trans('Error').'</span>';
-		}else {
-			print '<span style="color:green">'.$langs->trans('Success').'</span>';
-		}
+	if ($errors) {
+		print '<span style="color:red">'.$langs->trans('Error').'</span>';
+	} else {
+		print '<span style="color:green">'.$langs->trans('Success').'</span>';
+	}
 		print '</h3>';
 		print'</div>';
 		if ($errors) {
@@ -310,26 +309,25 @@ if ($action == "instanceverification") {
 						<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a>
 					</div>
 				</div>';
-			print '</form>';
-			print '<script>
+		print '</form>';
+		print '<script>
 			function applywaitMask(){
 				$(\'#waitMask\').children().first().contents()[0].nodeValue = "'.$langs->trans("MigrationInProgress").'"
 				$(\'#waitMask\').show();
 				$(\'#waitMask\').attr(\'style\',\'opacity:0.8\');
 			}
 			</script>';
-		}
+	}
 	print '</div>';
 	print'</div>';
 	print '<!-- END STEP3-->';
-
 } elseif ($action == "autoupgrade") {
 	print '<!-- BEGIN STEP4-->';
 	print '<div class="portlet light divstep " id="Step4">';
 	if ($errors) {
 		$upgradeerrormessage = $langs->trans("UpgradeErrorContent");
 		$upgradeerrormessage .= "\n\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
-		$upgradeerrormessage .= "\nErrorTab: ".implode(",",$errortab);
+		$upgradeerrormessage .= "\nErrorTab: ".implode(",", $errortab);
 		print '<h2 class="center" style="color:red">';
 		print $langs->trans("AutoupgradeError");
 		print '</h2><br>';
@@ -351,7 +349,7 @@ if ($action == "instanceverification") {
 		print '<input type="hidden" name="content" value="'.$upgradeerrormessage.'">';
 		print '</form>';
 		print '</div>';
-	}else {
+	} else {
 		print '<h2 class="center" style="color:green">';
 		print $langs->trans("AutoupgradeSucess");
 		print '</h2><br>';
@@ -494,7 +492,7 @@ if ($action == "instanceverification") {
 			<div '.($stepautoupgrade <= 1 ? 'style="display:none;"' : '').'class="portlet light divstep" id="step2">
 					<h2>'.$langs->trans("Step", 2).' - '.$langs->trans("VersionConfirmation").'</small></h1><br>
 					<div>
-						'.$langs->trans("AutoupgradeStep2Text",(!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).' 
+						'.$langs->trans("AutoupgradeStep2Text", (!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).' 
 					</div>
 					<br>
 					<div class="center">
