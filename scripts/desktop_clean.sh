@@ -1,6 +1,6 @@
 #!/bin/bash
 #---------------------------------------------------------
-# Script to run remotely the clean.sh
+# Script to run remotely the script clean.sh
 #
 # /pathto/clean_remote.sh hostfile [hostgrouporname]
 #---------------------------------------------------------
@@ -11,7 +11,7 @@ source /etc/lsb-release
 
 if [ "x$2" == "x" ]; then
    echo "Usage:   $0  hostfile  [hostgrouporname]"
-   echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
+   echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment'"
    echo "Example: $0  myhostfile  deployment"
    echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
    exit 1
