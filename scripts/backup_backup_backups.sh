@@ -121,7 +121,7 @@ cd "$scriptdir"
 # Loop on each target server
 for SERVSOURCECURSOR in `echo $SERVSOURCE | sed -e 's/,/ /g'`
 do
-	# Case of /mnt/diskbackup/home_
+	# Case of /mnt/diskbackup/home*x
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of system backup on $SERVSOURCECURSOR:$DIRSOURCE1$i to $DIRDESTI1 ..."
 
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
@@ -134,20 +134,25 @@ do
 
 		$command 2>&1
 		if [ "x$?" != "x0" ]; then
-		  	echo "ERROR Failed to make rsync for $DIRSOURCE1"
+		  	echo "ERROR Failed to make rsync for $DIRSOURCE1$i"
+		  	echo
 		   	export ret1=$(($ret1 + 1));
 		   	export errstring="$errstring\nDir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
 		fi
 	done
 
-	echo End of copy of home dirs
+	echo End of copy of home dirs /mnt/diskbackup/home*x
 	sleep 2
+
+	# Force ret1 to 0 because it can be 23 due to error to rsync dir that does not exists
 	export ret1=0
 
 
 	export ret2=0
 	if [ "x$ret1" == "x0" ]; then
 		echo
+
+		# Case of /mnt/diskbackup/backup*x
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE2$i to $DIRDESTI2 ..."
 
 		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
@@ -169,14 +174,18 @@ do
 			        $command 2>&1
 			        if [ "x$?" != "x0" ]; then
 			        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
+			        	echo
 			        	export ret2=$(($ret2 + 1));
 			        	export errstring="$errstring\nDir $DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`
 			        fi
 
 				echo
 		done
+		
+		echo End of copy of home dirs /mnt/diskbackup/backup*x
 	fi
 	
+	echo
 	echo -e `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
 	echo
 
