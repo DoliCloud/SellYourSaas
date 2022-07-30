@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copy all backup of backups from other locations (on a remote backup server)
+# Catch/Pull all backup of backups on local computer
 #
 # Put the following entry into your root cron
 # /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.sh test|confirm /mnt/diskbackup remotebackupserver1,remotebackupserver2,...
