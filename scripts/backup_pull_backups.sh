@@ -26,6 +26,7 @@ echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups of backup on local serve
 export PID=${$}
 export realpath=$(realpath "${0}")
 export scriptdir=$(dirname "$realpath")
+export script=${0##*/}
 
 echo
 echo "${0} ${@}"
@@ -118,6 +119,8 @@ export ret2=0
 
 cd "$scriptdir"
 
+>/tmp/$script.log 
+
 # Loop on each target server
 for SERVSOURCECURSOR in `echo $SERVSOURCE | sed -e 's/,/ /g'`
 do
@@ -132,21 +135,28 @@ do
 		export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE1$i $DIRDESTI1";
 		echo "$command";
 
-		$command 2>&1
+		> /tmp/$script.err
+		$command >/tmp/$script.log 2>/tmp/$script.err
 		if [ "x$?" != "x0" ]; then
-		  	echo "ERROR Failed to make rsync for $DIRSOURCE1$i"
-		  	echo
-		   	export ret1=$(($ret1 + 1));
-		   	export errstring="$errstring\nDir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
+	        nberror=`cat /tmp/$script.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
+    	    cat /tmp/$script.err
+			if [ "x$nberror" != "x0" ]; then
+			  	echo "ERROR Failed to make rsync for $DIRSOURCE1$i"
+		  		echo
+		   		export ret1=$(($ret1 + 1));
+		   		export errstring="$errstring\nDir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
+		   	else
+                echo "No files found"
+                echo
+		   	fi
+		else
+			echo "OK"
+			echo
 		fi
 	done
 
 	echo End of copy of home dirs /mnt/diskbackup/home*x
 	sleep 2
-
-	# Force ret1 to 0 because it can be 23 due to error to rsync dir that does not exists
-	export ret1=0
-
 
 	export ret2=0
 	if [ "x$ret1" == "x0" ]; then
@@ -171,12 +181,23 @@ do
 			        export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE2$i $DIRDESTI2";
 		        	echo "$command";
 
-			        $command 2>&1
+					> /tmp/$script.err
+			        $command >/tmp/$script.log 2>/tmp/$script.err
 			        if [ "x$?" != "x0" ]; then
-			        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
-			        	echo
-			        	export ret2=$(($ret2 + 1));
-			        	export errstring="$errstring\nDir $DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`
+				        nberror=`cat /tmp/$script.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
+    	    			cat /tmp/$script.err
+						if [ "x$nberror" != "x0" ]; then
+				        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
+				        	echo
+				        	export ret2=$(($ret2 + 1));
+			    	    	export errstring="$errstring\nDir $DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`
+			    	    else
+			                echo "No files found"
+			                echo
+			    	    fi
+					else
+						echo "OK"
+						echo
 			        fi
 
 				echo
@@ -192,16 +213,16 @@ do
 done
 
 
-if [ "x$ret" != "x0" ]; then
-	#echo "Send email to $EMAILTO to inform about backup error"
-	#echo -e "The backup of backup of backup for "`hostname`" failed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of Backup of backup - "`hostname`" failed" $EMAILTO
-	#echo
+if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
+	echo "Send email to $EMAILTO to inform about backup error ret1=$ret1 ret2=$ret2"
+	echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
+	echo
 
 	exit $ret
+else 
+	echo "Send email to $EMAILTO to inform about backup success"
+	echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
+	echo
 fi
-
-#echo "Send email to $EMAILTO to inform about backup success"
-#echo -e "The backup of backup of backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup of backup to remote server succeed" $EMAILTO
-#echo
 
 exit 0

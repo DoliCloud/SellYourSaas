@@ -5424,3 +5424,23 @@ If this child are in state R, then you can try to reduce this by enabling the mo
 RequestReadTimeout handshake=5 header=10 body=30
 ---------------
 
+
+==== Migrate a ext4 partition into btrfs
+
+Run command to see partition types:
+
+[source,bash]
+---------------
+df -Th
+---------------
+
+If the data disk is ext4, you can convert it into BTRFS with:
+
+[source,bash]
+---------------
+btrfs-convert -p /dev/vdX
+---------------
+
+
+
+
