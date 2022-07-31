@@ -5432,6 +5432,7 @@ Run command to see partition types:
 [source,bash]
 ---------------
 df -Th
+lsblk -f
 ---------------
 
 If the data disk is ext4, you can convert it into BTRFS with:
@@ -5439,8 +5440,10 @@ If the data disk is ext4, you can convert it into BTRFS with:
 [source,bash]
 ---------------
 btrfs-convert -p /dev/vdX
+lsblk -f
 ---------------
 
+Then edit he */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it was changed)
 
 
 
