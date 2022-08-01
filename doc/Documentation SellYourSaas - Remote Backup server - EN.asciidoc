@@ -765,6 +765,16 @@ sudo systemctl status apport.service
 Note: Reports are into */var/crash*
 
 
+=== Installation of cron tasks
+
+Delete very old files every sunday by adding the cron task:
+
+[source,bash]
+---------------
+0 20 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +100 -exec rm {} \;
+---------------
+
+
 <<<<
 
 == Installation d'outils externes
