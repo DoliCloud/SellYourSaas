@@ -463,6 +463,15 @@ sudo apt install fail2ban
 ---------------
 
 
+Delete all snap packages (we don't need snap for backup servers):
+
+[source,bash]
+---------------
+sudo apt remove --purge --assume-yes snapd
+systemctl daemon-reload
+---------------
+
+
 === Disabling automatic update
 
 Uninstall the package *unattended-upgrades* if it was installed.
@@ -771,8 +780,8 @@ Delete very old files every sunday by adding the cron task:
 
 [source,bash]
 ---------------
-0 18 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +100 -delete;
-0 18 * * 1 find /mnt/diskbackup/*/ -type d -empty -delete
+0 18 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +100 -delete > /var/log/find_delete_old_files.log 2>&1
+0 18 * * 1 find /mnt/diskbackup/*/ -type d -empty -delete > /var/log/find_delete_empty_dir.log 2>&1
 ---------------
 
 

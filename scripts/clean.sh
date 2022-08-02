@@ -189,12 +189,12 @@ if [ -f /tmp/osusernamefound ]; then
 fi
 
 echo "Nettoyage vieux fichiers log"
-echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
-find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
+find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 
 echo "Nettoyage vieux fichiers /tmp"
-echo find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
-find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+echo find /tmp -mtime +30 -name 'phpsendmail*.log' -delete
+find /tmp -mtime +30 -name 'phpsendmail*.log' -delete
 
 
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
@@ -601,24 +601,24 @@ done;
 # Now clean also old dir in archives-test
 echo "***** Now clean also old dir in $archivedirtest - 15 days after being archived"
 cd $archivedirtest
-find $archivedirtest -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +15 -exec rm -fr {} \;
+find $archivedirtest -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +15 -delete
 
 # Now clean also old dir in archives-paid
 echo "***** Now clean also old dir in $archivedirpaid - 90 days after being archived"
 cd $archivedirpaid
-find $archivedirpaid -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +90 -exec rm -fr {} \;
+find $archivedirpaid -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +90 -delete
 
 if [[ "$dnsserver" == "1" ]]; then
 	# Now clean also old files in $archivedirbind
 	echo "***** Now clean also old files in $archivedirbind - 15 days after being archived"
 	cd $archivedirbind
-	find $archivedirbind -maxdepth 1 -type f -path '*archives*' -mtime +15 -exec rm -f {} \;
+	find $archivedirbind -maxdepth 1 -type f -path '*archives*' -mtime +15 -delete
 fi
 
 # Now clean also old files in $archivedircron
 echo "***** Now clean also old files in $archivedircron - 15 days after being archived"
 cd $archivedircron
-find $archivedircron -maxdepth 1 -type f -path '*cron*' -mtime +15 -exec rm -f {} \;
+find $archivedircron -maxdepth 1 -type f -path '*cron*' -mtime +15 -delete
 
 # Now clean miscellaneous files
 echo "***** Now clean miscellaneous files"
@@ -626,8 +626,8 @@ rm /var/log/repair.lock > /dev/null 2>&1
 
 # Now clean old journalctl files
 echo "***** Now clean journal files older than 60 days"
-echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;"
-find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -exec rm -f {} \;
+echo "find '/var/log/journal/*/user-*.journal' -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -delete"
+find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtime +60 -delete
 
 # Clean tmp files
 
@@ -636,7 +636,7 @@ find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtim
 if [[ "x$masterserver" == "x1" ]]; then
 	echo "***** We are on a master, so we clean sellyoursaas temp files" 
 	echo "Clean sellyoursaas temp files"
-	find "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/." ! -path "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/" -mtime +1 -exec rm -fr {} \;
+	find "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/." ! -path "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/" -mtime +1 -delete
 fi
 
 # Clean log files
@@ -653,10 +653,10 @@ fi
 # Clean archives 
 if [ "x$2" == "xoldtempinarchive" ]; then
 	echo "Clean archives dir from not expected files (should not be required anymore). Archives are no more tree of files but an archive since 1st of july 2019".
-	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
-	find "$archivedirpaid" -type d -path '*/osu*/temp' -exec rm -fr {} \;
-	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -exec rm -fr {} \;"
-	find "$archivedirtest" -type d -path '*/osu*/temp' -exec rm -fr {} \;
+	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -delete"
+	find "$archivedirpaid" -type d -path '*/osu*/temp' -delete
+	echo "find '$archivedirtest' -type d -path '*/osu*/temp' -delete"
+	find "$archivedirtest" -type d -path '*/osu*/temp' -delete
 fi
 
 if [[ $testorconfirm == "confirm" ]]; then
