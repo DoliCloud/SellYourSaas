@@ -127,7 +127,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 else
-	echo "$now Do a tar of config filesin conffiles.tar.gz"
+	echo "$now Do a tar of config files in conffiles.tar.gz"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz
 	chown root.admin $targetdir2/conffiles.tar.gz
