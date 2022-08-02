@@ -124,7 +124,7 @@ To check:
 ---------------
 cat /proc/mounts | grep diskX
 ---------------
-cat /proc/
+
 Rem: If you need to recover data files from another disk, use:
 
 [source, bash]

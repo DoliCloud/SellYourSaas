@@ -82,7 +82,7 @@ if [[ ! -d $targetdir2 ]]; then
 fi
 
 if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-	echo "Do a tar of config files in conffiles.tar.zst"
+	echo "$now Do a tar of config files in conffiles.tar.zst"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst
 	chown root.admin $targetdir2/conffiles.tar.zst
@@ -113,8 +113,10 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
     fi
     if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
+		export now=`date +'%Y-%m-%d %H:%M:%S'`
+
 		rm "$targetdir/${dbname}.sql.zst"
-		echo "Do a dump of database $dbname into $targetdir/${dbname}.sql.zst"
+		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.zst"
 		echo "$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst"
 		$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst
 		chown root.admin $targetdir/${dbname}.sql.zst
@@ -125,7 +127,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 else
-	echo "Do a tar of config filesin conffiles.tar.gz"
+	echo "$now Do a tar of config filesin conffiles.tar.gz"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz
 	chown root.admin $targetdir2/conffiles.tar.gz
@@ -158,8 +160,10 @@ else
     
     if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
+		export now=`date +'%Y-%m-%d %H:%M:%S'`
+
 		rm "$targetdir/${dbname}.sql.gz"
-		echo "Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
+		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
 		echo "$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz"
 		$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz
 		chown root.admin $targetdir/${dbname}.sql.gz
@@ -170,6 +174,9 @@ else
 		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 fi
+
+export now=`date +'%Y-%m-%d %H:%M:%S'`
+echo "Date=$now"
 
 if [ "x$errstring" != "x" ]; then
 	echo "Send email to $EMAILTO to inform about backup system error"
