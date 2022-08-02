@@ -214,6 +214,8 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "         the parameter --notransaction run the mysqldump without the --single-transaction\n";
 	print "         the parameter --quick run the mysqldump with the --quick option\n";
 	print "         the parameter --nostats disable send of statistics to the external supervision platform\n";
+	print "         the parameter --forcersync to force rsync even if date is too young\n";
+	print "         the parameter --forcedump to force sql dump even if date is too young\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
