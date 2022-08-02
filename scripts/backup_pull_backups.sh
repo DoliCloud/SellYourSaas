@@ -215,13 +215,27 @@ done
 
 if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 	echo "Send email to $EMAILTO to inform about backup error ret1=$ret1 ret2=$ret2"
-	echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
+	
+	#echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
+	
+	export body="Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring"
+	export subject="[Warning] Backup pulled of a backup - "`hostname`" failed" 
+	export headers="From: $EMAILFROM\r\n"
+	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
+	
 	echo
 
 	exit $ret
 else 
 	echo "Send email to $EMAILTO to inform about backup success"
-	echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
+
+	#echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
+
+	export body="Backup pulled of a backup for "`hostname`" succeed - End ret1=$ret1 ret2=$ret2\n$errstring"
+	export subject="[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" 
+	export headers="From: $EMAILFROM\r\n"
+	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
+
 	echo
 fi
 
