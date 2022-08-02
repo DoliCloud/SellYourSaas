@@ -47,12 +47,14 @@ $RSYNCDELETE=0;
 $NOTRANS=0;
 $QUICK=0;
 $NOSTATS=0;
+$FORCERSYNC=0;
+$FORCEDUMP=0;
 
 $instance=isset($argv[1])?$argv[1]:'';
 $dirroot=isset($argv[2])?$argv[2]:'';
 $mode=isset($argv[3])?$argv[3]:'';
 
-$keystocheck = array(4, 5, 6, 7);
+$keystocheck = array(4, 5, 6, 7, 8);
 foreach ($keystocheck as $keytocheck) {
 	if (isset($argv[$keytocheck])) {
 		if ($argv[$keytocheck] == '--delete') {
@@ -63,6 +65,10 @@ foreach ($keystocheck as $keytocheck) {
 			$QUICK=1;
 		} elseif ($argv[$keytocheck] == '--nostats') {
 			$NOSTATS=1;
+		} elseif ($argv[$keytocheck] == '--forcersync') {
+			$FORCERSYNC=1;
+		} elseif ($argv[$keytocheck] == '--forcedump') {
+			$FORCEDUMP=1;
 		}
 	}
 }
@@ -328,7 +334,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backuprsyncdayfrequency * 24 * 3600);
 	print strftime("%Y%m%d-%H%M%S").' Test date fo file '.$txtfile."\n";
-	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600)) {	// We add 3600 as security for date comparison
+	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600) || $FORCERSYNC) {	// We add 3600 as security for date comparison
 		// Instance is qualified for rsync backup
 		$command="rsync";
 		$param=array();
@@ -434,7 +440,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backupdumpdayfrequency * 24 * 3600);
 	print strftime("%Y%m%d-%H%M%S").' Test date fo file '.$txtfile."\n";
-	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600)) {	// We add 3600 as security for date comparison
+	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600) || $FORCEDUMP) {	// We add 3600 as security for date comparison
 		// Instance is qualified for dump backup
 		$serverdb = $server;
 		if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
@@ -576,7 +582,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 			}
 		}
 	} else {
-		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last rsync was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so sql dump is discarded.\n";
+		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last sql dump was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so sql dump is discarded.\n";
 	}
 }
 
