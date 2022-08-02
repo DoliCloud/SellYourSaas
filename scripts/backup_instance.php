@@ -332,7 +332,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	// TODO set $backuprsyncdayfrequency according to instance
 
 	// Test last date of rsync
-	$txtfile = $dirroot.'/'.$login.'/last_rsync_'.$instance.'.txt';
+	$txtfile = $dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backuprsyncdayfrequency * 24 * 3600);
 	print strftime("%Y%m%d-%H%M%S").' Test date fo file '.$txtfile."\n";
@@ -424,6 +424,16 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 			} else {
 				print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_rsync_'.$instance.'.txt'."\n";
 			}
+			if ($return_var == 0) {
+				$handle=fopen($dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt', 'w');
+				if ($handle) {
+					fwrite($handle, 'File created after rsync of '.$instance.". datebeforersync=".$datebeforersync." dateafterrsync=".$dateafterrsync." return_var=".$return_var."\n");
+					fwrite($handle, 'fullcommand = '.$fullcommand."\n");
+					fclose($handle);
+				} else {
+					print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_rsync_'.$instance.'.ok.txt'."\n";
+				}
+			}
 		}
 	} else {
 		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last rsync was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so rsync is discarded.\n";
@@ -438,7 +448,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	// TODO set $backupdumpdayfrequency according to instance
 
 	// Test last date of sql dump
-	$txtfile = $dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.txt';
+	$txtfile = $dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backupdumpdayfrequency * 24 * 3600);
 	print strftime("%Y%m%d-%H%M%S").' Test date fo file '.$txtfile."\n";
@@ -581,6 +591,16 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 				fclose($handle);
 			} else {
 				print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_mysqldump_'.$instance.'.txt'."\n";
+			}
+			if ($return_varmysql == 0) {
+				$handle=fopen($dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt', 'w');
+				if ($handle) {
+					fwrite($handle, 'File created after mysqldump of '.$instance.". datebeforemysqldump=".$datebeforemysqldump." dateaftermysqldump=".$dateaftermysqldump." return_varmysql=".$return_varmysql."\n");
+					fwrite($handle, 'fullcommand = '.preg_replace('/\s\-p"[^"]+"/', ' -phidden', $fullcommand)."\n");
+					fclose($handle);
+				} else {
+					print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_mysqldump_'.$instance.'.ok.txt'."\n";
+				}
 			}
 		}
 	} else {
