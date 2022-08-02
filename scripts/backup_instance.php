@@ -174,7 +174,7 @@ dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 $return_varother = 0;
 $return_var = 0;
 $return_varmysql = 0;
-
+$return_outputmysql = 0;
 
 
 /*
@@ -335,7 +335,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$txtfile = $dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backuprsyncdayfrequency * 24 * 3600);
-	print strftime("%Y%m%d-%H%M%S").' Test date fo file '.$txtfile."\n";
+	print strftime("%Y%m%d-%H%M%S").' Test date of file '.$txtfile."\n";
 	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600) || $FORCERSYNC) {	// We add 3600 as security for date comparison
 		// Instance is qualified for rsync backup
 		$command="rsync";
@@ -451,7 +451,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$txtfile = $dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backupdumpdayfrequency * 24 * 3600);
-	print strftime("%Y%m%d-%H%M%S").' Test date fo file '.$txtfile."\n";
+	print strftime("%Y%m%d-%H%M%S").' Test date of file '.$txtfile."\n";
 	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600) || $FORCEDUMP) {	// We add 3600 as security for date comparison
 		// Instance is qualified for dump backup
 		$serverdb = $server;
