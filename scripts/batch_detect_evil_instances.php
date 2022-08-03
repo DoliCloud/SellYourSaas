@@ -117,6 +117,20 @@ if ($fp) {
 	exit(-1);
 }
 
+$fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'pathtospamdir') {
+			$pathtospamdir = $tmpline[1];
+		}
+	}
+} else {
+	$pathtospamdir = '/tmp/spam';
+}
+
 
 /*
  * Main

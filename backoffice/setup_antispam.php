@@ -116,7 +116,7 @@ print '<td></td>';
 print '</tr>';
 
 //$dirforspam = DOL_DATA_ROOT.'/sellyoursaas_local/spam';
-$dirforspam = getDolGlobalString('SELLYOURSAAS_DIR_FOR_SPAM', '/tmp/spam');
+$dirforspam = '/tmp/spam';
 
 print '<tr class="oddeven nohover">';
 print '<td>';

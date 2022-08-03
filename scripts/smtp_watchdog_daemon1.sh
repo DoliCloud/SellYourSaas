@@ -42,7 +42,7 @@ if [ "x$EMAILTO" == "x" ]; then
 	export EMAILTO=supervision@$DOMAIN
 fi
 
-export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas-public.conf | cut -d '=' -f 2`
 if [ "x$pathtospamdir" == "x" ]; then
 	export pathtospamdir="/tmp/spam"
 fi

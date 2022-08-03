@@ -18,7 +18,7 @@ echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
-export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas-public.conf | cut -d '=' -f 2`
 if [ "x$pathtospamdir" == "x" ]; then
 	export pathtospamdir="/tmp/spam"
 fi
