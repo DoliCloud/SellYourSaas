@@ -38,6 +38,7 @@ $stringoflistofmodules = "";
 if ($action == "instanceverification") {
 	$confinstance = 0;
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+	require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 	$object = new Contrat($db);
 	$instanceselect = GETPOST("instanceselect", "alpha");
 	$instanceselect = explode("_", $instanceselect);
@@ -106,13 +107,34 @@ if ($action == "instanceverification") {
 				}
 
 				// Search of external modules
-				$i=0;
-				foreach ($confinstance->global as $key => $val) {
-					if (preg_match('/MAIN_MODULES_FOR_EXTERNAL/', $key) && !empty($val)) {
-						$i++;
+				$nbexternalmodules=0;
+				$modulestodesactivate = "";
+				$arraycoremodules = array();
+				$namemodule = array();
+				$listmodules = dol_dir_list(DOL_DOCUMENT_ROOT."/core/modules/","files");
+				foreach ($listmodules as $key => $module) {
+					preg_match('/mod([[:upper:]].*)\.class\.php/', $module["name"],$namemodule);
+					if (!empty($namemodule)) {
+						$arraycoremodules[] = strtoupper($namemodule[1]);
 					}
 				}
-			} else {
+				foreach ($confinstance->global as $key => $val) {
+					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {
+						$moduletotest=preg_replace('/MAIN_MODULE_/', "", $key);
+						if (!in_array($moduletotest,$arraycoremodules)) {
+							if ($nbexternalmodules != 0) {
+								$modulestodesactivate .= ",";
+							}
+							$modulestodesactivate .= $moduletotest;
+							$nbexternalmodules++;
+						}
+					}
+				}
+				if ($nbexternalmodules != 0) {
+					$errortab[] = $langs->trans("ExternalModulesNeedDisabled",$modulestodesactivate);
+					$errors ++;
+				}		
+			}else {
 				$errortab[] = $langs->trans("NewDbConnexionError");
 				$errors ++;
 			}
@@ -260,26 +282,26 @@ if ($action == "instanceverification") {
 	}
 		print '</h3>';
 		print'</div>';
-	if ($errors) {
-		print '<br><div class="portlet dark" style="width:50%;margin-left:auto;margin-right:auto;">';
-		print $langs->trans("ErrorListSupport").' :<br>';
-		print '<ul style="list-style-type:\'-\';">';
-		foreach ($errortab as $key => $error) {
-			print '<li>';
-			print $error;
-			print '</li>';
-		}
-		print '</ul></div>';
-		print '<div class="center"><a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a></div>';
-	} else {
-		print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-		print '<input type="hidden" name="action" value="autoupgrade">';
-		print '<input type="hidden" name="mode" value="autoupgrade">';
-		print '<input type="hidden" name="backtopagesupport" value="'.$backtopagesupport.'">';
-		print '<input type="hidden" name="instanceselect" value="'.GETPOST("instanceselect", "alpha").'">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'</h4>';
-		print '<br><div class="containerflexautomigration">
+		if ($errors) {
+			print '<br><div class="portlet dark" style="width:50%;margin-left:auto;margin-right:auto;">';
+			print $langs->trans("ErrorListSupport").' :<br>';
+			print '<ul style="list-style-type:\'-\';">';
+			foreach ($errortab as $key => $error) {
+				print '<li>';
+				print $error;
+				print '</li><br>';
+			}
+			print '</ul></div>';
+			print '<div class="center"><a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a></div>';
+		}else {
+			print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+			print '<input type="hidden" name="action" value="autoupgrade">';
+			print '<input type="hidden" name="mode" value="autoupgrade">';
+			print '<input type="hidden" name="backtopagesupport" value="'.$backtopagesupport.'">';
+			print '<input type="hidden" name="instanceselect" value="'.GETPOST("instanceselect", "alpha").'">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'</h4>';
+			print '<br><div class="containerflexautomigration">
 					<div class="right" style="width:30%;margin-right:10px">	
 						<button id="" type="submit" class="btn green-haze btn-circle btnstep" onclick="applywaitMask()">'.$langs->trans("ConfirmAutoupgrade").'</button>
 					</div>
