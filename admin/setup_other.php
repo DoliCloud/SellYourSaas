@@ -106,6 +106,8 @@ if ($action == 'set') {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", GETPOST("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 		}
 
+		dolibarr_set_const($db, "SELLYOURSAAS_SECURITY_KEY", GETPOST("SELLYOURSAAS_SECURITY_KEY", 'none'), 'chaine', 0, '', $conf->entity);
+
 		// Save images
 		$dirforimage=$conf->mycompany->dir_output.'/logos/';
 		foreach ($_FILES as $postkey => $postvar) {
@@ -259,37 +261,26 @@ print '<input type="hidden" name="action" value="set">';
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
-print '<td class="titlefield">'.$langs->trans("Other").'</td><td>'.$langs->trans("Value").'</td>';
-print '<td class="titlefield"><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
+print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID").'</td>';
+// SELLYOURSAAS_ENABLE_OPTINMESSAGES
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_OPTINMESSAGES").'</td>';
 print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_OPTINMESSAGES', array(), null, 0, 0, 0);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
 print '</td>';
-print '<td><span class="opacitymedium small">1,99,...</span></td>';
+print '<td><span class="opacitymedium small">Set to yes to add a checkbox on register page to accept "Commercial offers".</td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE" value="'.getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', '').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">0=No limit</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INFRA_COST").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_INFRA_COST" value="'.getDolGlobalString('SELLYOURSAAS_INFRA_COST', 0).'">';
-print '</td>';
-print '<td><span class="opacitymedium small">50</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PERCENTAGE_FEE").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_PERCENTAGE_FEE" value="'.getDolGlobalString('SELLYOURSAAS_PERCENTAGE_FEE', 0).'">';
-print '</td>';
-print '<td><span class="opacitymedium small">0.02</span></td>';
-print '</tr>';
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<!-- suffix = '.$suffix.' -->'."\n";
@@ -350,20 +341,19 @@ print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
 print '</tr>';
 
-// SELLYOURSAAS_ENABLE_OPTINMESSAGES
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_OPTINMESSAGES").'</td>';
+// Allow SEPA Payment for ?
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID").'</td>';
 print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ENABLE_OPTINMESSAGES', array(), null, 0, 0, 0);
-} else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
 print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to add a checkbox on register page to accept "Commercial offers".</td>';
+print '<td><span class="opacitymedium small">1,99,...</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE" value="'.getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', '').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">0=No limit</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION").'</td>';
@@ -379,6 +369,20 @@ if ($conf->use_javascript_ajax) {
 }
 print '</td>';
 print '<td></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INFRA_COST").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_INFRA_COST" value="'.getDolGlobalString('SELLYOURSAAS_INFRA_COST', 0).'">';
+print '</td>';
+print '<td><span class="opacitymedium small">50</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PERCENTAGE_FEE").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_PERCENTAGE_FEE" value="'.getDolGlobalString('SELLYOURSAAS_PERCENTAGE_FEE', 0).'">';
+print '</td>';
+print '<td><span class="opacitymedium small">0.02</span></td>';
 print '</tr>';
 
 // SELLYOURSAAS_DATADOG_ENABLED
@@ -452,6 +456,13 @@ print '</td>';
 print '<td><span class="opacitymedium small"></span></td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").' <span class="opacitymedium">(To protect the URL for Spam reporting webhooks)</spam></td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_SECURITY_KEY').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">123456abcdef</span></td>';
+print '</tr>';
+
 print '</table>';
 print '</div>';
 
@@ -462,7 +473,7 @@ print "</form>\n";
 
 
 print "<br>";
-print '<br>';
+
 
 // Define $urlwithroot
 $urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));
@@ -481,7 +492,7 @@ $message .= img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "
 $message = str_replace('{s1}', $url, $message);
 print $message;
 
-print '<br>';
+print '<br><br>';
 
 /*
 $message='';

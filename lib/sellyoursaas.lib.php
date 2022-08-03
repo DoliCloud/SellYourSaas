@@ -436,9 +436,9 @@ function sellyoursaas_admin_prepare_head()
 	$head[$h][2] = "setup";
 	$h++;
 
-	$head[$h][0] = "setup_automation.php";
-	$head[$h][1] = $langs->trans("Automation");
-	$head[$h][2] = "setup_automation";
+	$head[$h][0] = "setup_deploy_server.php";
+	$head[$h][1] = $langs->trans("ParametersOnDeploymentServers");
+	$head[$h][2] = "setup_deploy_server";
 	$h++;
 
 	$head[$h][0] = "setup_register_security.php";
@@ -446,9 +446,9 @@ function sellyoursaas_admin_prepare_head()
 	$head[$h][2] = "setup_register_security";
 	$h++;
 
-	$head[$h][0] = "setup_deploy_server.php";
-	$head[$h][1] = $langs->trans("ParametersOnDeploymentServers");
-	$head[$h][2] = "setup_deploy_server";
+	$head[$h][0] = "setup_automation.php";
+	$head[$h][1] = $langs->trans("Automation");
+	$head[$h][2] = "setup_automation";
 	$h++;
 
 	$head[$h][0] = "setup_other.php";
