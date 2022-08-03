@@ -220,7 +220,7 @@ if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 	
 	export body="Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring"
 	export subject="[Warning] Backup pulled of a backup - "`hostname`" failed" 
-	export headers="From: $EMAILFROM\r\n"
+	export headers="From: $EMAILFROM"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 	
 	echo
@@ -233,7 +233,7 @@ else
 
 	export body="Backup pulled of a backup for "`hostname`" succeed - End ret1=$ret1 ret2=$ret2\n$errstring"
 	export subject="[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" 
-	export headers="From: $EMAILFROM\r\n"
+	export headers="From: $EMAILFROM"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 
 	echo
