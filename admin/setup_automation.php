@@ -133,11 +133,6 @@ if (in_array('exec', $arrayoffunctionsdisabled)) {
 }
 print "<br>\n";
 
-//$head=array();
-//dol_fiche_head($head, 'serversetup', $langs->trans("SellYourSaas"), -1);
-
-print '<span class="opacitymedium">'.$langs->trans("SellYouSaasDesc")."</span><br>\n";
-print "<br>\n";
 
 $error=0;
 $head = sellyoursaas_admin_prepare_head();

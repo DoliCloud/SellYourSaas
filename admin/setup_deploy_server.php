@@ -143,11 +143,6 @@ if (in_array('exec', $arrayoffunctionsdisabled)) {
 }
 print "<br>\n";
 
-//$head=array();
-//dol_fiche_head($head, 'serversetup', $langs->trans("SellYourSaas"), -1);
-
-print '<span class="opacitymedium">'.$langs->trans("SellYouSaasDesc")."</span><br>\n";
-print "<br>\n";
 
 $error=0;
 
@@ -215,7 +210,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">'.$langs->trans("SSHPublicKeyDesc").'</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("LoginForSupport").'</td>';
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("LoginForSupport").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_LOGIN_FOR_SUPPORT" value="'.getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT').'">';
 print '</td>';
@@ -225,7 +220,9 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("PasswordForSupport").'</td>';
 print '<td>';
 print '<input type="password" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT').'">';
-print showValueWithClipboardCPButton(getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT'), 0, 'none');
+if (getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT')) {
+	print showValueWithClipboardCPButton(getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT'), 0, 'none');
+}
 print '</td>';
 print '<td><span class="opacitymedium small">Password to use to create a support user account on customer instances</span></td>';
 print '</tr>';
