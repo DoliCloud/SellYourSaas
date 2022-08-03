@@ -83,7 +83,6 @@ $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
 $ipserverdeployment='';
-$pathtospamdir = '/tmp/spam';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -117,6 +116,8 @@ if ($fp) {
 	exit(-1);
 }
 
+// Read /etc/sellyoursaas-public.conf file
+$pathtospamdir = '/tmp/spam';
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -127,8 +128,6 @@ if ($fp) {
 			$pathtospamdir = $tmpline[1];
 		}
 	}
-} else {
-	$pathtospamdir = '/tmp/spam';
 }
 
 
