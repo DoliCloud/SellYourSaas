@@ -135,9 +135,11 @@ else
 	rm -f $targetdir2/conffiles.tar.bz2
 	
 	export dbname="mysql"
+	export now=`date +'%Y-%m-%d %H:%M:%S'`
+	
 	rm "$targetdir/${dbname}.sql.gz"
-	echo "Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
-	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}.sql.gz"
+	echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
+	echo "$now $MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}.sql.gz"
 	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}.sql.gz
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}.sql.gz")
 	if (( "$FILESIZE" < 50 )); then
@@ -164,26 +166,27 @@ else
 
 		rm "$targetdir/${dbname}.sql.gz"
 		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
-		echo "$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz"
+		echo "$now $MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz"
 		$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz
 		chown root.admin $targetdir/${dbname}.sql.gz
 		chmod o-rwx $targetdir/${dbname}.sql.gz
 		rm -f $targetdir/${dbname}.sql.bz2
 		rm -f $targetdir/${dbname}.sql.zst
 	else
-		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
+		export now=`date +'%Y-%m-%d %H:%M:%S'`
+
+		echo "$now No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 fi
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
-echo "Date=$now"
 
 if [ "x$errstring" != "x" ]; then
-	echo "Send email to $EMAILTO to inform about backup system error"
+	echo "$now Send email to $EMAILTO to inform about backup system error"
 	echo -e "The local backup of system for "`hostname`" failed (started at $now).\nerrstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup system of "`hostname`" failed" $EMAILTO
 	echo
 else
-	echo "Send email to $EMAILTO to inform about backup system success"
+	echo "$now Send email to $EMAILTO to inform about backup system success"
 	echo -e "The local backup of system for "`hostname`" succeed (started at $now)" | mail -aFrom:$EMAILFROM -s "[Backup system - "`hostname`"] Backup of system succeed" $EMAILTO
 	echo
 fi
