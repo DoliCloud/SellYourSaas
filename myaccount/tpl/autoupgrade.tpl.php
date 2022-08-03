@@ -38,6 +38,7 @@ $stringoflistofmodules = "";
 if ($action == "instanceverification") {
 	$confinstance = 0;
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+	require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 	$object = new Contrat($db);
 	$instanceselect = GETPOST("instanceselect", "alpha");
 	$instanceselect = explode("_", $instanceselect);
@@ -106,11 +107,32 @@ if ($action == "instanceverification") {
 				}
 
 				// Search of external modules
-				$i=0;
-				foreach ($confinstance->global as $key => $val) {
-					if (preg_match('/MAIN_MODULES_FOR_EXTERNAL/', $key) && !empty($val)) {
-						$i++;
+				$nbexternalmodules=0;
+				$modulestodesactivate = "";
+				$arraycoremodules = array();
+				$namemodule = array();
+				$listmodules = dol_dir_list(DOL_DOCUMENT_ROOT."/core/modules/", "files");
+				foreach ($listmodules as $key => $module) {
+					preg_match('/mod([[:upper:]].*)\.class\.php/', $module["name"], $namemodule);
+					if (!empty($namemodule)) {
+						$arraycoremodules[] = strtoupper($namemodule[1]);
 					}
+				}
+				foreach ($confinstance->global as $key => $val) {
+					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {
+						$moduletotest=preg_replace('/MAIN_MODULE_/', "", $key);
+						if (!in_array($moduletotest, $arraycoremodules)) {
+							if ($nbexternalmodules != 0) {
+								$modulestodesactivate .= ",";
+							}
+							$modulestodesactivate .= $moduletotest;
+							$nbexternalmodules++;
+						}
+					}
+				}
+				if ($nbexternalmodules != 0) {
+					$errortab[] = $langs->trans("ExternalModulesNeedDisabled", $modulestodesactivate);
+					$errors ++;
 				}
 			} else {
 				$errortab[] = $langs->trans("NewDbConnexionError");
@@ -267,7 +289,7 @@ if ($action == "instanceverification") {
 		foreach ($errortab as $key => $error) {
 			print '<li>';
 			print $error;
-			print '</li>';
+			print '</li><br>';
 		}
 		print '</ul></div>';
 		print '<div class="center"><a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a></div>';
