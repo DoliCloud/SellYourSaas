@@ -107,9 +107,6 @@ if ($fp) {
 		if ($tmpline[0] == 'ipserverdeployment') {
 			$ipserverdeployment = $tmpline[1];
 		}
-		if ($tmpline[0] == 'pathtospamdir') {
-			$pathtospamdir = $tmpline[1];
-		}
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
