@@ -130,16 +130,16 @@ fi
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 
-	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -exec rm {} \;
+	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -delete
 fi
 
 echo "Nettoyage vieux fichiers log"
-echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
-find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
+find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 
 echo "Nettoyage vieux /tmp"
-echo find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
-find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
+echo find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
+find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 
 echo "Check files for antispam system and create them if not found"
 [ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;

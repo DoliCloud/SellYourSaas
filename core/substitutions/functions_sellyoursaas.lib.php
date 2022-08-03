@@ -45,7 +45,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
 	if (isset($parameters['needforkey'])) {
 		$substitutionarray['BackupInstanceTabTitle'] = $langs->trans('BackupInstance');
-		if ($object->array_options['options_latestbackup_status'] == 'KO') {
+		if (!empty($object->array_options['options_latestbackup_status']) && $object->array_options['options_latestbackup_status'] == 'KO') {
 			$substitutionarray['BackupInstanceTabTitle'] = $substitutionarray['BackupInstanceTabTitle'].img_warning($langs->trans("BackupError"));
 		}
 	}

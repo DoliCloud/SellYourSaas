@@ -743,6 +743,7 @@ masterserver=1
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
+
 # Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
 archivetestinstances=1
 
@@ -775,6 +776,9 @@ databaseportdeployment=3306
 databaseuserdeployment=sellyoursaas
 databasepassdeployment=xxxxx
 
+# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+usecompressformatforarchive=zstd
+
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
 # Set directory where instances are stored (default is /home/jail/home)
@@ -789,6 +793,10 @@ archivedirpaid=/mnt/diskbackup/archives-paid
 
 # Set option to exclude some tables for some instances in backup
 #backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
+# Can set the frequency of rsync
+#backuprsyncdayfrequency=1
+# Can set the frequency of sql dump
+#backupdumpdayfrequency=1
 
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
@@ -1971,11 +1979,94 @@ Ignore if you have error when sending emails, sending emails is setup later.
 
 === Setup of cpulimit (optional)
 
-* Launch cpulimit at startup to execute:
+* Launch a cpulimit daemon at startup for example with *cpulimit_daemon_launcher.sh*
 
 [source,conf]
 ---------------
-cpulimit launched with script  cpulimit --exe=apache2 --limit=20
+#!/bin/sh
+#
+# Script to start CPU limit daemon
+#
+set -e
+
+case "$1" in
+start)
+if [ $(ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | wc -l) -eq 0 ]; then
+    nohup /usr/bin/cpulimit_daemon.sh >/dev/null 2>&1 &
+    ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon started successfully"; else print " * cpulimit daemon can not be started" }'
+else
+    echo " * cpulimit daemon can't be started, because it is already running"
+fi
+;;
+stop)
+CPULIMIT_DAEMON=$(ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | wc -l)
+CPULIMIT_INSTANCE=$(ps -eo pid,args | gawk '$2=="cpulimit" {print $1}' | wc -l)
+CPULIMIT_ALL=$((CPULIMIT_DAEMON + CPULIMIT_INSTANCE))
+if [ $CPULIMIT_ALL -gt 0 ]; then
+    if [ $CPULIMIT_DAEMON -gt 0 ]; then
+        ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | xargs kill -9   # kill cpulimit daemon
+    fi
+
+    if [ $CPULIMIT_INSTANCE -gt 0 ]; then
+        ps -eo pid,args | gawk '$2=="cpulimit" {print $1}' | xargs kill -9                    # release cpulimited process to normal priority
+    fi
+    ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon can not be stopped"; else print " * cpulimit daemon stopped successfully" }'
+else
+    echo " * cpulimit daemon can't be stopped, because it is not running"
+fi
+;;
+restart)
+$0 stop
+sleep 3
+$0 start
+;;
+status)
+ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon is running"; else print " * cpulimit daemon is not running" }'
+;;
+esac
+exit 0
+---------------
+
+
+This will execute the daemon */usr/bin/cpulimit_daemon.sh*
+
+[source,conf]
+---------------
+#!/bin/bash
+# ==============================================================
+# CPU limit daemon - set PID's max. percentage CPU consumptions
+# ==============================================================
+
+# Variables
+CPU_LIMIT=40       	# Maximum percentage CPU consumption by each PID
+DAEMON_INTERVAL=3  	# Daemon check interval in seconds
+BLACK_PROCESSES_LIST=   # Limit only processes defined in this variable. If variable is empty (default) all violating processes are limited.
+WHITE_PROCESSES_LIST=   # Limit all processes except processes defined in this variable. If variable is empty (default) all violating processes are limited.
+
+# Check if one of the variables BLACK_PROCESSES_LIST or WHITE_PROCESSES_LIST is defined.
+if [[ -n "$BLACK_PROCESSES_LIST" &&  -n "$WHITE_PROCESSES_LIST" ]] ; then    # If both variables are defined then error is produced.
+   echo "At least one or both of the variables BLACK_PROCESSES_LIST or WHITE_PROCESSES_LIST must be empty."
+   exit 1
+elif [[ -n "$BLACK_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+   NEW_PIDS_COMMAND="top -b -n1 -c | grep -E '$BLACK_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+elif [[ -n "$WHITE_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+   NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6' | grep -E -v '$WHITE_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+else
+   NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6 && \$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+fi
+
+# Search and limit violating PIDs
+while sleep $DAEMON_INTERVAL
+do
+   NEW_PIDS=$(eval "$NEW_PIDS_COMMAND")                                                                    # Violating PIDs
+   LIMITED_PIDS=$(ps -eo args | gawk '$1=="cpulimit" {print $3}')                                          # Already limited PIDs
+   QUEUE_PIDS=$(comm -23 <(echo "$NEW_PIDS" | sort -u) <(echo "$LIMITED_PIDS" | sort -u) | grep -v '^$')   # PIDs in queue
+
+   for i in $QUEUE_PIDS
+   do
+       cpulimit -p $i -l $CPU_LIMIT -z &   # Limit new violating processes
+   done
+done
 ---------------
 
 See script *cpulimit_daemon* to put into */etc/init.d*.
@@ -1988,16 +2079,19 @@ Note: Some global quotas can be set with the *ulimit* tool in */etc/security/lim
 
 === Setup of /etc/security/limits.conf (optional)
 
-* Create a file */etc/security/limits.d/sellyoursaas.conf* (or edit file */etc/security/limits.conf* if ot does not work) for example to increase the max number of files open by a process and set the max filesize for users with ID > 1000
+* Create a file */etc/security/limits.d/sellyoursaas.conf* (or edit file */etc/security/limits.conf* if ot does not work) for example to increase the max number of files open by a process and set the max filesize for users with ID >= 65535 (See "man limits.conf" for possible syntaxes)
 
 [source,conf]
 ---------------
 mysql           soft     nofile           4096
 mysql           hard     nofile           32768
 
-# Set max size of block (4096 B) for files
-1000:           soft     fsize            1000000
-1000:           hard     fsize            1000000
+# Set max size of block written into a file (domain is UIDstart:UIDend with UIDend empty)
+#65535:           soft     fsize            1000000
+#65535:           hard     fsize            1000000
+#65535:           hard     nproc            50
+#65535:           hard     maxlogins        10
+#65535:           hard     cpu              5000
 ---------------
 
 Note: To get/see the current limits of OS and connected user:
@@ -2008,8 +2102,8 @@ ulimit -a
 ---------------
 
 Note: 
-You can check that there is indeed the line *session required pam_limits.so* in the files /etc/pam.d/system-auth or /etc/pam.d/password-auth and/or /etc/pam.d/sudo to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
-NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files /etc/pam.d/common-session or /etc/pam.d/login. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
+You can check that there is indeed the line *session required pam_limits.so* in the files */etc/pam.d/system-auth* or */etc/pam.d/password-auth* and/or */etc/pam.d/sudo* to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
+NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files */etc/pam.d/common-session* or */etc/pam.d/login*. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
 
 
 
@@ -3317,7 +3411,7 @@ Run cerbot with the following command line (you can test it beforehand by adding
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --expand
+certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
 ---------------
 
 For example, you can use *supervision@mysaasdomain.com* as the email for letsencrypt account.
@@ -3517,9 +3611,9 @@ You must have inside the cron of user *root*
 # cron master and deployment root
 #47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
-00 3 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
-40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
-#00 * * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test > /home/admin/logs/batch_detect_evil_instances.log 2>&1
+00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
+40 15 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
+#00 10 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test > /home/admin/logs/batch_detect_evil_instances.log 2>&1
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
@@ -5345,4 +5439,27 @@ If this child are in state R, then you can try to reduce this by enabling the mo
 ---------------
 RequestReadTimeout handshake=5 header=10 body=30
 ---------------
+
+
+==== Migrate a ext4 partition into btrfs
+
+Run command to see partition types:
+
+[source,bash]
+---------------
+df -Th
+lsblk -f
+---------------
+
+If the data disk is ext4, you can convert it into BTRFS with:
+
+[source,bash]
+---------------
+btrfs-convert -p /dev/vdX
+lsblk -f
+---------------
+
+Then edit he */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it was changed)
+
+
 

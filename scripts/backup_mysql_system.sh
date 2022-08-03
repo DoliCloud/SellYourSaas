@@ -82,7 +82,7 @@ if [[ ! -d $targetdir2 ]]; then
 fi
 
 if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-	echo "Do a tar of config files"
+	echo "$now Do a tar of config files in conffiles.tar.zst"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst
 	chown root.admin $targetdir2/conffiles.tar.zst
@@ -91,18 +91,18 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	rm -f $targetdir2/conffiles.tar.bz2
 
 	export dbname="mysql" 
-	rm "$targetdir/${dbname}_"`date +%d`".sql.zst"
-	echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.zst"
-	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
-	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
-	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.zst")
+	rm "$targetdir/${dbname}.sql.zst"
+	echo "Do a dump of database $dbname into $targetdir/${dbname}.sql.zst"
+	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst"
+	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst
+	FILESIZE=$(stat -c%s "$targetdir/${dbname}.sql.zst")
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
 	fi
-	chown root.admin $targetdir/${dbname}_`date +%d`.sql.zst
-	chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.zst
-	rm -f $targetdir/${dbname}_`date +%d`.sql.gz
-	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
+	chown root.admin $targetdir/${dbname}.sql.zst
+	chmod o-rwx $targetdir/${dbname}.sql.zst
+	rm -f $targetdir/${dbname}.sql.gz
+	rm -f $targetdir/${dbname}.sql.bz2
 	
     export foundmasterdatabase=0;  
     if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
@@ -113,19 +113,21 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
     fi
     if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
-		rm "$targetdir/${dbname}_"`date +%d`".sql.zst"
-		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.zst"
-		echo "$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_"`date +%d`".sql.zst"
-		$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}_`date +%d`.sql.zst
-		chown root.admin $targetdir/${dbname}_`date +%d`.sql.zst
-		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.zst
-		rm -f $targetdir/${dbname}_`date +%d`.sql.gz
-		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
+		export now=`date +'%Y-%m-%d %H:%M:%S'`
+
+		rm "$targetdir/${dbname}.sql.zst"
+		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.zst"
+		echo "$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst"
+		$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst
+		chown root.admin $targetdir/${dbname}.sql.zst
+		chmod o-rwx $targetdir/${dbname}.sql.zst
+		rm -f $targetdir/${dbname}.sql.gz
+		rm -f $targetdir/${dbname}.sql.bz2
 	else
 		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 else
-	echo "Do a tar of config files"
+	echo "$now Do a tar of config files in conffiles.tar.gz"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz
 	chown root.admin $targetdir2/conffiles.tar.gz
@@ -133,18 +135,20 @@ else
 	rm -f $targetdir2/conffiles.tar.bz2
 	
 	export dbname="mysql"
-	rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
-	echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.gz"
-	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
-	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
-	FILESIZE=$(stat -c%s "$targetdir/${dbname}_"`date +%d`".sql.gz")
+	export now=`date +'%Y-%m-%d %H:%M:%S'`
+	
+	rm "$targetdir/${dbname}.sql.gz"
+	echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
+	echo "$now $MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}.sql.gz"
+	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}.sql.gz
+	FILESIZE=$(stat -c%s "$targetdir/${dbname}.sql.gz")
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
 	fi
-	chown root.admin $targetdir/${dbname}_`date +%d`.sql.gz
-	chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
-	rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
-	rm -f $targetdir/${dbname}_`date +%d`.sql.zst
+	chown root.admin $targetdir/${dbname}.sql.gz
+	chmod o-rwx $targetdir/${dbname}.sql.gz
+	rm -f $targetdir/${dbname}.sql.bz2
+	rm -f $targetdir/${dbname}.sql.zst
 	
     export foundmasterdatabase=0;  
     if [ "x$DATABASE" != "x" -a "x$masterserver" != "x" -a "x$masterserver" != "x0" ]; then
@@ -158,25 +162,31 @@ else
     
     if [ "x$foundmasterdatabase" == "x1" ]; then	
 		export dbname=$DATABASE 
-		rm "$targetdir/${dbname}_"`date +%d`".sql.gz"
-		echo "Do a dump of database $dbname into $targetdir/${dbname}_"`date +%d`".sql.gz"
-		echo "$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}_"`date +%d`".sql.gz"
-		$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}_`date +%d`.sql.gz
-		chown root.admin $targetdir/${dbname}_`date +%d`.sql.gz
-		chmod o-rwx $targetdir/${dbname}_`date +%d`.sql.gz
-		rm -f $targetdir/${dbname}_`date +%d`.sql.bz2
-		rm -f $targetdir/${dbname}_`date +%d`.sql.zst
+		export now=`date +'%Y-%m-%d %H:%M:%S'`
+
+		rm "$targetdir/${dbname}.sql.gz"
+		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
+		echo "$now $MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz"
+		$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz
+		chown root.admin $targetdir/${dbname}.sql.gz
+		chmod o-rwx $targetdir/${dbname}.sql.gz
+		rm -f $targetdir/${dbname}.sql.bz2
+		rm -f $targetdir/${dbname}.sql.zst
 	else
-		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
+		export now=`date +'%Y-%m-%d %H:%M:%S'`
+
+		echo "$now No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
 fi
 
+export now=`date +'%Y-%m-%d %H:%M:%S'`
+
 if [ "x$errstring" != "x" ]; then
-	echo "Send email to $EMAILTO to inform about backup system error"
+	echo "$now Send email to $EMAILTO to inform about backup system error"
 	echo -e "The local backup of system for "`hostname`" failed (started at $now).\nerrstring=$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup system of "`hostname`" failed" $EMAILTO
 	echo
 else
-	echo "Send email to $EMAILTO to inform about backup system success"
+	echo "$now Send email to $EMAILTO to inform about backup system success"
 	echo -e "The local backup of system for "`hostname`" succeed (started at $now)" | mail -aFrom:$EMAILFROM -s "[Backup system - "`hostname`"] Backup of system succeed" $EMAILTO
 	echo
 fi

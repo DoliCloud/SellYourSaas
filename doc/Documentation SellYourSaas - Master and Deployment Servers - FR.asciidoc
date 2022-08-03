@@ -665,29 +665,43 @@ avec le contenu suivant
 
 [source,conf]
 ---------------
+# File /etc/sellyoursaas.conf
+
 # domain du service
 domain=mysaasdomainname.com
 
 # If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
-# If deployment server: IPs allowed to request a deployment
-allowed_hosts=127.0.0.1,ipduservermaster
 
-# Set to 1 if this server is the master server
+# Set to 1 if this server is the master server, 
+# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 masterserver=1
-# Set to 1 if this server host instances for the pool (deployment server)
+# Set to 1 if this server host instances for the pool (deployment server), 
+# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
+
+# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
+archivetestinstances=1
+
 # Set to its own IP if it is a deployment server. Keep empty for master only server.
-ipserverdeployment=ip.du.server.deployment
+ipserverdeployment=ip.of.deployment.server
+
+# If deployment server: IPs allowed to request a deployment
+allowed_hosts=127.0.0.1,ipofmasterserver
+
+# email from
+emailfrom=noreply@mysaasdomainname.com
+# email supervision
+emailsupervision=supervision@mysaasdomainname.com
 
 # Set location of the master database
-databasehost=ip.du.serveur.master ou localhost si serveur master
+databasehost=ipOfMasterServer or localhost if on master server
 # Set port of the master database (default is 3306)
 databaseport=3306
 # Set database name of the master server
-database=databaseduservermaster
+database=databaseNameOnMasterServer
 # Set a credential for an access to the master database (each server can have a different account to access the master database)
 databaseuser=sellyoursaas
 databasepass=xxxxx
@@ -700,11 +714,14 @@ databaseportdeployment=3306
 databaseuserdeployment=sellyoursaas
 databasepassdeployment=xxxxx
 
-# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
-archivetestinstances=1
+# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+usecompressformatforarchive=zstd
 
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+
 # Set directory where backup are stored
 backupdir=/mnt/diskbackup/backup
 # Set directory where archives of tests instances are stored
@@ -712,10 +729,15 @@ archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
 
-# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
-usecompressformatforarchive=gzip
 # Set option to exclude some tables for some instances in backup
 #backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
+# Can set the frequency of rsync
+#backuprsyncdayfrequency=1
+# Can set the frequency of sql dump
+#backupdumpdayfrequency=1
+
+# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+usecompressformatforarchive=gzip
 
 # Set remote server launcher ip (default is 0.0.0.0)
 remoteserverlistenip=0.0.0.0
@@ -723,20 +745,20 @@ remoteserverlistenip=0.0.0.0
 remoteserverlistenport=8080
 
 remotebackupserver=ip.of.remote.backup.ssh.server
+remotebackupuser=admin
 remotebackupdir=/mnt/diskbackup
 
-# Advanced Options to use different paths in deployment server
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
 # Option to use different path for dataroot
 #olddoldataroot=/home/admin/wwwroot/dolibarr_documents
 #newdoldataroot=/new/path/of/documents
 # Options to change the directory of vhostfile templates
 #templatesdir=/path/of/vhostfile/templates
+
 # Options to change the SSL certificates names in Apache virtualhost
 #websslcertificatecrt=with.sellyoursaas.com.crt
 #websslcertificatekey=with.sellyoursaas.com.key
 #websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+
 # Options for Jailkit
 #chrootdir=/home/jail/chroot
 #privatejailtemplatename=privatejail
@@ -1795,20 +1817,107 @@ Test que l'exécution par la crontab fonctionne correctement en lançant sous ro
 /etc/cron.daily/afick_cron
 ---------------
 
-Ignore if you have error when sending emails, sending emails is setup later.
+Ignorez si vous avez des erreurs d'envoi d'email, l'envoi d'emails est configuré plus tard.
 
 
-=== Configuration de cpulimit (optionnel)
+=== Setup de cpulimit (optional)
 
-* Lancement de cpulimit au démarrage pour exécuter:
+* Launch a cpulimit daemon at startup for example with *cpulimit_daemon_launcher.sh*
 
 [source,conf]
 ---------------
-cpulimit launched with script  cpulimit --exe=apache2 --limit=20
+#!/bin/sh
+#
+# Script to start CPU limit daemon
+#
+set -e
+
+case "$1" in
+start)
+if [ $(ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | wc -l) -eq 0 ]; then
+    nohup /usr/bin/cpulimit_daemon.sh >/dev/null 2>&1 &
+    ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon started successfully"; else print " * cpulimit daemon can not be started" }'
+else
+    echo " * cpulimit daemon can't be started, because it is already running"
+fi
+;;
+stop)
+CPULIMIT_DAEMON=$(ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | wc -l)
+CPULIMIT_INSTANCE=$(ps -eo pid,args | gawk '$2=="cpulimit" {print $1}' | wc -l)
+CPULIMIT_ALL=$((CPULIMIT_DAEMON + CPULIMIT_INSTANCE))
+if [ $CPULIMIT_ALL -gt 0 ]; then
+    if [ $CPULIMIT_DAEMON -gt 0 ]; then
+        ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | xargs kill -9   # kill cpulimit daemon
+    fi
+
+    if [ $CPULIMIT_INSTANCE -gt 0 ]; then
+        ps -eo pid,args | gawk '$2=="cpulimit" {print $1}' | xargs kill -9                    # release cpulimited process to normal priority
+    fi
+    ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon can not be stopped"; else print " * cpulimit daemon stopped successfully" }'
+else
+    echo " * cpulimit daemon can't be stopped, because it is not running"
+fi
+;;
+restart)
+$0 stop
+sleep 3
+$0 start
+;;
+status)
+ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon is running"; else print " * cpulimit daemon is not running" }'
+;;
+esac
+exit 0
 ---------------
 
-Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 
+This will execute the daemon */usr/bin/cpulimit_daemon.sh*
+
+[source,conf]
+---------------
+#!/bin/bash
+# ==============================================================
+# CPU limit daemon - set PID's max. percentage CPU consumptions
+# ==============================================================
+
+# Variables
+CPU_LIMIT=40       	# Maximum percentage CPU consumption by each PID
+DAEMON_INTERVAL=3  	# Daemon check interval in seconds
+BLACK_PROCESSES_LIST=   # Limit only processes defined in this variable. If variable is empty (default) all violating processes are limited.
+WHITE_PROCESSES_LIST=   # Limit all processes except processes defined in this variable. If variable is empty (default) all violating processes are limited.
+
+# Check if one of the variables BLACK_PROCESSES_LIST or WHITE_PROCESSES_LIST is defined.
+if [[ -n "$BLACK_PROCESSES_LIST" &&  -n "$WHITE_PROCESSES_LIST" ]] ; then    # If both variables are defined then error is produced.
+   echo "At least one or both of the variables BLACK_PROCESSES_LIST or WHITE_PROCESSES_LIST must be empty."
+   exit 1
+elif [[ -n "$BLACK_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+   NEW_PIDS_COMMAND="top -b -n1 -c | grep -E '$BLACK_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+elif [[ -n "$WHITE_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+   NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6' | grep -E -v '$WHITE_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+else
+   NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6 && \$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+fi
+
+# Search and limit violating PIDs
+while sleep $DAEMON_INTERVAL
+do
+   NEW_PIDS=$(eval "$NEW_PIDS_COMMAND")                                                                    # Violating PIDs
+   LIMITED_PIDS=$(ps -eo args | gawk '$1=="cpulimit" {print $3}')                                          # Already limited PIDs
+   QUEUE_PIDS=$(comm -23 <(echo "$NEW_PIDS" | sort -u) <(echo "$LIMITED_PIDS" | sort -u) | grep -v '^$')   # PIDs in queue
+
+   for i in $QUEUE_PIDS
+   do
+       cpulimit -p $i -l $CPU_LIMIT -z &   # Limit new violating processes
+   done
+done
+---------------
+
+See script *cpulimit_daemon* to put into */etc/init.d*.
+
+
+=== Ajouter des quotas disk par utilisateurs (optionnal)
+
+Note: Some global quotas can be set with the *ulimit* tool in */etc/security/limits.conf* (see next chapter on ulimit)
 
 
 === Configuration de /etc/security/limits.conf (optionnel)
@@ -1819,6 +1928,10 @@ Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 ---------------
 mysql           soft     nofile           4096
 mysql           hard     nofile           32768
+
+# Set max size of block written into a file (domain is UIDstart:UIDend with UIDend empty)
+#65535:           soft     fsize            1000000
+#65535:           hard     fsize            1000000
 ---------------
 
 Pour voir les limites:

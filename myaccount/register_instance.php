@@ -393,7 +393,8 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		exit(-28);
 	}
 
-	// Possibility to block email adresses not blocked by DisposableEmail
+	// Possibility to block email adresses from a regex into global setup
+	// TODO: should be possible to use the blacklist list.
 	if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
 		if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
 			$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
@@ -409,7 +410,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		}
 	}
 
-	if (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED) && ! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY)) {
+	if (getDolGlobalInt('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED') && getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY')) {
 		$allowed = false;
 		$disposable = false;
 		$allowedemail = (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED) ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());

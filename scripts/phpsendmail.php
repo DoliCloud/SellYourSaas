@@ -30,7 +30,7 @@ $emailfrom = '';
 
 // Rules
 $MAXOK = 10;
-$MAXPERDAY = 500;
+$MAXPERDAY = 250;	// By default, will be overwritten with sellyoursaas-public.conf
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start phpsendmail.php\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . " SERVER_NAME = ".(empty($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'])."\n", FILE_APPEND);
@@ -58,6 +58,15 @@ if ($fp) {
 if (is_numeric($maxemailperday) && $maxemailperday > 0) {
 	$MAXPERDAY = (int) $maxemailperday;
 }
+
+$processownerid = posix_getuid();
+$tmparray = posix_getpwuid($processownerid);
+$usernamestring = $tmparray['name'];
+file_put_contents($logfile, date('Y-m-d H:i:s') . " processownerid=".$processownerid." usernamestring=".$usernamestring."\n", FILE_APPEND);
+
+// TODO Check quota of email for the UID $processownerid / $usernamestring
+//export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
+//echo "$now usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
 
 
 // Main

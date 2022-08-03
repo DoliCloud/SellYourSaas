@@ -11,8 +11,9 @@ export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export MAXPERDAY=`grep '^maxemailperday=' /etc/sellyoursaas-public.conf | cut -d '=' -f 2`
 if [ "x$MAXPERDAY" == "x" ]; then
-	export MAXPERDAY=500
+	export MAXPERDAY=1000
 fi
+
 
 
 echo >> /var/log/smtp_watchdog1.log
@@ -104,9 +105,13 @@ while read -r line ; do
 										
 					if [[ $processownerid =~ $re ]] ; then
 						echo "$now We try to get the usernamestring from processownerid" >> /var/log/phpsendmail.log 2>&1
-				
+
 						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
 						echo "$now usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
+						
+						#TODO Get quota of emails MAXPERDAY for the UID $processownerid / $usernamestring
+						
+						
 					else
 						echo "$now processownerid not valid, we can't find $usernamestring" >> "/var/log/phpsendmail.log"
 					fi

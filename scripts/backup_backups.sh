@@ -232,8 +232,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 				fi
 			done
 	    else
-	    	echo No directory found starting with name $backupdir/osu$i
-			export errstring="$errstring\nNo directory found starting with name $backupdir/osu$i"
+	    	echo "No directory found starting with name $backupdir/osu$i"
+			export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" No directory found starting with name $backupdir/osu$i\n"
 	    fi
 	done
 fi

@@ -440,7 +440,7 @@ EvilUser=Utilisateur déloyal ou spammeur
 DisableEmailToCustomer=Ne pas envoyer d'e-mail au client
 CommissionsOnOldSystem=Commissions sur l'ancienne plateforme
 InvoiceBeforeAreAvailableOnDemandAt=Les factures d'avant le %s sont disponibles par demande email à %s
-MyAcountDesc=Cet espace est dédié à la gestion de vos abonnements à <a href="%s" target="dolicloud"> %s </a> . Vous pouvez créer de nouvelles instances d'applications, choisir des options, obtenir vos factures d'abonnement, contacter l'équipe de support ou annuler votre compte.
+MyAcountDesc=Cet espace est dédié à la gestion de vos abonnements à <a href="%s" target="dolicloud">%s</a>. Vous pouvez créer de nouvelles instances d'applications, choisir des options, obtenir vos factures d'abonnement, contacter l'équipe de support ou annuler votre compte.
 YourCustomUrl=Votre URL personnalisée
 CustomURL=URL personnalisée
 NextInvoice=Prochaine facture
@@ -499,8 +499,8 @@ DelayAutomaticPaymentDesc=Ne pas essayer de prendre le paiement automatiquement 
 DeploymentUserAgent=User agent ayant demandé le déploiement
 CustomVirtualHostLine=Ligne de titre personnalisée de l'hôte virtuel
 EnterAVirtualHostLine=Saisissez une ligne à ajouter dans l'en-tête du fichier d'hôte virtuel du serveur Web. Par exemple : <br> php_value date.timezone "Europe/Paris". <br> Vous devez suspendre et réactiver l'instance pour que cela soit effectif.
-CustomVirtualHostDir=Ligne de répertoire personnalisée de l'hôte virtuel
-EnterAVirtualHostDirLine=Entrez une ligne à ajouter dans la section répertoire du fichier hôte virtuel du serveur Web. Par exemple : <br> Require ip 1.2.3.4/16 <br> Vous devez suspendre et réactiver l'instance pour que cela soit effectif.
+CustomVirtualHostDir=Ligne de RequireAll personnalisée de l'hôte virtuel
+EnterAVirtualHostDirLine=Entrez une ligne à ajouter dans la section RequireAll de la section Directory du fichier hôte virtuel du serveur Web. Par exemple : <br> Require ip 1.2.3.4/16 <br> Vous devez suspendre et réactiver l'instance pour que cela soit effectif.
 DomainOfRegistrationPage=Domaine de la page d'enregistrement
 SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES=Nb jours avant d'arrêter les essais de paiement de facture
 SELLYOURSAAS_NBHOURSBETWEENTRIES=Nb d'heures minimum entre chaque essai de paiement de facture
