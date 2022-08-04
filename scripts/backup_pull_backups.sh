@@ -44,6 +44,8 @@ export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupserver=`grep '^remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupserverport=`grep '^remotebackupserverport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export testorconfirm=$2
 export USER=$1
@@ -223,6 +225,10 @@ if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 	export headers="From: $EMAILFROM"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 	
+	if [ -s /usr/syno/bin/synodsmnotify ]; then
+		#/usr/syno/bin/synodsmnotify "@administrators" "System Event" "$subject $body"; 
+	fi
+	
 	echo
 
 	exit $ret
@@ -233,9 +239,13 @@ else
 
 	export body="Backup pulled of a backup for "`hostname`" succeed - End ret1=$ret1 ret2=$ret2\n$errstring"
 	export subject="[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" 
-	export headers="From: $EMAILFROM"
+	export headers="From: $EMAILFROM\r\n"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 
+	if [ -s /usr/syno/bin/synodsmnotify ]; then
+		#/usr/syno/bin/synodsmnotify "@administrators" "System Event" "$subject $body";
+	fi
+	
 	echo
 fi
 
