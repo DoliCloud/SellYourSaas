@@ -225,9 +225,9 @@ if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 	export headers="From: $EMAILFROM"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 	
-	if [ -s /usr/syno/bin/synodsmnotify ]; then
+	#if [ -s /usr/syno/bin/synodsmnotify ]; then
 		#/usr/syno/bin/synodsmnotify "@administrators" "System Event" "$subject $body"; 
-	fi
+	#fi
 	
 	echo
 
@@ -242,9 +242,9 @@ else
 	export headers="From: $EMAILFROM\r\n"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 
-	if [ -s /usr/syno/bin/synodsmnotify ]; then
+	#if [ -s /usr/syno/bin/synodsmnotify ]; then
 		#/usr/syno/bin/synodsmnotify "@administrators" "System Event" "$subject $body";
-	fi
+	#fi
 	
 	echo
 fi
