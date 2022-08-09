@@ -206,16 +206,16 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
-	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick] [--nostats]\n";
+	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick] [--forcersync] [--forcedump] [--nostats]\n";
 	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
 	print "         the parameter --delete run the rsync with the --delete option\n";
 	print "         the parameter --notransaction run the mysqldump without the --single-transaction\n";
-	print "         the parameter --quick run the mysqldump with the --quick option\n";
-	print "         the parameter --nostats disable send of statistics to the external supervision platform\n";
+	print "         the parameter --quick run the mysqldump with the --quick option (recommended)\n";
 	print "         the parameter --forcersync to force rsync even if date is too young\n";
 	print "         the parameter --forcedump to force sql dump even if date is too young\n";
+	print "         the parameter --nostats disable send of statistics to the external supervision platform\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
