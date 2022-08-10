@@ -118,10 +118,11 @@ export ret2=0
 
 cd "$scriptdir"
 
->/tmp/$script.log 
 
 
 if [ "x$3" != "x" -a "x$4" != "x" ]; then
+	>/tmp/$script.generic.log 
+
 	# Generic usage
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in generic mode" 
 
@@ -140,11 +141,11 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE1/* $DIRDESTI1";
 	echo "$command";
 
-	> /tmp/$script.err
-	$command >/tmp/$script.log 2>/tmp/$script.err
+	> /tmp/$script.generic.err
+	$command >/tmp/$script.generic.log 2>/tmp/$script.generic.err
 	if [ "x$?" != "x0" ]; then
-        nberror=`cat /tmp/$script.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
-	    cat /tmp/$script.err
+        nberror=`cat /tmp/$script.generic.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
+	    cat /tmp/$script.generic.err
 		if [ "x$nberror" != "x0" ]; then
 		  	echo "ERROR Failed to make rsync for $DIRSOURCE1"
 	  		echo
@@ -159,6 +160,8 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 		echo
 	fi
 else
+	>/tmp/$script.log 
+
 	# Usage for sellyoursaas
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in SellYourSaas mode" 
 
