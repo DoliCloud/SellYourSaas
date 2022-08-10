@@ -134,7 +134,7 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	export DIRDESTI1="$backupdir";
 
 	export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
-	export OPTIONS="$OPTIONS --exclude '*.qcow' --exclude '*.qcow2' --exclude 'sda*.img' --exclude='VirtualBox*VMs/'"
+	export OPTIONS="$OPTIONS --exclude '.debris' --exclude '*.qcow' --exclude '*.qcow2' --exclude 'sda*.img' --exclude='VirtualBox*VMs/'"
 	
 	# Note: for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
 	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE1 $DIRDESTI1";
@@ -149,7 +149,7 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 		  	echo "ERROR Failed to make rsync for $DIRSOURCE1"
 	  		echo
 	   		export ret1=$(($ret1 + 1));
-	   		export errstring="$errstring\nDir $DIRSOURCE1 "`date '+%Y-%m-%d %H:%M:%S'`
+	   		export errstring="Dir $DIRSOURCE1 "`date '+%Y-%m-%d %H:%M:%S'`
 	   	else
             echo "No files found"
             echo
@@ -271,7 +271,7 @@ if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 	
 	#echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
 	
-	export body="Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring"
+	export body="Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2<br>\n$errstring"
 	export subject="[Warning] Backup pulled of a backup - "`hostname`" failed" 
 	export headers="From: $EMAILFROM"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
@@ -288,7 +288,7 @@ else
 
 	#echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
 
-	export body="Backup pulled of a backup for "`hostname`" succeed - End ret1=$ret1 ret2=$ret2\n$errstring"
+	export body="Backup pulled of a backup for "`hostname`" succeed - End ret1=$ret1 ret2=$ret2<br>\n$errstring"
 	export subject="[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" 
 	export headers="From: $EMAILFROM"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
