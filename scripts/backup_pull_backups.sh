@@ -134,7 +134,7 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	export DIRDESTI1="$backupdir";
 
 	export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
-	export OPTIONS="$OPTIONS --exclude '.debris' --exclude '*.qcow' --exclude '*.qcow2' --exclude 'sda*.img' --exclude='VirtualBox*VMs/'"
+	export OPTIONS="$OPTIONS --exclude '.debris' --exclude '*.qcow' --exclude '*.qcow2' --exclude '*.fsa' --exclude='VirtualBox*VMs/'"
 	
 	# Note: for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
 	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE1/* $DIRDESTI1";
