@@ -137,7 +137,7 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	export OPTIONS="$OPTIONS --exclude '.debris' --exclude '*.qcow' --exclude '*.qcow2' --exclude 'sda*.img' --exclude='VirtualBox*VMs/'"
 	
 	# Note: for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
-	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE1 $DIRDESTI1";
+	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE1/* $DIRDESTI1";
 	echo "$command";
 
 	> /tmp/$script.err
