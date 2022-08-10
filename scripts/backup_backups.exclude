@@ -1,6 +1,6 @@
 *.qcow
 *.qcow2
-sda*.img
+*.fsa
 *_log
 *.log
 *.log.old
