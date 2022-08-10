@@ -290,7 +290,7 @@ else
 
 	export body="Backup pulled of a backup for "`hostname`" succeed - End ret1=$ret1 ret2=$ret2\n$errstring"
 	export subject="[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" 
-	export headers="From: $EMAILFROM\r\n"
+	export headers="From: $EMAILFROM"
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 
 	#if [ -s /usr/syno/bin/synodsmnotify ]; then
