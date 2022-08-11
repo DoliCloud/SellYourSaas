@@ -191,7 +191,7 @@ else
 			echo "$command";
 	
 			> /tmp/$script.err
-			$command >/tmp/$script.log 2>/tmp/$script.err
+			$command >>/tmp/$script.log 2>/tmp/$script.err
 			if [ "x$?" != "x0" ]; then
 		        nberror=`cat /tmp/$script.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
 	    	    cat /tmp/$script.err
@@ -237,7 +237,7 @@ else
 			        	echo "$command";
 	
 						> /tmp/$script.err
-				        $command >/tmp/$script.log 2>/tmp/$script.err
+				        $command >>/tmp/$script.log 2>/tmp/$script.err
 				        if [ "x$?" != "x0" ]; then
 					        nberror=`cat /tmp/$script.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
 	    	    			cat /tmp/$script.err
