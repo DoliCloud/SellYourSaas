@@ -90,7 +90,7 @@ while read -r line ; do
 				
 				if [ "x$processid" != "x" ]; then
 					if [[ $processownerid =~ $re ]] ; then
-						echo "$now We got the processownerid from the ss command, surely a web access" >> /var/log/phpsendmail.log 2>&1
+						echo "$now We got the processownerid from the ss command, surely an email sent from a web page" >> /var/log/phpsendmail.log 2>&1
 					else
 						echo "$now We did not get the processownerid from the ss command. We try to get the processownerid using the processid from ps" >> /var/log/phpsendmail.log 2>&1
 

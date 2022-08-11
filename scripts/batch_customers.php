@@ -139,8 +139,11 @@ $langs->load("main");				// To load language file for default language
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
 if (! isset($argv[1])) {	// Check parameters
 	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter]\n";
-	print "Usage on deployment servers: ".$script_file." (backuptest|backuptestrsync|backuptestdatabase|backup|backupdelete) [instancefilter]\n";
+	print "Usage on deployment servers: ".$script_file." backup... [instancefilter]\n";
 	print "\n";
+	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
+	print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
+	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats table.\n";
 	print "- backuptest          test rsync+database backup\n";
 	print "- backuptestrsync     test rsync backup\n";
 	print "- backuptestdatabase  test database backup\n";
@@ -148,9 +151,6 @@ if (! isset($argv[1])) {	// Check parameters
 	print "- backupdatabase      creates backup (mysqldump)\n";
 	print "- backup              creates backup (rsync + database) ***** Used by cron on deployment servers *****\n";
 	print "- backupdelete        creates backup (rsync with delete + database)\n";
-	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats.\n";
-	print "- updatecountsonly    updates counters of instances only (only nb of user for instances)\n";
-	print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
 	exit(-1);
 }
 print '--- start script with mode '.$argv[1]."\n";
@@ -161,11 +161,18 @@ $now = dol_now();
 
 $action=$argv[1];
 $nbofok=0;
+
+
+// Initialize the array $instances*
+
+
 // Nb of deployed instances
 $nbofinstancedeployed=0;
-// Nb of paying instance
+// Nb of errors
 $nboferrors=0;
+// List of instances
 $instances=array();
+$instancestrial=array();
 $instancespaidsuspended=array();
 $instancespaidsuspendedandpaymenterror=array();
 $instancespaidnotsuspended=array();
@@ -185,14 +192,12 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 	$instancefiltercomplete = $instancefiltercomplete.".".$tmpstring;   // Automatically concat first domain name
 }
 
-
-
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($dbmaster);
 
 // Get list of instance
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
-$sql.= " ce.deployment_status as instance_status";
+$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 if ($instancefiltercomplete) {
@@ -209,7 +214,7 @@ if ($instancefiltercomplete) {
 $sql.= " AND ce.deployment_status IS NOT NULL";
 $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 // Add filter on deployment server
-if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+if (preg_match('/backup/', $action)) {
 	$sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
 }
 
@@ -295,12 +300,13 @@ if ($resql) {
 						}
 					}
 
-					$instances[$obj->id]=$instance;
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} elseif ($instancefiltercomplete) {
-					$instances[$obj->id]=$instance;
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} else {
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 				}
 			}
@@ -312,7 +318,7 @@ if ($resql) {
 	$nboferrors++;
 	dol_print_error($dbtousetosearch);
 }
-print "We found ".count($instances)." qualified instances including ".count($instancespaidsuspended)." suspended + ".count($instancespaidnotsuspendedpaymenterror)." active with payment ko\n";
+print "We found ".count($instancestrial)." deployed trial + ".count($instances)." deployed paid instances including ".count($instancespaidsuspended)." suspended + ".count($instancespaidnotsuspendedpaymenterror)." active with payment ko\n";
 
 
 //print "----- Start loop for backup_instance\n";
@@ -325,57 +331,70 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 	// Loop on each instance
 	if (! $error) {
 		$i = 0;
-		foreach ($instances as $instance) {
+		foreach ($instances as $arrayofinstance) {
+			$instance = $arrayofinstance['instance'];
+
 			$now = dol_now();
 
 			$return_val=0; $error=0; $errors=array();	// No error by default into each loop
 
-			// Run backup
-			print "***** Process backup of instance ".($i+1)." ".$instance.' - '.strftime("%Y%m%d-%H%M%S")."\n";
-
-			$mode = 'unknown';
-			$mode = ($action == 'backup'?'confirm':$mode);
-			$mode = ($action == 'backupdelete'?'confirm':$mode);
-			$mode = ($action == 'backuprsync'?'confirmrsync':$mode);
-			$mode = ($action == 'backupdatabase'?'confirmdatabase':$mode);
-			$mode = ($action == 'backuptest'?'test':$mode);
-			$mode = ($action == 'backuptestdatabase'?'testdatabase':$mode);
-			$mode = ($action == 'backuptestrsync'?'testrsync':$mode);
-
-			$command = ($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
-			if ($action == 'backupdelete') {
-				$command .= ' --delete';
-			}
-			//$command .= " --notransaction";
-			$command .= " --quick";
-
-			echo $command."\n";
-
-			if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase') {
-				$utils = new Utils($db);
-				$outputfile = $conf->admin->dir_temp.'/out.tmp';
-				$resultarray = $utils->executeCLI($command, $outputfile);
-
-				$return_val = $resultarray['result'];
-				$content_grabbed = $resultarray['output'];
-
-				echo "Result: ".$return_val."\n";
-				echo "Output: ".$content_grabbed."\n";
+			$qualifiedforbackup = 1;
+			// TODO Use a frequency on contract to know if we have to do backup or not
+			if ($arrayofinstance['latestbackup_date_ok'] > ($now - (23 * 3600))) {
+				$qualifiedforbackup = 0;
 			}
 
-			if ($return_val != 0) $error++;
-
-			// Return
-			if (! $error) {
-				$nbofok++;
-				$instancesbackupsuccess[$instance] = array('date' => dol_now('gmt'));
-				print '-> Backup process success for '.$instance."\n";
-				sleep(2);	// On success, we wait 2 seconds
+			if (empty($qualifiedforbackup)) {
+				// Discard backup
+				print "***** Discard backup of paid instance ".($i+1)." ".$instance.' - '.strftime("%Y%m%d-%H%M%S")." - Already successfull recently.\n";
 			} else {
-				$nboferrors++;
-				$instancesbackuperror[$instance] = array('date' => dol_now('gmt'));
-				print '-> Backup process fails for '.$instance."\n";
-				sleep(5);	// On error, we wait 5 seconds
+				// Run backup
+				print "***** Process backup of paid instance ".($i+1)." ".$instance.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+
+				$mode = 'unknown';
+				$mode = ($action == 'backup'?'confirm':$mode);
+				$mode = ($action == 'backupdelete'?'confirm':$mode);
+				$mode = ($action == 'backuprsync'?'confirmrsync':$mode);
+				$mode = ($action == 'backupdatabase'?'confirmdatabase':$mode);
+				$mode = ($action == 'backuptest'?'test':$mode);
+				$mode = ($action == 'backuptestdatabase'?'testdatabase':$mode);
+				$mode = ($action == 'backuptestrsync'?'testrsync':$mode);
+
+				$command = ($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
+				if ($action == 'backupdelete') {
+					$command .= ' --delete';
+				}
+				//$command .= " --notransaction";
+				$command .= " --quick";
+
+				echo $command."\n";
+
+				if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase') {
+					$utils = new Utils($db);
+					$outputfile = $conf->admin->dir_temp.'/out.tmp';
+					$resultarray = $utils->executeCLI($command, $outputfile);
+
+					$return_val = $resultarray['result'];
+					$content_grabbed = $resultarray['output'];
+
+					echo "Result: ".$return_val."\n";
+					echo "Output: ".$content_grabbed."\n";
+				}
+
+				if ($return_val != 0) $error++;
+
+				// Return
+				if (! $error) {
+					$nbofok++;
+					$instancesbackupsuccess[$instance] = array('date' => dol_now('gmt'));
+					print '-> Backup process success for '.$instance."\n";
+					sleep(2);	// On success, we wait 2 seconds
+				} else {
+					$nboferrors++;
+					$instancesbackuperror[$instance] = array('date' => dol_now('gmt'));
+					print '-> Backup process fails for '.$instance."\n";
+					sleep(5);	// On error, we wait 5 seconds
+				}
 			}
 
 			$i++;
@@ -398,7 +417,9 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 	// Loop on each instance
 	if (! $error && $action != 'updatestatsonly') {
 		$i=0;
-		foreach ($instances as $instance) {
+		foreach ($instances as $arrayofinstance) {
+			$instance = $arrayofinstance['instance'];
+
 			$return_val=0; $error=0; $errors=array();
 
 			// Run database update
@@ -611,7 +632,9 @@ print $out;
 $createlistofpaidinstance = 0;
 if ($createlistofpaidinstance) {
 	if ($handle = fopen('/tmp/listofpaidinstances', 'w')) {
-		foreach ($instances as $id => $instance) {
+		foreach ($instances as $id => $arrayofinstance) {
+			$instance = $arrayofinstance['instance'];
+
 			fwrite($handle, $id." ".$instance."\n");
 		}
 		fclose($handle);

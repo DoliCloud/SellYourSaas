@@ -188,27 +188,27 @@ $return_var = 0;
 
 // Preparation
 
-print "----- Go into dir /home/jail/home\n";
+print "Go into dir /home/jail/home\n";
 chdir('/home/jail/home/');
 
 dol_mkdir($pathtospamdir);
 
 
-print "----- Loop for blacklistip\n";
+print "----- Generate file blacklistip\n";
 
 $tmpblacklistip = new Blacklistip($db);
-$tmparray = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
-if (is_numeric($tmparray) && $tmparray < 0) {
+$tmparrayblacklistip = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparrayblacklistip) && $tmparrayblacklistip < 0) {
 	echo "Erreur: failed to get blacklistip elements.\n";
 }
 
-if (!empty($tmparray)) {
+if (!empty($tmparrayblacklistip)) {
 	//home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam
 
 	// Generate the file balcklistip
 	$filetobuild = $pathtospamdir.'/blacklistip';
 	$fh = fopen($filetobuild, "w");
-	foreach ($tmparray as $val) {
+	foreach ($tmparrayblacklistip as $val) {
 		$buffer = trim($val->content);
 		fwrite($fh, $buffer."\n");
 	}
@@ -219,19 +219,19 @@ if (!empty($tmparray)) {
 }
 
 
-print "----- Loop for blacklistfrom\n";
+print "----- Generate file blacklistfrom\n";
 
 $tmpblacklistfrom = new Blacklistfrom($db);
-$tmparray = $tmpblacklistfrom->fetchAll('', '', 1000, 0, array('status'=>1));
-if (is_numeric($tmparray) && $tmparray < 0) {
+$tmparrayblacklistfrom = $tmpblacklistfrom->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparrayblacklistfrom) && $tmparrayblacklistfrom < 0) {
 	echo "Erreur: failed to get blacklistfrom elements.\n";
 }
 
-if (!empty($tmparray)) {
+if (!empty($tmparrayblacklistfrom)) {
 	// Generate the file balcklistfrom
 	$filetobuild = $pathtospamdir.'/blacklistfrom';
 	$fh = fopen($filetobuild, "w");
-	foreach ($tmparray as $val) {
+	foreach ($tmparrayblacklistfrom as $val) {
 		$buffer = trim($val->content);
 		fwrite($fh, $buffer."\n");
 	}
@@ -243,19 +243,19 @@ if (!empty($tmparray)) {
 }
 
 
-print "----- Loop for blacklistto\n";
+print "----- Generate file blacklistto\n";
 
 $tmpblacklistto = new Blacklistto($db);
-$tmparray = $tmpblacklistto->fetchAll('', '', 1000, 0, array('status'=>1));
-if (is_numeric($tmparray) && $tmparray < 0) {
+$tmparrayblacklistto = $tmpblacklistto->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparrayblacklistto) && $tmparrayblacklistto < 0) {
 	echo "Erreur: failed to get blacklistto elements.\n";
 }
 
-if (!empty($tmparray)) {
+if (!empty($tmparrayblacklistto)) {
 	// Generate the file balcklistip
 	$filetobuild = $pathtospamdir.'/blacklistto';
 	$fh = fopen($filetobuild, "w");
-	foreach ($tmparray as $val) {
+	foreach ($tmparrayblacklistto as $val) {
 		$buffer = trim($val->content);
 		fwrite($fh, $buffer."\n");
 	}
@@ -266,23 +266,19 @@ if (!empty($tmparray)) {
 }
 
 
-// TODO Loop on each free instance not yet suspended (or only $instancefiltercomplete if defined)
-// Use same code than batch_customers.php
-
-
-print "----- Loop for spam keys into index.php using blacklistcontent\n";
+print "----- Generate file blacklistcontent\n";
 
 $tmpblacklistcontent = new Blacklistcontent($db);
-$tmparray = $tmpblacklistcontent->fetchAll('', '', 1000, 0, array('status'=>1));
-if (is_numeric($tmparray) && $tmparray < 0) {
+$tmparrayblacklistcontent = $tmpblacklistcontent->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparrayblacklistcontent) && $tmparrayblacklistcontent < 0) {
 	echo "Erreur: failed to get blacklistcontent elements.\n";
 }
 
-if (!empty($tmparray)) {
+if (!empty($tmparrayblacklistcontent)) {
 	// Generate the file balcklistcontent
 	$filetobuild = $pathtospamdir.'/blacklistcontent';
 	$fh = fopen($filetobuild, "w");
-	foreach ($tmparray as $val) {
+	foreach ($tmparrayblacklistcontent as $val) {
 		$buffer = trim($val->content);
 		fwrite($fh, $buffer."\n");
 	}
@@ -290,8 +286,209 @@ if (!empty($tmparray)) {
 	$newmask = '0664';
 	@chmod($filetobuild, octdec($newmask));
 	print 'File '.$filetobuild.' has been updated'."\n";
+}
 
-	foreach ($tmparray as $val) {
+
+$tmpblacklistdir = new Blacklistdir($db);
+$tmparrayblacklistdir = $tmpblacklistdir->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparrayblacklistdir) && $tmparrayblacklistdir < 0) {
+	echo "Erreur: failed to get blacklistdir elements.\n";
+}
+
+
+print "----- Generate file blacklistdir\n";
+
+if (!empty($tmparrayblacklistdir)) {
+	// Generate the file balcklistdir
+	$filetobuild = $pathtospamdir.'/blacklistdir';
+	$fh = fopen($filetobuild, "w");
+	foreach ($tmparrayblacklistdir as $val) {
+		$buffer = trim($val->content);
+		fwrite($fh, $buffer."\n");
+	}
+	fclose($fh);
+	$newmask = '0664';
+	@chmod($filetobuild, octdec($newmask));
+	print 'File '.$filetobuild.' has been updated'."\n";
+}
+
+
+
+// Initialize the array $instances*
+print "----- Initialize the arrayinstances*\n";
+
+
+// Nb of deployed instances
+$nbofinstancedeployed=0;
+// Nb of errors
+$nboferrors=0;
+// List of instances
+$instances=array();
+$instancestrial=array();
+$instancespaidsuspended=array();
+$instancespaidsuspendedandpaymenterror=array();
+$instancespaidnotsuspended=array();
+$instancespaidnotsuspendedpaymenterror=array();
+$instancesbackuperror=array();
+$instancesupdateerror=array();
+$instancesbackupsuccess=array();
+
+
+$instancefilter=(isset($argv[2])?$argv[2]:'');
+$instancefiltercomplete=$instancefilter;
+
+// Forge complete name of instance
+if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomplete) && ! preg_match('/\.home\.lan$/', $instancefiltercomplete)) {
+	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
+	$instancefiltercomplete = $instancefiltercomplete.".".$tmpstring;   // Automatically concat first domain name
+}
+
+include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+$object=new Contrat($dbmaster);
+
+// Get list of instance
+$sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
+$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok";
+$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
+$sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
+if ($instancefiltercomplete) {
+	$stringforsearch = '';
+	$tmparray = explode(',', $instancefiltercomplete);
+	foreach ($tmparray as $instancefiltecompletevalue) {
+		if (! empty($stringforsearch)) $stringforsearch.=", ";
+		$stringforsearch.="'".trim($instancefiltecompletevalue)."'";
+	}
+	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
+} else {
+	$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
+}
+$sql.= " AND ce.deployment_status IS NOT NULL";
+$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
+// Add filter on deployment server
+//if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+	$sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
+//}
+
+$dbtousetosearch = $dbmaster;
+
+print $sql."\n";                                    // To have this into the ouput of cron job
+
+dol_syslog($script_file, LOG_DEBUG);
+
+$resql=$dbtousetosearch->query($sql);
+if ($resql) {
+	$num = $dbtousetosearch->num_rows($resql);
+	$i = 0;
+	if ($num) {
+		// Loop on each deployed instance/contract
+		while ($i < $num) {
+			$obj = $dbtousetosearch->fetch_object($resql);
+			if ($obj) {
+				// We process the instance
+				$instance = $obj->instance;
+
+				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+
+				unset($object->linkedObjects);
+				unset($object->linkedObjectsIds);
+
+				// Load data of instance and set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
+				$instance_status = 'UNKNOWN';
+				$result = $object->fetch($obj->id);
+				if ($result <= 0) {
+					$i++;
+					dol_print_error($dbmaster, $object->error, $object->errors);
+					continue;
+				} else {
+					if ($object->array_options['options_deployment_status'] == 'processing') {
+						$instance_status = 'PROCESSING';
+					} elseif ($object->array_options['options_deployment_status'] == 'undeployed') {
+						$instance_status = 'UNDEPLOYED';
+					} elseif ($object->array_options['options_deployment_status'] == 'done') {
+						// should be here due to test into SQL request
+						$instance_status = 'DEPLOYED';
+						$nbofinstancedeployed++;
+					}
+				}
+
+				if ($instance_status == 'DEPLOYED') {
+					$issuspended = sellyoursaasIsSuspended($object);
+					if ($issuspended) {
+						$instance_status = 'SUSPENDED';
+					}
+					// Note: to check that all non deployed instance has line with status that is 5 (close), you can run
+					// select * from llx_contrat as c, llx_contrat_extrafields as ce, llx_contratdet as cd WHERE ce.fk_object = c.rowid
+					// AND cd.fk_contrat = c.rowid AND ce.deployment_status <> 'done' AND cd.statut <> 5;
+					// You should get nothing.
+				}
+
+				// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
+				$payment_status='PAID';
+				$ispaid = sellyoursaasIsPaidInstance($object);	// This load linkedObjectsIds
+				if (! $ispaid) {
+					$payment_status='TRIAL';
+				} else {
+					$ispaymentko = sellyoursaasIsPaymentKo($object);
+					if ($ispaymentko) {
+						$payment_status='FAILURE';
+					}
+				}
+
+				print "Analyze".($instancefiltercomplete ? '' : ' deployed')." instance ".($i+1)." ".$instance.": instance_status=".$instance_status." payment_status=".$payment_status.(empty($object->array_options['options_suspendmaintenance_message']) ? "" : " (maintenance/redirect: ".($object->array_options['options_suspendmaintenance_message']).")")."\n";
+
+				// Count
+				if (! in_array($payment_status, array('TRIAL'))) {
+					// We analyze all non trial deployed instances
+					if (in_array($instance_status, array('SUSPENDED'))) {
+						$instancespaidsuspended[$obj->id] = $obj->ref.' ('.$instance.')';
+						if (in_array($payment_status, array('FAILURE'))) {
+							$instancespaidsuspendedandpaymenterror[$obj->id] = $obj->ref.' ('.$instance.')';
+						}
+					} else {
+						$instancespaidnotsuspended[$obj->id] = $obj->ref.' ('.$instance.')';
+						if (in_array($payment_status, array('FAILURE'))) {
+							$instancespaidnotsuspendedpaymenterror[$obj->id] = $obj->ref.' ('.$instance.')';
+						}
+					}
+
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
+				} elseif ($instancefiltercomplete) {
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
+				} else {
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
+				}
+			}
+			$i++;
+		}
+	}
+} else {
+	$error++;
+	$nboferrors++;
+	dol_print_error($dbtousetosearch);
+}
+print "We found ".count($instancestrial)." deployed trial + ".count($instances)." deployed paid instances including ".count($instancespaidsuspended)." suspended + ".count($instancespaidnotsuspendedpaymenterror)." active with payment ko\n";
+
+
+
+print "----- Generate file mailquota\n";
+
+
+
+// TODO Loop on each instance of server (or only $instancefiltercomplete if defined)
+// Use same code than batch_customers.php
+
+// If paid instance, we complete the file $filetobuild = $pathtospamdir.'/mailquota';
+
+// If free instance; we do...
+
+print "----- Loop for spam keys into index.php using blacklistcontent\n";
+
+if (!empty($tmparrayblacklistcontent)) {
+	foreach ($tmparrayblacklistcontent as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
 			$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu*/dbn*/htdocs/index.php";
@@ -312,28 +509,10 @@ if (!empty($tmparray)) {
 }
 
 
-print "----- Loop for spam dir using blacklistdir\n";
+print "----- Loop for spam dir or files using blacklistdir\n";
 
-$tmpblacklistdir = new Blacklistdir($db);
-$tmparray = $tmpblacklistdir->fetchAll('', '', 1000, 0, array('status'=>1));
-if (is_numeric($tmparray) && $tmparray < 0) {
-	echo "Erreur: failed to get blacklistdir elements.\n";
-}
-
-if (!empty($tmparray)) {
-	// Generate the file balcklistdir
-	$filetobuild = $pathtospamdir.'/blacklistdir';
-	$fh = fopen($filetobuild, "w");
-	foreach ($tmparray as $val) {
-		$buffer = trim($val->content);
-		fwrite($fh, $buffer."\n");
-	}
-	fclose($fh);
-	$newmask = '0664';
-	@chmod($filetobuild, octdec($newmask));
-	print 'File '.$filetobuild.' has been updated'."\n";
-
-	foreach ($tmparray as $val) {
+if (!empty($tmparrayblacklistdir)) {
+	foreach ($tmparrayblacklistdir as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
 			$command = "find osu*/dbn*/htdocs/ -maxdepth 2";
@@ -365,39 +544,6 @@ if (!empty($tmparray)) {
 		}
 	}
 }
-
-/*
-print "----- Loop for spam dir using whitelistdir\n";
-
-$tmpblacklistdir = new Blacklistdir($db);
-$tmparray = $tmpblacklistdir->fetchAll('', '', 1000, 0, array('status'=>1));
-if (is_numeric($tmparray) && $tmparray < 0) {
-	echo "Erreur: failed to get whitelistdir elements.\n";
-}
-
-if (!empty($tmparray)) {
-	$buffer = '';
-	foreach ($tmparray as $val) {
-		$buffertmp = dol_sanitizePathName(trim($val->content));
-		if ($buffertmp) {
-			$buffer .= ($buffer ? '|' : '').$buffertmp;
-		}
-	}
-
-	echo 'Scan if we found a non whitelistdir dir '.$buffer.' in osuSTAR/dbnSTAR/htdocs/ ';
-	$command = "find osuSTAR/dbnSTAR/htdocs/ -maxdepth 1 -type d | grep -v '".escapeshellcmd(str_replace("'", ".", $buffer))."'";
-	$fullcommand=$command;
-	$output=array();
-	//echo $command."\n";
-	exec($fullcommand, $output, $return_var);
-	if ($return_var == 0) {		// command returns 0 if something was found
-		// We found an evil string
-		print "- ALERT: evil dirs '".(join(', ', $output))."' was/were found using the command: ".$command."\n";
-	} else {
-		print "- OK\n";
-	}
-}
-*/
 
 
 
