@@ -691,6 +691,7 @@ class modSellYourSaas extends DolibarrModules
 
 
 		// Cancellation questions
+		/*
 		$this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=sellyoursaas',
 			'type'=>'left',
@@ -723,6 +724,7 @@ class modSellYourSaas extends DolibarrModules
 			'user'=>0
 		);
 		$r++;
+		*/
 	}
 
 	/**
