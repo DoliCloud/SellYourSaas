@@ -18,7 +18,6 @@ $logfile = '/var/log/phpsendmail.log';
 //$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
 $pathtospamdir = '/tmp/spam';
 
-
 //* Get the email content
 $mail='';
 $toline = ''; $ccline = ''; $bccline = '';
@@ -47,6 +46,9 @@ if ($fp) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'maxemailperday') {
 			$maxemailperday = $tmpline[1];
+		}
+		if ($tmpline[0] == 'pathtospamdir') {
+			$pathtospamdir = $tmpline[1];
 		}
 	}
 } else {
