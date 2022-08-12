@@ -850,6 +850,9 @@ With the following content:
 
 # Options for antispam system
 maxemailperday=500
+
+# Option to use a different path for spam (for public script)
+#pathtospamdir=/tmp/spam
 ---------------
 
 
@@ -5102,7 +5105,6 @@ If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment 
 
 To activate Jailkit, a chroot security system (see Jailkit configuration)
 * SELLYOURSAAS_SSH_JAILKIT_ENABLED = 1
-
 
 === Command ScaleWay
 
