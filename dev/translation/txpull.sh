@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #------------------------------------------------------
 # Script to pull language files to Transifex
 #
@@ -8,7 +8,8 @@
 #------------------------------------------------------
 
 
-#echo TX_TOKEN=$TX_TOKEN
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR/../..
 
 # Syntax
 if [ "x$1" = "x" ]
