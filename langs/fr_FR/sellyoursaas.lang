@@ -129,7 +129,6 @@ PleaseWait=Merci de patienter.
 AddressLine=Ligne adresse
 Organization=Organisation
 NameOfCompany=Nom de société/institution
-ConfirmPassword=Confirmer mot de passe
 ChooseANameForYourApplication=Choisissez un nom d'adresse pour l'application
 WhenRegisteringYouAccept=En vous enregistrant, vous acceptez les<br><a href="%s" target="_blank">Conditions d'utilisation</a>
 SignMeUp=Créer mon instance

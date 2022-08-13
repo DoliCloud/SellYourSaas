@@ -497,7 +497,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				</div>
 				<div class="horizontal-fld">
 				  <div class="control-group required">
-					<label class="control-label" for="password2" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("ConfirmPassword") ?></label>
+					<label class="control-label" for="password2" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("PasswordRetype") ?></label>
 					<div class="controls">
 					  <input<?php echo $disabled; ?> name="password2" type="password" maxlength="128" required />
 					</div>

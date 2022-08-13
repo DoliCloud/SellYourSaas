@@ -129,7 +129,6 @@ PleaseWait=Please wait.
 AddressLine=Address line
 Organization=Organization
 NameOfCompany=Company/organization name
-ConfirmPassword=Confirm your password
 ChooseANameForYourApplication=Choose Application Address
 WhenRegisteringYouAccept=By registering you agree to our<br><a href="%s" target="_blank">Terms of Service</a>.
 SignMeUp=Sign Me Up!
