@@ -340,16 +340,16 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 
 			$qualifiedforbackup = 1;
 			// TODO Use a frequency on contract to know if we have to do backup or not
-			if ($arrayofinstance['latestbackup_date_ok'] > ($now - (23 * 3600))) {
+			if ($arrayofinstance['latestbackup_date_ok'] > ($now - (12 * 3600))) {
 				$qualifiedforbackup = 0;
 			}
 
 			if (empty($qualifiedforbackup)) {
 				// Discard backup
-				print "***** Discard backup of paid instance ".($i+1)." ".$instance.' - '.strftime("%Y%m%d-%H%M%S")." - Already successfull recently.\n";
+				print "***** Discard backup of paid instance ".($i+1)." ".$instance.' at '.strftime("%Y%m%d-%H%M%S")." - Already successfull recently the ".dol_print_date($arrayofinstance['latestbackup_date_ok'], "%Y%m%d-%H%M%S").".\n";
 			} else {
 				// Run backup
-				print "***** Process backup of paid instance ".($i+1)." ".$instance.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+				print "***** Process backup of paid instance ".($i+1)." ".$instance.' at '.strftime("%Y%m%d-%H%M%S")." - Previous success was on ".dol_print_date($arrayofinstance['latestbackup_date_ok'], "%Y%m%d-%H%M%S").".\n";
 
 				$mode = 'unknown';
 				$mode = ($action == 'backup'?'confirm':$mode);
