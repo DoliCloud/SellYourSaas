@@ -2220,7 +2220,7 @@ Then check the email box and/or the file */var/log/mail.log* (if file /var/log/m
 For information about the queue or the setup of Postfix:
 ---------------
 postqueue -p
-postsuper -r all
+postsuper -r ALL
 # Diff in master.cf
 postconf -Mf
 # Diff in main.cf
@@ -5453,10 +5453,28 @@ max_allowed_packet=100000000
 
 You may experience a too high number of child processed (reaching the maximum). You can see this on pahe https://withX.mysaasdomain.com/server-status
 If this child are in state R, then you can try to reduce this by enabling the module ReqTimeout and set
+
 [source,bash]
 ---------------
 RequestReadTimeout handshake=5 header=10 body=30
 ---------------
+
+
+==== Emails are blocked in postfix queue
+
+To scan all emails in postfix queue with Queue ID + Message-ID :
+
+[source,bash]
+---------------
+for id in `postqueue -p | grep '^[A-Z0-9]' | cut -f1 -d' '|sed 's/*//g'`; do echo $id; postcat -h -q "$id" | grep "Message-ID" ; done > /tmp/aaa
+---------------
+
+
+
+
+
+
+
 
 
 
