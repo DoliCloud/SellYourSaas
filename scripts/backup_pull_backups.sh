@@ -150,12 +150,14 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 		  	echo "ERROR Failed to make rsync for $DIRSOURCE1"
 	  		echo
 	   		export ret1=$(($ret1 + 1));
-	   		export errstring="Dir $DIRSOURCE1 "`date '+%Y-%m-%d %H:%M:%S'`
+	   		export errstring="${0} $1 $2 $3 $4 -> Dir $DIRSOURCE1 "`date '+%Y-%m-%d %H:%M:%S'`
 	   	else
-            echo "No files found"
+	   	    export errstring="$3 $4 -> No files found"
+            echo "${0} $1 $2 $3 $4 -> No files found"
             echo
 	   	fi
 	else
+	    export errstring="${0} $1 $2 $3 $4 -> OK"
 		echo "OK"
 		echo
 	fi
@@ -182,6 +184,8 @@ else
 		# Case of /mnt/diskbackup/home*x
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of system backup on $SERVSOURCECURSOR:$DIRSOURCE1$i to $DIRDESTI1 ..."
 	
+	    export errstring="${0} $1 $2 -> "
+	    
 		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE1$i"
 			export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
