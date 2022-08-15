@@ -878,15 +878,17 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 						var pid = jQuery("#service option:selected").val();
 						console.log("We select product id = "+pid);
 					';
-	foreach ($arrayofplansfull as $key => $plan) {
-		if (!empty($plan['restrict_domains'])) {
-			$restrict_domains = explode(",", $plan['restrict_domains']);
-			foreach ($restrict_domains as $domain) {
-				print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
-				break;
+	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
+		foreach ($arrayofplansfull as $key => $plan) {
+			if (!empty($plan['restrict_domains'])) {
+				$restrict_domains = explode(",", $plan['restrict_domains']);
+				foreach ($restrict_domains as $domain) {
+					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
+					break;
+				}
+			} else {
+				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
 			}
-		} else {
-			print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
 		}
 	}
 
@@ -895,8 +897,10 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 				jQuery("#service").trigger("change");
 			});'."\n";
 
-	foreach ($arrayofplansfull as $key => $plan) {
-		print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
+		foreach ($arrayofplansfull as $key => $plan) {
+			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+		}
 	}
 	print '</script>';
 
