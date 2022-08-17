@@ -5469,6 +5469,9 @@ To scan all emails in postfix queue with Queue ID + Message-ID :
 for id in `postqueue -p | grep '^[A-Z0-9]' | cut -f1 -d' '|sed 's/*//g'`; do echo $id; postcat -h -q "$id" | grep "Message-ID" ; done > /tmp/aaa
 ---------------
 
+To get content of email in queue:
+
+postcat -q ID 
 
 
 
