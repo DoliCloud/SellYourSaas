@@ -146,7 +146,7 @@ fi
 echo "testorconfirm = $testorconfirm"
 
 export errstring=""
-export ret=0
+export atleastoneerror=0
 declare -A ret1
 declare -A ret2
 
@@ -243,31 +243,33 @@ echo `date +'%Y-%m-%d %H:%M:%S'`" End with errstring=$errstring"
 echo
 
 
-# Loop on each target server
+# Loop on each targeted server for return code
+export atleastoneerror=0
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
 	echo `date +'%Y-%m-%d %H:%M:%S'`" End for $SERVDESTICURSOR ret1[$SERVDESTICURSOR]=${ret1[$SERVDESTICURSOR]} ret2[$SERVDESTICURSOR]=${ret2[$SERVDESTICURSOR]}"
 
 	if [ "x${ret1[$SERVDESTICURSOR]}" != "x0" ]; then
-		echo "Send email to $EMAILTO to warn about backup error"
-		echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=${ret1[$SERVDESTICURSOR]} ret2=${ret2[$SERVDESTICURSOR]} errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-		ret=${ret1[$SERVDESTICURSOR]}
+		atleastoneerror=1
 	elif [ "x${ret2[$SERVDESTICURSOR]}" != "x0" ]; then
-		echo "Send email to $EMAILTO to warn about backup error"
-		echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=${ret1[$SERVDESTICURSOR]} ret2=${ret2[$SERVDESTICURSOR]} errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-		ret=${ret2[$SERVDESTICURSOR]}
+		atleastoneerror=1
 	fi
-
-	echo
 done
+
+
+# Send email if there is one error
+if [ "x$atleastoneerror" != "x0" ]; then
+	echo "Send email to $EMAILTO to warn about backup error"
+	echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
+fi
 
 
 # Delete temporary emptydir
 rmdir $HOME/emptydir
 
 
-if [ "x$ret" != "x0" ]; then
-	exit $ret
+if [ "x$atleastoneerror" != "x0" ]; then
+	exit 1
 fi
 
 if [ "x$3" != "x" ]; then

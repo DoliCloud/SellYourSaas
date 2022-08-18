@@ -5471,7 +5471,11 @@ for id in `postqueue -p | grep '^[A-Z0-9]' | cut -f1 -d' '|sed 's/*//g'`; do ech
 
 To get content of email in queue:
 
-postcat -q ID 
+postcat -qbh IDINQUEUE > /tmp/file.eml
+
+To flush the queur for one message
+
+postqueue -i IDINQUEUE
 
 
 
