@@ -248,7 +248,7 @@ export atleastoneerror=0
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
 	echo `date +'%Y-%m-%d %H:%M:%S'`" End for $SERVDESTICURSOR ret1[$SERVDESTICURSOR]=${ret1[$SERVDESTICURSOR]} ret2[$SERVDESTICURSOR]=${ret2[$SERVDESTICURSOR]}"
-
+    
 	if [ "x${ret1[$SERVDESTICURSOR]}" != "x0" ]; then
 		atleastoneerror=1
 	elif [ "x${ret2[$SERVDESTICURSOR]}" != "x0" ]; then
@@ -260,7 +260,7 @@ done
 # Send email if there is one error
 if [ "x$atleastoneerror" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
+	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\n\nerrstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
 fi
 
 
