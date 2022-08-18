@@ -151,7 +151,7 @@ declare -A ret1
 declare -A ret2
 
 
-# the following line clears the last weeks incremental directory
+# the following line is to have an empty dir to clear the last incremental directories
 [ -d $HOME/emptydir ] || mkdir $HOME/emptydir
 
 
@@ -257,26 +257,23 @@ do
 done
 
 
-# Send email if there is one error
-if [ "x$atleastoneerror" != "x0" ]; then
-	echo "Send email to $EMAILTO to warn about backup error"
-	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\n\nerrstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
-fi
-
-
 # Delete temporary emptydir
 rmdir $HOME/emptydir
 
 
+# Send email if there is one error
 if [ "x$atleastoneerror" != "x0" ]; then
+	echo "Send email to $EMAILTO to warn about backup error"
+	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nerrstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
+	
 	exit 1
 fi
 
 if [ "x$3" != "x" ]; then
-	echo Script was called for only one given instance. No email or supervision event sent in such situation
+	echo Script was called for only one given instance. No email or supervision event sent on success in such situation
 else
 	echo "Send email to $EMAILTO to inform about backup success"
-	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed.\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 fi
 echo
 
