@@ -737,8 +737,6 @@ class modSellYourSaas extends DolibarrModules
 	 */
 	public function init($options = '')
 	{
-		global $conf, $langs;
-
 		$result=$this->_load_tables('/sellyoursaas/sql/');
 
 		// Create extrafields
@@ -842,6 +840,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('latestbackup_date_ok',           "LatestBackupDateOK", 'datetime', 160,    '',    'contrat', 0, 0,    '',      '', 1, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('latestbackup_status',            "LatestBackupStatus",  'varchar', 161,   '2',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('latestbackup_message',          "LatestBackupMessage",     'text', 162, '8192',    'contrat', 0, 0,    '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('backup_frequency',                  "BackupFrequency",     'int',  165,   '3',    'contrat', 0, 0,   '1',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('cookieregister_counter',                    "RegistrationCounter",     'int', 170,  '10',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 1);
 		$resultx=$extrafields->addExtraField('cookieregister_previous_instance', "RegistrationPreviousInstance", 'varchar', 171, '128',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('discountcode', 	    	 			             "DiscountCode", 'varchar', 200, '255',    'contrat', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
