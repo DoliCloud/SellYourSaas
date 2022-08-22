@@ -230,7 +230,7 @@ if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.ho
 
 $idofinstancefound = 0;
 
-$sql = "SELECT c.rowid, c.statut";
+$sql = "SELECT c.rowid, c.ref, c.ref_customer as instance, c.statut";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= "  WHERE c.entity IN (".getEntity('contract').")";
 $sql.= " AND c.ref_customer = '".$dbmaster->escape($instance)."'";
@@ -247,13 +247,17 @@ if ($num_rows > 1) {
 	exit(-2);
 } else {
 	$obj = $dbmaster->fetch_object($resql);
-	if ($obj) $idofinstancefound = $obj->rowid;
+	if ($obj) {
+		$idofinstancefound = $obj->rowid;
+	}
 }
 
 dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
 $object = new SellYourSaasContract($dbmaster);
 $result=0;
-if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
+if ($idofinstancefound) {
+	$result = $object->fetch($idofinstancefound);
+}
 
 
 if ($result <= 0) {
@@ -270,6 +274,8 @@ $object->username_db     = $object->array_options['options_username_db'];
 $object->password_db     = $object->array_options['options_password_db'];
 $object->database_db     = $object->array_options['options_database_db'];
 $object->deployment_host = $object->array_options['options_deployment_host'];
+$object->latestbackup_date_ok = $object->array_options['options_latestbackup_date_ok'];
+$object->backup_frequency = $object->array_options['options_backup_frequency'];
 
 if (empty($object->instance) && empty($object->username_web) && empty($object->password_web) && empty($object->database_db)) {
 	print "Error: properties for instance ".$instance." was not registered into database.\n";
@@ -329,7 +335,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	}
 
 	// Get frequency of rsync for the instance
-	// TODO set $backuprsyncdayfrequency according to instance
+	if (!empty($object->backupfrequency)) {
+		// TODO use $object->backupfrequency for $backuprsyncdayfrequency
+	}
 
 	// Test last date of rsync
 	$txtfile = $dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt';
@@ -445,7 +453,9 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 	// Get frequency of sql dump for the instance
-	// TODO set $backupdumpdayfrequency according to instance
+	if (!empty($object->backupfrequency)) {
+		// TODO use $object->backupfrequency for $backupdumpdayfrequency
+	}
 
 	// Test last date of sql dump
 	$txtfile = $dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt';

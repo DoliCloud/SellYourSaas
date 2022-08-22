@@ -38,4 +38,6 @@ class SellYourSaasContract extends Contrat
 	public $password_db;
 	public $database_db;
 	public $deployment_host;
+	public $latestbackup_date_ok;
+	public $backup_frequency;
 }
