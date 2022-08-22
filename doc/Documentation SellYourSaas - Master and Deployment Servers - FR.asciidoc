@@ -1072,7 +1072,7 @@ Sur le *Serveur Master*:
         AuthUserFile /etc/apache2/.htpasswd
         Require valid-user
         # Or if you prefer restrict to some ip, you can add lines "Require ip x.y.z.w" into a .conf file into this directory:
-        IncludeOptional /etc/sellyoursaas-allowed-ip.d/*.conf
+        IncludeOptional /etc/sellyoursaas.d/*.conf
         </Directory>
 
         #leaving /public, /api and /dav accessible to everyone
