@@ -203,7 +203,7 @@ else
 				  	echo "ERROR Failed to make rsync for $DIRSOURCE1$i"
 			  		echo
 			   		export ret1=$(($ret1 + 1));
-			   		export errstring="$errstring\nDir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`
+			   		export errstring="$errstring\nDir $DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
 			   	else
 	                echo "No files found"
 	                echo
@@ -249,7 +249,7 @@ else
 					        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
 					        	echo
 					        	export ret2=$(($ret2 + 1));
-				    	    	export errstring="$errstring\nDir $DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`
+				    	    	export errstring="$errstring\nDir $DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
 				    	    else
 				                echo "No files found"
 				                echo
@@ -289,7 +289,7 @@ if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 	
 	echo
 
-	exit $ret
+	exit 1
 else 
 	echo "Send email to $EMAILTO to inform about backup success"
 

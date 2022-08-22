@@ -269,7 +269,7 @@ rmdir $HOME/emptydir
 # Send email if there is one error
 if [ "x$atleastoneerror" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nerrstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
+	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nErrors or warnings are:\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
 	
 	exit 1
 fi
