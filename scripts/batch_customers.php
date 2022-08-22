@@ -608,7 +608,7 @@ if ($action != 'updatestatsonly') {
 	$out.= "** Nb of paying instances processed ko: ".$nboferrors;
 }
 if (count($instancesbackuperror)) {
-	$out.= ", error for backup on ";
+	$out.= ", ERROR FOR BACKUP ON ";
 	foreach ($instancesbackuperror as $instance => $val) {
 		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
 	}
