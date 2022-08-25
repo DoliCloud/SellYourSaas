@@ -60,7 +60,7 @@ option n then p (then choose the partition number, first and last sector) then w
 fdisk -l
 
 fsck -N /dev/vdxY
-mkfs.ext4 /dev/vdxY
+mkfs.btrfs /dev/vdxY
 ---------------
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
@@ -76,7 +76,7 @@ blkid
 
 [source, bash]
 ---------------
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (does not block the server from starting)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0 (does not block the server from starting)
 ---------------
 
 * Mount disk
@@ -108,7 +108,7 @@ To add -noatime to the filesystem in the */etc/fstab* file:
 
 [source, bash]
 ---------------
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0
 ---------------
 
 To take the change into account:
@@ -941,6 +941,42 @@ mount /dev/sdXY /mnt
 ---------------
 
 Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
+
+
+=== Use of btrfs to create a subvolume vor each backup dir of each server
+
+Then you create a subvolume for each directory you want to be able to make snapshots.
+
+To list existing subvolumes:
+
+[source,bash]
+---------------
+btrfs subvolume list /mnt/diskbackup
+---------------
+
+To create a subvolume for a server
+
+[source,bash]
+---------------
+btrfs subvolume create /mnt/diskbackup/xxx   # with xxx = home_serverX or backup_serverX
+chown admin.admin /mnt/diskbackup/xxx
+chmod -R o-rw /mnt/diskbackup/xxx
+---------------
+
+To create a readonly snapshot
+
+[source,bash]
+---------------
+btrfs subvolume snapshot -r /mnt/diskbackup/xxx /mnt/diskbackup/.snapshots/xxx
+---------------
+
+To delete a readonly snapshot
+
+[source,bash]
+---------------
+btrfs subvolume delete /mnt/diskbackup/.snapshots/xxx
+---------------
+
 
 
 <<<<<<<
