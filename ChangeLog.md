@@ -8,12 +8,17 @@
  * NEW Add an evil picto on instances flagged as evil
  * NEW Add a page to list all evil instances (with filter predefined for this)
  * NEW Enhance the clean.sh script
- * NEW Add option SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
  * NEW Add a parameter "Max number of deployement per IP (VPN)" (default 1) that is specific on VPN usage so different
        than the paramater "Max number of deployement per IP" (default 4)
- * NEW Can enablde/disable external service to validate IP or email in a simple click into SellYourSaas module setup.
- * NEW Add option Direct SFTP/mysql access "On demand only"
- * Prepare code for service to validate email quality (like done for IP validation)
+ * NEW Add option SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
+ * NEW Can enable/disable external service to validate IP or email in a simple click into SellYourSaas module setup.
+ * NEW The option "Direct access to SFTP/mysql" on service setup now accept the value "On demand only". The tab will be visible to
+   customer with a message to ask the access doing a ticket.
+ * NEW Split the setup page into several pages.
+ * NEW Can contact IPQualityScore external service to validate email quality (like done for IP validation)
+ * NEW Add option backuprsyncdayfrequency and backupdumpdayfrequency (Value 1 by default).
+ * Experimental feature to allow end user to migrate its instance from its own backup (works for a Dolibarr instance only)
+ * Experimental feature to allow end user to upgrate its instance to a higher version (works for a Dolibarr instance only)
  * FIX Timezone is filled also for instances created from customer dashboard
 
 

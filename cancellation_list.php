@@ -102,8 +102,7 @@ if (! $sortorder) {
 
 // Security check
 $socid=0;
-if ($user->societe_id > 0) {	// Protection if external user
-	//$socid = $user->societe_id;
+if ($user->socid > 0) {	// Protection if external user
 	accessforbidden();
 }
 //$result = restrictedArea($user, 'sellyoursaas', $id,'');

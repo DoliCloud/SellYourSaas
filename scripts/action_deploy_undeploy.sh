@@ -756,7 +756,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	echo "Force permissions and owner on $targetdir/$osusername/$dbname"
 	chown -R $osusername.$osusername $targetdir/$osusername/$dbname
-	chmod -R go-rwx $targetdir/$osusername/$dbname
+	chmod -R go-rwxs $targetdir/$osusername/$dbname
 fi
 
 

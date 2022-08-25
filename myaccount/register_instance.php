@@ -393,21 +393,24 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		exit(-28);
 	}
 
-	/* No more used, use instead SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED and SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED
-	if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
-		$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
-		if (! empty($listofbanned)) {
-			foreach ($listofbanned as $banned) {
-				if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
-					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
-					header("Location: ".$newurl);
-					exit(-29);
+	// Possibility to block email adresses from a regex into global setup
+	// TODO: should be possible to use the blacklist list.
+	if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
+		if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
+			$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
+			if (! empty($listofbanned)) {
+				foreach ($listofbanned as $banned) {
+					if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
+						setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
+						header("Location: ".$newurl);
+						exit(-29);
+					}
 				}
 			}
 		}
 	}
-	*/
-	if (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED) && ! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY)) {
+
+	if (getDolGlobalInt('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED') && getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY')) {
 		$allowed = false;
 		$disposable = false;
 		$allowedemail = (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED) ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
@@ -965,6 +968,8 @@ if ($reusecontractid) {
 			}
 		}
 	} else {
+		dol_syslog("register_instance.php We will create the thirdparty");
+
 		// Set lang to backoffice language
 		$savlangs = $langs;
 		$langs = $langsen;
@@ -995,6 +1000,8 @@ if ($reusecontractid) {
 	}
 
 	if (! empty($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG)) {
+		dol_syslog("register_instance.php We will set customer into the categroy");
+
 		$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG), 'customer');
 		if ($result < 0) {
 			$db->rollback();

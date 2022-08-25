@@ -127,17 +127,22 @@ if [ "x$1" == "x" ]; then
 	echo "Usage: ${0} (test|confirm) [m|w] [osuX] [--delete]"
 	echo "Where m (default) is to keep 1 month of backup, and w is to keep 1 week of backup"
 	echo "You can also set a group of 4 first letter on username to backup the backup of a limited number of users."
-	exit 1
+	echo
+	exit 101
 fi
 
 if [ "x$SERVDESTI" == "x" ]; then
 	echo "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} (test|confirm) [osuX]"
+	echo
+	exit 102
 fi
 
 if [ "x$DOMAIN" == "x" ]; then
 	echo "Value for domain seems to not be set into /etc/sellyoursaas.conf" 1>&2
 	echo "Usage: ${0} (test|confirm) [osuX]"
+	echo
+	exit 103
 fi
 
 
@@ -146,12 +151,12 @@ fi
 echo "testorconfirm = $testorconfirm"
 
 export errstring=""
-export ret=0
+export atleastoneerror=0
 declare -A ret1
 declare -A ret2
 
 
-# the following line clears the last weeks incremental directory
+# the following line is to have an empty dir to clear the last incremental directories
 [ -d $HOME/emptydir ] || mkdir $HOME/emptydir
 
 
@@ -232,8 +237,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 				fi
 			done
 	    else
-	    	echo No directory found starting with name $backupdir/osu$i
-			export errstring="$errstring\nNo directory found starting with name $backupdir/osu$i"
+	    	echo "No directory found starting with name $backupdir/osu$i"
+			export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" No directory found starting with name $backupdir/osu$i\n"
 	    fi
 	done
 fi
@@ -243,22 +248,17 @@ echo `date +'%Y-%m-%d %H:%M:%S'`" End with errstring=$errstring"
 echo
 
 
-# Loop on each target server
+# Loop on each targeted server for return code
+export atleastoneerror=0
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
 	echo `date +'%Y-%m-%d %H:%M:%S'`" End for $SERVDESTICURSOR ret1[$SERVDESTICURSOR]=${ret1[$SERVDESTICURSOR]} ret2[$SERVDESTICURSOR]=${ret2[$SERVDESTICURSOR]}"
-
+    
 	if [ "x${ret1[$SERVDESTICURSOR]}" != "x0" ]; then
-		echo "Send email to $EMAILTO to warn about backup error"
-		echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=${ret1[$SERVDESTICURSOR]} ret2=${ret2[$SERVDESTICURSOR]} errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-		ret=${ret1[$SERVDESTICURSOR]}
+		atleastoneerror=1
 	elif [ "x${ret2[$SERVDESTICURSOR]}" != "x0" ]; then
-		echo "Send email to $EMAILTO to warn about backup error"
-		echo -e "Failed to make copy backup to remote backup server $SERVDESTICURSOR - End ret1=${ret1[$SERVDESTICURSOR]} ret2=${ret2[$SERVDESTICURSOR]} errstring=\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server failed for "`hostname` $EMAILTO
-		ret=${ret2[$SERVDESTICURSOR]}
+		atleastoneerror=1
 	fi
-
-	echo
 done
 
 
@@ -266,15 +266,19 @@ done
 rmdir $HOME/emptydir
 
 
-if [ "x$ret" != "x0" ]; then
-	exit $ret
+# Send email if there is one error
+if [ "x$atleastoneerror" != "x0" ]; then
+	echo "Send email to $EMAILTO to warn about backup error"
+	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nErrors or warnings are:\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
+	
+	exit 1
 fi
 
 if [ "x$3" != "x" ]; then
-	echo Script was called for only one given instance. No email or supervision event sent in such situation
+	echo Script was called for only one given instance. No email or supervision event sent on success in such situation
 else
 	echo "Send email to $EMAILTO to inform about backup success"
-	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed.\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 fi
 echo
 

@@ -36,6 +36,11 @@ span.labelprod {
     display: block;
 }
 
+.pforbutton a {
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
 .start {
 	text-align: start;
 }

@@ -7,6 +7,8 @@ echo "CERTBOT_ALL_DOMAINS=$CERTBOT_ALL_DOMAINS"
 export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 #export subdomain=$CERTBOT_DOMAIN
 zone_file="/etc/bind/${subdomain}.hosts"
+echo "zone_file=$zone_file"
+
 #current_certificates="/etc/letsencrypt/live/with1.doliasso.org/*pem"
 
 #LET'S ENCRYPT VARIABLES

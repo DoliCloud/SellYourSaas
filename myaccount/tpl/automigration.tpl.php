@@ -304,6 +304,7 @@ if ($action == 'fileverification') {
 		print '<input type="hidden" name="dirfilename" value="'.$filetoverify["dir"].'">';
 		print '<input type="hidden" name="mode" value="automigration">';
 		print '<input type="hidden" name="subject" value="'.GETPOST('subject', 'alpha').'">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
 
 		print '<br><div class="center">
             <h3 style="color:red;"><strong>

@@ -64,9 +64,9 @@ do
 		#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
 		rm -fr files/_cache/*
 		# We remove subdir of build. We need files into build root only.
-		find build/* -type d -exec rm -fr {} \;
+		find build/* -type d -delete
 		echo "Clean some files to save disk spaces"
-		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -exec rm -f {} \;
+		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -delete
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php"

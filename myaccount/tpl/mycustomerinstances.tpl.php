@@ -801,7 +801,7 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
     		</div>
     		<div class="horizontal-fld margintoponly">
     		<div class="control-group required">
-    		<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
+    		<label class="control-label" for="password2" trans="1">'.$langs->trans("PasswordRetype").'</label><input name="password2" type="password" maxlength="128" required />
     		</div>
     		</div>
     		</div> <!-- end group -->
@@ -878,17 +878,19 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 						var pid = jQuery("#service option:selected").val();
 						console.log("We select product id = "+pid);
 					';
-	foreach ($arrayofplansfull as $key => $plan) {
-		if (!empty($plan['restrict_domains'])) {
-			$restrict_domains = explode(",", $plan['restrict_domains']);
-			foreach($restrict_domains as $domain) {
-				print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
-				if ($domain == $domainname) {
-					break;	// We keep only the first domain in list as the domain to keep possible for deployment
+	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
+		foreach ($arrayofplansfull as $key => $plan) {
+			if (!empty($plan['restrict_domains'])) {
+				$restrict_domains = explode(",", $plan['restrict_domains']);
+				foreach($restrict_domains as $domain) {
+					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
+					if ($domain == $domainname) {
+						break;	// We keep only the first domain in list as the domain to keep possible for deployment
+					}
 				}
+			} else {
+				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
 			}
-		} else {
-			print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
 		}
 	}
 
@@ -897,8 +899,10 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 				jQuery("#service").trigger("change");
 			});'."\n";
 
-	foreach ($arrayofplansfull as $key => $plan) {
-		print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
+		foreach ($arrayofplansfull as $key => $plan) {
+			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+		}
 	}
 	print '</script>';
 

@@ -90,7 +90,7 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
  *	Actions
  */
 
-$parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
+$parameters=array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 
 if (empty($reshook)) {

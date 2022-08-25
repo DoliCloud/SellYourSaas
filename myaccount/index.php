@@ -3283,9 +3283,9 @@ if (empty($welcomecid)) {
 						print '
 							<!-- XDaysBeforeEndOfTrial -->
 							<div class="note note-warning">
-							<h4 class="block">'.$langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), $contract->ref_customer).' !</h4>';
+							<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), '{s1}')).' !</h4>';
 						if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
-							print '<p>
+							print '<p class="pforbutton">
 								<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							print $langs->trans("AddAPaymentMode");
 							print '</a>';
@@ -3302,7 +3302,7 @@ if (empty($welcomecid)) {
 						print '
 							<!-- TrialInstanceWasSuspended -->
 							<div class="note note-warning">
-							<h4 class="block">'.$langs->trans("TrialInstanceWasSuspended", $contract->ref_customer).' !</h4>';
+							<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("TrialInstanceWasSuspended", '{s1}')).' !</h4>';
 						if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
 							print '
 								<p>
@@ -3325,7 +3325,7 @@ if (empty($welcomecid)) {
 					print '
 						<!-- XDaysAfterEndOfTrial -->
 						<div class="note note-warning">
-						<h4 class="block">'.$langs->trans("XDaysAfterEndOfTrial", $contract->ref_customer, abs($delayindays)).' !</h4>';
+						<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("XDaysAfterEndOfTrial", '{s1}', abs($delayindays))).' !</h4>';
 					if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
 						print '
 							<p>

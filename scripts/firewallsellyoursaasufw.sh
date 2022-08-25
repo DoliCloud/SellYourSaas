@@ -66,12 +66,9 @@ ufw allow out 43/tcp
 # DNS
 ufw allow out 53/tcp
 ufw allow out 53/udp
-# NFS
+# NFS (only 2049 is required in out, not 111)
 ufw allow out 2049/tcp
 ufw allow out 2049/udp
-#Required ?
-#ufw allow out 111/tcp
-#ufw allow out 111/udp
 
 
 # From external source to local - In

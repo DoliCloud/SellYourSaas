@@ -103,7 +103,6 @@ $permissiontoadd = $user->rights->sellyoursaas->write; // Used by the include of
 $permissiontodelete = $user->rights->sellyoursaas->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
 $permissionnote = $user->rights->sellyoursaas->write; // Used by the include of actions_setnotes.inc.php
 $permissiondellink = $user->rights->sellyoursaas->write; // Used by the include of actions_dellink.inc.php
-$upload_dir = $conf->mymodule->multidir_output[isset($object->entity) ? $object->entity : 1].'/myobject';
 
 // Security check - Protection if external user
 //if ($user->societe_id > 0) accessforbidden();

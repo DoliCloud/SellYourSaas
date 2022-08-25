@@ -18,6 +18,11 @@ echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
+export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas-public.conf | cut -d '=' -f 2`
+if [ "x$pathtospamdir" == "x" ]; then
+	export pathtospamdir="/tmp/spam"
+fi
+
 # Go into a safe dir
 cd /tmp
 
@@ -125,16 +130,16 @@ fi
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 
-	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -exec rm {} \;
+	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -delete
 fi
 
 echo "Nettoyage vieux fichiers log"
-echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
-find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
+find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 
 echo "Nettoyage vieux /tmp"
-echo find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
-find /tmp -mtime +30 -name 'phpsendmail*.*' -exec rm {} \;
+echo find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
+find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 
 echo "Check files for antispam system and create them if not found"
 [ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
@@ -145,10 +150,10 @@ echo "Check files for antispam system and create them if not found"
 chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
 chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
 
-[ -d /tmp/spam ] || mkdir /tmp/spam;
-[ -s /tmp/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
-[ -s /tmp/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
-[ -s /tmp/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
-[ -s /tmp/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
-chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
-chown admin.www-data /tmp/spam/*
+[ -d $pathtospamdir ] || mkdir $pathtospamdir;
+[ -s $pathtospamdir/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail $pathtospamdir/;
+[ -s $pathtospamdir/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip $pathtospamdir/;
+[ -s $pathtospamdir/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom $pathtospamdir/;
+[ -s $pathtospamdir/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
+chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/*
+chown admin.www-data $pathtospamdir/*

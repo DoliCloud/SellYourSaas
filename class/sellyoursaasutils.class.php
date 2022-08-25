@@ -1944,7 +1944,8 @@ class SellYourSaasUtils
 
 							$errorforlocaltransaction = 0;
 
-							$comment = 'Renew date of contract '.$object->ref." by doRenewalContracts";
+							$label = 'Renewal of contrat '.$object->ref;
+							$comment = 'Renew date of contract '.$object->ref.' by doRenewalContracts';
 
 							// First launch update of resources if it is not a redirect contract:
 							$result = 1;
@@ -1972,19 +1973,20 @@ class SellYourSaasUtils
 
 									// Create an event
 									$actioncomm = new ActionComm($this->db);
-									$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-									$actioncomm->code        = 'AC_'.$actioncode;
-									$actioncomm->label       = 'Renewal of contrat '.$object->ref;
-									$actioncomm->datep       = $now;
-									$actioncomm->datef       = $now;
-									$actioncomm->percentage  = -1;   // Not applicable
-									$actioncomm->socid       = $object->thirdparty->id;
-									$actioncomm->authorid    = $user->id;   // User saving action
-									$actioncomm->userownerid = $user->id;	// Owner of action
-									$actioncomm->fk_element  = $object->id;
-									$actioncomm->elementtype = 'contract';
-									$actioncomm->note        = 'Contract renewed by doRenewalContracts';
-									$ret=$actioncomm->create($user);       // User creating action
+									$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+									$actioncomm->code         = 'AC_'.$actioncode;
+									$actioncomm->label        = $label;
+									$actioncomm->datep        = $now;
+									$actioncomm->datef        = $now;
+									$actioncomm->percentage   = -1;   // Not applicable
+									$actioncomm->socid        = $object->thirdparty->id;
+									$actioncomm->authorid     = $user->id;   // User saving action
+									$actioncomm->userownerid  = $user->id;	// Owner of action
+									$actioncomm->fk_element   = $object->id;
+									$actioncomm->elementtype  = 'contract';
+									$actioncomm->note_private = $comment;
+
+									$ret = $actioncomm->create($user);       // User creating action
 								} else {
 									$contracterror[$object->id]=$object->ref;
 
@@ -3158,7 +3160,7 @@ class SellYourSaasUtils
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance','unsuspend', 'undeploy', 'undeployall', 'migrate')) &&
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance','unsuspend', 'undeploy', 'undeployall', 'migrate','upgrade')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
 			if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
@@ -3355,12 +3357,15 @@ class SellYourSaasUtils
 
 				$automigrationtmpdir = $dirfortmpfiles."/automigration_".$object->socid.".tmp";
 				$automigrationdocumentarchivename = (empty($object->array_options["automigrationdocumentarchivename"]) ? '' : $object->array_options["automigrationdocumentarchivename"]);
+				$dirforexampleforsources = (empty($object->array_options["dirforexampleforsources"]) ? '' : $object->array_options["dirforexampleforsources"]);
+				$laststableupgradeversion = (empty($object->array_options["laststableupgradeversion"]) ? '' : $object->array_options["laststableupgradeversion"]);
+				$lastversiondolibarrinstance = (empty($object->array_options["lastversiondolibarrinstance"]) ? '' : $object->array_options["lastversiondolibarrinstance"]);
 				// get direct access value
 				$directaccess=0;
 				if ($producttmp->array_options['options_app_or_option'] == 'app') {
 					$directaccess=$producttmp->array_options['options_directaccess'];
 				}
-				if ($remoteaction != "migrate") {
+				if ($remoteaction != "migrate" && $remoteaction != "upgrade") {
 					dol_syslog("Create conf file ".$tmppackage->srcconffile1);
 					if ($tmppackage->srcconffile1 && $conffile) {
 						dol_delete_file($tmppackage->srcconffile1, 0, 1, 0, null, false, 0);
@@ -3417,6 +3422,9 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostdir);       	// Param 40 in .sh: Will replace __IncludeFromContract__ in virtual host
 				$commandurl.= '&'.str_replace(' ', '£', $automigrationtmpdir);			// Param 41 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $automigrationdocumentarchivename); //Param 42 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $dirforexampleforsources); //Param 43 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $laststableupgradeversion); //Param 44 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $lastversiondolibarrinstance); //Param 45 in .sh
 
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 

@@ -417,3 +417,52 @@ function getRootUrlForAccount($object)
 
 	return $ret;
 }
+
+/**
+ * Prepare array with list of tabs
+ *
+ * @return  array				Array of tabs to show
+ */
+function sellyoursaas_admin_prepare_head()
+{
+	global $langs, $conf, $user;
+
+	$langs->load("sellyoursaas");
+	$h = 0;
+	$head = array();
+
+	$head[$h][0] = "setup.php";
+	$head[$h][1] = $langs->trans("ParametersOnMasterServer");
+	$head[$h][2] = "setup";
+	$h++;
+
+	$head[$h][0] = "setup_deploy_server.php";
+	$head[$h][1] = $langs->trans("ParametersOnDeploymentServers");
+	$head[$h][2] = "setup_deploy_server";
+	$h++;
+
+	$head[$h][0] = "setup_register_security.php";
+	$head[$h][1] = $langs->trans("SecurityOfRegistrations");
+	$head[$h][2] = "setup_register_security";
+	$h++;
+
+	$head[$h][0] = "setup_automation.php";
+	$head[$h][1] = $langs->trans("Automation");
+	$head[$h][2] = "setup_automation";
+	$h++;
+
+	$head[$h][0] = "setup_other.php";
+	$head[$h][1] = $langs->trans("Other");
+	$head[$h][2] = "setup_other";
+	$h++;
+
+	// Show more tabs from modules
+	// Entries must be declared in modules descriptor with line
+	// $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
+	// $this->tabs = array('entity:-tabname);   												to remove a tab
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'useradmin');
+
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'useradmin', 'remove');
+
+	return $head;
+}

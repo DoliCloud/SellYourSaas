@@ -1066,7 +1066,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		        			</div>
 		        			<div class="horizontal-fld margintoponly">
 		        			<div class="control-group required">
-		        			<label class="control-label" for="password2" trans="1">'.$langs->trans("ConfirmPassword").'</label><input name="password2" type="password" maxlength="128" required />
+		        			<label class="control-label" for="password2" trans="1">'.$langs->trans("PasswordRetype").'</label><input name="password2" type="password" maxlength="128" required />
 		        			</div>
 		        			</div>
 		        			</div> <!-- end group -->';
