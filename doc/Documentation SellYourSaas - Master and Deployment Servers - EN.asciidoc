@@ -4089,11 +4089,11 @@ resize2fs /dev/vdX9
 [Cloning a server instance for an extra production server or a dev server]
 === Clone or duplicate a server instance into another server
 
-The following explains the operations to clone a deployment server into another deployment server.
+The following explains the operations to clone a deployment server into another new deployment server.
 
-==== Create the server
+==== Create the new server
 
-- Create a snapshot of *Deployment server* to be cloned.
+- Create a snapshot of the *Deployment server* to be cloned (for security purposes).
 
 - Create a new server from that snapshot:
 
@@ -4101,12 +4101,12 @@ The following explains the operations to clone a deployment server into another 
 
 Choose name of server, for example:  withX.mysaasdomain.com
 
-Choose the snapshot or image to use and copy into area *post installation script* the content of file */scripts/post_inst_script.sh*.
+Choose the snapshot or image to use and copy the content of file */scripts/post_inst_script.sh* into area *post installation script*.
 
-Once the server is created, double check it does have an associated IP. If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field Fixed IP empty so it is set by OVH. Reboot the server.
+Once the server is created, double check it does have an associated IP visible in OVH dashboard. If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field "Fixed IP" empty so it is set by OVH. Reboot the server.
 
-If you can't connect to server, it is possible you have to configure */etc/network/interfaces* to get your IPv4 via DHCP. To do so :
-Connect to the console. Execute *ip link show* to get the MAC address. Check the file */etc/netplan/50-cloud-init.yaml* to get the right MAC address.
+If you can't connect to server, it is possible that you have to configure */etc/network/interfaces* to get your IPv4 via DHCP. To do so :
+Connect to the console of server from OVH dashboard. Execute *ip link show* to get the MAC address. Check the file */etc/netplan/50-cloud-init.yaml* to get the right MAC address.
 Correct and reboot if needed. 
 
 Then correct IPv6 setup into file */etc/netplan/50-cloud-init.yaml*.
@@ -4124,7 +4124,7 @@ TODO
 
 ==== Disable cron
 
-- Once the server is ready: connect to deactivate the duplicated crons from the cloned server, you can also deactivate the cron process itself with :
+- Once the server is ready: connect to it to deactivate the crons tasks (coming from the cloned server). You can do this by disabling the cron process itself with :
 
 [source,bash]
 ---------------
@@ -4133,7 +4133,7 @@ systemctl disable cron
 systemctl status cron
 ---------------
 
-- Edit the crons from *root* and *admin* 
+- Edit the crons for *root* and *admin* 
 
 ---------------
 crontab -e
