@@ -167,10 +167,8 @@ option n then p (then choose the partition number, first and last sector) then w
 fdisk -l
 
 fsck -N /dev/vdxY
-mkfs.ext4 /dev/vdxY
+mkfs.btrfs /dev/vdxY      (you can also use mkfs.ext4 /dev/vdxY)
 ---------------
-
-@TODO Use mkfs.btrfs /dev/vdxY
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
 
@@ -195,9 +193,9 @@ blkid
 
 [source, bash]
 ---------------
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 defaults 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs defaults 0 0
 or
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0     #does not block the server from starting
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0     #does not block the server from starting
 ---------------
 
 
@@ -235,7 +233,7 @@ To add -noatime to the filesystem in the */etc/fstab* file:
 
 [source, bash]
 ---------------
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0
 ---------------
 
 To take the change into account:
@@ -4165,11 +4163,11 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 
 ==== Create data disks
 
-- Edit */etc/fstab* to remove the mounting of data disks.
+- Edit */etc/fstab* to remove the entry mounting data disks (that may link to the disk of old instance).
 
-- Create a snapshot of the data disk.
+- Create a snapshot of the source data disk (if you have a source to reuse).
   or
-- Create a new OVH data disk from the snapshot and attach it to the server. After association it must be visible with :
+- Create a new OVH data disk (from the snapshot or from scratch) and attach it to the server. After association, disk must be visible with :
 
 	fdisk -l
 
