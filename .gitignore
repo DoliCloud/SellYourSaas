@@ -3,3 +3,4 @@
 .settings/
 .idea
 .vscode
+/.asciidoctorconfig.adoc
