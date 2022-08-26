@@ -3633,7 +3633,9 @@ cd / && run-parts --report /etc/cron.daily
 
 
 
-== Installation of Dolibarr
+== Installation of Dolibarr framework
+
+We need to install the program files of Dolibarr ERP CRM as we use it for a lot of utiliy tools.
 
 On all servers (*Master and Deployment*):
 
@@ -3984,6 +3986,20 @@ vi /var/log/datadog/agent.log
 
 == Exploitation - Supervision
 
+=== Test an installation
+
+This is some steps to do to test an installation:
+
+- You can run the script desktop_install_check.sh. It will run an ansible script to check your instance (and may fix some trouble). This
+script is regularly completed but still check only few part of your installation only.
+
+- Try to send an email from a deployed application.
+
+- Try to make a backup from the internal backup tool of the deployed application (if the deployed application has such a tool).
+
+- If the deployed application is Dolibarr, you can check a call of page https://myinstances/public/test/test_exec.php
+
+
 === Backup / Restore
 
 ==== Backup system
@@ -4030,7 +4046,7 @@ pip install awscli --upgrade --user
 ---------------
 
 
-=== Update deployment images
+=== Update images of application to deploy
 
 - A cron script on the *Master* does the git pull to update the images of the packages to deploy.
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git*
