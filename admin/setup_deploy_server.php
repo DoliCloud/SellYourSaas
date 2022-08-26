@@ -90,7 +90,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_PUBLIC_KEY", GETPOST("SELLYOURSAAS_PUBLIC_KEY", 'none'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_LOGIN_FOR_SUPPORT", GETPOST("SELLYOURSAAS_LOGIN_FOR_SUPPORT", 'alpha'), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_PASSWORD_FOR_SUPPORT", GETPOST("SELLYOURSAAS_PASSWORD_FOR_SUPPORT", 'none'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD", GETPOST("SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD", 'none'), 'chaine', 0, '', $conf->entity);
 
 		$dir=GETPOST("DOLICLOUD_INSTANCES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
@@ -219,9 +219,9 @@ print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("PasswordForSupport").'</td>';
 print '<td>';
-print '<input type="password" name="SELLYOURSAAS_PASSWORD_FOR_SUPPORT" value="'.getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT').'">';
-if (getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT')) {
-	print showValueWithClipboardCPButton(getDolGlobalString('SELLYOURSAAS_PASSWORD_FOR_SUPPORT'), 0, 'none');
+print '<input type="password" name="SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD').'">';
+if (getDolGlobalString('SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD')) {
+	print showValueWithClipboardCPButton(getDolGlobalString('SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD'), 0, 'none');
 }
 print '</td>';
 print '<td><span class="opacitymedium small">Password to use to create a support user account on customer instances</span></td>';

@@ -140,7 +140,7 @@ if (empty($reshook)) {
 
 			$loginforsupport = $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
 
-			$password = $conf->global->SELLYOURSAAS_PASSWORD_FOR_SUPPORT;
+			$password = $conf->global->SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD;
 			if (empty($password)) {
 				require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
 				$password = getRandomPassword(false);
