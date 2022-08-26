@@ -340,7 +340,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA_FOR_THI
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
 print '</td>';
-print '<td><span class="opacitymedium small">1,99,...</span></td>';
+print '<td><span class="opacitymedium small">12345</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE").'</td>';
