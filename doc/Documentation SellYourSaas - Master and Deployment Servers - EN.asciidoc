@@ -5465,8 +5465,9 @@ max_allowed_packet=100000000
 
 ==== Web request are slow due to maximum number of child reached
 
-You may experience a too high number of child processed (reaching the maximum). You can see this on pahe https://withX.mysaasdomain.com/server-status
-If this child are in state R, then you can try to reduce this by enabling the module ReqTimeout and set
+You may experience a too high number of child processed (reaching the maximum). You can see this on the
+page https://supervision.mysaasdomain.com/server-status
+If most child are in state R, then you can try to reduce this by enabling the module ReqTimeout and set
 
 [source,bash]
 ---------------
