@@ -160,11 +160,12 @@ while read -r line ; do
 	echo "remoteip=$remoteip" >> "/tmp/phpsendmail-$processownerid-$processid-$smtpportcaller-smtpsocket.tmp"
 	
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
-	echo "$now The file /tmp/phpsendmail-$processownerid-$processid-$smtpportcaller-smtpsocket.tmp has been generated" >> "/var/log/phpsendmail.log"
 	
 	if [[ "x$usernamestring" =~ ^xosu.* ]]; then
-		chown $usernamestring.$usernamestring "/tmp/phpsendmail-$processownerid-$processid-smtpsocket.tmp" 2>&1
+		chown $usernamestring.$usernamestring "/tmp/phpsendmail-$processownerid-$processid-$smtpportcaller-smtpsocket.tmp" 2>&1
 	fi
+
+	echo "$now The file /tmp/phpsendmail-$processownerid-$processid-$smtpportcaller-smtpsocket.tmp has been generated" >> "/var/log/phpsendmail.log"
 	
 	# Complete log /var/log/phpsendmail.log for this smtp email
 	if [[ $processownerid =~ $re ]] ; then
