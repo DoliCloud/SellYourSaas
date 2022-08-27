@@ -5493,10 +5493,17 @@ To flush the queur for one message
 postqueue -i IDINQUEUE
 
 
+==== Error apparmor "unconfined can not change_hat"
 
+If you have such an error:
 
+[source,bash]
+---------------
+Aug 27 10:50:00 xxxxx kernel: [9800813.155984] audit: type=1400 audit(1661597400.360:473920): apparmor="DENIED" operation="change_hat" info="unconfined can not change_hat" error=-1 profile="unconfined" pid=620020 comm="apache2"
+---------------
 
-
+You may have updated the apparmor profile of apache but apache was not restarted completely.
+Try to stop and kill all apache process not stopped. Restart apache.
 
 
 
