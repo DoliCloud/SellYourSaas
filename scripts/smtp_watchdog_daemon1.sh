@@ -86,8 +86,8 @@ while read -r line ; do
 				export now=`date '+%Y-%m-%d %H:%M:%S'`
 				echo "$now Extract processid from line" >> /var/log/phpsendmail.log 2>&1
 				echo "$now $result" >> /var/log/phpsendmail.log 2>&1
-				export processownerid=`echo "$result" | grep -m 1 'ESTAB\|SYN-SENT' | sed 's/.*uid://' | sed 's/\s.*//'`
-				export processid=`echo "$result" | grep -m 1 'ESTAB\|SYN-SENT' | sed 's/.*pid=//' | sed 's/,.*//'`
+				export processownerid=`echo "$result" | grep -m 1 'ESTAB\|SYN-SENT' | grep 'uid:' | sed 's/.*uid://' | sed 's/\s.*//'`
+				export processid=`echo "$result" | grep -m 1 'ESTAB\|SYN-SENT' | grep 'pid=' | sed 's/.*pid=//' | sed 's/,.*//'`
 
 				export now=`date '+%Y-%m-%d %H:%M:%S'`
 				echo "$now We got processid=${processid}, processownerid=${processownerid}" >> /var/log/phpsendmail.log 2>&1
