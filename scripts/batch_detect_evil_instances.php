@@ -497,24 +497,29 @@ foreach ($instances as $instanceid => $instancearray) {
 
 print "----- Loop for spam keys into index.php using blacklistcontent\n";
 
-foreach ($instancestrial as $instanceid => $instancearray) {
-	if (!empty($tmparrayblacklistcontent)) {
-		foreach ($tmparrayblacklistcontent as $val) {
-			$buffer = dol_sanitizePathName(trim($val->content));
-			if ($buffer) {
+if (!empty($tmparrayblacklistcontent)) {
+	foreach ($tmparrayblacklistcontent as $val) {
+		$buffer = dol_sanitizePathName(trim($val->content));
+		if ($buffer) {
+			$ok=1;
+			$commandexample = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu*/dbn*/htdocs/index.php";
+			echo 'Scan if we found the string '.$buffer.' with '.$commandexample;
+			foreach ($instancestrial as $instanceid => $instancearray) {
 				$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' ".$instancearray['osu']."/dbn*/htdocs/index.php";
-				echo 'Scan if we found the string '.$buffer.' with '.$command.' ';
 				$fullcommand=$command;
 				$output=array();
 				//echo $command."\n";
+
 				exec($fullcommand, $output, $return_var);
 				if ($return_var == 0) {		// grep -l returns 0 if something was found
 					// We found an evil string
-					print "- ALERT: the evil string '".$buffer."' was found in content of index.php\n";
+					print "\nALERT: Evil string '".$buffer."' was found in content of index.php with command ".$command."\n";
 					$nboferrors = 1;
-				} else {
-					print "- OK\n";
+					$ok = 0;
 				}
+			}
+			if ($ok) {
+				print " - OK\n";
 			}
 		}
 	}
@@ -523,25 +528,28 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 
 print "----- Loop for spam dir or files using blacklistdir\n";
 
-foreach ($instancestrial as $instanceid => $instancearray) {
-	if (!empty($tmparrayblacklistdir)) {
-		foreach ($tmparrayblacklistdir as $val) {
-			$buffer = dol_sanitizePathName(trim($val->content));
-			if ($buffer) {
-				$command = "find ".$instancearray['osu']."/dbn*/htdocs/ -maxdepth 2";
-				if (!empty($val->noblacklistif)) {
-					$tmpdirarray = explode('|', $val->noblacklistif);
-					foreach ($tmpdirarray as $tmpdir) {
-						if ($tmpdir) {
-							$command .= " ! -path '*".escapeshellcmd(preg_replace('/[^a-z0-9\.\-]/', '', $tmpdir))."*'";
-						}
+if (!empty($tmparrayblacklistdir)) {
+	foreach ($tmparrayblacklistdir as $val) {
+		$buffer = dol_sanitizePathName(trim($val->content));
+		if ($buffer) {
+			// Define the string to exclude some patterns
+			$exclude = "";
+			if (!empty($val->noblacklistif)) {
+				$tmpdirarray = explode('|', $val->noblacklistif);
+				foreach ($tmpdirarray as $tmpdir) {
+					if ($tmpdir) {
+						$exclude .= " ! -path '*".escapeshellcmd(preg_replace('/[^a-z0-9\.\-]/', '', $tmpdir))."*'";
 					}
 				}
+			}
+
+			$ok=1;
+			$commandexample = "find osu*/dbn*/htdocs/ -maxdepth 2".$exclude;
+			echo 'Scan if we found the blacklist dir '.$buffer.' with '.$commandexample;
+			foreach ($instancestrial as $instanceid => $instancearray) {
+				$command = "find ".$instancearray['osu']."/dbn*/htdocs/ -maxdepth 2";
+				$command .= $exclude;
 				$command .= " | grep '".escapeshellcmd($buffer)."'";
-				/*if (!empty($val->noblacklistif)) {
-					$command .= " | grep -v '".str_replace("'", ".", $val->noblacklistif)."'";
-				}*/
-				echo 'Scan if we found the blacklist dir '.$buffer.' with '.$command.' ';
 				$fullcommand=$command;
 				$output=array();
 				//echo $command."\n";
@@ -549,11 +557,13 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 				exec($fullcommand, $output, $return_var);
 				if ($return_var == 0) {		// command returns 0 if something was found
 					// We found an evil string
-					print "- ALERT: the evil dir/file '".$buffer."' was found\n";
+					print "\nALERT: the evil dir/file '".$buffer."' was found\n";
 					$nboferrors = 2;
-				} else {
-					print "- OK\n";
+					$ok = 0;
 				}
+			}
+			if ($ok) {
+				print " - OK\n";
 			}
 		}
 	}
