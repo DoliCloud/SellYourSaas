@@ -495,7 +495,7 @@ foreach ($instances as $instanceid => $instancearray) {
 }
 
 
-print "----- Loop for spam keys into index.php using blacklistcontent\n";
+print "----- Loop for spam keys into index.php using blacklistcontent (for spam and phishing detection)\n";
 
 if (!empty($tmparrayblacklistcontent)) {
 	foreach ($tmparrayblacklistcontent as $val) {
