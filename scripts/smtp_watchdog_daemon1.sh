@@ -103,19 +103,6 @@ while read -r line ; do
 						echo "$now processownerid=$processownerid" >> "/var/log/phpsendmail.log"
 					fi
 										
-					if [[ $processownerid =~ $re ]] ; then
-						echo "$now We try to get the usernamestring from processownerid" >> /var/log/phpsendmail.log 2>&1
-
-						export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
-						echo "$now usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
-						
-						#TODO Get quota of emails MAXPERDAY for the UID $processownerid / $usernamestring
-						
-						
-					else
-						echo "$now processownerid not valid, we can't find $usernamestring" >> "/var/log/phpsendmail.log"
-					fi
-						
 					if [[ $processid =~ $re ]] ; then
 						echo "$now We try to get the apache process info" >> /var/log/phpsendmail.log 2>&1
 						#echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
@@ -137,6 +124,19 @@ while read -r line ; do
                     else 
                     	echo "$now processid not valid, we can't find apache and remoteip data" >> "/var/log/phpsendmail.log"
 					fi
+				fi
+				
+				if [[ $processownerid =~ $re ]] ; then
+					echo "$now We try to get the usernamestring from processownerid" >> /var/log/phpsendmail.log 2>&1
+
+					export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
+					echo "$now usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
+					
+					#TODO Get quota of emails MAXPERDAY for the UID $processownerid / $usernamestring
+					
+					
+				else
+					echo "$now processownerid not valid, we can't find $usernamestring" >> "/var/log/phpsendmail.log"
 				fi
 			fi
 		fi

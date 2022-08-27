@@ -361,7 +361,7 @@ $object=new Contrat($dbmaster);
 
 // Get list of instance
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
-$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok";
+$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 if ($instancefiltercomplete) {
@@ -464,13 +464,13 @@ if ($resql) {
 						}
 					}
 
-					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} elseif ($instancefiltercomplete) {
-					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} else {
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 				}
 			}
@@ -486,35 +486,35 @@ print "We found ".count($instancestrial)." deployed trial + ".count($instances).
 
 
 
-print "----- Generate file mailquota\n";
+print "----- Generate file mailquota for paid instances\n";
 
+foreach ($instances as $instanceid => $instancearray) {
+	// TODO
+	// We complete the file $filetobuild = $pathtospamdir.'/mailquota';
+	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']."\n";
+}
 
-
-// TODO Loop on each instance of server (or only $instancefiltercomplete if defined)
-// Use same code than batch_customers.php
-
-// If paid instance, we complete the file $filetobuild = $pathtospamdir.'/mailquota';
-
-// If free instance; we do...
 
 print "----- Loop for spam keys into index.php using blacklistcontent\n";
 
-if (!empty($tmparrayblacklistcontent)) {
-	foreach ($tmparrayblacklistcontent as $val) {
-		$buffer = dol_sanitizePathName(trim($val->content));
-		if ($buffer) {
-			$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu*/dbn*/htdocs/index.php";
-			echo 'Scan if we found the string '.$buffer.' with '.$command.' ';
-			$fullcommand=$command;
-			$output=array();
-			//echo $command."\n";
-			exec($fullcommand, $output, $return_var);
-			if ($return_var == 0) {		// grep -l returns 0 if something was found
-				// We found an evil string
-				print "- ALERT: the evil string '".$buffer."' was found in content of index.php\n";
-				$nboferrors = 1;
-			} else {
-				print "- OK\n";
+foreach ($instancestrial as $instanceid => $instancearray) {
+	if (!empty($tmparrayblacklistcontent)) {
+		foreach ($tmparrayblacklistcontent as $val) {
+			$buffer = dol_sanitizePathName(trim($val->content));
+			if ($buffer) {
+				$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' ".$instancearray['osu']."/dbn*/htdocs/index.php";
+				echo 'Scan if we found the string '.$buffer.' with '.$command.' ';
+				$fullcommand=$command;
+				$output=array();
+				//echo $command."\n";
+				exec($fullcommand, $output, $return_var);
+				if ($return_var == 0) {		// grep -l returns 0 if something was found
+					// We found an evil string
+					print "- ALERT: the evil string '".$buffer."' was found in content of index.php\n";
+					$nboferrors = 1;
+				} else {
+					print "- OK\n";
+				}
 			}
 		}
 	}
@@ -523,40 +523,41 @@ if (!empty($tmparrayblacklistcontent)) {
 
 print "----- Loop for spam dir or files using blacklistdir\n";
 
-if (!empty($tmparrayblacklistdir)) {
-	foreach ($tmparrayblacklistdir as $val) {
-		$buffer = dol_sanitizePathName(trim($val->content));
-		if ($buffer) {
-			$command = "find osu*/dbn*/htdocs/ -maxdepth 2";
-			if (!empty($val->noblacklistif)) {
-				$tmpdirarray = explode('|', $val->noblacklistif);
-				foreach ($tmpdirarray as $tmpdir) {
-					if ($tmpdir) {
-						$command .= " ! -path '*".escapeshellcmd(preg_replace('/[^a-z0-9\.\-]/', '', $tmpdir))."*'";
+foreach ($instancestrial as $instanceid => $instancearray) {
+	if (!empty($tmparrayblacklistdir)) {
+		foreach ($tmparrayblacklistdir as $val) {
+			$buffer = dol_sanitizePathName(trim($val->content));
+			if ($buffer) {
+				$command = "find ".$instancearray['osu']."/dbn*/htdocs/ -maxdepth 2";
+				if (!empty($val->noblacklistif)) {
+					$tmpdirarray = explode('|', $val->noblacklistif);
+					foreach ($tmpdirarray as $tmpdir) {
+						if ($tmpdir) {
+							$command .= " ! -path '*".escapeshellcmd(preg_replace('/[^a-z0-9\.\-]/', '', $tmpdir))."*'";
+						}
 					}
 				}
-			}
-			$command .= " | grep '".escapeshellcmd($buffer)."'";
-			/*if (!empty($val->noblacklistif)) {
-				$command .= " | grep -v '".str_replace("'", ".", $val->noblacklistif)."'";
-			}*/
-			echo 'Scan if we found the blacklist dir '.$buffer.' with '.$command.' ';
-			$fullcommand=$command;
-			$output=array();
-			//echo $command."\n";
+				$command .= " | grep '".escapeshellcmd($buffer)."'";
+				/*if (!empty($val->noblacklistif)) {
+					$command .= " | grep -v '".str_replace("'", ".", $val->noblacklistif)."'";
+				}*/
+				echo 'Scan if we found the blacklist dir '.$buffer.' with '.$command.' ';
+				$fullcommand=$command;
+				$output=array();
+				//echo $command."\n";
 
-			exec($fullcommand, $output, $return_var);
-			if ($return_var == 0) {		// command returns 0 if something was found
-				// We found an evil string
-				print "- ALERT: the evil dir/file '".$buffer."' was found\n";
-				$nboferrors = 2;
-			} else {
-				print "- OK\n";
+				exec($fullcommand, $output, $return_var);
+				if ($return_var == 0) {		// command returns 0 if something was found
+					// We found an evil string
+					print "- ALERT: the evil dir/file '".$buffer."' was found\n";
+					$nboferrors = 2;
+				} else {
+					print "- OK\n";
+				}
 			}
 		}
 	}
 }
-
 
 
 $dbmaster->close();	// Close database opened handler
