@@ -698,8 +698,8 @@ if (! $nboferrors) {
 			}
 
 			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=['.$sellyoursaasname.' - '.gethostname().'] Backup of user instances succeed'."\n";
-			$cmail = new CMailFile('['.$sellyoursaasname.' - '.gethostname().'] Backup of user instances succeed', $to, $from, $msg);
+			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Backup instances - '.gethostname().'] Backup of user instances succeed'."\n";
+			$cmail = new CMailFile('[Backup instances - '.gethostname().'] Backup of user instances succeed', $to, $from, $msg);
 			$result = $cmail->sendfile();
 		} else {
 			print 'Script was called for a given instance. No email or indicator sent in such situation'."\n";
