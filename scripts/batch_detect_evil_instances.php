@@ -513,13 +513,15 @@ if (!empty($tmparrayblacklistcontent)) {
 				exec($fullcommand, $output, $return_var);
 				if ($return_var == 0) {		// grep -l returns 0 if something was found
 					// We found an evil string
-					print "\nALERT: Evil string '".$buffer."' was found in content of index.php with command ".$command."\n";
+					print "\nALERT: Evil string '".$buffer."' was found in content of index.php with command ".$command;
 					$nboferrors = 1;
 					$ok = 0;
 				}
 			}
 			if ($ok) {
 				print " - OK\n";
+			} else {
+				print "\n";
 			}
 		}
 	}
@@ -557,13 +559,15 @@ if (!empty($tmparrayblacklistdir)) {
 				exec($fullcommand, $output, $return_var);
 				if ($return_var == 0) {		// command returns 0 if something was found
 					// We found an evil string
-					print "\nALERT: the evil dir/file '".$buffer."' was found\n";
+					print "\nALERT: the evil dir/file '".$buffer."' was found with command ".$command;
 					$nboferrors = 2;
 					$ok = 0;
 				}
 			}
 			if ($ok) {
 				print " - OK\n";
+			} else {
+				print "\n";
 			}
 		}
 	}
