@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2004-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2004-2022 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -438,7 +438,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 
 // Backup command line
-$backupstringtoshow=$backupstring.' confirm';
+$backupstringtoshow=$backupstring.' confirm --nostats';
 $backupstringtoshow2=$backupstring.' confirm';
 print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-file paddingright"></span> Backup command line string <span class="opacitymedium">(to run on the server where to store the backup)</span><br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
@@ -476,7 +476,7 @@ if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(can be run on any server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
-	print $backupstringtoshow." --nostats\n";
+	print $backupstringtoshow."\n";
 	print $restorestringtoshow;
 	print '</textarea>';
 
