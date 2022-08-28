@@ -1,12 +1,12 @@
 = Sell-Your-Saas installation and operation document
-This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, MediaWiki, PrestaShop, ...) - Laurent Destailleur - www.sellyoursaas.org
+This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...) - Laurent Destailleur - www.sellyoursaas.org
 :source-highlighter: rouge
 :companyname: Teclib
 :corpname: Teclib
 :orgname: Teclib
 :creator: Laurent Destailleur
 :title: Document installation and operation of SellYourSaas
-:subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, MediaWiki, PrestaShop, ...).
+:subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...).
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi
 :imagesdir: ./img
 :city: Bordeaux
@@ -1001,7 +1001,7 @@ sudo apt install -y ntp git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt-install -y php-readline php-xmlrpc
+sudo apt install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
@@ -1020,7 +1020,7 @@ sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysql php-curl php-memcached php-imagick php-geoip php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
-sudo apt-install -y php-readline php-xmlrpc
+sudo apt install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
 sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
