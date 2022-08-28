@@ -19,6 +19,8 @@ if [ "$(id -u)" == "0" ]; then
    exit 1
 fi
 
+error=0
+
 echo "Update git dirs found into $1."
 
 for dir in `ls -d $1/dolibarr* | grep -v documents`
@@ -45,6 +47,9 @@ do
 	        	git reset --hard HEAD
 	        	# Do not use git pull --depth=1 here, this will make merge errors.
 	        	git pull
+	        	if [ $? -ne 0 ]; then
+	        		export error=1
+	        	fi
 	        fi
 	        echo Result of git pull = $?
 
@@ -57,4 +62,6 @@ do
 	fi
 done
 
-echo "Finished."
+echo "Finished (exit=$error)."
+exit $error
+
