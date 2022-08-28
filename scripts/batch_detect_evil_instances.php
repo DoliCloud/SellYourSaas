@@ -582,6 +582,9 @@ if ($nboferrors) {
 	print '--- end OK with no error - '.strftime("%Y%m%d-%H%M%S")."\n";
 }
 
+$sendcontext = 'emailing';
+//$sendcontext = 'standard';
+
 if ($nboferrors) {
 	if ($action == 'testemail') {
 		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
@@ -592,7 +595,7 @@ if ($nboferrors) {
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Alert(s) in batch_detect_evil_instances - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
-		$cmail = new CMailFile('[Warning] Alert(s) in batch_detect_evil_instances - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', 'emailing');
+		$cmail = new CMailFile('[Warning] Alert(s) in batch_detect_evil_instances - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 		$result = $cmail->sendfile();
 	}
 }
