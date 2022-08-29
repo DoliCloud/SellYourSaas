@@ -710,7 +710,10 @@ if ($reusecontractid) {
 	}
 
 	// Check if some deployment are already in process and ask to wait
-	$MAXDEPLOYMENTPARALLEL = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL);
+	$MAXDEPLOYMENTPARALLEL = getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 2);
+	if ($MAXDEPLOYMENTPARALLEL <= 0) {	// Protection to avoid problems
+		$MAXDEPLOYMENTPARALLEL = 1;
+	}
 
 	$tmp=explode('.', $sldAndSubdomain.$tldid, 2);
 	$sldAndSubdomain=$tmp[0];
@@ -730,8 +733,8 @@ if ($reusecontractid) {
 	} else {
 		dol_print_error($db, 'Bad sql request');
 	}
-	dol_syslog("nbofinstanceindeployment = ".$nbofinstanceindeployment." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPARALLEL." except if ip is 127.0.0.1)");
-	if ($remoteip != '127.0.0.1' && (($nbofinstanceindeployment < 0) || ($nbofinstanceindeployment > $MAXDEPLOYMENTPARALLEL))) {
+	dol_syslog("nbofinstanceindeployment = ".$nbofinstanceindeployment." for ip ".$remoteip." (must be lower than ".$MAXDEPLOYMENTPARALLEL." except if ip is 127.0.0.1)");
+	if ($remoteip != '127.0.0.1' && (($nbofinstanceindeployment < 0) || ($nbofinstanceindeployment >= $MAXDEPLOYMENTPARALLEL))) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyRequestPleaseTryLater"), null, 'errors');
 			header("Location: ".$newurl);
