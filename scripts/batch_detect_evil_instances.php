@@ -512,12 +512,14 @@ print "We found ".count($instancestrial)." deployed trial + ".count($instances).
 
 print "----- Generate file mailquota for paid instances\n";
 
-file_put_contents($pathtospamdir.'/mailquota', "# File of paid instance with their quota");
+file_put_contents($pathtospamdir.'/mailquota', "# File of paid instance with their quota\n");
 
+$i = 0;
 foreach ($instances as $instanceid => $instancearray) {
+	$i++;
 	// We complete the file $filetobuild = $pathtospamdir.'/mailquota';
 	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n";
-	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n", FILE_APPEND);
+	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance #'.$i.' id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n", FILE_APPEND);
 }
 
 
