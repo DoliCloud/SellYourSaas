@@ -428,8 +428,8 @@ function getInstancesOfUser($pathtospamdir)
 	if ($fp) {
 		while (($buffer = fgets($fp, 1024)) !== false) {
 			$reg = array();
-			if (preg_match('\sid=(\d+)\sref=([^\s]+)\sosu=([^\s]+)\smailquota=(\d+)', $buffer, $reg)) {
-				$instanceofuser[$reg[3]] = array('id'=>$reg[1], 'ref='=>$reg[2], 'osu'=>$reg[3]);
+			if (preg_match('/\sid=(\d+)\sref=([^\s]+)\sosu=([^\s]+)\smailquota=(\d+)/', $buffer, $reg)) {
+				$instanceofuser[$reg[3]] = array('id'=>$reg[1], 'ref='=>$reg[2], 'osu'=>$reg[3], 'mailquota'=>$reg[4]);
 			}
 		}
 		if (!feof($fp)) {
