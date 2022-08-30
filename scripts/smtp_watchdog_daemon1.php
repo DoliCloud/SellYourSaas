@@ -326,7 +326,7 @@ while (!feof($handle)) {
 
 	file_put_contents($phpsendmailtmp, "Emails were sent using SMTP by processid=$processid processownerid=$processownerid smtpportcaller=$smtpportcaller\n", FILE_APPEND);
 	file_put_contents($phpsendmailtmp, "SMTP connection from $smtpipcaller:$smtpportcaller -> $smtpipcalled:$smtpportcalled\n", FILE_APPEND);
-	file_put_contents($phpsendmailtmp, $result['result'].' '.$result['output']."\n", FILE_APPEND);
+	file_put_contents($phpsendmailtmp, (empty($result['result']) ? '' : $result['result']).' '.(empty($result['output']) ? '' : $result['output'])."\n", FILE_APPEND);
 	file_put_contents($phpsendmailtmp, "usernamestring=$usernamestring\n", FILE_APPEND);
 	file_put_contents($phpsendmailtmp, "apachestring=$apachestring\n", FILE_APPEND);
 	file_put_contents($phpsendmailtmp, "remoteip=$remoteip\n", FILE_APPEND);
