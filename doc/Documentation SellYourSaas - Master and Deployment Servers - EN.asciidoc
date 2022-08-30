@@ -1665,6 +1665,18 @@ maxretry = 5
 
 
 
+[email-dol-perday]
+
+; rule against out of limit emails (max 500 emails per day)
+enabled = true
+port    = http,https
+filter  = email-dolibarr-rulesall
+logpath = /var/log/phpsendmail.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 86400     ; 1 day
+maxretry = 500
+
 [email-dol-blacklist]
 
 ; rule against email ko - blacklist ip, email or content
@@ -1677,17 +1689,17 @@ bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 1
 
-[email-dol-perday]
+[email-dol-quota]
 
-; rule against out of limit emails (max 500 emails per day)
+; rule against email ko - quota reached
 enabled = true
 port    = http,https
-filter  = email-dolibarr-rulesall
+filter  = email-dolibarr-ruleskoquota
 logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
+action = %(action_mw)s
 bantime  = 86400     ; 1 day
 findtime = 86400     ; 1 day
-maxretry = 500
+maxretry = 1
 
 [email-dol-perhour]
 
@@ -1758,6 +1770,7 @@ Then place the filter files supplied with the project in *etc/fail2ban/filter.d*
 ---------------
 cd /etc/fail2ban/filter.d
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
