@@ -20,17 +20,27 @@
  * Script must be ran with admin from master server.
  */
 
+if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
 if (!defined('NOSESSION')) define('NOSESSION', '1');
+if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
-$path=dirname(__FILE__).'/';
+$path=dirname($_SERVER['PHP_SELF']).'/';
 
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
 	exit(-1);
 }
+
+// Global variables
+$version='1.0';
+$error=0;
+
+// -------------------- START OF YOUR CODE HERE --------------------
+@set_time_limit(0);							// No timeout for this script
+define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 $logfile = '/var/log/smtp_watchdog1.log';
 $logphpsendmail = '/var/log/phpsendmail.log';
