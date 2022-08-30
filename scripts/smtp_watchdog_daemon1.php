@@ -182,7 +182,7 @@ while (!feof($handle)) {
 	$processid="";
 	$apachestring="";
 
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " a new line appears into ".$WDLOGFILE." -> process it and write into ".$logphpsendmail."\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " a new line appears into ".$WDLOGFILE." -> process it and write it into ".$logphpsendmail."\n", FILE_APPEND);
 
 	// Write into smtp_watchdog1.log
 	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ----- start smtp_watchdog_daemon1.php\n", FILE_APPEND);
@@ -236,11 +236,11 @@ while (!feof($handle)) {
 					} else {
 						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We did not get the processownerid from the ss command. We try to get the processownerid using the processid from ps\n", FILE_APPEND);
 
-						$commandps = 'ps -faxW -o "uid,pid,cpu,start,time,cmd" | grep --color=never " '.$processid.' " | grep -n "color=never" | awk \'{ print $1 }\'';
+						$commandps = 'ps -f -a -x -o "uid,pid,cpu,start,time,cmd" | grep --color=never " '.$processid.' " | grep -v "color=never" | awk \'{ print $1 }\'';
 
 						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandps=".$commandps."\n", FILE_APPEND);
 
-						$resultps = $utils->executeCli($commandps, $outputfile);
+						$resultps = $utils->executeCli($commandps, $outputfile, 0, null, 1);
 						if (empty($resultps['result'])) {
 							$processownerid = trim($resultps['output']);
 						} else {
