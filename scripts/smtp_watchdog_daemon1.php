@@ -176,11 +176,11 @@ while (!feof($handle)) {
 	flush();
 
 	$ok = 1;
-	$remoteip='unknown';
-	$usernamestring="";
-	$processownerid="";
-	$processid="";
-	$apachestring="";
+	$remoteip = 'unknown';
+	$usernamestring = '';
+	$processownerid = '';
+	$processid = '';
+	$apachestring = '';
 
 	file_put_contents($logfile, date('Y-m-d H:i:s') . " a new line appears into ".$WDLOGFILE." -> process it and write it into ".$logphpsendmail."\n", FILE_APPEND);
 
@@ -194,7 +194,7 @@ while (!feof($handle)) {
 	$smtpportcaller=preg_replace('/\s.*/', '', preg_replace('/.*SPT=/', '', $line));
 	$smtpportcalled=preg_replace('/\s.*/', '', preg_replace('/.*DPT=/', '', $line));
 
-	$result = "";
+	$result = '';
 
 
 	// TODO Call this sometimes to refresh list of paid instances
@@ -356,8 +356,8 @@ while (!feof($handle)) {
 	}
 
 	// Check quota
-	if ($ok && preg_match('/^[0-9]+$/', $processownerid)) {
-		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to check the quota for processownerid\n", FILE_APPEND);
+	if ($ok && is_numeric($processownerid) && $processownerid >= 65535) {
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to check the quota for processownerid=".$processownerid."\n", FILE_APPEND);
 
 		// Test if we reached quota, if yes, discard the email and log it for fail2ban
 		//dol_dir_list('/tmp', 'files', 0, '^phpsendmail\-'.$processownerid.'\-');
@@ -392,9 +392,9 @@ while (!feof($handle)) {
 	}
 
 	// Check IP quality
-	if ($ok && $remoteip != "unknown") {
+	if ($ok && $remoteip != "unknown" && (!is_numeric($processownerid) || $processownerid >= 65535)) {
 		// Test IP quality
-		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We check the quality of the IP ".$remoteip."\n", FILE_APPEND);
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We check the quality of the remoteip=".$remoteip."\n", FILE_APPEND);
 
 		// If ipquality shows it is tor ip (has tor or active_tor on), we refuse and we add ip into blacklistip
 		// If ipquality shows it is a vpn (vpn or active_vpn on), if fraud_score > SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED, we refuse and we add into blacklist
