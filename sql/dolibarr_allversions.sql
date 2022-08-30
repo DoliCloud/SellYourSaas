@@ -84,6 +84,7 @@ CREATE TABLE llx_sellyoursaas_blacklistdir(
 
 ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN date_use datetime;
 ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN comment varchar(255);
+ALTER TABLE llx_sellyoursaas_whitelistip ADD COLUMN comment varchar(255);
 
 ALTER TABLE llx_sellyoursaas_blacklistdir ADD COLUMN noblacklistif varchar(255);
 

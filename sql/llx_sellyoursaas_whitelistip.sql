@@ -19,6 +19,7 @@ CREATE TABLE llx_sellyoursaas_whitelistip(
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
 	entity integer DEFAULT 1 NOT NULL, 
 	content varchar(128) NOT NULL, 
+	comment varchar(255) NULL,
 	date_creation datetime NOT NULL, 
 	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
 	status integer DEFAULT 1 NOT NULL
