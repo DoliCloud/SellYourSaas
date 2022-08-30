@@ -382,7 +382,7 @@ while (!feof($handle)) {
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Nb of processes found with ".$commandresexec." = ".$resexec." (we accept ".$MAXALLOWED.")\n", FILE_APPEND);
 
 			if ($resexec > $MAXALLOWED) {
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko daily quota reached. User has reached its daily quota of $MAXALLOWED\n", FILE_APPEND);
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko quota reached. User has reached its quota of ".$MAXALLOWED."\n", FILE_APPEND);
 				$ok = 0;
 				//echo "smtp_watchdog_daemon1 has found an abusive smtp usage of over quota." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
 			}
@@ -396,6 +396,8 @@ while (!feof($handle)) {
 		// Test IP quality
 		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We check the quality of the remoteip=".$remoteip."\n", FILE_APPEND);
 
+		$evil = 0;
+
 		// If ipquality shows it is tor ip (has tor or active_tor on), we refuse and we add ip into blacklistip
 		// If ipquality shows it is a vpn (vpn or active_vpn on), if fraud_score > SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED, we refuse and we add into blacklist
 		//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore\n", FILE_APPEND);
@@ -404,6 +406,14 @@ while (!feof($handle)) {
 		//else
 		//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " IP $remoteip is good according to IPQualityScore\n", FILE_APPEND);
 		// TODO
+
+		if ($evil) {
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore\n", FILE_APPEND);
+
+			// Add IP to blacklistip
+			file_put_contents($pathtospamdir.'/blacklistip', $remoteip."\n", FILE_APPEND);
+			chmod($pathtospamdir."/blacklistip", 0666);
+		}
 	}
 
 	if ($ok) {
