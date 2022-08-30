@@ -56,7 +56,7 @@ if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
 	fclose($fp);
 	foreach ($array as $val) {
-		$tmpline=explode("=", $val);
+		$tmpline = explode("=", $val);
 		if ($tmpline[0] == 'maxemailperday') {
 			$maxemailperday = $tmpline[1];
 		}
@@ -88,7 +88,7 @@ $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
-		$tmpline=explode("=", $val);
+		$tmpline = explode("=", $val);
 		if ($tmpline[0] == 'domain') {
 			$DOMAIN = $tmpline[1];
 		}
@@ -270,7 +270,7 @@ while (!feof($handle)) {
 
 							// Try to guess remoteip
 							if (!empty($apachestring)) {
-								$arrayapachestring = explode('\s', $apachestring);
+								$arrayapachestring = preg_split('/\s+/', $apachestring);
 								$remoteip = $arrayapachestring[2];
 								file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " remoteip=".$remoteip."\n", FILE_APPEND);
 							}
