@@ -519,7 +519,7 @@ foreach ($instances as $instanceid => $instancearray) {
 	$i++;
 	// We complete the file $filetobuild = $pathtospamdir.'/mailquota';
 	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n";
-	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance #'.$i.' id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n", FILE_APPEND);
+	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance '.$i.' id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n", FILE_APPEND);
 }
 
 

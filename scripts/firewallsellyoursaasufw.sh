@@ -47,6 +47,7 @@ ufw allow out log 25/tcp
 ufw allow out log 2525/tcp
 ufw allow out log 465/tcp
 ufw allow out log 587/tcp
+#ufw allow out log 1025/tcp
 # LDAP LDAPS
 ufw allow out 389/tcp
 ufw allow out 636/tcp
