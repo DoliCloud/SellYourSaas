@@ -12,6 +12,7 @@ $WDLOGFILE='/var/log/ufw.log';
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Get $maxemailperday
 $maxemailperday = 0;
+$maxemailperdaypaid = 0;
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
 	fclose($fp);
@@ -19,6 +20,9 @@ if ($fp) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'maxemailperday') {
 			$maxemailperday = $tmpline[1];
+		}
+		if ($tmpline[0] == 'maxemailperdaypaid') {
+			$maxemailperdaypaid = $tmpline[1];
 		}
 		if ($tmpline[0] == 'pathtospamdir') {
 			$pathtospamdir = $tmpline[1];
@@ -30,6 +34,9 @@ if ($fp) {
 }
 if (is_numeric($maxemailperday) && $maxemailperday > 0) {
 	$MAXPERDAY = (int) $maxemailperday;
+}
+if (is_numeric($maxemailperdaypaid) && $maxemailperdaypaid > 0) {
+	$MAXPERDAYPAID = (int) $maxemailperdaypaid;
 }
 
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
@@ -59,6 +66,9 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . " Try to detect a smtp connexi
 if (empty($MAXPERDAY)) {
 	$MAXPERDAY=1000;
 }
+if (empty($MAXPERDAYPAID)) {
+	$MAXPERDAYPAID=1000;
+}
 if (empty($EMAILFROM)) {
 	$EMAILFROM="noreply@".$DOMAIN;
 }
@@ -81,6 +91,37 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . "Now event captured will be lo
 $re='^[0-9]+$';
 
 
+/**
+ * getInstancesOfUser()
+ *
+ * @param	string	$pathtospamdir		Spam dir
+ * @return	array						Array of instances in mailquota (so paid instances)
+ */
+function getInstancesOfUser($pathtospamdir)
+{
+	$instanceofuser = array();
+	// Loop on each line of $pathtospamdir/mailquota
+	$fp = @fopen($pathtospamdir."/mailquota", "r");
+	if ($fp) {
+		while (($buffer = fgets($fp, 1024)) !== false) {
+			$reg = array();
+			if (preg_match('\sid=(\d+)\sref=([^\s]+)\sosu=([^\s]+)\smailquota=(\d+)', $buffer, $reg)) {
+				$instanceofuser[$reg[1]] = array('id'=>$reg[1], 'ref='=>$reg[2], 'osu'=>$reg[3]);
+			}
+		}
+		if (!feof($fp)) {
+			echo "Erreur: fgets() a échoué\n";
+		}
+		fclose($fp);
+	}
+	return $instanceofuser;
+}
+
+
+// Load $instanceofuser
+$instanceofuser = getInstancesOfUser($pathtospamdir);
+
+
 $handle = popen("tail -F ".$WDLOGFILE." | grep --line-buffered 'UFW ALLOW'", 'r');
 while (!feof($handle)) {
 	$line = fgets($handle);
@@ -93,7 +134,7 @@ while (!feof($handle)) {
 	$apachestring="";
 
 	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ----- start smtp_watchdog_daemon1.php");
-	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Found a UFW ALLOW, in $WDLOGFILE, now try to find process IP and ports...");
+	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Found a UFW ALLOW, in $WDLOGFILE, now try to find the process IPs and ports...");
 	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$line);
 
 	$smtpipcaller=preg_replace('/\s.*/', '', preg_replace('/.*SRC=/', '', $line));
@@ -102,6 +143,9 @@ while (!feof($handle)) {
 	$smtpportcalled=preg_replace('/\s.*/', '', preg_replace('/.*DPT=/', '', $line));
 
 	$result = "";
+
+	// TODO Call this sometimes only
+	//$instanceofuser = getInstancesOfUser();
 }
 pclose($handle);
 

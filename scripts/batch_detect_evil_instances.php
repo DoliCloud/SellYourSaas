@@ -114,6 +114,8 @@ if ($fp) {
 }
 
 // Read /etc/sellyoursaas-public.conf file
+$maxemailperday = 0;
+$maxemailperdaypaid = 0;
 $pathtospamdir = '/tmp/spam';
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Add each line to an array
@@ -121,11 +123,33 @@ if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'maxemailperday') {
+			$maxemailperday = $tmpline[1];
+		}
+		if ($tmpline[0] == 'maxemailperdaypaid') {
+			$maxemailperdaypaid = $tmpline[1];
+		}
 		if ($tmpline[0] == 'pathtospamdir') {
 			$pathtospamdir = $tmpline[1];
 		}
 	}
+} else {
+	print "ERROR Failed to open /etc/sellyoursaas-public.conf file\n";
+	//exit(-1);
 }
+if (is_numeric($maxemailperday) && $maxemailperday > 0) {
+	$MAXPERDAY = (int) $maxemailperday;
+}
+if (is_numeric($maxemailperdaypaid) && $maxemailperdaypaid > 0) {
+	$MAXPERDAYPAID = (int) $maxemailperdaypaid;
+}
+if (empty($MAXPERDAY)) {
+	$MAXPERDAY=1000;
+}
+if (empty($MAXPERDAYPAID)) {
+	$MAXPERDAYPAID=1000;
+}
+
 
 
 /*
@@ -488,10 +512,12 @@ print "We found ".count($instancestrial)." deployed trial + ".count($instances).
 
 print "----- Generate file mailquota for paid instances\n";
 
+file_put_contents($pathtospamdir.'/mailquota', "# File of paid instance with their quota");
+
 foreach ($instances as $instanceid => $instancearray) {
-	// TODO
 	// We complete the file $filetobuild = $pathtospamdir.'/mailquota';
 	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']."\n";
+	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n", FILE_APPEND);
 }
 
 
