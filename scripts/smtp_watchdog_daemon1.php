@@ -271,7 +271,7 @@ while (!feof($handle)) {
 							// Try to guess remoteip
 							if (!empty($apachestring)) {
 								$arrayapachestring = preg_split('/\s+/', $apachestring);
-								$remoteip = $arrayapachestring[2];
+								$remoteip = $arrayapachestring[1];
 								file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " remoteip=".$remoteip."\n", FILE_APPEND);
 							}
 						} else {
