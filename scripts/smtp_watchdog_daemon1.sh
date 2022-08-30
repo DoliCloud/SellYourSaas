@@ -120,6 +120,12 @@ while read -r line ; do
                         if [[ "x$apachestring" != "x" ]] ; then
                         	export remoteip=`echo $apachestring | awk '{print $2}'`
                             echo "$now remoteip=$remoteip" >> "/var/log/phpsendmail.log"
+                            
+                            # Test IP
+                            # If ipquality shows it is tor ip (has tor or active_tor on), we refuse and we add ip into blacklistip
+                            # If ipquality shows it is a vpn (vpn or active_vpn on), if fraud_score > SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED, we refuse and we add into blacklist
+                            #echo "$new $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore" >> /var/log/phpsendmail.log
+                            #
                         fi
                     else 
                     	echo "$now processid not valid, we can't find apache and remoteip data" >> "/var/log/phpsendmail.log"
