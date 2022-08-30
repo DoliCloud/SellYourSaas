@@ -347,16 +347,18 @@ while (!feof($handle)) {
 		// $remoteip, $usernamestring, $smtpportcalled, $smtpipcalled, $apachestring
 		if (in_array($remoteip, $blacklistips)) {
 			// We found the ip into the blacklistip
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We found the IP $remoteip into blacklistip file blacklistip file\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We found the IP $remoteip into ".$pathtospamdir."/blacklistip file\n", FILE_APPEND);
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip file\n", FILE_APPEND);
 			$ok = 0;
 		} else {
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " IP $remoteip not found into blacklistip file blacklistip file\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " IP $remoteip not found into ".$pathtospamdir."/blacklistip file\n", FILE_APPEND);
 		}
 	}
 
 	// Check quota
 	if ($ok && preg_match('/^[0-9]+$/', $processownerid)) {
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to check the quota for processownerid\n", FILE_APPEND);
+
 		// Test if we reached quota, if yes, discard the email and log it for fail2ban
 		//dol_dir_list('/tmp', 'files', 0, '^phpsendmail\-'.$processownerid.'\-');
 		$commandresexec="find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l";
@@ -392,6 +394,8 @@ while (!feof($handle)) {
 	// Check IP quality
 	if ($ok && $remoteip != "unknown") {
 		// Test IP quality
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We check the quality of the IP ".$remoteip."\n", FILE_APPEND);
+
 		// If ipquality shows it is tor ip (has tor or active_tor on), we refuse and we add ip into blacklistip
 		// If ipquality shows it is a vpn (vpn or active_vpn on), if fraud_score > SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED, we refuse and we add into blacklist
 		//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore\n", FILE_APPEND);
