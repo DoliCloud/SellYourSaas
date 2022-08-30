@@ -50,7 +50,8 @@ if [ "x$1" == "xstart" ]; then
 		cd $scriptdir
 		
 		echo "smtp_watchdog_daemon1 started"
-		./smtp_watchdog_daemon1.sh 2>&1 &
+		#./smtp_watchdog_daemon1.sh 2>&1 &
+		/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php 2>&1 &
 		
 	else
 		echo smtp_watchdog_daemon1 is already running with PID $pid
