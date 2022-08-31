@@ -1,6 +1,7 @@
 #!/bin/bash
 #----------------------------------------------------------------
-# This script allows to update or fix the /etc/sellyoursaas.conf file
+# This script allows to update or fix 
+# the /etc/sellyoursaas.conf or the /etc/sellyoursaas-public.conf file
 #----------------------------------------------------------------
 
 

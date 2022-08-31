@@ -3715,6 +3715,8 @@ and add the following content:
 <?php
 $dolibarr_main_document_root='/home/admin/wwwroot/dolibarr/htdocs';
 $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
+
+$dolibarr_main_instance_unique_id='...';	// Use the same ID than the master server.
 ---------------
 
 
