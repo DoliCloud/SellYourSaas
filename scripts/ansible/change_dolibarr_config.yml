@@ -13,9 +13,9 @@
   tasks:
   - name: Change conf value
     ini_file:
-      path: /home/admin/wwwroot/dolibarr/htdocs/conf/conf.conf
+      path: /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
       section: null
       option: "${{option}}"
-      value: "{{value}}"
+      value: "'{{value}}';"
       no_extra_spaces: yes
       backup: yes

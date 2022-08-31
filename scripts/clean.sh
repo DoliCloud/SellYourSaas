@@ -196,6 +196,10 @@ echo "Nettoyage vieux fichiers /tmp"
 echo find /tmp -mtime +30 -name 'phpsendmail*.log' -delete
 find /tmp -mtime +30 -name 'phpsendmail*.log' -delete
 
+echo "Nettoyage vieux fichiers conf"
+echo find /home/admin/wwwroot/dolibarr/htdocs/conf -mtime +10 -name '*~' -delete
+find /home/admin/wwwroot/dolibarr/htdocs/conf -mtime +10 -name '*~' -delete
+
 
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
 for fic in `ls /etc/apache2/sellyoursaas-available/*.*.*.*.conf /etc/apache2/sellyoursaas-available/*.home.lan 2>/dev/null`
