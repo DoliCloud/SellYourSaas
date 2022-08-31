@@ -651,6 +651,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 				$arraytags=array('result'=>'ok');
 				$statsd->increment('sellyoursaas.backup', 1, $arraytags);
 			} catch (Exception $e) {
+				print "Error when sending data to DataDog\n";
 			}
 		}
 	}
@@ -682,6 +683,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 				$arraytags=array('result'=>'ko');
 				$statsd->increment('sellyoursaas.backup', 1, $arraytags);
 			} catch (Exception $e) {
+				print "Error when sending data to DataDog\n";
 			}
 		}
 	}
