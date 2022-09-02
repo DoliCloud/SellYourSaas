@@ -3339,13 +3339,6 @@ Note: Reports are into */var/crash*
 sudo apt remove cerbot; sudo apt install snapd;
 sudo snap install --classic certbot;
 sudo ln -fs /snap/bin/certbot /usr/bin/certbot
-
-# Old method was:
-#cd /root
-#apt install software-properties-common python-software-properties
-#add-apt-repository ppa:certbot/certbot
-#apt update
-#apt install python-certbot-apache
 ---------------
 
 And to list certbot cron job:
