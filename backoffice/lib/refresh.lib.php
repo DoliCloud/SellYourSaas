@@ -382,22 +382,26 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
  *
  * Rem: Comptage des users par status
  *
- * @param	Database	$db			Database handler
- * @param	integer		$datelim	Date limit
- * @return	array					Array of data
+ * @param	Database	$db				Database handler
+ * @param	integer		$datelim		Date limit
+ * @param	integer		$datefirstday	Date first day
+ * @return	array						Array of data
  */
-function sellyoursaas_calculate_stats($db, $datelim)
+function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 {
 	$error = 0;
 
-	$total = $totalcommissions = $totalinstancespaying = $totalinstancespayingall = $totalinstancespayingwithoutrecinvoice = 0;
+	$total = $totalcommissions = $totalnewinstances = $totallostinstances = $totalinstancespaying = $totalinstancespayingall = $totalinstancespayingwithoutrecinvoice = 0;
 	$totalinstancesexpiredfree = $totalinstancesexpiredpaying = $totalinstancessuspendedfree = $totalinstancessuspendedpaying = 0;
 	$totalinstances = $totalusers = 0;
 	$listofinstancespaying=array(); $listofinstancespayingall=array(); $listofinstancespayingwithoutrecinvoice = array();
-	$listofcustomers=array(); $listofcustomerspaying=array(); $listofcustomerspayingwithoutrecinvoice=array(); $listofcustomerspayingall=array();
+	$listofcustomerstrial=array(); $listofcustomerspaying=array(); $listofcustomerspayingwithoutrecinvoice=array(); $listofcustomerspayingall=array();
 	$listofsuspendedrecurringinvoice=array();
+	$listofnewinstances=array(); $listoflostinstances=array();
 
 	$nbofinstancedeployed = 0;
+
+	$now = dol_now();
 
 	// Get list of deployed instances
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
@@ -408,14 +412,21 @@ function sellyoursaas_calculate_stats($db, $datelim)
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 	$sql.= " AND ce.deployment_status = 'done'";
 	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
-	if ($datelim) $sql.= " AND ce.deployment_date_end <= '".$db->idate($datelim)."'";	// Only instances deployed before this date
+	if ($datelim && ($datelim < $now)) {
+		$sql.= " AND ce.deployment_date_end <= '".$db->idate($datelim)."'";		// Only instances deployed with end before this date
+	}
+	/*
+	if ($datefirstday) {
+		$sql.= " AND ce.deployment_date_end >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
+	}
+	*/
 
 	dol_syslog("sellyoursaas_calculate_stats begin", LOG_DEBUG, 1);
 
 	$resql=$db->query($sql);
 	if ($resql) {
 		$num = $db->num_rows($resql);
-		dol_syslog("sellyoursaas_calculate_stats found ".$num." record", LOG_DEBUG, 1);
+		dol_syslog("sellyoursaas_calculate_stats found ".$num." record", LOG_DEBUG);
 
 		$i = 0;
 		if ($num) {
@@ -488,7 +499,7 @@ function sellyoursaas_calculate_stats($db, $datelim)
 								$totalinstancessuspendedfree++;
 							}
 
-							$listofcustomers[$obj->customer_id]++;	// This is in fact the total of trial only customers
+							$listofcustomerstrial[$obj->customer_id]++;	// This is the total of trial only customers
 							//print "cpt=".$totalinstances." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price." -> 0<br>\n";
 						} else {
 							$ispaymentko = sellyoursaasIsPaymentKo($object);
@@ -587,10 +598,105 @@ function sellyoursaas_calculate_stats($db, $datelim)
 
 	dol_syslog("sellyoursaas_calculate_stats end", LOG_DEBUG, -1);
 
+
+	// Get list of new deployed instances
+	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
+	$sql.= " ce.deployment_status as instance_status,";
+	$sql.= " s.parent, s.nom as name,";
+	$sql.= " f.total_ht";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
+	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object,";
+	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
+	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
+	$sql.= " ".MAIN_DB_PREFIX."societe as s";
+	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
+	//$sql.= " AND ce.deployment_status = 'done'";
+	//$sql.= " AND f.suspended = 0";
+	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
+	$sql.= " AND ((ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid)";
+	$sql.= " OR (ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid))";
+	if ($datelim && ($datelim < $now)) {
+		$sql.= " AND f.datec <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
+	}
+	if ($datefirstday) {
+		$sql.= " AND f.datec >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
+	}
+
+	dol_syslog("sellyoursaas_calculate_stats new begin", LOG_DEBUG, 1);
+
+	$resql=$db->query($sql);
+	if ($resql) {
+		$num = $db->num_rows($resql);
+		dol_syslog("sellyoursaas_calculate_stats new found ".$num." record", LOG_DEBUG);
+
+		$i = 0;
+		if ($num) {
+			// Loop on all deployed instances
+			while ($i < $num) {
+				$obj = $db->fetch_object($resql);
+				if ($obj) {
+					$listofnewinstances[$obj->customer_id]++;
+					$totalnewinstances += $obj->total_ht;
+				}
+			}
+		}
+	}
+
+	dol_syslog("sellyoursaas_calculate_stats new end", LOG_DEBUG, -1);
+
+
+	// Get list of lost undeployed instances
+	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
+	$sql.= " ce.deployment_status as instance_status, ce.undeployment_date,";
+	$sql.= " s.parent, s.nom as name,";
+	$sql.= " f.total_ht";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
+	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object,";
+	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
+	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
+	$sql.= " ".MAIN_DB_PREFIX."societe as s";
+	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
+	$sql.= " AND ce.deployment_status = 'undeployed'";
+	//$sql.= " AND f.suspended = 0";
+	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
+	$sql.= " AND ((ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid)";
+	$sql.= " OR (ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid))";
+	if ($datelim && ($datelim < $now)) {
+		$sql.= " AND ce.undeployment_date <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
+	}
+	if ($datefirstday) {
+		$sql.= " AND ce.undeployment_date >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
+	}
+
+	dol_syslog("sellyoursaas_calculate_stats lostinstances begin", LOG_DEBUG, 1);
+
+	$resql=$db->query($sql);
+	if ($resql) {
+		$num = $db->num_rows($resql);
+		dol_syslog("sellyoursaas_calculate_stats lostinstances found ".$num." record", LOG_DEBUG);
+
+		$i = 0;
+		if ($num) {
+			// Loop on all deployed instances
+			while ($i < $num) {
+				$obj = $db->fetch_object($resql);
+				if ($obj) {
+					$listoflostinstances[$obj->customer_id]++;
+					$totallostinstances += $obj->total_ht;
+				}
+			}
+		}
+	}
+
+	dol_syslog("sellyoursaas_calculate_stats lostinstances end", LOG_DEBUG, -1);
+
+
 	//var_dump($listofinstancespaying);
-	return array(
+	$retarray = array(
 		'total'=>(double) $total,
 		'totalcommissions'=>(double) $totalcommissions,
+		'totalnewinstances'=>(double) $totalnewinstances,
+		'totallostinstances'=>(double) $totallostinstances,
 		'totalinstancespaying'=>(int) $totalinstancespaying,
 		'totalinstancespayingall'=>(int) $totalinstancespayingall,
 		'totalinstancespayingwithoutrecinvoice'=>(int) $totalinstancespayingwithoutrecinvoice,
@@ -600,11 +706,17 @@ function sellyoursaas_calculate_stats($db, $datelim)
 		'totalinstancesexpiredpaying'=>(int) $totalinstancesexpiredpaying,
 		'totalinstances'=>(int) $totalinstances,						// Total instances (trial + paid)
 		'totalusers'=>(int) $totalusers,								// Total users (trial + paid)
-		'totalcustomers'=>(int) count($listofcustomers),				// Trial only customers
+		'totalcustomers'=>(int) count($listofcustomerstrial),			// Trial only customers (for backward compatibility)
+		'totalcustomerstrial'=>(int) count($listofcustomerstrial),		// Trial only customers
 		'totalcustomerspaying'=>(int) count($listofcustomerspaying),	// Paying customers
 		'listofinstancespaying'=>$listofinstancespaying,
 		'listofinstancespayingall'=>$listofinstancespayingall,
 		'listofinstancespayingwithoutrecinvoice'=>$listofinstancespayingwithoutrecinvoice,
-		'listofsuspendedrecurringinvoice'=>$listofsuspendedrecurringinvoice
+		'listofsuspendedrecurringinvoice'=>$listofsuspendedrecurringinvoice,
+		'listofnewinstances'=>$listofnewinstances,
+		'listoflostinstances'=>$listoflostinstances
 	);
+	//var_dump($retarray);
+
+	return $retarray;
 }

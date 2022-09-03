@@ -513,7 +513,13 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 					continue;
 				}
 
-				$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','totalcustomers','totalcustomerspaying','benefit','serverprice');
+				//$statkeylist=array('total','totalcommissions','totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','totalcustomers','totalcustomerspaying','benefit','serverprice');
+				$statkeylist=array(
+					'total', 'totalcommissions', 'totalnewinstances', 'totallostinstances',
+					'totalinstancespaying','totalinstancespayingall','totalinstances','totalusers','totalcustomers','totalcustomerspaying',
+					'benefit','serverprice',
+					'newinstances', 'lostinstances'
+				);
 
 				$x=sprintf("%04d%02d", $year, $m);
 
@@ -528,7 +534,9 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 				if ($dowehavetomakeupdatefordate) {
 					// Update stats for the metric
 					print 'Calculate statistics for x='.$x."\n";
-					$rep = sellyoursaas_calculate_stats($dbmaster, $datelastday);	// Get qty and amount into template invoices linked to active contracts
+
+					$rep = sellyoursaas_calculate_stats($dbmaster, $datelastday, $datefirstday);	// Get qty and amount into all template invoices linked to active contracts deployed before the $datelastday
+
 					$part = (empty($conf->global->SELLYOURSAAS_PERCENTAGE_FEE) ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
 
 					foreach ($statkeylist as $statkey) {
@@ -537,25 +545,33 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 							print "Update stats for ".$statkey." x=".$x.' datelastday='.dol_print_date($datelastday, 'dayhour', 'gmt');
 
 							if ($rep) {
-								$total=$rep['total'];
-								$totalcommissions=$rep['totalcommissions'];
-								$totalinstancespaying=$rep['totalinstancespaying'];
-								$totalinstancespayingall=$rep['totalinstancespayingall'];
-								$totalinstances=$rep['totalinstances'];
-								$totalusers=$rep['totalusers'];
-								$totalcustomerspaying=$rep['totalcustomerspaying'];
-								$totalcustomers=$rep['totalcustomers'];
-								$benefit=($total * (1 - $part) - $serverprice - $totalcommissions);
+								$total = $rep['total'];
+								$totalcommissions = $rep['totalcommissions'];
+								$totalnewinstances = $rep['totalnewinstances'];
+								$totallostinstances = $rep['totallostinstances'];
+								$totalinstancespaying = $rep['totalinstancespaying'];
+								$totalinstancespayingall = $rep['totalinstancespayingall'];
+								$totalinstances = $rep['totalinstances'];		// total trial only instances
+								$totalusers = $rep['totalusers'];
+								$totalcustomerspaying = $rep['totalcustomerspaying'];
+								$totalcustomers = $rep['totalcustomers'];
+								$newinstances = count($rep['listofnewinstances']);
+								$lostinstances = count($rep['listoflostinstances']);
+								$benefit = ($total * (1 - $part) - $serverprice - $totalcommissions);
 
 								$y=0;
 								if ($statkey == 'total') $y=$total;
 								if ($statkey == 'totalcommissions') $y=$totalcommissions;
+								if ($statkey == 'totalnewinstances') $y=$totalnewinstances;
+								if ($statkey == 'totallostinstances') $y=$totallostinstances;
 								if ($statkey == 'totalinstancespaying') $y=$totalinstancespaying;
 								if ($statkey == 'totalinstancespayingall') $y=$totalinstancespayingall;
 								if ($statkey == 'totalinstances') $y=$totalinstances;
 								if ($statkey == 'totalusers') $y=$totalusers;
 								if ($statkey == 'totalcustomerspaying') $y=$totalcustomerspaying;
 								if ($statkey == 'totalcustomers') $y=$totalcustomers;
+								if ($statkey == 'newinstances') $y=$newinstances;
+								if ($statkey == 'lostinstances') $y=$lostinstances;
 								if ($statkey == 'serverprice') $y=$serverprice;
 								if ($statkey == 'benefit') $y=$benefit;
 

@@ -729,3 +729,6 @@ EvilInstances=Instances (flagged as evil)
 SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE=Maximum amount of invoice (monthly). Payment tries will be canceled if amount is higher. 
 PleaseOpenATicketToRequestYourCredential=Such access is not enabled by default. Please open a ticket to request your credentials.
 BackupFrequency=Backup frequency (interval in days)
+VariationOfCurrentMonth=Current month variation
+NewInstances=New paid instances
+LostInstances=Lost paid instances
