@@ -166,6 +166,9 @@ if ($dbmaster) {
 }
 if (empty($db)) $db=$dbmaster;
 
+// Set serverprice with the param from $conf of the $dbmaster server.
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+
 //$langs->setDefaultLang('en_US'); 	// To change default language of $langs
 $langs->load("main");				// To load language file for default language
 @set_time_limit(0);					// No timeout for this script

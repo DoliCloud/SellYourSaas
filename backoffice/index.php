@@ -72,6 +72,9 @@ if ($mode == 'refreshstats') {
 	ini_set('max_execution_time', '300'); //300 seconds = 5 minutes
 }
 
+// Set serverprice with the param from $conf of the $dbmaster server.
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+
 
 /*
  *	Actions

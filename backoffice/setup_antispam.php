@@ -44,7 +44,6 @@ dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use
 dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 
-
 // Load traductions files requiredby by page
 $langs->loadLangs(array("admin", "companies", "other", "sellyoursaas@sellyoursaas"));
 
@@ -71,6 +70,9 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 $keytodesactivate	= GETPOST('key', 'alpha');
 $value	= GETPOST('value', 'alpha');
+
+// Set serverprice with the param from $conf of the $dbmaster server.
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
 
 
 /*

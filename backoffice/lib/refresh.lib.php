@@ -18,15 +18,10 @@
 /**
  *       \file       htdocs/sellyoursaas/backoffice/lib/refresh.lib.php
  *       \ingroup    sellyoursaas
- *       \brief      Library for sellyoursaas backoofice lib
+ *       \brief      Library for sellyoursaas refresh lib
  */
 
-// Files with some lib
-global $conf;
-
-// Show totals
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
-
+// Files with some functions
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 

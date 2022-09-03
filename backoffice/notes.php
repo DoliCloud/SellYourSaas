@@ -43,7 +43,6 @@ dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use
 dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 
-
 // Load traductions files requiredby by page
 $langs->loadLangs(array("companies","other","sellyoursaas@sellyoursaas"));
 
@@ -68,12 +67,14 @@ $pagenext = $page + 1;
 // Security check
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
+// Set serverprice with the param from $conf of the $dbmaster server.
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
 
 
 
-/*******************************************************************
-* ACTIONS
-********************************************************************/
+/*
+ * Actions
+ */
 
 if ($action == 'update') {
 	dolibarr_set_const($db, "NLTECHNO_NOTE", GETPOST("NLTECHNO_NOTE", 'none'), 'chaine', 0, '', $conf->entity);

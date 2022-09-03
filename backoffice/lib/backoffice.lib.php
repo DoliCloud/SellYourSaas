@@ -16,9 +16,9 @@
  */
 
 /**
- *       \file       htdocs/sellyoursaas/backoffice/lib/refresh.lib.php
+ *       \file       htdocs/sellyoursaas/backoffice/lib/backoffice.lib.php
  *       \ingroup    sellyoursaas
- *       \brief      Library for sellyoursaas backoofice lib
+ *       \brief      Library for sellyoursaas backoffice lib
  */
 
 
@@ -61,4 +61,3 @@ function sellYourSaasBackofficePrepareHead()
 
 	return $head;
 }
-
