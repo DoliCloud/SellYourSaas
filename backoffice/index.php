@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2007-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2022 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -210,7 +210,7 @@ $param = '';
 
 print '<form method="post" action="'.dol_buildpath('/sellyoursaas/backoffice/index.php', 1).'">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
-print '<table class="noborder nohover" width="100%">';
+print '<table class="noborder nohover centpercent">';
 print '<tr class="liste_titre">';
 print '<td>';
 print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
@@ -269,7 +269,7 @@ print "\n";
 
 
 // Show variation
-print '<table class="noborder" width="100%">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td class="wordwrap wordbreak"><span class="valignmiddle">'.$langs->trans("VariationOfCurrentMonth").'</span>';
 print '</td>';
@@ -295,7 +295,7 @@ print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
 // Show totals
-print '<table class="noborder" width="100%">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td class="wordwrap wordbreak"><span class="valignmiddle">'.$langs->trans("Statistics").'</span>';
 print '</td>';
@@ -526,6 +526,51 @@ if ($resql) {
 	}
 } else dol_print_error($db);
 
+// array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn))
+$data4 = array();
+$sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'dolicloud_stats';
+$sql.=" WHERE service = '".$db->escape($servicetouse)."' AND name IN ('totalnewinstances', 'totallostinstances', 'newinstances', 'lostinstances')";
+$sql.=" ORDER BY x, name";
+$resql=$db->query($sql);
+if ($resql) {
+	$num = $db->num_rows($resql);
+	$i=0;
+
+	$oldx='';
+	$absice=array();
+	while ($i < $num) {
+		$obj=$db->fetch_object($resql);
+		if ($obj->x < $startyear."01") { $i++; continue; }
+		if ($obj->x > $endyear."12") { $i++; continue; }
+
+		if ($oldx && $oldx != $obj->x) {
+			// break
+			preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
+			$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
+			ksort($absice);
+			$data4[]=$absice;
+			$absice=array();
+		}
+
+		$oldx=$obj->x;
+
+		if ($obj->name == 'totalnewinstances') $absice[1]=$obj->y;
+		if ($obj->name == 'totallostinstances') $absice[2]=$obj->y;
+		if ($obj->name == 'newinstances') $absice[3]=$obj->y;
+		if ($obj->name == 'lostinstances') $absice[4]=$obj->y;
+
+		$i++;
+	}
+
+	if ($oldx) {
+		preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
+		$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
+		ksort($absice);
+		$data4[]=$absice;
+	}
+} else dol_print_error($db);
+
+
 
 if (empty($conf->dol_optimize_smallscreen)) {
 	$WIDTH=600;
@@ -537,7 +582,7 @@ if (empty($conf->dol_optimize_smallscreen)) {
 
 $fileurlnb = '';
 
-// Show graph
+// Set graph
 $px1 = new DolGraph();
 $mesg = $px1->isGraphKo();
 if (! $mesg) {
@@ -564,7 +609,7 @@ if (! $mesg) {
 	$px1->SetCssPrefix("cssboxes");
 	$px1->SetType(array('lines','lines','lines'));
 	$px1->mode='depth';
-	$px1->SetTitle($langs->trans("Amount"));
+	$px1->SetTitle($langs->trans("Profits"));
 
 	$px1->draw('dolicloudamount.png', $fileurlnb);
 }
@@ -601,7 +646,6 @@ if (! $mesg) {
 	$px2->draw('dolicloudcustomersusers.png', $fileurlnb);
 }
 
-// Show graph
 $px3 = new DolGraph();
 $mesg = $px3->isGraphKo();
 if (! $mesg) {
@@ -621,9 +665,35 @@ if (! $mesg) {
 	$px3->SetCssPrefix("cssboxes");
 	$px3->SetType(array('lines'));
 	$px3->mode='depth';
-	$px3->SetTitle($langs->trans("Other"));
+	$px3->SetTitle($langs->trans("AverageRevenuePerInstance"));
 
 	$px3->draw('dolicloudaveragebasket.png', $fileurlnb);
+}
+
+$px4 = new DolGraph();
+$mesg = $px4->isGraphKo();
+if (! $mesg) {
+	$px4->SetData($data4);
+	$data4 = null;
+	$legend=array();
+	$legend[0]=$langs->trans("NbNewInstances");
+	$legend[1]=$langs->trans("NbLostInstances");
+	$legend[2]=$langs->trans("AmountNewInstances");
+	$legend[3]=$langs->trans("AmountLostInstances");
+
+	$px4->SetLegend($legend);
+	$px4->SetMaxValue($px4->GetCeilMaxValue());
+	$px4->SetWidth($WIDTH);
+	$px4->SetHeight($HEIGHT);
+	$px4->SetYLabel($langs->trans("Amount"));
+	$px4->SetShading(3);
+	$px4->SetHorizTickIncrement(1);
+	$px4->SetCssPrefix("cssboxes");
+	$px4->SetType(array('lines'));
+	$px4->mode='depth';
+	$px4->SetTitle($langs->trans("NewAndLostInstances"));
+
+	$px4->draw('dolicloudnewlostinstances.png', $fileurlnb);
 }
 
 print '<div class="fichecenter"><br></div>';
@@ -633,10 +703,13 @@ print '<div class="fichecenter"><br></div>';
 
 print '<div class="fichecenter center"><center>';
 print '<div class="inline-block nohover">';
-print $px1->show();
+print $px2->show();
 print '</div>';
 print '<div class="inline-block nohover">';
-print $px2->show();
+print $px4->show();
+print '</div>';
+print '<div class="inline-block nohover">';
+print $px1->show();
 print '</div>';
 print '<div class="inline-block nohover">';
 print $px3->show();
