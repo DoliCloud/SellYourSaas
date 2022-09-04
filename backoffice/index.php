@@ -554,10 +554,10 @@ if ($resql) {
 
 		$oldx=$obj->x;
 
-		if ($obj->name == 'totalnewinstances') $absice[1]=$obj->y;
-		if ($obj->name == 'totallostinstances') $absice[2]=$obj->y;
-		if ($obj->name == 'newinstances') $absice[3]=$obj->y;
-		if ($obj->name == 'lostinstances') $absice[4]=$obj->y;
+		if ($obj->name == 'newinstances') $absice[1]=$obj->y;
+		if ($obj->name == 'lostinstances') $absice[2]=$obj->y;
+		if ($obj->name == 'totalnewinstances') $absice[3]=$obj->y;
+		if ($obj->name == 'totallostinstances') $absice[4]=$obj->y;
 
 		$i++;
 	}
@@ -678,8 +678,8 @@ if (! $mesg) {
 	$legend=array();
 	$legend[0]=$langs->trans("NbNewInstances");
 	$legend[1]=$langs->trans("NbLostInstances");
-	$legend[2]=$langs->trans("AmountNewInstances");
-	$legend[3]=$langs->trans("AmountLostInstances");
+	$legend[2]=$langs->trans("AmountNewInstances").' ('.$langs->trans("HT").')';
+	$legend[3]=$langs->trans("AmountLostInstances").' ('.$langs->trans("HT").')';
 
 	$px4->SetLegend($legend);
 	$px4->SetMaxValue($px4->GetCeilMaxValue());
