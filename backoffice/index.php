@@ -599,6 +599,7 @@ if (! $mesg) {
 	}
 
 	$px1->SetLegend($legend);
+	$px1->setShowPointValue(2);
 	$px1->SetMaxValue($px1->GetCeilMaxValue());
 	$px1->SetWidth($WIDTH);
 	$px1->SetHeight($HEIGHT);
@@ -631,6 +632,7 @@ if (! $mesg) {
 	}
 
 	$px2->SetLegend($legend);
+	$px2->setShowPointValue(2);
 	$px2->SetMaxValue($px2->GetCeilMaxValue());
 	$px2->SetWidth($WIDTH);
 	$px2->SetHeight($HEIGHT);
@@ -655,6 +657,7 @@ if (! $mesg) {
 	$legend[0]=$langs->trans("AverageRevenuePerInstance").' ('.$langs->trans("HT").')';
 
 	$px3->SetLegend($legend);
+	$px3->setShowPointValue(2);
 	$px3->SetMaxValue($px3->GetCeilMaxValue());
 	$px3->SetWidth($WIDTH);
 	$px3->SetHeight($HEIGHT);
@@ -681,6 +684,7 @@ if (! $mesg) {
 	$legend[3]=$langs->trans("AmountLostInstances").' ('.$langs->trans("HT").')';
 
 	$px4->SetLegend($legend);
+	$px4->setShowPointValue(2);
 	$px4->SetMaxValue($px4->GetCeilMaxValue());
 	$px4->SetWidth($WIDTH);
 	$px4->SetHeight($HEIGHT);
