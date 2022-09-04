@@ -468,7 +468,8 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		$stats=array();
 
 		// Load list of existing stats into $stats
-		$sql ="SELECT name, x, y";                        // name is 'total', 'totalcommissions', 'totalinstancepaying', 'totalinstances', 'totalusers', 'benefit', 'totalcustomers', 'totalcustomerspaying'
+		// name can be 'total', 'totalcommissions', 'totalinstancepaying', 'totalinstances', 'totalusers', 'benefit', 'totalcustomers', 'totalcustomerspaying'...
+		$sql ="SELECT name, x, y";
 		$sql.=" FROM ".MAIN_DB_PREFIX."dolicloud_stats";
 		$sql.=" WHERE service = '".$dbmaster->escape($servicetouse)."'";
 		$sql.=" ORDER BY x, name";
