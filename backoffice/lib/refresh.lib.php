@@ -638,6 +638,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 					$listofnewinstances[$obj->customer_id]++;
 					$totalnewinstances += $obj->total_ht;
 				}
+				$i++;
 			}
 		}
 	}
@@ -684,6 +685,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 					$listoflostinstances[$obj->customer_id]++;
 					$totallostinstances += $obj->total_ht;
 				}
+				$i++;
 			}
 		}
 	}
