@@ -122,6 +122,7 @@ $datefirstday=dol_get_first_day($endyear, $endmonth, 1);
 $nbyears = (GETPOSTISSET('nbyears') ? ((int) GETPOST('nbyears', 'int')) : getDolGlobalInt('SELLYOURSAAS_NB_YEARS', 2));
 $startyear=$endyear - $nbyears;
 
+
 $total=0;
 $totalcommissions=0;
 $totalnewinstances=0;
