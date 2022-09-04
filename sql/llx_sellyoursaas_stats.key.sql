@@ -15,12 +15,4 @@
 -- along with this program. If not, see <http://www.gnu.org/licenses/>.
 -- ===================================================================
 
-CREATE TABLE llx_dolicloud_stats
-(
-	rowid integer AUTO_INCREMENT PRIMARY KEY,
-	service varchar(24),								-- old or xxx
-	name varchar(24),
-	x varchar(16),
-	y double,
-	tms timestamp
-) ENGINE = innodb;
+ALTER TABLE llx_sellyoursaas_stats ADD INDEX uk_dolicloud_stats(x);

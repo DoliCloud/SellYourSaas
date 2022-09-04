@@ -370,7 +370,7 @@ class Sellyoursaasapi extends DolibarrApi
 		$tmparray = dol_getdate($now);
 		$tmpprev = dol_get_prev_month($tmparray['mon'], $tmparray['year']);
 
-		$sql = 'SELECT name, x, y, tms FROM '.MAIN_DB_PREFIX."dolicloud_stats";
+		$sql = 'SELECT name, x, y, tms FROM '.MAIN_DB_PREFIX."sellyoursaas_stats";
 
 		if ($yearmonth == 'last') {
 			$sql .= " WHERE x = '".$this->db->escape(dol_print_date($now, '%Y%m'))."' OR x = '".sprintf('%04d%02d', $tmpprev['year'], $tmpprev['month'])."'";

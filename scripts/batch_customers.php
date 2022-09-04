@@ -145,7 +145,7 @@ if (! isset($argv[1])) {	// Check parameters
 	print "Usage on deployment servers: ".$script_file." backup... [instancefilter]\n";
 	print "\n";
 	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
-	print "- updatestatsonly     updates stats only (only table dolicloud_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
+	print "- updatestatsonly     updates stats only (only table sellyoursaas_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
 	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats table.\n";
 	print "- backuptest          test rsync+database backup\n";
 	print "- backuptestrsync     test rsync backup\n";
@@ -470,7 +470,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		// Load list of existing stats into $stats
 		// name can be 'total', 'totalcommissions', 'totalinstancepaying', 'totalinstances', 'totalusers', 'benefit', 'totalcustomers', 'totalcustomerspaying'...
 		$sql ="SELECT name, x, y";
-		$sql.=" FROM ".MAIN_DB_PREFIX."dolicloud_stats";
+		$sql.=" FROM ".MAIN_DB_PREFIX."sellyoursaas_stats";
 		$sql.=" WHERE service = '".$dbmaster->escape($servicetouse)."'";
 		$sql.=" ORDER BY x, name";
 
@@ -579,7 +579,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 								print " -> ".$y."\n";
 
 								if ($today <= $datelastday) {	// Remove existing entry if current month
-									$sql ="DELETE FROM ".MAIN_DB_PREFIX."dolicloud_stats";
+									$sql ="DELETE FROM ".MAIN_DB_PREFIX."sellyoursaas_stats";
 									$sql.=" WHERE name = '".$dbmaster->escape($statkey)."' AND x='".$dbmaster->escape($x)."'";
 									$sql.=" AND service = '".$dbmaster->escape($servicetouse)."'";
 									dol_syslog("sql=".$sql);
@@ -589,7 +589,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 									}
 								}
 
-								$sql = "INSERT INTO ".MAIN_DB_PREFIX."dolicloud_stats(service, name, x, y)";
+								$sql = "INSERT INTO ".MAIN_DB_PREFIX."sellyoursaas_stats(service, name, x, y)";
 								$sql .= " VALUES('".$dbmaster->escape($servicetouse)."', '".$dbmaster->escape($statkey)."', '".$dbmaster->escape($x)."', ".((float) $y).")";
 
 								$resql = $dbmaster->query($sql);
