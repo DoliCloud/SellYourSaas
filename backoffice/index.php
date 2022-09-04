@@ -119,8 +119,7 @@ $endyear=$tmparray['year'];
 $endmonth=$tmparray['mon'];
 $datelastday=dol_get_last_day($endyear, $endmonth, 1);
 $datefirstday=dol_get_first_day($endyear, $endmonth, 1);
-$startyear=$endyear-2;
-
+$startyear=$endyear - (GETPOSTISSET('nbyears') ? GETPOSTISSET('nbyears', 'int') : getDolGlobalInt('SELLYOURSAAS_NB_YEARS', 2));
 
 
 $total=0;
