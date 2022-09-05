@@ -269,7 +269,7 @@ while (!feof($handle)) {
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " The processid is still unknown, we try with netstat\n", FILE_APPEND);
 
 			// Try another method with netstat
-			$commandns = 'netstat -npt | grep \':25\s\|:2525\s\|:465\s\|:587\s';	// -napt show also the LISTEN processes
+			$commandns = 'netstat -npt | grep \':25\s\|:2525\s\|:465\s\|:587\s\'';	// -napt show also the LISTEN processes
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandns=".$commandns."\n", FILE_APPEND);
 
 			$resultns = $utils->executeCli($commandns, $outputfile, 0, null, 1);
