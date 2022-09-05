@@ -528,7 +528,7 @@ if (empty($object->nbofusers)) {
 					//$serverdeployment = $this->getRemoteServerDeploymentIp($domainname);
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 
-					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
+					dol_syslog("instance_links.php: Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
 
 					$serverdb = $serverdeployment;
 					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
@@ -547,7 +547,7 @@ if (empty($object->nbofusers)) {
 					} else {
 						$sqlformula = trim($sqlformula);
 
-						dol_syslog("Execute sql=".$sqlformula);
+						dol_syslog("instance_links.php: Execute sql=".$sqlformula);
 
 						$resql = $dbinstance->query($sqlformula);
 						if ($resql) {
