@@ -86,6 +86,7 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';
 dol_include_once('/sellyoursaas/class/packages.class.php');
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
@@ -959,6 +960,42 @@ if ($action == 'updateurl') {
 				}
 				$error++;
 			}
+		}
+
+		if (!$error && isModEnabled('stripe')) {
+			$companybankaccount->fetch(GETPOST('bankid'));
+			$service = 'StripeTest';
+			$servicestatus = 0;
+			if (!empty($conf->global->STRIPE_LIVE) && !GETPOST('forcesandbox', 'alpha')) {
+				$service = 'StripeLive';
+				$servicestatus = 1;
+			}
+
+			$companypaymentmode = new CompanyPaymentMode($db);
+			$companypaymentmode->fetch(null,null,$socid);
+			$stripe = new Stripe($db);
+
+			if ($companypaymentmode->type != 'ban') {
+				$error++;
+				setEventMessages('ThisPaymentModeIsNotSepa', null, 'errors');
+			} else {
+				$cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatus, 1);
+				if (!$cu) {
+					$error++;
+					setEventMessages($stripe->error, $stripe->errors, 'errors');
+				}
+
+				if (!$error) {
+					// Creation of Stripe SEPA + update of societe_account
+					$card = $stripe->sepaStripe($cu, $companypaymentmode, $stripeacc, $servicestatus, 1);
+					if (!$card) {
+						$error++;
+						setEventMessages($stripe->error, $stripe->errors, 'errors');
+					}else {
+						setEventMessages("SEPA on Stripe", "SEPA IBAN is now linked to customer account !");
+					}
+				}
+			}	
 		}
 
 		if (!$error) {

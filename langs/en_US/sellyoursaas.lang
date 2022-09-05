@@ -715,6 +715,7 @@ CommentOfUninstall=Uninstallation Comment
 SupportChannel=Support channel
 AskForSupport=Ask for support
 SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID=List of customers id with "experimental" SEPA payment enabled
+SELLYOURSAAS_ENABLE_SEPA=Enable SEPA payment
 ConfirmDestruction=Confirm destruction
 SELLYOURSAAS_ASK_DESTROY_REASON=Add a question on the reason of cancelation when a user try to delete its instance
 SELLYOURSAAS_SUPPORT_URL=External URL for ticket/help desk service
