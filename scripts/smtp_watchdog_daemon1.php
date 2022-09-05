@@ -200,10 +200,11 @@ while (!feof($handle)) {
 	$smtpportcaller=preg_replace('/\s.*/', '', preg_replace('/.*\sSPT=/', '', $line));
 	$smtpportcalled=preg_replace('/\s.*/', '', preg_replace('/.*\sDPT=/', '', $line));
 
-	$processownerid=preg_replace('/\s.*/', '', preg_replace('/.*\sUID=/', '', $line));
-	$processid = '';
+	if (preg_match('/\sUID=/', $line)) {
+		$processownerid=preg_replace('/\s.*/', '', preg_replace('/.*\sUID=/', '', $line));
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processownerid=${processownerid} from iptable log ".$WDLOGFILE."\n", FILE_APPEND);
+	}
 
-	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processownerid=${processownerid} from iptable log ".$WDLOGFILE."\n", FILE_APPEND);
 
 	$result = '';
 
@@ -408,63 +409,71 @@ while (!feof($handle)) {
 	}
 
 	// Check quota
-	if ($ok && is_numeric($processownerid) && $processownerid >= 65535) {
-		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to check the quota for processownerid=".$processownerid."\n", FILE_APPEND);
+	if ($ok) {
+		if (is_numeric($processownerid) && $processownerid >= 65535) {
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to check the quota for processownerid=".$processownerid."\n", FILE_APPEND);
 
-		// Test if we reached quota, if yes, discard the email and log it for fail2ban
-		//dol_dir_list('/tmp', 'files', 0, '^phpsendmail\-'.$processownerid.'\-');
-		$commandresexec="find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l";
+			// Test if we reached quota, if yes, discard the email and log it for fail2ban
+			//dol_dir_list('/tmp', 'files', 0, '^phpsendmail\-'.$processownerid.'\-');
+			$commandresexec="find /tmp/phpsendmail-$processownerid-* -mtime -1 | wc -l";
 
-		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandresexec = ".$commandresexec."\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandresexec = ".$commandresexec."\n", FILE_APPEND);
 
-		$resultresexec = $utils->executeCLI($commandresexec, $outputfile, 0, null, 1);
-		$resexec = -1;
-		if (empty($resultresexec['result'])) {
-			$resexec = trim($resultresexec['output']);
+			$resultresexec = $utils->executeCLI($commandresexec, $outputfile, 0, null, 1);
+			$resexec = -1;
+			if (empty($resultresexec['result'])) {
+				$resexec = trim($resultresexec['output']);
 
-			$MAXALLOWED = $MAXPERDAYPAID;
-			if ($usernamestring) {
-				if (in_array($usernamestring, array_keys($instanceofuser))) {
-					$MAXALLOWED = $instanceofuser[$usernamestring]['mailquota'];
-				} else {
-					$MAXALLOWED = $MAXPERDAY;
+				$MAXALLOWED = $MAXPERDAYPAID;
+				if ($usernamestring) {
+					if (in_array($usernamestring, array_keys($instanceofuser))) {
+						$MAXALLOWED = $instanceofuser[$usernamestring]['mailquota'];
+					} else {
+						$MAXALLOWED = $MAXPERDAY;
+					}
 				}
-			}
 
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Nb of processes found with ".$commandresexec." = ".$resexec." (we accept ".$MAXALLOWED.")\n", FILE_APPEND);
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Nb of processes found with ".$commandresexec." = ".$resexec." (we accept ".$MAXALLOWED.")\n", FILE_APPEND);
 
-			if ($resexec > $MAXALLOWED) {
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko quota reached. User has reached its quota of ".$MAXALLOWED."\n", FILE_APPEND);
-				$ok = 0;
-				//echo "smtp_watchdog_daemon1 has found an abusive smtp usage of over quota." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
+				if ($resexec > $MAXALLOWED) {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko quota reached. User has reached its quota of ".$MAXALLOWED."\n", FILE_APPEND);
+					$ok = 0;
+					//echo "smtp_watchdog_daemon1 has found an abusive smtp usage of over quota." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
+				}
+			} else {
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultresexec['error']." ".$resultresexec['output']."\n", FILE_APPEND);
 			}
 		} else {
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultresexec['error']." ".$resultresexec['output']."\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Process owner id=".$processownerid." is lower than 65535 so we do not check quota.\n", FILE_APPEND);
 		}
 	}
 
 	// Check IP quality
-	if ($ok && $remoteip != "unknown" && (!is_numeric($processownerid) || $processownerid >= 65535)) {
-		// Test IP quality
-		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We check the quality of the remoteip=".$remoteip."\n", FILE_APPEND);
+	if ($ok && $remoteip != "unknown") {
+		if (!is_numeric($processownerid) || $processownerid >= 65535) {
+			// Test IP quality
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We check the quality of the remoteip=".$remoteip."\n", FILE_APPEND);
 
-		$evil = 0;
+			$evil = 0;
 
-		// If ipquality shows it is tor ip (has tor or active_tor on), we refuse and we add ip into blacklistip
-		// If ipquality shows it is a vpn (vpn or active_vpn on), if fraud_score > SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED, we refuse and we add into blacklist
-		//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore\n", FILE_APPEND);
-		//$ok=0;
-		//echo "smtp_watchdog_daemon1 has found an abusive smtp usage using a VPN to send emails." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
-		//else
-		//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " IP $remoteip is good according to IPQualityScore\n", FILE_APPEND);
-		// TODO
+			// If ipquality shows it is tor ip (has tor or active_tor on), we refuse and we add ip into blacklistip
+			// If ipquality shows it is a vpn (vpn or active_vpn on), if fraud_score > SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED, we refuse and we add into blacklist
+			//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore\n", FILE_APPEND);
+			//$ok=0;
+			//echo "smtp_watchdog_daemon1 has found an abusive smtp usage using a VPN to send emails." | mail -aFrom:$EMAILFROM -s "[Warning] smtp_watchdog_daemon1 has found an abusive smtp usage on "`hostname`"." $EMAILTO
+			//else
+			//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " IP $remoteip is good according to IPQualityScore\n", FILE_APPEND);
+			// TODO
 
-		if ($evil) {
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore\n", FILE_APPEND);
+			if ($evil) {
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko blacklist - IP found into blacklistip of IPQualityScore\n", FILE_APPEND);
 
-			// Add IP to blacklistip
-			file_put_contents($pathtospamdir.'/blacklistip', $remoteip."\n", FILE_APPEND);
-			chmod($pathtospamdir."/blacklistip", 0666);
+				// Add IP to blacklistip
+				file_put_contents($pathtospamdir.'/blacklistip', $remoteip."\n", FILE_APPEND);
+				chmod($pathtospamdir."/blacklistip", 0666);
+			}
+		} else {
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Process owner id=".$processownerid." is lower than 65535 so we do not check quota.\n", FILE_APPEND);
 		}
 	}
 
