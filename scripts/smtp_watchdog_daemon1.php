@@ -205,108 +205,109 @@ while (!feof($handle)) {
 	//$blacklistips = getBlackListIps();
 
 
-	if (!empty($smtpportcalled)) {
-		if (!empty($smtpipcalled)) {
-			$command = "ss --oneline -e -H -p -t state all dport $smtpportcalled dst [$smtpipcalled]";
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Execute command $command\n", FILE_APPEND);
+	if (!empty($smtpportcalled) && !empty($smtpipcalled)) {
+		$command = "ss --oneline -e -H -p -t state all dport $smtpportcalled dst [$smtpipcalled]";
+		if (!empty($smtpportcaller)) {
+			$command = "ss --oneline -e -H -p -t state all sport $smtpportcaller dport $smtpportcalled dst [$smtpipcalled]";
+		}
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Execute command $command\n", FILE_APPEND);
 
-			include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
-			$utils = new Utils($db);
-			$result = $utils->executeCli($command, $outputfile);
+		include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
+		$utils = new Utils($db);
+		$result = $utils->executeCli($command, $outputfile);
 
-			if (empty($result['result'])) {
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Extract processid from line...\n", FILE_APPEND);
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$result['output']."\n", FILE_APPEND);
+		if (empty($result['result'])) {
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Extract processid from line...\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$result['output']."\n", FILE_APPEND);
 
-				$processownerid = '';
-				$processid = '';
-				$reg = array();
-				if (preg_match('/(ESTAB|SYN-SENT).*uid:(\d+)/', $result['output'], $reg)) {
-					$processownerid = $reg[2];
-				}
-				if (preg_match('/(ESTAB|SYN-SENT).*pid=(\d+)/', $result['output'], $reg)) {
-					$processid = $reg[2];
-				}
-
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=${processid}, processownerid=${processownerid}\n", FILE_APPEND);
-
-				if (!empty($processid)) {
-					if (preg_match('/^[0-9]+$/', $processownerid)) {
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got the processownerid from the ss command, surely an email sent from a web page\n", FILE_APPEND);
-					} else {
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We did not get the processownerid from the ss command. We try to get the processownerid using the processid from ps\n", FILE_APPEND);
-
-						$commandps = 'ps -f -a -x -o "uid,pid,cpu,start,time,cmd" | grep --color=never " '.$processid.' " | grep -v "color=never" | awk \'{ print $1 }\'';
-
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandps=".$commandps."\n", FILE_APPEND);
-
-						$resultps = $utils->executeCli($commandps, $outputfile, 0, null, 1);
-						if (empty($resultps['result'])) {
-							$processownerid = trim($resultps['output']);
-						} else {
-							file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultps['error']." ".$resultps['output']."\n", FILE_APPEND);
-						}
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " processownerid=$processownerid\n", FILE_APPEND);
-					}
-
-					// We try to get the apache process info
-					if (preg_match('/^[0-9]+$/', $processid)) {
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to get the apache process info\n", FILE_APPEND);
-						// echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
-
-						// Add a sleep to increase hope to have line "... client ip - pid ..." written into other_vhosts_pid.log file
-						sleep(1);
-
-						// export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep -m 1 " $processid "`
-						$commandapachestring = 'tail -n 200 /var/log/apache2/other_vhosts_pid.log | grep -m 1 " '.$processid.' "';
-
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandapachestring = ".$commandapachestring."\n", FILE_APPEND);
-
-						$resultapachestring = $utils->executeCLI($commandapachestring, $outputfile, 0, null, 1);
-						$apachestring = '';
-						if (empty($resultapachestring['result'])) {
-							$apachestring = trim($resultapachestring['output']);
-							file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " apachestring=".$apachestring."\n", FILE_APPEND);
-
-							// Try to guess remoteip
-							if (!empty($apachestring)) {
-								$arrayapachestring = preg_split('/\s+/', $apachestring);
-								$remoteip = $arrayapachestring[1];
-								file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " remoteip=".$remoteip."\n", FILE_APPEND);
-							}
-						} else {
-							// If not found, result may be 1. Not an error to report.
-							//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultapachestring['error']." ".$resultapachestring['output']."\n", FILE_APPEND);
-							file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " no entry found into other_vhosts_pid.log so apachestring=".$apachestring." remoteip=".$remoteip."\n", FILE_APPEND);
-						}
-					} else {
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " processid not valid, we can't find apache and remoteip data\n", FILE_APPEND);
-					}
-				}
-
-				// We try to get the usernamestring from processownerid
-				if (preg_match('/^[0-9]+$/', $processownerid)) {
-					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to get the usernamestring from processownerid\n", FILE_APPEND);
-
-					$commandpasswd = 'grep "x:'.$processownerid.':" /etc/passwd | cut -f1 -d:';
-
-					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandpasswd = ".$commandpasswd."\n", FILE_APPEND);
-
-					$resultcommandpasswd = $utils->executeCLI($commandpasswd, $outputfile, 0, null, 1);
-					$usernamestring = '';
-					if (empty($resultcommandpasswd['result'])) {
-						$usernamestring = trim($resultcommandpasswd['output']);
-					} else {
-						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultcommandpasswd['error']." ".$resultcommandpasswd['output']."\n", FILE_APPEND);
-					}
-
-					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " usernamestring=".$usernamestring."\n", FILE_APPEND);
-				} else {
-					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " processownerid not valid, we can't find usernamestring\n", FILE_APPEND);
-				}
-			} else {
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$result['error']." ".$result['output']."\n", FILE_APPEND);
+			$processownerid = '';
+			$processid = '';
+			$reg = array();
+			if (preg_match('/(ESTAB|SYN-SENT).*uid:(\d+)/', $result['output'], $reg)) {
+				$processownerid = $reg[2];
 			}
+			if (preg_match('/(ESTAB|SYN-SENT).*pid=(\d+)/', $result['output'], $reg)) {
+				$processid = $reg[2];
+			}
+
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=${processid}, processownerid=${processownerid}\n", FILE_APPEND);
+
+			if (!empty($processid)) {
+				if (preg_match('/^[0-9]+$/', $processownerid)) {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got the processownerid from the ss command, surely an email sent from a web page\n", FILE_APPEND);
+				} else {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We did not get the processownerid from the ss command. We try to get the processownerid using the processid from ps\n", FILE_APPEND);
+
+					$commandps = 'ps -f -a -x -o "uid,pid,cpu,start,time,cmd" | grep --color=never " '.$processid.' " | grep -v "color=never" | awk \'{ print $1 }\'';
+
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandps=".$commandps."\n", FILE_APPEND);
+
+					$resultps = $utils->executeCli($commandps, $outputfile, 0, null, 1);
+					if (empty($resultps['result'])) {
+						$processownerid = trim($resultps['output']);
+					} else {
+						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultps['error']." ".$resultps['output']."\n", FILE_APPEND);
+					}
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " processownerid=$processownerid\n", FILE_APPEND);
+				}
+
+				// We try to get the apache process info
+				if (preg_match('/^[0-9]+$/', $processid)) {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to get the apache process info\n", FILE_APPEND);
+					// echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
+
+					// Add a sleep to increase hope to have line "... client ip - pid ..." written into other_vhosts_pid.log file
+					sleep(1);
+
+					// export apachestring=`/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep -m 1 " $processid "`
+					$commandapachestring = 'tail -n 200 /var/log/apache2/other_vhosts_pid.log | grep -m 1 " '.$processid.' "';
+
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandapachestring = ".$commandapachestring."\n", FILE_APPEND);
+
+					$resultapachestring = $utils->executeCLI($commandapachestring, $outputfile, 0, null, 1);
+					$apachestring = '';
+					if (empty($resultapachestring['result'])) {
+						$apachestring = trim($resultapachestring['output']);
+						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " apachestring=".$apachestring."\n", FILE_APPEND);
+
+						// Try to guess remoteip
+						if (!empty($apachestring)) {
+							$arrayapachestring = preg_split('/\s+/', $apachestring);
+							$remoteip = $arrayapachestring[1];
+							file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " remoteip=".$remoteip."\n", FILE_APPEND);
+						}
+					} else {
+						// If not found, result may be 1. Not an error to report.
+						//file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultapachestring['error']." ".$resultapachestring['output']."\n", FILE_APPEND);
+						file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " no entry found into other_vhosts_pid.log so apachestring=".$apachestring." remoteip=".$remoteip."\n", FILE_APPEND);
+					}
+				} else {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " processid not valid, we can't find apache and remoteip data\n", FILE_APPEND);
+				}
+			}
+
+			// We try to get the usernamestring from processownerid
+			if (preg_match('/^[0-9]+$/', $processownerid)) {
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to get the usernamestring from processownerid\n", FILE_APPEND);
+
+				$commandpasswd = 'grep "x:'.$processownerid.':" /etc/passwd | cut -f1 -d:';
+
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandpasswd = ".$commandpasswd."\n", FILE_APPEND);
+
+				$resultcommandpasswd = $utils->executeCLI($commandpasswd, $outputfile, 0, null, 1);
+				$usernamestring = '';
+				if (empty($resultcommandpasswd['result'])) {
+					$usernamestring = trim($resultcommandpasswd['output']);
+				} else {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultcommandpasswd['error']." ".$resultcommandpasswd['output']."\n", FILE_APPEND);
+				}
+
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " usernamestring=".$usernamestring."\n", FILE_APPEND);
+			} else {
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " processownerid not valid, we can't find usernamestring\n", FILE_APPEND);
+			}
+		} else {
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$result['error']." ".$result['output']."\n", FILE_APPEND);
 		}
 	}
 
