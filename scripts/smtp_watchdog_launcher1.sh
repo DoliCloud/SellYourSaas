@@ -49,10 +49,17 @@ if [ "x$1" == "xstart" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
 		
-		echo "smtp_watchdog_daemon1 started"
-		#./smtp_watchdog_daemon1.sh 2>&1 &
-		/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php 2>&1 &
+		export dolibarrdir=`grep '^dolibarrdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 		
+		#./smtp_watchdog_daemon1.sh 2>&1 &
+		if [ "x$dolibarrdir" != "x" ]; then
+			echo Launch $dolibarrdir/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php
+			$dolibarrdir/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php 2>&1 &
+		else
+			echo Launch /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php
+			/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php 2>&1 &
+		fi
+		echo "smtp_watchdog_daemon1 started"
 	else
 		echo smtp_watchdog_daemon1 is already running with PID $pid
 	fi
