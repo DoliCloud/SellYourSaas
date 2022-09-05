@@ -243,7 +243,7 @@ while (!feof($handle)) {
 				$processid = $reg[2];
 			}
 
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=${processid}, processownerid=${processownerid} from ss command\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=${processid}, processownerid=${processownerid} from log or ss command\n", FILE_APPEND);
 		} else {
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$result['error']." ".$result['output']."\n", FILE_APPEND);
 		}
@@ -307,7 +307,7 @@ while (!feof($handle)) {
 
 			// We try to get the apache process info
 			if (preg_match('/^[0-9]+$/', $processid)) {
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We have the processid, now we try to get the apache process info to get remoteip\n", FILE_APPEND);
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got the processid, now we try to get the apache process info to get remoteip\n", FILE_APPEND);
 				// echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
 				// wget http://127.0.0.1/server-status -O -
 
@@ -444,7 +444,7 @@ while (!feof($handle)) {
 				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultresexec['error']." ".$resultresexec['output']."\n", FILE_APPEND);
 			}
 		} else {
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Process owner id=".$processownerid." is lower than 65535 so we do not check quota.\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " processownerid ".$processownerid." is undefined or lower than 65535 so we do not check quota.\n", FILE_APPEND);
 		}
 	}
 
