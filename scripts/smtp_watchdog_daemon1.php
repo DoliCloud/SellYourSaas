@@ -230,7 +230,38 @@ while (!feof($handle)) {
 				$processid = $reg[2];
 			}
 
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=${processid}, processownerid=${processownerid}\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=${processid}, processownerid=${processownerid} from ss command\n", FILE_APPEND);
+
+			/*
+			if (empty($processid)) {
+				// Try another method with server-status
+				$commandlynx = '/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status';
+				// echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandlynx=".$commandlynx."\n", FILE_APPEND);
+
+				$resultlynx = $utils->executeCli($commandlynx, $outputfile, 0, null, 1);
+				if (empty($resultlynx['result'])) {
+					$xxx = trim($resultlynx['output']);
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$xxx."\n", FILE_APPEND);
+				} else {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultlynx['error']." ".$resultlynx['output']."\n", FILE_APPEND);
+				}
+			}
+			*/
+
+			if (empty($processid)) {
+				// Try another method with netstat
+				$commandns = 'netstat -npt';
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandns=".$commandns."\n", FILE_APPEND);
+
+				$resultns = $utils->executeCli($commandns, $outputfile, 0, null, 1);
+				if (empty($resultns['result'])) {
+					$xxx = trim($resultns['output']);
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$xxx."\n", FILE_APPEND);
+				} else {
+					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultns['error']." ".$resultns['output']."\n", FILE_APPEND);
+				}
+			}
 
 			if (!empty($processid)) {
 				if (preg_match('/^[0-9]+$/', $processownerid)) {
@@ -255,6 +286,7 @@ while (!feof($handle)) {
 				if (preg_match('/^[0-9]+$/', $processid)) {
 					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We try to get the apache process info\n", FILE_APPEND);
 					// echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
+					// wget http://127.0.0.1/server-status -O -
 
 					// Add a sleep to increase hope to have line "... client ip - pid ..." written into other_vhosts_pid.log file
 					sleep(1);

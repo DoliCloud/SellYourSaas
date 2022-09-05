@@ -1231,7 +1231,7 @@ if ($reusecontractid) {
 					try {
 						dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
 						$jsonreponse = json_decode($result['content'], true);
-						dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
+						dol_syslog("For ip ".$remoteip.": fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
 						if ($jsonreponse['success']) {
 							if ($jsonreponse['recent_abuse'] && !empty($conf->global->SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP)) {	// Not recommanded if users are using shared IP
 								dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
@@ -1289,7 +1289,7 @@ if ($reusecontractid) {
 					try {
 						dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
 						$jsonreponse = json_decode($result['content'], true);
-						dol_syslog("For ".$remoteip.", valid=".$jsonreponse['valid']." - disposable=".$jsonreponse['disposable']." - dns_valid=".$jsonreponse['dns_valid']." - timed_out=".$jsonreponse['timed_out']);
+						dol_syslog("For email ".$email.": valid=".$jsonreponse['valid']." - disposable=".$jsonreponse['disposable']." - dns_valid=".$jsonreponse['dns_valid']." - timed_out=".$jsonreponse['timed_out']);
 						if ($jsonreponse['success']) {
 							$contract->array_options['options_deployment_emailquality'] .= 'ipq-valid='.$jsonreponse['valid'].';';
 							$contract->array_options['options_deployment_emailquality'] .= 'ipq-disposable='.$jsonreponse['disposable'].';';
