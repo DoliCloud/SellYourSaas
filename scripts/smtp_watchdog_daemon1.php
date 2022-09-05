@@ -193,7 +193,7 @@ while (!feof($handle)) {
 	// Write into smtp_watchdog1.log
 	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ----- start smtp_watchdog_daemon1.php\n", FILE_APPEND);
 	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Found log prefix ".$LOGPREFIX.", in $WDLOGFILE, now try to find the process IPs and ports...\n", FILE_APPEND);
-	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$line."\n", FILE_APPEND);
+	file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".trim($line)."\n", FILE_APPEND);
 
 	$smtpipcaller=preg_replace('/\s.*/', '', preg_replace('/.*\sSRC=/', '', $line));
 	$smtpipcalled=preg_replace('/\s.*/', '', preg_replace('/.*\sDST=/', '', $line));
@@ -233,7 +233,7 @@ while (!feof($handle)) {
 
 		if (empty($result['result'])) {
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Extract processid from line...\n", FILE_APPEND);
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$result['output']."\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".trim($result['output'])."\n", FILE_APPEND);
 
 			$reg = array();
 			if (preg_match('/(ESTAB|SYN-SENT).*uid:(\d+)/', $result['output'], $reg)) {	// Often
@@ -307,7 +307,7 @@ while (!feof($handle)) {
 
 			// We try to get the apache process info
 			if (preg_match('/^[0-9]+$/', $processid)) {
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We have the processid, now we try to get the apache process info\n", FILE_APPEND);
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We have the processid, now we try to get the apache process info to get remoteip\n", FILE_APPEND);
 				// echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
 				// wget http://127.0.0.1/server-status -O -
 
