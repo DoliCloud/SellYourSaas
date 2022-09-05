@@ -1110,7 +1110,7 @@ class SellYourSaasUtils
 						}
 
 						if (!$error) {	// Payment was not canceled
-							if ($companypaymentmode->type = 'ban') {
+							if ($companypaymentmode->type == 'ban') {
 								$stripecard = $stripe->sepaStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
 							}else {
 								$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
@@ -1258,6 +1258,7 @@ class SellYourSaasUtils
 									if ($paymentmethod == 'stripe') $paymentTypeId = $conf->global->STRIPE_PAYMENT_MODE_FOR_PAYMENTS;
 									if (empty($paymentTypeId)) {
 										$paymentType = $_SESSION["paymentType"];
+										if ($companypaymentmode->type = 'ban') $paymentType = 'BAN';
 										if (empty($paymentType)) $paymentType = 'CB';
 										$paymentTypeId = dol_getIdFromCode($this->db, $paymentType, 'c_paiement', 'code', 'id', 1);
 									}
