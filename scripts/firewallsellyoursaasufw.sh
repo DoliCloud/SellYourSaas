@@ -213,6 +213,12 @@ ufw default deny outgoing
 ufw enable
 ufw reload
 
+
+# Note: to enabled including --log-uid, we must insert rule directly in iptables
+iptables -A OUTPUT -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[SELLYOURSAAS LOG] : "
+ip6tables -A OUTPUT -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[SELLYOURSAAS LOG] : "
+
+
 $0 status
 	;;
 
