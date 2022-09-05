@@ -32,6 +32,7 @@ echo "**** ${0}"
 
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
+export dolibarrdir=`grep '^dolibarrdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 if [ "x$1" == "x" ]; then
 	echo "Usage: ${0##*/} start|stop|status"
@@ -49,12 +50,10 @@ if [ "x$1" == "xstart" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
 		
-		export dolibarrdir=`grep '^dolibarrdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-		
 		#./smtp_watchdog_daemon1.sh 2>&1 &
 		if [ "x$dolibarrdir" != "x" ]; then
-			echo Launch $dolibarrdir/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php
-			$dolibarrdir/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php 2>&1 &
+			echo "Launch $dolibarrdir/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php"
+			"${dolibarrdir}/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php" 2>&1 &
 		else
 			echo Launch /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php
 			/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php 2>&1 &
