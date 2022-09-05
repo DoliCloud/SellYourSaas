@@ -944,13 +944,25 @@ if ($action == 'updateurl') {
 
 			$resultbankcreate = $companybankaccount->update($user);
 			if ($resultbankcreate > 0) {
-				$resultbanksetdefault = $companybankaccount->setAsDefault(0, '');
-				if ($resultbanksetdefault > 0) {
-					setEventMessages($langs->trans("BankSaved"), null, 'mesgs');
-					setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
-				} else {
-					setEventMessages($companybankaccount->error, $companybankaccount->errors, 'errors');
+				$sql = "UPDATE ".MAIN_DB_PREFIX ."societe_rib";
+				$sql.= " SET status = '".$db->escape($servicestatusstripe)."'";
+				$sql.= " WHERE rowid = " . $companybankid;
+				$sql.= " AND type = 'ban'";
+				$resql = $db->query($sql);
+				if (! $resql) {
+					dol_syslog("Failed to update societe_rib ".$db->lasterror(), LOG_ERR);
+					setEventMessages($db->lasterror(), null, 'errors');
 					$error++;
+				}
+				if (!$error) {
+					$resultbanksetdefault = $companybankaccount->setAsDefault(0, '');
+					if ($resultbanksetdefault > 0) {
+						setEventMessages($langs->trans("BankSaved"), null, 'mesgs');
+						setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
+					} else {
+						setEventMessages($companybankaccount->error, $companybankaccount->errors, 'errors');
+						$error++;
+					}
 				}
 			} else {
 				if ($db->lasterrno() == 'DB_ERROR_RECORD_ALREADY_EXISTS') {

@@ -770,7 +770,7 @@ class SellYourSaasUtils
 		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql .= " AND sr.status = ".((int) $servicestatus);
-		$sql .= " AND sr.type = 'card'";	// This exclude payment mode of type IBAN for example (only card is used for doTakePaymentStripe)
+		$sql .= " AND sr.type IN ('card','ban')";	// This exclude payment mode of type IBAN for example (only card is used for doTakePaymentStripe)
 		$sql .= " AND sr.stripe_card_ref IS NOT NULL";	// Only stripe payment mode
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
@@ -1110,7 +1110,11 @@ class SellYourSaasUtils
 						}
 
 						if (!$error) {	// Payment was not canceled
-							$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
+							if ($companypaymentmode->type = 'ban') {
+								$stripecard = $stripe->sepaStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
+							}else {
+								$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
+							}
 							if ($stripecard) {  // Can be card_... (old mode) or pm_... (new mode)
 								$FULLTAG='INV='.$invoice->id.'-CUS='.$thirdparty->id;
 								$description='Stripe payment from doTakePaymentStripeForThirdparty: '.$FULLTAG.' ref='.$invoice->ref;
@@ -1157,7 +1161,7 @@ class SellYourSaasUtils
 									$paymentintent = $stripe->getPaymentIntent($amounttopay, $currency, $FULLTAG, $description, $invoice, $customer->id, $stripeacc, $servicestatus, 0, 'automatic', $confirmnow, $stripecard->id, 1);
 
 									$charge = new stdClass();
-									if ($paymentintent->status === 'succeeded') {
+									if ($paymentintent->status === 'succeeded' || $paymentintent->status === 'processing') {
 										$charge->status = 'ok';
 										$charge->id = $paymentintent->id;
 										$charge->customer = $customer->id;
