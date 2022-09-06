@@ -398,23 +398,30 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<?php
 			if (! empty($tmpproduct->array_options['options_register_text'])) {
 				$keytouse = $tmpproduct->array_options['options_register_text'];
-				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
-					print '<div class="customregisterinformation">'."\n";
-					print '<div class="register_text">'."\n";
+				$registertexttoshow = '';
 				if ($langs->trans($keytouse) != $keytouse) {
-					print $langs->trans($keytouse);
+					$registertexttoshow = $langs->trans($keytouse);
 				} else {	// We try english version
 					if ($langsen->trans($keytouse) != $keytouse) {
-						print $langsen->trans($keytouse);
+						$registertexttoshow = $langsen->trans($keytouse);
+					} else {
+						// If no translation found, we do not show nothing
 					}
 				}
+
+				print '<!-- show custom registration text of service using key '.dol_escape_htmltag($keytouse).' -->'."\n";
+				print '<div class="customregisterinformation">'."\n";
+				if ($registertexttoshow) {
+					print '<div class="register_text">'."\n";
+					print $registertexttoshow;
 					print '</div>'."\n";
-				?>
-					<div class="valignmiddle customcompanylogo">
-					<a href="<?php echo $homepage ?>"><img style="max-width:100%"src="<?php echo $linklogo; ?>" /></a><br>
-					</div>
-					<?php
-					print '</div>'."\n";
+				} else {
+					print '<!-- The translation key "'.$keytouse.'" has no translation found for '.$langs->defaultlang.' and '.$langsen->defaultlang.' so we do not show it. -->';
+				}
+				print '<div class="valignmiddle customcompanylogo">'."\n";
+				print '<a href="'.$homepage.'"><img style="max-width:100%"src="'.$linklogo.'"></a><br>';
+				print '</div>'."\n";
+				print '</div>'."\n";
 			}
 			?>
 
