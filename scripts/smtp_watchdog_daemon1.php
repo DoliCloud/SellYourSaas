@@ -170,11 +170,11 @@ $blacklistips = getBlackListIps($pathtospamdir);
 $datelastload = dol_now();
 
 
-$LOGPREFIX='UFW ALLOW';
+//$LOGPREFIX='UFW ALLOW';
 // Note: to enable including --log-uid, we must insert rule directly in iptables
 //iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
 //ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
-//$LOGPREFIX='UFW ALLOW SELLYOURSAAS';
+$LOGPREFIX='UFW ALLOW SELLYOURSAAS';
 
 $handle = popen("tail -F ".$WDLOGFILE." | grep --line-buffered '".$LOGPREFIX."'", 'r');
 while (!feof($handle)) {
