@@ -44,6 +44,8 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 if [ "x$1" == "xstart" ]; then
+	#iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+	#ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
 
 	pid=`ps ax | grep 'smtp_watchdog_daemon1' | grep -v grep | awk ' { print $1 } '`
 	if [ "x$pid" == "x" ]; then

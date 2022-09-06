@@ -215,8 +215,8 @@ ufw reload
 
 
 # Note: to enabled including --log-uid, we must insert rule directly in iptables
-iptables -A OUTPUT -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[SELLYOURSAAS LOG] : "
-ip6tables -A OUTPUT -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[SELLYOURSAAS LOG] : "
+iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
 
 
 $0 status
