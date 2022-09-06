@@ -211,10 +211,10 @@ while (!feof($handle)) {
 
 	if ($datelastload < (dol_now() - 3600)) {
 		// Call this sometimes to refresh list of paid instances
-		$instanceofuser = getInstancesOfUser();
+		$instanceofuser = getInstancesOfUser($pathtospamdir);
 
 		// Call this sometimes to refresh list of black listed IPs
-		$blacklistips = getBlackListIps();
+		$blacklistips = getBlackListIps($pathtospamdir);
 
 		$datelastload = dol_now();
 	}
