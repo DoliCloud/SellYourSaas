@@ -284,7 +284,7 @@ while (!feof($handle)) {
 					$processid = $reg[2];
 				}
 			} else {
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultns['error']." ".$resultns['output']."\n", FILE_APPEND);
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$resultns['error']." ".$resultns['result']." ".$resultns['output']."\n", FILE_APPEND);
 			}
 		}
 
