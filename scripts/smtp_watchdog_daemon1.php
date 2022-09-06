@@ -210,6 +210,8 @@ while (!feof($handle)) {
 
 
 	if ($datelastload < (dol_now() - 3600)) {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " reload cached files\n", FILE_APPEND);
+
 		// Call this sometimes to refresh list of paid instances
 		$instanceofuser = getInstancesOfUser($pathtospamdir);
 
