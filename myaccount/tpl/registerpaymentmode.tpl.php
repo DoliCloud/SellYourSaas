@@ -594,7 +594,11 @@ print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" cl
 print '
 	</div>';
 
+
+// SEPA Payment mode
+
 print '
+	<!-- SEPA Payment mode -->
 	<div class="linksepa" style="display: none;">
 		<div class="center quatrevingtpercent center">';
 if ($mythirdpartyaccount->isInEEC()) {
@@ -658,6 +662,10 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("IBAN").' </td><td class="valignmiddle start"><input type="text" name="iban" id="iban" value="'.dol_escape_htmltag($iban).'"></td></tr>';
 		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BIC").' </td><td class="valignmiddle start"><input type="text" name="bic" id="bic" value="'.dol_escape_htmltag($bic).'" class="maxwidth125"></td></tr>';
 		print '</table>';
+
+		print '<br>';
+
+		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name).'</div>';
 
 		print '<br><br>';
 		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
