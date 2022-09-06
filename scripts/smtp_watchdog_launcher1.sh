@@ -44,8 +44,18 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 if [ "x$1" == "xstart" ]; then
-	#iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
-	#ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+	# Note: to enabled including --log-uid, we must insert rule directly in iptables
+	# We add rule only if not already found
+	iptables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
+	if [ "x$?" == "x1" ]; then
+		echo Add iptables rule
+		iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+	fi
+	ip6tables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
+	if [ "x$?" == "x1" ]; then
+		echo Add ip6tables rule
+		ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+	fi
 
 	pid=`ps ax | grep 'smtp_watchdog_daemon1' | grep -v grep | awk ' { print $1 } '`
 	if [ "x$pid" == "x" ]; then

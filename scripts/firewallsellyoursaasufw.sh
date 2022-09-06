@@ -88,7 +88,7 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 			export atleastoneipfound=1
 		done
 	done
-
+iptables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
 	if [[ "x$atleastoneipfound" == "x1" ]]; then
 		echo Disallow existing In access for SSH for specific ip
 		for num in `ufw status numbered |(grep ' 22/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
@@ -215,8 +215,17 @@ ufw reload
 
 
 # Note: to enabled including --log-uid, we must insert rule directly in iptables
-iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
-ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+# We add rule only if not already found
+iptables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
+if [ "x$?" == "x1" ]; then
+	echo Add iptables rule
+	iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+fi
+ip6tables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
+if [ "x$?" == "x1" ]; then
+	echo Add ip6tables rule
+	ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
+fi
 
 
 $0 status
