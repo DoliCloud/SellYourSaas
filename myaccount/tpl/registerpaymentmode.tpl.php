@@ -665,7 +665,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 
 		print '<br>';
 
-		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name).'</div>';
+		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name, $mysoc->name).'</div>';
 
 		print '<br><br>';
 		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
