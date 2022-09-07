@@ -3568,7 +3568,6 @@ a2ensite 000-default-ssl.conf
 
 
 [[installing_cron_tasks]]
-[[installation_des_taches_cron]]
 === Installation of Cron tasks
 
 ==== On Master server
@@ -4015,13 +4014,13 @@ script is regularly completed but still check only few part of your installation
 A backup of the server+bases can be done with a VM snapshot.
 It is also possible to snapshot only extra disks.
 
-See chapter <<Cloning a server instance for an extra production server or a dev server>>
+See chapter <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_server>>
 
 ==== Restoration system
 
 From OVH's "Snapshots" interface, you can restore a VM image on a server or a disk image on a disk, provided the target has at least the same amount of storage.
 
-See chapter <<Cloning a server instance for an extra production server or a dev server>>
+See chapter <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_server>>
 
 
 ==== Backup files and database
@@ -4108,7 +4107,7 @@ resize2fs /dev/vdX9
 ---------------
 
 
-[Cloning a server instance for an extra production server or a dev server]
+[[Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_server]]
 === Clone or duplicate a server instance into another server
 
 The following explains the operations to clone a deployment server into another new deployment server.
@@ -4573,7 +4572,7 @@ To push an image on a project:
 
 - To recreate a server from an image
 
-See chapter <<Cloning a server instance for an extra production server ordéveloppement>>
+See chapter <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_server>>
 
 
 === Booting a server in rescue mode
