@@ -342,9 +342,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	// Test last date of rsync
 	$txtfile = $dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
-	$datetriggerrsync = dol_now('gmt') - ($backuprsyncdayfrequency * 24 * 3600);
+	$datetriggerrsync = dol_now('gmt') - ($backuprsyncdayfrequency * 24 * 3600) + (12 * 3600);
 	print strftime("%Y%m%d-%H%M%S").' Test date of file '.$txtfile."\n";
-	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600) || $FORCERSYNC) {	// We add 3600 as security for date comparison
+	if (!dol_is_file($txtfile) || $txtfiledate <= $datetriggerrsync || $FORCERSYNC) {	// We add 3600 as security for date comparison
 		// Instance is qualified for rsync backup
 		$command="rsync";
 		$param=array();
@@ -444,7 +444,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 			}
 		}
 	} else {
-		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last rsync was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so rsync is discarded.\n";
+		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last rsync was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after the trigger date  ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so rsync is discarded.\n";
 	}
 }
 
@@ -460,7 +460,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	// Test last date of sql dump
 	$txtfile = $dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
-	$datetriggerrsync = dol_now('gmt') - ($backupdumpdayfrequency * 24 * 3600);
+	$datetriggerrsync = dol_now('gmt') - ($backupdumpdayfrequency * 24 * 3600) + (12 * 3600);
 	print strftime("%Y%m%d-%H%M%S").' Test date of file '.$txtfile."\n";
 	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600) || $FORCEDUMP) {	// We add 3600 as security for date comparison
 		// Instance is qualified for dump backup
@@ -614,7 +614,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 			}
 		}
 	} else {
-		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last sql dump was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so sql dump is discarded.\n";
+		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last sql dump was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after the trigger date ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so sql dump is discarded.\n";
 	}
 }
 
