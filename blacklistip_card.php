@@ -244,8 +244,7 @@ llxHeader('', $title, $help_url);
 // Part to create
 if ($action == 'create') {
 	if (empty($permissiontoadd)) {
-		accessforbidden($langs->trans('NotEnoughPermissions'), 0, 1);
-		exit;
+		accessforbidden('NotEnoughPermissions');
 	}
 
 	print load_fiche_titre($langs->trans("NewObject", $langs->transnoentitiesnoconv("Blacklistip")), '', 'object_'.$object->picto);
