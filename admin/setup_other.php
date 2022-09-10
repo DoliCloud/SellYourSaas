@@ -349,7 +349,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_SEPA', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)) {
+	if (empty($conf->global->SELLYOURSAAS_ENABLE_SEPA)) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
