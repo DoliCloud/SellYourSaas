@@ -823,7 +823,19 @@ class ActionsSellyoursaas
 
 					// Search if customer is a dolicloud customer
 					$hascateg = $categobj->containsObject('customer', $thirdparty->id);
-					if ($hascateg) $result='senderprofile_1_1';
+					if ($hascateg) {
+						// If the thirdparty is a prospect or customer tagged with SELLYOURSAAS category for prospect/customers, then we take the first sender profile
+						$sql = "SELECT rowid, label, email FROM ".$this->db->prefix()."c_email_senderprofile";
+						$sql .= " WHERE active = 1 AND (private = 0 OR private = ".((int) $user->id).")";
+						$sql .= " ORDER BY position";
+						$resql = $this->db->query($sql);
+						if ($resql) {
+							$obj = $this->db->fetch_object($resql);
+							if ($obj) {
+								$result = 'senderprofile_'.$obj->rowid.'_1';
+							}
+						}
+					}
 					//var_dump($hascateg);
 
 					// Search if customer has a premium subscription
