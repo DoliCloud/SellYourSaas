@@ -2991,6 +2991,13 @@ class SellYourSaasUtils
 								$fstatlock=@ssh2_sftp_stat($sftp, $fileinstalllock2);
 								$datelockfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
+								// Check if installmodules.lock exists
+								$dir = $object->array_options['options_database_db'];
+								$fileinstallmoduleslock="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$fileinstallmoduleslock2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $fileinstallmoduleslock2);
+								$dateinstallmoduleslockfile=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
+
 								// Check if authorized_keys_support exists (created during os account creation, into skel dir)
 								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
@@ -3000,6 +3007,7 @@ class SellYourSaasUtils
 								//var_dump($fileauthorizedkeys2);
 
 								$object->array_options['options_filelock'] = $datelockfile;
+								$object->array_options['options_fileinstallmoduleslock'] = $dateinstallmoduleslockfile;
 								$object->array_options['options_fileauthorizekey'] = $dateauthorizedkeysfile;
 								$object->update($user);
 							}
