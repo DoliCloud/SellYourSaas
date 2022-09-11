@@ -173,7 +173,7 @@ elseif ($action == 'addinstallmoduleslock') {
 			if (empty($fstat['atime'])) {
 				$stream = fopen($fileinstallmoduleslock, 'w');
 				//var_dump($stream);exit;
-				fwrite($stream, "// File to protect from install/upgrade.\n");
+				fwrite($stream, "// File to protect from install/upgrade external modules.\n");
 				fclose($stream);
 				$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_web.'/'.$dir.'/documents/installmodules.lock');
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
