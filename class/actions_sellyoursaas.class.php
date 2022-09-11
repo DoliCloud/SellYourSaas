@@ -243,6 +243,15 @@ class ActionsSellyoursaas
 					{
 						print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletelock&token='.newToken().'">' . $langs->trans('SellYourSaasRemoveLock') . '</a>';
 					}*/
+
+					/*if (empty($object->array_options['options_fileinstallmoduleslock']))
+					 {
+					 print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreateinstallmoduleslock&token='.newToken().'">' . $langs->trans('RecreateInstallModulesLock') . '</a>';
+					 }
+					 else
+					 {
+					 print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deleteinstallmoduleslock&token='.newToken().'">' . $langs->trans('SellYourSaasRemoveInstallModulesLock') . '</a>';
+					 }*/
 				} else {
 					print '<a class="butActionRefused" href="#" title="'.$langs->trans("ContractMustHaveStatusDone").'">' . $langs->trans('RefreshRemoteData') . '</a>';
 				}
