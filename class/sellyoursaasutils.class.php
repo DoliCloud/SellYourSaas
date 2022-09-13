@@ -721,9 +721,10 @@ class SellYourSaasUtils
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
 	 * @param	int		$noemailtocustomeriferror		1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
+	 * @param	string	$mode							Payment type can be "card" or "ban"  
 	 * @return	int			                    		0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doTakePaymentStripe($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0)
+	public function doTakePaymentStripe($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0, $mode = 'card')
 	{
 		global $conf, $langs, $mysoc;
 
@@ -770,7 +771,7 @@ class SellYourSaasUtils
 		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql .= " AND sr.status = ".((int) $servicestatus);
-		$sql .= " AND sr.type IN ('card','ban')";	// This exclude payment mode of type IBAN for example (only card is used for doTakePaymentStripe)
+		$sql .= " AND sr.type = ".$mode;	// This exclude payment mode of type IBAN for example (only card is used for doTakePaymentStripe)
 		$sql .= " AND sr.stripe_card_ref IS NOT NULL";	// Only stripe payment mode
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
@@ -851,9 +852,10 @@ class SellYourSaasUtils
 	 * @param	int		             $noemailtocustomeriferror	1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
 	 * @param	int		             $nocancelifpaymenterror	1=Do not cancel payment if there is a recent payment error AC_PAYMENT_STRIPE_KO (used to charge from user console)
 	 * @param   int                  $calledinmyaccountcontext  1=The payment is called in a myaccount GUI context. So we can ignore control on delayed payments.
+	 * @param	string				 $mode						Payment type can be "card" or "ban"
 	 * @return	int					                 			0 if no error, >0 if error
 	 */
-	public function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice = null, $includedraft = 0, $noemailtocustomeriferror = 0, $nocancelifpaymenterror = 0, $calledinmyaccountcontext = 0)
+	public function doTakePaymentStripeForThirdparty($service, $servicestatus, $thirdparty_id, $companypaymentmode, $invoice = null, $includedraft = 0, $noemailtocustomeriferror = 0, $nocancelifpaymenterror = 0, $calledinmyaccountcontext = 0, $mode='card')
 	{
 		global $conf, $mysoc, $user, $langs;
 
@@ -1110,10 +1112,12 @@ class SellYourSaasUtils
 						}
 
 						if (!$error) {	// Payment was not canceled
-							if ($companypaymentmode->type == 'ban') {
+							if ($mode == "ban") {
 								$stripecard = $stripe->sepaStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
-							}else {
+							}else if($mode == "card"){
 								$stripecard = $stripe->cardStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
+							}else{
+								$stripecard = null;
 							}
 							if ($stripecard) {  // Can be card_... (old mode) or pm_... (new mode)
 								$FULLTAG='INV='.$invoice->id.'-CUS='.$thirdparty->id;
