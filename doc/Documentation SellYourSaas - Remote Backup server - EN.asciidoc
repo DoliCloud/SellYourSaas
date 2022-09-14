@@ -484,17 +484,19 @@ apt remove unattended-upgrades
 
 === Installation of the firewall ===
 
-* Create a firewall to accept input of SSH only and allow output for NTP and DNS
+* Create a firewall to accept input of SSH only and allow output for NTP and DNS and HTTPS
 
 [source, bash]
 ---------------
 ufw allow 22
 ufw allow out ntp
 ufw allow out 53
+ufw allow out 443
 ufw status
 ufw enable
 ---------------
 
+Port 22 is for SSH, NTP is 123/upd, 53 if for DNS, 443 is to allow for monitoring agent reports
 
 
 === Installation of fail2ban ===
