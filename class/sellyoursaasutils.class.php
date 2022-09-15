@@ -1707,7 +1707,7 @@ class SellYourSaasUtils
 
 					dol_syslog('Call sellyoursaasIsPaidInstance start', LOG_DEBUG, 1);
 					$isAPayingContract = sellyoursaasIsPaidInstance($object, 0, 0);		// This load also ->linkedObjectsIds
-					dol_syslog('Call sellyoursaasIsPaidInstance end', LOG_DEBUG, -1);
+					dol_syslog('Call sellyoursaasIsPaidInstance end isAPayingContract='.$isAPayingContract, LOG_DEBUG, -1);
 					if ($mode == 'test' && $isAPayingContract) {
 						$contractignored[$object->id]=$object->ref;
 						continue;											// Discard if this is a paid instance when we are in test mode
@@ -1804,6 +1804,8 @@ class SellYourSaasUtils
 		$this->output .= count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
 
 		$conf->global->SYSLOG_FILE = $savlog;
+
+		dol_syslog(__METHOD__.' end', LOG_DEBUG);
 
 		return ($error ? 1: 0);
 	}
