@@ -778,7 +778,7 @@ class modSellYourSaas extends DolibarrModules
 			'yesv2'=>'Yes'
 		);
 		$param=array('options'=>$arrayoptions);
-		$resultx=$extrafields->addExtraField('dolicloud',                            "SaasCustomer",   'select', 102,   '3', 'thirdparty', 0, 1, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('dolicloud',                            "SaasCustomer",   'select', 102,   '3', 'thirdparty', 0, 1, 'no', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('date_registration',                "RegistrationDate", 'datetime', 103,    '', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('domain_registration_page', "DomainOfRegistrationPage",  'varchar', 103, '128', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('source',                                     "Source",  'varchar', 104,  '64', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
