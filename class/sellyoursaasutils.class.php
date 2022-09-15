@@ -323,7 +323,7 @@ class SellYourSaasUtils
 
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
 					$isAPayingContract = sellyoursaasIsPaidInstance($object);
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 					if ($mode == 'test' && $isAPayingContract) {          // Discard if this is a paid instance when we are in test mode
 						$contractpayingupdated[$object->id]=$object->ref;
 
@@ -339,7 +339,7 @@ class SellYourSaasUtils
 					// Suspend instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
 					$tmparray = sellyoursaasGetExpirationDate($object);
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 					$expirationdate = $tmparray['expirationdate'];
 
 					if ($expirationdate && $expirationdate < $date_limit_expiration) {
@@ -1707,7 +1707,7 @@ class SellYourSaasUtils
 
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
 					$isAPayingContract = sellyoursaasIsPaidInstance($object, 0, 0);		// This load also ->linkedObjectsIds
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 					if ($mode == 'test' && $isAPayingContract) {
 						$contractignored[$object->id]=$object->ref;
 						continue;											// Discard if this is a paid instance when we are in test mode
@@ -1720,7 +1720,7 @@ class SellYourSaasUtils
 					// Update expiration date of instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
 					$tmparray = sellyoursaasGetExpirationDate($object, 0);				// This loop on $object->lines
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
 					$duration_unit = $tmparray['duration_unit'];
@@ -1886,7 +1886,7 @@ class SellYourSaasUtils
 
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
 					$isAPayingContract = sellyoursaasIsPaidInstance($object);
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 					if ($mode == 'test' && $isAPayingContract) {
 						$contractignored[$object->id]=$object->ref;
 						continue;											// Discard if this is a paid instance when we are in test mode
@@ -1899,7 +1899,7 @@ class SellYourSaasUtils
 					// Update expiration date of instance
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
 					$tmparray = sellyoursaasGetExpirationDate($object, 0);
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
 					$duration_unit = $tmparray['duration_unit'];
@@ -2176,7 +2176,7 @@ class SellYourSaasUtils
 
 					dol_syslog('Call sellyoursaasIsPaidInstance', LOG_DEBUG, 1);
 					$isAPayingContract = sellyoursaasIsPaidInstance($object);
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 
 					if ($mode == 'test' && $isAPayingContract) {
 						dol_syslog("It is a paying contract, it will not be processed by this batch");
@@ -2190,7 +2190,7 @@ class SellYourSaasUtils
 					// Get expiration date
 					dol_syslog('Call sellyoursaasGetExpirationDate', LOG_DEBUG, 1);
 					$tmparray = sellyoursaasGetExpirationDate($object, 1);
-					dol_syslog('', 0, -1);
+					dol_syslog('', LOG_DEBUG, -1);
 					$expirationdate = $tmparray['expirationdate'];
 
 					if ($expirationdate && $expirationdate < $now) {	// If contract expired (we already had a test into main select, this is a security)
