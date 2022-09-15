@@ -303,7 +303,7 @@ mkdir /home/admin/backup/mysql; chown admin.admin /home/admin/backup/mysql;
 mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
-Check that the id of this user *admin* is greater than or equal to 1000.
+Check in /etc/passwd that the id of this user *admin* is greater than or equal to 1000.
  
 
 Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
