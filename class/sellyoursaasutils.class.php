@@ -1789,7 +1789,7 @@ class SellYourSaasUtils
 							}
 						} else {
 							$error++;
-							$this->error = "Bad value for newdate in doRefreshContracts - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
+							$this->error = "Bad value for newdate in doRefreshContracts ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
 							dol_syslog($this->error, LOG_ERR);
 						}
 					}
@@ -2003,7 +2003,7 @@ class SellYourSaasUtils
 							}
 						} else {
 							$error++;
-							$this->error = "Bad value for newdate in doRenewalContracts - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
+							$this->error = "Bad value for newdate in doRenewalContracts ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
 							dol_syslog($this->error, LOG_ERR);
 						}
 					}
