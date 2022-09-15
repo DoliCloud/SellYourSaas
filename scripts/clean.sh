@@ -605,12 +605,14 @@ done;
 # Now clean also old dir in archives-test
 echo "***** Now clean also old dir in $archivedirtest - 15 days after being archived"
 cd $archivedirtest
-find $archivedirtest -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +15 -delete
+# Note we can't use delete because search and delete is on dir and dir may contains some files
+find $archivedirtest -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +15 -exec rm -fr {} \;
 
 # Now clean also old dir in archives-paid
 echo "***** Now clean also old dir in $archivedirpaid - 90 days after being archived"
 cd $archivedirpaid
-find $archivedirpaid -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +90 -delete
+# Note we can't use delete because search and delete is on dir and dir may contains some files
+find $archivedirpaid -maxdepth 1 -name 'osu*' -path '*archives*' -type d -mtime +90 -exec rm -fr {} \;
 
 if [[ "$dnsserver" == "1" ]]; then
 	# Now clean also old files in $archivedirbind
