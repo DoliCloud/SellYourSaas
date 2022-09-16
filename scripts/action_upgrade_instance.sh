@@ -301,8 +301,8 @@ if [[ "$mode" == "upgrade" ]];then
 				echo "Error on upgrade.php"
 				exit 432
 			fi
-			$versionfrom = $(( $versionfrom + 1 ))
-			$versionto = $(( $versionto + 1 ))
+			versionfrom=$(( $versionfrom + 1 ))
+			versionto=$(( $versionto + 1 ))
 		done
 	fi
 fi
