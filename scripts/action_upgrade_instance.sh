@@ -260,7 +260,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 		versionfrom=$lastversiondolibarrinstance
 		versionto=$(( $versionfrom + 1 ))
-		while [$versionfrom -lt $laststableupgradeversion]
+		while [ $versionfrom -lt $laststableupgradeversion ]
 		do
 			echo "upgrade from versiob $versionfrom.0.0 to version $versionto.0.0"
 
