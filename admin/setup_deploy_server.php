@@ -85,28 +85,50 @@ foreach ($tmpservices as $key => $tmpservice) {
 
 if ($action == 'set') {
 	$error=0;
+	$reg = array();
 
 	if (! $error) {
-		dolibarr_set_const($db, "SELLYOURSAAS_PUBLIC_KEY", GETPOST("SELLYOURSAAS_PUBLIC_KEY", 'none'), 'chaine', 0, '', $conf->entity);
+		$valueforkey = GETPOST("SELLYOURSAAS_PUBLIC_KEY", 'none');
+		if (preg_match('/pub$/m', $valueforkey)) {
+			setEventMessages($langs->trans("ErrorFieldForSSHKeyMustContainsTheKeyStringNotTheNameOfFile"), null, 'errors');
+			$error++;
+		}
+		dolibarr_set_const($db, "SELLYOURSAAS_PUBLIC_KEY", $valueforkey, 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_LOGIN_FOR_SUPPORT", GETPOST("SELLYOURSAAS_LOGIN_FOR_SUPPORT", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD", GETPOST("SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD", 'none'), 'chaine', 0, '', $conf->entity);
 
 		$dir=GETPOST("DOLICLOUD_INSTANCES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
-		dolibarr_set_const($db, "DOLICLOUD_INSTANCES_PATH", GETPOST("DOLICLOUD_INSTANCES_PATH"), 'chaine', 0, '', $conf->entity);
+		if (preg_match('/(,|\s)/', $dir, $reg)) {
+			setEventMessages($langs->trans("ErrorDirMustNotContainsCharacter", $reg[1]), null, 'errors');
+			$error++;
+		}
+		dolibarr_set_const($db, "DOLICLOUD_INSTANCES_PATH", $dir, 'chaine', 0, '', $conf->entity);
 
 		$dir=GETPOST("DOLICLOUD_BACKUP_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
-		dolibarr_set_const($db, "DOLICLOUD_BACKUP_PATH", GETPOST("DOLICLOUD_BACKUP_PATH"), 'chaine', 0, '', $conf->entity);
+		if (preg_match('/(,|\s)/', $dir, $reg)) {
+			setEventMessages($langs->trans("ErrorDirMustNotContainsCharacter", $reg[1]), null, 'errors');
+			$error++;
+		}
+		dolibarr_set_const($db, "DOLICLOUD_BACKUP_PATH", $dir, 'chaine', 0, '', $conf->entity);
 
 		$dir=GETPOST("SELLYOURSAAS_TEST_ARCHIVES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
-		dolibarr_set_const($db, "SELLYOURSAAS_TEST_ARCHIVES_PATH", GETPOST("SELLYOURSAAS_TEST_ARCHIVES_PATH"), 'chaine', 0, '', $conf->entity);
+		if (preg_match('/(,|\s)/', $dir, $reg)) {
+			setEventMessages($langs->trans("ErrorDirMustNotContainsCharacter", $reg[1]), null, 'errors');
+			$error++;
+		}
+		dolibarr_set_const($db, "SELLYOURSAAS_TEST_ARCHIVES_PATH", $dir, 'chaine', 0, '', $conf->entity);
 
 		$dir=GETPOST("SELLYOURSAAS_PAID_ARCHIVES_PATH");
 		//if (! dol_is_dir($dir) && ! dol_is_link($dir)) setEventMessage($langs->trans("ErrorDirNotFound",$dir),'warnings');
-		dolibarr_set_const($db, "SELLYOURSAAS_PAID_ARCHIVES_PATH", GETPOST("SELLYOURSAAS_PAID_ARCHIVES_PATH"), 'chaine', 0, '', $conf->entity);
+		if (preg_match('/(,|\s)/', $dir, $reg)) {
+			setEventMessages($langs->trans("ErrorDirMustNotContainsCharacter", $reg[1]), null, 'errors');
+			$error++;
+		}
+		dolibarr_set_const($db, "SELLYOURSAAS_PAID_ARCHIVES_PATH", $dir, 'chaine', 0, '', $conf->entity);
 	}
 
 	if (! $error) {
