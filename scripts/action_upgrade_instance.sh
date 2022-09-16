@@ -258,8 +258,8 @@ if [[ "$mode" == "upgrade" ]];then
 		echo "$instancedir/htdocs/install/"
 		cd $instancedir/htdocs/install/
 
-		$versionfrom = $lastversiondolibarrinstance
-		$versionto = $(( $versionfrom + 1 ))
+		$versionfrom=$lastversiondolibarrinstance
+		$versionto=$(( $versionfrom + 1 ))
 		while [$versionfrom -lt $laststableupgradeversion]
 		do
 			echo "upgrade from versiob $versionfrom.0.0 to version $versionto.0.0"
