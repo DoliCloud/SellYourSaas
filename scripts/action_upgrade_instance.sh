@@ -226,6 +226,11 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "upgrade" ]];then
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** upgrade dolibarr instance"
+	if [ $lastversiondolibarrinstance -lt 4 ]
+	then
+		echo "Version too old."
+		exit 440
+	fi
 	if [ -d "$dirforexampleforsources" ]
 	then
 		echo "cd $dirforexampleforsources/.."
@@ -253,45 +258,53 @@ if [[ "$mode" == "upgrade" ]];then
 		echo "$instancedir/htdocs/install/"
 		cd $instancedir/htdocs/install/
 
-		echo "php upgrade.php $lastversiondolibarrinstance.0.0 $laststableupgradeversion.0.0 > output.html"
-		php upgrade.php $lastversiondolibarrinstance.0.0 $laststableupgradeversion.0.0 > output.html
+		$versionfrom = $lastversiondolibarrinstance
+		$versionto = $(( $versionfrom + 1 ))
+		while [$versionfrom -lt $laststableupgradeversion]
+		do
+			echo "upgrade from versiob $versionfrom.0.0 to version $versionto.0.0"
 
-		if [ $? -eq 0 ]
-		then
-			echo "php upgrade2.php $lastversiondolibarrinstance.0.0 $laststableupgradeversion.0.0 > output2.html"
-			php upgrade2.php $lastversiondolibarrinstance.0.0 $laststableupgradeversion.0.0 > output2.html
+			echo "php upgrade.php $versionfrom.0.0 $versionto.0.0 > output.html"
+			php upgrade.php $versionfrom.0.0 $versionto.0.0 > output.html
 
 			if [ $? -eq 0 ]
 			then
-				echo "php step5.php $lastversiondolibarrinstance.0.0 $laststableupgradeversion.0.0 > output3.html"
-				php step5.php $lastversiondolibarrinstance.0.0 $laststableupgradeversion.0.0 > output3.html
+				echo "php upgrade2.php $versionfrom.0.0 $versionto.0.0 > output2.html"
+				php upgrade2.php $versionfrom.0.0 $versionto.0.0 > output2.html
 
 				if [ $? -eq 0 ]
 				then
-					echo "cd $instancedir/"
-					cd $instancedir/
+					echo "php step5.php $versionfrom.0.0 $versionto.0.0 > output3.html"
+					php step5.php $versionfrom.0.0 $versionto.0.0 > output3.html
 
-					if [ ! -f "documents/install.lock" ]
+					if [ $? -eq 0 ]
 					then
-						echo "touch documents/install.lock"
-						touch documents/install.lock
+						echo "cd $instancedir/"
+						cd $instancedir/
+
+						if [ ! -f "documents/install.lock" ]
+						then
+							echo "touch documents/install.lock"
+							touch documents/install.lock
+						fi
+						echo "Successfully upgraded instance"
+					else
+						echo "Error on step5.php"
+						exit 434
 					fi
-					echo "Successfully upgraded instance"
+
 				else
-					echo "Error on step5.php"
-					exit 434
+					echo "Error on upgrade2.php"
+					exit 433
 				fi
-
 			else
-				echo "Error on upgrade2.php"
-				exit 433
+				echo "Error on upgrade.php"
+				exit 432
 			fi
-		else
-			echo "Error on upgrade.php"
-			exit 432
-		fi
+			$versionfrom = $(( $versionfrom + 1 ))
+			$versionto = $(( $versionto + 1 ))
+		done
 	fi
-
 fi
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"
