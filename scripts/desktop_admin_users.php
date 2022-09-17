@@ -94,8 +94,8 @@ $now = time();
 
 // mandatory params
 $action = $argv[1];
-$login = $argv[2];
-$hostfile = $argv[3];
+$login = isset($argv[2]) ? $argv[2] : '';
+$hostfile = isset($argv[3]) ? $argv[3] : '';
 
 // optional params
 $userip = '';
