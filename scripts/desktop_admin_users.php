@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2007-2019 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2022 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ if (! $res) die("Include of master fails");
 
 
 print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
-if (! isset($argv[1])) {	// Check parameters
+if (! isset($argv[3])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed desktop.\n";
 	print "\n";
@@ -93,7 +93,7 @@ print '--- start'."\n";
 $now = time();
 
 // mandatory params
-$action = $argv[1];
+$action = isset($argv[1]) ? $argv[1] : '';
 $login = isset($argv[2]) ? $argv[2] : '';
 $hostfile = isset($argv[3]) ? $argv[3] : '';
 
@@ -126,9 +126,15 @@ if ($action == 'create') {
 	$scriptyaml = 'deactivate_user.yml';
 } elseif ($action == 'delete') {
 	$scriptyaml = 'delete_user.yml';
+} elseif ($action == 'remove') {
+	$scriptyaml = 'remove_user.yml';
 } else {
 	echo "Error: Bad parameter action. Must be (create|allowroot|disallowroot|deactivate|reactivate|remove).\n";
 	exit(-1);
+}
+
+if (empty($target)) {
+	$target = "master,deployment,web";
 }
 
 $currentdir = getcwd();
