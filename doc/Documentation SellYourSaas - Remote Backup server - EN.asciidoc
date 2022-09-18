@@ -445,7 +445,7 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd ncdu
+sudo apt install ntp git gzip zip zstd ncdu duc
 sudo apt install rkhunter chkrootkit
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
