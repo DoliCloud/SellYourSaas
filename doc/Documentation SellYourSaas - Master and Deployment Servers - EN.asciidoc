@@ -847,7 +847,8 @@ With the following content:
 # File /etc/sellyoursaas-public.conf
 
 # Options for antispam system
-maxemailperday=500
+maxemailperday=50
+maxemailperdaypaid=500
 
 # Option to use a different path for spam (for public script)
 #pathtospamdir=/tmp/spam
