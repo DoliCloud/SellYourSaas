@@ -1,7 +1,7 @@
 #!/bin/bash
 #----------------------------------------------------------------
-# This script allows to update or fix 
-# the /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+# This script allows to update or fix the Dolibarr config file
+# /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 #----------------------------------------------------------------
 
 
