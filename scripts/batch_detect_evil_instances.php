@@ -386,7 +386,7 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($dbmaster);
 
-// Get list of instance
+// Get list of instance (not already flagged as spammer of flagged as clean)
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
@@ -405,9 +405,8 @@ if ($instancefiltercomplete) {
 $sql.= " AND ce.deployment_status IS NOT NULL";
 $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 // Add filter on deployment server
-//if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
-	$sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
-//}
+$sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
+$sql.=" AND (ce.spammer IS NULL or ce.spammer = '')";
 
 $dbtousetosearch = $dbmaster;
 
