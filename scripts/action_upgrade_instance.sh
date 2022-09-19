@@ -233,10 +233,8 @@ if [[ "$mode" == "upgrade" ]];then
 	fi
 	if [ -d "$dirforexampleforsources" ]
 	then
-		echo "cd $dirforexampleforsources"
-		cd $dirforexampleforsources
-		echo "cp -r * $instancedir/"
-		cp -r * $instancedir/
+		echo "cp $dirforexampleforsources/* $instancedir/"
+		cp -r $dirforexampleforsources/* $instancedir/
 
 		if [ $? -eq 0 ]
 		then

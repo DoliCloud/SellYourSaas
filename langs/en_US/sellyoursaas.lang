@@ -662,6 +662,7 @@ UpgradeErrorContent=An error occured while trying to auto-upgrade: \n&#60;add yo
 MigrationErrorContent=An error occured while trying to use the migration wizard: \n&#60;add your message here&#62;
 ConfirmMigration=Confirm migration
 MigrationInProgress=Auto migration is in progress.
+UpgradeInProgress=Auto upgrade is in progress.
 ErrorOnMigration=An error occured while trying to migrate your instance.<br>We can still migrate you data, just click the button under.
 ErrorOnSqlDumpForge=SQL dump format error
 ErrorOnSqlPrefix=SQL table prexif error
