@@ -233,9 +233,9 @@ if [[ "$mode" == "upgrade" ]];then
 	fi
 	if [ -d "$dirforexampleforsources" ]
 	then
-		echo "cd $dirforexampleforsources/.."
-		cd $dirforexampleforsources/..
-		echo "cp -r dolibarr/* $instancedir/"
+		echo "cd $dirforexampleforsources"
+		cd $dirforexampleforsources
+		echo "cp -r * $instancedir/"
 		cp -r dolibarr/* $instancedir/
 
 		if [ $? -eq 0 ]
@@ -262,7 +262,7 @@ if [[ "$mode" == "upgrade" ]];then
 		versionto=$(( $versionfrom + 1 ))
 		while [ $versionfrom -lt $laststableupgradeversion ]
 		do
-			echo "upgrade from versiob $versionfrom.0.0 to version $versionto.0.0"
+			echo "upgrade from version $versionfrom.0.0 to version $versionto.0.0"
 
 			echo "php upgrade.php $versionfrom.0.0 $versionto.0.0 > output.html"
 			php upgrade.php $versionfrom.0.0 $versionto.0.0 > output.html
