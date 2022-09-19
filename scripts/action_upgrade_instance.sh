@@ -236,7 +236,7 @@ if [[ "$mode" == "upgrade" ]];then
 		echo "cd $dirforexampleforsources"
 		cd $dirforexampleforsources
 		echo "cp -r * $instancedir/"
-		cp -r dolibarr/* $instancedir/
+		cp -r * $instancedir/
 
 		if [ $? -eq 0 ]
 		then
