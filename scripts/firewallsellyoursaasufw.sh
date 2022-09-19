@@ -26,6 +26,11 @@ if [[ "x$allowed_hosts" == "x" && "x$instanceserver" != "x" && "x$instanceserver
 	exit 4
 fi
 
+port_ssh=`grep '^Port ' /etc/ssh/sshd_config.d/sellyoursaas.conf | cut -d ' ' -f 2`
+if [[ "x$port_ssh" == "x" ]]; then
+	export port_ssh = 22
+fi
+
 
 case $1 in
   start)
@@ -35,7 +40,7 @@ case $1 in
 #------------------------------------
 
 # SSH
-ufw allow out 22/tcp
+ufw allow out $port_ssh/tcp
 # HTTP
 ufw allow out 80/tcp
 ufw allow out 8080/tcp
@@ -88,10 +93,15 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 			export atleastoneipfound=1
 		done
 	done
-iptables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
+	iptables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
 	if [[ "x$atleastoneipfound" == "x1" ]]; then
 		echo Disallow existing In access for SSH for specific ip
 		for num in `ufw status numbered |(grep ' 22/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
+		do
+			echo delete rule number $num
+			ufw --force delete $num
+		done
+		for num in `ufw status numbered |(grep ' $port_ssh/tcp'|grep -v 'Anywhere'|awk -F"[][]" '{print $2}') | sort -r`
 		do
 			echo delete rule number $num
 			ufw --force delete $num
@@ -105,17 +115,17 @@ iptables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
 		do
 			# Allow SSH to the restricted ip $line
 			echo Allow SSH to the restricted ip $line
-			ufw allow from $line to any port 22 proto tcp
+			ufw allow from $line to any port $port_ssh proto tcp
 		done
 	done
 fi
 
 if [[ "x$atleastoneipfound" == "x1" ]]; then
 	echo Disallow In access for SSH to everybody
-	ufw delete allow in 22/tcp
+	ufw delete allow in $port_ssh/tcp
 else 
 	echo Allow In access with SSH to everybody
-	ufw allow in 22/tcp
+	ufw allow in $port_ssh/tcp
 fi
 
 # MYSQL
@@ -162,8 +172,8 @@ else
 fi
 
 # Seems not required
-#ufw allow from 127.0.0.0/8 to any port 22 proto tcp
-#ufw allow from 192.168.0.0/16 to any port 22 proto tcp
+#ufw allow from 127.0.0.0/8 to any port $port_ssh proto tcp
+#ufw allow from 192.168.0.0/16 to any port $port_ssh proto tcp
 #ufw allow from 127.0.0.0/8 to any port 3306 proto tcp
 #ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
 
@@ -193,12 +203,12 @@ fi
 
 # To accept remote action on port 8080
 if [[ "x$allowed_hosts" != "x" ]]; then
-	echo Process allowed_host=$allowed_hosts to accept remote call on 22, 3306 and 8080
+	echo Process allowed_host=$allowed_hosts to accept remote call on $port_ssh, 3306 and 8080
 	ufw delete allow in 8080/tcp
 	for ipsrc in `echo $allowed_hosts | tr "," "\n"`
 	do
-		echo Process ip $ipsrc - Allow remote actions requests on port 22, 3306 and 8080 from this ip
-		ufw allow from $ipsrc to any port 22 proto tcp
+		echo Process ip $ipsrc - Allow remote actions requests on port $port_ssh, 3306 and 8080 from this ip
+		ufw allow from $ipsrc to any port $port_ssh proto tcp
 		ufw allow from $ipsrc to any port 3306 proto tcp
 		ufw allow from $ipsrc to any port 8080 proto tcp
 	done

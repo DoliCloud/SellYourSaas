@@ -1932,9 +1932,9 @@ exclude_suffix := tmp old bak
 # default configuration will be upgraded
 # local configuration will be kept
 ########## put your local config below ####################
-!/var/log/mysql
-!/var/log/letsencrypt
-!/var/log/datadog
+! /var/log/mysql
+! /var/log/letsencrypt
+! /var/log/datadog
 
 !/etc/apache2/sellyoursaas-available
 !/etc/apache2/sellyoursaas-online
@@ -1955,7 +1955,7 @@ exclude_suffix := tmp old bak
 
 /home MyRule
 /home/admin/logs Logs
-/var/log/datadog Logs
+/var/log/datadog Logs2
 !/home/admin/backup
 !/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
