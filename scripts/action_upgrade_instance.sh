@@ -279,15 +279,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 					if [ $? -eq 0 ]
 					then
-						echo "cd $instancedir/"
-						cd $instancedir/
-
-						if [ ! -f "documents/install.lock" ]
-						then
-							echo "touch documents/install.lock"
-							touch documents/install.lock
-						fi
-						echo "Successfully upgraded instance"
+						echo "Successfully upgraded to version $versionto"
 					else
 						echo "Error on step5.php"
 						exit 434
@@ -304,6 +296,15 @@ if [[ "$mode" == "upgrade" ]];then
 			versionfrom=$(( $versionfrom + 1 ))
 			versionto=$(( $versionto + 1 ))
 		done
+
+		echo "cd $instancedir/"
+		cd $instancedir/
+
+		if [ ! -f "documents/install.lock" ]
+		then
+			echo "touch documents/install.lock"
+			touch documents/install.lock
+		fi
 	fi
 fi
 
