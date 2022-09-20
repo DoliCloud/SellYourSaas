@@ -2993,6 +2993,13 @@ class SellYourSaasUtils
 								$fstatlock=@ssh2_sftp_stat($sftp, $fileinstalllock2);
 								$datelockfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
+								// Check if installmodules.lock exists
+								$dir = $object->array_options['options_database_db'];
+								$fileinstallmoduleslock="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$fileinstallmoduleslock2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $fileinstallmoduleslock2);
+								$dateinstallmoduleslockfile=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
+
 								// Check if authorized_keys_support exists (created during os account creation, into skel dir)
 								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
@@ -3002,12 +3009,13 @@ class SellYourSaasUtils
 								//var_dump($fileauthorizedkeys2);
 
 								$object->array_options['options_filelock'] = $datelockfile;
+								$object->array_options['options_fileinstallmoduleslock'] = $dateinstallmoduleslockfile;
 								$object->array_options['options_fileauthorizekey'] = $dateauthorizedkeysfile;
 								$object->update($user);
 							}
 						}
 
-						if ($remoteaction == 'recreateauthorizedkeys') {
+						elseif ($remoteaction == 'recreateauthorizedkeys') {
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
@@ -3059,7 +3067,7 @@ class SellYourSaasUtils
 							}
 						}
 
-						if ($remoteaction == 'deletelock') {
+						elseif ($remoteaction == 'deletelock') {
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
@@ -3083,7 +3091,7 @@ class SellYourSaasUtils
 							}
 						}
 
-						if ($remoteaction == 'recreatelock') {
+						elseif ($remoteaction == 'recreatelock') {
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
@@ -3107,6 +3115,61 @@ class SellYourSaasUtils
 								}
 
 								$object->array_options['options_filelock']=(empty($fstat['atime'])?'':$fstat['atime']);
+
+								if (! empty($fstat['atime'])) {
+									$result = $object->update($user, 1);
+								}
+							}
+						}
+
+						elseif ($remoteaction == 'deleteinstallmoduleslock') {
+							$sftp = ssh2_sftp($connection);
+							if (! $sftp) {
+								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
+								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
+								$error++;
+							} else {
+								// Check if install.lock exists
+								$dir = $object->array_options['options_database_db'];
+								$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$result=ssh2_sftp_unlink($sftp, $filetodelete);
+
+								if (! $result) {
+									$error++;
+									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
+								} else {
+									$object->array_options['options_fileinstallmoduleslock'] = '';
+								}
+								if ($result) {
+									$result = $object->update($user, 1);
+								}
+							}
+						}
+
+						elseif ($remoteaction == 'recreateinstallmoduleslock') {
+							$sftp = ssh2_sftp($connection);
+							if (! $sftp) {
+								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
+								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
+								$error++;
+							} else {
+								// Check if install.lock exists
+								$dir = $object->array_options['options_database_db'];
+								//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$fileinstallmoduleslock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
+								if (empty($fstat['atime'])) {
+									$stream = fopen($fileinstallmoduleslock, 'w');
+									//var_dump($stream);exit;
+									fwrite($stream, "// File to protect from install/upgrade external module.\n");
+									fclose($stream);
+									$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
+								} else {
+									$error++;
+									$this->errors[]=$langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
+								}
+
+								$object->array_options['options_fileinstallmoduleslock']=(empty($fstat['atime'])?'':$fstat['atime']);
 
 								if (! empty($fstat['atime'])) {
 									$result = $object->update($user, 1);

@@ -116,6 +116,10 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 				$fstatlock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/'.$dir.'/documents/install.lock');
 				$object->filelock=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
+				// Check if installmodules.lock exists
+				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/'.$dir.'/documents/installmodules.lock');
+				$object->fileinstallmoduleslock=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
+
 				// Define dates
 				/*if (empty($object->date_registration) || empty($object->date_endfreeperiod))
 				{
