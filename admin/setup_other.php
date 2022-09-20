@@ -343,6 +343,22 @@ print '</td>';
 print '<td><span class="opacitymedium small">12345</span></td>';
 print '</tr>';
 
+// Allow Sepa
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_SEPA', array(), null, 0, 0, 0);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ENABLE_SEPA)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium small">Set to yes to add Sepa as a Payment method.</td>';
+print '</tr>';
+
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE").'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE" value="'.getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', '').'">';
