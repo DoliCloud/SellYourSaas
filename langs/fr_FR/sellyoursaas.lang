@@ -657,6 +657,7 @@ UpgradeErrorContent=Une erreur s'est produite lors de la tentative de mise à jo
 MigrationErrorContent=Une erreur s'est produite lors de la tentative d'utilisation de l'assistant de migration :\n&#60;ajoutez votre message ici&#62;
 ConfirmMigration=Confirmer la migration
 MigrationInProgress=La migration automatique est en cours.
+UpgradeInProgress=La mise à jour automatique est en cours.
 ErrorOnMigration=Une erreur s'est produite lors de la tentative de migration de votre instance. <br> Nous pouvons toujours migrer vos données, cliquez simplement sur le bouton ci-dessous.
 ErrorOnSqlDumpForge=Erreur de format de vidage SQL
 ErrorOnSqlPrefix=Erreur de préxif de table SQL
