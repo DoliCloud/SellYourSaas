@@ -23,7 +23,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 	public $desc = 'Resellers SellYourSaas';
 	public $require_admin = 0;
 
-	public $enabled = '$conf->sellyoursaas->enabled && !empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM)';
+	public $enabled = '$conf->sellyoursaas->enabled && getDolGlobalInt(\'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM\')';
 
 	public $require_module = array();
 	public $picto = 'sellyoursaas@sellyoursaas';

@@ -511,7 +511,7 @@ class modSellYourSaas extends DolibarrModules
 			'url'=>'/societe/list.php?search_categ_sup=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
 			'langs'=>'',
 			'position'=>601,
-			'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'enabled'=>'$conf->sellyoursaas->enabled && getDolGlobalInt(\'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM\')',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
@@ -526,7 +526,7 @@ class modSellYourSaas extends DolibarrModules
 			'url'=>'/societe/card.php?action=create&type=f&options_dolicloud=no&suppcats[]=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>602,
-			'enabled'=>'$conf->sellyoursaas->enabled && $conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'enabled'=>'$conf->sellyoursaas->enabled && getDolGlobalInt(\'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM\')',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
 			'user'=>0
