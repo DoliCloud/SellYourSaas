@@ -324,25 +324,55 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			$resql=$newdb->query($sql);
 			if ($resql) {
 				$obj = $newdb->fetch_object($resql);
-				$object->lastlogin_admin = $obj->login;
-				$object->lastpass_admin = $obj->pass;
-				$lastloginadmin = $object->lastlogin_admin;
-				$lastpassadmin = $object->lastpass_admin;
+				if ($obj) {
+					$object->lastlogin_admin = $obj->login;
+					$object->lastpass_admin = $obj->pass;
+					$lastloginadmin = $object->lastlogin_admin;
+					$lastpassadmin = $object->lastpass_admin;
+				}
 			} else {
 				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
 			}
 		}
 
 		// Get $stringofversion and $stringoflistofmodules
-		// TODO Put the defintion in a sql into package
+		$formula = '';
+		$sqltogetpackage = 'SELECT p.version_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
+		$sqltogetpackage .= ' WHERE cd.fk_contrat = '.((int) $object->id);
+		$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
+		$sqltogetpackage .= " AND pe.app_or_option = 'app'";
+		$sqltogetpackage .= ' AND pe.package = p.rowid';
+		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one line
+
+		$resqltogetpackage = $db->query($sqltogetpackage);
+		if ($resqltogetpackage) {
+			$obj = $db->fetch_object($resqltogetpackage);
+			if ($obj) {
+				$formula = $obj->version_formula;
+			}
+		} else {
+			dol_print_error($db);
+		}
+		if (preg_match('/SQL:/', $formula)) {
+			// Define $stringofversion
+			$formula = preg_replace('/SQL:/', '', $formula);
+			// 'MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
+			$resqlformula = $newdb->query($formula);
+			if ($resqlformula) {
+				$obj = $newdb->fetch_object($resqlformula);
+				if ($obj) {
+					$stringofversion = $obj->name.'='.$obj->value;
+				} else {
+					dol_print_error($newdb);
+				}
+			}
+		}
+
 		if ($fordolibarr) {
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
-
-			// Define $stringofversion
-			$stringofversion = 'MAIN_VERSION_LAST_INSTALL='.$confinstance->global->MAIN_VERSION_LAST_INSTALL.' / MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
-
 			// Define $stringoflistofmodules
+			// TODO Put the defintion in a sql into package
 			$i=0;
 			foreach ($confinstance->global as $key => $val) {
 				if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && ! empty($val)) {
@@ -675,7 +705,7 @@ print '</tr>';
 // Modules
 print '<tr>';
 print '<td>'.$langs->trans("Modules").'</td>';
-print '<td colspan="3">'.$stringoflistofmodules.'</td>';
+print '<td colspan="3"><span class="small">'.$stringoflistofmodules.'</span></td>';
 print '</tr>';
 
 print "</table><br>";

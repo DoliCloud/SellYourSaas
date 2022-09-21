@@ -3,6 +3,7 @@
 
 ## 1.3
 
+ * NEW Retreiving version of a deployed instance use the SQL definition found into package instead of hardcoded SQL.
  * NEW Add some blacklist tables et page to edit them.
  * NEW Add a whitelist table and page to edit it. Any IP in this table is allowed to create instance whatever are other checks.
  * NEW Add an evil picto on instances flagged as evil
