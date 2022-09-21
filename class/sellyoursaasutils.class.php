@@ -771,7 +771,7 @@ class SellYourSaasUtils
 		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql .= " AND sr.status = ".((int) $servicestatus);
-		$sql .= " AND sr.type = ".$mode;	// This exclude payment mode of type IBAN for example (only card is used for doTakePaymentStripe)
+		$sql .= " AND sr.type = '".$this->db->escape($mode)."'";	// This exclude payment mode of other types
 		$sql .= " AND sr.stripe_card_ref IS NOT NULL";	// Only stripe payment mode
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
