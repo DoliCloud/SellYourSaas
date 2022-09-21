@@ -657,9 +657,16 @@ print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
 
+// Installmodules.lock file
+print '<tr>';
+print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No"));
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstallmoduleslock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ($object->array_options['options_fileinstallmoduleslock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstallmoduleslock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
+print '</td>';
+print '<td></td><td></td>';
+print '</tr>';
 
 // Version
-
 print '<tr>';
 print '<td>'.$langs->trans("Version").'</td>';
 print '<td colspan="3">'.$stringofversion.'</td>';
