@@ -493,9 +493,9 @@ class SellYourSaasUtils
 		$sql = 'SELECT DISTINCT sr.rowid, sr.fk_soc, sr.exp_date_month, sr.exp_date_year, sr.last_four, sr.status';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'societe_rib as sr, '.MAIN_DB_PREFIX.'societe_extrafields as se,';
 		$sql.= ' '.MAIN_DB_PREFIX.'facture_rec as fr';
-		$sql.= " WHERE sr.fk_soc = fr.fk_soc AND sr.default_rib = 1 AND sr.type = 'card' AND sr.status = ".$servicestatus;
+		$sql.= " WHERE sr.fk_soc = fr.fk_soc AND sr.default_rib = 1 AND sr.type = 'card' AND sr.status = ".((int) $servicestatus);
 		$sql.= " AND se.fk_object = fr.fk_soc AND se.dolicloud = 'yesv2'";
-		$sql.= " AND sr.exp_date_month = ".$currentmonth." AND sr.exp_date_year = ".$currentyear;
+		$sql.= " AND sr.exp_date_month = ".((int) $currentmonth)." AND sr.exp_date_year = ".((int) $currentyear);
 		$sql.= " AND fr.suspended = ".FactureRec::STATUS_NOTSUSPENDED;
 		$sql.= " AND fr.frequency > 0";
 
@@ -642,8 +642,8 @@ class SellYourSaasUtils
 			$sql = 'SELECT DISTINCT sr.rowid, sr.fk_soc, sr.exp_date_month, sr.exp_date_year, sr.last_four, sr.status';
 			$sql.= ' FROM '.MAIN_DB_PREFIX.'societe_rib as sr, '.MAIN_DB_PREFIX.'societe_extrafields as se,';
 			$sql.= ' '.MAIN_DB_PREFIX.'facture_rec as fr';
-			$sql.= " WHERE sr.fk_soc = fr.fk_soc AND sr.default_rib = 1 AND sr.type = 'paypal' AND sr.status = ".$servicestatus;
-			$sql.= " AND sr.exp_date_month = ".$currentmonth." AND sr.exp_date_year = ".$currentyear;
+			$sql.= " WHERE sr.fk_soc = fr.fk_soc AND sr.default_rib = 1 AND sr.type = 'paypal' AND sr.status = ".((int) $servicestatus);
+			$sql.= " AND sr.exp_date_month = ".((int) $currentmonth)." AND sr.exp_date_year = ".((int) $currentyear);
 			$sql.= " AND se.fk_object = fr.fk_soc AND se.dolicloud = 'yesv2'";
 			$sql.= " AND fr.suspended = ".FactureRec::STATUS_NOTSUSPENDED;
 			$sql.= " AND fr.frequency > 0";
