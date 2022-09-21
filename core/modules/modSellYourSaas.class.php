@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2008 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2008-2022 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * Licensed under the GNU GPL v3 or higher (See file gpl-3.0.html)
  */
@@ -472,6 +472,21 @@ class modSellYourSaas extends DolibarrModules
 			'url'=>'/sellyoursaas/backoffice/newcustomerinstance.php?action=create',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>241,
+			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "write")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_instances',
+			'type'=>'left',
+			'titre'=>'OnlineInstancesWithBackupErrors',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_instances_backup',
+			'url'=>'/contrat/list.php?leftmenu=contracts&contextpage=sellyoursaasinstancesbackup&sortfield=ef.latestbackup_date_ok&sortorder=asc&search_options_deployment_status=done&search_options_latestbackup_status=KO',
+			'langs'=>'sellyoursaas@sellyoursaas',
+			'position'=>245,
 			'enabled'=>'$conf->sellyoursaas->enabled',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->hasRight("sellyoursaas", "write")',
 			'target'=>'',
