@@ -3759,6 +3759,8 @@ class SellYourSaasUtils
 								}
 
 								// TODO Check $newqty is lower than a max defined into service.
+
+								$dbinstance->free($resql);
 							} else {
 								$error++;
 								$this->error = $dbinstance->lasterror();
