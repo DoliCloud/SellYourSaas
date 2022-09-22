@@ -65,8 +65,9 @@ if ($action == "instanceverification") {
 			$username_web = $object->thirdparty->email;
 			$password_web = $object->thirdparty->array_options['options_password'];
 
-			$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+			$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 			$newdb->prefix_db = $prefix_db;
+
 			if (is_object($newdb) && $newdb->connected) {
 				$confinstance = new Conf();
 				$confinstance->setValues($newdb);
@@ -207,7 +208,7 @@ if ($action == "autoupgrade") {
 		$tmpproduct = new Product($db);
 		$tmppackage = new Packages($db);
 
-		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		$newdb->prefix_db = $prefix_db;
 		$lastversiondolibarrinstance = "";
 		if (is_object($newdb) && $newdb->connected) {
@@ -302,7 +303,7 @@ if ($action == "instanceverification") {
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'</h4>';
 		print '<br><div class="containerflexautomigration">
-					<div class="right" style="width:30%;margin-right:10px">	
+					<div class="right" style="width:30%;margin-right:10px">
 						<button id="" type="submit" class="btn green-haze btn-circle btnstep" onclick="applywaitMask()">'.$langs->trans("ConfirmAutoupgrade").'</button>
 					</div>
 					<div>
@@ -373,7 +374,7 @@ if ($action == "instanceverification") {
 		<div class="portlet light divstep " id="Step1">
 				<h2>'.$langs->trans("Step", 1).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
 				<div style="padding-left:25px">
-				'.$langs->trans("AutoupgradeStep1Text").'<br><br>           
+				'.$langs->trans("AutoupgradeStep1Text").'<br><br>
 				</div>
 				<div class="center" style="padding-top:10px">';
 				print '<select id="instanceselect" name="instanceselect" class="minwidth600" required="required">';
@@ -492,12 +493,12 @@ if ($action == "instanceverification") {
 			<div '.($stepautoupgrade <= 1 ? 'style="display:none;"' : '').'class="portlet light divstep" id="step2">
 					<h2>'.$langs->trans("Step", 2).' - '.$langs->trans("VersionConfirmation").'</small></h1><br>
 					<div>
-						'.$langs->trans("AutoupgradeStep2Text", (!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).' 
+						'.$langs->trans("AutoupgradeStep2Text", (!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).'
 					</div>
 					<br>
 					<div class="center">
 					<div class="containerflexautomigration">
-						<div class="right" style="width:30%;margin-right:10px">	
+						<div class="right" style="width:30%;margin-right:10px">
 							<button id="buttonstep_3" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 						</div>
 						<div>

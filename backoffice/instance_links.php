@@ -157,7 +157,7 @@ if (empty($reshook)) {
 
 		$server = (! empty($hostname_db) ? $hostname_db : $server);
 
-		$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
 		if ($newdb) {
 			$urlmyaccount = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
@@ -188,8 +188,10 @@ if (empty($reshook)) {
 			} else {
 				setEventMessages($tmpcontract->error, $tmpcontract->errors, 'errors');
 			}
+
+			$newdb->close();
 		} else {
-			dol_print_error($newdb);
+			dol_print_error('', 'Failed to get DoliDB');
 		}
 	}
 
@@ -279,7 +281,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->password_web = $password_web;
 	$object->hostname_web = $hostname_os;
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 	$newdb->prefix_db = $prefix_db;
 
 	$stringofversion = '';
@@ -330,6 +332,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 					$lastloginadmin = $object->lastlogin_admin;
 					$lastpassadmin = $object->lastpass_admin;
 				}
+
+				$newdb->free($resql);
 			} else {
 				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
 			}
@@ -385,10 +389,10 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	}
 
 
-	if (is_object($object->db2)) {
+	/*if (is_object($object->db2)) {
 		$savdb=$object->db;
 		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
-	}
+	}*/
 
 
 	$object->fetch_thirdparty();
@@ -782,6 +786,9 @@ print '</tr>';
 print '</table>';
 print '</div>';
 
+if (is_object($newdb) && $newdb->connected) {
+	$newdb->close();
+}
 
 llxFooter();
 

@@ -178,7 +178,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 
 	$server = (! empty($hostname_db) ? $hostname_db : $instance);
 
-	$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
+	$newdb = getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
 	$ret=1;
 
@@ -269,6 +269,8 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 								}
 
 								$object->nbofusers += $newqty;
+
+								$newdb->free($resql);
 							} else {
 								$error++;
 								setEventMessages($newdb->lasterror(), null, 'errors');
@@ -296,6 +298,8 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					$object->lastpass_admin = $obj->pass;
 					$lastloginadmin = $object->lastlogin_admin;
 					$lastpassadmin = $object->lastpass_admin;
+
+					$newdb->free($resql);
 				} else $error++;
 			}
 
@@ -304,7 +308,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 				$modulesenabled=array(); $lastinstall=''; $lastupgrade='';
 				$resql=$newdb->query($sqltogetmodules);
 				if ($resql) {
-					$num=$newdb->num_rows($resql);
+					$num = $newdb->num_rows($resql);
 					$i=0;
 					while ($i < $num) {
 						$obj = $newdb->fetch_object($resql);
@@ -322,20 +326,26 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					}
 					$object->modulesenabled=join(',', $modulesenabled);
 					$object->version=($lastupgrade?$lastupgrade:$lastinstall);
-				} else $error++;
+
+					$newdb->free($resql);
+				} else {
+					$error++;
+				}
 			}
 
 			$deltatzserver=(getServerTimeZoneInt()-0)*3600;	// Diff between TZ of NLTechno and DoliCloud
 
 			// Get last login of users
 			if (! $error) {
-				$resql=$newdb->query($sqltogetlastloginuser);
+				$resql = $newdb->query($sqltogetlastloginuser);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
 
 					$object->lastlogin  = $obj->login;
 					$object->lastpass   = $obj->pass;
 					$object->date_lastlogin = ($obj->datelastlogin ? ($newdb->jdate($obj->datelastlogin)+$deltatzserver) : '');
+
+					$newdb->free($resql);
 				} else {
 					$error++;
 					$errors[]='Failed to connect to database '.$instance.' '.$username_db;

@@ -886,11 +886,11 @@ class ActionsSellyoursaas
 			$database_db = $object->database_db;
 			if (empty($database_db)) $database_db = $contract->array_options['options_database_db'];
 
-			$server = (! empty($hostname_db) ? $hostname_db : $instance);
+			$server = (! empty($hostname_db) ? $hostname_db : $server);
 
-			$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
+			$newdb = getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
-			if ($newdb->connected) {
+			if (is_object($newdb) && $newdb->connected) {
 				// Get version
 				$parameters['substitutionarray']['sellyoursaas_version']=7;
 				$sql = " SELECT value FROM ".MAIN_DB_PREFIX."const where name = 'MAIN_VERSION_LAST_UPGRADE'";
@@ -903,6 +903,8 @@ class ActionsSellyoursaas
 						$parameters['substitutionarray']['sellyoursaas_version']=$vermaj;
 					}
 				}
+
+				$newdb->close();
 			}
 		}
 

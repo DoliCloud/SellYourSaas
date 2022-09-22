@@ -113,7 +113,7 @@ if (empty($reshook)) {
 	include DOL_DOCUMENT_ROOT.'/core/actions_changeselectedfields.inc.php';
 
 	if ($action == "createsupportuser") {
-		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		$newdb->prefix_db = $prefix_db;
 
 		if (is_object($newdb)) {
@@ -189,7 +189,7 @@ if (empty($reshook)) {
 		}
 	}
 	if ($action == "deletesupportuser") {
-		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
 			$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM ".$prefix_db."user WHERE login = '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."')";
 			$resql=$newdb->query($sql);
@@ -203,7 +203,7 @@ if (empty($reshook)) {
 	}
 
 	if ($action == "disableuser") {
-		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
 			// TODO Set definition to disable a user into the package
 			$sql="UPDATE ".$prefix_db."user set statut=0 WHERE rowid = ".GETPOST('remoteid', 'int');
@@ -217,7 +217,7 @@ if (empty($reshook)) {
 		}
 	}
 	if ($action == "enableuser") {
-		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
 			// TODO Set definition to disable a user into the package
 			$sql="UPDATE ".$prefix_db."user set statut=1 WHERE rowid = ".GETPOST('remoteid', 'int');
@@ -232,7 +232,7 @@ if (empty($reshook)) {
 	}
 
 	if ($action == "confirm_resetpassword") {
-		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
 			$password=GETPOST('newpassword', 'none');
 
@@ -268,8 +268,11 @@ if (empty($reshook)) {
 
 
 			$resql=$newdb->query($sql);
-			if (! $resql) dol_print_error($newdb);
-			else setEventMessages("PasswordModified", null, 'mesgs');
+			if (! $resql) {
+				dol_print_error($newdb);
+			} else {
+				setEventMessages("PasswordModified", null, 'mesgs');
+			}
 		}
 	}
 
@@ -333,10 +336,11 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 
 
-	if (is_object($object->db2)) {
+	/*if (is_object($object->db2)) {
 		$savdb=$object->db;
 		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
-	}
+	}*/
+
 
 	$object->fetch_thirdparty();
 
@@ -506,6 +510,9 @@ if (!$error && ! $user->societe_id) {
 	print "</div><br>";
 }
 
+if (is_object($newdb) && $newdb->connected) {
+	$newdb->close();
+}
 
 llxFooter();
 

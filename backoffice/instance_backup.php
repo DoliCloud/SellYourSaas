@@ -192,7 +192,7 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
  *	Actions
  */
 
-$parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
+$parameters=array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 
 if (empty($reshook)) {
@@ -279,12 +279,12 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	$password_web = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	//$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
-	if (is_object($object->db2)) {
-		$savdb=$object->db;
-		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
-	}
+	/*if (is_object($object->db2)) {
+		$savdb = $object->db;
+		$object->db = $object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
+	}*/
 
 
 
@@ -353,7 +353,7 @@ if ($id > 0 || $instanceoldid > 0) {
 
 if ($id > 0 && $action != 'edit' && $action != 'create') {
 	if (is_object($object->db2)) {
-		$object->db=$savdb;
+		$object->db = $savdb;
 	}
 
 
