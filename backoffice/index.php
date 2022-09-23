@@ -519,10 +519,11 @@ if ($resql) {
 	if ($oldx) {
 		preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
 		$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
-		$benefit=(empty($absice[2]) ? 0 : price2num($absice[1] / $absice[2], 'MT'));
+		$averagebasket=(empty($absice[2]) ? 0 : price2num($absice[1] / $absice[2], 'MT'));
 		$absice[1]=$averagebasket; unset($absice[2]);
 		ksort($absice);
 		$data3[]=$absice;
+		$absice=array();
 	}
 } else dol_print_error($db);
 
