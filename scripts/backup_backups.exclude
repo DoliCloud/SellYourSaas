@@ -4,8 +4,11 @@
 *_log
 *.log
 *.log.old
+*.log.1
 *log.*.gz
 *log.*.gz.old
+*log.*.zstd
+*log.*.zstd.old
 _sessions/*
 _log/*
 _tmp/*
