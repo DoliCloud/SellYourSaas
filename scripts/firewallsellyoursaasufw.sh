@@ -28,7 +28,7 @@ fi
 
 port_ssh=`grep '^Port ' /etc/ssh/sshd_config.d/sellyoursaas.conf | cut -d ' ' -f 2`
 if [[ "x$port_ssh" == "x" ]]; then
-	export port_ssh = 22
+	export port_ssh=22
 fi
 
 
