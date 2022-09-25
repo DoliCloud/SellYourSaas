@@ -460,9 +460,22 @@ if (!sellyoursaasIsPaidInstance($object)) {
 	// No message
 }
 
+$sendcontext = 'emailing';
+
 // Send result to supervision if enabled
 if (empty($return_var) && empty($return_varmysql)) {
 	if ($mode == 'confirm') {
+		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		// Supervision tools are generic for all domain. No way to target a specific supervision email.
+
+		$msg = 'Restore done without errors by '.$script_file." ".$argv[1]." ".$argv[2]." ".$argv[3]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n";
+
+		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Restore instance - '.gethostname().'] Restore of user instance succeed.'."\n";
+		$cmail = new CMailFile('[Restore instance - '.gethostname().'] Restore of user instance succeed - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
+		$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
+
 		// Send to DataDog (metric + event)
 		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 			try {
@@ -478,6 +491,7 @@ if (empty($return_var) && empty($return_varmysql)) {
 				$arraytags=array('result'=>'ok');
 				$statsd->increment('sellyoursaas.restore', 1, $arraytags);
 			} catch (Exception $e) {
+				// No action
 			}
 		}
 	}
@@ -486,6 +500,17 @@ if (empty($return_var) && empty($return_varmysql)) {
 	if (! empty($return_varmysql)) print "ERROR into restore process of mysqldump: ".$return_varmysql."\n";
 
 	if ($mode == 'confirm') {
+		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		// Supervision tools are generic for all domain. No way to target a specific supervision email.
+
+		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." ".$argv[3]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$return_var."\n".$return_varmysql;
+
+		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in restoring - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
+		$cmail = new CMailFile('[Warning] Error(s) in restore process - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
+		$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
+
 		// Send to DataDog (metric + event)
 		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 			try {
@@ -501,6 +526,7 @@ if (empty($return_var) && empty($return_varmysql)) {
 				$arraytags=array('result'=>'ko');
 				$statsd->increment('sellyoursaas.restore', 1, $arraytags);
 			} catch (Exception $e) {
+				// No action
 			}
 		}
 	}

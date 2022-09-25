@@ -3,6 +3,7 @@
 
 ## 1.3
 
+ * NEW Using the restore_instance tool add a line into historic of events for instance.
  * NEW Add a page view to list instances with current backup errors
  * NEW Retreiving version of a deployed instance uses the SQL definition found into package instead of hardcoded SQL.
  * NEW Add some blacklist tables et page to edit them.
