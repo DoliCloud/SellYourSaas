@@ -242,20 +242,27 @@ if [[ "x$instanceserver" != "x0" ]]; then
 					   	echo "Command was: $command"
 			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}. Command was: $command\n"
 			        else
+			        	echo
 			        	# Success of backup of backup, we try to calculate disk usage for each dir
-			        	for osudir in `ls $homedir/osu$i`
+			        	echo `date +'%Y-%m-%d %H:%M:%S'`" Scan dir named $homedir/osu$i*"
+			        	for osudir in `ls -d $homedir/osu$i*`
 			        	do
-			        		if [[ $nbdu -gt 10 ]]; then
+			        		export osudirbase=`basename $osudir`
+			        		if [[ $nbdu -lt 10 ]]; then
 				        		export osudirbase=`basename $osudir`
-				        		echo `date +'%Y-%m-%d %H:%M:%S'`" we calculate disk used for $osudir saved into $homedir/$osudirbase/.ducs.db";
 				        		export found=`find $homedir/$osudirbase/.ducs.db -mtime -60 2>/dev/null | wc -l`
 				        		if [ "x$found" = "x0" ]; then
 				        			# No recent .ducs.db found, so we calculate it
-				        			echo "No recent .ducs.db into $homedir/$osudirbase and nb already updated = $nbdu, so we update it."
-					        		#export command2="ducs index $DIRSOURCE2/$osudirbase -b $homedir/$osudirbase/.ducs.db"
-					        		#chmod $osudirbase.$osudirbase $homedir/$osudirbase/.ducs.db
-					        		((nbdu=nbdu+1))
+				        			echo `date +'%Y-%m-%d %H:%M:%S'`" No recent .ducs.db into $homedir/$osudirbase and nb already updated = $nbdu, so we update it."
+				        			echo "duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.ducs.db"
+					        		duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.ducs.db
+					        		chown $osudirbase.$osudirbase $homedir/$osudirbase/.ducs.db
+					        		export nbdu=$((nbdu+1))
+					        	else
+					        		echo `date +'%Y-%m-%d %H:%M:%S'`" File $homedir/$osudirbase/.ducs.db was recently updated"
 					        	fi
+				        	else
+				        		echo `date +'%Y-%m-%d %H:%M:%S'`" Max nb of update to do reached ($nbdu), we cancel duc for $homedir/$osudirbase/"
 				        	fi
 			        	done
 			        fi
