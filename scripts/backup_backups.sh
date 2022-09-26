@@ -183,7 +183,7 @@ do
 	
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
 	export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
-	echo `date +'%Y-%m-%d %H:%M:%S'`"$command";
+	echo `date +'%Y-%m-%d %H:%M:%S'`" $command";
 	
 	
 	$command 2>&1
