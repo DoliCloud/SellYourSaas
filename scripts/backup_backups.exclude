@@ -26,6 +26,7 @@ _tmp/*
 .config/google-chrome
 .config/Rambox
 .cpanm
+.duc.db
 .dvdcss
 .gradle
 .gvfs

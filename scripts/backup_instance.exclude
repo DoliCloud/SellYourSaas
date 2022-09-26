@@ -9,6 +9,7 @@ _tmp/*
 */temp/*
 
 .buildpath
+.duc.db
 .git
 .gitignore
 .settings
