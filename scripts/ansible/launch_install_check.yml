@@ -25,7 +25,8 @@
       - zip 
       - zstd 
       - memcached 
-      - ncdu 
+      - ncdu
+      - duc
       - acl
       - snapd
     register: command_output
