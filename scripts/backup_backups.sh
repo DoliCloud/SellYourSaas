@@ -124,7 +124,7 @@ echo "TESTN=$TESTN"
 echo "testorconfirm = $testorconfirm"
 
 echo
-echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups on a remote server(s) $SERVDESTI" 
+echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups on remote server(s) $SERVDESTI" 
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
@@ -244,8 +244,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			        else
 			        	echo
 			        	# Success of backup of backup, we try to calculate disk usage for each dir
-			        	echo `date +'%Y-%m-%d %H:%M:%S'`" Scan dir named $homedir/osu$i*"
-			        	for osudir in `ls -d $homedir/osu$i*`
+			        	echo `date +'%Y-%m-%d %H:%M:%S'`" Scan dir named $DIRSOURCE2/osu$i*"
+			        	for osudir in `ls -d $DIRSOURCE2/osu$i*`
 			        	do
 			        		export osudirbase=`basename $osudir`
 			        		if [[ $nbdu -lt 10 ]]; then
