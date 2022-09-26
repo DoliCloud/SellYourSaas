@@ -310,7 +310,7 @@ if [ "x$atleastoneerror" != "x0" ]; then
 fi
 
 if [ "x$3" != "x" ]; then
-	echo Script was called for only one given instance. No email or supervision event sent on success in such situation
+	echo "Script was called for only one of few given instances. No email or supervision event sent on success in such situation."
 else
 	echo "Send email to $EMAILTO to inform about backup success"
 	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed.\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
