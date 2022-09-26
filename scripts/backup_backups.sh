@@ -12,6 +12,7 @@ export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
 echo "**** ${0}"
+echo
 echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
@@ -120,9 +121,10 @@ echo "remotebackupdir=$remotebackupdir"
 echo "HISTODIR=$HISTODIR"
 echo "OPTIONS=$OPTIONS"
 echo "TESTN=$TESTN"
+echo "testorconfirm = $testorconfirm"
 
-echo "**** ${0} started"
-echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups on a remote server" 
+echo
+echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups on a remote server(s) $SERVDESTI" 
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
@@ -153,10 +155,6 @@ if [ "x$DOMAIN" == "x" ]; then
 fi
 
 
-
-# For debug
-echo "testorconfirm = $testorconfirm"
-
 export errstring=""
 export atleastoneerror=0
 declare -A ret1
@@ -180,10 +178,12 @@ do
 	#echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of emptydir to $SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/..."
 	#rsync $TESTN -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI1/backupold_$HISTODIR/
 
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of $DIRSOURCE1 to $USER@$SERVDESTICURSOR:$DIRDESTI1..."
+	echo
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of $DIRSOURCE1 to remote $USER@$SERVDESTICURSOR:$DIRDESTI1..."
+	
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
 	export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
-	echo "$command";
+	echo `date +'%Y-%m-%d %H:%M:%S'`"$command";
 	
 	
 	$command 2>&1
@@ -203,7 +203,7 @@ done
 # Loop on each target server to make backup of SOURCE2 (if no error during backup of SOURCE1)
 if [[ "x$instanceserver" != "x0" ]]; then
 	echo
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories $DIRSOURCE2/osu to $SERVDESTI..."
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories $DIRSOURCE2/osu to remote $SERVDESTI..."
 
 	#for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 	#do
