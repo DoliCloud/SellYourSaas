@@ -193,12 +193,12 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans("Domain").'</td>';
 	print '<td>'.$langs->trans("IP").'</td>';
-	/*print '<td>';
-	print $form->textwithpicto($langs->trans("Registration"), $helptooltip);
-	print '</td>';*/
 	print '<td class="center">';
 	$helptooltip = img_warning('', '').' '.$langs->trans("EvenIfDomainIsOpenTo");
 	print $form->textwithpicto($langs->trans("Closed").'|'.$langs->trans("Open"), $helptooltip);
+	print '</td>';
+	print '<td class="center">';
+	print $form->textwithpicto($langs->trans("Instances"), $langs->trans("NbOfOpenInstances"));
 	print '</td>';
 	print '<td></td>';
 	print '<td></td>';
@@ -207,10 +207,29 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print '</td>';
 	print '</tr>';
 
+	// Get nb of open instances per ip
+	$openinstances = array();
+	$sql = "SELECT ce.deployment_host, COUNT(rowid) as nb FROM ".$db->prefix()."contrat_extrafields as ce";
+	$sql .= " WHERE deployment_status in ('processing', 'done')";
+	$sql .= " GROUP BY ce.deployment_host";
+	$resql = $db->query($sql);
+	if ($resql) {
+		while ($obj = $db->fetch_object($resql)) {
+			$openinstances[$obj->deployment_host] = (int) $obj->nb;
+		}
+	} else {
+		dol_print_error($db);
+	}
+
+	// Loop on each deployment server
 	foreach ($listofips as $key => $val) {
 		$tmparraydomain = explode(':', $listofdomains[$key]);
 		print '<tr class="oddeven">';
+
+		// Domain
 		print '<td>'.$tmparraydomain[0].'</td>';
+
+		// IP
 		print '<td>'.$val.'</td>';
 		/*print '<td>';
 		if (! empty($tmparraydomain[1])) {
@@ -223,6 +242,8 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 			print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("Open");
 		}
 		print '</td>';*/
+
+		// Open / Closed
 		print '<td class="center">';
 		if (! empty($tmparraydomain[1])) {
 			if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
@@ -245,6 +266,16 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		}
 		print $enabledisablehtml;
 		print '</td>';
+
+		print '<td class="center">';
+		if (empty($openinstances[$val])) {
+			print '0';
+		} else {
+			print dol_escape_htmltag($openinstances[$val]);
+		}
+		print '</td>';
+
+		// Commands
 		print '<td>';
 		$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
 		print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
@@ -254,6 +285,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
 		print '</td>';
 
+		// Announce
 		print '<td>';
 		$keyforparam = 'SELLYOURSAAS_ANNOUNCE_ON_'.$tmparraydomain[0];
 		if (empty($conf->global->$keyforparam)) {
@@ -276,11 +308,11 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		print '<input type="hidden" name="action" value="setSELLYOURSAAS_ANNOUNCE">';
 		print '<input type="hidden" name="key" value="'.$tmparraydomain[0].'">';
 		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<textarea class="flat inputsearch inline-block maxwidth200" type="text" name="value" rows="'.ROWS_2.'">';
+		print '<textarea class="flat valignmiddle inputsearch inline-block maxwidth200" type="text" name="value" rows="'.ROWS_2.'">';
 		print $conf->global->$keyforparam2;
 		print '</textarea>';
-		print '<div class="center valigntop inline-block">';
-		print '<input type="submit" name="saveannounce" class="button small" value="'.$langs->trans("Save").'">';
+		print '<div class="center valignmiddle inline-block">';
+		print '<input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'">';
 		print '</div>';
 		print '</form>';
 		print '</td>';
