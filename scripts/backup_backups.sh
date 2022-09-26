@@ -28,6 +28,7 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export homedir=`grep '^homedir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
@@ -37,13 +38,19 @@ if [ "x$2" == "xw" ]; then
 	HISTODIR=`date +%u`
 fi
 
+if [ "x$homedir" == "x" ]; then
+	export homedir=/mnt/diskhome/home
+fi
+if [ "x$backupdir" == "x" ]; then
+	export backupdir=/mnt/diskbackup/backup
+fi
 if [ "x$remotebackupdir" == "x" ]; then
 	export remotebackupdir=/mnt/diskbackup
 fi
 
 # Source
 export DIRSOURCE1="/home";
-export DIRSOURCE2=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export DIRSOURCE2=$backupdir
 
 # Target
 export SERVDESTI=`grep '^remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -191,7 +198,7 @@ do
     
     sleep 2
 done
-
+ 
 	
 # Loop on each target server to make backup of SOURCE2 (if no error during backup of SOURCE1)
 if [[ "x$instanceserver" != "x0" ]]; then
@@ -204,6 +211,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	#	rsync $TESTN -a $HOME/emptydir/ $USER@$SERVDESTICURSOR:$DIRDESTI2/backupold_$HISTODIR/
 	#done
 
+	export nbdu=0
+	
 	for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
 		echo
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ----- Process directory $backupdir/osu$i"
@@ -232,18 +241,35 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}."
 					   	echo "Command was: $command"
 			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}. Command was: $command\n"
+			        else
+			        	# Success of backup of backup, we try to calculate disk usage for each dir
+			        	for osudir in `ls $homedir/osu$i`
+			        	do
+			        		if [[ $nbdu -gt 10 ]]; then
+				        		export osudirbase=`basename $osudir`
+				        		echo `date +'%Y-%m-%d %H:%M:%S'`" we calculate disk used for $osudir saved into $homedir/$osudirbase/.ducs.db";
+				        		export found=`find $homedir/$osudirbase/.ducs.db -mtime -60 2>/dev/null | wc -l`
+				        		if [ "x$found" = "x0" ]; then
+				        			# No recent .ducs.db found, so we calculate it
+				        			echo "No recent .ducs.db into $homedir/$osudirbase and nb already updated = $nbdu, so we update it."
+					        		#export command2="ducs index $DIRSOURCE2/$osudirbase -b $homedir/$osudirbase/.ducs.db"
+					        		#chmod $osudirbase.$osudirbase $homedir/$osudirbase/.ducs.db
+					        		((nbdu=nbdu+1))
+					        	fi
+				        	fi
+			        	done
 			        fi
 				else
 					echo "Canceled. An error occured in backup of DIRSOURCE2=$DIRSOURCE2/osu$i"
 					export errstring="$errstring\nCanceled. An error occured in backup of DIRSOURCE2=$DIRSOURCE2/osu$i"
 				fi
+				
+				sleep 2
 			done
 	    else
 	    	echo "No directory found starting with name $backupdir/osu$i"
 			export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" No directory found starting with name $backupdir/osu$i\n"
 	    fi
-	    
-        sleep 2
 	done
 fi
 
