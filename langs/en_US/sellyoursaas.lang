@@ -746,3 +746,4 @@ Profits=Profits
 ErrorFieldForSSHKeyMustContainsTheKeyStringNotTheNameOfFile=The field for SSH public keys must contains the list of public key strings, not a path of a file.
 OnlineInstancesWithBackupErrors=Backup errors of online instances
 NbOfOpenInstances=Nb of Open instances
+IPConfirmEmail=IP email confirmation
