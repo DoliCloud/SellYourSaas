@@ -188,6 +188,8 @@ do
     	echo "Command was: $command"
     	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir $DIRSOURCE1 to $SERVDESTICURSOR. ret=${ret1[$SERVDESTICURSOR]}. Command was: $command\n"
     fi
+    
+    sleep 2
 done
 
 	
@@ -240,6 +242,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	    	echo "No directory found starting with name $backupdir/osu$i"
 			export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" No directory found starting with name $backupdir/osu$i\n"
 	    fi
+	    
+        sleep 2
 	done
 fi
 
