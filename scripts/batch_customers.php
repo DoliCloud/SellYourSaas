@@ -175,8 +175,8 @@ $nbofinstancedeployed=0;
 // Nb of errors
 $nboferrors=0;
 // List of instances
-$instances=array();
-$instancestrial=array();
+$instances=array();				// array of paid instances
+$instancestrial=array();		// array of trial instances
 $instancespaidsuspended=array();
 $instancespaidsuspendedandpaymenterror=array();
 $instancespaidnotsuspended=array();
@@ -424,9 +424,10 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 	$sellyoursaasutils = new SellYourSaasUtils($dbmaster);
 
-	// Loop on each instance
-	if (! $error && $action != 'updatestatsonly') {
+
+	if (! $error && $action != 'updatestatsonly') {		// make updatecountsonly so refresh remote metrics only
 		$i=0;
+		// Loop on each paid instance
 		foreach ($instances as $arrayofinstance) {
 			$instance = $arrayofinstance['instance'];
 
@@ -464,7 +465,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 	}
 
 
-	if (! $error && $action != 'updatecountsonly') {
+	if (! $error && $action != 'updatecountsonly') {	// make updatestatsonly so count existing instances only
 		$stats=array();
 
 		// Load list of existing stats into $stats

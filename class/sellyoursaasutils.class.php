@@ -2925,7 +2925,7 @@ class SellYourSaasUtils
 	 * 													'rename'=change apache virtual host file
 	 * 													'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
 	 * 													'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics
-	 * 													'refreshmetrics'=loop on each line and read remote data and update qty of metrics
+	 * 													'refreshmetrics'=loop on each line of contract and read remote data and update qty of metrics
 	 * 													'recreateauthorizedkeys', 'deletelock', 'recreatelock'
 	 * 													'migrate',
 	 * @param 	Contrat|ContratLigne	$object			Object contract or contract line
