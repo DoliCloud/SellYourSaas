@@ -251,16 +251,16 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			        		if [[ $nbdu -lt 10 ]]; then
 				        		export osudirbase=`basename $osudir`
 				        		if [[ -d $homedir/$osudirbase/ ]]; then
-					        		export found=`find $homedir/$osudirbase/.ducs.db -mtime -60 2>/dev/null | wc -l`
+					        		export found=`find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l`
 					        		if [ "x$found" = "x0" ]; then
-					        			# No recent .ducs.db found, so we calculate it
-					        			echo `date +'%Y-%m-%d %H:%M:%S'`" No recent .ducs.db into $homedir/$osudirbase and nb already updated = $nbdu, so we update it."
-					        			echo "duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.ducs.db"
-						        		duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.ducs.db
-						        		chown $osudirbase.$osudirbase $homedir/$osudirbase/.ducs.db
+					        			# No recent .duc.db found, so we calculate it
+					        			echo `date +'%Y-%m-%d %H:%M:%S'`" No recent .duc.db into $homedir/$osudirbase and nb already updated = $nbdu, so we update it."
+					        			echo "duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.duc.db"
+						        		duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.duc.db
+						        		chown $osudirbase.$osudirbase $homedir/$osudirbase/.duc.db
 						        		export nbdu=$((nbdu+1))
 						        	else
-						        		echo `date +'%Y-%m-%d %H:%M:%S'`" File $homedir/$osudirbase/.ducs.db was recently updated"
+						        		echo `date +'%Y-%m-%d %H:%M:%S'`" File $homedir/$osudirbase/.duc.db was recently updated"
 						        	fi
 						        else
 					        		echo `date +'%Y-%m-%d %H:%M:%S'`" Dir $homedir/$osudirbase/ does not exists, we cancel duc for $homedir/$osudirbase/"
