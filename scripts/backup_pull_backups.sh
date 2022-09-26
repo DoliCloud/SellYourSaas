@@ -10,8 +10,9 @@
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
-
+echo
 echo "**** ${0} started"
+echo
 
 if [ "x$1" == "x" ]; then
 	echo "Usage:   ${0}  remotelogin  (test|confirm|confirmdelete)"
@@ -28,6 +29,7 @@ export realpath=$(realpath "${0}")
 export scriptdir=$(dirname "$realpath")
 export script=${0##*/}
 
+echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
@@ -104,7 +106,7 @@ echo "EMAILTO=$EMAILTO"
 
 
 if [ "x$USER" == "x" -o "x$testorconfirm" == "x" -o "x$remotebackupserver" == "x" -o "x$remotebackupdir" == "x" ]; then
-:	echo "Usage:   ${0}  remotelogin  (test|confirm)"
+	echo "Usage:   ${0}  remotelogin  (test|confirm)"
 	echo "Example: ${0}  admin        test"
 	echo "Example: ${0}  admin        test     mysellyoursaasbackupserver.com:22/media/admin/HDDATA1_LD/  /volumeX/NASBACKUPMYDIR"
 	echo "Note:    The user running the script must have its public key declared on the backup server to pull"

@@ -13,6 +13,19 @@ export now=`date +'%Y-%m-%d %H:%M:%S'`
 echo
 echo "**** ${0}"
 echo
+
+if [ "$(id -u)" != "0" ]; then
+	echo "This script must be run as root" 1>&2
+	exit 100
+fi
+
+if [ "x$1" == "x" ]; then
+	echo "Usage: ${0} (test|confirm) [m|w] [osuX] [--delete]"
+	echo "Where m (default) is to keep 1 month of backup, and w is to keep 1 week of backup"
+	echo "You can also set a group of 4 first letter on username to backup the backup of a limited number of users."
+	exit 101
+fi
+
 echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
@@ -74,8 +87,6 @@ fi
 
 export DISTRIB_RELEASE=`lsb_release -r -s`
 
-#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
-#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
 export OPTIONS="-4 --stats -rlt --chmod=u=rwX";
 if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 	# Version must be 20.10+ on both side !
@@ -122,23 +133,6 @@ echo "HISTODIR=$HISTODIR"
 echo "OPTIONS=$OPTIONS"
 echo "TESTN=$TESTN"
 echo "testorconfirm = $testorconfirm"
-
-echo
-echo `date +'%Y-%m-%d %H:%M:%S'`" Start to copy backups on remote server(s) $SERVDESTI" 
-
-if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root" 1>&2
-   exit 100
-fi
-
-if [ "x$1" == "x" ]; then
-	echo
-	echo "Usage: ${0} (test|confirm) [m|w] [osuX] [--delete]"
-	echo "Where m (default) is to keep 1 month of backup, and w is to keep 1 week of backup"
-	echo "You can also set a group of 4 first letter on username to backup the backup of a limited number of users."
-	echo
-	exit 101
-fi
 
 if [ "x$SERVDESTI" == "x" ]; then
 	echo "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf" 1>&2
@@ -248,7 +242,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			        	for osudir in `ls -d $DIRSOURCE2/osu$i*`
 			        	do
 			        		export osudirbase=`basename $osudir`
-			        		if [[ $nbdu -lt 10 ]]; then
+			        		if [[ $nbdu -lt 20 ]]; then
 				        		export osudirbase=`basename $osudir`
 				        		if [[ -d $homedir/$osudirbase/ ]]; then
 					        		export found=`find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l`
