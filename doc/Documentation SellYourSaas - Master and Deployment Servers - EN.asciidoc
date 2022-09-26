@@ -4028,18 +4028,26 @@ See chapter <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_
 
 ===== Local backup
 
-- The configuration of the server and the system database is done locally via the cron task
+- The configuration of the server and the system database is done locally via the cron task of *root* :
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* of *root* (see <<installing_cron_tasks>>) to the disks */home/admin/backup/conf* and */home/admin/backup/mysql*
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* 
 
-- Paying user instances are backed up locally by the cron task
+See <<installing_cron_tasks>>. This will write backup files into */home/admin/backup/conf* and */home/admin/backup/mysql*
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup* of *admin* (see <<installing_cron_tasks>>) to the disk */mnt/diskbackup/backup/osu*
+- Paying user instances are backed up locally by the cron task of *admin* :
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup*
+
+See <<installing_cron_tasks>>. This will write backup files into */mnt/diskbackup/backup/osu*
 
 
 ===== Remote backup
 
-- An external backup must be done to another server by the *root* user crons running */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1* to copy from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). This script is in root's crontab (see <<installing_cron_tasks>>).
+- An external backup must be done to another server by a cron task of *root* :
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1*
+
+See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). 
 
 The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
 
@@ -4052,6 +4060,23 @@ pip install awscli --upgrade --user
 
     TODO...
 ---------------
+
+=== Moving an instance withX into withY
+
+*If the new instance withY exists:*
+
+Then go on the page of contract/instance X in the backoffice, tab "Backups" and use the command lines into 
+section "Duplicate an instance into another instance (already existing instance)".
+
+
+*If the new instance withY does not exists yet:*
+
+Then go on the file of instance X in the backoffice, tab "Backups" and use the command lines into 
+section "Move an instance into another server (non existing target instance)".
+
+The option "confirm" will move the instance and close the old one.
+The option "confirmredirect" will move the instance and the old one will be flagged as a "redirect to the new one"
+so the old URL will still works (temporarily until the old instance is closed)
 
 
 === Update images of application to deploy
