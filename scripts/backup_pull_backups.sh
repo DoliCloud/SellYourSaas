@@ -14,7 +14,7 @@ export now=`date +'%Y-%m-%d %H:%M:%S'`
 echo "**** ${0} started"
 
 if [ "x$1" == "x" ]; then
-	echo "Usage:   ${0}  remotelogin  (test|confirm)"
+	echo "Usage:   ${0}  remotelogin  (test|confirm|confirmdelete)"
 	echo "Example: ${0}  admin        test"
 	echo "Example: ${0}  admin        test     mysellyoursaasbackupserver.com:22/mydir  /volume2/NASBACKUPMYDIR"
 	echo "Note:    The user running the script must have its public key declared on the backup server to pull"
@@ -58,10 +58,11 @@ fi
 export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
-#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete";
-#export OPTIONS="-v -4 --stats -a --chmod=u=rwX --delete --delete-excluded";
 #export OPTIONS=" -4 --stats -rlt --chmod=u=rwX";
 export OPTIONS=" -4 --stats -rlt --no-specials";
+if [ "x$testorconfirm" == "xconfirmdelete" ]; then
+	export OPTIONS="$OPTIONS --delete --delete-excluded"
+fi
 
 #export DISTRIB_RELEASE=`lsb_release -r -s`
 #if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
