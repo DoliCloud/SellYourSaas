@@ -2941,7 +2941,7 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 }
 // Detect local announce
 foreach ($listofcontractidopen as $tmpcontract) {
-	$tmpdomainname = getDomainFromURL($tmpcontract->ref_customer, 1);
+	$tmpdomainname = getDomainFromURL($tmpcontract->ref_customer, 2);
 	if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON_'.$tmpdomainname)) {
 		$showannoucefordomain[$tmpdomainname] = 'SELLYOURSAAS_ANNOUNCE_'.$tmpdomainname;
 	}
