@@ -2934,32 +2934,50 @@ if ($welcomecid > 0) {
 	';
 }
 
-// Show global announce
+$showannoucefordomain = array();
+// Detect global announce
 if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
-	$sql = "SELECT tms from ".MAIN_DB_PREFIX."const where name = 'SELLYOURSAAS_ANNOUNCE'";
-	$resql=$db->query($sql);
-	if ($resql) {
-		$obj = $db->fetch_object($resql);
-		$datemessage = $db->jdate($obj->tms);
-
-		print '
-    		<div class="note note-warning">';
-		print '<b>'.dol_print_date($datemessage, 'dayhour').'</b> : ';
-		   $reg=array();
-		if (preg_match('/^\((.*)\)$/', $conf->global->SELLYOURSAAS_ANNOUNCE, $reg)) {
-			$texttoshow = $langs->trans($reg[1]);
-		} else {
-			$texttoshow = $conf->global->SELLYOURSAAS_ANNOUNCE;
-		}
-		print '<h4 class="block">'.$texttoshow.'</h4>
-    		</div>
-    	';
-	} else {
-		dol_print_error($db);
+	$showannoucefordomain['_global_'] = 'SELLYOURSAAS_ANNOUNCE';
+}
+// Detect local announce
+foreach ($listofcontractidopen as $tmpcontract) {
+	$tmpdomainname = getDomainFromURL($tmpcontract->ref_customer, 1);
+	if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON_'.$tmpdomainname)) {
+		$showannoucefordomain[$tmpdomainname] = 'SELLYOURSAAS_ANNOUNCE_'.$tmpdomainname;
 	}
 }
+// Show annouces detected
+if (!empty($showannoucefordomain)) {
+	foreach ($showannoucefordomain as $tmpdomainame => $tmpkey) {
+		$sql = "SELECT name, value, tms from ".MAIN_DB_PREFIX."const where name = '".$db->escape($tmpkey)."'";
+		$resql=$db->query($sql);
+		if ($resql) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				$datemessage = $db->jdate($obj->tms);
 
-
+				print '<div class="note note-warning">';
+				print '<b>'.dol_print_date($datemessage, 'dayhour').'</b>';
+				if ($tmpdomainame != '_global_') {
+					print ' - '.$langs->trans("Domain").' <b>'.$tmpdomainame.'</b>';
+				}
+				print ' : ';
+				print '<h4 class="block">';
+				$reg=array();
+				if (preg_match('/^\((.*)\)$/', $obj->value, $reg)) {
+					print $langs->trans($reg[1]);
+				} else {
+					print $obj->value;
+				}
+				print '</h4>';
+				print '</div>';
+			}
+			$db->free($resql);
+		} else {
+			dol_print_error($db);
+		}
+	}
+}
 
 // List of available plans/products (available for reseller)
 $arrayofplans=array();

@@ -3,6 +3,7 @@
 
 ## 1.3
 
+ * FIX Can show a different alert/announce message for each deployment server.  
  * NEW Show the number of open instances in the page to setup Deployment servers  
  * NEW Using the restore_instance tool add a line into historic of events for instance.
  * NEW Add a page view to list instances with current backup errors
