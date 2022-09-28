@@ -998,7 +998,7 @@ There are two scenarios depending on your version of Ubuntu. Follow the instruct
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install -y ntp git gzip zip zstd memcached ncdu acl ufw sudo
+sudo apt install -y ntp git gzip zip zstd memcached ncdu duc acl ufw sudo
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring
@@ -1017,7 +1017,7 @@ sudo apt install -y mailutils postfix
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu acl ufw sudo
+sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu duc acl ufw sudo
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysql php-curl php-memcached php-imagick php-geoip php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
@@ -1797,8 +1797,7 @@ The process *spamd* must be running. Start it manually if it is not the case the
 
 [source,bash]
 ---------------
-/usr/sbin/spamd &
-disown
+/etc/init.d/spamassassin start
 ---------------
 
 To test that spamassassin client is working, create a file */tmp/testspam* with content
