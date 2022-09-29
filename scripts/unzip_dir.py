@@ -21,6 +21,6 @@ for root, dir_names, file_names in os.walk('.'):
             if not path.exists(full_dir_name):
                 os.makedirs(full_dir_name)  # only create if not done yet
             made_dirs.add(full_dir_name)
-        os.rename(os.path.join(root, file_name),
-                  os.path.join(root, alt_file_name))
+        print 'rename ', os.path.join(root, file_name), os.path.join(root, alt_file_name);
+        os.rename(os.path.join(root, file_name), os.path.join(root, alt_file_name))
                   
