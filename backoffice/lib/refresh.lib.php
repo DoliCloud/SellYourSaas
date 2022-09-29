@@ -513,6 +513,9 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 								$totalinstancessuspendedfree++;
 							}
 
+							if (empty($listofcustomerstrial[$obj->customer_id])) {
+								$listofcustomerstrial[$obj->customer_id] = 0;	// This is the total of trial only customers
+							}
 							$listofcustomerstrial[$obj->customer_id]++;	// This is the total of trial only customers
 							//print "cpt=".$totalinstances." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price." -> 0<br>\n";
 						} else {
@@ -537,7 +540,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 							$price_ttc = 0;
 
 							$atleastonenotsuspended = 0;
-							if (is_array($object->linkedObjectsIds['facturerec'])) {		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
+							if (!empty($object->linkedObjectsIds['facturerec']) && is_array($object->linkedObjectsIds['facturerec'])) {		// $object->linkedObjects loaded by the previous sellyoursaasIsPaidInstance
 								foreach ($object->linkedObjectsIds['facturerec'] as $rowidelementelement => $idtemplateinvoice) {
 									$templateinvoice->suspended = 0;
 									$templateinvoice->unit_frequency = 0;
@@ -570,11 +573,17 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 							}
 
 							if (! $atleastonenotsuspended) {	// Really a paying customer if template invoice not suspended
+								if (empty($listofcustomerspayingwithoutrecinvoice[$obj->customer_id])) {
+									$listofcustomerspayingwithoutrecinvoice[$obj->customer_id] = 0;
+								}
 								$listofcustomerspayingwithoutrecinvoice[$obj->customer_id]++;
 								$listofinstancespayingwithoutrecinvoice[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
 								$totalinstancespayingwithoutrecinvoice++;
 							}
 
+							if (empty($listofcustomerspayingall[$obj->customer_id])) {
+								$listofcustomerspayingall[$obj->customer_id] = 0;
+							}
 							$listofcustomerspayingall[$obj->customer_id]++;
 							$listofinstancespayingall[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
 							$totalinstancespayingall++;
@@ -583,6 +592,9 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 								// If service really paying and not suspended and no payment error
 								$total += $price;
 
+								if (empty($listofcustomerspaying[$obj->customer_id])) {
+									$listofcustomerspaying[$obj->customer_id] = 0;
+								}
 								$listofcustomerspaying[$obj->customer_id]++;
 								$listofinstancespaying[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
 								$totalinstancespaying++;

@@ -68,8 +68,10 @@ $extrafields->fetch_name_optionals_label('packages');
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';  // Must be include, not include_once  // Must be include, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 if ($id > 0 || ! empty($ref)) $upload_dir = $conf->sellyoursaas->multidir_output[$object->entity] . "/" . $object->id;
 
-$permissionnote=1;
-//$permissionnote=$user->rights->sellyoursaas->write;	// Used by the include of actions_setnotes.inc.php
+$permissiontoread = $user->hasRight('sellyoursaas', 'read');
+$permissiontoadd = $user->hasRight('sellyoursaas', 'write');
+$permissiontodelete = $user->hasRight('sellyoursaas', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+$permissionnote = $user->hasRight('sellyoursaas', 'write');
 
 
 /*

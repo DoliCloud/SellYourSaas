@@ -91,13 +91,16 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php';  // Must be include, not include_once  // Must be include, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 if ($id > 0 || ! empty($ref)) $upload_dir = $conf->sellyoursaas->multidir_output[$object->entity] . "/" . $object->id;
 
+$permissiontoread = $user->hasRight('sellyoursaas', 'read');
+$permissiontoadd = $user->hasRight('sellyoursaas', 'write');
+$permissiontodelete = $user->hasRight('sellyoursaas', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
 
 
 /*
  *	Actions
  */
 
-$parameters=array('id'=>$socid);
+$parameters=array();
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
@@ -228,7 +231,7 @@ if ($object->id > 0) {
 	print '</div>';
 
 	if (! empty($conf->agenda->enabled) && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read) )) {
-		$param='&socid='.$socid;
+		$param='';
 		if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param.='&contextpage='.$contextpage;
 		if ($limit > 0 && $limit != $conf->liste_limit) $param.='&limit='.$limit;
 
