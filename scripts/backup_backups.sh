@@ -242,7 +242,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			        	for osudir in `ls -d $DIRSOURCE2/osu$i*`
 			        	do
 			        		export osudirbase=`basename $osudir`
-			        		if [[ $nbdu -lt 20 ]]; then
+			        		if [[ $nbdu -lt 50 ]]; then
 				        		export osudirbase=`basename $osudir`
 				        		if [[ -d $homedir/$osudirbase/ ]]; then
 					        		export found=`find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l`
