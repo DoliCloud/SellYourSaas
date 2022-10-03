@@ -984,7 +984,7 @@ a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
 a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias 
 a2enmod mpm_itk mpm_prefork
-a2enmod php7.0|php7.2|php7.4
+a2enmod php7.0|php7.2|php7.4|php8.1
 ---------------
 
 
