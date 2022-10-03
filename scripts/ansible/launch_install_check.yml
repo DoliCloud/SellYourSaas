@@ -93,6 +93,7 @@
   - debug:
       var: command_output.stdout_lines
 
+  ##### apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
@@ -211,6 +212,25 @@
     when: 
       - php74 is defined
 
+  - name: Check or update opcache.memory_consumption php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: opcache
+      option: opcache.memory_consumption
+      value: 256
+    when: 
+      - opcode is defined
+
+  - name: Check or update opcache.max_accelerated_files php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: opcache
+      option: opcache.max_accelerated_files
+      value: 10000
+    when: 
+      - opcode is defined
+
+  ##### cli/php.ini
   - name: Check or update auto_prepend_file cli/php.ini
     ini_file:
       path: /etc/php/7.4/cli/php.ini
