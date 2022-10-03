@@ -1254,18 +1254,24 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
 	if [ $dbforcesetpassword == "1" ]; then
 		Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+		Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
+		Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
 	else
 		Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
+		Q3a=""
+		Q3b=""
 		# If we use mysql and not mariadb, we set password differently
 		dpkg -l | grep mariadb > /dev/null
 		if [ $? == "1" ]; then
 			# For mysql
 			Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+			Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
+			Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
 		fi
 	fi
 	
 	Q4="FLUSH PRIVILEGES; "
-	SQL="${Q1}${Q2}${Q3}${Q4}"
+	SQL="${Q1}${Q2}${Q3}${Q3a}${Q3b}${Q4}"
 	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
