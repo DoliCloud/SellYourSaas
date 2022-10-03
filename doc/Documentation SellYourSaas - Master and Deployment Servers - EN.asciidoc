@@ -1886,6 +1886,11 @@ wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick
 ou pour Ubuntu 18.04
 wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
 dpkg -i afick.deb
+ou pour Ubuntu 22.04
+wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0.tgz/download
+tar -xvf afick-3.7.0.tgz; 
+cd afick-3.7.0; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf afick.conf; 
+mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron 
 ---------------
 
 * Comment the lines that exclude suffixes that we want to include in analysis in */etc/afick.conf* and keep uncommented only these ones (we only want to exclude log and backup):
@@ -1982,6 +1987,7 @@ Test that execution by crontab works correcly by running under root:
 /etc/cron.daily/afick_cron
 ---------------
 
+It may takes several minutes to generate the database into */var/lib/afick* or */opt/afick/database/afick*.
 Ignore if you have error when sending emails, sending emails is setup later.
 
 
