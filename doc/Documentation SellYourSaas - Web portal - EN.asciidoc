@@ -883,8 +883,8 @@ Create a file */etc/postfix/generic* to add binding between email used to send e
 
 [source,bash]
 ---------------
-root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
+root@myshortservername.mysaasdomainname.com		noreply@mysaasdomainname.com
+admin@myshortservername.mysaasdomainname.com	noreply@mysaasdomainname.com
 ---------------
 
 Compile the file with:
@@ -898,7 +898,7 @@ echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
-Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
+Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomainname.com*:
 
 [source,bash]
 ---------------

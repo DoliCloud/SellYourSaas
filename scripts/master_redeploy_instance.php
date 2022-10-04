@@ -179,7 +179,7 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user from master server.\n";
 	print "Usage:   $script_file  server  instance  [test|confirm]\n";
-	print "Example: $script_file  with1.mysaasdomain.com  all  test\n";
+	print "Example: $script_file  with1.mysaasdomainname.com  all  test\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
