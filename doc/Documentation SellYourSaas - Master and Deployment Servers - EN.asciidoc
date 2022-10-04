@@ -3093,7 +3093,7 @@ session.use_only_cookies = 1
 session.cookie_httponly = 1
 session.cookie_samesite = Lax
 
-opcache.memory_consumption = 512
+opcache.memory_consumption = 1024
 opcache.max_accelerated_files = 100000
 opcache.file_update_protection = 2
 ---------------
