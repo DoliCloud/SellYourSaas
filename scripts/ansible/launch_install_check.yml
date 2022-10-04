@@ -217,7 +217,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: opcache
       option: opcache.memory_consumption
-      value: '256'
+      value: '512'
     when: 
       - opcode is defined
 
@@ -226,7 +226,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: opcache
       option: opcache.max_accelerated_files
-      value: '10000'
+      value: '100000'
     when: 
       - opcode is defined
 
