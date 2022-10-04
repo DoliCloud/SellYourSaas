@@ -337,9 +337,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	}
 
 	// Get frequency of rsync for the instance
-	if (!empty($object->backupfrequency)) {
-		// TODO use $object->backupfrequency for $backuprsyncdayfrequency
-	}
+	/*if (!empty($object->backupfrequency)) {
+		// use $object->backupfrequency for $backuprsyncdayfrequency
+	}*/
 
 	// Test last date of rsync
 	$txtfile = $dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt';
@@ -455,9 +455,9 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 	// Get frequency of sql dump for the instance
-	if (!empty($object->backupfrequency)) {
-		// TODO use $object->backupfrequency for $backupdumpdayfrequency
-	}
+	/*if (!empty($object->backupfrequency)) {
+		// use $object->backupfrequency for $backupdumpdayfrequency
+	} */
 
 	// Test last date of sql dump
 	$txtfile = $dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt';
