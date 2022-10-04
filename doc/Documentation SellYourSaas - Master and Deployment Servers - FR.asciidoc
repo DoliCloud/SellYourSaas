@@ -4356,7 +4356,7 @@ Pour mettre à jour Ubuntu 16.04 vers 18.04 sur un serveur SellYourSaas:
 apt dist-upgrade
 
 apt install php-mysql
-a2enmode php7.2
+a2enmod php7.2
 apt remove php-fpm php7-fpm
 ---------------
 
