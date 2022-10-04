@@ -70,10 +70,25 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 $keyforaction	= GETPOST('key', 'alpha');
 $value	= GETPOST('value', 'alpha');
+if (!GETPOST('cancel', 'alpha')) {
+	$domainnamenew = GETPOST("domainname","alpha");
+	$ipaddressnew = GETPOST("ipaddress","alpha");
+	$statusnew = GETPOST("openedclosedinstance","alpha");
+}
 
 // Set serverprice with the param from $conf of the $dbmaster server.
 $serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+$error = 0;
 
+if (GETPOST('addinstance', 'alpha')) {
+	$action = 'addinstance';
+}
+if (GETPOST('saveannounce', 'alpha')) {
+	$action = 'setSELLYOURSAAS_ANNOUNCE';
+}
+if (GETPOST('editinstance', 'alpha')) {
+	$action = 'editinstance';
+}
 
 /*
  *	Actions
@@ -123,7 +138,138 @@ if ($action == 'setSELLYOURSAAS_ANNOUNCE') {
 	}
 }
 
+if ($action == 'addinstance') {
+	if ($user->hasRight('sellyoursaas', 'write')) {
+		if (empty($domainnamenew)) {
+			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Domain")), null, 'errors');
+			$error++;
+		}
+		if (empty($ipaddressnew)) {
+			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("IP")), null, 'errors');
+			$error++;
+		}
+		if ($statusnew == -1) {
+			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+			$error++;
+		}
 
+		if (!$error) {
+			$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+			$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+			$tmpdomainkey = array();
+			$res = 0;
+
+			if ($statusnew == 0) {
+				$tmpdomainkey[0] = $domainnamenew;
+				$tmpdomainkey[1] = 'closed';
+				$listofdomains[] = implode(':', $tmpdomainkey);
+				$listofdomains = implode(',', $listofdomains);
+				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
+			} elseif ($statusnew == 1) {
+				$tmpdomainkey[0] = $domainnamenew;
+				$listofdomains[] = implode(':', $tmpdomainkey);
+				$listofdomains = implode(',', $listofdomains);
+				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
+			}else {
+				setEventMessages($langs->transnoentities("ErrorInvalidValue",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+				$error++;
+			}
+
+			if (!$error) {
+				$listofips[] = $ipaddressnew;
+				$listofips = implode(',', $listofips);
+				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_IP", $listofips, 'chaine', 0, '', $conf->entity);
+				unset($domainnamenew);
+				unset($ipaddressnew);
+				unset($statusnew);
+			}
+		}
+	}else {
+		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+	}
+}
+
+if ($action == 'editinstance') {
+	if ($user->hasRight('sellyoursaas', 'write')) {
+		if (empty($domainnamenew)) {
+			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Domain")), null, 'errors');
+			$error++;
+		}
+		if (empty($ipaddressnew)) {
+			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("IP")), null, 'errors');
+			$error++;
+		}
+		if ($statusnew == -1) {
+			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+			$error++;
+		}
+
+		if (!$error) {
+			$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+			$tmpdomainkey = explode(':', $listofdomains[$keyforaction]);
+			$tmpdomainnew = explode(':', $domainnamenew);
+			$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+			$res = 0;
+
+			if ($statusnew == 0) {
+				$tmpdomainkey[0] = $tmpdomainnew[0];
+				$tmpdomainkey[1] = 'closed';
+				if (!empty($tmpdomainnew[1])) {
+					$tmpdomainkey[2] = $tmpdomainnew[1];
+				}else {
+					unset($tmpdomainkey[2]);
+				}
+				$listofdomains[$keyforaction] = implode(':', $tmpdomainkey);
+				$listofdomains = implode(',', $listofdomains);
+				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
+			} elseif ($statusnew == 1) {
+				$tmpdomainkey[0] = $tmpdomainnew[0];
+				if (!empty($tmpdomainnew[1])) {
+					$tmpdomainkey[1] = $tmpdomainnew[1];
+				}else {
+					unset($tmpdomainkey[1]);
+				}
+				if (!empty($tmpdomainkey[2])) {
+					unset($tmpdomainkey[2]);
+				}
+				$listofdomains[$keyforaction] = implode(':', $tmpdomainkey);
+				$listofdomains = implode(',', $listofdomains);
+				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
+			}else {
+				setEventMessages($langs->transnoentities("ErrorInvalidValue",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+				$error++;
+			}
+
+			if (!$error) {
+				$listofips[$keyforaction] = $ipaddressnew;
+				$listofips = implode(',', $listofips);
+				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_IP", $listofips, 'chaine', 0, '', $conf->entity);
+				unset($domainnamenew);
+				unset($ipaddressnew);
+				unset($statusnew);
+			}
+		}
+	}else {
+		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+	}
+}
+
+if ($action == 'confirm_delete') {
+	if ($user->hasRight("sellyoursaas", "delete")) {
+		$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+		$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+		unset($listofdomains[$keyforaction]);
+		unset($listofips[$keyforaction]);
+		$listofdomains = implode(',', $listofdomains);
+		dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
+		$listofips = implode(',', $listofips);
+		dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_IP", $listofips, 'chaine', 0, '', $conf->entity);
+	}else {
+		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+	}
+	$action = '';
+
+}
 /*
  *	View
  */
@@ -152,6 +298,12 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	$langs->load("errors");
 	print $langs->trans("ErrorModuleSetupNotComplete", "SellYourSaas");
 } else {
+	$formconfirm = '';
+	if ($action == 'delete') {
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?key='.$keyforaction, $langs->trans('DeleteDeploymentServerFromList'), $langs->trans('ConfirmDeleteDeploymentServerFromList'), 'confirm_delete', '', 0, 1);
+	}
+	print $formconfirm;
+
 	print '<div class="fichecenter">';
 
 	// List of deployment servers
@@ -189,13 +341,14 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print_fiche_titre($form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), $helptooltip)).'<br>';
 
 	print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<table class="noborder nohover centpercent">';
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans("Domain").'</td>';
 	print '<td>'.$langs->trans("IP").'</td>';
 	print '<td class="center">';
 	$helptooltip = img_warning('', '').' '.$langs->trans("EvenIfDomainIsOpenTo");
-	print $form->textwithpicto($langs->trans("Closed").'|'.$langs->trans("Open"), $helptooltip);
+	print $form->textwithpicto($langs->trans("Closed").'|'.$langs->trans("Opened"), $helptooltip);
 	print '</td>';
 	print '<td class="center">';
 	print $form->textwithpicto($langs->trans("Instances"), $langs->trans("NbOfOpenInstances"));
@@ -205,6 +358,9 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print '<td colspan="2">';
 	print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
 	print '</td>';
+	if ($user->hasRight('sellyoursaas', 'write') || $user->hasRight('sellyoursaas', 'delete')) {
+		print '<td></td>';
+	}
 	print '</tr>';
 
 	// Get nb of open instances per ip
@@ -221,101 +377,190 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		dol_print_error($db);
 	}
 
+	// Row to add deployment server
+	if ($user->hasRight("sellyoursaas", "write")) {
+		print '<tr>';
+		// Domain
+		print '<td>';
+		$inputdomainname = '<input type="text" name="domainname" id="domainnameadd" value="'.($action != "edit" ? $domainnamenew : '').'" '.($action == "edit" ? 'disabled' : '').'>';
+		print $form->textwithpicto($inputdomainname, $langs->trans("SellYourSaasSubDomainsDeployPageHelp"));
+		print '</td>';
+
+		// IP
+		print '<td>';
+		print '<input class="maxwidth100" type="text" name="ipaddress" id="ipaddressadd" value="'.($action != "edit" ? $ipaddressnew : '').'" '.($action == "edit" ? 'disabled' : '').'>';
+		print '</td>';
+
+		// Open / Closed
+		print '<td class="center">';
+		print '<select name="openedclosedinstance" id="openedclosedinstancenew" '.($action == "edit" ? 'disabled' : '').'>';
+		print '<option value="-1"></option>';
+		print '<option '.($statusnew == "0" && $action != "edit" ?'selected=""' : '').' value="0">'.$langs->trans('Closed').'</option>';
+		print '<option '.($statusnew == "1" && $action != "edit" ?'selected=""' : '').' value="1">'.$langs->trans('Opened').'</option>';
+		print '</select>';
+		print '</td>';
+		print ajax_combobox("openedclosedinstancenew");
+		
+		print '<td></td>';
+		print '<td></td>';
+		print '<td></td>';
+		print '<td></td>';
+
+		print '<td colspan="2" class="right">';
+		print '<input type="submit" name="addinstance" class="button smallpaddingimp" value="'.$langs->trans("Add").'" '.($action == "edit" ? 'disabled' : '').'>';
+		print '</td>';
+		print '</tr>';
+	}
+
 	// Loop on each deployment server
 	foreach ($listofips as $key => $val) {
 		$tmparraydomain = explode(':', $listofdomains[$key]);
 		print '<tr class="oddeven">';
-
-		// Domain
-		print '<td>'.$tmparraydomain[0].'</td>';
-
-		// IP
-		print '<td>'.$val.'</td>';
-		/*print '<td>';
-		if (! empty($tmparraydomain[1])) {
+		if ($action == "edit" && $key == $keyforaction) {
+			print '<input type="hidden" name="key" value="'.$key.'">';
+			// Domain
 			if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
-				print $langs->trans("Closed");
+				print '<td>';
+				$inputdomainname = '<input type="text" name="domainname" id="domainnameadd" value="'.$tmparraydomain[0].(!empty($tmparraydomain[2]) ? ':'.$tmparraydomain[2] : '').'">';
+				print $form->textwithpicto($inputdomainname, $langs->trans("SellYourSaasSubDomainsDeployPageHelp"));
+				print '</td>';
 			} else {
-				print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("OnDomainOnly", $tmparraydomain[1]);
+				print '<td>';
+				$inputdomainname = '<input type="text" name="domainname" id="domainnameadd" value="'.$listofdomains[$key].'">';
+				print $form->textwithpicto($inputdomainname, $langs->trans("SellYourSaasSubDomainsDeployPageHelp"));
+				print '</td>';
 			}
-		} else {
-			print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("Open");
-		}
-		print '</td>';*/
+	
+			// IP
+			print '<td>';
+			print '<input class="maxwidth100" type="text" name="ipaddress" id="ipaddressadd" value="'.$val.'">';
+			print '</td>';
 
-		// Open / Closed
-		print '<td class="center">';
-		if (! empty($tmparraydomain[1])) {
+			// Open / Closed
+			print '<td class="center">';
+			print '<select name="openedclosedinstance" id="openedclosedinstanceedit">';
+			print '<option value="-1"></option>';
 			if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
-				// Button off, click to enable
-				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.urlencode($key).'&token='.newToken().'">';
-				$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
-				$enabledisablehtml.='</a>';
+				print '<option selected="" value="0">'.$langs->trans('Closed').'</option>';
+				print '<option value="1">'.$langs->trans('Opened').'</option>';
+			}else {
+				print '<option value="0">'.$langs->trans('Closed').'</option>';
+				print '<option selected="" value="1">'.$langs->trans('Opened').'</option>';
+			}
+			print '</select>';
+			print '</td>';
+			print ajax_combobox("openedclosedinstanceedit");
+
+			print '<td></td>';
+			print '<td></td>';
+			print '<td></td>';
+			print '<td></td>';
+	
+			print '<td colspan="2" class="right">';
+			print '<input type="submit" name="editinstance" class="button smallpaddingimp" value="'.$langs->trans("Save").'">';
+			print '<input type="submit" name="cancel" class="button smallpaddingimp" value="'.$langs->trans("Cancel").'">';
+			print '</td>';
+		}else {
+			// Domain
+			print '<td>'.$tmparraydomain[0].'</td>';
+
+			// IP
+			print '<td>'.$val.'</td>';
+			/*print '<td>';
+			if (! empty($tmparraydomain[1])) {
+				if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
+					print $langs->trans("Closed");
+				} else {
+					print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("OnDomainOnly", $tmparraydomain[1]);
+				}
+			} else {
+				print img_picto($langs->trans("Open"), 'check', '', false, 0, 0, '', 'paddingright', 0).$langs->trans("Open");
+			}
+			print '</td>';*/
+
+			// Open / Closed
+			print '<td class="center">';
+			if (! empty($tmparraydomain[1])) {
+				if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
+					// Button off, click to enable
+					$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.urlencode($key).'&token='.newToken().'">';
+					$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
+					$enabledisablehtml.='</a>';
+				} else {
+					// Button on, click to disable
+					$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.urlencode($key).'&token='.newToken().'">';
+					$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+					$enabledisablehtml.='</a><br>';
+					$enabledisablehtml.='<span class="small opacitymedium">'.$langs->trans("OnDomainOnly", $tmparraydomain[1]).'</span>';
+				}
 			} else {
 				// Button on, click to disable
 				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.urlencode($key).'&token='.newToken().'">';
 				$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
-				$enabledisablehtml.='</a><br>';
-				$enabledisablehtml.='<span class="small opacitymedium">'.$langs->trans("OnDomainOnly", $tmparraydomain[1]).'</span>';
+				$enabledisablehtml.='</a>';
 			}
-		} else {
-			// Button on, click to disable
-			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.urlencode($key).'&token='.newToken().'">';
-			$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
-			$enabledisablehtml.='</a>';
+			print $enabledisablehtml;
+			print '</td>';
+
+			print '<td class="center">';
+			if (empty($openinstances[$val])) {
+				print '0';
+			} else {
+				print dol_escape_htmltag($openinstances[$val]);
+			}
+			print '</td>';
+
+			// Commands
+			print '<td>';
+			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
+			print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
+			print '</td>';
+			print '<td>';
+			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
+			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
+			print '</td>';
+
+			// Announce
+			print '<td>';
+			$keyforparam = 'SELLYOURSAAS_ANNOUNCE_ON_'.$tmparraydomain[0];
+			if (empty($conf->global->$keyforparam)) {
+				// Button off, click to enable
+				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
+				$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
+				$enabledisablehtml.='</a>';
+			} else {
+				// Button on, click to disable
+				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
+				$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
+				$enabledisablehtml.='</a> ';
+			}
+			print $enabledisablehtml;
+			print '</td>';
+
+			print '<td class="nowraponall">';
+			$keyforparam2 = 'SELLYOURSAAS_ANNOUNCE_'.$tmparraydomain[0];
+			print '<input type="hidden" name="action" value="setSELLYOURSAAS_ANNOUNCE">';
+			print '<input type="hidden" name="key" value="'.$tmparraydomain[0].'">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<textarea class="flat valignmiddle inputsearch inline-block maxwidth200" type="text" name="value" rows="'.ROWS_2.'">';
+			print $conf->global->$keyforparam2;
+			print '</textarea>';
+			print '<div class="center valignmiddle inline-block">';
+			print '<input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'">';
+			print '</div>';
+			print '</td>';
+			if ($user->hasRight('sellyoursaas', 'write') || $user->hasRight('sellyoursaas', 'delete')) {
+				# code...
+				print '<td class="minwidth50">';
+				if ($user->hasRight('sellyoursaas', 'write')) {
+					print '<a href="'.$_SERVER["PHP_SELF"].'?action=edit&token='.newToken().'&key='.$key.'">'.img_picto($langs->trans("Edit"), 'edit', 'class="marginleftonly"').'</a>';
+				}
+				if ($user->hasRight('sellyoursaas', 'delete')) {
+					print '<a href="'.$_SERVER["PHP_SELF"].'?action=delete&token='.newToken().'&key='.$key.'">'.img_delete('', 'class="marginleftonly valigntextbottom"').'</a>';
+				}
+				print '</td>';
+			}
 		}
-		print $enabledisablehtml;
-		print '</td>';
-
-		print '<td class="center">';
-		if (empty($openinstances[$val])) {
-			print '0';
-		} else {
-			print dol_escape_htmltag($openinstances[$val]);
-		}
-		print '</td>';
-
-		// Commands
-		print '<td>';
-		$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
-		print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
-		print '</td>';
-		print '<td>';
-		$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
-		print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
-		print '</td>';
-
-		// Announce
-		print '<td>';
-		$keyforparam = 'SELLYOURSAAS_ANNOUNCE_ON_'.$tmparraydomain[0];
-		if (empty($conf->global->$keyforparam)) {
-			// Button off, click to enable
-			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
-			$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
-			$enabledisablehtml.='</a>';
-		} else {
-			// Button on, click to disable
-			$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
-			$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
-			$enabledisablehtml.='</a> ';
-		}
-		print $enabledisablehtml;
-		print '</td>';
-
-		print '<td class="nowraponall">';
-		$keyforparam2 = 'SELLYOURSAAS_ANNOUNCE_'.$tmparraydomain[0];
-		print '<form method="POST">';
-		print '<input type="hidden" name="action" value="setSELLYOURSAAS_ANNOUNCE">';
-		print '<input type="hidden" name="key" value="'.$tmparraydomain[0].'">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<textarea class="flat valignmiddle inputsearch inline-block maxwidth200" type="text" name="value" rows="'.ROWS_2.'">';
-		print $conf->global->$keyforparam2;
-		print '</textarea>';
-		print '<div class="center valignmiddle inline-block">';
-		print '<input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'">';
-		print '</div>';
-		print '</form>';
-		print '</td>';
 
 		print '</tr>';
 		/*
@@ -337,6 +582,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		 */
 	}
 	print '</table>';
+	print '</form>';
 
 	print '</div>';
 

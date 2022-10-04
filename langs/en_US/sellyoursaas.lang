@@ -66,6 +66,9 @@ DirForBackupInstances=Dir for paid customer instances backups
 SELLYOURSAAS_TEST_ARCHIVES_PATH=Dir for archives of test instances
 SELLYOURSAAS_PAID_ARCHIVES_PATH=Dir for archives of paid instances
 ErrorConnectOkButFailedToCreateFile=Connection SSH ok, but failed to create file
+ErrorInvalidValue=Invalid value for field "%s"
+DeleteDeploymentServerFromList=Remove server
+ConfirmDeleteDeploymentServerFromList=Are you sure you want to remove the deployment server from the server list
 Welcome=Welcome
 MotD=Welcome to setup page of your software, enhanced by SellYouSaas modules.
 CommissionPerMonth=Commission to distribute each month
@@ -501,6 +504,7 @@ ParametersOnDeploymentServers=Parameters for Deployment servers
 RestrictDomainNames=Visible on some domains only
 KeepEmptyForNoRestrictionOnDomain=Keep empty if services (in sales) that includes this package should be always visible on dashboard. Enter some domain name(s), separated with coma, to exclude visibility of the services providing this package when the dashboard has not the same domain name.<br>Example: mydomain.com,mydomain2.com
 SellYourSaasSubDomainsHelp=Enter full list (separated by a comma) of subdomains to show in combolists when a user wants to create a new instance. If the subdomain must be visible only when dashboard or registration page is on a particular domain, enter the domaine after ':'. Put a dummy name will make the subdomain never visible, except if you add &forcesubdomain= as parameter on registration page.
+SellYourSaasSubDomainsDeployPageHelp=If the subdomain must be visible only when dashboard or registration page is on a particular domain, enter the domaine after ':'. Put a dummy name will make the subdomain never visible, except if you add &forcesubdomain= as parameter on registration page.
 DelayAutomaticPayment=Delay automatic payment
 DelayAutomaticPaymentDesc=Do not try to take payment automatically before this date
 DeploymentUserAgent=User agent requesting deployment
