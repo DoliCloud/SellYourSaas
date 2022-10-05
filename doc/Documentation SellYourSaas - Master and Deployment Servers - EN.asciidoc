@@ -3122,12 +3122,24 @@ On *Deployment servers*:
 
 The PHP wrapper to send mail allows to intercept any mail sent via PHP before actually sending it (to do an antispam analysis and log it in a file that can be used by fail2ban)
 
+For *PHP versions below 8.1*:
+
 Create a symlink to the 2 tools used for preprocessing PHP
 
 [source,bash]
 ---------------
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
+---------------
+
+For *PHP versions greater than or equal to 8.1*:
+
+Create a hard link to the 2 tools used for preprocessing PHP
+
+[source,bash]
+---------------
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
 Modify the file *php.ini* (the one for *apache* and the one for *cli*) with:
