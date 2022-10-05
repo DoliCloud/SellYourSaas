@@ -3,11 +3,12 @@
 
 ## 1.3
 
- * FIX Can show a different alert/announce message for each deployment server.  
+ * NEW Can add a server and remove it from the Deployment tab. Need write permission of sellyoursaas. No more need for admin status.  
+ * NEW Retreiving version of a deployed instance uses the SQL definition found into package instead of hardcoded SQL.
+ * NEW Can defined frequency of backup per instance
  * NEW Show the number of open instances in the page to setup Deployment servers  
  * NEW Using the restore_instance tool add a line into historic of events for instance.
  * NEW Add a page view to list instances with current backup errors
- * NEW Retreiving version of a deployed instance uses the SQL definition found into package instead of hardcoded SQL.
  * NEW Add some blacklist tables et page to edit them.
  * NEW Add a whitelist table and page to edit it. Any IP in this table is allowed to create instance whatever are other checks.
  * NEW Add an evil picto on instances flagged as evil
@@ -24,6 +25,7 @@
  * NEW Add option backuprsyncdayfrequency and backupdumpdayfrequency (Value 1 by default).
  * Experimental feature to allow end user to migrate its instance from its own backup (works for a Dolibarr instance only)
  * Experimental feature to allow end user to upgrate its instance to a higher version (works for a Dolibarr instance only)
+ * FIX Can show a different alert/announce message for each deployment server.  
  * FIX Timezone is filled also for instances created from customer dashboard
 
 
