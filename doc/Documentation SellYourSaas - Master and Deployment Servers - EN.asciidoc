@@ -3503,6 +3503,14 @@ NOTE: This is the wildcard certificate that will be used for the customer instan
 mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/000-default-ssl.conf
 ---------------
 
+If not, create it as an empty file.
+
+[source,bash]
+---------------
+touch /etc/apache2/sites-available/000-default-ssl.conf
+---------------
+
+
 * Edit this file */etc/apache2/sites-available/000-default-ssl.conf* with this content:
 
 [source,bash]
@@ -3568,7 +3576,7 @@ You may try later or create a new instance from scratch from page <a href="https
 </html>
 ---------------
 
-Enable the virtual host:
+* Enable the virtual host:
 
 [source,bash]
 ---------------
