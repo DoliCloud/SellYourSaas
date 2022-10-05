@@ -3,6 +3,7 @@
 
 ## 1.3
 
+ * NEW Can send an email on sellyoursaas job error (need dolibarr 17+) 
  * NEW Can add a server and remove it from the Deployment tab. Need write permission of sellyoursaas. No more need for admin status.  
  * NEW Retreiving version of a deployed instance uses the SQL definition found into package instead of hardcoded SQL.
  * NEW Can defined frequency of backup per instance
