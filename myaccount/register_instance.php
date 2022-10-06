@@ -242,7 +242,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
 	if (! preg_match('/\?/', $newurl)) $newurl.='?';
 	$newurl.='&mode=instances';
-	$newurl.='&reusecontractid='.$reusecontractid;
+	$newurl.='&reusecontractid='.((int) $reusecontractid);
 } elseif ($reusesocid) {		// When we use the "Add another instance" from myaccount dashboard
 	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we have already load the $tmpproduct
 		$tmpproduct = new Product($db);
@@ -957,7 +957,7 @@ if ($reusecontractid) {
 
 
 	// Start transaction
-	$db->begin();
+	$db->begin('register_instance create/update thirdparty');
 
 	if ($tmpthirdparty->id > 0) {
 		if (empty($reusesocid)) {
