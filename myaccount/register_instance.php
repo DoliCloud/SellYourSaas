@@ -658,10 +658,10 @@ if ($reusecontractid) {
 	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
+			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIp")."\n";
+			print $langs->trans("TooManyInstancesForSameIp", $remoteip)."\n";
 		}
 		exit(-70);
 	}
@@ -679,10 +679,10 @@ if ($reusecontractid) {
 	dol_syslog("nbofinstancewithsameipvpn = ".$nbofinstancewithsameipvpn." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPVPN." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameipvpn < 0) || ($nbofinstancewithsameipvpn > $MAXDEPLOYMENTPERIPVPN))) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
+			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIp")."\n";
+			print $langs->trans("TooManyInstancesForSameIp", $remoteip)."\n";
 		}
 		exit(-70);
 	}
@@ -701,10 +701,10 @@ if ($reusecontractid) {
 	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIPPERHOUR))) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour"), null, 'errors');
+			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIpThisHour")."\n";
+			print $langs->trans("TooManyInstancesForSameIpThisHour", $remoteip)."\n";
 		}
 		exit(-71);
 	}
