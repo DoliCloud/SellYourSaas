@@ -222,52 +222,47 @@ if [[ "x$instanceserver" != "x0" ]]; then
 
 			for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 			do
-				if [ "x${ret1[$SERVDESTICURSOR]}" == "x0" ]; then
-					export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-			        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
-		        	echo `date +'%Y-%m-%d %H:%M:%S'`" $command";
+				export RSYNC_RSH="ssh -p $SERVPORTDESTI"
+		        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+	        	echo `date +'%Y-%m-%d %H:%M:%S'`" $command";
 
-			        $command 2>&1
-				   	# WARNING: The set of rescommand must be just after the $command. No echo between.
-					rescommand=$?
-			        if [ "x$rescommand" != "x0" ]; then
-			        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
-			        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}."
-					   	echo "Command was: $command"
-			        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}. Command was: $command\n"
-			        else
-			        	echo
-			        	# Success of backup of backup, we try to calculate disk usage for each dir
-			        	echo `date +'%Y-%m-%d %H:%M:%S'`" Scan dir named $DIRSOURCE2/osu$i*"
-			        	for osudir in `ls -d $DIRSOURCE2/osu$i*`
-			        	do
+		        $command 2>&1
+			   	# WARNING: The set of rescommand must be just after the $command. No echo between.
+				rescommand=$?
+		        if [ "x$rescommand" != "x0" ]; then
+		        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
+		        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}."
+				   	echo "Command was: $command"
+		        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}. Command was: $command\n"
+		        else
+		        	echo
+		        	# Success of backup of backup, we try to calculate disk usage for each dir
+		        	echo `date +'%Y-%m-%d %H:%M:%S'`" Scan dir named $DIRSOURCE2/osu$i*"
+		        	for osudir in `ls -d $DIRSOURCE2/osu$i*`
+		        	do
+		        		export osudirbase=`basename $osudir`
+		        		if [[ $nbdu -lt 50 ]]; then
 			        		export osudirbase=`basename $osudir`
-			        		if [[ $nbdu -lt 50 ]]; then
-				        		export osudirbase=`basename $osudir`
-				        		if [[ -d $homedir/$osudirbase/ ]]; then
-					        		export found=`find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l`
-					        		if [ "x$found" = "x0" ]; then
-					        			# No recent .duc.db found, so we calculate it
-					        			echo `date +'%Y-%m-%d %H:%M:%S'`" No recent .duc.db into $homedir/$osudirbase and nb already updated = $nbdu, so we update it."
-					        			echo "duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.duc.db"
-						        		duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.duc.db
-						        		chown $osudirbase.$osudirbase $homedir/$osudirbase/.duc.db
-						        		export nbdu=$((nbdu+1))
-						        	else
-						        		echo `date +'%Y-%m-%d %H:%M:%S'`" File $homedir/$osudirbase/.duc.db was recently updated"
-						        	fi
-						        else
-					        		echo `date +'%Y-%m-%d %H:%M:%S'`" Dir $homedir/$osudirbase/ does not exists, we cancel duc for $homedir/$osudirbase/"
-						        fi
-				        	else
-				        		echo `date +'%Y-%m-%d %H:%M:%S'`" Max nb of update to do reached ($nbdu), we cancel duc for $homedir/$osudirbase/"
-				        	fi
-			        	done
-			        fi
-				else
-					echo "Canceled. An error occured in backup of DIRSOURCE2=$DIRSOURCE2/osu$i"
-					export errstring="$errstring\nCanceled. An error occured in backup of DIRSOURCE2=$DIRSOURCE2/osu$i"
-				fi
+			        		if [[ -d $homedir/$osudirbase/ ]]; then
+				        		export found=`find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l`
+				        		if [ "x$found" = "x0" ]; then
+				        			# No recent .duc.db found, so we calculate it
+				        			echo `date +'%Y-%m-%d %H:%M:%S'`" No recent .duc.db into $homedir/$osudirbase and nb already updated = $nbdu, so we update it."
+				        			echo "duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.duc.db"
+					        		duc index $DIRSOURCE2/$osudirbase -x -m 3 -d $homedir/$osudirbase/.duc.db
+					        		chown $osudirbase.$osudirbase $homedir/$osudirbase/.duc.db
+					        		export nbdu=$((nbdu+1))
+					        	else
+					        		echo `date +'%Y-%m-%d %H:%M:%S'`" File $homedir/$osudirbase/.duc.db was recently updated"
+					        	fi
+					        else
+				        		echo `date +'%Y-%m-%d %H:%M:%S'`" Dir $homedir/$osudirbase/ does not exists, we cancel duc for $homedir/$osudirbase/"
+					        fi
+			        	else
+			        		echo `date +'%Y-%m-%d %H:%M:%S'`" Max nb of update to do reached ($nbdu), we cancel duc for $homedir/$osudirbase/"
+			        	fi
+		        	done
+		        fi
 				
 				sleep 2
 			done
