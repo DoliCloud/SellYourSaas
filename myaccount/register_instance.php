@@ -543,6 +543,7 @@ if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
 	exit(-61);
 }
 
+// Set if IP is whitelisted
 $whitelisted = false;
 if (!empty($tmparraywhitelist)) {
 	foreach ($tmparraywhitelist as $val) {
@@ -655,8 +656,8 @@ if ($reusecontractid) {
 			$nbofinstancewithsameip = $objselect->nb;
 		}
 	}
-	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1)");
-	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
+	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1 or whitelisted)");
+	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
 		dol_syslog("TooManyInstancesForSameIp - ".$remoteip);
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
@@ -677,8 +678,8 @@ if ($reusecontractid) {
 			$nbofinstancewithsameipvpn = $objselect->nb;
 		}
 	}
-	dol_syslog("nbofinstancewithsameipvpn = ".$nbofinstancewithsameipvpn." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPVPN." except if ip is 127.0.0.1)");
-	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameipvpn < 0) || ($nbofinstancewithsameipvpn > $MAXDEPLOYMENTPERIPVPN))) {
+	dol_syslog("nbofinstancewithsameipvpn = ".$nbofinstancewithsameipvpn." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPVPN." except if ip is 127.0.0.1 or whitelisted)");
+	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameipvpn < 0) || ($nbofinstancewithsameipvpn > $MAXDEPLOYMENTPERIPVPN))) {
 		dol_syslog("TooManyInstancesForSameIp - ".$remoteip);
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
@@ -700,7 +701,7 @@ if ($reusecontractid) {
 		$objselect = $db->fetch_object($resselect);
 		if ($objselect) $nbofinstancewithsameip = $objselect->nb;
 	}
-	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1)");
+	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1. Whitelist ip does not bypass this test)");
 	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIPPERHOUR))) {
 		dol_syslog("TooManyInstancesForSameIpThisHour - ".$remoteip);
 		if (substr($sapi_type, 0, 3) != 'cli') {
