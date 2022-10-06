@@ -161,19 +161,17 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	if (empty($lastpassadmin)) {
 		if (! empty($object->array_options['options_deployment_init_adminpass'])) {
 			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
-			$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-			$links.='Link to application (initial install pass) : ';
+			$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application (initial install pass)<br><div class="urllink">';
 		} else {
 			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
-			$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-			$links.='Link to application : ';
+			$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application<br><div class="urllink">';
 		}
 	} else {
 		$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
-		$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-		$links.='Link to application (last logged admin) : ';
+		$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application (last logged admin)<br><div class="urllink">';
 	}
-	$links.=$link.'<br>';
+	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
+	$links .= $link.'</div>';
 
 	$links.='<br>';
 
@@ -197,9 +195,10 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
 		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
 	}
-	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.$url.'</a>';
-	$links.='Link to customer dashboard : ';
-	$links.=$link.'<br>';
+
+	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
+	$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to customer dashboard<br><div class="urllink">';
+	$links .= $link.'</div>';
 
 	$links.='<br>';
 

@@ -677,7 +677,7 @@ print '</tr>';
 
 // Authorized key file
 print '<tr>';
-print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No"));
+print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
@@ -686,7 +686,7 @@ print '</tr>';
 
 // Install.lock file
 print '<tr>';
-print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No"));
+print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
@@ -695,7 +695,7 @@ print '</tr>';
 
 // Installmodules.lock file
 print '<tr>';
-print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No"));
+print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstallmoduleslock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_fileinstallmoduleslock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstallmoduleslock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
@@ -736,9 +736,11 @@ print '<table class="noborder entpercent">';
 print '<tr>';
 print '<td>'.$langs->trans("Instance").'</td>';
 print '<td>'.$langs->trans("RefCustomer").'</td>';
-print '<td>'.$langs->trans("RegistrationCounter").'</td>';
-print '<td>'.$langs->trans("IP").'</td>';
-print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
+print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($langs->trans("RegistrationCounter")).'">'.$langs->trans("RegistrationCounter").'</td>';
+print '<td>'.$langs->trans("IP");
+print ' &nbsp; <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.img_picto('', 'download', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("GetFileOfIps").'</span></a>';
+print '</td>';
+print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($langs->trans("DeploymentIPVPNProba")).'">'.$langs->trans("DeploymentIPVPNProba").'</td>';
 print '<td>'.$langs->trans("Date").'</td>';
 print '<td>'.$langs->trans("Status").'</td>';
 print '<td></td>';
@@ -756,11 +758,11 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
 	print '<td>'.dol_print_ip($instance->array_options['options_deployment_ip']).'</td>';
 	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
-	print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
+	print '<td class="nowraponall">'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';
 	print '<td align="right">';
 	if ($user->rights->sellyoursaas->write) {
-		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
+		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("MarkAsSpamAndClose").'</span></a>';
 		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
 			print ' &nbsp; ';
 			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
@@ -772,18 +774,19 @@ foreach ($arraylistofinstances as $instance) {
 	print '</tr>';
 }
 
+/*
 print '<tr class="liste_total">';
 print '<td></td>';
 print '<td></td>';
 print '<td></td>';
 print '<td>';
-print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
 print '</td>';
 print '<td></td>';
 print '<td></td>';
 print '<td></td>';
 print '<td></td>';
 print '</tr>';
+*/
 
 print '</table>';
 print '</div>';
