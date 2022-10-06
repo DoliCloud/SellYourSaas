@@ -1262,8 +1262,12 @@ class SellYourSaasUtils
 									if ($paymentmethod == 'stripe') $paymentTypeId = $conf->global->STRIPE_PAYMENT_MODE_FOR_PAYMENTS;
 									if (empty($paymentTypeId)) {
 										$paymentType = $_SESSION["paymentType"];
-										if ($companypaymentmode->type = 'ban') $paymentType = 'BAN';
-										if (empty($paymentType)) $paymentType = 'CB';
+										if ($companypaymentmode->type == 'ban') {
+											$paymentType = 'PRE';
+										}
+										if (empty($paymentType)) {
+											$paymentType = 'CB';
+										}
 										$paymentTypeId = dol_getIdFromCode($this->db, $paymentType, 'c_paiement', 'code', 'id', 1);
 									}
 
@@ -1321,9 +1325,15 @@ class SellYourSaasUtils
 										dol_syslog('* Add payment to bank');
 
 										$bankaccountid = 0;
-										if ($paymentmethod == 'paybox') $bankaccountid = $conf->global->PAYBOX_BANK_ACCOUNT_FOR_PAYMENTS;
-										if ($paymentmethod == 'paypal') $bankaccountid = $conf->global->PAYPAL_BANK_ACCOUNT_FOR_PAYMENTS;
-										if ($paymentmethod == 'stripe') $bankaccountid = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;
+										if ($paymentmethod == 'paybox') {
+											$bankaccountid = getDolGlobalInt('PAYBOX_BANK_ACCOUNT_FOR_PAYMENTS');
+										}
+										if ($paymentmethod == 'paypal') {
+											$bankaccountid = getDolGlobalInt('PAYPAL_BANK_ACCOUNT_FOR_PAYMENTS');
+										}
+										if ($paymentmethod == 'stripe') {
+											$bankaccountid = getDolGlobalInt('STRIPE_BANK_ACCOUNT_FOR_PAYMENTS');
+										}
 
 										if ($bankaccountid > 0) {
 											$label='(CustomerInvoicePayment)';
@@ -2284,7 +2294,7 @@ class SellYourSaasUtils
 									$invoice_draft->note_private		= 'Template invoice created by batch doSuspendInstances because expired and a payment mode exists for customer';
 									$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
 									$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
-									$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
+									$invoice_draft->fk_account          = getDolGlobalInt('STRIPE_BANK_ACCOUNT_FOR_PAYMENTS');	// stripe
 
 									$invoice_draft->fetch_thirdparty();
 

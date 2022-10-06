@@ -1302,7 +1302,7 @@ if ($action == 'updateurl') {
 							$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
 							$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
 							$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
-							$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
+							$invoice_draft->fk_account          =getDolGlobalInt('STRIPE_BANK_ACCOUNT_FOR_PAYMENTS');	// stripe
 
 							$invoice_draft->fetch_thirdparty();
 
@@ -1986,7 +1986,7 @@ if ($action == 'updateurl') {
 							$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
 							$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
 							$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
-							$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
+							$invoice_draft->fk_account          = getDolGlobalInt('STRIPE_BANK_ACCOUNT_FOR_PAYMENTS');	// stripe
 
 							$invoice_draft->fetch_thirdparty();
 
@@ -3227,7 +3227,7 @@ $arrayofcompanypaymentmode = array();
 $sql = 'SELECT rowid, default_rib FROM '.MAIN_DB_PREFIX."societe_rib";
 $sql.= " WHERE type in ('ban', 'card', 'paypal')";
 $sql.= " AND fk_soc = ".$mythirdpartyaccount->id;
-$sql.= " AND (type = 'ban' OR (type='card' AND status = ".$servicestatusstripe.") OR (type='paypal' AND status = ".$servicestatuspaypal."))";
+$sql.= " AND (type = 'ban' OR (type = 'card' AND status = ".$servicestatusstripe.") OR (type = 'paypal' AND status = ".$servicestatuspaypal."))";
 $sql.= " ORDER BY default_rib DESC, tms DESC";
 
 $resql = $db->query($sql);

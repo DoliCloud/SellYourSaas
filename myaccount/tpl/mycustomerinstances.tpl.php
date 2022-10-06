@@ -504,7 +504,7 @@ if (count($listofcontractidreseller) == 0) {
 						$sqlpaymentmodes = 'SELECT rowid, default_rib FROM '.MAIN_DB_PREFIX."societe_rib";
 						$sqlpaymentmodes.= " WHERE type in ('ban', 'card', 'paypal')";
 						$sqlpaymentmodes.= " AND fk_soc = ".$tmpcustomer->id;
-						$sqlpaymentmodes.= " AND (type = 'ban' OR (type='card' AND status = ".$servicestatusstripe.") OR (type='paypal' AND status = ".$servicestatuspaypal."))";
+						$sqlpaymentmodes.= " AND (type = 'ban' OR (type = 'card' AND status = ".$servicestatusstripe.") OR (type = 'paypal' AND status = ".$servicestatuspaypal."))";
 						$sqlpaymentmodes.= " ORDER BY default_rib DESC, tms DESC";
 
 						$resqlpaymentmodes = $db->query($sqlpaymentmodes);

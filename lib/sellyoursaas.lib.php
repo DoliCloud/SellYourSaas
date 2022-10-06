@@ -113,7 +113,7 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	$sql = 'SELECT rowid, default_rib FROM '.MAIN_DB_PREFIX."societe_rib";
 	$sql.= " WHERE type in ('ban', 'card', 'paypal')";
 	$sql.= " AND fk_soc = ".$thirdpartyidtotest;
-	$sql.= " AND (type = 'ban' OR (type='card' AND status = ".$servicestatusstripe.") OR (type='paypal' AND status = ".$servicestatuspaypal."))";
+	$sql.= " AND (type = 'ban' OR (type = 'card' AND status = ".$servicestatusstripe.") OR (type = 'paypal' AND status = ".$servicestatuspaypal."))";
 	$sql.= " ORDER BY default_rib DESC, tms DESC";
 
 	$resqltmp = $db->query($sql);
