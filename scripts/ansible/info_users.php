@@ -205,8 +205,11 @@ if ($resql) {
 				}
 			}
 		}
+	} elseif ($num_rows == 0) {
+		fwrite(STDERR, 'Login '.$login.' not found in Dolibarr Master.'."\n");
+		exit(0);
 	} else {
-		fwrite(STDERR, 'Bad number of record found when searching the login'."\n");
+		fwrite(STDERR, 'Bad number of record found when searching the login in Dolibarr Master'."\n");
 		exit(1);
 	}
 } else {
