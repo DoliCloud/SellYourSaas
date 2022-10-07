@@ -1477,7 +1477,8 @@ systemctl stop remote-server-launcher.service
   
 * As well as the specific rules for sellyoursaas:
   
-  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*
+  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
 
 To do this, first create a */etc/fail2ban/jail.local* file with this content:
@@ -1496,7 +1497,7 @@ systemctl status fail2ban
 If not, you can create all required logs with :
 [source, bash]
 ---------------
-grep logpath /etc/fail2ban/jail.local |cut -d= -f2|grep '^ /'|sort|uniq|xargs touch
+grep logpath /etc/fail2ban/jail.local | cut -d= -f2 | grep '^ /'|sort|uniq|xargs touch
 ---------------
 
 
@@ -1729,6 +1730,7 @@ maxretry = 10
 [web-dol-passforgotten]
 
 ; rule against call of passwordforgottenpage
+; enabled = true for master, false for deployment
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulespassforgotten
@@ -1741,6 +1743,7 @@ maxretry = 10
 [web-dol-bruteforce]
 
 ; rule against bruteforce hacking (login + api)
+; enabled = true for master, false for deployment
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesbruteforce
@@ -1754,6 +1757,7 @@ maxretry = 10
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
 ; disable this rule by setting enabled to false on non master servers
+; enabled = true for master, false for deployment
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesregisterinstance
@@ -1764,6 +1768,8 @@ findtime = 86400     ; 1 day
 maxretry = 10
 
 ---------------
+
+For deployment server only, disable into */etc/fail2ban/jail.local* the 3 rules starting with web-dolibarr-* (they must be used on Master server only)
 
 Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating a link:
 
