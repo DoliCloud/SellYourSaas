@@ -82,6 +82,10 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 $parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
+
 if (empty($reshook)) {
 	// Cancel
 	if (GETPOST('cancel', 'alpha') && ! empty($backtopage)) {

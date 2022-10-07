@@ -194,6 +194,9 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 $parameters=array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
 
 if (empty($reshook)) {
 	// Cancel
@@ -202,7 +205,7 @@ if (empty($reshook)) {
 		exit;
 	}
 
-	include 'refresh_action.inc.php';
+	//include 'refresh_action.inc.php';
 
 	if ($action == 'backupinstance') {
 		// Launch the remote action backup

@@ -5266,7 +5266,7 @@ If you find into */var/log/auth.log* an error like:
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
 
-The client (maybe an old PHP version) uses a deprecated algorithm for negotiation. Edit the */etc/ssh/sshd_config* of the server by adding:
+The client (maybe an old PHP version) uses a deprecated algorithm for negotiation. Edit the file */etc/ssh/sshd_config.d/sellyousaas.conf* of the server by adding:
 
 [source,bash]
 ---------------

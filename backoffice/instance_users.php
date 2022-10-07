@@ -103,6 +103,9 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 $parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
 
 if (empty($reshook)) {
 	// Cancel
@@ -277,7 +280,7 @@ if (empty($reshook)) {
 	}
 
 	if (! in_array($action, array('resetpassword', 'confirm_resetpassword', 'createsupportuser', 'deletesupportuser'))) {
-		include 'refresh_action.inc.php';
+		//include 'refresh_action.inc.php';
 
 		$action = 'view';
 	}
