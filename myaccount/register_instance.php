@@ -1139,7 +1139,7 @@ if ($reusecontractid) {
 		}
 
 		// Add security controls - call getRemoteCheck()
-		$resultremotecheck = getRemoteCheck();
+		$resultremotecheck = getRemoteCheck($remoteip, $whitelisted, $email);
 
 		$contract->array_options['options_deployment_vpn_proba'] = $resultremotecheck['vpnproba'];
 		$contract->array_options['options_deployment_ipquality'] = $resultremotecheck['ipquality'];
@@ -1155,34 +1155,6 @@ if ($reusecontractid) {
 		$contract->array_options['options_deployment_emailquality'] = dol_trunc($contract->array_options['options_deployment_emailquality'], 250);
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 		//dol_syslog("options_deployment_emailquality = ".$contract->array_options['options_deployment_emailquality'], LOG_DEBUG);
-
-
-		// SELLYOURSAAS_BLACKLIST_IP_MASKS and SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN are hidden constants.
-		// Deprecated. Use instead the List of blacklist ips into menu. This is done a begin of page
-
-		// Block for some IPs
-		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
-			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
-			foreach ($arrayofblacklistips as $blacklistip) {
-				if ($remoteip == $blacklistip) {
-					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");
-					$abusetest = 4;
-				}
-			}
-		}
-
-		// Block for some IPs if VPN proba is higher that a threshold
-		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
-			if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
-				$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
-				foreach ($arrayofblacklistips as $blacklistip) {
-					if ($remoteip == $blacklistip) {
-						dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
-						$abusetest = 5;
-					}
-				}
-			}
-		}
 
 		if ($abusetest) {
 			$db->rollback();

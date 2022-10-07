@@ -677,5 +677,33 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		}
 	}
 
+
+	// SELLYOURSAAS_BLACKLIST_IP_MASKS and SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN are hidden constants.
+	// Deprecated. Use instead the List of blacklist ips into menu. This is done a begin of page
+
+	// Block for some IPs
+	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
+		$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
+		foreach ($arrayofblacklistips as $blacklistip) {
+			if ($remoteip == $blacklistip) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");
+				$abusetest = 4;
+			}
+		}
+	}
+
+	// Block for some IPs if VPN proba is higher that a threshold
+	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
+		if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
+			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+			foreach ($arrayofblacklistips as $blacklistip) {
+				if ($remoteip == $blacklistip) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
+					$abusetest = 5;
+				}
+			}
+		}
+	}
+
 	return array('ipquality'=>$ipquality, 'emailquality'=>$emailquality, 'vpnproba'=>$vpnproba, 'abusetest'=>$abusetest, 'fraudscoreip'=>$fraudscoreip, 'fraudscoreemail'=>$fraudscoreemail);
 }
