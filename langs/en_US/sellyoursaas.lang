@@ -478,7 +478,7 @@ AccountToDelete=Account to delete
 PaymentDoneOnStripeTest=Payment on Stripe - Test (%s done)
 PaymentDoneOnStripeLive=Payment on Stripe - Live (%s done)
 PayBalance=Pay the balance
-QtyFormulaExamples=<u>Example of rules to calculate quantities:</u><br><br>SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login != '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'<br><br>BASH:du -ks --exclude=htdocs __INSTANCEDIR__ | cut -f 1 | php -r '$a=intval(fgets(STDIN))/1000000; print ($a>0?$a:0).chr(32).($a>5?($a-5):0);<br><br>PHPMETHOD:nameOfMethod;param1;param2  (paramX can be a substitution key, ie __CONTRACTREF__, __INSTANCEDBPREFIX__)
+QtyFormulaExamples=<u>Example of rules to calculate quantities:</u><br><br>SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login != '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'<br><br>BASH:duc info -b -d /home/jail/home/__OSUSERNAME__/.duc.db 2>/dev/null | awk 'NR>=2 { print $5 }' | php -r '$a=fgets(STDIN)/1000000000; print ($a>0?$a:0).chr(32).($a>5?($a-5):0);<br><br>PHPMETHOD:nameOfMethod;param1;param2  (paramX can be a substitution key, ie __CONTRACTREF__, __INSTANCEDBPREFIX__)
 VersionFormulaExamples=<u>Example of rules to get a version:</u><br><br>SQL:select field as version from __INSTANCEDBPREFIX__config where key = 'version'
 SourceURLOfEvent=Source URL of event
 SeeOnBackoffice=See on backoffice

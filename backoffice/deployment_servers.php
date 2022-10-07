@@ -71,9 +71,9 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 $keyforaction	= GETPOST('key', 'alpha');
 $value	= GETPOST('value', 'alpha');
 if (!GETPOST('cancel', 'alpha')) {
-	$domainnamenew = GETPOST("domainname","alpha");
-	$ipaddressnew = GETPOST("ipaddress","alpha");
-	$statusnew = GETPOST("openedclosedinstance","alpha");
+	$domainnamenew = GETPOST("domainname", "alpha");
+	$ipaddressnew = GETPOST("ipaddress", "alpha");
+	$statusnew = GETPOST("openedclosedinstance", "alpha");
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.
@@ -141,15 +141,15 @@ if ($action == 'setSELLYOURSAAS_ANNOUNCE') {
 if ($action == 'addinstance') {
 	if ($user->hasRight('sellyoursaas', 'write')) {
 		if (empty($domainnamenew)) {
-			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Domain")), null, 'errors');
+			setEventMessages($langs->transnoentities("ErrorFieldRequired", $langs->trans("Domain")), null, 'errors');
 			$error++;
 		}
 		if (empty($ipaddressnew)) {
-			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("IP")), null, 'errors');
+			setEventMessages($langs->transnoentities("ErrorFieldRequired", $langs->trans("IP")), null, 'errors');
 			$error++;
 		}
 		if ($statusnew == -1) {
-			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+			setEventMessages($langs->transnoentities("ErrorFieldRequired", $langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
 			$error++;
 		}
 
@@ -170,8 +170,8 @@ if ($action == 'addinstance') {
 				$listofdomains[] = implode(':', $tmpdomainkey);
 				$listofdomains = implode(',', $listofdomains);
 				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
-			}else {
-				setEventMessages($langs->transnoentities("ErrorInvalidValue",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+			} else {
+				setEventMessages($langs->transnoentities("ErrorInvalidValue", $langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
 				$error++;
 			}
 
@@ -184,7 +184,7 @@ if ($action == 'addinstance') {
 				unset($statusnew);
 			}
 		}
-	}else {
+	} else {
 		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
 	}
 }
@@ -192,15 +192,15 @@ if ($action == 'addinstance') {
 if ($action == 'editinstance') {
 	if ($user->hasRight('sellyoursaas', 'write')) {
 		if (empty($domainnamenew)) {
-			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Domain")), null, 'errors');
+			setEventMessages($langs->transnoentities("ErrorFieldRequired", $langs->trans("Domain")), null, 'errors');
 			$error++;
 		}
 		if (empty($ipaddressnew)) {
-			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("IP")), null, 'errors');
+			setEventMessages($langs->transnoentities("ErrorFieldRequired", $langs->trans("IP")), null, 'errors');
 			$error++;
 		}
 		if ($statusnew == -1) {
-			setEventMessages($langs->transnoentities("ErrorFieldRequired",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+			setEventMessages($langs->transnoentities("ErrorFieldRequired", $langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
 			$error++;
 		}
 
@@ -216,7 +216,7 @@ if ($action == 'editinstance') {
 				$tmpdomainkey[1] = 'closed';
 				if (!empty($tmpdomainnew[1])) {
 					$tmpdomainkey[2] = $tmpdomainnew[1];
-				}else {
+				} else {
 					unset($tmpdomainkey[2]);
 				}
 				$listofdomains[$keyforaction] = implode(':', $tmpdomainkey);
@@ -226,7 +226,7 @@ if ($action == 'editinstance') {
 				$tmpdomainkey[0] = $tmpdomainnew[0];
 				if (!empty($tmpdomainnew[1])) {
 					$tmpdomainkey[1] = $tmpdomainnew[1];
-				}else {
+				} else {
 					unset($tmpdomainkey[1]);
 				}
 				if (!empty($tmpdomainkey[2])) {
@@ -235,8 +235,8 @@ if ($action == 'editinstance') {
 				$listofdomains[$keyforaction] = implode(':', $tmpdomainkey);
 				$listofdomains = implode(',', $listofdomains);
 				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
-			}else {
-				setEventMessages($langs->transnoentities("ErrorInvalidValue",$langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
+			} else {
+				setEventMessages($langs->transnoentities("ErrorInvalidValue", $langs->trans("Closed").'|'.$langs->trans("Opened")), null, 'errors');
 				$error++;
 			}
 
@@ -249,7 +249,7 @@ if ($action == 'editinstance') {
 				unset($statusnew);
 			}
 		}
-	}else {
+	} else {
 		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
 	}
 }
@@ -264,11 +264,10 @@ if ($action == 'confirm_delete') {
 		dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
 		$listofips = implode(',', $listofips);
 		dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_IP", $listofips, 'chaine', 0, '', $conf->entity);
-	}else {
+	} else {
 		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
 	}
 	$action = '';
-
 }
 /*
  *	View
@@ -382,7 +381,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		print '<tr>';
 		// Domain
 		print '<td>';
-		$inputdomainname = '<input type="text" name="domainname" id="domainnameadd" value="'.($action != "edit" ? $domainnamenew : '').'" '.($action == "edit" ? 'disabled' : '').'>';
+		$inputdomainname = '<input type="text" name="domainname" id="domainnameadd" class="widthcentpercentminusx" value="'.($action != "edit" ? $domainnamenew : '').'" '.($action == "edit" ? 'disabled' : '').'>';
 		print $form->textwithpicto($inputdomainname, $langs->trans("SellYourSaasSubDomainsDeployPageHelp"));
 		print '</td>';
 
@@ -400,7 +399,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		print '</select>';
 		print '</td>';
 		print ajax_combobox("openedclosedinstancenew");
-		
+
 		print '<td></td>';
 		print '<td></td>';
 		print '<td></td>';
@@ -430,7 +429,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 				print $form->textwithpicto($inputdomainname, $langs->trans("SellYourSaasSubDomainsDeployPageHelp"));
 				print '</td>';
 			}
-	
+
 			// IP
 			print '<td>';
 			print '<input class="maxwidth100" type="text" name="ipaddress" id="ipaddressadd" value="'.$val.'">';
@@ -443,7 +442,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 			if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
 				print '<option selected="" value="0">'.$langs->trans('Closed').'</option>';
 				print '<option value="1">'.$langs->trans('Opened').'</option>';
-			}else {
+			} else {
 				print '<option value="0">'.$langs->trans('Closed').'</option>';
 				print '<option selected="" value="1">'.$langs->trans('Opened').'</option>';
 			}
@@ -455,12 +454,12 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 			print '<td></td>';
 			print '<td></td>';
 			print '<td></td>';
-	
+
 			print '<td colspan="2" class="right">';
 			print '<input type="submit" name="editinstance" class="button smallpaddingimp" value="'.$langs->trans("Save").'">';
 			print '<input type="submit" name="cancel" class="button smallpaddingimp" value="'.$langs->trans("Cancel").'">';
 			print '</td>';
-		}else {
+		} else {
 			// Domain
 			print '<td>'.$tmparraydomain[0].'</td>';
 
@@ -550,7 +549,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 			print '</div>';
 			print '</td>';
 			if ($user->hasRight('sellyoursaas', 'write') || $user->hasRight('sellyoursaas', 'delete')) {
-				# code...
+				// code...
 				print '<td class="minwidth50">';
 				if ($user->hasRight('sellyoursaas', 'write')) {
 					print '<a href="'.$_SERVER["PHP_SELF"].'?action=edit&token='.newToken().'&key='.$key.'">'.img_picto($langs->trans("Edit"), 'edit', 'class="marginleftonly"').'</a>';
