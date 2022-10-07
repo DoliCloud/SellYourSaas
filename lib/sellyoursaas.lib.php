@@ -539,8 +539,6 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	// Evaluate VPN probability with IPQualityScore but also TOR or bad networks and email
 	if (!empty($conf->global->SELLYOURSAAS_IPQUALITY_ON) && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
-		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-
 		// Retrieve additional (optional) data points which help us enhance fraud scores.
 		$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
 		$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
