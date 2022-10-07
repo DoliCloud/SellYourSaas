@@ -5282,6 +5282,12 @@ Then reload ssh with
 /etc/init.d/ssh reload
 ---------------
 
+To test if a couple client-server can work with one algorightm, you can try:
+
+ssh -oHostKeyAlgorithms=ssh-rsa admin@ip.of.server
+ssh -oHostKeyAlgorithms=ssh-ed25519 admin@ip.of.server
+
+
 
 ==== Some remote action generates a PHP coredump
 
