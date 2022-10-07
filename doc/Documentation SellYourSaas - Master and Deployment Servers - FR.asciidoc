@@ -1349,15 +1349,12 @@ systemctl stop remote-server-launcher.service
   
 * Ainsi que les règles spécifiques à sellyoursaas:
   
-  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
-
-
-Pour cela, créer d'abord un fichier */etc/fail2ban/jail.local* avec ce contenu:
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, 
+  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
 NOTE: Les règles disponibles peuvent varier selon la version de l'OS installé.
 
-NOTE: Penser à modifier aussi *mybusinessips* par votre ou vos ips séparés par des espaces ainsi que le paramètre *destemail* par l'email de supervision de votre société.
-
+Pour cela, créer d'abord un fichier */etc/fail2ban/jail.local* avec ce contenu:
 
 [source,bash]
 ---------------
@@ -1523,94 +1520,35 @@ bantime  = 7200      ; 2 hours
 findtime = 3600      ; 1 hour
 maxretry = 5
 
-
-
-[email-dol-blacklist]
-
-; rule against email ko - blacklist ip, email or content
-enabled = true
-port    = http,https
-filter  = email-dolibarr-ruleskoblacklist
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 1
-
-[email-dol-perday]
-
-; rule against out of limit emails (max 500 emails per day)
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesall
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 86400     ; 1 day
-maxretry = 500
-
-[email-dol-perhour]
-
-; rule against intensive email ko - too high number of recipient
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesko
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 7200      ; 2 hour
-findtime = 3600      ; 1 hour
-maxretry = 5
-
-[email-dol-perhouradmin]
-
-; rule against out of limit emails (max 10 from admin)
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesadmin
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 60        ; 1 minute
-maxretry = 10
-
-[web-dol-passforgotten]
-
-; rule against call of passwordforgottenpage
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulespassforgotten
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
-[web-dol-bruteforce]
-
-; rule against bruteforce hacking (login + api)
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulesbruteforce
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 3600      ; 1 hour
-maxretry = 10
-
-[web-dol-registerinstance]
-
-; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enabled to false on non master servers
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulesregisterinstance
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
 ---------------
+
+NOTE: Modifier le fichier pour modifier *mybusinessips* par votre ou vos IPs séparés par des espaces ainsi que le paramètre *destemail* par l'email de supervision de votre société.
+
+
+Puis placer les fichiers de règles fournis avec le projet dans *etc/fail2ban/jail.d* dans le répertoire du même nom */etc/fail2ban/jail.d* en créant un lien:
+
+*For all servers:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
+---------------
+
+*Add also this for Master servers only:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+---------------
+
 
 Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/filter.d* dans le répertoire du même nom */etc/fail2ban/filter.d* en créant un lien:
 

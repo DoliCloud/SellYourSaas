@@ -1472,33 +1472,21 @@ systemctl stop remote-server-launcher.service
 === Installation of fail2ban ===
 
 * Installation of fail2ban and activation of the following fail2ban rules:
+
+We will enable some specific fail2ban rules for sellyoursaas:
+
   *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
-  
-* As well as the specific rules for sellyoursaas:
+
+As well as the specific rules for sellyoursaas:
   
   *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*
   *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
-
-To do this, first create a */etc/fail2ban/jail.local* file with this content:
-
 NOTE: The rules available may vary depending on the version of the OS installed.
 
-NOTE: Remember to also modify *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
 
-NOTE: Fail2ban won't start if any log mentioned in its conf does not exist, you can check that fail2ban is actually running with :
-
-[source, bash]
----------------
-systemctl status fail2ban
----------------
-
-If not, you can create all required logs with :
-[source, bash]
----------------
-grep logpath /etc/fail2ban/jail.local | cut -d= -f2 | grep '^ /'|sort|uniq|xargs touch
----------------
+To do this, first create a */etc/fail2ban/jail.local* file with this content:
 
 
 [source, bash]
@@ -1522,7 +1510,7 @@ grep logpath /etc/fail2ban/jail.local | cut -d= -f2 | grep '^ /'|sort|uniq|xargs
 # "ignoreip" can be an IP address, a CIDR mask or a DNS host. Fail2ban will not
 # ban a host which matches an address in this list. Several addresses can be
 # defined using space separator.
-ignoreip = 127.0.0.1/8 mybusinessips ipofmaster
+ignoreip = 127.0.0.1/8 mybusinessips ip.of.master.server
 
 # "bantime" is the number of seconds that a host is banned.
 bantime  = 3600
@@ -1665,113 +1653,37 @@ bantime  = 7200      ; 2 hours
 findtime = 3600      ; 1 hour
 maxretry = 5
 
-
-
-[email-dol-perday]
-
-; rule against out of limit emails (max 500 emails per day)
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesall
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 86400     ; 1 day
-maxretry = 500
-
-[email-dol-blacklist]
-
-; rule against email ko - blacklist ip, email or content
-enabled = true
-port    = http,https
-filter  = email-dolibarr-ruleskoblacklist
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 1
-
-[email-dol-quota]
-
-; rule against email ko - quota reached
-enabled = true
-port    = http,https
-filter  = email-dolibarr-ruleskoquota
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 86400     ; 1 day
-maxretry = 1
-
-[email-dol-perhour]
-
-; rule against intensive email ko - too high number of recipient
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesko
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 7200      ; 2 hour
-findtime = 3600      ; 1 hour
-maxretry = 5
-
-[email-dol-perhouradmin]
-
-; rule against out of limit emails (max 10 from admin)
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesadmin
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 60        ; 1 minute
-maxretry = 10
-
-[web-dol-passforgotten]
-
-; rule against call of passwordforgottenpage
-; enabled = true for master, false for deployment
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulespassforgotten
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
-[web-dol-bruteforce]
-
-; rule against bruteforce hacking (login + api)
-; enabled = true for master, false for deployment
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulesbruteforce
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 3600      ; 1 hour
-maxretry = 10
-
-[web-dol-registerinstance]
-
-; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enabled to false on non master servers
-; enabled = true for master, false for deployment
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulesregisterinstance
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
 ---------------
 
-For deployment server only, disable into */etc/fail2ban/jail.local* the 3 rules starting with web-dolibarr-* (they must be used on Master server only)
+Then modify the values in this file for *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
 
-Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating a link:
+
+Then place sellyoursaas conf rules supplied with the project in *etc/fail2ban/jail.d* inside the directory of the same name */etc/fail2ban/jail.d* by creating links:
+ 
+*For all servers:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
+---------------
+
+*Add also this for Master servers only:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+---------------
+
+
+Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating links:
 
 [source, bash]
 ---------------
@@ -1786,14 +1698,33 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
 ---------------
 
-Relaunch fail2ban and check errors into */var/log/fail2ban.log*
 
-Note: If you need to have the existing log files re-parsed fully again, you must change a char at begin of file to checksum for recovery point will fails. If it fails, delete file /var/lib/fail2ban/fail2ban.sqlite3
+NOTE: Fail2ban won't start if any log mentioned in its conf does not exist, so you can create log files to be sure this way:
+
+[source, bash]
+---------------
+grep logpath /etc/fail2ban/jail.local | cut -d= -f2 | grep '^ /'|sort|uniq|xargs touch
+---------------
+
+
+
+* Relaunch fail2ban and check errors into */var/log/fail2ban.log*
+
+[source, bash]
+---------------
+/etc/init.d/fail2ban stop
+/etc/init.d/fail2ban start
+systemctl status fail2ban
+fail2ban-client status
+---------------
+
+
+Note: If you need to have the existing log files re-parsed fully again, you must change a char at begin of the file to make the checksum for recovery point fails. If it fails, delete completely the file /var/lib/fail2ban/fail2ban.sqlite3
 
 Note: To test a rule works, append a line into the log file and check the /var/log/fail2ban.log file. For example:
 echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - /user/card.php?id=1 )" >> /var/log/phpsendmail.log
 
-Note: To test rule file on an existing log file:
+Note: To test a rule file on an existing log file:
 fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
 
