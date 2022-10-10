@@ -367,8 +367,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			}
 
 			// Clone
-			if ($user->rights->sellyoursaas->write) {
-				print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=clone&token='.newToken().'&object=order">' . $langs->trans("ToClone") . '</a></div>';
+			if ($permissiontoadd) {
+				print dolGetButtonAction($langs->trans("ToClone"), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.'&socid='.$object->socid.'&action=clone&object=package', 'clone', $permissiontoadd);
 			}
 
 			/*if ($user->rights->sellyoursaas->write)
@@ -383,11 +383,8 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 				}
 			}*/
 
-			if ($user->rights->sellyoursaas->delete) {
-				print '<div class="inline-block divButAction"><a class="butActionDelete" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=delete&amp;token='.newToken().'">'.$langs->trans('Delete').'</a></div>'."\n";
-			} else {
-				print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans('Delete').'</a></div>'."\n";
-			}
+			// Delete
+			print dolGetButtonAction($langs->trans("Delete"), '', 'delete', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delete&token='.newToken(), 'delete', $permissiontodelete);
 		}
 		print '</div>'."\n";
 	}
