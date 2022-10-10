@@ -702,7 +702,7 @@ print "-> Files owner were modified for instance ".$newobject->ref_customer.": "
 */
 
 
-print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
 $command="mysqldump";
 $param=array();
@@ -724,10 +724,10 @@ $param[]="--hex-blob";
 $param[]="--default-character-set=utf8";
 
 $fullcommand = $command." ".join(" ", $param);
-$fullcommandredirectionfile = $tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').'.sql';
+$fullcommandredirectionfile = $tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').'.sql';
 $output = array();
 $return_varmysql = 0;
-print strftime("%Y%m%d-%H%M%S").' '.$fullcommand." > ".$fullcommandredirectionfile."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand." > ".$fullcommandredirectionfile."\n";
 
 $outputfile = $conf->admin->dir_temp.'/out.tmp';
 $resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, $fullcommandredirectionfile);
@@ -735,7 +735,7 @@ $resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, $fullcommandredi
 $return_varmysql = $resultarray['result'];
 $content_grabbed = $resultarray['output'];
 
-print strftime("%Y%m%d-%H%M%S").' mysqldump done (return='.$return_varmysql.')'."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysqldump done (return='.$return_varmysql.')'."\n";
 
 // Output result
 print $content_grabbed."\n";
@@ -757,13 +757,13 @@ $sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newo
 $sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
 
 
-print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
 $fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropa."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropa."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
@@ -777,7 +777,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 $fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropb."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropb."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
@@ -788,12 +788,12 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	print $content_grabbed."\n";
 }
 
-$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
-print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
+$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$output=array();
 	$return_var=0;
-	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);

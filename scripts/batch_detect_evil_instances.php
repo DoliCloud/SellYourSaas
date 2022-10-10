@@ -179,7 +179,7 @@ $langs->load("main");				// To load language file for default language
 //$user->getrights();
 
 
-print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
+print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
 	print "Script to detect evils instances by scanning inside its data for blacklist content.\n";
 	print "Usage on deployment servers: ".$script_file." (test|testemail|remove) [instancefilter]\n";
@@ -607,9 +607,9 @@ if (!empty($tmparrayblacklistdir)) {
 $dbmaster->close();	// Close database opened handler
 
 if ($nboferrors) {
-	print '--- end ERROR nb='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+	print '--- end ERROR nb='.$nboferrors.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 } else {
-	print '--- end OK with no error - '.strftime("%Y%m%d-%H%M%S")."\n";
+	print '--- end OK with no error - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 }
 
 $sendcontext = 'emailing';
@@ -621,7 +621,7 @@ if ($nboferrors) {
 		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
-		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".strftime("%Y%m%d-%H%M%S").")\n\n".$out;
+		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Alert(s) in batch_detect_evil_instances - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";

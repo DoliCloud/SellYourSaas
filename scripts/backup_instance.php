@@ -345,7 +345,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$txtfile = $dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backuprsyncdayfrequency * 24 * 3600) + (12 * 3600);
-	print strftime("%Y%m%d-%H%M%S").' Test date of file '.$txtfile."\n";
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Test date of file '.$txtfile."\n";
 	if (!dol_is_file($txtfile) || $txtfiledate <= $datetriggerrsync || $FORCERSYNC) {	// We add 3600 as security for date comparison
 		// Instance is qualified for rsync backup
 		$command="rsync";
@@ -413,10 +413,10 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		$param[] = $dirroot.'/'.$login;
 		$fullcommand=$command." ".join(" ", $param);
 		$output=array();
-		$datebeforersync = strftime("%Y%m%d-%H%M%S");
+		$datebeforersync = dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt');
 		print $datebeforersync.' '.$fullcommand."\n";
 		exec($fullcommand, $output, $return_var);
-		$dateafterrsync = strftime("%Y%m%d-%H%M%S");
+		$dateafterrsync = dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt');
 		print $dateafterrsync.' rsync done (return='.$return_var.')'."\n";
 
 		// Output result
@@ -432,7 +432,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 				fwrite($handle, 'fullcommand = '.$fullcommand."\n");
 				fclose($handle);
 			} else {
-				print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_rsync_'.$instance.'.txt'."\n";
+				print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Warning: Failed to create file last_rsync_'.$instance.'.txt'."\n";
 			}
 			if ($return_var == 0) {
 				$handle=fopen($dirroot.'/'.$login.'/last_rsync_'.$instance.'.ok.txt', 'w');
@@ -441,12 +441,12 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 					fwrite($handle, 'fullcommand = '.$fullcommand."\n");
 					fclose($handle);
 				} else {
-					print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_rsync_'.$instance.'.ok.txt'."\n";
+					print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Warning: Failed to create file last_rsync_'.$instance.'.ok.txt'."\n";
 				}
 			}
 		}
 	} else {
-		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last rsync was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after the trigger date  ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so rsync is discarded.\n";
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' According to file '.$txtfile.', last rsync was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after the trigger date  ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so rsync is discarded.\n";
 	}
 }
 
@@ -463,12 +463,12 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$txtfile = $dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt';
 	$txtfiledate = dol_filemtime($txtfile);
 	$datetriggerrsync = dol_now('gmt') - ($backupdumpdayfrequency * 24 * 3600) + (12 * 3600);
-	print strftime("%Y%m%d-%H%M%S").' Test date of file '.$txtfile."\n";
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Test date of file '.$txtfile."\n";
 	if (!dol_is_file($txtfile) || $txtfiledate <= ($datetriggerrsync + 3600) || $FORCEDUMP) {	// We add 3600 as security for date comparison
 		// Instance is qualified for dump backup
 		$serverdb = $server;
 		if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
-			print strftime("%Y%m%d-%H%M%S").' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
+			print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
 			$serverdb = $object->hostname_db;
 		}
 
@@ -521,16 +521,16 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 			if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > /dev/null';
 			else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst';
 			// Delete file with same name and other extensions (if other option was enabled in past)
-			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
-			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
+			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.bz2');
+			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.gz');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.bz2');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.gz');
 		} else {
 			if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
 			else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz';
 			// Delete file with same name and other extensions (if other option was enabled in past)
-			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.bz2');
-			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst');
+			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.bz2');
+			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.zst');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.bz2');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.bz2');
@@ -540,10 +540,10 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		// Execute command
 		$output=array();
 		$return_outputmysql=0;
-		$datebeforemysqldump = strftime("%Y%m%d-%H%M%S");
+		$datebeforemysqldump = dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt');
 		print $datebeforemysqldump.' '.$fullcommand."\n";
 		exec($fullcommand, $output, $return_varmysql);
-		$dateaftermysqldump = strftime("%Y%m%d-%H%M%S");
+		$dateaftermysqldump = dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt');
 
 		$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
 		print $outputerr;
@@ -579,11 +579,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 			if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
 				dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.zst');
 				// Delete file with same extensions but using old version name
-				dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.zst');
+				dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.zst');
 			} else {
 				dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.gz');
 				// Delete file with same extensions but using old version name
-				dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.gmstrftime('%d').'.sql.gz');
+				dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.gz');
 			}
 		}
 
@@ -602,7 +602,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 				fwrite($handle, 'fullcommand = '.preg_replace('/\s\-p"[^"]+"/', ' -phidden', $fullcommand)."\n");
 				fclose($handle);
 			} else {
-				print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_mysqldump_'.$instance.'.txt'."\n";
+				print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Warning: Failed to create file last_mysqldump_'.$instance.'.txt'."\n";
 			}
 			if ($return_varmysql == 0) {
 				$handle=fopen($dirroot.'/'.$login.'/last_mysqldump_'.$instance.'.ok.txt', 'w');
@@ -611,12 +611,12 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 					fwrite($handle, 'fullcommand = '.preg_replace('/\s\-p"[^"]+"/', ' -phidden', $fullcommand)."\n");
 					fclose($handle);
 				} else {
-					print strftime("%Y%m%d-%H%M%S").' Warning: Failed to create file last_mysqldump_'.$instance.'.ok.txt'."\n";
+					print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Warning: Failed to create file last_mysqldump_'.$instance.'.ok.txt'."\n";
 				}
 			}
 		}
 	} else {
-		print strftime("%Y%m%d-%H%M%S").' According to file '.$txtfile.', last sql dump was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after the trigger date ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so sql dump is discarded.\n";
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' According to file '.$txtfile.', last sql dump was done the '.dol_print_date($txtfiledate, 'standard', 'gmt') ." GMT so after the trigger date ".dol_print_date($datetriggerrsync, 'standard', 'gmt')." GMT, so sql dump is discarded.\n";
 	}
 }
 

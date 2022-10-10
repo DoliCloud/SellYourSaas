@@ -159,7 +159,7 @@ if ($fp) {
  *	Main
  */
 
-print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
+print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 
 if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
@@ -264,8 +264,6 @@ while ($i < $num_rows) {
 	$now=dol_now();
 
 	// WIP
-
-
 }
 
 

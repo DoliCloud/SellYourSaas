@@ -77,7 +77,7 @@ $langs->load("main");				// To load language file for default language
 //$user->getrights();
 
 
-print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
+print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
 	print 'Redeploy the public keys found into the setup (SELLYOURSAAS_PUBLIC_KEY) to the authorized_keys_support file of all customers on deployment servers.'."\n";
 	print 'Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).'."\n";
@@ -221,7 +221,7 @@ if ($action == 'test' || $action == 'confirm') {
 			$return_val=0; $error=0; $errors=array();	// No error by default into each loop
 
 			// Run backup
-			print "--- Process deploy of public key to instance ".($i+1)." (id ".$key.") ".$instance.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+			print "--- Process deploy of public key to instance ".($i+1)." (id ".$key.") ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 
 			$errors=array();
 
@@ -258,9 +258,9 @@ print "Nb of instances deployment ko: ".$nboferrors;
 print (count($instanceserror)?", error for deploy public key on ".join(',', $instanceserror):"");
 print "\n";
 if (! $nboferrors) {
-	print '--- end ok - '.strftime("%Y%m%d-%H%M%S")."\n";
+	print '--- end ok - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 } else {
-	print '--- end error code='.$nboferrors.' - '.strftime("%Y%m%d-%H%M%S")."\n";
+	print '--- end error code='.$nboferrors.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 }
 
 $db->close();	// Close database opened handler

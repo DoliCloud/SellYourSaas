@@ -82,7 +82,7 @@ if ($key != $conf->global->SELLYOURSAAS_SECURITY_KEY) {
  */
 
 $tmpfile = DOL_DATA_ROOT.'/dolibarr_sellyoursaas_spamreport.log';
-$date = strftime("%Y-%m-%d %H:%M:%S", time());
+$date = dol_print_date(dol_now('gmt'), "%Y-%m-%d %H:%M:%S", 'gmt');
 $body = file_get_contents('php://input');
 
 file_put_contents($tmpfile, "\n***** Spam report received ".$date."*****\n", FILE_APPEND);

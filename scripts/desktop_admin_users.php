@@ -70,8 +70,8 @@ if (! $res) die("Include of master fails");
 //if (! $result > 0) { dol_print_error('',$user->error); exit; }
 //$user->getrights();
 
-
-print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
+$date = new DateTime();
+print "***** ".$script_file." (".$version.") - ".$date->format('Ymd-H:i:s')." *****\n";
 if (! isset($argv[3])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed desktop.\n";

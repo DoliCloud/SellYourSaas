@@ -62,7 +62,7 @@ print '<html>
 <body>';
 
 $tmpfile = '/var/log/sellyoursaas_test.log';
-$date = strftime("%Y-%m-%d %H:%M:%S", time());
+$date = dol_print_date(dol_now('gmt'), "%Y-%m-%d %H:%M:%S", 'gmt');
 
 file_put_contents($tmpfile, "\n***** Test report received ".$date."*****\n", FILE_APPEND);
 file_put_contents($tmpfile, var_export($_SERVER, true), FILE_APPEND);
