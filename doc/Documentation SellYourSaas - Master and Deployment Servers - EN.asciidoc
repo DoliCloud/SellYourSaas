@@ -5292,7 +5292,7 @@ To use a different version of lib for PHP to make ssh2_connect, you can run phpi
 
 [source,bash]
 ---------------
-git clone https://github.com/libssh2/libssh2.git libssh2; ./configure; make; make install
+git clone https://github.com/libssh2/libssh2.git libssh2; cd libssh2; ./configure; make; make install
 git clone https://github.com/php/pecl-networking-ssh2.git php-ssh2; cd php-ssh2; phpize; ./configure --with-ssh2; make; make install; 
 php -i | grep ssh2
 restart
