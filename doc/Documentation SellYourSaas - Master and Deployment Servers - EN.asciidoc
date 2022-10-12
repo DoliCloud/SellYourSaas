@@ -5288,11 +5288,11 @@ ssh -oHostKeyAlgorithms=ssh-rsa admin@ip.of.server
 ssh -oHostKeyAlgorithms=ssh-ed25519 admin@ip.of.server
 
 
-To use a different version of lib for PHP to make ssh2_connect, you can run phpize, Recompile libssh2 and Recompile php-ssh2:
+To use a different version of lib for PHP to make ssh2_connect, you can run Recompile libssh2 and Recompile php-ssh2:
 
 [source,bash]
 ---------------
-git clone https://github.com/libssh2/libssh2.git libssh2; cd libssh2; ./configure; make; make install
+git clone https://github.com/libssh2/libssh2.git libssh2; cd libssh2; ./configure; make; make install;
 git clone https://github.com/php/pecl-networking-ssh2.git php-ssh2; cd php-ssh2; phpize; ./configure --with-ssh2; make; make install; 
 php -i | grep ssh2
 restart
