@@ -26,7 +26,9 @@ if [[ "x$allowed_hosts" == "x" && "x$instanceserver" != "x" && "x$instanceserver
 	exit 4
 fi
 
-port_ssh=`grep '^Port ' /etc/ssh/sshd_config.d/sellyoursaas.conf | cut -d ' ' -f 2`
+if [[ -s /etc/ssh/sshd_config.d/sellyoursaas.conf ]]; then
+	port_ssh=`grep '^Port ' /etc/ssh/sshd_config.d/sellyoursaas.conf | cut -d ' ' -f 2`
+fi
 if [[ "x$port_ssh" == "x" ]]; then
 	export port_ssh=22
 fi
