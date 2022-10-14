@@ -863,6 +863,22 @@ mkdir -p /etc/sellyoursaas.d
 ---------------
 
 
+* Optional: If you want to restrict access to some IP (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
+create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only) 
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas.d/xxx-allowed-ip-zzz.conf
+
+# User 1
+Require ip ip.user.1
+# User 2
+Require ip ip.user.2
+---------------
+
+Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufx.sh* to have the change taken into account on the firewall.
+
+
 === Installing the nfs share
 
 NFS sharing will allow the *Deployment* servers to recover the application images to be installed which are centralized on the
