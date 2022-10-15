@@ -343,6 +343,11 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			}
 		}
 
+		// Replace __INSTANCEDIR__, __INSTALLHOURS__, __INSTALLMINUTES__, __OSUSERNAME__, __APPUNIQUEKEY__, __APPDOMAIN__, ...
+		$substitarray=array(
+			'__INSTANCEDBPREFIX__' => $prefix_db
+		);
+
 		// Get $stringofversion and $stringoflistofmodules
 		$formula = '';
 		$sqltogetpackage = 'SELECT p.version_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
@@ -364,6 +369,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		if (preg_match('/SQL:/', $formula)) {
 			// Define $stringofversion
 			$formula = preg_replace('/SQL:/', '', $formula);
+			$formula = make_substitutions($formula, $substitarray);
 			// 'MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
 			$resqlformula = $newdb->query($formula);
 			if ($resqlformula) {
