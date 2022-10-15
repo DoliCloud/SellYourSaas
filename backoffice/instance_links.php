@@ -374,12 +374,12 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			$resqlformula = $newdb->query($formula);
 
 			if ($resqlformula) {
-				$num = $newdb->db->num_rows($resqlformula);
+				$num = $newdb->num_rows($resqlformula);
 
 				$i=0;
 				while ($i < $num) {
-					$obj = $newdb->db->fetch_object($resql);
-					$stringofversion = ($i > 0 ? ' / ' : '');
+					$obj = $newdb->fetch_object($resql);
+					$stringofversion .= ($i > 0 ? ' / ' : '');
 					if ($obj) {
 						$stringofversion .= $obj->name.'='.$obj->value;
 					} else {
