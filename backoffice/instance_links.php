@@ -379,10 +379,11 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 				$i=0;
 				while ($i < $num) {
 					$obj = $newdb->db->fetch_object($resql);
+					$stringofversion = ($i > 0 ? ' / ' : '');
 					if ($obj) {
-						$stringofversion = ($i > 0 ? ' / ' : '').$obj->name.'='.$obj->value;
+						$stringofversion .= $obj->name.'='.$obj->value;
 					} else {
-						$stringofversion = ($i > 0 ? ' / ' : '').$langs->trans("Unknown");
+						$stringofversion .= $langs->trans("Unknown");
 					}
 					$i++;
 				}
