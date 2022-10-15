@@ -378,7 +378,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 				$i=0;
 				while ($i < $num) {
-					$obj = $newdb->fetch_object($resql);
+					$obj = $newdb->fetch_object($resqlformula);
 					$stringofversion .= ($i > 0 ? ' / ' : '');
 					if ($obj) {
 						$stringofversion .= $obj->name.'='.$obj->value;
