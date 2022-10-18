@@ -423,6 +423,33 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', 'bodyforlist');
 
+
+$param = '';
+$listofipwithinstances=array();
+$sql="SELECT DISTINCT deployment_host FROM ".MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+$resqlistofipwithinstances=$db->query($sql);
+if ($resqlistofipwithinstances) {
+	while ($obj = $db->fetch_object($resqlistofipwithinstances)) {
+		$listofipwithinstances[]=$obj->deployment_host;
+	}
+	$db->free($resqlistofipwithinstances);
+} else dol_print_error($db);
+
+print "\n";
+print "<!-- section of deployment servers -->\n";
+print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+print '<table class="noborder nohover centpercent">';
+print '<tr class="liste_titre">';
+print '<td>'.$langs->trans('DeploymentServers').'</td></tr>';
+print '<tr class="oddeven nohover">';
+print '<td>'.$langs->trans('SellYourSaasSubDomainsIPDeployed').': <strong>'.join(', ', $listofipwithinstances).'</strong></td>';
+print '</tr>';
+
+print '</td>';
+print '</tr>';
+print "</table>";
+print '</div>';
+
 // Example : Adding jquery code
 // print '<script type="text/javascript">
 // jQuery(document).ready(function() {

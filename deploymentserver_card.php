@@ -242,6 +242,18 @@ llxHeader('', $title, $help_url);
 // });
 // </script>';
 
+// Get nb of open instances per ip
+$openinstances = array();
+$sql = "SELECT ce.deployment_host, COUNT(rowid) as nb FROM ".$db->prefix()."contrat_extrafields as ce";
+$sql .= " WHERE deployment_status in ('processing', 'done')";
+$sql .= " AND ce.deployment_host = '".$object->ipaddress."'";
+$resql = $db->query($sql);
+if ($resql) {
+	$obj = $db->fetch_object($resql);
+	$object->nb_instances = (int) $obj->nb;
+} else {
+	dol_print_error($db);
+}
 
 // Part to create
 if ($action == 'create') {
@@ -451,10 +463,18 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	print '<table class="border centpercent tableforfield">'."\n";
 
 	// Common attributes
-	$keyforbreak='servercustomerannouncestatus';	// We change column just before this field
+	$keyforbreak='servercustomerannounce';	// We change column just before this field
 	//unset($object->fields['fk_project']);				// Hide field already shown in banner
 	//unset($object->fields['fk_soc']);					// Hide field already shown in banner
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
+
+	//Add instance count
+	print '<tr><td class="">';
+	print $form->textwithpicto($langs->trans("Instances"), $langs->trans("NbOfOpenInstances"));
+	print '</td>';
+	print '<td>';
+	print dol_escape_htmltag($object->nb_instances);
+	print '</tr></td>';
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';

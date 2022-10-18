@@ -115,13 +115,13 @@ class Deploymentserver extends CommonObject
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
-		'status' => array('type'=>'integer', 'label'=>'Status', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Désactivé', '1'=>'Actif'), 'validate'=>'1',),
+		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
 		'fk_country' => array('type'=>'integer:Ccountry:core/class/ccountry.class.php', 'label'=>'Country', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>5,),
-		'domainname' => array('type'=>'varchar(128)', 'label'=>'Domain', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>1,),
-		'subdomainname' => array('type'=>'varchar(128)', 'label'=>'SubDomainName', 'enabled'=>'1', 'position'=>56, 'notnull'=>0, 'visible'=>1, 'help'=>"SubDomainNameInfo",),
+		'domainname' => array('type'=>'varchar(128)', 'label'=>'SubDomainName', 'enabled'=>'1', 'position'=>50, 'notnull'=>1, 'visible'=>1,),
+		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>56, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo",),
 		'ipaddress' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>51, 'notnull'=>1, 'visible'=>1,),
-		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'position'=>61, 'notnull'=>0, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'D&eacute;sactiv&eacute;', '1'=>'Actif'),),
-		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>1,),
+		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'position'=>63, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'D&eacute;sactiv&eacute;', '1'=>'Actif'),),
+		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo",),
 	);
 	public $rowid;
 	public $note_private;
@@ -130,7 +130,7 @@ class Deploymentserver extends CommonObject
 	public $status;
 	public $fk_country;
 	public $domainname;
-	public $subdomainname;
+	public $fromdomainname;
 	public $ipaddress;
 	public $servercustomerannouncestatus;
 	public $servercustomerannounce;
@@ -810,10 +810,10 @@ class Deploymentserver extends CommonObject
 		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
 			global $langs;
 			//$langs->load("sellyoursaas@sellyoursaas");
-			$this->labelStatus[self::STATUS_ENABLED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatus[self::STATUS_DISABLED] = $langs->transnoentitiesnoconv('Disabled');
-			$this->labelStatusShort[self::STATUS_ENABLED] = $langs->transnoentitiesnoconv('Enabled');
-			$this->labelStatusShort[self::STATUS_DISABLED] = $langs->transnoentitiesnoconv('Disabled');
+			$this->labelStatus[self::STATUS_ENABLED] = $langs->transnoentitiesnoconv('Opened');
+			$this->labelStatus[self::STATUS_DISABLED] = $langs->transnoentitiesnoconv('Closed');
+			$this->labelStatusShort[self::STATUS_ENABLED] = $langs->transnoentitiesnoconv('Opened');
+			$this->labelStatusShort[self::STATUS_DISABLED] = $langs->transnoentitiesnoconv('Closed');
 		}
 
 		$statusType = 'status'.$status;

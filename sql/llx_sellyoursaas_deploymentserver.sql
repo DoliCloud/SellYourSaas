@@ -23,7 +23,7 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	status integer NOT NULL, 
 	fk_country integer, 
 	domainname varchar(128) NOT NULL, 
-	subdomainname varchar(128), 
+	fromdomainname varchar(128), 
 	ipaddress varchar(128) NOT NULL, 
 	servercustomerannouncestatus integer, 
 	servercustomerannounce text
