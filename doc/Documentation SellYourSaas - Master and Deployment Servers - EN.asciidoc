@@ -97,8 +97,8 @@ Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and band
 
 _Example with OVH Public Cloud:_
  
-For the master server: VPS or B2-15 or more
-For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
+For the master server: A 4 GB memory minimum server with 2 CPU minimum.
+For the deployment server(s), for 500 instances: A 8 GB memory minimum server with 4 CPU minimum - Cost in 2020: 30 euros / month.
 
 === Choice a Hostname for the server(s) and set it
 
@@ -2119,7 +2119,10 @@ myorigin = /etc/mailname
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
 recipient_delimiter = +
-inet_interfaces = public.ip.returned.by_server_s_reverse_dns
+# Use this if your hosting make public IP visible locally with ifconfig -a
+#inet_interfaces = public.ip.returned.by_server_s_reverse_dns
+# Use this if your hosting does not make the public IP visible locally with ifconfig -a
+#inet_interfaces = all
 inet_protocols = ipv4
 smtp_generic_maps = hash:/etc/postfix/generic
 
@@ -2221,7 +2224,7 @@ Check that user postfix is in the *sasl* group. If not, add it:
 adduser postfix sasl
 ---------------
 
-Add 'n' to */etc/postfix/master.cf*, to deactivate the smtpd chroot
+Add 'n' to */etc/postf*, to deactivate the smtpd chroot
 
 [source,bash]
 ---------------
@@ -4282,7 +4285,7 @@ Nothing to do.
 
 ==== Other changes to make
 
-- Modify the Postfix configuration files beloew (you can also deactivate Postfix completely or simply send emails to a dummy SMTP server for development purposes)
+- Modify the Postfix configuration files below (you can also deactivate Postfix completely or simply send emails to a dummy SMTP server for development purposes)
   
   */etc/postfix/main.cf*
   */etc/postfix/mydestination*
