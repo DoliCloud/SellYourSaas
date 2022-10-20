@@ -223,9 +223,9 @@ while (!feof($handle)) {
 
 
 	if (!empty($smtpportcalled) && !empty($smtpipcalled)) {
-		$command = "ss --oneline -e -H -p -t state all dport $smtpportcalled dst [$smtpipcalled]";
+		$command = "ss -e -H -p -t state all '( dport = $smtpportcalled ') dst [$smtpipcalled] ";
 		if (!empty($smtpportcaller)) {
-			$command = "ss --oneline -e -H -p -t state all sport $smtpportcaller dport $smtpportcalled dst [$smtpipcalled]";
+			$command = "ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled )' dst [$smtpipcalled]";
 		}
 		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Execute command $command\n", FILE_APPEND);
 
