@@ -3550,15 +3550,11 @@ print '
 	</div>
 
 
-	<!-- Bootstrap core JavaScript
+	<!-- Bootstrap core JavaScript for menu popup
 	================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="dist/js/popper.min.js"></script>
 	<script src="dist/js/bootstrap.min.js"></script>
-	<!--
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
-	-->
 ';
 
 
