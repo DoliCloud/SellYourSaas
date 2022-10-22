@@ -71,9 +71,9 @@ echo "***** Report disk used per instance"
 
 > /tmp/disk_used.tmp
 
-for fic in `ls -A`; do duc info -b -a -d $fic/.duc.db >> /tmp/disk_used.tmp; done
+for fic in `ls -A`; do duc info -b -a -d $fic/.duc.db >>/tmp/disk_used.tmp 2>&1; done
 
-cat /tmp/disk_used.tmp | grep -v "Date" | awk ' { print $5" "$6; } ' | sort -n -r -k 1
+cat /tmp/disk_used.tmp | sed -e 's/Error opening:/YYYY-MM-DD HH:MM:SS 0 0 0/g' | grep -v "Date" | awk ' { if ($6) { print $5" "$6; } } ' | sort -n -r -k 1
 
 echo 
 
