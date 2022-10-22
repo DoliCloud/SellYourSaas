@@ -11,21 +11,20 @@ source /etc/lsb-release
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
-echo
-echo "**** ${0}"
-echo "${0} ${@}"
-echo "# user id --------> $(id -u)"
-echo "# now ------------> $now"
-echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
-echo "# arguments ------> ${@}"
-echo "# path to me -----> ${0}"
-echo "# parent path ----> ${0%/*}"
-echo "# my name --------> ${0##*/}"
-echo "# realname -------> $(realpath ${0})"
-echo "# realname name --> $(basename $(realpath ${0}))"
-echo "# realname dir ---> $(dirname $(realpath ${0}))"
-
+#echo
+#echo "**** ${0}"
+#echo "${0} ${@}"
+#echo "# user id --------> $(id -u)"
+#echo "# now ------------> $now"
+#echo "# PID ------------> ${$}"
+#echo "# PWD ------------> $PWD" 
+#echo "# arguments ------> ${@}"
+#echo "# path to me -----> ${0}"
+#echo "# parent path ----> ${0%/*}"
+#echo "# my name --------> ${0##*/}"
+#echo "# realname -------> $(realpath ${0})"
+#echo "# realname name --> $(basename $(realpath ${0}))"
+#echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))				
@@ -72,9 +71,9 @@ echo "***** Report disk used per instance"
 
 > /tmp/disk_used.tmp
 
-for fic in `ls -A`; do duc info -b -a -d $fic/.duc.db; >> /tmp/disk_used.tmp done
+for fic in `ls -A`; do duc info -b -a -d $fic/.duc.db >> /tmp/disk_used.tmp; done
 
-cat /tmp/disk_used.tmp | grep -v "Date" | awk ' { print $5" "$6; } '
+cat /tmp/disk_used.tmp | grep -v "Date" | awk ' { print $5" "$6; } ' | sort -n -r -k 1
 
 echo 
 
