@@ -67,7 +67,7 @@ cd $targetdir;
 	#exit 6
 #fi
 
-echo "***** Report disk used per instance"
+echo "***** Report disk used per instance (scan home dir duc.db file containing analysis of content into backup dir)"
 
 > /tmp/disk_used.tmp
 

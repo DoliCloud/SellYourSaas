@@ -72,6 +72,15 @@ include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
 
+// Global variables
+$FORCE=0;
+if ($argv[2] == '--force') {
+	unset($argv[2]);
+	$FORCE=1;
+}
+if ($argv[3] == '--force') {
+	$FORCE=1;
+}
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
@@ -141,8 +150,8 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter]\n";
-	print "Usage on deployment servers: ".$script_file." backup... [instancefilter]\n";
+	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter] [--force]\n";
+	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force]\n";
 	print "\n";
 	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
 	print "- updatestatsonly     updates stats only (only table sellyoursaas_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
@@ -372,6 +381,9 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 				$command = ($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
 				if ($action == 'backupdelete') {
 					$command .= ' --delete';
+				}
+				if ($FORCE) {
+					$command .= ' --forcersync --forcedump';
 				}
 				//$command .= " --notransaction";
 				$command .= " --quick";
