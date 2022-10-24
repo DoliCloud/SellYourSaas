@@ -119,7 +119,7 @@ class Deploymentserver extends CommonObject
 		'date_modification' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
 		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
 		'fk_country' => array('type'=>'integer:Ccountry:core/class/ccountry.class.php', 'label'=>'Country', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>5,),
-		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>10, 'visible'=>1, 'help'=>"FromDomainNameInfo",),
+		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo",),
 		'ipaddress' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>51, 'notnull'=>1, 'visible'=>1,),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'position'=>63, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'D&eacute;sactiv&eacute;', '1'=>'Actif'),),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo",),
