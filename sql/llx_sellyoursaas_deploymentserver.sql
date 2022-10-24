@@ -16,16 +16,17 @@
 
 CREATE TABLE llx_sellyoursaas_deploymentserver(
 	-- BEGIN MODULEBUILDER FIELDS
-	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
+	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	ref varchar(128) NOT NULL,
+	entity integer DEFAULT 1 NOT NULL,  -- multi company id
 	note_private text, 
-	date_creation datetime NOT NULL, 
-	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
-	status integer NOT NULL, 
-	fk_country integer, 
-	domainname varchar(128) NOT NULL, 
-	fromdomainname varchar(128), 
-	ipaddress varchar(128) NOT NULL, 
-	servercustomerannouncestatus integer, 
+	date_creation datetime NOT NULL,
+	date_modification timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	status integer NOT NULL,
+	fk_country integer,
+	fromdomainname varchar(128),
+	ipaddress varchar(128) NOT NULL,
+	servercustomerannouncestatus integer,
 	servercustomerannounce text
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
