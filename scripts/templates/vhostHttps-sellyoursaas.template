@@ -20,7 +20,7 @@
         AssignUserID __osUsername__ __osGroupname__
         </IfModule>
 
-		# __ AllowOverride __ is defined into package.
+		# __ AllowOverride __ is defined on package.
 		# __ IncludeFromContract __ is defined on contract. 
 		# For example: "Require ip 1.2.3.4"
 		# or "IncludeOptional /etc/apache2/sellyoursaas-online/__webAppDomain__-directory-options.conf"
