@@ -269,7 +269,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 							$line->date_fin_validite = $object->array_options['options_date_endfreeperiod'];	// deprecated
 
 							$line->update($user);
-							break;	// No need to loop on all, the cosntant CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES should be enabled by module SELLYOURSAAS so that update of all other lines for end date is updating one line.
+							break;	// No need to loop on all, the constant CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES should be enabled by module SELLYOURSAAS
+									// so the line->update() will update also all other lines when we update one line.
 						}
 					}
 				}
