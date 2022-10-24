@@ -874,7 +874,7 @@ class Deploymentserver extends CommonObject
 		// Set here init that are not commonf fields
 		// $this->property1 = ...
 		// $this->property2 = ...
-
+		$this->ipaddress = "Ipaddress";
 		$this->initAsSpecimenCommon();
 	}
 
