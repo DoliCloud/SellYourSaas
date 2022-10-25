@@ -1210,10 +1210,18 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'home';
 			$h++;
 
-			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
-			$head[$h][1] = $langs->trans("DeploymentServers");
-			$head[$h][2] = 'deploymentservers';
-			$h++;
+			if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+				$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
+				$head[$h][1] = $langs->trans("DeploymentServers");
+				$head[$h][2] = 'deploymentservers';
+				$h++;
+			}else {
+				$head[$h][0] = '/custom/sellyoursaas/deploymentserver_list.php';
+				$head[$h][0] = dol_buildpath('/sellyoursaas/deploymentserver_list.php', 1);
+				$head[$h][1] = $langs->trans("DeploymentServers");
+				$head[$h][2] = 'deploymentservers';
+				$h++; 
+			}
 
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php', 1);
 			$head[$h][1] = $langs->trans("AntiSpam");

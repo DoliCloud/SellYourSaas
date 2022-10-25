@@ -77,6 +77,7 @@ if (!$res) {
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 // load sellyoursaas libraries
 require_once __DIR__.'/class/deploymentserver.class.php';
@@ -261,7 +262,7 @@ $now = dol_now();
 
 //$help_url = "EN:Module_Deploymentserver|FR:Module_Deploymentserver_FR|ES:Módulo_Deploymentserver";
 $help_url = '';
-$title = $langs->trans("Deploymentservers");
+$title = $langs->trans("DeploymentServers");
 $morejs = array();
 $morecss = array();
 
@@ -423,6 +424,10 @@ if ($num == 1 && !empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && $
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', 'bodyforlist');
 
+$head = sellYourSaasBackofficePrepareHead();
+
+//$head = commande_prepare_head(null);
+dol_fiche_head($head, 'deploymentservers', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');
 
 $param = '';
 $listofipwithinstances=array();
