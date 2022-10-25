@@ -88,6 +88,7 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';
 dol_include_once('/sellyoursaas/class/packages.class.php');
+dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
@@ -2942,7 +2943,26 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 // Detect local announce
 foreach ($listofcontractidopen as $tmpcontract) {
 	$tmpdomainname = getDomainFromURL($tmpcontract->ref_customer, 2);
-	if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON_'.$tmpdomainname)) {
+	$deploymentserver = new Deploymentserver($db);
+	$deploymentserver->fetch(null, $tmpdomainname);
+	if (!empty($deploymentserver->servercustomerannouncestatus) && !empty($deploymentserver->servercustomerannounce)) {
+		//$datemessage = $db->jdate();
+		print '<div class="note note-warning">';
+		print '<b>'.dol_print_date($deploymentserver->date_modification, 'dayhour').'</b>';
+		if ($tmpdomainname != '_global_') {
+			print ' - '.$langs->trans("Domain").' <b>'.$tmpdomainname.'</b>';
+		}
+		print ' : ';
+		print '<h4 class="block">';
+		$reg=array();
+		if (preg_match('/^\((.*)\)$/', $deploymentserver->servercustomerannounce, $reg)) {
+			print $langs->trans($reg[1]);
+		} else {
+			print $deploymentserver->servercustomerannounce;
+		}
+		print '</h4>';
+		print '</div>';
+	} else if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON_'.$tmpdomainname)) {
 		$showannoucefordomain[$tmpdomainname] = 'SELLYOURSAAS_ANNOUNCE_'.$tmpdomainname;
 	}
 }

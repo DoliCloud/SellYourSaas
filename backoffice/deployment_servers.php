@@ -550,7 +550,6 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 			print '</div>';
 			print '</td>';
 			if ($user->hasRight('sellyoursaas', 'write') || $user->hasRight('sellyoursaas', 'delete')) {
-				// code...
 				print '<td class="minwidth50">';
 				if ($user->hasRight('sellyoursaas', 'write')) {
 					print '<a href="'.$_SERVER["PHP_SELF"].'?action=edit&token='.newToken().'&key='.$key.'">'.img_picto($langs->trans("Edit"), 'edit', 'class="marginleftonly"').'</a>';

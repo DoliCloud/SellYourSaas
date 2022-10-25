@@ -1086,7 +1086,12 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		$tldid=GETPOST('tldid', 'alpha');
 
 		$domainstosuggest = array();   // This is list of all sub domains to show into combo list. Can be: with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
-		$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+		if (!empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'))) {
+			$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+		}else {
+			$staticdeploymentserver = new Deploymentserver($db);
+			$listofdomain = $staticdeploymentserver->fetchAllDomains();
+		}	
 		foreach ($listofdomain as $val) {
 			$newval=$val;
 			$reg = array();

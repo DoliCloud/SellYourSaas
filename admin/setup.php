@@ -47,6 +47,7 @@ require_once DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formticket.class.php";
 require_once DOL_DOCUMENT_ROOT."/categories/class/categorie.class.php";
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 
 // Access control
 if (! $user->admin) accessforbidden();
@@ -63,7 +64,12 @@ $langs->loadLangs(array("admin", "errors", "install", "sellyoursaas@sellyoursaas
 $hookmanager->initHooks(array('sellyoursaas-setup'));
 
 $tmpservices=array();
-$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+$staticdeploymentserver = new Deploymentserver($db);
+if (!empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'))) {
+	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+}else {
+	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
+}
 foreach ($tmpservicessub as $key => $tmpservicesub) {
 	$tmpservicesub = preg_replace('/:.*$/', '', $tmpservicesub);
 	if ($key > 0) $tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
@@ -181,7 +187,6 @@ if ($action == 'removelogoblack') {
 }
 
 if ($action == 'importdeployementconsttoobj') {
-	dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 	$$errors = 0;
 	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 	$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
@@ -190,7 +195,7 @@ if ($action == 'importdeployementconsttoobj') {
 		$tmparraydomain = explode(':', $listofdomains[$key]);
 		$newobj = new Deploymentserver($db);
 
-		$newobj->domainname = $db->escape($tmparraydomain[0]);
+		$newobj->ref = $db->escape($tmparraydomain[0]);
 		$newobj->ipaddress = $db->escape($value);
 
 		if (! empty($tmparraydomain[1])) {
@@ -219,6 +224,8 @@ if ($action == 'importdeployementconsttoobj') {
 
 	if (!$errors) {
 		setEventMessages($langs->trans("RecordsImported", $nbrecords), null, 'mesgs');
+		dolibarr_del_const($db, "SELLYOURSAAS_MAIN_DOMAIN_NAME", $conf->entity);
+		dolibarr_del_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $conf->entity);
 	}
 }
 

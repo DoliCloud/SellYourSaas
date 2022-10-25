@@ -555,9 +555,14 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						<?php
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 						$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-
 						$domainstosuggest = array();
-						$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);   // This is list of all sub domains to show into combo list
+						if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+							$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);   // This is list of all sub domains to show into combo list
+						}else {
+							dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
+							$staticdeploymentserver = new Deploymentserver($db);
+							$listofdomain = $staticdeploymentserver->fetchAllDomains();
+						}
 						foreach ($listofdomain as $val) {
 							$newval = $val;
 							$reg = array();

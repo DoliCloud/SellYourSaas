@@ -453,6 +453,8 @@ class Deploymentserver extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		$now = dol_now();
+		$this->date_modification = $this->db->idate($now);
 		return $this->updateCommon($user, $notrigger);
 	}
 
@@ -1035,7 +1037,7 @@ class Deploymentserver extends CommonObject
 	 * @param  string      $filtermode   Filter mode (AND or OR)
 	 * @return array                	 array of domainnames
 	 */
-	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, $filter, $filtermode = 'AND')
+	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array() , $filtermode = 'AND')
 	{
 		$reflist = array();
 		$objectlist = $this->fetchAll($sortorder, $sortfield, $limit, $offset, $filter, $filtermode);

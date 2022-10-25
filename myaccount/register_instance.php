@@ -88,6 +88,7 @@ require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/packages.class.php');
+dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 dol_include_once('/sellyoursaas/class/blacklistip.class.php');
 dol_include_once('/sellyoursaas/class/whitelistip.class.php');
@@ -1072,7 +1073,6 @@ if ($reusecontractid) {
 		$tmp=explode('.', $contract->ref_customer, 2);
 		$sldAndSubdomain=$tmp[0];
 		$domainname=$tmp[1];
-
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 		$onlyifopen = 1;
 		if (GETPOST('forcesubdomain')) {
@@ -1085,9 +1085,12 @@ if ($reusecontractid) {
 			dol_print_error_email('BADDOMAIN', 'Trying to deploy on a not valid domain '.$domainname.' (not exists or closed).', null, 'alert alert-error');
 			exit(-94);
 		}
+		$deploymentserver = new Deploymentserver($db);
+		$deploymentserver->fetch(null, $domainname);
 
 		$contract->array_options['options_plan'] = $productref;
 		$contract->array_options['options_deployment_status'] = 'processing';
+		$contract->array_options['options_deployment_server'] = $deploymentserver->id;
 		$contract->array_options['options_deployment_date_start'] = $now;
 		$contract->array_options['options_deployment_init_email'] = $email;
 		$contract->array_options['options_deployment_init_adminpass'] = $password;
