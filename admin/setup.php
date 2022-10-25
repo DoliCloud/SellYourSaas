@@ -224,8 +224,8 @@ if ($action == 'importdeployementconsttoobj') {
 
 	if (!$errors) {
 		setEventMessages($langs->trans("RecordsImported", $nbrecords), null, 'mesgs');
-		dolibarr_del_const($db, "SELLYOURSAAS_MAIN_DOMAIN_NAME", $conf->entity);
 		dolibarr_del_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $conf->entity);
+		dolibarr_del_const($db, "SELLYOURSAAS_SUB_DOMAIN_IP", $conf->entity);
 	}
 }
 
@@ -256,7 +256,7 @@ if (in_array('exec', $arrayoffunctionsdisabled)) {
 	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
 }
 print "<br>\n";
-if (getDolGlobalString("SELLYOURSAAS_SUB_DOMAIN_IP")) {
+if (!empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES')) || !empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'))) {
 	print '</b> <a href="'.$_SERVER["PHP_SELF"].'?action=importdeployementconsttoobj"><button>Function <b>to switch deployment instance to object mode</button></a><br>';
 	print "<br>\n";
 }
@@ -298,19 +298,21 @@ print '</td>';
 print '<td><span class="opacitymedium small">mysaasdomainname.com</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td class="fieldrequired">'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
-print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES').'" class="minwidth300">';
-print '</td>';
-print '<td><span class="opacitymedium small">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
-print '</tr>';
+if (!empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES')) || !empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'))) {
+	print '<tr class="oddeven"><td class="fieldrequired">'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
+	print '<td>';
+	print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES').'" class="minwidth300">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
+	print '</tr>';
 
-print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
-print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_IP" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP').'" class="minwidth300">';
-print '</td>';
-print '<td><span class="opacitymedium small">192.168.0.1,123.456.789.012...</span></td>';
-print '</tr>';
+	print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
+	print '<td>';
+	print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_IP" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP').'" class="minwidth300">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">192.168.0.1,123.456.789.012...</span></td>';
+	print '</tr>';
+}
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainEmail").'</td>';
 print '<td>';

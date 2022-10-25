@@ -39,7 +39,7 @@ function sellYourSaasBackofficePrepareHead()
 	$head[$h][2] = 'home';
 	$h++;
 
-	if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+	if (!empty(getDolGlobalString("SELLYOURSAAS_SUB_DOMAIN_NAMES")) || !empty(getDolGlobalString("SELLYOURSAAS_SUB_DOMAIN_IP"))) {
 		$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
 		$head[$h][1] = $langs->trans("DeploymentServers");
 		$head[$h][2] = 'deploymentservers';
