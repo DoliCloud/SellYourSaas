@@ -186,48 +186,6 @@ if ($action == 'removelogoblack') {
 	dolibarr_del_const($db, $constname, $conf->entity);
 }
 
-if ($action == 'importdeployementconsttoobj') {
-	$$errors = 0;
-	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-	$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
-	$nbrecords = 0;
-	foreach ($listofips as $key => $value) {
-		$tmparraydomain = explode(':', $listofdomains[$key]);
-		$newobj = new Deploymentserver($db);
-
-		$newobj->ref = $db->escape($tmparraydomain[0]);
-		$newobj->ipaddress = $db->escape($value);
-
-		if (! empty($tmparraydomain[1])) {
-			if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
-				$newobj->status = $newobj::STATUS_DISABLED;	
-			} else {
-				if (! empty($tmparraydomain[2])) {
-					$newobj->status = $newobj::STATUS_DISABLED;	
-				}else {
-					$newobj->status = $newobj::STATUS_ENABLED;
-				}
-				$newobj->fromdomainname = $db->escape($tmparraydomain[1]);
-			}
-		} else {
-			$newobj->status = $newobj::STATUS_ENABLED;
-		}
-
-		$res = $newobj->create($user);
-		if ($res <= 0) {
-			setEventMessages($newobj->error, $newobj->errors, "errors");
-			$errors++;
-			break;
-		}
-		$nbrecords++;
-	}
-
-	if (!$errors) {
-		setEventMessages($langs->trans("RecordsImported", $nbrecords), null, 'mesgs');
-		dolibarr_del_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $conf->entity);
-		dolibarr_del_const($db, "SELLYOURSAAS_SUB_DOMAIN_IP", $conf->entity);
-	}
-}
 
 /*
  * View
@@ -256,10 +214,6 @@ if (in_array('exec', $arrayoffunctionsdisabled)) {
 	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
 }
 print "<br>\n";
-if (!empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES')) || !empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'))) {
-	print '</b> <a href="'.$_SERVER["PHP_SELF"].'?action=importdeployementconsttoobj"><button>Function <b>to switch deployment instance to object mode</button></a><br>';
-	print "<br>\n";
-}
 
 $error=0;
 
