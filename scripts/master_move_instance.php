@@ -772,6 +772,12 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	$content_grabbed = $resultarray['output'];
 
 	print $content_grabbed."\n";
+	// If table already not exist, return_var is 1
+	// If technical error, return_var is also 1, so we disable this test
+	/*if ($return_var) {
+		print "Error on droping table into the new instance\n";
+		exit(-2);
+	}*/
 }
 
 $fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
@@ -786,6 +792,12 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	$content_grabbed = $resultarray['output'];
 
 	print $content_grabbed."\n";
+	// If table already not exist, return_var is 1
+	// If technical error, return_var is also 1, so we disable this test
+	/*if ($return_var) {
+		print "Error on droping table into the new instance\n";
+		exit(-2);
+	}*/
 }
 
 $fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;

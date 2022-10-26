@@ -2381,7 +2381,7 @@ FLUSH PRIVILEGES;
 
 On *all servers*:
 
-In order not to allow brute force cracking, if it is not already the case, put the user *root* of the database in authentication from the system root account only (using *auth_socket* or *unix_socket*):
+In order to disallow brute force cracking, if it is not already the case, put the user *root* of the database in authentication from the system root account only (using *auth_socket* or *unix_socket*):
 
 For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
 
@@ -2426,6 +2426,11 @@ Note: To show specific parameters that are not the default values, you can launc
 mysqld --print-defaults
 ---------------
 
+To see the default value
+[source,bash]
+---------------
+SHOW VARIABLES LIKE 'default_authentication_plugin';
+---------------
 
 Note: To delete active plugins, empty the mysql *plugin* table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
 
