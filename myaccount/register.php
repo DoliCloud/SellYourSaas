@@ -56,7 +56,7 @@ require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 dol_include_once('/sellyoursaas/class/packages.class.php');
 
 // Re set variables specific to new environment
-$conf->global->SYSLOG_FILE_ONEPERSESSION='sellyoursaas';
+$conf->global->SYSLOG_FILE_ONEPERSESSION='register';
 
 
 //$langs=new Translate('', $conf);
