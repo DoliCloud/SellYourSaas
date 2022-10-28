@@ -56,7 +56,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 if (! empty($conf->ldap->enabled)) require_once DOL_DOCUMENT_ROOT.'/core/class/ldap.class.php';
 
 // Re set variables specific to new environment
-$conf->global->SYSLOG_FILE_ONEPERSESSION='sellyoursaas';
+// We keep log of this page in main dolibarr.log so fail2ban for passwordforgotten will work for both pass in backoffice and myaccount.
+//$conf->global->SYSLOG_FILE_ONEPERSESSION='sellyoursaas';
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');

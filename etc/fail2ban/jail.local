@@ -222,7 +222,7 @@ maxretry = 10
 
 [web-dol-passforgotten]
 
-; rule against call of passwordforgottenpage
+; rule against call of passwordforgottenpage (for backoffice and myaccount)
 ; disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
@@ -253,7 +253,7 @@ maxretry = 10
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesregisterinstance
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_sellyoursaas.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
