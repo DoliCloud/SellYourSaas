@@ -93,7 +93,7 @@ dol_include_once('/sellyoursaas/class/blacklistip.class.php');
 dol_include_once('/sellyoursaas/class/whitelistip.class.php');
 
 // Re set variables specific to new environment
-$conf->global->SYSLOG_FILE_ONEPERSESSION=1;
+$conf->global->SYSLOG_FILE_ONEPERSESSION='sellyoursaas';
 
 
 //$langs=new Translate('', $conf);
