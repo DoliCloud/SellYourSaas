@@ -3,7 +3,7 @@
 
 ## 1.3
 
- * NEW Add script dis_used_per_instance.sh
+ * NEW Add script disk_used_per_instance.sh
  * NEW Can send an email on sellyoursaas job error (need dolibarr 17+) 
  * NEW Can add a server and remove it from the Deployment tab. Need write permission of sellyoursaas. No more need for admin status.  
  * NEW Retreiving version of a deployed instance uses the SQL definition found into package instead of hardcoded SQL.
