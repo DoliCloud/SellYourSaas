@@ -30,6 +30,13 @@ if [[ "x$allowed_hosts" == "x" && "x$instanceserver" != "x" && "x$instanceserver
 	exit 4
 fi
 
+ipserverdeployment=`grep '^ipserverdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$ipserverdeployment" == "x" && "x$instanceserver" != "x" && "x$instanceserver" != "x0" ]]; then
+	echo Parameter ipserverdeployment not found or empty. This is not possible when the server is an instanceserver.
+	exit 4
+fi
+
+
 if [[ -s /etc/ssh/sshd_config.d/sellyoursaas.conf ]]; then
 	port_ssh=`grep '^Port ' /etc/ssh/sshd_config.d/sellyoursaas.conf | cut -d ' ' -f 2`
 fi
@@ -124,6 +131,10 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 			ufw allow from $line to any port $port_ssh proto tcp
 		done
 	done
+	
+	# Allow SSH to myself (for example this is required with Scaleway)
+	echo Allow SSH to the restricted ip $ipserverdeployment
+	ufw allow from $ipserverdeployment to any port $port_ssh proto tcp
 fi
 
 if [[ "x$atleastoneipfound" == "x1" ]]; then
@@ -134,7 +145,7 @@ else
 	ufw allow in $port_ssh/tcp
 fi
 
-# MYSQL
+# MySQL
 export atleastoneipfound=0
 
 if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
@@ -162,11 +173,15 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 		echo Process file $fic
 		for line in `grep -v '^#' "$fic" | sed 's/\s*Require ip\s*//i' | grep '.*[\.:].*[\.:].*[\.:].*'`
 		do
-			# Allow Mysql to the restricted ip $line
-			echo Allow Mysql to the restricted ip $line
+			# Allow MySQL to the restricted ip $line
+			echo Allow MySQL to the restricted ip $line
 			ufw allow from $line to any port 3306 proto tcp
 		done
 	done
+	
+	# Allow MySQL to myself (for example this is required with Scaleway)
+	echo Allow MySQL to the restricted ip $ipserverdeployment
+	ufw allow from $ipserverdeployment to any port 3306 proto tcp
 fi
 
 if [[ "x$atleastoneipfound" == "x1" ]]; then
@@ -195,7 +210,7 @@ ufw allow in 953/udp
 
 # To see master NFS server
 if [[ "x$masterserver" != "x0" ]]; then
-	echo Enable NFS entry from instance servers
+	echo Enable NFS entry to allow access to master from instance servers
 	ufw allow in 111/tcp
 	ufw allow in 111/udp
 	ufw allow in 2049/tcp
