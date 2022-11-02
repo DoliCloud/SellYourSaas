@@ -233,8 +233,9 @@ if [[ "$mode" == "upgrade" ]];then
 	fi
 	if [ -d "$dirforexampleforsources" ]
 	then
-		echo "cp $dirforexampleforsources/* $instancedir/"
-		cp -r $dirforexampleforsources/* $instancedir/
+		echo "rsync -v -r $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
+		rsync -v -r $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom
+		#cp -r $dirforexampleforsources/* $instancedir/
 
 		if [ $? -eq 0 ]
 		then
