@@ -110,7 +110,7 @@ if (! empty($oldinstance) && ! preg_match('/\.on\.dolicloud\.com$/', $oldinstanc
 }
 // Forge complete name of instance
 if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance)) {
-	if (!empty(getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'))) {
+	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 	}else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
