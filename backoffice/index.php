@@ -280,7 +280,6 @@ print '</tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("NewInstances");
 print '</td><td align="right">';
-$totalnewinstances = '12.123456789';
 print '<font size="+2">'.$newinstances.' | <span class="amount">'.price($totalnewinstances, 1, $langs, 1, -1, 'MT', $conf->currency).'</span><span class="opacitymedium">'.($newinstances ? ' | '.price(price2num($totalnewinstances/$newinstances, 'MT'), 1, $langs, 1, -1, -1, $conf->currency).' / '.$langs->trans("instances") : '').'</span></font>';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
