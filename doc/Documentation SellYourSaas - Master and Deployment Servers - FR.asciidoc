@@ -62,7 +62,7 @@ Financé par les sociétés Open Source https://www.dolicloud.com[DoliCloud] et 
     * ... 
      
 
-Le projet est disponible de manière communautaire depuis 2020 sur GitHub: https://github.com/eldy/sellyoursaas
+Le projet est disponible de manière communautaire depuis 2020 sur GitHub: https://github.com/dolicloud/sellyoursaas
 
 Il est composé:
 
@@ -636,7 +636,7 @@ apt install git
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
@@ -645,7 +645,7 @@ chown -R admin.admin /home/admin/wwwroot/dolibarr
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 
@@ -984,7 +984,7 @@ a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
 a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias 
 a2enmod mpm_itk mpm_prefork
-a2enmod php7.0|php7.2|php7.4
+a2enmod php7.0|php7.2|php7.4|php8.1
 ---------------
 
 
@@ -1884,8 +1884,8 @@ et l'email à utiliser qui est officiellement valide.
 
 [source,bash]
 ---------------
-root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
+root@myshortservername.mysaasdomainname.com		noreply@mysaasdomainname.com
+admin@myshortservername.mysaasdomainname.com	noreply@mysaasdomainname.com
 ---------------
 
 Compiler le fichier par:
@@ -1899,7 +1899,7 @@ echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
-Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomain.com*:
+Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomainname.com*:
 
 [source,bash]
 ---------------
@@ -3163,12 +3163,24 @@ Sur les *Serveurs de déploiement*:
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 
-Créer les liens de 2 outils de préprocessing PHP
+Pour les *Versions de PHP inférieures à 8.1* :
+
+Créer les liens symboliques de 2 outils de pré-processing PHP
 
 [source,bash]
 ---------------
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
+---------------
+
+Pour les *Versions de PHP supérieures ou égales à 8.1* :
+
+Créer les liens physiques de 2 outils de pré-processing PHP
+
+[source,bash]
+---------------
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
 Modifier le fichier *php.ini* (celui de *apache* et celui de *cli*) avec:
@@ -3664,8 +3676,8 @@ Sur le *Serveur Master*:
 
 [source,ini]
 ---------------
-a2ensite admin.mysaasdomain.com
-a2ensite myaccount.mysaasdomain.com
+a2ensite admin.mysaasdomainname.com
+a2ensite myaccount.mysaasdomainname.com
 /etc/init.d/apache2 restart
 ---------------
 
@@ -3706,9 +3718,11 @@ $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
 
 * Installer la base de données de MaxMind:
 
-mkdir /home/admin/tools/maxmind/
+mkdir /home/admin/tools/maxmind/ -p
 
 Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
+
+(ou wget https://cdn.jsdelivr.net/npm/geolite2-country@1.0.2/GeoLite2-Country.mmdb.gz)
 
 chmod -R o-w /home/admin/tools/maxmind
 
@@ -4294,7 +4308,7 @@ Pour mettre à jour Ubuntu 16.04 vers 18.04 sur un serveur SellYourSaas:
 apt dist-upgrade
 
 apt install php-mysql
-a2enmode php7.2
+a2enmod php7.2
 apt remove php-fpm php7-fpm
 ---------------
 

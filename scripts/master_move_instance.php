@@ -200,7 +200,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server.\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
 	print "Mode is test for a test mode.\n";
 	print "        confirm for real mode.\n";
 	print "        confirmredirect for real mode and set old instance as a redirect instance.\n";

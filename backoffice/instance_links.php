@@ -343,6 +343,11 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			}
 		}
 
+		// Replace __INSTANCEDBPREFIX__
+		$substitarray=array(
+			'__INSTANCEDBPREFIX__' => $prefix_db
+		);
+
 		// Get $stringofversion and $stringoflistofmodules
 		$formula = '';
 		$sqltogetpackage = 'SELECT p.version_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
@@ -364,14 +369,23 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		if (preg_match('/SQL:/', $formula)) {
 			// Define $stringofversion
 			$formula = preg_replace('/SQL:/', '', $formula);
+			$formula = make_substitutions($formula, $substitarray);
 			// 'MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
 			$resqlformula = $newdb->query($formula);
+
 			if ($resqlformula) {
-				$obj = $newdb->fetch_object($resqlformula);
-				if ($obj) {
-					$stringofversion = $obj->name.'='.$obj->value;
-				} else {
-					$stringofversion = $langs->trans("Unknown");
+				$num = $newdb->num_rows($resqlformula);
+
+				$i=0;
+				while ($i < $num) {
+					$obj = $newdb->fetch_object($resqlformula);
+					$stringofversion .= ($i > 0 ? ' / ' : '');
+					if ($obj) {
+						$stringofversion .= $obj->name.'='.$obj->value;
+					} else {
+						$stringofversion .= $langs->trans("Unknown");
+					}
+					$i++;
 				}
 			} else {
 				dol_print_error($newdb);
