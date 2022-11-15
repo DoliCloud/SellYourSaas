@@ -2718,7 +2718,7 @@ For this run:
 
 [source,bash]
 ---------------
-a2enmode apparmor
+a2enmod apparmor
 /etc/init.d/apache2 restart;
 ---------------
 
@@ -4433,12 +4433,12 @@ apt dist-upgrade
 
 # if you move from 16.04 to 18.04, you must also run
 apt install php-mysql
-a2enmode php7.2
+a2enmod php7.2
 apt remove php-fpm php7-fpm
 
 # if you move from 18.04 to 20.04, you must also run
 apt install php-mysql
-a2enmode php7.4
+a2enmod php7.4
 apt remove php-fpm php7-fpm
 ---------------
 
