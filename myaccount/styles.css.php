@@ -416,6 +416,9 @@ border-radius: 0 4px 4px 0;
 	box-shadow: 0px 0px 10px #ccc;
 }
 
+.whitespacenowrap {
+	white-space : normal !important;
+}
 
 .grid-wrapper-automigration {
 	display : grid;
