@@ -691,12 +691,12 @@ On all servers (*Master and Deployment*):
 apt install git
 ---------------
 
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v14 or +) to be placed in */home/admin/wwwroot/dolibarr*
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v16 or +) to be placed in */home/admin/wwwroot/dolibarr*
 
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr --branch 15.0
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
