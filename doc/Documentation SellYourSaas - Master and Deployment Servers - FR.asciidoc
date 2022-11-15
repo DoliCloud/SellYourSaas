@@ -62,7 +62,7 @@ Financé par les sociétés Open Source https://www.dolicloud.com[DoliCloud] et 
     * ... 
      
 
-Le projet est disponible de manière communautaire depuis 2020 sur GitHub: https://github.com/eldy/sellyoursaas
+Le projet est disponible de manière communautaire depuis 2020 sur GitHub: https://github.com/dolicloud/sellyoursaas
 
 Il est composé:
 
@@ -636,7 +636,7 @@ apt install git
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
@@ -645,7 +645,7 @@ chown -R admin.admin /home/admin/wwwroot/dolibarr
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 

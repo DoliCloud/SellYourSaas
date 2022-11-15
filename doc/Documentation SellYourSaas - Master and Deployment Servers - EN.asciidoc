@@ -63,7 +63,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * ...
      
 
-The project has been available as a community project since 2020 on GitHub: https://github.com/eldy/sellyoursaas
+The project has been available as a community project since 2020 on GitHub: https://github.com/dolicloud/sellyoursaas
 
 It is composed:
 
@@ -691,12 +691,12 @@ On all servers (*Master and Deployment*):
 apt install git
 ---------------
 
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v14 or +) to be placed in */home/admin/wwwroot/dolibarr*
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v16 or +) to be placed in */home/admin/wwwroot/dolibarr*
 
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
@@ -705,7 +705,7 @@ chown -R admin.admin /home/admin/wwwroot/dolibarr
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas 
 ---------------
 
 
