@@ -57,10 +57,10 @@ chmod g+ws /home/admin/wwwroot/dolibarr_documents/
 chown admin.www-data /home/admin/wwwroot/dolibarr_documents
 for fic in `ls /home/admin/wwwroot/dolibarr_documents | grep -v sellyoursaas`; 
 do 
-	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/$fic
-	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/$fic
-	find /home/admin/wwwroot/dolibarr_documents/$fic -type d -exec chmod u+wx {} \;
-	find /home/admin/wwwroot/dolibarr_documents/$fic -type d -exec chmod g+ws {} \;
+	chown -R admin.www-data "/home/admin/wwwroot/dolibarr_documents/$fic"
+	chmod -R ug+rw "/home/admin/wwwroot/dolibarr_documents/$fic"
+	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod u+wx {} \;
+	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod g+ws {} \;
 done
 if [ -d /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf ]; then
 	chown www-data.www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
