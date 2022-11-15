@@ -636,7 +636,7 @@ apt install git
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr --branch 15.0
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
