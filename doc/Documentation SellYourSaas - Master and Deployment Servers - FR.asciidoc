@@ -984,7 +984,7 @@ a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
 a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias 
 a2enmod mpm_itk mpm_prefork
-a2enmod php7.0|php7.2|php7.4
+a2enmod php7.0|php7.2|php7.4|php8.1
 ---------------
 
 
@@ -3163,12 +3163,24 @@ Sur les *Serveurs de déploiement*:
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 
-Créer les liens de 2 outils de préprocessing PHP
+Pour les *Versions de PHP inférieures à 8.1* :
+
+Créer les liens symboliques de 2 outils de pré-processing PHP
 
 [source,bash]
 ---------------
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
+---------------
+
+Pour les *Versions de PHP supérieures ou égales à 8.1* :
+
+Créer les liens physiques de 2 outils de pré-processing PHP
+
+[source,bash]
+---------------
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
 Modifier le fichier *php.ini* (celui de *apache* et celui de *cli*) avec:
