@@ -1884,8 +1884,8 @@ et l'email à utiliser qui est officiellement valide.
 
 [source,bash]
 ---------------
-root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
+root@myshortservername.mysaasdomainname.com		noreply@mysaasdomainname.com
+admin@myshortservername.mysaasdomainname.com	noreply@mysaasdomainname.com
 ---------------
 
 Compiler le fichier par:
@@ -1899,7 +1899,7 @@ echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
-Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomain.com*:
+Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomainname.com*:
 
 [source,bash]
 ---------------
@@ -3676,8 +3676,8 @@ Sur le *Serveur Master*:
 
 [source,ini]
 ---------------
-a2ensite admin.mysaasdomain.com
-a2ensite myaccount.mysaasdomain.com
+a2ensite admin.mysaasdomainname.com
+a2ensite myaccount.mysaasdomainname.com
 /etc/init.d/apache2 restart
 ---------------
 
@@ -3718,9 +3718,11 @@ $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
 
 * Installer la base de données de MaxMind:
 
-mkdir /home/admin/tools/maxmind/
+mkdir /home/admin/tools/maxmind/ -p
 
 Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
+
+(ou wget https://cdn.jsdelivr.net/npm/geolite2-country@1.0.2/GeoLite2-Country.mmdb.gz)
 
 chmod -R o-w /home/admin/tools/maxmind
 
