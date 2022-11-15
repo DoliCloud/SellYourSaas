@@ -94,13 +94,17 @@ chown -R admin.admin /home/admin/wwwroot/dolibarr
 chmod -R a-w /home/admin/wwwroot/dolibarr
 chmod -R u+w /home/admin/wwwroot/dolibarr/.git
 
-echo Set owner and permission on /home/admin/wwwroot/dolibarr_nltechno
-chmod -R a-w /home/admin/wwwroot/dolibarr_nltechno 2>/dev/null
-chmod -R u+w /home/admin/wwwroot/dolibarr_nltechno/.git 2>/dev/null
+if [ -d /home/admin/wwwroot/dolibarr_nltechno ]; then
+	echo Set owner and permission on /home/admin/wwwroot/dolibarr_nltechno
+	chmod -R a-w /home/admin/wwwroot/dolibarr_nltechno 2>/dev/null
+	chmod -R u+w /home/admin/wwwroot/dolibarr_nltechno/.git 2>/dev/null
+fi
 
-echo Set owner and permission on /home/admin/wwwroot/dolibarr_sellyoursaas
-chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas
-chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git
+if [ -d /home/admin/wwwroot/dolibarr_sellyoursaas ]; then
+	echo Set owner and permission on /home/admin/wwwroot/dolibarr_sellyoursaas
+	chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas 2>/dev/null
+	chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git 2>/dev/null
+fi
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
@@ -116,7 +120,7 @@ do
 	chmod o-rwx /etc/apache2/$fic
 done
 
-if [[ "x$instanceserver" != "x0" ]]; then
+if [[ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]]; then
 	IFS=$(echo -en "\n\b")
 	echo We are on a deployment server, so we clean log files 
 	echo "Clean web server _error logs"
