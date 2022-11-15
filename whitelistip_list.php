@@ -707,7 +707,7 @@ while ($i < $imaxinloop) {
 				} elseif ($key == 'rowid') {
 					print $object->showOutputField($val, $key, $object->id, '');
 				} elseif ($key == 'content') {
-					$s = dol_print_ip($object->content, 0);
+					$s = dol_print_ip($object->content, 1);
 					print ($s ? $s : $object->content);
 				} else {
 					print $object->showOutputField($val, $key, $object->$key, '');
