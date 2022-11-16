@@ -650,6 +650,8 @@ dol_delete_file('/tmp/batch_detect_evil_instance.tmp');
 
 print "----- Loop for test instance not matching the file signature - in trial instances\n";
 foreach ($instancestrial as $instanceid => $instancearray) {
+	$error = 0;		// error for this instance
+
 	if ($datefilter && $instancearray['deployment_date_start'] < (dol_now() - $datefilter)) {
 		print 'Discard '.$instancearray['instance']." - too old (< now - ".$datefilter.")\n";
 		continue;
