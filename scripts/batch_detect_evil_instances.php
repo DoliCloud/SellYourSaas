@@ -67,8 +67,8 @@ if (! $res) {
 // $user is created but empty.
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
-include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
 include_once dol_buildpath("/sellyoursaas/class/blacklistip.class.php");
 include_once dol_buildpath("/sellyoursaas/class/blacklistfrom.class.php");
 include_once dol_buildpath("/sellyoursaas/class/blacklistto.class.php");
@@ -164,10 +164,9 @@ if ($dbmaster->error) {
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
-if (empty($db)) $db=$dbmaster;
-
-// Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+if (empty($db)) {
+	$db=$dbmaster;
+}
 
 //$langs->setDefaultLang('en_US'); 	// To change default language of $langs
 $langs->load("main");				// To load language file for default language
@@ -180,13 +179,19 @@ $langs->load("main");				// To load language file for default language
 
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+
+if (0 != posix_getuid()) {
+	echo "Script must be ran with root.\n";
+	exit(-1);
+}
+
 if (! isset($argv[1])) {	// Check parameters
 	print "Script to detect evils instances by scanning inside its data for blacklist content.\n";
 	print "Usage on deployment servers: ".$script_file." (test|testemail|remove) [instancefilter]\n";
 	print "\n";
 	print "Options are:\n";
-	print "- test          test scan\n";
-	print "- testemail     test scan and send email\n";
+	print "- test          Do a test scan\n";
+	print "- testemail     Do a test scan and send email\n";
 	print "- remove        not yet available\n";
 	exit(-1);
 }
@@ -211,6 +216,10 @@ $instancesbackuperror=array();
 $instancesupdateerror=array();
 $instancesbackupsuccess=array();
 
+if (! in_array($action, array('test', 'testemail', 'remove'))) {
+	echo "Bad value for 1st parameter (must be test|testemail|remove)\n";
+	exit(-1);
+}
 
 $instancefilter=(isset($argv[2])?$argv[2]:'');
 $instancefiltercomplete=$instancefilter;
@@ -233,7 +242,7 @@ chdir('/home/jail/home/');
 dol_mkdir($pathtospamdir);
 
 
-print "----- Generate file blacklistip\n";
+print "----- Init - Generate file blacklistip\n";
 
 $tmpblacklistip = new Blacklistip($db);
 $tmparrayblacklistip = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
@@ -258,7 +267,7 @@ if (!empty($tmparrayblacklistip)) {
 }
 
 
-print "----- Generate file blacklistfrom\n";
+print "----- Init - Generate file blacklistfrom\n";
 
 $tmpblacklistfrom = new Blacklistfrom($db);
 $tmparrayblacklistfrom = $tmpblacklistfrom->fetchAll('', '', 1000, 0, array('status'=>1));
@@ -282,7 +291,7 @@ if (!empty($tmparrayblacklistfrom)) {
 }
 
 
-print "----- Generate file blacklistto\n";
+print "----- Init - Generate file blacklistto\n";
 
 $tmpblacklistto = new Blacklistto($db);
 $tmparrayblacklistto = $tmpblacklistto->fetchAll('', '', 1000, 0, array('status'=>1));
@@ -305,7 +314,7 @@ if (!empty($tmparrayblacklistto)) {
 }
 
 
-print "----- Generate file blacklistcontent\n";
+print "----- Init - Generate file blacklistcontent\n";
 
 $tmpblacklistcontent = new Blacklistcontent($db);
 $tmparrayblacklistcontent = $tmpblacklistcontent->fetchAll('', '', 1000, 0, array('status'=>1));
@@ -335,7 +344,7 @@ if (is_numeric($tmparrayblacklistdir) && $tmparrayblacklistdir < 0) {
 }
 
 
-print "----- Generate file blacklistdir\n";
+print "----- Init - Generate file blacklistdir\n";
 
 if (!empty($tmparrayblacklistdir)) {
 	// Generate the file balcklistdir
@@ -388,7 +397,7 @@ $object=new Contrat($dbmaster);
 
 // Get list of instance (not already flagged as spammer of flagged as clean)
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
-$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu";
+$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu, ce.database_db as dbn";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 if ($instancefiltercomplete) {
@@ -407,7 +416,7 @@ $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_mes
 // Add filter on deployment server
 $sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
 $sql.=" AND (ce.spammer IS NULL or ce.spammer = '')";
-
+print $sql;
 $dbtousetosearch = $dbmaster;
 
 print $sql."\n";                                    // To have this into the ouput of cron job
@@ -490,14 +499,16 @@ if ($resql) {
 						}
 					}
 
-					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} elseif ($instancefiltercomplete) {
-					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					//$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} else {
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				}
 			}
 			$i++;
@@ -525,14 +536,14 @@ foreach ($instances as $instanceid => $instancearray) {
 }
 
 
-print "----- Loop for spam keys into index.php using blacklistcontent (for spam and phishing detection)\n";
+print "----- Loop for spam keys into index.php using blacklistcontent - in trial instances (for spam and phishing detection)\n";
 
 if (!empty($tmparrayblacklistcontent)) {
 	foreach ($tmparrayblacklistcontent as $val) {
 		$buffer = dol_sanitizePathName(trim($val->content));
 		if ($buffer) {
 			$ok=1;
-			$commandexample = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu*/dbn*/htdocs/index.php";
+			$commandexample = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu.../dbn*/htdocs/index.php";
 			echo 'Scan if we found the string '.$buffer.' with '.$commandexample;
 			foreach ($instancestrial as $instanceid => $instancearray) {
 				$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' ".$instancearray['osu']."/dbn*/htdocs/index.php";
@@ -543,7 +554,7 @@ if (!empty($tmparrayblacklistcontent)) {
 				exec($fullcommand, $output, $return_var);
 				if ($return_var == 0) {		// grep -l returns 0 if something was found
 					// We found an evil string
-					print "\nALERT: Evil string '".$buffer."' was found in content of index.php with command ".$command;
+					print "\nALERT: Evil string '".$buffer."' was found into instance id=".$instanceid." in content of index.php with command ".$command;
 					$nboferrors = 1;
 					$ok = 0;
 				}
@@ -558,7 +569,7 @@ if (!empty($tmparrayblacklistcontent)) {
 }
 
 
-print "----- Loop for spam dir or files using blacklistdir\n";
+print "----- Loop for spam dir or files using blacklistdir - in trial instances\n";
 
 if (!empty($tmparrayblacklistdir)) {
 	foreach ($tmparrayblacklistdir as $val) {
@@ -576,7 +587,7 @@ if (!empty($tmparrayblacklistdir)) {
 			}
 
 			$ok=1;
-			$commandexample = "find osu*/dbn*/htdocs/ -maxdepth 2".$exclude;
+			$commandexample = "find osu.../dbn*/htdocs/ -maxdepth 2".$exclude;
 			echo 'Scan if we found the blacklist dir '.$buffer.' with '.$commandexample;
 			foreach ($instancestrial as $instanceid => $instancearray) {
 				$command = "find ".$instancearray['osu']."/dbn*/htdocs/ -maxdepth 2";
@@ -589,7 +600,7 @@ if (!empty($tmparrayblacklistdir)) {
 				exec($fullcommand, $output, $return_var);
 				if ($return_var == 0) {		// command returns 0 if something was found
 					// We found an evil string
-					print "\nALERT: the evil dir/file '".$buffer."' was found with command ".$command;
+					print "\nALERT: the evil dir/file '".$buffer."' was found into instance id=".$instanceid." with command ".$command;
 					$nboferrors = 2;
 					$ok = 0;
 				}
@@ -603,13 +614,124 @@ if (!empty($tmparrayblacklistdir)) {
 	}
 }
 
+/*
+print "----- Loop for test instance not matching file permissions - in trial instances\n";
+print 'TODO...';
+foreach ($instancestrial as $instanceid => $instancearray) {
+	$command = "...";
+	$fullcommand=$command;
+	$output=array();
+
+	$return_var = 0;
+	//exec($fullcommand, $output, $return_var);
+	if ($return_var == 0) {		// command returns 0 if something was found
+		// We found an evil string
+		print "\nALERT: the test instance id=".$instanceid." does not match the signature, found with command ".$command;
+		$nboferrors = 2;
+		$ok = 0;
+	}
+}
+if ($ok) {
+	print " - OK\n";
+} else {
+	print "\n";
+}
+*/
+
+print "----- Loop for test instance not matching the file signature - in trial instances\n";
+foreach ($instancestrial as $instanceid => $instancearray) {
+	$dirtocheck = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs/install';
+	$tmparray = dol_dir_list($dirtocheck, 'files', 0, 'filelist.*\.xml.*', null, 'name', SORT_DESC, 0, 1);
+
+	if (!empty($tmparray)) {
+		$xmlfile = $tmparray[0]['fullname'];
+
+		if (dol_is_file($xmlfile)) {
+			// If file is a zip file (.../filelist-x.y.z.xml.zip), we uncompress it before
+			if (preg_match('/\.zip$/i', $xmlfile)) {
+				dol_mkdir($conf->admin->dir_temp);
+				$xmlfilenew = preg_replace('/\.zip$/i', '', $xmlfile);
+				$result = dol_uncompress($xmlfile, $conf->admin->dir_temp);
+				if (empty($result['error'])) {
+					$xmlfile = $conf->admin->dir_temp.'/'.basename($xmlfilenew);
+				} else {
+					print $langs->trans('FailedToUncompressFile').': '.$xmlfile;
+					$nboferrors++;
+					$error++;
+				}
+			}
+			$xml = simplexml_load_file($xmlfile);
+			if ($xml === false) {
+				print $langs->trans('XmlCorrupted').': '.$xmlfile."\n";
+				$nboferrors++;
+				$error++;
+			}
+		} else {
+			print $langs->trans('XmlNotFound').': '.$xmlfile."\n";
+			$nboferrors++;
+			$error++;
+		}
+	} else {
+		print $langs->trans('XmlNotFound').' searching into dir '.$dirtocheck."\n";
+		$nboferrors++;
+		$error++;
+	}
+
+	$return_var = 0;
+
+	if (empty($error) && !empty($xml)) {
+		$checksumconcat = array();
+		$file_list = array();
+		$out = '';
+
+		// Scan htdocs
+		if (is_object($xml->dolibarr_htdocs_dir[0])) {
+			//var_dump($xml->dolibarr_htdocs_dir[0]['includecustom']);exit;
+			//$includecustom = (empty($xml->dolibarr_htdocs_dir[0]['includecustom']) ? 0 : $xml->dolibarr_htdocs_dir[0]['includecustom']);
+
+			// Define qualified files (must be same than into generate_filelist_xml.php and in api_setup.class.php)
+			$regextoinclude = '\.(php|php3|php4|php5|phtml|phps|phar|inc|css|scss|html|xml|js|json|tpl|jpg|jpeg|png|gif|ico|sql|lang|txt|yml|bak|md|mp3|mp4|wav|mkv|z|gz|zip|rar|tar|less|svg|eot|woff|woff2|ttf|manifest)$';
+			//$regextoexclude = '('.($includecustom ? '' : 'custom|').'documents|conf|install|dejavu-fonts-ttf-.*|public\/test|sabre\/sabre\/.*\/tests|Shared\/PCLZip|nusoap\/lib\/Mail|php\/example|php\/test|geoip\/sample.*\.php|ckeditor\/samples|ckeditor\/adapters)$'; // Exclude dirs
+			$regextoexclude = 'conf.php';
+			$scanfiles = dol_dir_list($dirtocheck, 'files', 1, $regextoinclude, $regextoexclude);
+
+			// Fill file_list with files in signature, new files, modified files
+			$ret = getFilesUpdated($file_list, $xml->dolibarr_htdocs_dir[0], '', $dirtocheck, $checksumconcat); // Fill array $file_list
+			// Complete with list of new files
+			foreach ($scanfiles as $keyfile => $valfile) {
+				$tmprelativefilename = preg_replace('/^'.preg_quote($dirtocheck, '/').'/', '', $valfile['fullname']);
+				if (!in_array($tmprelativefilename, $file_list['insignature'])) {
+					$md5newfile = @md5_file($valfile['fullname']); // Can fails if we don't have permission to open/read file
+					$file_list['added'][] = array('filename'=>$tmprelativefilename, 'md5'=>$md5newfile);
+				}
+			}
+
+			print 'Process '.$instancearray['instance'].' - ';
+			print 'Missing: '.count($file_list['missing']).' - Updated: '.count($file_list['updated']).' - Added: '.count($file_list['added']);
+			if (count($file_list['updated']) + count($file_list['added'])) {
+				print "\n";
+				print 'Warning: Some files on instance id='.$instanceid.' - '.$instancearray['instance'].' have been modified or added'."\n";
+				$nboferrors++;
+			} else {
+				print " - OK\n";
+			}
+		} else {
+			print 'Error: Failed to found <b>dolibarr_htdocs_dir</b> into content of XML file:<br>'.dol_escape_htmltag(dol_trunc($xmlfile, 500))."\n";
+			$nboferrors++;
+			$error++;
+		}
+	}
+}
+
+
 
 $dbmaster->close();	// Close database opened handler
 
+print "\n";
 if ($nboferrors) {
-	print '--- end ERROR nb='.$nboferrors.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
+	print '***** end ERROR nb='.$nboferrors.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 } else {
-	print '--- end OK with no error - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
+	print '***** end OK with no error - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 }
 
 $sendcontext = 'emailing';
@@ -625,7 +747,7 @@ if ($nboferrors) {
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Alert(s) in batch_detect_evil_instances - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
-		$cmail = new CMailFile('[Warning] Alert(s) in batch_detect_evil_instances - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
+		$cmail = new CMailFile('[Alert] Alert(s) in batch_detect_evil_instances - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 		$result = $cmail->sendfile();
 	}
 }
