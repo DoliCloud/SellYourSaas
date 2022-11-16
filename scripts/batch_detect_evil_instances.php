@@ -421,7 +421,9 @@ $sql.= " AND ce.deployment_status IS NOT NULL";
 $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 // Add filter on deployment server
 $sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
-$sql.=" AND (ce.spammer IS NULL or ce.spammer = '')";
+if (empty($instancefiltercomplete)) {
+	$sql.=" AND (ce.spammer IS NULL or ce.spammer = '')";
+}
 print $sql;
 $dbtousetosearch = $dbmaster;
 
