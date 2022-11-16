@@ -3219,6 +3219,7 @@ class SellYourSaasUtils
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
 				continue;
 			}
+			dol_syslog("** Process contract line id=".$tmpobject->id);
 
 			$producttmp = new Product($this->db);
 			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
@@ -3234,15 +3235,20 @@ class SellYourSaasUtils
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance','unsuspend', 'undeploy', 'undeployall', 'migrate','upgrade')) &&
-				($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall', 'migrate','upgrade')) &&
+				($producttmp->array_options['options_app_or_option'] == 'app')) {
+					$doremoteaction = 1;
+			}
 			if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
-				($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
+				($producttmp->array_options['options_app_or_option'] == 'option')) {
+					$doremoteaction = 1;
+					$remoteaction = 'deployoption';		// force on deployoption for options services
+			}
 			// 'refresh' and 'refreshmetrics' are processed later.
 
-			// remoteaction = 'deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
+			// remoteaction = 'deploy','deployall','deployfiles','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
 			if ($doremoteaction) {
-				dol_syslog("Enter into doremoteaction code, with contract id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
+				dol_syslog("Enter into doremoteaction code, with contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
