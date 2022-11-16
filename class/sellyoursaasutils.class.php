@@ -3354,12 +3354,12 @@ class SellYourSaasUtils
 				dol_syslog("password0salted=".$password0salted." passwordmd5salted=".$passwordmd5salted." passwordsha256salted=".$passwordsha256salted, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = '';
-				dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
+				//dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
 				$password0 = dol_hash($password);	// deprecated. Depend on master setup.
 				$passwordmd5 = dol_hash($password, 'md5');
 				$passwordsha256 = dol_hash($password, 'sha256');
 				$passwordpassword_hash = dol_hash($password, 'password_hash');
-				dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
+				//dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = $savsalt;
 				$conf->global->MAIN_SECURITY_HASH_ALGO = $savhashalgo;
