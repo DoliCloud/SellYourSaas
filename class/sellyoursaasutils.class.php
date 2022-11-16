@@ -3240,7 +3240,7 @@ class SellYourSaasUtils
 					$doremoteaction = 1;
 			}
 			if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
-				($producttmp->array_options['options_app_or_option'] == 'option')) {
+				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
 					$doremoteaction = 1;
 					$remoteaction = 'deployoption';		// force on deployoption for options services
 			}
@@ -3248,7 +3248,7 @@ class SellYourSaasUtils
 
 			// remoteaction = 'deploy','deployall','deployfiles','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
 			if ($doremoteaction) {
-				dol_syslog("Enter into doremoteaction code, with contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
+				dol_syslog("Enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
@@ -3565,6 +3565,8 @@ class SellYourSaasUtils
 						}
 					}
 				}
+			} else {
+				dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 			}
 
 			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
