@@ -638,12 +638,16 @@ if ($ok) {
 }
 */
 
+dol_delete_file('/tmp/batch_detect_evil_instance.tmp');
+
 print "----- Loop for test instance not matching the file signature - in trial instances\n";
 foreach ($instancestrial as $instanceid => $instancearray) {
-	$dirtocheck = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs/install';
-	$tmparray = dol_dir_list($dirtocheck, 'files', 0, 'filelist.*\.xml.*', null, 'name', SORT_DESC, 0, 1);
+	$dirtocheck = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs';
+	$dirforxml = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs/install';
+	$tmparray = dol_dir_list($dirforxml, 'files', 0, 'filelist.*\.xml.*', null, 'name', SORT_DESC, 0, 1);
 
 	if (!empty($tmparray)) {
+		$xmlfileorig = $tmparray[0]['fullname'];
 		$xmlfile = $tmparray[0]['fullname'];
 
 		if (dol_is_file($xmlfile)) {
@@ -667,7 +671,7 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 				$error++;
 			}
 		} else {
-			print $langs->trans('XmlNotFound').': '.$xmlfile."\n";
+			print $langs->trans('XmlNotFound').': '.$xmlfileorig."\n";
 			$nboferrors++;
 			$error++;
 		}
@@ -692,7 +696,7 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 			// Define qualified files (must be same than into generate_filelist_xml.php and in api_setup.class.php)
 			$regextoinclude = '\.(php|php3|php4|php5|phtml|phps|phar|inc|css|scss|html|xml|js|json|tpl|jpg|jpeg|png|gif|ico|sql|lang|txt|yml|bak|md|mp3|mp4|wav|mkv|z|gz|zip|rar|tar|less|svg|eot|woff|woff2|ttf|manifest)$';
 			//$regextoexclude = '('.($includecustom ? '' : 'custom|').'documents|conf|install|dejavu-fonts-ttf-.*|public\/test|sabre\/sabre\/.*\/tests|Shared\/PCLZip|nusoap\/lib\/Mail|php\/example|php\/test|geoip\/sample.*\.php|ckeditor\/samples|ckeditor\/adapters)$'; // Exclude dirs
-			$regextoexclude = 'conf.php';
+			$regextoexclude = 'conf.php|custom\/README.md';
 			$scanfiles = dol_dir_list($dirtocheck, 'files', 1, $regextoinclude, $regextoexclude);
 
 			// Fill file_list with files in signature, new files, modified files
@@ -707,10 +711,31 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 			}
 
 			print 'Process '.$instancearray['instance'].' - ';
-			print 'Missing: '.count($file_list['missing']).' - Updated: '.count($file_list['updated']).' - Added: '.count($file_list['added']);
-			if (count($file_list['updated']) + count($file_list['added'])) {
-				print "\n";
+			$nbmissing = (is_array($file_list['missing']) ? count($file_list['missing']) : 0);
+			$nbupdated = (is_array($file_list['updated']) ? count($file_list['updated']) : 0);
+			$nbadded = (is_array($file_list['added']) ? count($file_list['added']) : 0);
+			print 'Missing: '.$nbmissing;
+			print ' - Updated: '.$nbupdated;
+			print ' - Added: '.$nbadded;
+			if ($nbupdated + $nbadded) {
+				print "\norig signature file = ".$xmlfileorig;
+				print "\nused signature file = ".$xmlfile."\n";
 				print 'Warning: Some files on instance id='.$instanceid.' - '.$instancearray['instance'].' have been modified or added'."\n";
+				if ($nbupdated) {
+					$s = '';
+					foreach ($file_list['updated'] as $tmp) {
+						$s .= $tmp['filename']."\n";
+					}
+					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "Updated\n".$s, FILE_APPEND);
+				}
+				if ($nbadded) {
+					$s = '';
+					foreach ($file_list['added'] as $tmp) {
+						$s .= $tmp['filename']."\n";
+					}
+					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "Added\n".$s, FILE_APPEND);
+				}
+
 				$nboferrors++;
 			} else {
 				print " - OK\n";
