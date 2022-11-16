@@ -709,7 +709,8 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 			// Define qualified files (must be same than into generate_filelist_xml.php and in api_setup.class.php)
 			$regextoinclude = '\.(php|php3|php4|php5|phtml|phps|phar|inc|css|scss|html|xml|js|json|tpl|jpg|jpeg|png|gif|ico|sql|lang|txt|yml|bak|md|mp3|mp4|wav|mkv|z|gz|zip|rar|tar|less|svg|eot|woff|woff2|ttf|manifest)$';
 			//$regextoexclude = '('.($includecustom ? '' : 'custom|').'documents|conf|install|dejavu-fonts-ttf-.*|public\/test|sabre\/sabre\/.*\/tests|Shared\/PCLZip|nusoap\/lib\/Mail|php\/example|php\/test|geoip\/sample.*\.php|ckeditor\/samples|ckeditor\/adapters)$'; // Exclude dirs
-			$regextoexclude = 'conf.php|custom\/README.md';
+			//$regextoexclude = 'conf.php|custom\/README.md';
+			$regextoexclude = 'conf.php|custom\/README.md|install|public|includes';
 			$scanfiles = dol_dir_list($dirtocheck, 'files', 1, $regextoinclude, $regextoexclude);
 
 			// Fill file_list with files in signature, new files, modified files
@@ -732,7 +733,7 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 			if ($nbupdated + $nbadded) {
 				print "\norig signature file = ".$xmlfileorig;
 				print "\nused signature file = ".$xmlfile."\n";
-				print 'Warning: Some files on instance id='.$instanceid.' - '.$instancearray['instance'].' have been modified or added'."\n";
+				print 'Warning: Some files on instance id='.$instanceid.' - '.$instancearray['instance'].' have been modified or added.';
 				if ($nbupdated) {
 					$s = '';
 					foreach ($file_list['updated'] as $tmp) {
@@ -747,6 +748,7 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 					}
 					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "Added\n".$s, FILE_APPEND);
 				}
+				print ' A summary is available into /tmp/batch_detect_evil_instance.tmp'."\n";
 
 				$nboferrors++;
 			} else {
