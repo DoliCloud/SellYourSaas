@@ -739,14 +739,14 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 					foreach ($file_list['updated'] as $tmp) {
 						$s .= $tmp['filename']."\n";
 					}
-					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "Updated ".$instancearray['instance']."\n".$s, FILE_APPEND);
+					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Updated into ".$instancearray['instance']."\n".$s."\n", FILE_APPEND);
 				}
 				if ($nbadded) {
 					$s = '';
 					foreach ($file_list['added'] as $tmp) {
 						$s .= $tmp['filename']."\n";
 					}
-					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "Added ".$instancearray['instance']."\n".$s, FILE_APPEND);
+					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Added into ".$instancearray['instance']."\n".$s."\n", FILE_APPEND);
 				}
 				print ' A summary is available into /tmp/batch_detect_evil_instance.tmp'."\n";
 
