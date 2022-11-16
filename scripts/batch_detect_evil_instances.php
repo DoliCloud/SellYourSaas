@@ -221,7 +221,15 @@ if (! in_array($action, array('test', 'testemail', 'remove'))) {
 	exit(-1);
 }
 
-$instancefilter=(isset($argv[2])?$argv[2]:'');
+$instancefilter = '';
+$datefilter = 0;
+if (isset($argv[2])) {
+	if (is_numeric($argv[2])) {
+		$datefilter = $argv[2];
+	} else {
+		$instancefilter = $argv[2];
+	}
+}
 $instancefiltercomplete=$instancefilter;
 
 // Forge complete name of instance
@@ -381,8 +389,6 @@ $instancesbackuperror=array();
 $instancesupdateerror=array();
 $instancesbackupsuccess=array();
 
-
-$instancefilter=(isset($argv[2])?$argv[2]:'');
 $instancefiltercomplete=$instancefilter;
 
 // Forge complete name of instance
@@ -397,7 +403,7 @@ $object=new Contrat($dbmaster);
 
 // Get list of instance (not already flagged as spammer of flagged as clean)
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
-$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu, ce.database_db as dbn";
+$sql.= " ce.deployment_date_start, ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu, ce.database_db as dbn";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 if ($instancefiltercomplete) {
@@ -499,14 +505,14 @@ if ($resql) {
 						}
 					}
 
-					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} elseif ($instancefiltercomplete) {
 					//$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} else {
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				}
@@ -642,6 +648,13 @@ dol_delete_file('/tmp/batch_detect_evil_instance.tmp');
 
 print "----- Loop for test instance not matching the file signature - in trial instances\n";
 foreach ($instancestrial as $instanceid => $instancearray) {
+	if ($datefilter && $instancearray['deployment_date_start'] < (dol_now() - $datefilter)) {
+		print 'Discard '.$instancearray['instance']." - too old (< now - ".$datefilter.")\n";
+		continue;
+	} else {
+		print 'Process '.$instancearray['instance']."\n";
+	}
+
 	$dirtocheck = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs';
 	$dirforxml = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs/install';
 	$tmparray = dol_dir_list($dirforxml, 'files', 0, 'filelist.*\.xml.*', null, 'name', SORT_DESC, 0, 1);
@@ -710,7 +723,6 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 				}
 			}
 
-			print 'Process '.$instancearray['instance'].' - ';
 			$nbmissing = (is_array($file_list['missing']) ? count($file_list['missing']) : 0);
 			$nbupdated = (is_array($file_list['updated']) ? count($file_list['updated']) : 0);
 			$nbadded = (is_array($file_list['added']) ? count($file_list['added']) : 0);
