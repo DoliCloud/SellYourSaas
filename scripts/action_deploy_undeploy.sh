@@ -8,10 +8,11 @@
 # And allow apache to sudo on this script by doing visudo to add line:
 #www-data        ALL=(ALL) NOPASSWD: /usr/bin/create_deploy_undeploy.sh
 #
-# deployall   create user and instance
-# deploy      create only instance
-# undeployall remove user and instance
-# undeploy    remove only instance (must be easy to restore) - rest can be done later with clean.sh
+# deployall    create user/dir + dns + files + config + apache virtual host + cron + database creation + cli
+# deploy       create dns + files + config + apache virtual host + cron + database creation + cli
+# deployoption create files + cli
+# undeployall  remove user and instance
+# undeploy     remove only instance (must be easy to restore) - rest can be done later with clean.sh
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 export nowlog=`date +'%Y%m%d-%H%M%S'`
@@ -692,7 +693,7 @@ fi
 
 # Deploy files
 
-if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
+if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption" ]]; then
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Deploy files"
 	
@@ -1354,7 +1355,7 @@ fi
 
 # Execute after CLI
 
-if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
+if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption" ]]; then
 	if [[ "x$cliafter" != "x" ]]; then
 		if [ -f $cliafter ]; then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Execute script with . $cliafter"

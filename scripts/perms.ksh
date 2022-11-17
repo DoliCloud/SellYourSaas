@@ -122,7 +122,7 @@ do
 	chmod o-rwx /etc/apache2/$fic
 done
 
-if [[ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]]; then
+if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
 	IFS=$(echo -en "\n\b")
 	echo We are on a deployment server, so we clean log files 
 	echo "Clean web server _error logs"

@@ -3219,6 +3219,7 @@ class SellYourSaasUtils
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
 				continue;
 			}
+			dol_syslog("** Process contract line id=".$tmpobject->id);
 
 			$producttmp = new Product($this->db);
 			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
@@ -3234,15 +3235,20 @@ class SellYourSaasUtils
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance','unsuspend', 'undeploy', 'undeployall', 'migrate','upgrade')) &&
-				($producttmp->array_options['options_app_or_option'] == 'app')) $doremoteaction = 1;
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall', 'migrate','upgrade')) &&
+				($producttmp->array_options['options_app_or_option'] == 'app')) {
+					$doremoteaction = 1;
+			}
 			if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
-				($producttmp->array_options['options_app_or_option'] == 'option')) $doremoteaction = 1;
+				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
+					$doremoteaction = 1;
+					$remoteaction = 'deployoption';		// force on deployoption for options services
+			}
 			// 'refresh' and 'refreshmetrics' are processed later.
 
-			// remoteaction = 'deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
+			// remoteaction = 'deploy','deployall','deployfiles','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
 			if ($doremoteaction) {
-				dol_syslog("Enter into doremoteaction code, with contract id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
+				dol_syslog("Enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
@@ -3354,12 +3360,12 @@ class SellYourSaasUtils
 				dol_syslog("password0salted=".$password0salted." passwordmd5salted=".$passwordmd5salted." passwordsha256salted=".$passwordsha256salted, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = '';
-				dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
+				//dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
 				$password0 = dol_hash($password);	// deprecated. Depend on master setup.
 				$passwordmd5 = dol_hash($password, 'md5');
 				$passwordsha256 = dol_hash($password, 'sha256');
 				$passwordpassword_hash = dol_hash($password, 'password_hash');
-				dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
+				//dol_syslog("password0=".$password." passwordmd5=".$passwordmd5." passwordsha256=".$passwordsha256, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = $savsalt;
 				$conf->global->MAIN_SECURITY_HASH_ALGO = $savhashalgo;
@@ -3559,6 +3565,8 @@ class SellYourSaasUtils
 						}
 					}
 				}
+			} else {
+				dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 			}
 
 			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
