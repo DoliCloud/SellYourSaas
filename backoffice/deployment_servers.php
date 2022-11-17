@@ -120,6 +120,7 @@ if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
 	}
 }
 
+// Enable the annouce for the server $keyforaction
 if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON') {
 	$keyforparam = 'SELLYOURSAAS_ANNOUNCE_ON_'.$keyforaction;
 	if ($value) {
@@ -129,9 +130,11 @@ if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON') {
 	}
 }
 
+// Set text for announce
 if ($action == 'setSELLYOURSAAS_ANNOUNCE') {
 	$keyforparam = 'SELLYOURSAAS_ANNOUNCE_'.$keyforaction;
 	if ($value) {
+		dolibarr_del_const($db, $keyforparam, $conf->entity);	// Delete old text
 		dolibarr_set_const($db, $keyforparam, $value, 'chaine', 0, '', $conf->entity);
 	} else {
 		dolibarr_del_const($db, $keyforparam, $conf->entity);
