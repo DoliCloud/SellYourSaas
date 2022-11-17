@@ -661,9 +661,8 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 		continue;
 	} else {
 		print 'Process '.$instancearray['instance']."\n";
-		file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Process instance ".$instancearray['instance']." - ".dol_print_date($instancearray['deployment_date_start'], 'dayhour', 'gmt')."\n", FILE_APPEND);
+		file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Process instance ".$instancearray['instance']." - Deployed on ".dol_print_date($instancearray['deployment_date_start'], 'dayhourrfc', 'gmt')."\n", FILE_APPEND);
 	}
-
 
 	$dirtocheck = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs';
 	$dirforxml = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs/install';
