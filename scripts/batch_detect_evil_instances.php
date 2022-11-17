@@ -779,10 +779,12 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 
 
 // Update data of scan
+// if (dol_is_file('/tmp/batch_detect_evil_instance.tmp')) {
 // $xxx = new Server($dbmaster);
 // $xxx->detect_evil_instance_nberrors = $nboferrors;
 // $xxx->detect_evil_instance_string = file_get_contents('/tmp/batch_detect_evil_instance.tmp');
 // $xxx->update($user);
+// }
 
 
 $dbmaster->close();	// Close database opened handler
