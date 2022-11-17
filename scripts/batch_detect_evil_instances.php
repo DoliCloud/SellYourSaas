@@ -544,33 +544,37 @@ foreach ($instances as $instanceid => $instancearray) {
 }
 
 
-print "----- Loop for spam keys into index.php using blacklistcontent - in trial instances (for spam and phishing detection)\n";
+$searchkeysintoindex = 0;
 
-if (!empty($tmparrayblacklistcontent)) {
-	foreach ($tmparrayblacklistcontent as $val) {
-		$buffer = dol_sanitizePathName(trim($val->content));
-		if ($buffer) {
-			$ok=1;
-			$commandexample = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu.../dbn*/htdocs/index.php";
-			echo 'Scan if we found the string '.$buffer.' with '.$commandexample;
-			foreach ($instancestrial as $instanceid => $instancearray) {
-				$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' ".$instancearray['osu']."/dbn*/htdocs/index.php";
-				$fullcommand=$command;
-				$output=array();
-				//echo $command."\n";
+if ($searchkeysintoindex) {
+	print "----- Loop for spam keys into index.php using blacklistcontent - in trial instances (for spam and phishing detection)\n";
 
-				exec($fullcommand, $output, $return_var);
-				if ($return_var == 0) {		// grep -l returns 0 if something was found
-					// We found an evil string
-					print "\nALERT: Evil string '".$buffer."' was found into instance id=".$instanceid." in content of index.php with command ".$command;
-					$nboferrors = 1;
-					$ok = 0;
+	if (!empty($tmparrayblacklistcontent)) {
+		foreach ($tmparrayblacklistcontent as $val) {
+			$buffer = dol_sanitizePathName(trim($val->content));
+			if ($buffer) {
+				$ok=1;
+				$commandexample = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' osu.../dbn*/htdocs/index.php";
+				echo 'Scan if we found the string '.$buffer.' with '.$commandexample;
+				foreach ($instancestrial as $instanceid => $instancearray) {
+					$command = "grep -l '".escapeshellcmd(str_replace("'", ".", $buffer))."' ".$instancearray['osu']."/dbn*/htdocs/index.php";
+					$fullcommand=$command;
+					$output=array();
+					//echo $command."\n";
+
+					exec($fullcommand, $output, $return_var);
+					if ($return_var == 0) {		// grep -l returns 0 if something was found
+						// We found an evil string
+						print "\nALERT: Evil string '".$buffer."' was found into instance id=".$instanceid." in content of index.php with command ".$command;
+						$nboferrors = 1;
+						$ok = 0;
+					}
 				}
-			}
-			if ($ok) {
-				print " - OK\n";
-			} else {
-				print "\n";
+				if ($ok) {
+					print " - OK\n";
+				} else {
+					print "\n";
+				}
 			}
 		}
 	}
@@ -657,7 +661,9 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 		continue;
 	} else {
 		print 'Process '.$instancearray['instance']."\n";
+		file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Process instance ".$instancearray['instance']." - ".dol_print_date($instancearray['deployment_date_start'], 'dayhour', 'gmt')."\n", FILE_APPEND);
 	}
+
 
 	$dirtocheck = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs';
 	$dirforxml = "/home/jail/home/".$instancearray['osu']."/".$instancearray['dbn'].'/htdocs/install';
@@ -731,9 +737,14 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 			$nbmissing = (is_array($file_list['missing']) ? count($file_list['missing']) : 0);
 			$nbupdated = (is_array($file_list['updated']) ? count($file_list['updated']) : 0);
 			$nbadded = (is_array($file_list['added']) ? count($file_list['added']) : 0);
-			print 'Missing: '.$nbmissing;
-			print ' - Updated: '.$nbupdated;
-			print ' - Added: '.$nbadded;
+
+			$s = 'Missing: '.$nbmissing;
+			$s .= ' - Updated: '.$nbupdated;
+			$s .= ' - Added: '.$nbadded;
+
+			print $s;
+			file_put_contents('/tmp/batch_detect_evil_instance.tmp', $s."\n", FILE_APPEND);
+
 			if ($nbupdated + $nbadded) {
 				print "\norig signature file = ".$xmlfileorig;
 				print "\nused signature file = ".$xmlfile."\n";
@@ -743,14 +754,14 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 					foreach ($file_list['updated'] as $tmp) {
 						$s .= $tmp['filename']."\n";
 					}
-					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Updated into ".$instancearray['instance']."\n".$s."\n", FILE_APPEND);
+					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "-- Files updated:\n".$s."\n", FILE_APPEND);
 				}
 				if ($nbadded) {
 					$s = '';
 					foreach ($file_list['added'] as $tmp) {
 						$s .= $tmp['filename']."\n";
 					}
-					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Added into ".$instancearray['instance']."\n".$s."\n", FILE_APPEND);
+					file_put_contents('/tmp/batch_detect_evil_instance.tmp', "-- Files added:\n".$s."\n", FILE_APPEND);
 				}
 				print ' A summary is available into /tmp/batch_detect_evil_instance.tmp'."\n";
 
@@ -760,12 +771,19 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 			}
 		} else {
 			print 'Error: Failed to found <b>dolibarr_htdocs_dir</b> into content of XML file:<br>'.dol_escape_htmltag(dol_trunc($xmlfile, 500))."\n";
+			file_put_contents('/tmp/batch_detect_evil_instance.tmp', 'Error: Failed to found <b>dolibarr_htdocs_dir</b> into content of XML file:<br>'.dol_escape_htmltag(dol_trunc($xmlfile, 500)), FILE_APPEND);
 			$nboferrors++;
 			$error++;
 		}
 	}
 }
 
+
+// Update data of scan
+// $xxx = new Server($dbmaster);
+// $xxx->detect_evil_instance_nberrors = $nboferrors;
+// $xxx->detect_evil_instance_string = file_get_contents('/tmp/batch_detect_evil_instance.tmp');
+// $xxx->update($user);
 
 
 $dbmaster->close();	// Close database opened handler
