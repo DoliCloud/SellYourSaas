@@ -90,7 +90,7 @@ class ActionsSellyoursaas
 
 		if ($object->element == 'societe') {
 			// Dashboard
-			if ($user->rights->sellyoursaas->read && ! empty($object->array_options['options_dolicloud'])) {
+			if ($user->hasRight('sellyoursaas', 'read') && ! empty($object->array_options['options_dolicloud'])) {
 				$url = '';
 				if ($object->array_options['options_dolicloud'] == 'yesv2') {
 					$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
@@ -218,7 +218,7 @@ class ActionsSellyoursaas
 
 		if (in_array($parameters['currentcontext'], array('contractcard'))				// do something only for the context 'contractcard'
 			&& ! empty($object->array_options['options_deployment_status'])) {
-			if ($user->rights->sellyoursaas->write) {
+			if ($user->hasRight('sellyoursaas', 'write')) {
 				if (in_array($object->array_options['options_deployment_status'], array('processing', 'undeployed'))) {
 					$alt = $langs->trans("SellYourSaasSubDomains").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
 					$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
@@ -704,7 +704,7 @@ class ActionsSellyoursaas
 	{
 		global $conf, $langs, $user;
 
-		if (! empty($user->rights->sellyoursaas->read)) {
+		if ($user->hasRight('sellyoursaas', 'read')) {
 			/*$langs->load("sellyoursaas@sellyoursaas");
 			$search_boxvalue = $parameters['search_boxvalue'];
 
@@ -817,7 +817,7 @@ class ActionsSellyoursaas
 
 		$result='';
 
-		if ($user->rights->sellyoursaas->read) {
+		if ($user->hasRight('sellyoursaas', 'read')) {
 			if (is_object($object)) {
 				$thirdparty = null;
 				if (is_object($object->thirdparty)) $thirdparty = $object->thirdparty;
@@ -1227,7 +1227,7 @@ class ActionsSellyoursaas
 		global $user;
 
 		if ($parameters['features'] == 'packages') {
-			if ($user->rights->sellyoursaas->read) {
+			if ($user->hasRight('sellyoursaas', 'read')) {
 				$this->results['result'] = 1;
 				return 1;
 			} else {
