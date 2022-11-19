@@ -131,6 +131,7 @@
     network inet6,
     network unix dgram,
 
+    # Warning, this may create troubles with sending email from postfix on ubuntu 18.04
     deny /etc/group r,
     deny /etc/passwd r,
 
