@@ -774,7 +774,7 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td class="nowraponall">'.$instance->getNomUrl(1).'</td>';
 	print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
 	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
-	print '<td>'.dol_print_ip($instance->array_options['options_deployment_ip']).'</td>';
+	print '<td>'.dol_print_ip($instance->array_options['options_deployment_ip'], 0).'</td>';
 	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
 	print '<td class="nowraponall">'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';

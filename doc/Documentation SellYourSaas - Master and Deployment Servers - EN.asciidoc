@@ -5259,7 +5259,7 @@ Error when sending email in */var/log/mail.log*
 	
 => If the user *postfix* really exists into /etc/passwd, the trouble may be apparmor that does not allow reading the file */etc/passwd*
 
-Check in file /etc/apparmor.d/usr/sbin/apache2 that /etc/passwd is not denied.
+Check in file /etc/apparmor.d/usr.sbin.apache2 that /etc/passwd is not denied.
 
 
 ==== php sessions files in /var/lib/php/sessions are not purged
