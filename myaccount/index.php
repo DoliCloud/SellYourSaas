@@ -3127,9 +3127,11 @@ if ($mythirdpartyaccount->isareseller) {
 		print '</th>';
 		print '<th>';
 		print $langs->trans("FixPrice");
+		print ' ('.$langs->trans("HT").')';
 		print '</th>';
 		print '<th>';
 		print $langs->trans("PricePerUsers");
+		print ' ('.$langs->trans("HT").')';
 		print '</th>';
 		for ($i=0; $i < $maxcptoptions; $i++) {
 			print '<th>';
