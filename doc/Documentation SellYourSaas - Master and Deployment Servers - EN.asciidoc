@@ -1508,7 +1508,7 @@ systemctl stop remote-server-launcher.service
 
 * Installation of fail2ban and activation of the following fail2ban rules:
 
-We will enable some specific fail2ban rules for sellyoursaas:
+We will enable some generic fail2ban rules:
 
   *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
@@ -1516,7 +1516,7 @@ We will enable some specific fail2ban rules for sellyoursaas:
 As well as the specific rules for sellyoursaas:
   
   *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*
-  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
+  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-limitpublic*, *web-dol-registerinstance*
 
 NOTE: The rules available may vary depending on the version of the OS installed.
 
@@ -1693,32 +1693,7 @@ maxretry = 5
 Then modify the values in this file for *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
 
 
-Then place sellyoursaas conf rules supplied with the project in *etc/fail2ban/jail.d* inside the directory of the same name */etc/fail2ban/jail.d* by creating links:
- 
-*For all servers:*
-
-[source, bash]
----------------
-cd /etc/fail2ban/jail.d
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
----------------
-
-*Add also this for Master servers only:*
-
-[source, bash]
----------------
-cd /etc/fail2ban/jail.d
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
----------------
-
-
-Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating links:
+Then place the available filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating links:
 
 [source, bash]
 ---------------
@@ -1728,9 +1703,35 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dol
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-ruleslimitpublic.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+---------------
+
+Then place sellyoursaas enabled conf rules supplied with the project in *etc/fail2ban/jail.d* inside the directory of the same name */etc/fail2ban/jail.d* by creating links:
+ 
+*For all servers:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-ruleskoquota.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-rulesko.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-rulesall.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-rulesadmin.conf
+---------------
+
+*Add also this for Master servers only:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-rulesbruteforce.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-ruleslimitpublic.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-rulesregisterinstance.conf
 ---------------
 
 
