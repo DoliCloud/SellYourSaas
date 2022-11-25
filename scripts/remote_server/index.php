@@ -82,7 +82,7 @@ else fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>> Call for action '.$tmparr
 
 fwrite($fh, "\n".date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
 
-if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployall', 'undeployall'))) {
+if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployall', 'undeployall'))) {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");
 	else fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' ...'."\n");
 
