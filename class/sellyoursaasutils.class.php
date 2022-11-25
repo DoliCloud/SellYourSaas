@@ -2930,9 +2930,10 @@ class SellYourSaasUtils
 	 *
 	 * @param	string					$remoteaction	Remote action:
 	 * 													'backup',
-	 * 													'deploy/deployall/undeploy/undeployall'=create/delete database,
-	 * 													'deployoption'=???
-	 * 													'rename'=change apache virtual host file
+	 * 													'deployall/undeployall'=create/delete all,
+	 * 													'deploy/undeploy'=create/delete all except user,
+	 * 													'deployoption'=create/delete files+cli,
+	 * 													'rename'=change apache virtual host file,
 	 * 													'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
 	 * 													'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics
 	 * 													'refreshmetrics'=loop on each line of contract and read remote data and update qty of metrics
