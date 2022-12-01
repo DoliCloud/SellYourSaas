@@ -485,6 +485,14 @@ sudo vi /etc/skel/.ssh/authorized_keys_support
 
 Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
+Also create a per-user mysql configuration file in */etc/skel/.my.cnf* to enable SellYourSaas end users to use the
+mysql client from their ssh shell connection.
+
+[source, bash]
+---------------
+printf '[client]\nprotocol=tcp' >> /etc/skel/.my.cnf
+---------------
+
 
 === Add alias
 

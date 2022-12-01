@@ -432,7 +432,16 @@ sudo chmod -R go-rwx /etc/skel/.ssh
 sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
-Ainsi tout nouveau compte account created (those of customer instances) will be accessible by the administrator(s).
+Ainsi, l'administrateur pourra accéder à tout nouveau compte créé (ceux des instances clients).
+
+Créez également un fichier de configuration mysql dans */etc/skel/.my.cnf* afin de permettre aux clients finaux de
+votre SellYourSaas d'utiliser le client mysql en console depuis une connexion shell ssh.
+
+[source, bash]
+---------------
+printf '[client]\nprotocol=tcp' >> /etc/skel/.my.cnf
+---------------
+
 
 
 
