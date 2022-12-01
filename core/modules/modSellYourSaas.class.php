@@ -856,6 +856,7 @@ class modSellYourSaas extends DolibarrModules
 			$listofips = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'));
 			$sql = "INSERT INTO ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver ( ref, entity, ipaddress, status, fromdomainname, date_creation)";
 			$sql .= " VALUES ";
+			$nbrecords = 0;
 			$entity = $_SESSION["dol_entity"];
 			foreach ($listofips as $key => $value) {
 				$valuesql = "(";
@@ -867,11 +868,11 @@ class modSellYourSaas extends DolibarrModules
 				if (! empty($tmparraydomain[1])) {
 					if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
 						$valuesql .= "'".$this->db->escape(0)."',";
-						$valuesql .= "NULL,";	
+						$valuesql .= "NULL,";
 					} else {
 						if (! empty($tmparraydomain[2])) {
-							$valuesql .= "'".$this->db->escape(0)."',";	
-						}else {
+							$valuesql .= "'".$this->db->escape(0)."',";
+						} else {
 							$valuesql .= "'".$this->db->escape(1)."',";
 						}
 						$valuesql .= "'".$this->db->escape($tmparraydomain[1])."',";
@@ -884,7 +885,7 @@ class modSellYourSaas extends DolibarrModules
 				$nbrecords++;
 				if ($nbrecords == count($listofips)) {
 					$valuesql .= ")";
-				}else {
+				} else {
 					$valuesql .= "),";
 				}
 				$sql .= $valuesql;

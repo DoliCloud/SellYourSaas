@@ -650,7 +650,7 @@ class Deploymentserver extends CommonObject
 	public function reopen($user, $notrigger = 0)
 	{
 		// Protection
-		if ($this->status != self::STATUS_CANCELED) {
+		if ($this->status == self::STATUS_ENABLED) {
 			return 0;
 		}
 
