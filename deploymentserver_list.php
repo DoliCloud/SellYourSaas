@@ -176,7 +176,8 @@ foreach ($object->fields as $key => $val) {
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 
 $object->fields = dol_sort_array($object->fields, 'position');
-$arrayfields['nb_instances'] = array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'checked'=>1, 'enabled'=>1, 'position'=>300, 'csslist'=>'right');
+$arrayfields['commands'] = array('type'=>'varchar', 'label'=>'Commands', 'checked'=>1, 'enabled'=>1, 'position'=>300, 'csslist'=>'center');
+$arrayfields['nb_instances'] = array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'checked'=>1, 'enabled'=>1, 'position'=>305, 'csslist'=>'right');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
 // There is several ways to check permission.
@@ -583,14 +584,6 @@ if (!empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {
 	print '</td>';
 }
 foreach ($object->fields as $key => $val) {
-	// Nb of instances
-	if ($key == 't.nb_instances') {
-		print '<td class="center">';
-		print $form->textwithpicto($langs->trans("Instances"), $langs->trans("NbOfOpenInstances"));
-		print '</td>';
-		continue;
-	}
-
 	$searchkey = empty($search[$key]) ? '' : $search[$key];
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
@@ -632,6 +625,10 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
 $parameters = array('arrayfields'=>$arrayfields);
 $reshook = $hookmanager->executeHooks('printFieldListOption', $parameters, $object); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
+if (!empty($arrayfields['commands']['checked'])) {
+	print '<td class="liste_titre"></td>';
+	print '<td class="liste_titre"></td>';
+}
 if (!empty($arrayfields['nb_instances']['checked'])) {
 	print '<td class="liste_titre"></td>';
 }
@@ -676,6 +673,12 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
 $parameters = array('arrayfields'=>$arrayfields, 'param'=>$param, 'sortfield'=>$sortfield, 'sortorder'=>$sortorder, 'totalarray'=>&$totalarray);
 $reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters, $object); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
+if (!empty($arrayfields['commands']['checked'])) {
+	print '<th class="liste_titre">'.$langs->trans("Commands").'</th>';
+	$totalarray['nbfield']++;
+	print '<th class="liste_titre"></th>';
+	$totalarray['nbfield']++;
+}
 if (!empty($arrayfields['nb_instances']['checked'])) {
 	print '<th class="liste_titre right">'.$langs->trans("NbOfOpenInstances").'</th>';
 	$totalarray['nbfield']++;
@@ -811,6 +814,17 @@ while ($i < $imaxinloop) {
 		$parameters = array('arrayfields'=>$arrayfields, 'object'=>$object, 'obj'=>$obj, 'i'=>$i, 'totalarray'=>&$totalarray);
 		$reshook = $hookmanager->executeHooks('printFieldListValue', $parameters, $object); // Note that $action and $object may have been modified by hook
 		print $hookmanager->resPrint;
+		// Column for commands
+		if (!empty($arrayfields['commands']['checked'])) {
+			print '<td class="small">';
+			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
+			print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
+			print '</td>';
+			print '<td class="small">';
+			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
+			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
+			print '</td>';
+		}
 		// Column nb of instances
 		if (!empty($arrayfields['nb_instances']['checked'])) {
 			print '<td class="right">'.$openinstances[$obj->ipaddress].'</td>';

@@ -173,7 +173,7 @@ if ($action == 'addinstance') {
 				$tmpdomainkey[1] = 'closed';
 				$listofdomains[] = implode(':', $tmpdomainkey);
 				$listofdomains = implode(',', $listofdomains);
-				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
+				dolibarr_set_const($db, "SELLYOURSAAS_SUB_DOMAis_emptyIN_NAMES", $listofdomains, 'chaine', 0, '', $conf->entity);
 			} elseif ($statusnew == 1) {
 				$tmpdomainkey[0] = $domainnamenew;
 				$listofdomains[] = implode(':', $tmpdomainkey);
