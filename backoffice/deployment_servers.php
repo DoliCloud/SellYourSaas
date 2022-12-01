@@ -358,7 +358,7 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	$helptooltip = img_warning('', '').' '.$langs->trans("EvenIfDomainIsOpenTo");
 	print $form->textwithpicto($langs->trans("Closed").'|'.$langs->trans("Opened"), $helptooltip);
 	print '</td>';
-	// Nb of instances
+
 	print '<td class="center">';
 	print $form->textwithpicto($langs->trans("Instances"), $langs->trans("NbOfOpenInstances"));
 	print '</td>';

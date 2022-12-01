@@ -112,17 +112,18 @@ class Deploymentserver extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>-1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'ref' => array('type'=>'varchar(128)', 'label'=>'SubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Reference of object', 'csslist'=>'tdoverflowmax150','visible'=>1, 'showoncombobox'=>1),
-		'entity' =>array('type'=>'integer', 'label'=>'Entity', 'default'=>1, 'enabled'=>1, 'visible'=>0, 'notnull'=>1, 'position'=>20, 'index'=>1),
-		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
-		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
-		'date_modification' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
-		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>52, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
-		'fk_country' => array('type'=>'integer:Ccountry:core/class/ccountry.class.php', 'label'=>'Country', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>5,),
+		'ref' => array('type'=>'varchar(128)', 'label'=>'SellYourSaasSubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Reference of object', 'csslist'=>'tdoverflowmax150','visible'=>1, 'showoncombobox'=>1),
 		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo",),
-		'ipaddress' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>51, 'notnull'=>1, 'visible'=>1,),
-		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'position'=>63, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'D&eacute;sactiv&eacute;', '1'=>'Actif'),),
-		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>62, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo",),
+		'entity' =>array('type'=>'integer', 'label'=>'Entity', 'default'=>1, 'enabled'=>1, 'visible'=>0, 'notnull'=>1, 'position'=>20, 'index'=>1),
+		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
+		'date_modification' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2),
+		'ipaddress' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>51, 'notnull'=>1, 'visible'=>1),
+		//'nb_instances' => array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'enabled'=>'1', 'position'=>60, 'visible'=>1, 'index'=>1),
+		//'fk_country' => array('type'=>'integer:Ccountry:core/class/ccountry.class.php', 'label'=>'Country', 'enabled'=>'1', 'position'=>52, 'notnull'=>0, 'visible'=>-1, 'picto'=>'country', 'css'=>'maxwidth500 '),
+		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
+		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
+		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo",),
+		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'),),
 	);
 	public $rowid;
 	public $entity;
@@ -1037,7 +1038,7 @@ class Deploymentserver extends CommonObject
 	 * @param  string      $filtermode   Filter mode (AND or OR)
 	 * @return array                	 array of domainnames
 	 */
-	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array() , $filtermode = 'AND')
+	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
 	{
 		$reflist = array();
 		$objectlist = $this->fetchAll($sortorder, $sortfield, $limit, $offset, $filter, $filtermode);

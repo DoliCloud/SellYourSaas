@@ -176,7 +176,7 @@ foreach ($object->fields as $key => $val) {
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 
 $object->fields = dol_sort_array($object->fields, 'position');
-//$arrayfields['anotherfield'] = array('type'=>'integer', 'label'=>'AnotherField', 'checked'=>1, 'enabled'=>1, 'position'=>90, 'csslist'=>'right');
+$arrayfields['nb_instances'] = array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'checked'=>1, 'enabled'=>1, 'position'=>300, 'csslist'=>'right');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
 // There is several ways to check permission.
@@ -282,6 +282,9 @@ $parameters = array();
 $reshook = $hookmanager->executeHooks('printFieldListSelect', $parameters, $object); // Note that $action and $object may have been modified by hook
 $sql .= preg_replace('/^,/', '', $hookmanager->resPrint);
 $sql = preg_replace('/,\s*$/', '', $sql);
+
+$sqlfields = $sql; // $sql fields to remove for count total
+
 //$sql .= ", COUNT(rc.rowid) as anotherfield";
 $sql .= " FROM ".MAIN_DB_PREFIX.$object->table_element." as t";
 //$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."anothertable as rc ON rc.parent = t.rowid";
@@ -355,31 +358,12 @@ $sql .= $hookmanager->resPrint;
 $sql = preg_replace('/,\s*$/', '', $sql);
 */
 
-// Add HAVING from hooks
-/*
-$parameters = array();
-$reshook = $hookmanager->executeHooks('printFieldListHaving', $parameters, $object); // Note that $action and $object may have been modified by hook
-$sql .= empty($hookmanager->resPrint) ? "" : " HAVING 1=1 ".$hookmanager->resPrint;
-*/
-
 // Count total nb of records
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
-	/* This old and fast method to get and count full list returns all record so use a high amount of memory.
-	$resql = $db->query($sql);
-	$nbtotalofrecords = $db->num_rows($resql);
-	*/
-	/* The slow method does not consume memory on mysql (not tested on pgsql) */
-	/*$resql = $db->query($sql, 0, 'auto', 1);
-	while ($db->fetch_object($resql)) {
-		if (empty($nbtotalofrecords)) {
-			$nbtotalofrecords = 1;    // We can't make +1 because init value is ''
-		 } else {
-			 $nbtotalofrecords++;
-		 }
-	 }*/
 	/* The fast and low memory method to get and count full list converts the sql into a sql count */
-	$sqlforcount = preg_replace('/^SELECT[a-zA-Z0-9\._\s\(\),=<>\:\-\']+\sFROM/', 'SELECT COUNT(*) as nbtotalofrecords FROM', $sql);
+	$sqlforcount = preg_replace('/^'.preg_quote($sqlfields, '/').'/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
+	$sqlforcount = preg_replace('/GROUP BY .*$/', '', $sqlforcount);
 	$resql = $db->query($sqlforcount);
 	if ($resql) {
 		$objforcount = $db->fetch_object($resql);
@@ -599,6 +583,14 @@ if (!empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {
 	print '</td>';
 }
 foreach ($object->fields as $key => $val) {
+	// Nb of instances
+	if ($key == 't.nb_instances') {
+		print '<td class="center">';
+		print $form->textwithpicto($langs->trans("Instances"), $langs->trans("NbOfOpenInstances"));
+		print '</td>';
+		continue;
+	}
+
 	$searchkey = empty($search[$key]) ? '' : $search[$key];
 	$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 	if ($key == 'status') {
@@ -640,9 +632,9 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
 $parameters = array('arrayfields'=>$arrayfields);
 $reshook = $hookmanager->executeHooks('printFieldListOption', $parameters, $object); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
-/*if (!empty($arrayfields['anotherfield']['checked'])) {
+if (!empty($arrayfields['nb_instances']['checked'])) {
 	print '<td class="liste_titre"></td>';
-}*/
+}
 // Action column
 if (empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {
 	print '<td class="liste_titre maxwidthsearch">';
@@ -684,10 +676,10 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
 $parameters = array('arrayfields'=>$arrayfields, 'param'=>$param, 'sortfield'=>$sortfield, 'sortorder'=>$sortorder, 'totalarray'=>&$totalarray);
 $reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters, $object); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
-/*if (!empty($arrayfields['anotherfield']['checked'])) {
-	print '<th class="liste_titre right">'.$langs->trans("AnotherField").'</th>';
+if (!empty($arrayfields['nb_instances']['checked'])) {
+	print '<th class="liste_titre right">'.$langs->trans("NbOfOpenInstances").'</th>';
 	$totalarray['nbfield']++;
-}*/
+}
 // Action column
 if (empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {
 	print getTitleFieldOfList(($mode != 'kanban' ? $selectedfields : ''), 0, $_SERVER["PHP_SELF"], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
@@ -706,6 +698,19 @@ if (isset($extrafields->attributes[$object->table_element]['computed']) && is_ar
 	}
 }
 
+// Get nb of open instances per ip
+$openinstances = array();
+$sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb FROM ".$db->prefix()."contrat_extrafields as ce";
+$sqlperhost .= " WHERE deployment_status in ('processing', 'done')";
+$sqlperhost .= " GROUP BY ce.deployment_host";
+$resqlperhost = $db->query($sqlperhost);
+if ($sqlperhost) {
+	while ($obj = $db->fetch_object($resqlperhost)) {
+		$openinstances[$obj->deployment_host] = (int) $obj->nb;
+	}
+} else {
+	dol_print_error($db);
+}
 
 // Loop on record
 // --------------------------------------------------------------------
@@ -806,9 +811,10 @@ while ($i < $imaxinloop) {
 		$parameters = array('arrayfields'=>$arrayfields, 'object'=>$object, 'obj'=>$obj, 'i'=>$i, 'totalarray'=>&$totalarray);
 		$reshook = $hookmanager->executeHooks('printFieldListValue', $parameters, $object); // Note that $action and $object may have been modified by hook
 		print $hookmanager->resPrint;
-		/*if (!empty($arrayfields['anotherfield']['checked'])) {
-			print '<td class="right">'.$obj->anotherfield.'</td>';
-		}*/
+		// Column nb of instances
+		if (!empty($arrayfields['nb_instances']['checked'])) {
+			print '<td class="right">'.$openinstances[$obj->ipaddress].'</td>';
+		}
 		// Action column
 		if (empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {
 			print '<td class="nowrap center">';

@@ -215,8 +215,6 @@ if (empty($reshook)) {
 
 /*
  * View
- *
- * Put here all code to build page
  */
 
 $form = new Form($db);
@@ -242,17 +240,19 @@ llxHeader('', $title, $help_url);
 // });
 // </script>';
 
-// Get nb of open instances per ip
-$openinstances = array();
-$sql = "SELECT ce.deployment_host, COUNT(rowid) as nb FROM ".$db->prefix()."contrat_extrafields as ce";
-$sql .= " WHERE deployment_status in ('processing', 'done')";
-$sql .= " AND ce.deployment_host = '".$object->ipaddress."'";
-$resql = $db->query($sql);
-if ($resql) {
-	$obj = $db->fetch_object($resql);
-	$object->nb_instances = (int) $obj->nb;
-} else {
-	dol_print_error($db);
+// Get nb of open instances for this deployment IP
+if ($object->ipaddress) {
+	//$openinstances = array();
+	$sql = "SELECT COUNT(rowid) as nb FROM ".$db->prefix()."contrat_extrafields as ce";
+	$sql .= " WHERE deployment_status in ('processing', 'done')";
+	$sql .= " AND ce.deployment_host = '".$db->escape($object->ipaddress)."'";
+	$resql = $db->query($sql);
+	if ($resql) {
+		$obj = $db->fetch_object($resql);
+		$object->nb_instances = (int) $obj->nb;
+	} else {
+		dol_print_error($db);
+	}
 }
 
 // Part to create
@@ -284,13 +284,14 @@ if ($action == 'create') {
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_add.tpl.php';
 
 	// Country
-	print '<tr><td>'.$form->editfieldkey('Country', 'fk_country', '', $object, 0).'</td><td colspan="3" class="maxwidthonsmartphone">';
+	/*print '<tr><td>'.$form->editfieldkey('Country', 'fk_country', '', $object, 0).'</td><td colspan="3" class="maxwidthonsmartphone">';
 	print img_picto('', 'country', 'class="pictofixedwidth"');
 	print $form->select_country((GETPOSTISSET('fk_country') ? GETPOST('fk_country') : $object->fk_country), 'fk_country', '', 0, 'minwidth300 maxwidth500 widthcentpercentminusx');
 	if ($user->admin) {
 		print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
 	}
 	print '</td></tr>';
+	*/
 
 	// Other attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_add.tpl.php';
@@ -329,13 +330,14 @@ if (($id || $ref) && $action == 'edit') {
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_edit.tpl.php';
 
 	// Country
-	print '<tr><td>'.$form->editfieldkey('Country', 'fk_country', '', $object, 0).'</td><td colspan="3" class="maxwidthonsmartphone">';
+	/*print '<tr><td>'.$form->editfieldkey('Country', 'fk_country', '', $object, 0).'</td><td colspan="3" class="maxwidthonsmartphone">';
 	print img_picto('', 'country', 'class="pictofixedwidth"');
 	print $form->select_country((GETPOSTISSET('fk_country') ? GETPOST('fk_country') : $object->fk_country), 'fk_country', '', 0, 'minwidth300 maxwidth500 widthcentpercentminusx');
 	if ($user->admin) {
 		print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"), 1);
 	}
 	print '</td></tr>';
+	*/
 
 	// Other attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_edit.tpl.php';
@@ -551,9 +553,9 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		if (empty($reshook)) {
 			// Send
-			if (empty($user->socid)) {
-				print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init&token='.newToken().'#formmailbeforetitle');
-			}
+			//if (empty($user->socid)) {
+			//	print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init&token='.newToken().'#formmailbeforetitle');
+			//}
 
 			// Back to draft
 			if ($object->status == $object::STATUS_ENABLED) {
@@ -624,7 +626,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		// Show links to link elements
 		$linktoelem = $form->showLinkToObjectBlock($object, null, array('deploymentserver'));
 		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
-	
+
 
 		print '</div><div class="fichehalfright">';
 

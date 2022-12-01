@@ -148,6 +148,7 @@ NameForYourApplication=application address
 AccountAlreadyExistsForEmail=An account already exists for this email. If you are an already registered user and want to create another instance for the account, just login to your <a href="%s" target="_myaccount">customer dashboard</a> to create another instance.
 AnonymousUser=Anonymous user
 NotLanguage=Not language
+Deploymentserver=Deployment server
 DeploymentDateStart=Deployment start date (UTC)
 DeploymentDateEnd=Deployment end date (UTC)
 DeploymentStatus=Deployment status
@@ -754,6 +755,7 @@ OpenCloseStatus=Opened | Closed
 FromDomainName=Only from domain
 FromDomainNameInfo=If the subdomain must be visible only when dashboard or registration page is on a particular domain, enter the subdomain. Put a dummy name will make the subdomain never visible, except if you add &forcesubdomain= as parameter on registration page.
 SubDomainName=Subdomain name
+SellYourSaasSubDomainName=Deployment server (subdomain name)
 RecordsImported=%s Record(s) imported
 ServerCustomerAnnounceStatus=Customer announce status
 ServerCustomerAnnounce=Customer announce
