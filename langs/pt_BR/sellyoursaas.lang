@@ -18,7 +18,6 @@ RegistrationURLDesc=Para obter uma URL para registrar uma instância, você deve
 SecurityOfRegistrations=Segurança do registro
 IHaveAVATID=Eu tenho um ID de imposto/IVA
 NoResourceToCountUsersFound=Esta instância não contém produtos que precisam contar usuários de recursos
-DoNotUseDefaultStripeAccount=Não use a conta de distribuição padrão
 ThirdPartyModified=Modificado por terceiros
 YouCanClainAmountWhen=Você pode reivindicar o valor devido, uma vez por trimestre, e se o restante a cobrar for superior a <b> %s </b>
 SendYourInvoiceTo=Envie sua fatura para %s para <b> %s </b>

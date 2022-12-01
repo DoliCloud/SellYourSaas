@@ -629,7 +629,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
 	$sql.= " ce.deployment_status as instance_status,";
 	$sql.= " s.parent, s.nom as name,";
-	$sql.= " f.total_ht";
+	$sql.= " f.total_ht, f.unit_frequency";
 	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object,";
 	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
@@ -662,7 +662,11 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
 					$listofnewinstances[$obj->customer_id]++;
-					$totalnewinstances += $obj->total_ht;
+					$nbmonth = 1;
+					if ($obj->unit_frequency == 'y') {
+						$nbmonth = 12;
+					}
+					$totalnewinstances += ($obj->total_ht / $nbmonth);
 				}
 				$i++;
 			}
@@ -676,7 +680,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
 	$sql.= " ce.deployment_status as instance_status, ce.undeployment_date,";
 	$sql.= " s.parent, s.nom as name,";
-	$sql.= " f.total_ht";
+	$sql.= " f.total_ht, f.unit_frequency";
 	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object,";
 	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
@@ -709,7 +713,11 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
 					$listoflostinstances[$obj->customer_id]++;
-					$totallostinstances += $obj->total_ht;
+					$nbmonth = 1;
+					if ($obj->unit_frequency == 'y') {
+						$nbmonth = 12;
+					}
+					$totallostinstances += ($obj->total_ht / $nbmonth);
 				}
 				$i++;
 			}

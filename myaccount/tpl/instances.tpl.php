@@ -885,7 +885,7 @@ if ($action == "confirmundeploy") {
 	$formquestion[] = array(
 		"type"=>"radio",
 		"values"=>array(
-			"PriceProblem"=>$langs->trans("PriceProblem")
+			"Price"=>$langs->trans("PriceProblem")
 		),
 		"name"=>"reasonundeploy",
 		"morecss"=>"hideothertag"

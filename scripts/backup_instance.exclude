@@ -3,6 +3,7 @@
 *.log.old
 *log.*.gz
 *log.*.gz.old
+installmodules.lock
 _sessions/*
 _log/*
 _tmp/*

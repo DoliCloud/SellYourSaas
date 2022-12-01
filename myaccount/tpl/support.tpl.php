@@ -436,17 +436,20 @@ if ($sellyoursaassupporturl) {
 				$(".showforautomigration").hide();
 				$("#buttonforautomigrationwithhidden").show();
 				$("#form").focus();
-			})
-			$("#hideautoupgradediv").on("click",function(){
-				console.log("We cancel the automigration");
-				$(".hideforautomigration").show();
-				$(".showforautoupgrade").hide();
-				$("#form").focus();
 			})';
 
 			$stringtoprint .= '
 			$("input[name=\'subject\']").on("change",function(){
 				$("#subject_back").val($(this).val());
+			})';
+		}
+		if (!empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+			$stringtoprint .= '
+			$("#hideautoupgradediv").on("click",function(){
+				console.log("We cancel the autoupgrade");
+				$(".hideforautomigration").show();
+				$(".showforautoupgrade").hide();
+				$("#form").focus();
 			})';
 		}
 
@@ -467,8 +470,8 @@ if ($sellyoursaassupporturl) {
 			print '<div id="showforautomigration" class="showforautomigration" style="display:none;">';
 			print '<br><br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
-			print '<button id="hideautomigrationgoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutomigration").'</button>';
-			print '<button id="hideautomigrationdiv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("AutomigrationErrorOrNoAutomigration").'</button>';
+			print '<button id="hideautomigrationgoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("GoToAutomigration").'</button>&ensp;';
+			print '<button id="hideautomigrationdiv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("AutomigrationErrorOrNoAutomigration").'</button>';
 			print '</div>';
 			print '<br>';
 			print '</div>';
@@ -478,8 +481,8 @@ if ($sellyoursaassupporturl) {
 			print '<div id="showforautoupgrade" class="showforautoupgrade" style="display:none;">';
 			print '<br><br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
-			print '<button id="hideautoupgradegoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("GoToAutoUpgrade").'</button>';
-			print '<button id="hideautoupgradediv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("AutoupgradeErrorOrNoAutoupgrade").'</button>';
+			print '<button id="hideautoupgradegoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("GoToAutoUpgrade").'</button>&ensp;';
+			print '<button id="hideautoupgradediv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("AutoupgradeErrorOrNoAutoupgrade").'</button>';
 			print '</div>';
 			print '<br>';
 			print '</div>';

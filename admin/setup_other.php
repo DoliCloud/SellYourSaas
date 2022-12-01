@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2012-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2022 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 
 /**
- *     \file       htdocs/sellyoursaas/admin/setup.php
+ *     \file       htdocs/sellyoursaas/admin/setup_other.php
  *     \brief      Page administration module SellYourSaas
  */
 
@@ -503,10 +503,17 @@ var_dump(DOL_MAIN_URL_ROOT);
 */
 
 $message = '';
-$url = '<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY', 'KEYNOTDEFINED')).'&mode=test" target="_blank" rel="noopener">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY', 'KEYNOTDEFINED')).'[&mode=test]</a>';
+$url = dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY', 'KEYNOTDEFINED')).'[&mode=test]';
 $message .= img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
-$message = str_replace('{s1}', $url, $message);
-print $message;
+$message = str_replace('{s1}', '', $message);
+print $message.'<br>';
+print '<div class="urllink">';
+print '<input type="text" id="spamurl" class="quatrevingtpercent" value="'.$url.'">';
+print '<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY', 'KEYNOTDEFINED')).'&mode=test" target="_blank" rel="noopener">';
+print img_picto('', 'download', 'class="paddingleft hideonsmartphone"');
+print '</a>';
+print '</div>';
+print ajax_autoselect("spamurl");
 
 print '<br><br>';
 

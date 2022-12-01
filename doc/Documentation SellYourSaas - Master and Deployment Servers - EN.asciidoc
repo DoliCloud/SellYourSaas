@@ -63,7 +63,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * ...
      
 
-The project has been available as a community project since 2020 on GitHub: https://github.com/eldy/sellyoursaas
+The project has been available as a community project since 2020 on GitHub: https://github.com/dolicloud/sellyoursaas
 
 It is composed:
 
@@ -78,7 +78,7 @@ This document presents the steps for implementing your own SaaS business platfor
 
 == Choice and acquisition of a domain name
 
-The entire service will run on a domain name. In the rest of the document, we will use the value *mysaasdomain.com*
+The entire service will run on a domain name. In the rest of the document, we will use the value *mysaasdomainname.com*
 You need to acquire this domain name from a registrar.
 
 == Installation of the machine and OS
@@ -97,8 +97,8 @@ Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and band
 
 _Example with OVH Public Cloud:_
  
-For the master server: VPS or B2-15 or more
-For the deployment server (s), for 500 instances: B2-15 or + (i.e. 2 core server minimum - 8 GB memory minimum - Cost in 2020: 22 euros / month). Double the specifications if you are targeting 1,000 client instances per server.
+For the master server: A 4 GB memory minimum server with 2 CPU minimum.
+For the deployment server(s), for 500 instances: A 8 GB memory minimum server with 4 CPU minimum - Cost in 2020: 30 euros / month.
 
 === Choice a Hostname for the server(s) and set it
 
@@ -485,6 +485,14 @@ sudo vi /etc/skel/.ssh/authorized_keys_support
 
 Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
+Also create a per-user mysql configuration file in */etc/skel/.my.cnf* to enable SellYourSaas end users to use the
+mysql client from their ssh shell connection.
+
+[source, bash]
+---------------
+printf '[client]\nprotocol=tcp' >> /etc/skel/.my.cnf
+---------------
+
 
 === Add alias
 
@@ -691,12 +699,12 @@ On all servers (*Master and Deployment*):
 apt install git
 ---------------
 
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v14 or +) to be placed in */home/admin/wwwroot/dolibarr*
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v16 or +) to be placed in */home/admin/wwwroot/dolibarr*
 
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
@@ -705,7 +713,7 @@ chown -R admin.admin /home/admin/wwwroot/dolibarr
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas 
 ---------------
 
 
@@ -861,6 +869,22 @@ maxemailperdaypaid=500
 ---------------
 mkdir -p /etc/sellyoursaas.d
 ---------------
+
+
+* Optional: If you want to restrict access to some IP (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
+create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only) 
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas.d/xxx-allowed-ip-zzz.conf
+
+# User 1
+Require ip ip.user.1
+# User 2
+Require ip ip.user.2
+---------------
+
+Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufx.sh* to have the change taken into account on the firewall.
 
 
 === Installing the nfs share
@@ -1031,6 +1055,25 @@ sudo apt install -y libreoffice-common libreoffice-writer
 sudo apt install -y mailutils postfix
 ---------------
 
+* Installation of the 22.04+ Ubuntu packages
+
+[source,bash]
+---------------
+sudo apt update
+sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu duc acl ufw sudo
+sudo apt install -y mariadb-server mariadb-client
+sudo apt install -y apache2 apache2-bin lynx
+sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysql php-curl php-memcached php-imagick php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
+sudo apt install -y php-readline php-xmlrpc
+sudo apt install -y php-pear
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y bind9
+sudo apt install -y spamc spamassassin clamav clamav-daemon
+sudo apt install -y fail2ban
+sudo apt install -y libreoffice-common libreoffice-writer
+sudo apt install -y mailutils postfix
+---------------
+
 
 === Disabling automatic update
 
@@ -1074,7 +1117,7 @@ a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
 a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
 a2enmod mpm_itk mpm_prefork
-a2enmod php7.0|php7.2|php7.4
+a2enmod php7.0|php7.2|php7.4|php8.1
 ---------------
 
 Enable apache *configurations* to work with MPM_PREFORK and MPM_ITK:
@@ -1473,7 +1516,7 @@ systemctl stop remote-server-launcher.service
 
 * Installation of fail2ban and activation of the following fail2ban rules:
 
-We will enable some specific fail2ban rules for sellyoursaas:
+We will enable some generic fail2ban rules:
 
   *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
@@ -1481,7 +1524,7 @@ We will enable some specific fail2ban rules for sellyoursaas:
 As well as the specific rules for sellyoursaas:
   
   *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*
-  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
+  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-limitpublic*, *web-dol-registerinstance*
 
 NOTE: The rules available may vary depending on the version of the OS installed.
 
@@ -1658,32 +1701,7 @@ maxretry = 5
 Then modify the values in this file for *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
 
 
-Then place sellyoursaas conf rules supplied with the project in *etc/fail2ban/jail.d* inside the directory of the same name */etc/fail2ban/jail.d* by creating links:
- 
-*For all servers:*
-
-[source, bash]
----------------
-cd /etc/fail2ban/jail.d
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
----------------
-
-*Add also this for Master servers only:*
-
-[source, bash]
----------------
-cd /etc/fail2ban/jail.d
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
----------------
-
-
-Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating links:
+Then place the available filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating links:
 
 [source, bash]
 ---------------
@@ -1693,9 +1711,35 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dol
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-ruleslimitpublic.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+---------------
+
+Then place sellyoursaas conf rules to enable that are supplied with the project in *etc/fail2ban/jail.d* inside the directory of the same name */etc/fail2ban/jail.d* by creating links:
+ 
+*For all servers:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-ruleskoquota.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-rulesko.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-rulesall.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/email-dolibarr-rulesadmin.conf
+---------------
+
+*Add also this for Master servers only:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-rulesbruteforce.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-ruleslimitpublic.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-dolibarr-rulesregisterinstance.conf
 ---------------
 
 
@@ -2064,9 +2108,9 @@ Create a file */etc/postfix/generic* to add binding between email used to send e
 
 [source,bash]
 ---------------
-root@myshortservername						noreply@mysaasdomain.com
-root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
+root@myshortservername						noreply@mysaasdomainname.com
+root@myshortservername.mysaasdomainname.com		noreply@mysaasdomainname.com
+admin@myshortservername.mysaasdomainname.com	noreply@mysaasdomainname.com
 ---------------
 
 Compile the file with:
@@ -2081,7 +2125,7 @@ echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 echo >> /etc/postfix/virtual; postmap /etc/postfix/virtual
 ---------------
 
-Edit/Create the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
+Edit/Create the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomainname.com*:
 
 [source,bash]
 ---------------
@@ -2103,7 +2147,10 @@ myorigin = /etc/mailname
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
 recipient_delimiter = +
-inet_interfaces = public.ip.returned.by_server_s_reverse_dns
+# Use this if your hosting make public IP visible locally with ifconfig -a
+#inet_interfaces = public.ip.returned.by_server_s_reverse_dns
+# Use this if your hosting does not make the public IP visible locally with ifconfig -a
+#inet_interfaces = all
 inet_protocols = ipv4
 smtp_generic_maps = hash:/etc/postfix/generic
 
@@ -2166,7 +2213,7 @@ This is a command to send an email from the server to test the Postfix installat
 
 [source,bash]
 ---------------
-mail supervision@mysaasdomain.com
+mail supervision@mysaasdomainname.com
 ---------------
 
 Then check the email box and/or the file */var/log/mail.log* (if file /var/log/mail.log does not exists, check that */var/log/* has group write permission).
@@ -2205,7 +2252,7 @@ Check that user postfix is in the *sasl* group. If not, add it:
 adduser postfix sasl
 ---------------
 
-Add 'n' to */etc/postfix/master.cf*, to deactivate the smtpd chroot
+Add 'n' to */etc/postf*, to deactivate the smtpd chroot
 
 [source,bash]
 ---------------
@@ -2362,7 +2409,7 @@ FLUSH PRIVILEGES;
 
 On *all servers*:
 
-In order not to allow brute force cracking, if it is not already the case, put the user *root* of the database in authentication from the system root account only (using *auth_socket* or *unix_socket*):
+In order to disallow brute force cracking, if it is not already the case, put the user *root* of the database in authentication from the system root account only (using *auth_socket* or *unix_socket*):
 
 For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
 
@@ -2407,6 +2454,11 @@ Note: To show specific parameters that are not the default values, you can launc
 mysqld --print-defaults
 ---------------
 
+To see the default value
+[source,bash]
+---------------
+SHOW VARIABLES LIKE 'default_authentication_plugin';
+---------------
 
 Note: To delete active plugins, empty the mysql *plugin* table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
 
@@ -2675,7 +2727,7 @@ For this run:
 
 [source,bash]
 ---------------
-a2enmode apparmor
+a2enmod apparmor
 /etc/init.d/apache2 restart;
 ---------------
 
@@ -3065,12 +3117,24 @@ On *Deployment servers*:
 
 The PHP wrapper to send mail allows to intercept any mail sent via PHP before actually sending it (to do an antispam analysis and log it in a file that can be used by fail2ban)
 
+For *PHP versions below 8.1*:
+
 Create a symlink to the 2 tools used for preprocessing PHP
 
 [source,bash]
 ---------------
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
+---------------
+
+For *PHP versions greater than or equal to 8.1*:
+
+Create a hard link to the 2 tools used for preprocessing PHP
+
+[source,bash]
+---------------
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
 Modify the file *php.ini* (the one for *apache* and the one for *cli*) with:
@@ -3353,7 +3417,7 @@ Choose:
 certbot certonly --manual --preferred-challenges=dns -d "admin.<your_domain>"
 ---------------
 
-* On the *deployment servers*, to create automatically renewable wildcard *.withX.mysaasdomain.com certificates :
+* On the *deployment servers*, to create automatically renewable wildcard *.withX.mysaasdomainname.com certificates :
 
 Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
 
@@ -3362,7 +3426,7 @@ Run cerbot with the following command line (you can test it beforehand by adding
 certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
 ---------------
 
-For example, you can use *supervision@mysaasdomain.com* as the email for letsencrypt account.
+For example, you can use *supervision@mysaasdomainname.com* as the email for letsencrypt account.
 
 This create certificates and also enable the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
 
@@ -3403,7 +3467,7 @@ certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.
 ---------------
 
 Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
-*/etc/letsencrypt/renewal/withX.mysaasdomain.com.conf*
+*/etc/letsencrypt/renewal/withX.mysaasdomainname.com.conf*
 
 To check that a DNS update is ok for a challenge, you can use this URL: 
 https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
@@ -3568,7 +3632,7 @@ You must have inside the cron of user *root*
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 40 15 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
-#00 10 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test > /home/admin/logs/batch_detect_evil_instances.log 2>&1
+00 9 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test 86400 > /home/admin/logs/batch_detect_evil_instances.log 2>&1
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
@@ -3627,8 +3691,8 @@ On *Master server*:
 
 [source,ini]
 ---------------
-a2ensite admin.mysaasdomain.com
-a2ensite myaccount.mysaasdomain.com
+a2ensite admin.mysaasdomainname.com
+a2ensite myaccount.mysaasdomainname.com
 /etc/init.d/apache2 restart
 ---------------
 
@@ -3671,9 +3735,11 @@ $dolibarr_main_instance_unique_id='...';	// Use the same ID than the master serv
 
 * Install the free database file of Maxmind.
 
-mkdir /home/admin/tools/maxmind/
+mkdir /home/admin/tools/maxmind/ -p
 
 Copy the file GeoLite2-Country.mmdb you can get from website maxmind.com
+
+(or wget https://cdn.jsdelivr.net/npm/geolite2-country@1.0.2/GeoLite2-Country.mmdb.gz)
 
 chmod -R o-w /home/admin/tools/maxmind
 
@@ -4108,7 +4174,7 @@ The following explains the operations to clone a deployment server into another 
 
 *With OVH*:
 
-Choose name of server, for example:  withX.mysaasdomain.com
+Choose name of server, for example:  withX.mysaasdomainname.com
 
 Choose the snapshot or image to use and copy the content of file */scripts/post_inst_script.sh* into area *post installation script*.
 
@@ -4266,7 +4332,7 @@ Nothing to do.
 
 ==== Other changes to make
 
-- Modify the Postfix configuration files beloew (you can also deactivate Postfix completely or simply send emails to a dummy SMTP server for development purposes)
+- Modify the Postfix configuration files below (you can also deactivate Postfix completely or simply send emails to a dummy SMTP server for development purposes)
   
   */etc/postfix/main.cf*
   */etc/postfix/mydestination*
@@ -4378,12 +4444,12 @@ apt dist-upgrade
 
 # if you move from 16.04 to 18.04, you must also run
 apt install php-mysql
-a2enmode php7.2
+a2enmod php7.2
 apt remove php-fpm php7-fpm
 
 # if you move from 18.04 to 20.04, you must also run
 apt install php-mysql
-a2enmode php7.4
+a2enmod php7.4
 apt remove php-fpm php7-fpm
 ---------------
 
@@ -5183,7 +5249,7 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
 
 Error when sending email in */var/log/mail.log*:
 
-	Mar  2 22:41:59 myservername.mysaasdomain.com postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
+	Mar  2 22:41:59 myservername.mysaasdomainname.com postfix/error[12146]: 7E69E17DC50: to=<admin@novafirstcloud5.localdomain>, orig_to=<admin>, relay=none, delay=164458, delays=164458/0.06/0/0, dsn=4.4.3, status=deferred (delivery temporarily suspended: Host or domain name not found. Name service error for name=smtp.seendgrid.net type=A: Host not found, try again)
 
 => Check you have a file */etc/resolv.conf* that is linked to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
 
@@ -5192,6 +5258,17 @@ or
 nameserver 127.0.0.56
 
 If not, create it and restart postfix.
+
+
+==== Error when sending email unknown user name value: postfix
+
+Error when sending email in */var/log/mail.log*
+
+	fatal: file /etc/postfix/main.cf: parameter mail_owner: unknown user name value: postfix
+	
+=> If the user *postfix* really exists into /etc/passwd, the trouble may be apparmor that does not allow reading the file */etc/passwd*
+
+Check in file /etc/apparmor.d/usr.sbin.apache2 that /etc/passwd is not denied.
 
 
 ==== php sessions files in /var/lib/php/sessions are not purged
@@ -5268,7 +5345,7 @@ Try to restart mysql. Once logged, do a CREATE DATABASE thedatabase; DROP DATABA
 - Check the temp directory is writable by the web server user.
 	
 
-==== Error when doing PHP ssh2_connect to a server
+==== Error when doing PHP ssh2_connect or just ssh to a server
 
 If you find into */var/log/auth.log* an error like:
 
@@ -5281,6 +5358,7 @@ The client (maybe an old PHP version) uses a deprecated algorithm for negotiatio
 [source,bash]
 ---------------
 # Legacy changes - To allow an old client to connect to
+PubkeyAcceptedKeyTypes=+ssh-rsa
 HostKeyAlgorithms +ssh-rsa
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
@@ -5482,7 +5560,7 @@ max_allowed_packet=100000000
 ==== Web request are slow due to maximum number of child reached
 
 You may experience a too high number of child processed (reaching the maximum). You can see this on the
-page https://supervision.mysaasdomain.com/server-status
+page https://supervision.mysaasdomainname.com/server-status
 If most child are in state R, then you can try to reduce this by enabling the module ReqTimeout and set
 
 [source,bash]

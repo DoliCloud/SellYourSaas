@@ -9,6 +9,7 @@
 *log.*.gz.old
 *log.*.zstd
 *log.*.zstd.old
+installmodules.lock
 _sessions/*
 _log/*
 _tmp/*

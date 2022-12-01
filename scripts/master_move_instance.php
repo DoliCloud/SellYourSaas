@@ -200,7 +200,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server.\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
 	print "Mode is test for a test mode.\n";
 	print "        confirm for real mode.\n";
 	print "        confirmredirect for real mode and set old instance as a redirect instance.\n";
@@ -778,6 +778,12 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	$content_grabbed = $resultarray['output'];
 
 	print $content_grabbed."\n";
+	// If table already not exist, return_var is 1
+	// If technical error, return_var is also 1, so we disable this test
+	/*if ($return_var) {
+		print "Error on droping table into the new instance\n";
+		exit(-2);
+	}*/
 }
 
 $fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
@@ -792,6 +798,12 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	$content_grabbed = $resultarray['output'];
 
 	print $content_grabbed."\n";
+	// If table already not exist, return_var is 1
+	// If technical error, return_var is also 1, so we disable this test
+	/*if ($return_var) {
+		print "Error on droping table into the new instance\n";
+		exit(-2);
+	}*/
 }
 
 $fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
