@@ -783,6 +783,8 @@ class modSellYourSaas extends DolibarrModules
 		$param=array('options'=>array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed'));
 		$resultx=$extrafields->addExtraField('deployment_init_adminpass',   "DeploymentInitPassword",  'varchar', 103,   '64',    'contrat', 0, 0,    '',      '', 1, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('deployment_status',                 "DeploymentStatus",   'select', 104,     '',    'contrat', 0, 0,    '',  $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$param=array('options'=>array('Deploymentserver:sellyoursaas/class/deploymentserver.class.php:status=1'=>null));
+		$resultx=$extrafields->addExtraField('deployment_server',                  "DeploymentServer",	  'link', 105,     '',    'contrat', 0, 0,    '',  $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('deployment_host',                     "DeploymentHost",  'varchar', 105,  '128',    'contrat', 0, 0,    '',      '', 1, '', -1, 'DeploymentHostDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('deployment_date_start',          "DeploymentDateStart", 'datetime', 106,     '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('deployment_date_end',              "DeploymentDateEnd", 'datetime', 107,     '',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
@@ -846,7 +848,53 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('rsapublicmain', 	    	     "PublicRSAKey",  'text',     100,    '2000', 'user', 0, 0,  '',      '', 1, '',  1, 'PublicRSAKeyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('ippublicmain', 	    	     "IPPublicMain",  'varchar',  105,     '255', 'user', 0, 0,  '',      '', 1, '',  1, 'IPPublicMainDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
+		// Routine to transform SUB_DOMAIN_NAMES and SUB_DOMAIN_IP constants into object
+		if ($result > 0 && (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')))) {
+			$errors = 0;
+			$now = dol_now();
+			$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+			$listofips = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'));
+			$sql = "INSERT INTO ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver ( ref, entity, ipaddress, status, fromdomainname, date_creation)";
+			$sql .= " VALUES ";
+			$entity = $_SESSION["dol_entity"];
+			foreach ($listofips as $key => $value) {
+				$valuesql = "(";
+				$tmparraydomain = explode(':', $listofdomains[$key]);
+				$valuesql .= "'".$this->db->escape($tmparraydomain[0])."',";
+				$valuesql .= $this->db->escape($entity).",";
+				$valuesql .= "'".$this->db->escape($value)."',";
 
+				if (! empty($tmparraydomain[1])) {
+					if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
+						$valuesql .= "'".$this->db->escape(0)."',";
+						$valuesql .= "NULL,";	
+					} else {
+						if (! empty($tmparraydomain[2])) {
+							$valuesql .= "'".$this->db->escape(0)."',";	
+						}else {
+							$valuesql .= "'".$this->db->escape(1)."',";
+						}
+						$valuesql .= "'".$this->db->escape($tmparraydomain[1])."',";
+					}
+				} else {
+					$valuesql .= "'".$this->db->escape(1)."',";
+					$valuesql .= "NULL,";
+				}
+				$valuesql .= "'".$this->db->idate($now)."'";
+				$nbrecords++;
+				if ($nbrecords == count($listofips)) {
+					$valuesql .= ")";
+				}else {
+					$valuesql .= "),";
+				}
+				$sql .= $valuesql;
+			}
+			$resql = $this->db->query($sql);
+			$resql ? : $errors++;
+			if (!$errors) {
+				dolibarr_set_const($this->db, "SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION", 1, 'int', 0, '', $conf->entity);
+			}
+		}
 		$sql = array();
 		return $this->_init($sql, $options);
 	}

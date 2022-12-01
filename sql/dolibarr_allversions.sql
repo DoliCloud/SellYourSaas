@@ -110,6 +110,22 @@ CREATE TABLE llx_sellyoursaas_blacklistdir(
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
 
+CREATE TABLE llx_sellyoursaas_deploymentserver(
+	-- BEGIN MODULEBUILDER FIELDS
+	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
+	ref varchar(128) NOT NULL,
+	entity integer DEFAULT 1 NOT NULL,  -- multi company id
+	note_private text, 
+	date_creation datetime NOT NULL,
+	date_modification timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	status integer DEFAULT 0 NOT NULL,
+	fk_country integer,
+	fromdomainname varchar(128),
+	ipaddress varchar(128) NOT NULL,
+	severcustomerannounce text,
+	severcustomerannouncestatus integer
+	-- END MODULEBUILDER FIELDS
+) ENGINE=innodb;
 
 ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN date_use datetime;
 ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN comment varchar(255);

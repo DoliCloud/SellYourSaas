@@ -195,7 +195,13 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 
 // Forge complete name of instance
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
-	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+	}else {
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$staticdeploymentserver = new Deploymentserver($db);
+		$tmparray = $staticdeploymentserver->fetchAllDomains();
+	}
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
 	$instance = $instance.".".$tmpstring;   // Automatically concat first domain name
 }

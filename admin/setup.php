@@ -47,6 +47,7 @@ require_once DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formticket.class.php";
 require_once DOL_DOCUMENT_ROOT."/categories/class/categorie.class.php";
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 
 // Access control
 if (! $user->admin) accessforbidden();
@@ -63,7 +64,12 @@ $langs->loadLangs(array("admin", "errors", "install", "sellyoursaas@sellyoursaas
 $hookmanager->initHooks(array('sellyoursaas-setup'));
 
 $tmpservices=array();
-$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+$staticdeploymentserver = new Deploymentserver($db);
+if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+}else {
+	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
+}
 foreach ($tmpservicessub as $key => $tmpservicesub) {
 	$tmpservicesub = preg_replace('/:.*$/', '', $tmpservicesub);
 	if ($key > 0) $tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
@@ -209,7 +215,6 @@ if (in_array('exec', $arrayoffunctionsdisabled)) {
 }
 print "<br>\n";
 
-
 $error=0;
 
 $head = sellyoursaas_admin_prepare_head();
@@ -247,19 +252,21 @@ print '</td>';
 print '<td><span class="opacitymedium small">mysaasdomainname.com</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td class="fieldrequired">'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
-print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES').'" class="minwidth300">';
-print '</td>';
-print '<td><span class="opacitymedium small">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
-print '</tr>';
+if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+	print '<tr class="oddeven"><td class="fieldrequired">'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
+	print '<td>';
+	print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES').'" class="minwidth300">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">with.mysaasdomainname.com,with.mysaas2.com:mysaas2.com...</span></td>';
+	print '</tr>';
 
-print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
-print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_IP" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP').'" class="minwidth300">';
-print '</td>';
-print '<td><span class="opacitymedium small">192.168.0.1,123.456.789.012...</span></td>';
-print '</tr>';
+	print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSubDomainsIP").'</td>';
+	print '<td>';
+	print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_IP" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP').'" class="minwidth300">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">192.168.0.1,123.456.789.012...</span></td>';
+	print '</tr>';
+}
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainEmail").'</td>';
 print '<td>';

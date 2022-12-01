@@ -24,6 +24,7 @@
 require_once DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php";
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
 dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
+dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 
 
 /**
@@ -160,11 +161,20 @@ class ActionsSellyoursaas
 
 		if (! empty($parameters['objref'])) {
 			$isanurlofasellyoursaasinstance=false;
-			$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-			foreach ($tmparray as $tmp) {
-				$newtmp = preg_replace('/:.*$/', '', $tmp);
-				if (preg_match('/'.preg_quote($newtmp, '/').'$/', $parameters['objref'])) $isanurlofasellyoursaasinstance=true;
+			if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES)) {
+				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+				foreach ($tmparray as $tmp) {
+					$newtmp = preg_replace('/:.*$/', '', $tmp);
+					if (preg_match('/'.preg_quote($newtmp, '/').'$/', $parameters['objref'])) $isanurlofasellyoursaasinstance=true;
+				}
+			} else {
+				$staticdeploymentserver = new Deploymentserver($this->db);
+				$tmparray = $staticdeploymentserver->fetchAllDomains();
+				foreach ($tmparray as $tmp) {
+					if (preg_match('/'.preg_quote($tmp, '/').'$/', $parameters['objref'])) $isanurlofasellyoursaasinstance=true;
+				}
 			}
+			
 			if ($isanurlofasellyoursaasinstance) {
 				$objref = $parameters['objref'];
 				$url = 'https://'.$parameters['objref'];
@@ -220,8 +230,34 @@ class ActionsSellyoursaas
 			&& ! empty($object->array_options['options_deployment_status'])) {
 			if ($user->hasRight('sellyoursaas', 'write')) {
 				if (in_array($object->array_options['options_deployment_status'], array('processing', 'undeployed'))) {
-					$alt = $langs->trans("SellYourSaasSubDomains").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
-					$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
+					if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+						$alt = $langs->trans("SellYourSaasSubDomains").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
+						$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
+					} else {
+						$listsubdomainname = array();
+						$listsubdomainip = array();
+						$sql = "SELECT ref, ipaddress";
+						$sql .= " FROM ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver";
+						$sql .= " WHERE entity = '".$this->db->escape($conf->entity)."'";
+						$resql = $this->db->query($sql);
+						if ($resql) {
+							$num = $this->db->num_rows($resql);
+							while ($i < $num) {
+								$obj = $this->db->fetch_object($resql);
+								$listsubdomainname[] = $obj->ref;
+								$listsubdomainip[] = $obj->ipaddress;
+								$i++;
+							}
+						}else {
+							$this->error = $this->db->lasterror();
+							dol_syslog(__METHOD__.' '.join(',', $this->errors), LOG_ERR);
+							return -1;
+						}
+						$listsubdomainip = implode(',', $listsubdomainip);
+						$listsubdomainname = implode(',', $listsubdomainname);
+						$alt = $langs->trans("SellYourSaasSubDomains").' '.$listsubdomainname;
+						$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$listsubdomainip;
+					}
 
 					print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deploy&token='.urlencode(newToken()).'" title="'.dol_escape_htmltag($alt).'">' . $langs->trans('Redeploy') . '</a>';
 				} else {
@@ -1174,10 +1210,18 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'home';
 			$h++;
 
-			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
-			$head[$h][1] = $langs->trans("DeploymentServers");
-			$head[$h][2] = 'deploymentservers';
-			$h++;
+			if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+				$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
+				$head[$h][1] = $langs->trans("DeploymentServers");
+				$head[$h][2] = 'deploymentservers';
+				$h++;
+			}else {
+				$head[$h][0] = '/custom/sellyoursaas/deploymentserver_list.php';
+				$head[$h][0] = dol_buildpath('/sellyoursaas/deploymentserver_list.php', 1);
+				$head[$h][1] = $langs->trans("DeploymentServers");
+				$head[$h][2] = 'deploymentservers';
+				$h++; 
+			}
 
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php', 1);
 			$head[$h][1] = $langs->trans("AntiSpam");

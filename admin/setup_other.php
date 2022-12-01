@@ -47,6 +47,7 @@ require_once DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formticket.class.php";
 require_once DOL_DOCUMENT_ROOT."/categories/class/categorie.class.php";
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 
 // Access control
 if (! $user->admin) accessforbidden();
@@ -63,7 +64,12 @@ $langs->loadLangs(array("admin", "errors", "install", "sellyoursaas@sellyoursaas
 $hookmanager->initHooks(array('sellyoursaas-setup'));
 
 $tmpservices=array();
-$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+$staticdeploymentserver = new Deploymentserver($db);
+if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+}else {
+	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
+}
 foreach ($tmpservicessub as $key => $tmpservicesub) {
 	$tmpservicesub = preg_replace('/:.*$/', '', $tmpservicesub);
 	if ($key > 0) $tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);

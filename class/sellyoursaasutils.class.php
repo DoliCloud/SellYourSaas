@@ -4129,33 +4129,55 @@ class SellYourSaasUtils
 		$error = 0;
 
 		$REMOTEIPTODEPLOYTO='';
-		$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-		$found=0;
-		foreach ($tmparray as $key => $val) {
-			$newval = preg_replace('/:.*$/', '', $val);
-			if ($newval == $domainname) {
-				if ($onlyifopen && preg_match('/:closed/', $val)) {		// Can be 'withX.adomain.com:closed' or 'withX.adomain.com:closed:adomain.com'
-					// This entry is closed.
-					continue;
+		if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+			$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+			$found=0;
+			foreach ($tmparray as $key => $val) {
+				$newval = preg_replace('/:.*$/', '', $val);
+				if ($newval == $domainname) {
+					if ($onlyifopen && preg_match('/:closed/', $val)) {		// Can be 'withX.adomain.com:closed' or 'withX.adomain.com:closed:adomain.com'
+						// This entry is closed.
+						continue;
+					}
+					$found = $key+1;
+					break;
 				}
-				$found = $key+1;
-				break;
 			}
-		}
-		//print 'Found domain at position '.$found;
-		if (! $found) {
-			dol_syslog("Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES, LOG_WARNING);
-			$this->error="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
-			$this->errors[]="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
-			$error++;
-		} else {
-			$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
-			$REMOTEIPTODEPLOYTO=$tmparray[($found-1)];
-			if (! $REMOTEIPTODEPLOYTO) {
-				dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP, LOG_WARNING);
-				$this->error="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
-				$this->errors[]="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
+			//print 'Found domain at position '.$found;
+			if (! $found) {
+				dol_syslog("Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES, LOG_WARNING);
+				$this->error="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
+				$this->errors[]="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
 				$error++;
+			} else {
+				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+				$REMOTEIPTODEPLOYTO=$tmparray[($found-1)];
+				if (! $REMOTEIPTODEPLOYTO) {
+					dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP, LOG_WARNING);
+					$this->error="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
+					$this->errors[]="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
+					$error++;
+				}
+			}
+		} else {
+			dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+			$deployementserver = new Deploymentserver($this->db);
+
+			$res = $deployementserver->fetch(null, $domainname);
+
+			if ($res < 0) {
+				$this->error = $deployementserver->error;
+				$this->errors[] = $deployementserver->errors;
+				$error++;
+			}else if ($res == 0 ) {
+				dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
+				$this->error="Failed to find server domain '".$domainname."' into database";
+				$this->errors[]="Failed to find server domain '".$domainname."' into database";
+				$error++;
+			}
+
+			if ($deployementserver->status != $deployementserver::STATUS_DISABLED) {
+				$REMOTEIPTODEPLOYTO = $deployementserver->ipaddress;
 			}
 		}
 
