@@ -30,7 +30,10 @@ if ($action == 'addauthorizedkey') {
 	$server=$hostname_os;
 
 	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+
+	dol_syslog("ssh2_connect $server $server_port");
 	$connection = ssh2_connect($server, $server_port);
+
 	if ($connection) {
 		if (! @ssh2_auth_password($connection, $username_web, $password_web)) {
 			dol_syslog("Could not authenticate with username ".$username_web." and password ".preg_replace('/./', '*', $password_web), LOG_WARNING);
@@ -56,6 +59,7 @@ if ($action == 'addauthorizedkey') {
 
 			// Create authorized_keys_support file
 			if (empty($fstat['atime'])) {		// Failed to connect or file does not exists
+				//dol_syslog("filecert=".$filecert);
 				$stream = fopen($filecert, 'w');
 				if ($stream === false) {
 					setEventMessages($langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile"), null, 'errors');
