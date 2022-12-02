@@ -122,8 +122,8 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	fk_country integer,
 	fromdomainname varchar(128),
 	ipaddress varchar(128) NOT NULL,
-	severcustomerannounce text,
-	severcustomerannouncestatus integer
+	servercustomerannounce text,
+	servercustomerannouncestatus integer
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
 
