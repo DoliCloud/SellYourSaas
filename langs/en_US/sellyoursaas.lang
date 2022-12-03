@@ -466,6 +466,7 @@ InstanceCreationBlockedForSecurityPurpose=Creation of your instance has been blo
 EnableNewInstance=Enable new registration/instances
 CustomerAccountArea=Customer accounts area
 MasterServer=Master server
+DeploymentServer=Deployment server
 DeploymentServers=Deployment servers
 PutAllInstancesOnLine=Put all instance online
 PutAllInstancesOffLine=Put all instance offline
