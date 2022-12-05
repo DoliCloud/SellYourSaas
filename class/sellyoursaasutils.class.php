@@ -4129,7 +4129,7 @@ class SellYourSaasUtils
 		$error = 0;
 
 		$REMOTEIPTODEPLOYTO='';
-		if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+		if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 			$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 			$found=0;
 			foreach ($tmparray as $key => $val) {
