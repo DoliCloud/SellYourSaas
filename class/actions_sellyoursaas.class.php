@@ -161,7 +161,7 @@ class ActionsSellyoursaas
 
 		if (! empty($parameters['objref'])) {
 			$isanurlofasellyoursaasinstance=false;
-			if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+			if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 				foreach ($tmparray as $tmp) {
 					$newtmp = preg_replace('/:.*$/', '', $tmp);
@@ -230,7 +230,7 @@ class ActionsSellyoursaas
 			&& ! empty($object->array_options['options_deployment_status'])) {
 			if ($user->hasRight('sellyoursaas', 'write')) {
 				if (in_array($object->array_options['options_deployment_status'], array('processing', 'undeployed'))) {
-					if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+					if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 						$alt = $langs->trans("SellYourSaasSubDomains").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
 						$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
 					} else {
@@ -1210,7 +1210,7 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'home';
 			$h++;
 
-			if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+			if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 				$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
 				$head[$h][1] = $langs->trans("DeploymentServers");
 				$head[$h][2] = 'deploymentservers';
