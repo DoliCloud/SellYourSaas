@@ -1085,19 +1085,19 @@ if ($reusecontractid) {
 			dol_print_error_email('BADDOMAIN', 'Trying to deploy on a not valid domain '.$domainname.' (not exists or closed).', null, 'alert alert-error');
 			exit(-94);
 		}
-		$deploymentserver = new Deploymentserver($db);
-		$deploymentserver->fetch(null, $domainname);
+		//$deploymentserver = new Deploymentserver($db);
+		//$deploymentserver->fetch(null, $domainname);
 
 		$contract->array_options['options_plan'] = $productref;
 		$contract->array_options['options_deployment_status'] = 'processing';
-		$contract->array_options['options_deployment_server'] = $deploymentserver->id;
+		//$contract->array_options['options_deployment_server'] = $deploymentserver->id;
+		$contract->array_options['options_deployment_host'] = $serverdeployement;
 		$contract->array_options['options_deployment_date_start'] = $now;
 		$contract->array_options['options_deployment_init_email'] = $email;
 		$contract->array_options['options_deployment_init_adminpass'] = $password;
 		$contract->array_options['options_date_endfreeperiod'] = $date_end;
 		$contract->array_options['options_undeployment_date'] = '';
 		$contract->array_options['options_undeployment_ip'] = '';
-		$contract->array_options['options_deployment_host'] = $serverdeployement;
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;

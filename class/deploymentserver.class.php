@@ -112,12 +112,12 @@ class Deploymentserver extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>-1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'ref' => array('type'=>'varchar(128)', 'label'=>'SellYourSaasSubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Reference of object', 'csslist'=>'tdoverflowmax250','visible'=>1, 'showoncombobox'=>1),
+		'ref' => array('type'=>'varchar(128)', 'label'=>'SellYourSaasSubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Reference of object', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
 		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo",),
 		'entity' =>array('type'=>'integer', 'label'=>'Entity', 'default'=>1, 'enabled'=>1, 'visible'=>0, 'notnull'=>1, 'position'=>20, 'index'=>1),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'date_modification' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2),
-		'ipaddress' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>51, 'notnull'=>1, 'visible'=>1),
+		'ipaddress' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>51, 'notnull'=>1, 'visible'=>1, 'showoncombobox'=>1),
 		//'nb_instances' => array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'enabled'=>'1', 'position'=>60, 'visible'=>1, 'index'=>1),
 		//'fk_country' => array('type'=>'integer:Ccountry:core/class/ccountry.class.php', 'label'=>'Country', 'enabled'=>'1', 'position'=>52, 'notnull'=>0, 'visible'=>-1, 'picto'=>'country', 'css'=>'maxwidth500 '),
 		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
