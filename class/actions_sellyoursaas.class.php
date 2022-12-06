@@ -165,13 +165,18 @@ class ActionsSellyoursaas
 				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 				foreach ($tmparray as $tmp) {
 					$newtmp = preg_replace('/:.*$/', '', $tmp);
-					if (preg_match('/'.preg_quote($newtmp, '/').'$/', $parameters['objref'])) $isanurlofasellyoursaasinstance=true;
+					if (preg_match('/'.preg_quote('.'.$newtmp, '/').'$/', $parameters['objref'])) {
+						$isanurlofasellyoursaasinstance=true;
+					}
 				}
 			} else {
 				$staticdeploymentserver = new Deploymentserver($this->db);
 				$tmparray = $staticdeploymentserver->fetchAllDomains();
 				foreach ($tmparray as $tmp) {
-					if (preg_match('/'.preg_quote($tmp, '/').'$/', $parameters['objref'])) $isanurlofasellyoursaasinstance=true;
+					$newtmp = preg_replace('/:.*$/', '', $tmp);
+					if (preg_match('/'.preg_quote('.'.$newtmp, '/').'$/', $parameters['objref'])) {
+						$isanurlofasellyoursaasinstance=true;
+					}
 				}
 			}
 
