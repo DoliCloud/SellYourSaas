@@ -4129,7 +4129,7 @@ class SellYourSaasUtils
 		$error = 0;
 
 		$REMOTEIPTODEPLOYTO='';
-		if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+		if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 			$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 			$found=0;
 			foreach ($tmparray as $key => $val) {
@@ -4169,7 +4169,7 @@ class SellYourSaasUtils
 				$this->error = $deployementserver->error;
 				$this->errors[] = $deployementserver->errors;
 				$error++;
-			}else if ($res == 0 ) {
+			} elseif ($res == 0 ) {
 				dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
 				$this->error="Failed to find server domain '".$domainname."' into database";
 				$this->errors[]="Failed to find server domain '".$domainname."' into database";

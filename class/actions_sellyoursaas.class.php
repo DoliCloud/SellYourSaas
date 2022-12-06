@@ -161,7 +161,7 @@ class ActionsSellyoursaas
 
 		if (! empty($parameters['objref'])) {
 			$isanurlofasellyoursaasinstance=false;
-			if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES)) {
+			if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
 				foreach ($tmparray as $tmp) {
 					$newtmp = preg_replace('/:.*$/', '', $tmp);
@@ -174,7 +174,7 @@ class ActionsSellyoursaas
 					if (preg_match('/'.preg_quote($tmp, '/').'$/', $parameters['objref'])) $isanurlofasellyoursaasinstance=true;
 				}
 			}
-			
+
 			if ($isanurlofasellyoursaasinstance) {
 				$objref = $parameters['objref'];
 				$url = 'https://'.$parameters['objref'];
@@ -230,7 +230,7 @@ class ActionsSellyoursaas
 			&& ! empty($object->array_options['options_deployment_status'])) {
 			if ($user->hasRight('sellyoursaas', 'write')) {
 				if (in_array($object->array_options['options_deployment_status'], array('processing', 'undeployed'))) {
-					if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+					if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 						$alt = $langs->trans("SellYourSaasSubDomains").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
 						$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
 					} else {
@@ -248,7 +248,7 @@ class ActionsSellyoursaas
 								$listsubdomainip[] = $obj->ipaddress;
 								$i++;
 							}
-						}else {
+						} else {
 							$this->error = $this->db->lasterror();
 							dol_syslog(__METHOD__.' '.join(',', $this->errors), LOG_ERR);
 							return -1;
@@ -1210,17 +1210,17 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'home';
 			$h++;
 
-			if (!empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES) && !empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+			if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 				$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
 				$head[$h][1] = $langs->trans("DeploymentServers");
 				$head[$h][2] = 'deploymentservers';
 				$h++;
-			}else {
+			} else {
 				$head[$h][0] = '/custom/sellyoursaas/deploymentserver_list.php';
 				$head[$h][0] = dol_buildpath('/sellyoursaas/deploymentserver_list.php', 1);
 				$head[$h][1] = $langs->trans("DeploymentServers");
 				$head[$h][2] = 'deploymentservers';
-				$h++; 
+				$h++;
 			}
 
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php', 1);
