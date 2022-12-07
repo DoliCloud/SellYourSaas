@@ -178,6 +178,7 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields['commands'] = array('type'=>'varchar', 'label'=>'Commands', 'checked'=>1, 'enabled'=>1, 'position'=>300, 'csslist'=>'center');
 $arrayfields['nb_instances'] = array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'checked'=>1, 'enabled'=>1, 'position'=>305, 'csslist'=>'right');
+$arrayfields['nb_backups'] = array('type'=>'integer', 'label'=>'NbOfBackups', 'checked'=>1, 'enabled'=>1, 'position'=>306, 'csslist'=>'right');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
 // There is several ways to check permission.
@@ -593,6 +594,9 @@ if (!empty($arrayfields['commands']['checked'])) {
 if (!empty($arrayfields['nb_instances']['checked'])) {
 	print '<td class="liste_titre"></td>';
 }
+if (!empty($arrayfields['nb_backups']['checked'])) {
+	print '<td class="liste_titre"></td>';
+}
 // Action column
 if (empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {
 	print '<td class="liste_titre maxwidthsearch">';
@@ -644,6 +648,10 @@ if (!empty($arrayfields['nb_instances']['checked'])) {
 	print '<th class="liste_titre right">'.$langs->trans("NbOfOpenInstances").'</th>';
 	$totalarray['nbfield']++;
 }
+if (!empty($arrayfields['nb_backups']['checked'])) {
+	print '<th class="liste_titre right">'.$langs->trans("NbOfBackups").'</th>';
+	$totalarray['nbfield']++;
+}
 // Action column
 if (empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {
 	print getTitleFieldOfList(($mode != 'kanban' ? $selectedfields : ''), 0, $_SERVER["PHP_SELF"], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
@@ -664,13 +672,20 @@ if (isset($extrafields->attributes[$object->table_element]['computed']) && is_ar
 
 // Get nb of open instances per ip
 $openinstances = array();
-$sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb FROM ".$db->prefix()."contrat_extrafields as ce";
+$backupokinstances = array();
+$backuptotalinstances = array();
+$sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko";
+$sqlperhost .= " FROM ".$db->prefix()."contrat_extrafields as ce";
 $sqlperhost .= " WHERE deployment_status in ('processing', 'done')";
 $sqlperhost .= " GROUP BY ce.deployment_host";
 $resqlperhost = $db->query($sqlperhost);
-if ($sqlperhost) {
+if ($resqlperhost) {
 	while ($obj = $db->fetch_object($resqlperhost)) {
 		$openinstances[$obj->deployment_host] = (int) $obj->nb;
+		$backupokinstances[$obj->deployment_host] = (int) $obj->nbbackupok;
+		$backuptotalinstances[$obj->deployment_host] = (int) $obj->nbbackupok + (int) $obj->nbbackupko;
 	}
 } else {
 	dol_print_error($db);
@@ -777,18 +792,32 @@ while ($i < $imaxinloop) {
 		print $hookmanager->resPrint;
 		// Column for commands
 		if (!empty($arrayfields['commands']['checked'])) {
-			print '<td class="small">';
+			print '<td class="small tdoverflowmax150">';
 			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
-			print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
+			print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, -1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
 			print '</td>';
-			print '<td class="small">';
+			print '<td class="small tdoverflowmax150">';
 			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
-			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
+			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, -1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
 			print '</td>';
 		}
 		// Column nb of instances
 		if (!empty($arrayfields['nb_instances']['checked'])) {
 			print '<td class="right">'.$openinstances[$obj->ipaddress].'</td>';
+		}
+		// Column nb of instances backups
+		if (!empty($arrayfields['nb_backups']['checked'])) {
+			print '<td class="right">';
+			if ($backuptotalinstances[$obj->ipaddress]) {
+				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
+					print '<span class="error">';
+				}
+				print $backupokinstances[$obj->ipaddress].'/'.$backuptotalinstances[$obj->ipaddress];
+				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
+					print '</span>';
+				}
+			}
+			print '</td>';
 		}
 		// Action column
 		if (empty($conf->global->MAIN_CHECKBOX_LEFT_COLUMN)) {

@@ -3,6 +3,8 @@
 
 ## 1.3
 
+ * NEW Add count of backup and error backup into list of servers
+ * NEW Store list of deployment servers into a table
  * NEW Add script disk_used_per_instance.sh
  * NEW Can send an email on sellyoursaas job error (need dolibarr 17+) 
  * NEW Can add a server and remove it from the Deployment tab. Need write permission of sellyoursaas. No more need for admin status.  

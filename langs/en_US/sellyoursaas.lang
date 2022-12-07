@@ -30,6 +30,7 @@ NbOfInstancesActivePayingAll=Number of paying instances
 NbOfInstancesActivePayingDesc=Number of instances deployed with existing active recurring invoice, non expired and non suspended
 NbOfInstancesActivePayingWithoutRecInvoice=Note: %s instances(s) of paying customers have no enabled recurring invoice
 NbOfInstancesPaying=Nb of non test instances
+NbOfBackups=Nb of backups
 NbOfActiveInstances=Nb of active instances
 NbOfSuspendedInstances=Nb of suspended instances
 NbOfExpiredInstances=Nb of expired instances
