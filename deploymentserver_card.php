@@ -242,14 +242,20 @@ llxHeader('', $title, $help_url);
 
 // Get nb of open instances for this deployment IP
 if ($object->ipaddress) {
-	//$openinstances = array();
-	$sql = "SELECT COUNT(rowid) as nb FROM ".$db->prefix()."contrat_extrafields as ce";
-	$sql .= " WHERE deployment_status in ('processing', 'done')";
-	$sql .= " AND ce.deployment_host = '".$db->escape($object->ipaddress)."'";
-	$resql = $db->query($sql);
-	if ($resql) {
-		$obj = $db->fetch_object($resql);
-		$object->nb_instances = (int) $obj->nb;
+	$sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
+	$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
+	$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko";
+	$sqlperhost .= " FROM ".$db->prefix()."contrat_extrafields as ce";
+	$sqlperhost .= " WHERE deployment_status in ('processing', 'done')";
+	$sqlperhost .= " AND ce.deployment_host = '".$db->escape($object->ipaddress)."'";
+	$sqlperhost .= " GROUP BY ce.deployment_host";
+	$resqlperhost = $db->query($sqlperhost);
+	if ($resqlperhost) {
+		while ($obj = $db->fetch_object($resqlperhost)) {
+			$object->nb_instances = (int) $obj->nb;
+			$object->nb_backupok = (int) $obj->nbbackupok;
+			$object->nb_backuptotal = (int) $obj->nbbackupok + (int) $obj->nbbackupko;
+		}
 	} else {
 		dol_print_error($db);
 	}
@@ -470,13 +476,33 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	//unset($object->fields['fk_soc']);					// Hide field already shown in banner
 	include DOL_DOCUMENT_ROOT.'/core/tpl/commonfields_view.tpl.php';
 
-	//Add instance count
+	// Instance nb
 	print '<tr><td class="">';
-	print $form->textwithpicto($langs->trans("Instances"), $langs->trans("NbOfOpenInstances"));
+	//print $form->textwithpicto($langs->trans("NbOfOpenInstances"), $langs->trans("NbOfOpenInstances"));
+	print $langs->trans("NbOfOpenInstances");
 	print '</td>';
 	print '<td>';
 	print dol_escape_htmltag($object->nb_instances);
-	print '</tr></td>';
+	print '</td></tr>';
+
+	// Instance nb
+	print '<tr><td class="">';
+	//print $form->textwithpicto($langs->trans("NbOfBackups"), $langs->trans("NbOfBackups"));
+	print $langs->trans("NbOfBackups");
+	print '</td>';
+	print '<td>';
+	$return = '';
+	if ($object->nb_backuptotal) {
+		if ($object->nb_backuptotal != $object->nb_backupok) {
+			$return .= '<span class="error">';
+		}
+		$return .= $object->nb_backupok.'/'.$object->nb_backuptotal;
+		if ($object->nb_backuptotal != $object->nb_backupok) {
+			$return .= '</span>';
+		}
+	}
+	print $return;
+	print '</td></tr>';
 
 	// Other attributes. Fields from hook formObjectOptions and Extrafields.
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
