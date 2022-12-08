@@ -1132,8 +1132,10 @@ has-warning .control-label,.has-warning .radio,.has-warning .checkbox
 -webkit-box-shadow: none;box-shadow: none;}.has-warning .form-control
 :focus {border-color: #f5d89e;-webkit-box-shadow: none;box-shadow: 
 none;}.has-warning .input-group-addon {color: #8a6d3b;border-color: 
-#faebcc;background-color: #fcf8e3;}.has-warning .
-form-control-feedback {color: #8a6d3b;}.has-error .help-block,.
+#faebcc;background-color: #fcf8e3;}
+.has-warning .
+form-control-feedback {color: #8a6d3b;}
+.has-error .help-block,.
 has-error .help-inline,.has-error .control-label,.has-error .radio,.
 has-error .checkbox,.has-error .radio-inline,.has-error .
 checkbox-inline {color: #a94442;}.has-error .form-control {

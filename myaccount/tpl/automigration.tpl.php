@@ -381,7 +381,7 @@ if ($action == 'view') {
                 </small>
                 </div>
                 <div class="containerflexautomigration">
-					<div class="right" style="width:30%;margin-right:10px">
+					<div class="right" style="margin-right:10px">
 						<a href="'.$_SERVER["REQUEST_URI"].'#Step2"><button id="buttonstep_2" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
 					</div>
 					<div>
@@ -403,7 +403,7 @@ if ($action == 'view') {
                 </div><br>
                 <div class="center">
                 <div class="containerflexautomigration">
-					<div class="right" style="width:30%;margin-right:10px">
+					<div class="right" style="margin-right:10px">
 						<a href="'.$_SERVER["REQUEST_URI"].'#Step3"><button id="buttonstep_3" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button></a>
 					</div>
 					<div>
@@ -517,7 +517,7 @@ if ($action == 'view') {
             </strong></h3>
             </div><br>
 			<div id="buttonstep4migration" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ?'style="display:none;"':'').'>
-				<div class="right" style="width:30%;margin-right:10px">
+				<div class="right" style="margin-right:10px">
 					<button id="buttonstep_4" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 				</div>
 				<div>
@@ -546,7 +546,7 @@ if ($action == 'view') {
             </div><br>
 
 			<div id="sumbmitfiles" class="containerflexautomigration" style="display:none;">
-				<div class="right" style="width:30%;margin-right:10px">
+				<div class="right" style="margin-right:10px">
                 	<input type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
 				</div>
 				<div>

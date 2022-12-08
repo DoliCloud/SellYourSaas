@@ -303,7 +303,7 @@ if ($action == "instanceverification") {
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'</h4>';
 		print '<br><div class="containerflexautomigration">
-					<div class="right" style="width:30%;margin-right:10px">
+					<div class="right" style="margin-right:10px">
 						<button id="" type="submit" class="btn green-haze btn-circle btnstep" onclick="applywaitMask()">'.$langs->trans("ConfirmAutoupgrade").'</button>
 					</div>
 					<div>
@@ -470,15 +470,15 @@ if ($action == "instanceverification") {
 		print'</select><br><br>';
 		print'</div>
 			<div class="center">
-			<h3 style="color:red;"><strong>
+			<h3><div class="note note-warning">
 			'.$langs->trans("AutoupgradeStep1Warning").'
-			</strong></h3>
-			<h3 style="color:#ffcb00;"><strong>
+			</div></h3>
+			<div class="bold">
 			'.$langs->trans("AutoupgradeStep1Note").'
-			</strong></h3>
+			</div>
 			</div><br>
 			<div id="buttonstep1upgrade" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ?'style="display:none;"':'').'>
-					<div class="right" style="width:30%;margin-right:10px">
+					<div class="right" style="margin-right:10px">
 						<button id="buttonstep_2" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 					</div>
 					<div>
@@ -498,7 +498,7 @@ if ($action == "instanceverification") {
 					<br>
 					<div class="center">
 					<div class="containerflexautomigration">
-						<div class="right" style="width:30%;margin-right:10px">
+						<div class="right" style="margin-right:10px">
 							<button id="buttonstep_3" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 						</div>
 						<div>
