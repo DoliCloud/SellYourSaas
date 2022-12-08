@@ -546,10 +546,10 @@ if ($action == 'view') {
             </div><br>
 
 			<div id="sumbmitfiles" class="containerflexautomigration" style="display:none;">
-				<div class="right" style="margin-right:10px">
+				<div class="right containerflexautomigrationitem" style="margin-right:10px">
                 	<input type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
 				</div>
-				<div>
+				<div class="left containerflexautomigrationitem">
 					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
 				</div>
 			</div>
@@ -627,6 +627,9 @@ if ($action == 'view') {
 		justify-content:center;
 		flex-wrap: wrap;
 	}
+	.containerflexautomigrationitem {
+		padding-bottom: 10px;
+	}
 	</style>";
 }
 if ($action == "automigration") {
@@ -639,9 +642,11 @@ if ($action == "automigration") {
 		print '<div class="center">';
 
 		$migrationerrormessage = $langs->trans("MigrationErrorContent");
-		$migrationerrormessage .= "\n\nMysqldump: ".$sqlfiletomigrate;
+		$migrationerrormessage .= "\n";
+		$migrationerrormessage .= "\n-------------------";
+		$migrationerrormessage .= "\nMysqldump: ".$sqlfiletomigrate;
 		$migrationerrormessage .= "\nDocumentDump: ".$dirfiletomigrate;
-		$migrationerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
+		$migrationerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "standard", 'gmt').' UTC';
 		$migrationerrormessage .= "\nErrors: ".(!empty($result["output"])?$result["output"]:$result["result"]);
 		print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormbacksupport">';
 		print '<input type="submit" class="btn green-haze btn-circle" value="'.$langs->trans("BackToSupport").'">';

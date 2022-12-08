@@ -310,10 +310,10 @@ if ($action == "instanceverification") {
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'...</h4>';
 		print '<br><div class="containerflexautomigration">
-					<div class="right" style="margin-right:10px">
+					<div class="right containerflexautomigrationitem paddingright paddingleft">
 						<button id="" type="submit" class="btn green-haze btn-circle btnstep" onclick="applywaitMask()">'.$langs->trans("ConfirmAutoupgrade").'</button>
 					</div>
-					<div>
+					<div class="left containerflexautomigrationitem paddingright paddingleft">
 						<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a>
 					</div>
 				</div>';
@@ -334,8 +334,10 @@ if ($action == "instanceverification") {
 	print '<div class="portlet light divstep " id="Step4">';
 	if ($errors) {
 		$upgradeerrormessage = $langs->trans("UpgradeErrorContent");
-		$upgradeerrormessage .= "\n\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
-		$upgradeerrormessage .= "\nErrorTab: ".implode(",", $errortab);
+		$upgradeerrormessage .= "\n";
+		$upgradeerrormessage .= "\n-------------------";
+		$upgradeerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "standard", 'gmt').' UTC';
+		$upgradeerrormessage .= "\nErrors: ".implode(",", $errortab);
 		print '<h2 class="center" style="color:red">';
 		print $langs->trans("AutoupgradeError");
 		print '</h2><br>';
@@ -412,7 +414,7 @@ if ($action == "instanceverification") {
 				'.$langs->trans("AutoupgradeStep1Text").'...<br><br>
 				</div>
 				<div class="center" style="padding-top:10px">';
-				print '<select id="instanceselect" name="instanceselect" class="minwidth600" required="required">';
+				print '<select id="instanceselect" name="instanceselect" class="minwidth600 maxwidth700" required="required">';
 				print '<option value="">&nbsp;</option>';
 	if (count($listofcontractid) == 0) {
 		// Should not happen
@@ -496,7 +498,7 @@ if ($action == "instanceverification") {
 				print '<option value="'.$optionid.'"'.(GETPOST('instanceselect', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
 				print '</option>';
-				print ajax_combobox('instanceselect', array(), 0, 0, 'off');
+				print ajax_combobox('instanceselect', array(), 0, 0, 'resolve');
 
 				$atleastonefound++;
 			}
@@ -504,7 +506,7 @@ if ($action == "instanceverification") {
 	}
 	print'</select><br><br>';
 	print'</div>
-			<div class="center">
+			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ?' style="display:none;"':'').'>
 			<h4><div class="note note-warning">
 			'.$langs->trans("AutoupgradeStep1Warning").'
 			</div></h4>
@@ -512,11 +514,11 @@ if ($action == "instanceverification") {
 			'.$langs->trans("AutoupgradeStep1Note").'
 			</div>
 			</div><br>
-			<div id="buttonstep1upgrade" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ?'style="display:none;"':'').'>
-					<div class="right" style="margin-right:10px">
+			<div id="buttonstep1upgrade" class="containerflexautomigration"'.(!GETPOST('instanceselect', 'alpha') ?' style="display:none;"':'').'>
+					<div class="right containerflexautomigrationitem paddingright paddingleft">
 						<button id="buttonstep_2" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 					</div>
-					<div>
+					<div class="left containerflexautomigrationitem paddingright paddingleft">
 						<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a>
 					</div>
 				</div>
@@ -534,22 +536,26 @@ if ($action == "instanceverification") {
 					<br>
 					<div class="center">
 					<div class="containerflexautomigration">
-						<div class="right" style="margin-right:10px">
+						<div class="right containerflexautomigrationitem paddingright paddingleft">
 							<button id="buttonstep_3" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 						</div>
-						<div>
+						<div class="left containerflexautomigrationitem paddingright paddingleft">
 							<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelUpgradeAndBacktoSupportPage").'</button></a>
 						</div>
 					</div>
 			</div>';
 	print'<!-- END STEP2-->';
 	print '</form>';
+
 	print '<script>
 		jQuery(document).ready(function() {
 			$("#instanceselect").on("change",function(){
-				if($(this).val() != ""){
+				console.log("change on instanceselect");
+				if ($(this).val() != "") {
+					$(".divstep1upgrade").show();
 					$("#buttonstep1upgrade").show();
-				}else{
+				} else {
+					$(".divstep1upgrade").hide();
 					$("#buttonstep1upgrade").hide();
 				}
 			});
@@ -567,6 +573,9 @@ print "<style>
 		display: flex;
 		justify-content:center;
 		flex-wrap: wrap;
+	}
+	.containerflexautomigrationitem {
+		padding-bottom: 10px;
 	}
 	</style>";
 print'</div>

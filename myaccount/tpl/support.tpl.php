@@ -247,6 +247,7 @@ if ($sellyoursaassupporturl) {
 		$out .= '<script type="text/javascript" language="javascript">';
 		$out .= 'jQuery(document).ready(function () {';
 		$out .= '    jQuery(".removedfile").click(function() {';
+		$out .= '        console.log("click on .removedfile");';
 		$out .= '        jQuery(".removedfilehidden").val(jQuery(this).val());';
 		$out .= '    });';
 		$out .= '})';
@@ -479,7 +480,7 @@ if ($sellyoursaassupporturl) {
 
 		if (!empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
 			print '<div id="showforautoupgrade" class="showforautoupgrade" style="display:none;">';
-			print '<br><br>';
+			print '<br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
 			print '<button id="hideautoupgradegoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("GoToAutoUpgrade").'</button>&ensp;';
 			print '<button id="hideautoupgradediv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("AutoupgradeErrorOrNoAutoupgrade").'</button>';
