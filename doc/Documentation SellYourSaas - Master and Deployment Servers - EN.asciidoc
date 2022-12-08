@@ -7,7 +7,7 @@ This document describes the technical and functional implementation of Sell-Your
 :creator: Laurent Destailleur
 :title: Document installation and operation of SellYourSaas
 :subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...).
-:keywords: sellyoursaas, saas, dolibarr, wamp, glpi
+:keywords: sellyoursaas, saas,olibarr, wamp, glpi
 :imagesdir: ./img
 :city: Bordeaux
 :toc: manual
@@ -3483,7 +3483,7 @@ find /etc/letsencrypt/ -name "*with<X>.<your_domain>*" -exec rm -fr {} \;
 
 ==== Install the certificates files
 
-* Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the certificate files:
+* Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the generated certificate files:
 
 For example, if your certificates files were generated with letsencrypt, you can do:
 
