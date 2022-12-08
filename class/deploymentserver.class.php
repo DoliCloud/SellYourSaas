@@ -804,8 +804,8 @@ class Deploymentserver extends CommonObject
 			$return .= '<br><span class="info-box-label opacitymedium">'.$this->label.'</span>';
 		}
 
-		$return .= '<br>'.$langs->trans("NbOfInstances").': '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
-		$return .= '<br>'.$langs->trans("NbOfBackups").': ';
+		$return .= '<br><span class="opacitymedium">'.$langs->trans("NbOfInstances").':</span> '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
+		$return .= '<br><span class="opacitymedium">'.$langs->trans("NbOfBackups").':</span> ';
 		if ($this->nb_backuptotal) {
 			if ($this->nb_backuptotal != $this->nb_backupok) {
 				$return .= '<span class="error">';
