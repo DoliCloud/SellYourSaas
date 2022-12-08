@@ -408,7 +408,7 @@ if ($action == "instanceverification") {
 	print '<!-- BEGIN STEP1-->
 		<div class="portlet light divstep " id="Step1">
 				<h2>'.$langs->trans("Step", 1).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
-				<div style="padding-left:25px">
+				<div>
 				'.$langs->trans("AutoupgradeStep1Text").'...<br><br>
 				</div>
 				<div class="center" style="padding-top:10px">';
@@ -566,6 +566,7 @@ print "<style>
 	.containerflexautomigration {
 		display: flex;
 		justify-content:center;
+		flex-wrap: wrap;
 	}
 	</style>";
 print'</div>

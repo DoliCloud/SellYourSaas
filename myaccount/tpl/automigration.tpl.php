@@ -625,6 +625,7 @@ if ($action == 'view') {
 	.containerflexautomigration {
 		display: flex;
 		justify-content:center;
+		flex-wrap: wrap;
 	}
 	</style>";
 }
