@@ -130,7 +130,7 @@ if ($sellyoursaassupporturl) {
 			$statuslabel = $contract->array_options['options_deployment_status'];
 			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-			$dbprefix = empty($contract->array_options['options_db_prefix']) ? '' : $contract->array_options['options_db_prefix'];
+			$dbprefix = empty($contract->array_options['options_prefix_db']) ? '' : $contract->array_options['options_prefix_db'];
 			if (empty($dbprefix)) $dbprefix = 'llx_';
 
 			if ($statuslabel == 'undeployed') {

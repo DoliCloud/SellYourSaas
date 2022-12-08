@@ -105,7 +105,7 @@ if (count($listofcontractidreseller) == 0) {
 		$statuslabel = $contract->array_options['options_deployment_status'];
 		$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-		$dbprefix = $contract->array_options['options_db_prefix'];
+		$dbprefix = $contract->array_options['options_prefix_db'];
 		if (empty($dbprefix)) $dbprefix = 'llx_';
 
 		// Get info about PLAN of Contract
@@ -819,7 +819,7 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 	// listofdomain can be:  with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		$staticdeploymentserver = new Deploymentserver($db);
 		$listofdomain = $staticdeploymentserver->fetchAllDomains();
 	}

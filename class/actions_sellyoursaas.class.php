@@ -791,11 +791,11 @@ class ActionsSellyoursaas
 						$ret .= '<span class="badge badge-status4 badge-status valignmiddle inline-block">'.$langs->trans("PayedMode").'</span>';
 						// nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
 						if (! $object->nbofservicesclosed) {
-							$daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND;
+							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND');
 							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Paid services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 						if ($object->nbofservicesclosed) {
-							$daysafterexpiration = $conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT;
+							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT');
 							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Paid instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 					} else {

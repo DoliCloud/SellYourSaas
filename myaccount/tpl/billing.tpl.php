@@ -82,7 +82,7 @@ if (count($listofcontractid) > 0) {
 		if ($statuslabel == 'processing') $color = 'orange';
 		if ($statuslabel == 'suspended') $color = 'orange';
 
-		$dbprefix = $contract->array_options['options_db_prefix'];
+		$dbprefix = $contract->array_options['options_prefix_db'];
 		if (empty($dbprefix)) $dbprefix = 'llx_';
 
 		print '

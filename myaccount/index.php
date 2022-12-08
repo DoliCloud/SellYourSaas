@@ -2962,7 +2962,7 @@ foreach ($listofcontractidopen as $tmpcontract) {
 		}
 		print '</h4>';
 		print '</div>';
-	} else if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON_'.$tmpdomainname)) {
+	} elseif (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON_'.$tmpdomainname)) {
 		$showannoucefordomain[$tmpdomainname] = 'SELLYOURSAAS_ANNOUNCE_'.$tmpdomainname;
 	}
 }
@@ -3351,6 +3351,7 @@ if (empty($welcomecid)) {
 		if ($mode == 'mycustomerinstances') continue;
 		if ($contract->array_options['options_deployment_status'] == 'undeployed') continue;
 
+		$delaybeforeendoftrial = 0;
 		$isAPayingContract = sellyoursaasIsPaidInstance($contract);		// At least one template or final invoice
 		$isASuspendedContract = sellyoursaasIsSuspended($contract);		// Is suspended or not ?
 		$tmparray = sellyoursaasGetExpirationDate($contract, 1);
@@ -3479,7 +3480,7 @@ if (empty($welcomecid)) {
 				if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 					$delayafterexpiration = ($now - $expirationdate);
 					$delayindays = round($delayafterexpiration / 3600 / 24);
-					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT') : getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT')) - $delayindays);
+					$delaybeforeundeployment = max(0, ($atleastonepaymentmode ? getDolGlobalInt('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT') : getDolGlobalInt('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT')) - $delayindays);
 
 					print '<!-- XDaysAfterEndOfPeriodInstanceSuspended '.$delayindays.' -->'."\n";
 					print '<div class="note note-warning">'."\n";

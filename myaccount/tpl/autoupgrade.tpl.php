@@ -21,9 +21,15 @@ if (empty($conf) || ! is_object($conf)) {
 	exit;
 }
 
+require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+require_once DOL_DOCUMENT_ROOT."/product/class/product.class.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
+dol_include_once('sellyoursaas/class/packages.class.php');
+
 ?>
 <!-- BEGIN PHP TEMPLATE autoupgrade.tpl.php -->
 <?php
+
 
 $upload_dir = $conf->sellyoursaas->dir_temp."/autoupgrade_".$mythirdpartyaccount->id.'.tmp';
 $backtopagesupport = GETPOST("backtopagesupport", 'alpha') ? GETPOST("backtopagesupport", 'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'&subject='.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha'));
@@ -35,10 +41,11 @@ $errortab = array();
 $errors = 0;
 $stringoflistofmodules = "";
 
+
+// Check of the prerequisites
 if ($action == "instanceverification") {
 	$confinstance = 0;
-	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
-	require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
+
 	$object = new Contrat($db);
 	$instanceselect = GETPOST("instanceselect", "alpha");
 	$instanceselect = explode("_", $instanceselect);
@@ -71,8 +78,8 @@ if ($action == "instanceverification") {
 			if (is_object($newdb) && $newdb->connected) {
 				$confinstance = new Conf();
 				$confinstance->setValues($newdb);
-				$lastinstallinstance = $confinstance->global->MAIN_VERSION_LAST_INSTALL;
-				$lastupgradelinstance = $confinstance->global->MAIN_VERSION_LAST_UPGRADE;
+				$lastinstallinstance = empty($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? '' : $confinstance->global->MAIN_VERSION_LAST_INSTALL;
+				$lastupgradelinstance = empty($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? '' : $confinstance->global->MAIN_VERSION_LAST_UPGRADE;
 				$laststableupgradeversion = getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR");
 				if (!empty($laststableupgradeversion)) {
 					$match = '/^'.getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").'.*/';
@@ -81,8 +88,6 @@ if ($action == "instanceverification") {
 						$errors++;
 					}
 				} else {
-					require_once DOL_DOCUMENT_ROOT."/product/class/product.class.php";
-					dol_include_once('sellyoursaas/class/packages.class.php');
 					$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
 					$tmpproduct = new Product($db);
 					$tmppackage = new Packages($db);
@@ -250,6 +255,7 @@ if ($action == "autoupgrade") {
 	}
 }
 
+
 print '
 <div class="page-content-wrapper">
     <div class="page-content">
@@ -270,19 +276,20 @@ print'
     <div class="row" id="choosechannel">
     <div class="col-md-12">';
 
+// Show result of check of prerequisites
 if ($action == "instanceverification") {
 	print '<!-- BEGIN STEP3-->
 		<div class="portlet light divstep " id="Step3">
 		<h2>'.$langs->trans("Step", 3).' - '.$langs->trans("UpgradeVerification").'</small></h2><br>';
-		print '<div class="center">';
-		print '<h3>'.$langs->trans('UpgradeVerification').' : ';
+	print '<div class="center">';
+	print '<h4>';
 	if ($errors) {
 		print '<span style="color:red">'.$langs->trans('Error').'</span>';
 	} else {
-		print '<span style="color:green">'.$langs->trans('Success').'</span>';
+		print '<span style="color:green">'.$langs->trans('PrerequisitesOK').'</span>';
 	}
-		print '</h3>';
-		print'</div>';
+	print '</h4>';
+	print'</div>';
 	if ($errors) {
 		print '<br><div class="portlet dark" style="width:50%;margin-left:auto;margin-right:auto;">';
 		print $langs->trans("ErrorListSupport").' :<br>';
@@ -301,7 +308,7 @@ if ($action == "instanceverification") {
 		print '<input type="hidden" name="backtopagesupport" value="'.$backtopagesupport.'">';
 		print '<input type="hidden" name="instanceselect" value="'.GETPOST("instanceselect", "alpha").'">';
 		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'</h4>';
+		print '<br><h4 class="center">'.$langs->trans("AutoupgradeStep3Text").'...</h4>';
 		print '<br><div class="containerflexautomigration">
 					<div class="right" style="margin-right:10px">
 						<button id="" type="submit" class="btn green-haze btn-circle btnstep" onclick="applywaitMask()">'.$langs->trans("ConfirmAutoupgrade").'</button>
@@ -365,6 +372,34 @@ if ($action == "instanceverification") {
 	print '</div>';
 	print '<!-- END STEP4-->';
 } else {
+	$idcontract = 0;
+	$instanceselect = GETPOST("instanceselect", "alpha");
+	if ($instanceselect) {
+		$instanceselect = explode("_", $instanceselect);
+		$idcontract = empty($instanceselect[1]) ? 0 : $instanceselect[1];
+	}
+
+	$newversion = (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR") ? "(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")" : "");
+
+	if ($idcontract > 0) {
+		$object = new Contrat($db);
+
+		$result=$object->fetch($idcontract);
+
+		$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
+		$tmpproduct = new Product($db);
+		$tmppackage = new Packages($db);
+
+		if ($dataofcontract['appproductid'] > 0) {
+			$tmpproduct->fetch($dataofcontract['appproductid']);
+			$tmppackage->fetch($tmpproduct->array_options['options_package']);
+
+			//$tmppackage->srcfile1 = 'ddd_16.0';
+			//var_dump($tmppackage->srcfile1);
+			$newversion = preg_replace('/[^0-9\.]/', '', $tmppackage->srcfile1);
+		}
+	}
+
 	print '<form action="'.$_SERVER["PHP_SELF"].'#Step'.($stepautoupgrade+1).'" method="GET">';
 	print '<input type="hidden" name="backtopagesupport" value="'.$backtopagesupport.'">';
 	print '<input type="hidden" name="action" value="'.($stepautoupgrade == 2 ? 'instanceverification' : 'view').'">';
@@ -374,7 +409,7 @@ if ($action == "instanceverification") {
 		<div class="portlet light divstep " id="Step1">
 				<h2>'.$langs->trans("Step", 1).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
 				<div style="padding-left:25px">
-				'.$langs->trans("AutoupgradeStep1Text").'<br><br>
+				'.$langs->trans("AutoupgradeStep1Text").'...<br><br>
 				</div>
 				<div class="center" style="padding-top:10px">';
 				print '<select id="instanceselect" name="instanceselect" class="minwidth600" required="required">';
@@ -389,8 +424,7 @@ if ($action == "instanceverification") {
 							$planref = $contract->array_options['options_plan'];
 							$statuslabel = $contract->array_options['options_deployment_status'];
 							$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
-
-							$dbprefix = $contract->array_options['options_db_prefix'];
+							$dbprefix = $contract->array_options['options_prefix_db'];
 							if (empty($dbprefix)) $dbprefix = 'llx_';
 
 			if ($statuslabel == 'undeployed') {
@@ -411,7 +445,8 @@ if ($action == "instanceverification") {
 				}
 
 				if ($line->fk_product > 0) {
-						$tmpproduct->fetch($line->fk_product);
+					$tmpproduct->fetch($line->fk_product);
+
 					if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
 						$planref = $tmpproduct->ref;			// Warning, ref is in language of user
 						$planlabel = $tmpproduct->label;		// Warning, label is in language of user
@@ -467,12 +502,12 @@ if ($action == "instanceverification") {
 			}
 		}
 	}
-		print'</select><br><br>';
-		print'</div>
+	print'</select><br><br>';
+	print'</div>
 			<div class="center">
-			<h3><div class="note note-warning">
+			<h4><div class="note note-warning">
 			'.$langs->trans("AutoupgradeStep1Warning").'
-			</div></h3>
+			</div></h4>
 			<div class="bold">
 			'.$langs->trans("AutoupgradeStep1Note").'
 			</div>
@@ -488,12 +523,13 @@ if ($action == "instanceverification") {
 		</div>
 		<!-- END STEP1-->';
 
-		print '<!-- BEGIN STEP2-->
+	print '<!-- BEGIN STEP2-->
 			<div id="Step2"></div>
 			<div '.($stepautoupgrade <= 1 ? 'style="display:none;"' : '').'class="portlet light divstep" id="step2">
 					<h2>'.$langs->trans("Step", 2).' - '.$langs->trans("VersionConfirmation").'</small></h1><br>
-					<div>
-						'.$langs->trans("AutoupgradeStep2Text", (!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).'
+					<div>';
+
+	print $langs->trans("AutoupgradeStep2Text", $newversion).'
 					</div>
 					<br>
 					<div class="center">

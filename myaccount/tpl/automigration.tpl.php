@@ -307,9 +307,9 @@ if ($action == 'fileverification') {
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 
 		print '<br><div class="center">
-            <h3 style="color:red;"><strong>
+            <h4 style="color:red;"><strong>
             '.$langs->trans("AutomigrationStep3Warning").'
-            </strong></h3><br>
+            </strong></h4><br>
         <input id="confirmmigration" type="submit" class="btn green-haze btn-circle" value="'.$langs->trans("ConfirmMigration").'" onclick="applywaitMask()">
 		<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
         </div>';
@@ -336,7 +336,7 @@ if ($action == 'fileverification') {
 		print '<form action="'.$_SERVER["PHP_SELF"].'" method="GET">';
 		print '<input type="hidden" name="action" value="presend">';
 		print '<div class="center">';
-		print '<h3 style="color:red;"><strong>'.$langs->trans("ErrorOnMigration").'</strong></h3><br>';
+		print '<h4 style="color:red;"><strong>'.$langs->trans("ErrorOnMigration").'</strong></h4><br>';
 		print '<input type="submit" class="btn green-haze btn-circle" value="'.$langs->trans("BackToSupport").'">';
 		print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
 		print '<input type="hidden" name="subject" value="'.$langs->trans("MigrationErrorSubject").'">';
@@ -433,7 +433,7 @@ if ($action == 'view') {
 			$statuslabel = $contract->array_options['options_deployment_status'];
 			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-			$dbprefix = $contract->array_options['options_db_prefix'];
+			$dbprefix = $contract->array_options['options_prefix_db'];
 			if (empty($dbprefix)) $dbprefix = 'llx_';
 
 			if ($statuslabel == 'undeployed') {
@@ -512,9 +512,9 @@ if ($action == 'view') {
 		print'</select><br><br>';
 		print'</div>
             <div class="center">
-            <h3 style="color:red;"><strong>
-            '.$langs->trans("AutomigrationStep3Warning").'
-            </strong></h3>
+            <h4><div class="note note-warning">
+			'.$langs->trans("AutomigrationStep3Warning").'
+			</div></h4>
             </div><br>
 			<div id="buttonstep4migration" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ?'style="display:none;"':'').'>
 				<div class="right" style="margin-right:10px">

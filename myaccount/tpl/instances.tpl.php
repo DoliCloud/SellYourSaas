@@ -171,7 +171,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		$statuslabel = $contract->array_options['options_deployment_status'];
 		$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-		$dbprefix = empty($contract->array_options['options_db_prefix']) ? '' : $contract->array_options['options_db_prefix'];
+		$dbprefix = empty($contract->array_options['options_prefix_db']) ? '' : $contract->array_options['options_prefix_db'];
 		if (empty($dbprefix)) $dbprefix = 'llx_';
 
 		// Get info about PLAN of Contract
@@ -1088,10 +1088,10 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		$domainstosuggest = array();   // This is list of all sub domains to show into combo list. Can be: with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
 		if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 			$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-		}else {
+		} else {
 			$staticdeploymentserver = new Deploymentserver($db);
 			$listofdomain = $staticdeploymentserver->fetchAllDomains();
-		}	
+		}
 		foreach ($listofdomain as $val) {
 			$newval=$val;
 			$reg = array();
