@@ -713,6 +713,9 @@ while ($i < $imaxinloop) {
 			print '<div class="box-flex-container">';
 		}
 		// Output Kanban
+		$object->nb_instances = $openinstances[$obj->ipaddress];
+		$object->nb_backuptotal = $backuptotalinstances[$obj->ipaddress];
+		$object->nb_backupok = $backupokinstances[$obj->ipaddress];
 		print $object->getKanbanView('');
 		if ($i == ($imaxinloop - 1)) {
 			print '</div>';

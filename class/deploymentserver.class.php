@@ -63,6 +63,10 @@ class Deploymentserver extends CommonObject
 	 */
 	public $picto = 'fa-server';
 
+	public $nb_instances;
+	public $nb_backupok;
+	public $nb_backuptotal;
+
 
 	const STATUS_DISABLED = 0;
 	const STATUS_ENABLED = 1;
@@ -777,6 +781,48 @@ class Deploymentserver extends CommonObject
 		}
 
 		return $result;
+	}
+
+	/**
+	 *	Return a thumb for kanban views
+	 *
+	 *	@param      string	    $option                 Where point the link (0=> main card, 1,2 => shipment, 'nolink'=>No link)
+	 *  @return		string								HTML Code for Kanban thumb.
+	 */
+	public function getKanbanView($option = '')
+	{
+		 global $langs;
+
+		$return = '<div class="box-flex-item box-flex-grow-zero">';
+		$return .= '<div class="info-box info-box-sm">';
+		$return .= '<span class="info-box-icon bg-infobox-action">';
+		$return .= img_picto('', $this->picto);
+		$return .= '</span>';
+		$return .= '<div class="info-box-content">';
+		$return .= '<span class="info-box-ref">'.(method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref).'</span>';
+		if (property_exists($this, 'label')) {
+			$return .= '<br><span class="info-box-label opacitymedium">'.$this->label.'</span>';
+		}
+
+		$return .= '<br>'.$langs->trans("NbOfInstances").': '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
+		$return .= '<br>'.$langs->trans("NbOfBackups").': ';
+		if ($this->nb_backuptotal) {
+			if ($this->nb_backuptotal != $this->nb_backupok) {
+				$return .= '<span class="error">';
+			}
+			$return .= $this->nb_backupok.'/'.$this->nb_backuptotal;
+			if ($this->nb_backuptotal != $this->nb_backupok) {
+				$return .= '</span>';
+			}
+		}
+		if (method_exists($this, 'getLibStatut')) {
+			$return .= '<br><div class="info-box-status margintoponly">'.$this->getLibStatut(5).'</div>';
+		}
+		$return .= '</div>';
+		$return .= '</div>';
+		$return .= '</div>';
+
+		return $return;
 	}
 
 	/**
