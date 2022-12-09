@@ -168,7 +168,7 @@ else
 	>/tmp/$script.log 
 
 	# Usage for sellyoursaas
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in SellYourSaas mode" 
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in SellYourSaas mode (using parameters from /etc/sellyoursaas.conf)" 
 
 	# Source
 	export SERVSOURCE=$remotebackupserver
