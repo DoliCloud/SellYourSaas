@@ -206,7 +206,7 @@ else
 				  	echo "ERROR Failed to make rsync for $DIRSOURCE1$i"
 			  		echo
 			   		export ret1=$(($ret1 + 1));
-			   		export errstring="$errstring\nDir $SERVSOURCECURSOR:$DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
+			   		export errstring="$errstring<br>Dir $SERVSOURCECURSOR:$DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
 			   	else
 	                echo "No files found"
 	                echo
@@ -252,7 +252,7 @@ else
 				        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
 				        	echo
 				        	export ret2=$(($ret2 + 1));
-			    	    	export errstring="$errstring\nDir $SERVSOURCECURSOR:$DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
+			    	    	export errstring="$errstring<br>Dir $SERVSOURCECURSOR:$DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
 			    	    else
 			                echo "No files found"
 			                echo
@@ -282,9 +282,10 @@ if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 	
 	#echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
 	
-	export body="Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2<br>\n$errstring"
-	export subject="[Warning] Backup pulled of a backup - "`hostname`" failed" 
-	export headers="From: $EMAILFROM"
+	export body="Backup pulled from a backup by "`hostname`" failed - End ret1=$ret1 ret2=$ret2<br>$errstring"
+	export subject="[Warning] Backup pulled from a backup - "`hostname`" failed" 
+	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8'; 
+	# Run php with -r (no need of ? tag)
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 	
 	#if [ -s /usr/syno/bin/synodsmnotify ]; then
@@ -299,9 +300,10 @@ else
 
 	#echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
 
-	export body="Backup pulled of a backup for "`hostname`" succeed - End ret1=$ret1 ret2=$ret2<br>\n$errstring"
-	export subject="[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" 
-	export headers="From: $EMAILFROM"
+	export body="Backup pulled from a backup by "`hostname`" succeed - End ret1=$ret1 ret2=$ret2<br>$errstring"
+	export subject="[Backup pulled from a Backup - "`hostname`"] Backup pulled from a backup succeed" 
+	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8'; 
+	# Run php with -r (no need of ? tag)
 	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
 
 	#if [ -s /usr/syno/bin/synodsmnotify ]; then

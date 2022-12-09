@@ -142,7 +142,7 @@ while ($line = fgets($pointer)) {
 		if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg)) {
 			$fromline .= trim($line)."\n";
 			$emailfrom = $reg[1];
-		} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg)) {
+		} elseif (preg_match('/^from:\s+([^\s]*)/i', $line, $reg)) {
 			$fromline .= trim($line)."\n";
 			$emailfrom = trim($reg[1]);
 		}
@@ -238,7 +238,7 @@ if (is_array($blacklistips) && in_array($ip, $blacklistips)) {
 
 $blacklistoffroms = @file_get_contents($pathtospamdir.'/blacklistfrom');
 if ($blacklistoffroms === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistfrom can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/blacklistfrom can't be read.\n", FILE_APPEND);
 } elseif (! empty($emailfrom)) {
 	$blacklistoffromsarray = explode("\n", $blacklistoffroms);
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
@@ -249,7 +249,7 @@ if ($blacklistoffroms === false) {
 
 $blacklistofdirs = @file_get_contents($pathtospamdir.'/blacklistdir');
 if ($blacklistofdirs === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistdir can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/blacklistdir can't be read.\n", FILE_APPEND);
 } elseif (! empty($_SERVER["REQUEST_URI"])) {
 	$blacklistofdirsarray = explode("\n", $blacklistofdirs);
 	if (is_array($blacklistofdirsarray)) {
@@ -264,7 +264,7 @@ if ($blacklistofdirs === false) {
 
 $blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
 if ($blacklistofcontents === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistcontent can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/blacklistcontent can't be read.\n", FILE_APPEND);
 } elseif (! empty($mail)) {
 	//file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents = ".$blacklistofcontents."\n", FILE_APPEND);
 	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);
