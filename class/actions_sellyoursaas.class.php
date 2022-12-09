@@ -1097,8 +1097,8 @@ class ActionsSellyoursaas
 			return 0;
 		}
 
-		if (! is_object($parameters['object']->thirdparty)) {
-			dol_syslog("Trigger afterPDFCreation was called but property thirdparty of object was not load by caller.", LOG_WARNING);
+		if (! isset($parameters['object']->thirdparty) || ! is_object($parameters['object']->thirdparty)) {
+			dol_syslog("Trigger afterPDFCreation was called but property thirdparty of object was not load by caller or does not exists.");
 			return 0;
 		}
 
@@ -1110,19 +1110,19 @@ class ActionsSellyoursaas
 		$mythirdpartyaccount = $parameters['object']->thirdparty;
 
 		// Define logo
-		$secondlogo = $conf->global->SELLYOURSAAS_LOGO_SMALL;
-		$secondlogoblack = $conf->global->SELLYOURSAAS_LOGO_SMALL_BLACK;
+		$secondlogo = getDolGlobalString('SELLYOURSAAS_LOGO_SMALL');
+		$secondlogoblack = getDolGlobalString('SELLYOURSAAS_LOGO_SMALL_BLACK');
 		if (is_object($mythirdpartyaccount) && $mythirdpartyaccount->array_options['options_domain_registration_page']) {
 			$domainforkey = strtoupper($mythirdpartyaccount->array_options['options_domain_registration_page']);
 			$domainforkey = preg_replace('/\./', '_', $domainforkey);
 
 			$constname = 'SELLYOURSAAS_LOGO_SMALL_'.$domainforkey;
 			$constnameblack = 'SELLYOURSAAS_LOGO_SMALL_BLACK_'.$domainforkey;
-			if (! empty($conf->global->$constname)) {
-				$secondlogo=$conf->global->$constname;
+			if (getDolGlobalString($constname)) {
+				$secondlogo = getDolGlobalString($constname);
 			}
-			if (! empty($conf->global->$constnameblack)) {
-				$secondlogoblack=$conf->global->$constnameblack;
+			if (getDolGlobalString($constnameblack)) {
+				$secondlogoblack = getDolGlobalString($constnameblack);
 			}
 		}
 

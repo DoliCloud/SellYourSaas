@@ -67,7 +67,7 @@ $tmpservices=array();
 $staticdeploymentserver = new Deploymentserver($db);
 if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-}else {
+} else {
 	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
 }
 foreach ($tmpservicessub as $key => $tmpservicesub) {
@@ -153,17 +153,17 @@ if ($action == 'removelogo') {
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 	$constname='SELLYOURSAAS_LOGO'.GETPOST('suffix', 'aZ09');
-	$logofile=$conf->mycompany->dir_output.'/logos/'.$conf->global->$constname;
+	$logofile=$conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constname);
 	if ($conf->global->$constname != '') dol_delete_file($logofile);
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL'.GETPOST('suffix', 'aZ09');
-	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname;
+	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
 	if ($conf->global->$constname != '') dol_delete_file($logosmallfile);
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_MINI'.GETPOST('suffix', 'aZ09');
-	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname;
+	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
 	if ($conf->global->$constname != '') dol_delete_file($logominifile);
 	dolibarr_del_const($db, $constname, $conf->entity);
 }
@@ -171,17 +171,17 @@ if ($action == 'removelogoblack') {
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 	$constname='SELLYOURSAAS_LOGO_BLACK'.GETPOST('suffix', 'aZ09');
-	$logofile=$conf->mycompany->dir_output.'/logos/'.$conf->global->$constname;
+	$logofile=$conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constname);
 	if ($conf->global->$constname != '') dol_delete_file($logofile);
 	dolibarr_del_const($db, "$constname", $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL_BLACK'.GETPOST('suffix', 'aZ09');
-	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname;
+	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
 	if ($conf->global->$constname != '') dol_delete_file($logosmallfile);
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_MINI_BLACK'.GETPOST('suffix', 'aZ09');
-	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname;
+	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
 	if ($conf->global->$constname != '') dol_delete_file($logominifile);
 	dolibarr_del_const($db, $constname, $conf->entity);
 }
