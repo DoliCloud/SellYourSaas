@@ -55,7 +55,7 @@ if ($action == "instanceverification") {
 		$result=$object->fetch($idcontract);
 		if ($result < 0) {
 			$errortab[] = $langs->trans("InstanceNotFound");
-			$errors ++;
+			$errors++;
 		}
 		if (!$error) {
 			$object->fetch_thirdparty();
@@ -139,16 +139,16 @@ if ($action == "instanceverification") {
 				}
 				if ($nbexternalmodules != 0) {
 					$errortab[] = $langs->trans("ExternalModulesNeedDisabled", $modulestodesactivate);
-					$errors ++;
+					$errors++;
 				}
 			} else {
 				$errortab[] = $langs->trans("NewDbConnexionError");
-				$errors ++;
+				$errors++;
 			}
 		}
 	} else {
 		$errortab[] = $langs->trans("InstanceNotFound");
-		$errors ++;
+		$errors++;
 	}
 }
 
@@ -176,7 +176,7 @@ if ($action == "autoupgrade") {
 		$result=$object->fetch($idcontract);
 		if ($result < 0) {
 			$errortab[] = $langs->trans("InstanceNotFound");
-			$errors ++;
+			$errors++;
 		}
 
 		$object->fetch_thirdparty();
@@ -245,7 +245,7 @@ if ($action == "autoupgrade") {
 			$object->array_options["lastversiondolibarrinstance"] = $lastversiondolibarrinstance;
 		} else {
 			$errortab[] = $langs->trans("ErrorFetchingProductOrPackage");
-			$errors ++;
+			$errors++;
 		}
 	}
 
@@ -258,6 +258,30 @@ if ($action == "autoupgrade") {
 			$errortab[] = $langs->trans("ErrorOnUpgradeScript");
 			setEventMessages($langs->trans("ErrorOnUpgradeScript"), null, "errors");
 		}
+
+		// TODO Add an entry into actioncomm
+		/*
+		print "Create event into database\n";
+		dol_syslog("Add event into database");
+
+		$user = new User($db);
+		$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+
+		if ($user->id > 0) {
+			$actioncomm=new ActionComm($db);
+			if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
+			$actioncomm->datep=dol_now('tzserver');
+			$actioncomm->percentage=100;
+			$actioncomm->label=($errors > 0 ? 'ERROR ': '').'Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode.' from myaccount';
+			$actioncomm->note_private='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode.' from myaccount'.($errors > 0 ? ' - errors='.$errors : '') ;
+			$actioncomm->fk_element=$object->id;
+			$actioncomm->elementtype='contract';
+			$actioncomm->type_code='AC_OTH_AUTO';
+			$actioncomm->userassigned[$user->id]=array('id'=>$user->id);
+			$actioncomm->userownerid=$user->id;
+			$actioncomm->create($user);
+		}
+		*/
 	}
 }
 

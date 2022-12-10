@@ -321,7 +321,7 @@ if [[ "$mode" == "upgrade" ]];then
 	fi
 fi
 
-echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"
+echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished with success"
 sleep 1
 echo `date +'%Y-%m-%d %H:%M:%S'`" return 0"
 echo
