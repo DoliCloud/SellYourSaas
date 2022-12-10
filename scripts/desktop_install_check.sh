@@ -9,7 +9,7 @@
 source /etc/lsb-release
 
 if [ "x$1" == "x" ]; then
-   echo "Usage:   $0  hostfile  [hostgrouporname]  (apache|php74|opcode)"
+   echo "Usage:   $0  hostfile  [hostgrouporname]  (apache|php74|php80|opcode)"
    echo "         [hostgrouporname] can be 'master', 'deployment' or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  master,deployment"
    echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
@@ -26,6 +26,9 @@ if [ "x$3" == "xall" ]; then
 fi
 if [ "x$3" == "xphp74" ]; then
 	php74=1
+fi
+if [ "x$3" == "xphp80" ]; then
+	php80=1
 fi
 if [ "x$3" == "xopcode" ]; then
 	opcode=1
@@ -57,6 +60,8 @@ if [ "x$all" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' apache='1' php74='1'"'
 elif [ "x$php74" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php74='1'"'
+elif [ "x$php80" == "x1" ]; then
+	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php80='1'"'
 elif [ "x$opcode" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' opcode='1'"'
 elif [ "x$apache" == "x1" ]; then
