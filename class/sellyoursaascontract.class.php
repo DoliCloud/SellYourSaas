@@ -32,6 +32,9 @@ class SellYourSaasContract extends Contrat
 	public $instance;
 	public $username_web;
 	public $password_web;
+	public $hostname_os;
+	public $username_os;
+	public $password_os;
 	public $hostname_db;
 	public $port_db;
 	public $username_db;

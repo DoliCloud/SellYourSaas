@@ -168,7 +168,6 @@ if ($action == 'automigration') {
 	$object->hostname_os  = $hostname_os;
 	$object->username_web = $username_web;
 	$object->password_web = $password_web;
-	$object->hostname_web = $hostname_os;
 
 	$sqlfiletomigrate = GETPOST('sqlfilename', 'alpha');
 	$dirfiletomigrate = GETPOST('dirfilename', 'alpha');
@@ -177,7 +176,7 @@ if ($action == 'automigration') {
 
 	//Backup old database
 	$mysqlbackupfilename=$upload_dir.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
-	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db;
+	$mysqlbackupcommand='mysqldump -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
 	$result = $utils->executeCli($mysqlbackupcommand, "", 0, $mysqlbackupfilename);
 
 	if ($result["result"] != 0) {
@@ -189,7 +188,7 @@ if ($action == 'automigration') {
 
 	//Drop llx_accounting_system and llx_accounting_account to prevent load error
 	if ($result["result"] == 0) {
-		$mysqlcommand='echo "drop table llx_accounting_system;" | mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db;
+		$mysqlcommand='echo "drop table llx_accounting_system;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
 		$result = $utils->executeCli($mysqlcommand, "", 0, null);
 		if ($result["result"] != 0) {
 			if (empty($result["output"])) {
@@ -197,7 +196,7 @@ if ($action == 'automigration') {
 			}
 			setEventMessages($langs->trans("ErrorOnDropingTables"), null, "errors");
 		} else {
-			$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db;
+			$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
 			$result = $utils->executeCli($mysqlcommand, "", 0, null);
 			if ($result["result"] != 0) {
 				if (empty($result["output"])) {
@@ -209,7 +208,7 @@ if ($action == 'automigration') {
 	}
 
 	if ($result["result"] == 0) {
-		$mysqlcommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.escapeshellcmd(dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate));
+		$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.escapeshellcmd(dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate));
 		$result = $utils->executeCli($mysqlcommand, "", 0, null, 1);
 		if ($result["result"] != 0) {
 			if (empty($result["output"])) {
@@ -229,7 +228,7 @@ if ($action == 'automigration') {
 	}
 
 	if ($result["result"] != 0) {
-		$mysqlcommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$mysqlbackupfilename;
+		$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.$mysqlbackupfilename;
 		$utils->executeCli($mysqlcommand, "", 0, null, 1);
 	}
 }

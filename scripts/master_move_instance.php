@@ -261,7 +261,7 @@ if (empty($db)) $db=$dbmaster;
 if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance)) {
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 		$staticdeploymentserver = new Deploymentserver($db);
 		$tmparray = $staticdeploymentserver->fetchAllDomains();
@@ -343,15 +343,15 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 }
 
 $newobject->instance = $newinstance;
-$newobject->username_web = $oldobject->array_options['options_username_os'];
-$newobject->password_web = $oldobject->array_options['options_password_os'];
-$newobject->hostname_web = $oldobject->array_options['options_hostname_os'];
-$newobject->username_db  = $oldobject->array_options['options_username_db'];
-$newobject->password_db  = $oldobject->array_options['options_password_db'];
-$newobject->database_db  = $oldobject->array_options['options_database_db'];
+$newobject->username_os = $oldobject->array_options['options_username_os'];
+$newobject->password_os = $oldobject->array_options['options_password_os'];
+$newobject->hostname_os = $oldobject->array_options['options_hostname_os'];
+$newobject->username_db = $oldobject->array_options['options_username_db'];
+$newobject->password_db = $oldobject->array_options['options_password_db'];
+$newobject->database_db = $oldobject->array_options['options_database_db'];
 
-if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db)) {
-	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_web, password_web or database_db).\n";
+if (empty($newobject->instance) || empty($newobject->username_os) || empty($newobject->password_os) || empty($newobject->database_db)) {
+	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_os, password_os or database_db).\n";
 	print "\n";
 	exit(-3);
 }
@@ -651,8 +651,8 @@ if ($mode == 'confirmunlock')
 	$connection = ssh2_connect($newserver, $server_port);
 	if ($connection)
 	{
-		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $newobject->username_web, $newobject->password_web))
+		//print $object->instance." ".$object->username_os." ".$object->password_os."<br>\n";
+		if (! @ssh2_auth_password($connection, $newobject->username_os, $newobject->password_os))
 		{
 			dol_syslog("Could not authenticate with username ".$username." . and password ".preg_replace('/./', '*', $password), LOG_ERR);
 			exit(-5);
@@ -663,7 +663,7 @@ if ($mode == 'confirmunlock')
 
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$newdatabasedb);
-			$fileinstalllock=$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/'.$dir.'/documents/install.lock';
+			$fileinstalllock=$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 
 			print 'Remove file '.$fileinstalllock."\n";
 

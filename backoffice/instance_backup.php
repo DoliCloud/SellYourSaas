@@ -80,6 +80,7 @@ $backupstring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/backup_instance.php '.$obj
 $restorestringfrombackup = '';
 $restorestringfromarchive = '';
 $restorestringpretoshow = '';
+$restorestringposttoshow = '';
 $moveinstancestringtoshow = '';
 
 $ispaid = sellyoursaasIsPaidInstance($object);
@@ -251,7 +252,6 @@ $help_url='';
 llxHeader('', $langs->trans("DoliCloudInstances"), $help_url);
 
 $form = new Form($db);
-$form2 = new Form($db2);
 $formcompany = new FormCompany($db);
 
 $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
@@ -278,8 +278,8 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 	$password_db = $object->array_options['options_password_db'];
 	$database_db = $object->array_options['options_database_db'];
 	$port_db     = $object->array_options['options_port_db'];
-	$username_web = $object->array_options['options_username_os'];
-	$password_web = $object->array_options['options_password_os'];
+	$username_os = $object->array_options['options_username_os'];
+	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
 	//$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
@@ -355,19 +355,18 @@ if ($id > 0 || $instanceoldid > 0) {
 }
 
 if ($id > 0 && $action != 'edit' && $action != 'create') {
-	if (is_object($object->db2)) {
+	/*if (is_object($object->db2)) {
 		$object->db = $savdb;
-	}
+	}*/
 
 
 	print '<div class="fichecenter">';
 
-	$backupdir=$conf->global->DOLICLOUD_BACKUP_PATH;
+	$backupdir = $conf->global->DOLICLOUD_BACKUP_PATH;
 
-	$login=$username_web;
-	$password=$password_web;
-
-	$server=$object->ref_customer;
+	$login = $username_os;
+	$password = $password_os;
+	$server = $object->ref_customer;
 
 	// ----- Backup instance -----
 	//print '<strong>INSTANCE BACKUP</strong><br>';
@@ -428,7 +427,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 
 	// Barre d'actions
-	if (! $user->societe_id) {
+	if (! $user->socid) {
 		print '<div class="tabsAction">';
 
 		if ($user->rights->sellyoursaas->write) {

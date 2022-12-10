@@ -3054,7 +3054,7 @@ class SellYourSaasUtils
 								}
 
 								// Check if authorized_key exists
-								//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
+								//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
 								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
 
@@ -3236,7 +3236,7 @@ class SellYourSaasUtils
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall', 'migrate','upgrade')) &&
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 					$doremoteaction = 1;
 			}
@@ -3247,12 +3247,13 @@ class SellYourSaasUtils
 			}
 			// 'refresh' and 'refreshmetrics' are processed later.
 
-			// remoteaction = 'deploy','deployall','deployfiles','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy'
+			// remoteaction = 'deploy','deployall','deployoption',...
 			if ($doremoteaction) {
 				dol_syslog("Enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 
 				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
+				// Load parent contract of the processed contract line $tmpobject
 				$contract = new Contrat($this->db);
 				$contract->fetch($tmpobject->fk_contrat);
 				$contract->fetch_thirdparty();
@@ -4027,6 +4028,7 @@ class SellYourSaasUtils
 				$actioncomm->elementtype = 'contract';
 				$actioncomm->note_private = $comment;     // Description of event ($comment come from calling parameter of function sellyoursaasRemoteAction)
 				if (! is_numeric($forceaddevent)) {
+					// Complete the note with an error message.
 					$actioncomm->note_private = dol_concatdesc($actioncomm->note_private, $forceaddevent);
 				}
 				$ret=$actioncomm->create($user);       // User creating action

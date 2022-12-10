@@ -59,6 +59,7 @@ if ($action == "instanceverification") {
 		}
 		if (!$error) {
 			$object->fetch_thirdparty();
+
 			$type_db = $conf->db->type;
 			$hostname_db  = $object->array_options['options_hostname_db'];
 			$username_db  = $object->array_options['options_username_db'];
@@ -177,6 +178,10 @@ if ($action == "autoupgrade") {
 			$errortab[] = $langs->trans("InstanceNotFound");
 			$errors ++;
 		}
+
+		$object->fetch_thirdparty();
+
+		// TODO Check the thirdparty of instance is same than logged thirdparty
 	}
 
 	if (!$error) {
@@ -202,12 +207,11 @@ if ($action == "autoupgrade") {
 		$object->database_db  = $database_db;
 		$object->port_db      = $port_db;
 		$object->prefix_db    = $prefix_db;
+		$object->hostname_os  = $hostname_os;
 		$object->username_os  = $username_os;
 		$object->password_os  = $password_os;
-		$object->hostname_os  = $hostname_os;
 		$object->username_web = $username_web;
 		$object->password_web = $password_web;
-		$object->hostname_web = $hostname_os;
 
 		$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
 		$tmpproduct = new Product($db);
@@ -246,7 +250,9 @@ if ($action == "autoupgrade") {
 	}
 
 	if (!$errors) {
-		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object);
+		$comment = 'Call of sellyoursaasRemoteAction(upgrade) on contract ref='.$object->ref;
+		$notused = '';
+		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object, 'admin', $notused, $notused, 1, $comment);
 		if ($exitcode < 0) {
 			$errors++;
 			$errortab[] = $langs->trans("ErrorOnUpgradeScript");

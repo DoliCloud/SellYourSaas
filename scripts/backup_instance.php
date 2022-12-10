@@ -226,7 +226,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 		$staticdeploymentserver = new Deploymentserver($db);
 		$tmparray = $staticdeploymentserver->fetchAllDomains();
@@ -274,8 +274,8 @@ if ($result <= 0) {
 }
 
 $object->instance        = $object->ref_customer;
-$object->username_web    = $object->array_options['options_username_os'];
-$object->password_web    = $object->array_options['options_password_os'];
+$object->username_os     = $object->array_options['options_username_os'];
+$object->password_os     = $object->array_options['options_password_os'];
 $object->hostname_db     = $object->array_options['options_hostname_db'];
 $object->port_db         = $object->array_options['options_port_db'];
 $object->username_db     = $object->array_options['options_username_db'];
@@ -285,7 +285,7 @@ $object->deployment_host = $object->array_options['options_deployment_host'];
 $object->latestbackup_date_ok = $object->array_options['options_latestbackup_date_ok'];
 $object->backup_frequency = $object->array_options['options_backup_frequency'];
 
-if (empty($object->instance) && empty($object->username_web) && empty($object->password_web) && empty($object->database_db)) {
+if (empty($object->instance) && empty($object->username_os) && empty($object->password_os) && empty($object->database_db)) {
 	print "Error: properties for instance ".$instance." was not registered into database.\n";
 	exit(-3);
 }
@@ -294,9 +294,9 @@ if (! is_dir($dirroot)) {
 	exit(-4);
 }
 
-$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-$login=$object->username_web;
-$password=$object->password_web;
+$dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
+$login = $object->username_os;
+$password = $object->password_os;
 
 $sourcedir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
 $server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);

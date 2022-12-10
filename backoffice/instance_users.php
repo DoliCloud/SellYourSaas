@@ -38,19 +38,25 @@ if (! $res) die("Include of main fails");
 require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
 require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+require_once DOL_DOCUMENT_ROOT."/projet/class/project.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 
 $langs->loadLangs(array("admin","companies","users","contracts","other","commercial","sellyoursaas@sellyoursaas"));
 
 $action		= (GETPOST('action', 'alpha') ? GETPOST('action', 'alpha') : 'view');
 $confirm	= GETPOST('confirm', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
+$sortfield = GETPOST('sortfield', 'aZ09comma');
+$sortorder = GETPOST('sortorder', 'aZ09comma');
+
 $id			= GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
+
 $error = 0; $errors = array();
 
 if (!$sortorder) {
@@ -58,7 +64,7 @@ if (!$sortorder) {
 }
 
 if ($action != 'create') {
-	$object = new Contrat($db);
+	$object = new SellYourSaasContract($db);
 }
 
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array array
@@ -85,8 +91,8 @@ $password_db = $object->array_options['options_password_db'];
 $database_db = $object->array_options['options_database_db'];
 $prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 $port_db     = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
-$username_web = $object->array_options['options_username_os'];
-$password_web = $object->array_options['options_password_os'];
+$username_os = $object->array_options['options_username_os'];
+$password_os = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
 if (empty($prefix_db)) {
@@ -101,7 +107,7 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
  *	Actions
  */
 
-$parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
+$parameters=array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
@@ -295,7 +301,6 @@ $help_url='';
 llxHeader('', $langs->trans("Users"), $help_url);
 
 $form = new Form($db);
-$form2 = new Form($db2);
 $formcompany = new FormCompany($db);
 
 $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
@@ -403,9 +408,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref, '', $nodbprefix, '', '', 1);
 
-	if (is_object($object->db2)) {
-		$object->db=$savdb;
-	}
+	/*if (is_object($object->db)) {
+		$object->db = $savdb;
+	}*/
 
 	print '<div class="fichecenter">';
 	print '</div>';
@@ -426,8 +431,8 @@ $password_db = $object->array_options['options_password_db'];
 $database_db = $object->array_options['options_database_db'];
 $port_db     = $object->array_options['options_port_db'];
 $prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
-$username_web = $object->array_options['options_username_os'];
-$password_web = $object->array_options['options_password_os'];
+$username_os = $object->array_options['options_username_os'];
+$password_os = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
 $dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
@@ -479,7 +484,7 @@ print '</form>'."\n";
 
 
 // Barre d'actions
-if (!$error && ! $user->societe_id) {
+if (!$error && ! $user->socid) {
 	print '<div class="tabsAction">';
 
 	if ($user->rights->sellyoursaas->write) {
@@ -635,7 +640,9 @@ function print_user_table($newdb, $object)
 						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
 							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
 						} else {
-							print '<td>'.$obj->$key.'</td>';
+							print '<td>';
+							print (empty($obj->$key) ? '' : $obj->$key);
+							print '</td>';
 						}
 					}
 				}

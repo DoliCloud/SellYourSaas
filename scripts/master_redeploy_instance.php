@@ -193,7 +193,7 @@ if (! in_array($mode, array('test', 'confirm'))) {
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 		$staticdeploymentserver = new Deploymentserver($db);
 		$tmparray = $staticdeploymentserver->fetchAllDomains();
@@ -244,30 +244,30 @@ while ($i < $num_rows) {
 	}
 
 	$object->instance = $object->ref_customer;
-	$object->username_web = $object->array_options['options_username_os'];
-	$object->password_web = $object->array_options['options_password_os'];
+	$object->username_os = $object->array_options['options_username_os'];
+	$object->password_os = $object->array_options['options_password_os'];
 	$object->username_db = $object->array_options['options_username_db'];
 	$object->password_db = $object->array_options['options_password_db'];
 	$object->database_db = $object->array_options['options_database_db'];
 	$object->deployment_host = $object->array_options['options_deployment_host'];
+	$object->username_web = $object->thirdparty->email;
+	$object->password_web = $object->thirdparty->array_options['options_password'];
 
-	if (empty($object->instance) && empty($object->username_web) && empty($object->password_web) && empty($object->database_db)) {
+	if (empty($object->instance) && empty($object->username_os) && empty($object->password_os) && empty($object->database_db)) {
 		print "Error: properties for instance ".$instance." was not registered into database.\n";
 		exit(-5);
 	}
 
-	$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-	$login=$object->username_web;
-	$password=$object->password_web;
+	$dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 
-	$server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
+	$server = ($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
 
-	if (empty($login) || empty($dirdb)) {
+	if (empty($object->array_options['options_username_os']) || empty($dirdb)) {
 		print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
 		exit(-6);
 	}
 
-	$now=dol_now();
+	$now = dol_now();
 
 	// WIP
 }

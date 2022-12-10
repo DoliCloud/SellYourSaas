@@ -135,7 +135,7 @@ if (0 == posix_getuid() && empty($conf->global->SELLYOURSAAS_SCRIPT_BYPASS_ROOT_
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 		$staticdeploymentserver = new Deploymentserver($db);
 		$tmparray = $staticdeploymentserver->fetchAllDomains();
@@ -155,14 +155,14 @@ if ($result <= 0) {
 }
 
 $object->instance = $object->ref_customer;
-$object->username_web = $object->array_options['options_username_os'];
-$object->password_web = $object->array_options['options_password_os'];
+$object->username_os = $object->array_options['options_username_os'];
+$object->password_os = $object->array_options['options_password_os'];
 $object->username_db = $object->array_options['options_username_db'];
 $object->password_db = $object->array_options['options_password_db'];
 $object->database_db = $object->array_options['options_database_db'];
 
 
-if (empty($object->instance) || empty($object->username_web) || empty($object->password_web) || empty($object->database_db)) {
+if (empty($object->instance) || empty($object->username_os) || empty($object->password_os) || empty($object->database_db)) {
 	print "Error: Some properties for instance ".$instance." was not registered into database.\n";
 	exit(-3);
 }
@@ -172,8 +172,8 @@ if (! is_file($dirroot.'/README.md')) {
 }
 
 $dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-$login = $object->username_web;
-$password = $object->password_web;
+$login = $object->username_os;
+$password = $object->password_os;
 
 $targetdir = $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
 $server = $object->array_options['options_hostname_os'];
@@ -184,7 +184,7 @@ if (empty($login) || empty($dirdb)) {
 	exit(-5);
 }
 
-$sftpconnectstring=$object->username_web.'@'.$server.':'.$targetdir;
+$sftpconnectstring=$object->username_os.'@'.$server.':'.$targetdir;
 
 print 'Synchro of files '.$dirroot.' to '.$targetdir."\n";
 print 'SFTP connect string : '.$sftpconnectstring."\n";
@@ -250,8 +250,8 @@ if ($mode == 'confirmunlock') {
 
 	$connection = ssh2_connect($server, $server_port);
 	if ($connection) {
-		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $object->username_web, $object->password_web)) {
+		//print $object->instance." ".$object->username_os." ".$object->password_os."<br>\n";
+		if (! @ssh2_auth_password($connection, $object->username_os, $object->password_os)) {
 			dol_syslog("Could not authenticate with username ".$username." . and password ".preg_replace('/./', '*', $password), LOG_ERR);
 			exit(-5);
 		} else {
@@ -259,7 +259,7 @@ if ($mode == 'confirmunlock') {
 
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
-			$fileinstalllock=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_web.'/'.$dir.'/documents/install.lock';
+			$fileinstalllock=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 
 			print 'Remove file '.$fileinstalllock."\n";
 

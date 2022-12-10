@@ -42,10 +42,10 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 {
 	$instance = $object->instance;
 	if (empty($instance)) $instance = $object->ref_customer;
-	$username_web = $object->username_web;
-	if (empty($username_web)) $username_web = $object->array_options['options_username_os'];
-	$password_web = $object->password_web;
-	if (empty($password_web)) $password_web = $object->array_options['options_password_os'];
+	$username_os = $object->username_os;
+	if (empty($username_os)) $username_os = $object->array_options['options_username_os'];
+	$password_os = $object->password_os;
+	if (empty($password_os)) $password_os = $object->array_options['options_password_os'];
 	$database_db = $object->database_db;
 	if (empty($database_db)) $database_db = $object->array_options['options_database_db'];
 
@@ -55,14 +55,14 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 	if (function_exists("ssh2_connect")) {
 		$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 
-		if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_web." ".$password_web."\n";
+		if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_os." ".$password_os."\n";
 
 		$connection = ssh2_connect($server, $server_port);
 		if ($connection) {
-			if ($printoutput) print $instance." ".$username_web." ".$password_web."\n";
+			if ($printoutput) print $instance." ".$username_os." ".$password_os."\n";
 
-			if (! @ssh2_auth_password($connection, $username_web, $password_web)) {
-				dol_syslog("Could not authenticate in dolicloud_files_refresh with username ".$username_web." . and password ".preg_replace('/./', '*', $password_web), LOG_ERR);
+			if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
+				dol_syslog("Could not authenticate in dolicloud_files_refresh with username ".$username_os." . and password ".preg_replace('/./', '*', $password_os), LOG_ERR);
 			} else {
 				$sftp = ssh2_sftp($connection);
 				if (! $sftp) {
@@ -72,52 +72,52 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 				}
 
 				$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
-				//$file="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/'.$dir.'/htdocs/conf/conf.php';
-				//$file="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/'.$dir.'/htdocs/conf/conf.php';    // With PHP 5.6.27+
+				//$file="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/htdocs/conf/conf.php';
+				//$file="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/htdocs/conf/conf.php';    // With PHP 5.6.27+
 
 				// Update ssl certificate
 				// Dir .ssh must have rwx------ permissions
 				// File authorized_keys_support must have rw------- permissions
 
 				// Check if authorized_keys_support exists
-				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/.ssh/authorized_keys_support';
-				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
-				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support');
+				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/.ssh/authorized_keys_support';
+				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
+				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support');
 				// Create authorized_keys_support file
 				if (empty($fstat['atime']) || $recreateauthorizekey == 2) {
 					if ($recreateauthorizekey) {
-						@ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh');
+						@ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh');
 
 						$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 
 						// We overwrite authorized_keys_support
-						if ($printoutput) print 'Write file '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support.'."\n";
+						if ($printoutput) print 'Write file '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support.'."\n";
 
 						$stream = @fopen($filecert, 'w');
 						//var_dump($stream);exit;
 						if ($stream) {
 							fwrite($stream, $publickeystodeploy);
 							fclose($stream);
-							$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/.ssh/authorized_keys_support');
+							$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support');
 						} else {
 							$errors[]='Failed to open for write '.$filecert."\n";
 						}
 					} else {
-						if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys_support not found.\n";
+						if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os."/.ssh/authorized_keys_support not found.\n";
 					}
 				} else {
-					if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web."/.ssh/authorized_keys_support already exists.\n";
+					if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os."/.ssh/authorized_keys_support already exists.\n";
 				}
 				$object->fileauthorizedkey=(empty($fstat['mtime'])?'':$fstat['mtime']);
 
 				// Check if install.lock exists
-				//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/'.$dir.'/documents/install.lock';
-				//$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/'.$dir.'/documents/install.lock';    // With PHP 5.6.27+
-				$fstatlock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/'.$dir.'/documents/install.lock');
+				//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
+				//$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/install.lock';    // With PHP 5.6.27+
+				$fstatlock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/install.lock');
 				$object->filelock=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
 				// Check if installmodules.lock exists
-				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_web.'/'.$dir.'/documents/installmodules.lock');
+				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
 				$object->fileinstallmoduleslock=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
 
 				// Define dates
@@ -158,10 +158,10 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 {
 	$instance = $object->instance;
 	if (empty($instance)) $instance = $object->ref_customer;
-	$username_web = $object->username_web;
-	if (empty($username_web)) $username_web = $object->array_options['options_username_os'];
-	$password_web = $object->password_web;
-	if (empty($password_web)) $password_web = $object->array_options['options_password_os'];
+	$username_os = $object->username_os;
+	if (empty($username_os)) $username_os = $object->array_options['options_username_os'];
+	$password_os = $object->password_os;
+	if (empty($password_os)) $password_os = $object->array_options['options_password_os'];
 
 	$hostname_db = $object->hostname_db;
 	if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];

@@ -121,7 +121,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		$conf->global->SELLYOURSAAS_NAME = $savconf->global->SELLYOURSAAS_NAME;
 		$conf->global->SELLYOURSAAS_ACCOUNT_URL = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
 		$conf->global->SELLYOURSAAS_MAIN_EMAIL = $savconf->global->SELLYOURSAAS_MAIN_EMAIL;
-		$conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM = $savconf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM;
+		$conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM = empty($savconf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM) ? '' : $savconf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM;
 		$conf->global->SELLYOURSAAS_NOREPLY_EMAIL = $savconf->global->SELLYOURSAAS_NOREPLY_EMAIL;
 		$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL = $savconf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
 
@@ -143,6 +143,19 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 			}
 		}
 
+		if (empty($savconf->global->SELLYOURSAAS_MAIN_EMAIL)) {
+			$savconf->global->SELLYOURSAAS_MAIN_EMAIL = '';
+		}
+		if (empty($savconf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM)) {
+			$savconf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM = '';
+		}
+		if (empty($savconf->global->SELLYOURSAAS_NOREPLY_EMAIL)) {
+			$savconf->global->SELLYOURSAAS_NOREPLY_EMAIL = '';
+		}
+		if (empty($savconf->global->SELLYOURSAAS_SUPERVISION_EMAIL)) {
+			$savconf->global->SELLYOURSAAS_SUPERVISION_EMAIL = '';
+		}
+
 		$conf->global->SELLYOURSAAS_DOMAIN_REGISTRATION = $constforaltname;
 		$conf->global->SELLYOURSAAS_ACCOUNT_URL        = $urlmyaccount;
 		$conf->global->SELLYOURSAAS_MAIN_EMAIL         = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_MAIN_EMAIL);
@@ -150,11 +163,11 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		$conf->global->SELLYOURSAAS_NOREPLY_EMAIL      = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_NOREPLY_EMAIL);
 		$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL  = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $savconf->global->SELLYOURSAAS_SUPERVISION_EMAIL);
 
-		dol_syslog("substitutionarray['__ONLINE_PAYMENT_URL__'] = ".$substitutionarray['__ONLINE_PAYMENT_URL__']);
+		dol_syslog("substitutionarray['__ONLINE_PAYMENT_URL__'] = ".(empty($substitutionarray['__ONLINE_PAYMENT_URL__']) ? '' : $substitutionarray['__ONLINE_PAYMENT_URL__']));
 
 		// Replace url inside var $substitutionarray['__ONLINE_PAYMENT_URL__'] to use options_domain_registration_page instead of SELLYOURSAAS_MAIN_DOMAIN_NAME
 		// A common value looks like  https://admin.mysellyoursaasdomain.com/public/payment/newpayment.php?source=invoice&ref=XXXX&securekey=zzzzzzz
-		$newsubstiturl = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $substitutionarray['__ONLINE_PAYMENT_URL__']);
+		$newsubstiturl = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], (empty($substitutionarray['__ONLINE_PAYMENT_URL__']) ? '' : $substitutionarray['__ONLINE_PAYMENT_URL__']));
 		dol_syslog("newsubstiturl = ".$newsubstiturl);
 		$substitutionarray['__ONLINE_PAYMENT_URL__'] = $newsubstiturl;
 

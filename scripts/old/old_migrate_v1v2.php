@@ -112,7 +112,7 @@ if (! empty($oldinstance) && ! preg_match('/\.on\.dolicloud\.com$/', $oldinstanc
 if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance)) {
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 		$staticdeploymentserver = new Deploymentserver($db);
 		$tmparray = $staticdeploymentserver->fetchAllDomains();
@@ -127,7 +127,15 @@ if ($result <= 0) {
 	print "Error: old instance ".$oldinstance." not found.\n";
 	exit(-2);
 }
-if (empty($oldobject->instance) || empty($oldobject->username_web) || empty($oldobject->password_web) || empty($oldobject->database_db)) {
+
+$oldobjectusername_os = $oldobject->array_options['options_username_os'];
+$oldobjectpassword_os = $oldobject->array_options['options_password_os'];
+$oldobjecthostname_os = $oldobject->array_options['options_hostname_os'];
+$oldbjectusername_db = $oldobject->array_options['options_username_db'];
+$oldobjectpassword_db = $oldobject->array_options['options_password_db'];
+$oldobjectdatabase_db = $oldobject->array_options['options_database_db'];
+
+if (empty($oldinstance) || empty($oldobjectusername_os) || empty($oldobjectpassword_os) || empty($oldobjectdatabase_db)) {
 	print "Error: Some properties for old instance ".$oldinstance." was not registered into database.\n";
 	exit(-3);
 }
@@ -824,16 +832,16 @@ if ($result <= 0 || $newobject->statut == 0) {
 	exit(-9);
 }
 
-$newobject->instance = $newinstance;
-$newobject->username_web = $newobject->array_options['options_username_os'];
-$newobject->password_web = $newobject->array_options['options_password_os'];
-$newobject->hostname_web = $newobject->array_options['options_hostname_os'];
-$newobject->username_db  = $newobject->array_options['options_username_db'];
-$newobject->password_db  = $newobject->array_options['options_password_db'];
-$newobject->database_db  = $newobject->array_options['options_database_db'];
+$newobjectinstance = $newinstance;
+$newobjectusername_os = $newobject->array_options['options_username_os'];
+$newobjectpassword_os = $newobject->array_options['options_password_os'];
+$newobjecthostname_os = $newobject->array_options['options_hostname_os'];
+$newobjectusername_db = $newobject->array_options['options_username_db'];
+$newobjectpassword_db = $newobject->array_options['options_password_db'];
+$newobjectdatabase_db = $newobject->array_options['options_database_db'];
 
-if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db)) {
-	print "Error: Some properties for instance ".$newinstance." was not registered into database (missing instance, username_web, password_web or database_db.\n";
+if (empty($newobjectinstance) || empty($newobjectusername_os) || empty($newobjectpassword_os) || empty($newobjectdatabase_db)) {
+	print "Error: Some properties for instance ".$newinstance." was not registered into database (missing instance, username_os, password_os or database_db.\n";
 	exit(-3);
 }
 
@@ -850,7 +858,7 @@ $newpasswordbase=$newobject->password_db;
 
 $sourcedir=$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.$olddirdb;
 $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb;
-$oldserver=$oldobject->hostname_web;
+$oldserver=$oldobject->hostname_os;
 $newserver=$newobject->array_options['options_hostname_os'];
 
 if (empty($oldlogin) || empty($olddirdb)) {
@@ -858,8 +866,8 @@ if (empty($oldlogin) || empty($olddirdb)) {
 	exit(-5);
 }
 
-$oldsftpconnectstring=$oldobject->username_web.'@'.$oldobject->hostname_web.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $olddirdb);
-$newsftpconnectstring=$newobject->username_web.'@'.$newobject->hostname_web.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdirdb);
+$oldsftpconnectstring=$oldobject->username_os.'@'.$oldobject->hostname_os.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $olddirdb);
+$newsftpconnectstring=$newobject->username_os.'@'.$newobject->hostname_os.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdirdb);
 
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
