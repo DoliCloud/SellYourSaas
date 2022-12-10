@@ -226,7 +226,7 @@
 		# Warning: this comments are interpreted
 		#include <abstractions/base>
 		/etc/ssl/openssl.cnf r,
-        /etc/nsswitch.conf r,
+		/etc/nsswitch.conf r,
 		
 		#allow owner /etc/passwd r,
 		allow /etc/passwd r,
