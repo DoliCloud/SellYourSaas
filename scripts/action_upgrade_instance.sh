@@ -10,6 +10,7 @@
 
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
+export nowlog=`date +'%Y%m%d-%H%M%S'`
 
 echo
 echo
@@ -25,7 +26,6 @@ echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
-export ZONES_PATH="/etc/bind/zones"
 export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
@@ -46,46 +46,46 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 if [ "x$1" == "x" ]; then
-	echo "Missing parameter 1 - mode (suspend|suspendmaintenance|unsuspend)" 1>&2
+	echo "Missing parameter 1 - mode (upgrade)" 1>&2
 	exit 1
 fi
 if [ "x$2" == "x" ]; then
 	echo "Missing parameter 2 - osusername" 1>&2
-	exit 20
+	exit 2
 fi
 if [ "x$3" == "x" ]; then
 	echo "Missing parameter 3 - ospassword" 1>&2
-	exit 30
+	exit 3
 fi
 if [ "x$4" == "x" ]; then
 	echo "Missing parameter 4 - instancename" 1>&2
-	exit 41
+	exit 4
 fi
 if [ "x$5" == "x" ]; then
 	echo "Missing parameter 5 - domainname" 1>&2
-	exit 50
+	exit 5
 fi
 if [ "x$6" == "x" ]; then
 	echo "Missing parameter 6 - dbname" 1>&2
-	exit 60
+	exit 6
 fi
 if [ "x$7" == "x" ]; then
 	echo "Missing parameter 7 - dbport" 1>&2
-	exit 70
+	exit 7
 fi
 if [ "x${23}" == "x" ]; then
 	echo "Missing parameter 23 - REMOTEIP" 1>&2
 	exit 23
 fi
-if [ "x$43" == "x"]; then
+if [ "x$43" == "x" ]; then
         echo "Missing parameter 43 - dirforexampleforsources"
         exit 43
 fi
-if [ "x$44" == "x"]; then
+if [ "x$44" == "x" ]; then
         echo "Missing parameter 44 - laststableupgradeversion"
         exit 44
 fi
-if [ "x$45" == "x"]; then
+if [ "x$45" == "x" ]; then
         echo "Missing parameter 45 - lastversiondolibarrinstance"
         exit 45
 fi
@@ -101,9 +101,9 @@ export dbport=$7
 export dbusername=$8
 export dbpassword=$9
 
-export fileforconfig1=${10}
-export targetfileforconfig1=${11}
-export dirwithdumpfile=${12}
+export fileforconfig1=${10//£/ }
+export targetfileforconfig1=${11//£/ }
+export dirwithdumpfile=${12//£/ }
 export dirwithsources1=${13}
 export targetdirwithsources1=${14}
 export dirwithsources2=${15}
@@ -140,6 +140,10 @@ export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
 export sshaccesstype=${39}
+export INCLUDEFROMCONTRACT=${40//£/ }
+if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
+	INCLUDEFROMCONTRACT=""
+fi
 
 export dirforexampleforsources=${43}
 export laststableupgradeversion=${44}
@@ -166,6 +170,8 @@ export webSSLCertificateIntermediate=`grep '^websslcertificateintermediate=' /et
 if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
+
+export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 # possibility to change the path of sellyoursass directory
 olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -210,7 +216,8 @@ echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
-echo "instancedir = $instancedir"
+echo "templatesdir (from /etc/sellyoursaas.conf) = $templatesdir"
+echo "instancedir (from /etc/sellyoursaas.conf) = $instancedir"
 echo "fqn = $fqn"
 echo "fqnold = $fqnold"
 echo "CRONHEAD = $CRONHEAD"
@@ -219,7 +226,15 @@ echo "laststableupgradeversion = $laststableupgradeversion"
 echo "lastversiondolibarrinstance = $lastversiondolibarrinstance"
 
 
+MYSQL=`which mysql`
+MYSQLDUMP=`which mysqldump`
+
+
 testorconfirm="confirm"
+
+
+# Backup of database should have been done previously
+# by calling the remote action 'backup'
 
 
 # Upgrade
