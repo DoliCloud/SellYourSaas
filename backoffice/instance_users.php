@@ -306,36 +306,50 @@ if (empty($reshook)) {
 		if (is_object($newdb)) {
 			$password=GETPOST('newpassword', 'none');
 
-			// TODO Use the encryption of remote instance.
-			// Currently, we use admin setup or sellyoursaas setup if defined
-			$savsalt = $conf->global->MAIN_SECURITY_SALT;
-			$savalgo = $conf->global->MAIN_SECURITY_HASH_ALGO;
-			if (! empty($conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION)) {
-				$conf->global->MAIN_SECURITY_SALT = $conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
-			}
-			if (! empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD)) {
-				$conf->global->MAIN_SECURITY_HASH_ALGO = $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
-			}
-
-			$password_crypted = dol_hash($password);
-
-			$conf->global->MAIN_SECURITY_SALT = $savsalt;
-			$conf->global->MAIN_SECURITY_HASH_ALGO = $savalgo;
-
-			// TODO Set definition of algorithm to hash password into the package
+			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
-				if (!empty($conf->global->MAIN_SHOW_PASSWORD_INTO_LOG)) {
-					dol_syslog("new password=".$password);
+				$fordolibarr = 0;
+				$forglpi = 1;
+			}
+
+
+			if ($fordolibarr) {
+				// Save setup and init env to have dol_hash ok for target instance
+				$savMAIN_SECURITY_HASH_ALGO = getDolGlobalString('MAIN_SECURITY_HASH_ALGO');
+				$savMAIN_SECURITY_SALT = getDolGlobalString('MAIN_SECURITY_SALT');
+
+				// Get setup of remote
+				$sql="SELECT value FROM ".$prefix_db."const WHERE name = 'MAIN_SECURITY_HASH_ALGO' ORDER BY entity LIMIT 1";
+				$resql=$newdb->query($sql);
+				if ($resql) {
+					$obj = $newdb->fetch_object($resql);
+					if ($obj) $conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+				} else {
+					setEventMessages("Failed to get remote MAIN_SECURITY_HASH_ALGO", null, 'warnings');
 				}
-				$password_crypted = md5($password);
+				$sql="SELECT value FROM ".$prefix_db."const WHERE name = 'MAIN_SECURITY_SALT' ORDER BY entity LIMIT 1";
+				$resql=$newdb->query($sql);
+				if ($resql) {
+					$obj = $newdb->fetch_object($resql);
+					if ($obj) $conf->global->MAIN_SECURITY_SALT = $obj->value;
+				} else {
+					setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
+				}
+
+				// Calculate hash using remote setup
+				$password_crypted_for_remote = dol_hash($password);
+
+				// Restore current setup
+				$conf->global->MAIN_SECURITY_HASH_ALGO = $savMAIN_SECURITY_HASH_ALGO;
+				$conf->global->MAIN_SECURITY_SALT = $savMAIN_SECURITY_SALT;
 			}
 
 			// TODO Set definition to update password of a userinto the package
-			$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
-			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
-				$sql="UPDATE glpi_users set password='".$newdb->escape($password_crypted)."' WHERE id = ".((int) GETPOST('remoteid', 'int'));
+			if ($fordolibarr) {
+				$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted_for_remote)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
+			} elseif ($forglpi) {
+				$sql="UPDATE glpi_users set password = MD5('".$newdb->escape($password)."') WHERE id = ".((int) GETPOST('remoteid', 'int'));
 			}
-
 
 			$resql=$newdb->query($sql);
 			if (! $resql) {

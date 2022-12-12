@@ -372,7 +372,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// ----- Backup instance -----
 	//print '<strong>INSTANCE BACKUP</strong><br>';
 
-	print '<div class="underbanner clearboth"></div>';
+	//print '<div class="underbanner clearboth"></div>';
+
+	print '<div class="div-table-responsive">';
 	print '<table class="noborder centpercent tableforfield">';
 
 	// Backup dir
@@ -422,7 +424,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '</tr>';
 
 	print "</table>";
-
+	print '</div>';
 
 	print "</div>";
 
