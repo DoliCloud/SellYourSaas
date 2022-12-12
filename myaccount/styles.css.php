@@ -405,6 +405,7 @@ border-radius: 0 4px 4px 0;
     padding: 10px 20px;
     text-align: justify;
     opacity: 0.65;
+	font-size: 0.95em;
 }
 
 .areaforresources {
