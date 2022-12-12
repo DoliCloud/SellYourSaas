@@ -200,17 +200,25 @@ if (empty($reshook)) {
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 			} elseif ($forglpi) {
-				$sql = "INSERT INTO glpi_users(name, password, date_mod)";
+				$sql = "INSERT INTO glpi_users(name, password, date_mod, is_active)";
 				$sql .= " VALUES('".$newdb->escape($loginforsupport)."',";
 				$sql .= " MD5('".$newdb->escape($password)."'),";
 				//$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
-				$sql .= " '".$newdb->idate(dol_now())."'";
+				$sql .= " '".$newdb->idate(dol_now())."', ";
+				$sql .= " 1";
 				$sql .= ")";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
 					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
 					else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+				} else {
+					$insertedid = $newdb->last_insert_id('glpi_users', 'id');
+					if ($insertedid > 0) {
+						$sql = "insert into glpi_profiles_users(users_id, profiles_id) SELECT ".((int) $insertedid).", id from glpi_profiles where interface = 'central'";
+						$resql=$newdb->query($sql);
+					}
 				}
+
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 			} else {
@@ -251,6 +259,10 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if (! $resql) dol_print_error($newdb);
 			} elseif ($forglpi) {
+				$sql="DELETE FROM glpi_profiles_users WHERE users_id = (SELECT id FROM glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."')";
+				$resql=$newdb->query($sql);
+				if (! $resql) dol_print_error($newdb);
+
 				$sql="DELETE FROM glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
 				$resql=$newdb->query($sql);
 				if (! $resql) dol_print_error($newdb);
@@ -271,7 +283,7 @@ if (empty($reshook)) {
 			if ($fordolibarr) {
 				$sql="UPDATE ".$prefix_db."user set statut=0 WHERE rowid = ".GETPOST('remoteid', 'int');
 			} elseif ($forglpi) {
-				$sql="UPDATE glpi_users set is_active=FALSE WHERE rowid = ".GETPOST('remoteid', 'int');
+				$sql="UPDATE glpi_users set is_active = 0 WHERE rowid = ".GETPOST('remoteid', 'int');
 			}
 
 			$resql=$newdb->query($sql);
@@ -292,7 +304,7 @@ if (empty($reshook)) {
 			if ($fordolibarr) {
 				$sql="UPDATE ".$prefix_db."user set statut=1 WHERE rowid = ".GETPOST('remoteid', 'int');
 			} elseif ($forglpi) {
-				$sql="UPDATE glpi_users set is_active=TRUE WHERE rowid = ".GETPOST('remoteid', 'int');
+				$sql="UPDATE glpi_users set is_active = 1 WHERE rowid = ".GETPOST('remoteid', 'int');
 			}
 
 			$resql=$newdb->query($sql);
@@ -396,10 +408,16 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
 	if (is_object($newdb) && $newdb->connected) {
-		// Get user/pass of last admin user
-		$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
-		// TODO Set definition to read users table into the package
+		$fordolibarr = 1;
 		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+			$fordolibarr = 0;
+			$forglpi = 1;
+		}
+
+		// Get user/pass of last admin user
+		if ($fordolibarr) {
+			$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+		} elseif ($forglpi) {
 			$sql="SELECT name as login, '' as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 		}
 
@@ -646,37 +664,44 @@ function print_user_table($newdb, $object)
 	print '</tr>';
 
 	if (is_object($newdb) && $newdb->connected) {
-		// Get user/pass of all users in database
-		$sql ="SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
-		$sql.=" FROM ".$prefix_db."user";
-		$sql .= $newdb->order($sortfield, $sortorder);
-
-		// TODO Set definition of SQL to get list of all users into the package
+		$fordolibarr = 1;
 		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+			$fordolibarr = 0;
+			$forglpi = 1;
+		}
+
+		$sql = '';
+
+		// Get user/pass of all users in database
+		if ($fordolibarr) {
+			$sql = "SELECT rowid, login, lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_soc, fk_socpeople, fk_member, entity, statut";
+			$sql .= " FROM ".$prefix_db."user";
+			$sql .= $newdb->order($sortfield, $sortorder);
+
+			$resql=$newdb->query($sql);
+			if (empty($resql)) {	// Alternative for Dolibarr 3.7-
+				$sql = "SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
+				$sql .= " FROM ".$prefix_db."user";
+				$sql .= $newdb->order($sortfield, $sortorder);
+				$resql = $newdb->query($sql);
+				if (empty($resql)) {	// Alternative for Dolibarr 3.3-
+					$sql = "SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
+					$sql .= " FROM ".$prefix_db."user";
+					$sql .= $newdb->order($sortfield, $sortorder);
+				}
+			}
+		} elseif ($forglpi) {
 			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
-			//$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, concat(gp.name, ' ', gp.interface) as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
 			$sql .= " glpi_useremails.email as email";
 			$sql .= " FROM glpi_users as gu";
 			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
-			$sql .= " LEFT JOIN glpi_profiles_users as gpu ON gpu.users_id = gu.id LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id AND gp.interface = 'central'";
-			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.name = 'supportcloud' OR gu2.is_deleted = 1)";
-			// TODO Limit payant uniquement
+			$sql .= " LEFT JOIN glpi_profiles_users as gpu ON gpu.users_id = gu.id";
+			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id AND gp.interface = 'central'";
+			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.is_deleted = 1)";
 			$sql .= " ORDER BY gu.is_active DESC";
 		}
 
 		$resql=$newdb->query($sql);
-		if (empty($resql)) {	// Alternative for Dolibarr 3.7-
-			$sql ="SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-			$sql.=" FROM ".$prefix_db."user ORDER";
-			$sql .= $newdb->order($sortfield, $sortorder);
-			$resql=$newdb->query($sql);
-			if (empty($resql)) {	// Alternative for Dolibarr 3.3-
-				$sql ="SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-				$sql.=" FROM ".$prefix_db."user";
-				$sql .= $newdb->order($sortfield, $sortorder);
-				$resql=$newdb->query($sql);
-			}
-		}
 
 		if ($resql) {
 			$num=$newdb->num_rows($resql);
