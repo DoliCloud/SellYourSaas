@@ -200,10 +200,12 @@ if (empty($reshook)) {
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 			} elseif ($forglpi) {
-				$sql = "INSERT INTO glpi_users(name, password, date_mod, is_active)";
+				$sql = "INSERT INTO glpi_users(name, password, authtype, date_mod, password_last_update, is_active)";
 				$sql .= " VALUES('".$newdb->escape($loginforsupport)."',";
 				$sql .= " MD5('".$newdb->escape($password)."'),";
 				//$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
+				$sql .= " 1,";
+				$sql .= " '".$newdb->idate(dol_now())."', ";
 				$sql .= " '".$newdb->idate(dol_now())."', ";
 				$sql .= " 1";
 				$sql .= ")";
@@ -214,7 +216,7 @@ if (empty($reshook)) {
 				} else {
 					$insertedid = $newdb->last_insert_id('glpi_users', 'id');
 					if ($insertedid > 0) {
-						$sql = "insert into glpi_profiles_users(users_id, profiles_id) SELECT ".((int) $insertedid).", id from glpi_profiles where interface = 'central'";
+						$sql = "insert into glpi_profiles_users(users_id, profiles_id, entities_id, is_recursive) SELECT ".((int) $insertedid).", id, 0, 1 from glpi_profiles where interface = 'central'";
 						$resql=$newdb->query($sql);
 					}
 				}
