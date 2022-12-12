@@ -200,7 +200,7 @@ if (empty($reshook)) {
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 			} elseif ($forglpi) {
-				$sql = "INSERT INTO ".$prefix_db."glpi_users(name, pass_crypted, date_mod)";
+				$sql = "INSERT INTO glpi_users(name, password, date_mod)";
 				$sql .= " VALUES('".$newdb->escape($loginforsupport)."',";
 				$sql .= " MD5('".$newdb->escape($password)."'),";
 				//$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
@@ -251,7 +251,7 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if (! $resql) dol_print_error($newdb);
 			} elseif ($forglpi) {
-				$sql="DELETE FROM ".$prefix_db."glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
+				$sql="DELETE FROM glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
 				$resql=$newdb->query($sql);
 				if (! $resql) dol_print_error($newdb);
 			}
@@ -262,9 +262,16 @@ if (empty($reshook)) {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
 			// TODO Set definition to disable a user into the package
-			$sql="UPDATE ".$prefix_db."user set statut=0 WHERE rowid = ".GETPOST('remoteid', 'int');
-			if (preg_match('/glpi-network\.cloud/', $object->ref_customer)) {
-				$sql="UPDATE ".$prefix_db."glpi_user set is_active=FALSE WHERE rowid = ".GETPOST('remoteid', 'int');
+			$fordolibarr = 1;
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+				$fordolibarr = 0;
+				$forglpi = 1;
+			}
+
+			if ($fordolibarr) {
+				$sql="UPDATE ".$prefix_db."user set statut=0 WHERE rowid = ".GETPOST('remoteid', 'int');
+			} elseif ($forglpi) {
+				$sql="UPDATE glpi_users set is_active=FALSE WHERE rowid = ".GETPOST('remoteid', 'int');
 			}
 
 			$resql=$newdb->query($sql);
@@ -276,9 +283,16 @@ if (empty($reshook)) {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
 			// TODO Set definition to disable a user into the package
-			$sql="UPDATE ".$prefix_db."user set statut=1 WHERE rowid = ".GETPOST('remoteid', 'int');
+			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
-				$sql="UPDATE ".$prefix_db."glpi_user set is_active=TRUE WHERE rowid = ".GETPOST('remoteid', 'int');
+				$fordolibarr = 0;
+				$forglpi = 1;
+			}
+
+			if ($fordolibarr) {
+				$sql="UPDATE ".$prefix_db."user set statut=1 WHERE rowid = ".GETPOST('remoteid', 'int');
+			} elseif ($forglpi) {
+				$sql="UPDATE glpi_users set is_active=TRUE WHERE rowid = ".GETPOST('remoteid', 'int');
 			}
 
 			$resql=$newdb->query($sql);
