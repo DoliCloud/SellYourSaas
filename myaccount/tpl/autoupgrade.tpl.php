@@ -42,7 +42,7 @@ $errors = 0;
 $stringoflistofmodules = "";
 
 
-// Check of the prerequisites
+// Check of the prerequisites (step 3)
 if ($action == "instanceverification") {
 	$confinstance = 0;
 
