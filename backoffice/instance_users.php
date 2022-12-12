@@ -126,27 +126,7 @@ if (empty($reshook)) {
 		$newdb->prefix_db = $prefix_db;
 
 		if (is_object($newdb)) {
-			$savMAIN_SECURITY_HASH_ALGO = $conf->global->MAIN_SECURITY_HASH_ALGO;
-			$savMAIN_SECURITY_SALT = $conf->global->MAIN_SECURITY_SALT;
-
-			// Get setup of remote
-			$sql="SELECT value FROM ".$prefix_db."const WHERE name = 'MAIN_SECURITY_HASH_ALGO' ORDER BY entity LIMIT 1";
-			$resql=$newdb->query($sql);
-			if ($resql) {
-				$obj = $newdb->fetch_object($resql);
-				if ($obj) $conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
-			} else {
-				setEventMessages("Failed to get remote MAIN_SECURITY_HASH_ALGO", null, 'warnings');
-			}
-			$sql="SELECT value FROM ".$prefix_db."const WHERE name = 'MAIN_SECURITY_SALT' ORDER BY entity LIMIT 1";
-			$resql=$newdb->query($sql);
-			if ($resql) {
-				$obj = $newdb->fetch_object($resql);
-				if ($obj) $conf->global->MAIN_SECURITY_SALT = $obj->value;
-			} else {
-				setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
-			}
-
+			// Get login and password for support
 			$loginforsupport = $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
 
 			$password = $conf->global->SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD;
@@ -154,44 +134,99 @@ if (empty($reshook)) {
 				require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
 				$password = getRandomPassword(false);
 			}
+			$password_crypted_for_remote = '';
 
-			// Calculate hash with remote setup
-			$password_crypted_for_remote = dol_hash($password);
+
+			$fordolibarr = 1;
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+				$forglpi = 1;
+			}
+
+
+			if ($fordolibarr) {
+				// Save setup and init env to have dol_hash ok for target instance
+				$savMAIN_SECURITY_HASH_ALGO = getDolGlobalString('MAIN_SECURITY_HASH_ALGO');
+				$savMAIN_SECURITY_SALT = getDolGlobalString('MAIN_SECURITY_SALT');
+
+				// Get setup of remote
+				$sql="SELECT value FROM ".$prefix_db."const WHERE name = 'MAIN_SECURITY_HASH_ALGO' ORDER BY entity LIMIT 1";
+				$resql=$newdb->query($sql);
+				if ($resql) {
+					$obj = $newdb->fetch_object($resql);
+					if ($obj) $conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+				} else {
+					setEventMessages("Failed to get remote MAIN_SECURITY_HASH_ALGO", null, 'warnings');
+				}
+				$sql="SELECT value FROM ".$prefix_db."const WHERE name = 'MAIN_SECURITY_SALT' ORDER BY entity LIMIT 1";
+				$resql=$newdb->query($sql);
+				if ($resql) {
+					$obj = $newdb->fetch_object($resql);
+					if ($obj) $conf->global->MAIN_SECURITY_SALT = $obj->value;
+				} else {
+					setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
+				}
+
+				// Calculate hash using remote setup
+				$password_crypted_for_remote = dol_hash($password);
+
+				// Restore current setup
+				$conf->global->MAIN_SECURITY_HASH_ALGO = $savMAIN_SECURITY_HASH_ALGO;
+				$conf->global->MAIN_SECURITY_SALT = $savMAIN_SECURITY_SALT;
+			}
+
 
 			// Set language to use for notes on the user we will create.
 			$newlangs = new Translate('', $conf);
 			$newlangs->setDefaultLang('en_US');		// TODO Best is to used the language of customer.
 			$newlangs->load("sellyoursaas@sellyoursaas");
 
-			// Restore current setup
-			$conf->global->MAIN_SECURITY_HASH_ALGO = $savMAIN_SECURITY_HASH_ALGO;
-			$conf->global->MAIN_SECURITY_SALT = $savMAIN_SECURITY_SALT;
 			$private_note = $newlangs->trans("NoteForSupportUser");
 			$emailsupport = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 			$signature = '--<br>Support team';
 
-			$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature, api_key)";
-			$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
-			$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
-			$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
-			$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
-			$sql .= " '".$newdb->escape($password)."')";
-			$resql=$newdb->query($sql);
-			if (! $resql) {
-				if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
-				else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+			if ($fordolibarr) {
+				$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, note, email, signature, api_key)";
+				$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
+				$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
+				$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
+				$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($private_note)."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
+				$sql .= " '".$newdb->escape($password)."')";
+				$resql=$newdb->query($sql);
+				if (! $resql) {
+					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
+					else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+				}
+
+				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
+			} elseif ($forglpi) {
+				$sql = "INSERT INTO ".$prefix_db."glpi_users(name, pass_crypted, date_mod)";
+				$sql .= " VALUES('".$newdb->escape($loginforsupport)."',";
+				$sql .= " MD5('".$newdb->escape($password)."'),";
+				//$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
+				$sql .= " '".$newdb->idate(dol_now())."'";
+				$sql .= ")";
+				$resql=$newdb->query($sql);
+				if (! $resql) {
+					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
+					else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+				}
+
+				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
+			} else {
+				// TODO
 			}
 
-			$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 
 			// Add all permissions on support user
-			$edituser = new User($newdb);
-			$edituser->id = $idofcreateduser;
-			$edituser->entity = 0;
+			if ($fordolibarr) {
+				$edituser = new User($newdb);
+				$edituser->id = $idofcreateduser;
+				$edituser->entity = 0;
 
-			$resaddright = $edituser->addrights(0, 'allmodules', '', 0, 1);
-			if ($resaddright <= 0) {
-				setEventMessages('Failed to set all permissions : '.$edituser->error, $edituser->errors, 'warnings');
+				$resaddright = $edituser->addrights(0, 'allmodules', '', 0, 1);
+				if ($resaddright <= 0) {
+					setEventMessages('Failed to set all permissions : '.$edituser->error, $edituser->errors, 'warnings');
+				}
 			}
 
 			setEventMessages('Password for user <b>'.$loginforsupport.'</b> set to <b>'.$password.'</b>', null, 'warnings');
@@ -200,14 +235,24 @@ if (empty($reshook)) {
 	if ($action == "deletesupportuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
-			$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM ".$prefix_db."user WHERE login = '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."')";
-			$resql=$newdb->query($sql);
-			if (! $resql) dol_print_error($newdb);
+			$fordolibarr = 1;
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+				$forglpi = 1;
+			}
 
-			// Get user/pass of last admin user
-			$sql="DELETE FROM ".$prefix_db."user WHERE login = '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."'";
-			$resql=$newdb->query($sql);
-			if (! $resql) dol_print_error($newdb);
+			if ($fordolibarr) {
+				$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM ".$prefix_db."user WHERE login = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."')";
+				$resql=$newdb->query($sql);
+				if (! $resql) dol_print_error($newdb);
+
+				$sql="DELETE FROM ".$prefix_db."user WHERE login = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
+				$resql=$newdb->query($sql);
+				if (! $resql) dol_print_error($newdb);
+			} elseif ($forglpi) {
+				$sql="DELETE FROM ".$prefix_db."glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
+				$resql=$newdb->query($sql);
+				if (! $resql) dol_print_error($newdb);
+			}
 		}
 	}
 
