@@ -268,6 +268,18 @@ if [[ "$mode" == "upgrade" ]];then
 			rm documents/install.lock
 		fi
 
+		if [ ! -d "documents/admin/" ]
+		then
+			echo "mkdir documents/admin/"
+			mkdir documents/admin/
+		fi
+
+		if [ ! -d "documents/admin/tmp" ]
+		then
+			echo "mkdir documents/admin/tmp"
+			mkdir documents/admin/tmp
+		fi
+
 		echo "$instancedir/htdocs/install/"
 		cd $instancedir/htdocs/install/
 
@@ -277,18 +289,18 @@ if [[ "$mode" == "upgrade" ]];then
 		do
 			echo "upgrade from version $versionfrom.0.0 to version $versionto.0.0"
 
-			echo "php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output.html"
-			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output.html
+			echo "php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
+			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html
 
 			if [ $? -eq 0 ]
 			then
-				echo "php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output2.html"
-				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output2.html
+				echo "php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output2.html"
+				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output2.html
 
 				if [ $? -eq 0 ]
 				then
 					echo "php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output3.html"
-					php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output3.html
+					php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output3.html
 
 					if [ $? -eq 0 ]
 					then
