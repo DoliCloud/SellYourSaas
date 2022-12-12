@@ -181,10 +181,14 @@ if ($action == "autoupgrade") {
 
 		$object->fetch_thirdparty();
 
-		// TODO Check the thirdparty of instance is same than logged thirdparty
+		// Check the thirdparty of instance is same than logged thirdparty
+		if ($object->socid != $mythirdpartyaccount->id) {
+			$errortab[] = $langs->trans("ErrorWrongLoggedThirdpartyToUpgrade");
+			$errors++;
+		}
 	}
 
-	if (!$error) {
+	if (!$errors) {
 		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];
@@ -259,7 +263,7 @@ if ($action == "autoupgrade") {
 			setEventMessages($langs->trans("ErrorOnUpgradeScript"), null, "errors");
 		}
 
-		// TODO Add an entry into actioncomm
+		// TODO: Add an entry into actioncomm
 		/*
 		print "Create event into database\n";
 		dol_syslog("Add event into database");

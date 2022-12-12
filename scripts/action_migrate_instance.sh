@@ -234,7 +234,7 @@ if [[ "$mode" == "migrate" ]]; then
 									echo "Successfully file migration"
 							else
 									echo "Error on file migration"
-									exit 411
+									exit 211
 							fi
 							;;
 					*.tbz2|*.tar.bz2)
@@ -245,7 +245,7 @@ if [[ "$mode" == "migrate" ]]; then
 									echo "Successfully file migration"
 							else
 									echo "Error on file migration"
-									exit 412
+									exit 212
 							fi
 							;;
 					*.tgz|*.tar.gz)
@@ -256,7 +256,7 @@ if [[ "$mode" == "migrate" ]]; then
 									echo "Successfully file migration"
 							else
 									echo "Error on file migration"
-									exit 413
+									exit 213
 							fi
 							;;
 			esac
@@ -264,7 +264,7 @@ if [[ "$mode" == "migrate" ]]; then
             chown $osusername:$osusername $instancedir/documents
 	else
 			echo "File $automigrationdocumentarchivename not found"
-			exit 410
+			exit 210
 	fi
 fi
 
