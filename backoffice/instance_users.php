@@ -139,6 +139,7 @@ if (empty($reshook)) {
 
 			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+				$fordolibarr = 0;
 				$forglpi = 1;
 			}
 
@@ -237,6 +238,7 @@ if (empty($reshook)) {
 		if (is_object($newdb)) {
 			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+				$fordolibarr = 0;
 				$forglpi = 1;
 			}
 

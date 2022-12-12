@@ -300,6 +300,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 		$fordolibarr = 1;
 		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+			$fordolibarr = 0;
 			$forglpi = 1;
 		}
 
