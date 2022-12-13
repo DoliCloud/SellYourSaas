@@ -3,6 +3,7 @@
 
 ## 1.3
 
+ * NEW Can set max number of emails per instance
  * NEW Add count of backup and error backup into list of servers
  * NEW Store list of deployment servers into a table
  * NEW Add script disk_used_per_instance.sh

@@ -513,14 +513,14 @@ if ($resql) {
 						}
 					}
 
-					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'maxperday'=>$obj->maxperday, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} elseif ($instancefiltercomplete) {
 					//$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'maxperday'=>$obj->maxperday, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} else {
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'maxperday'=>$obj->maxperday, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				}
@@ -545,8 +545,8 @@ $i = 0;
 foreach ($instances as $instanceid => $instancearray) {
 	$i++;
 	// We complete the file $filetobuild = $pathtospamdir.'/mailquota';
-	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n";
-	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance '.$i.' id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n", FILE_APPEND);
+	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".($instancearray['maxperday'] ? $instancearray['maxperday'] : $MAXPERDAYPAID)."\n";
+	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance '.$i.' id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".($instancearray['maxperday'] ? $instancearray['maxperday'] : $MAXPERDAYPAID)."\n", FILE_APPEND);
 }
 
 
