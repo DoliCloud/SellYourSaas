@@ -409,7 +409,8 @@ $object=new Contrat($dbmaster);
 
 // Get list of instance (not already flagged as spammer of flagged as clean)
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
-$sql.= " ce.deployment_date_start, ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu, ce.database_db as dbn";
+$sql.= " ce.deployment_date_start, ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu, ce.database_db as dbn,";
+$sql.= " ce.maxperday";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 if ($instancefiltercomplete) {
