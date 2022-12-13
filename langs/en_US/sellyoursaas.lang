@@ -766,3 +766,5 @@ ServerCustomerAnnounceInfo=Exemple<br>(AnnounceMajorOutage)<br>(AnnounceMinorOut
 IPConfirmEmail=Email confirmation IP
 ErrorOnUpgradeScript=Error running upgrade script
 UpgradeErrorSubject=Error of the upgrade process
+MaxEmailPerDay=Max number of emails per day
+MaxEmailPerDayDesc=If empty, the default value defined into /etc/sellyoursaas.conf of the deployment server will be used.
