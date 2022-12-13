@@ -236,7 +236,7 @@ $instancefiltercomplete=$instancefilter;
 if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomplete) && ! preg_match('/\.home\.lan$/', $instancefiltercomplete)) {
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 		$staticdeploymentserver = new Deploymentserver($db);
 		$tmparray = $staticdeploymentserver->fetchAllDomains();
@@ -658,7 +658,7 @@ if ($ok) {
 
 dol_delete_file('/tmp/batch_detect_evil_instance.tmp');
 
-print "----- Loop for test instance not matching the file signature - in trial instances\n";
+print "----- Loop for test instance not matching the file signature - in trial instances (".count($instancestrial)." instances)\n";
 foreach ($instancestrial as $instanceid => $instancearray) {
 	$error = 0;		// error for this instance
 
