@@ -216,8 +216,8 @@ echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
-echo "templatesdir (from /etc/sellyoursaas.conf) = $templatesdir"
-echo "instancedir (from /etc/sellyoursaas.conf) = $instancedir"
+echo "templatesdir (from parameters) = $templatesdir"
+echo "instancedir (from parameters) = $instancedir"
 echo "fqn = $fqn"
 echo "fqnold = $fqnold"
 echo "CRONHEAD = $CRONHEAD"
@@ -259,7 +259,7 @@ if [[ "$mode" == "upgrade" ]];then
 			exit 221
 		fi
 
-		echo "cd $instancedir/"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/"
         cd $instancedir/
 
 		if [ -f "documents/install.lock" ]
@@ -280,26 +280,26 @@ if [[ "$mode" == "upgrade" ]];then
 			mkdir documents/admin/tmp
 		fi
 
-		echo "$instancedir/htdocs/install/"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/htdocs/install/"
 		cd $instancedir/htdocs/install/
 
 		versionfrom=$lastversiondolibarrinstance
 		versionto=$(( $versionfrom + 1 ))
 		while [ $versionfrom -lt $laststableupgradeversion ]
 		do
-			echo "upgrade from version $versionfrom.0.0 to version $versionto.0.0"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" upgrade from version $versionfrom.0.0 to version $versionto.0.0"
 
-			echo "php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output.html"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output.html"
 			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output.html
 
 			if [ $? -eq 0 ]
 			then
-				echo "php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output2.html"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output2.html"
 				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output2.html
 
 				if [ $? -eq 0 ]
 				then
-					echo "php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/tmp/output3.html"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/tmp/output3.html"
 					php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output3.html
 
 					if [ $? -eq 0 ]
@@ -322,13 +322,15 @@ if [[ "$mode" == "upgrade" ]];then
 			versionto=$(( $versionto + 1 ))
 		done
 
-		echo "cd $instancedir/"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/"
 		cd $instancedir/
 
 		if [ ! -f "documents/install.lock" ]
 		then
-			echo "touch documents/install.lock"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Recreate the lock file documents/install.lock"
 			touch documents/install.lock
+			chmod o-w documents/install.lock
+			chown $osusername.$osusername documents/install.lock 
 		fi
 	fi
 fi
