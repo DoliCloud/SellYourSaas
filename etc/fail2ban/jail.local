@@ -221,14 +221,13 @@ findtime = 60        ; 1 minute
 maxretry = 10
 
 
-
-[web-dol-passforgotten]
+[web-accesslog-limit403]
 
 ; rule against call of 403 forbidden access (for all servers)
 enabled = true
 port    = http,https
 filter  = web-accesslog-limit403
-logpath = /var/log/apache2/other_virtual_hosts.log
+logpath = /var/log/apache2/other_vhosts_access.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
