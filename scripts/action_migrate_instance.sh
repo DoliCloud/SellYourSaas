@@ -260,8 +260,8 @@ if [[ "$mode" == "migrate" ]]; then
 							fi
 							;;
 			esac
-			echo "chown $osusername:$osusername $instancedir/documents"
-            chown $osusername:$osusername $instancedir/documents
+			echo "chown -R $osusername:$osusername $instancedir/documents"
+            chown -R $osusername:$osusername $instancedir/documents
 	else
 			echo "File $automigrationdocumentarchivename not found"
 			exit 210
