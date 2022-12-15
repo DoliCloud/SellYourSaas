@@ -236,7 +236,7 @@ $instancefiltercomplete=$instancefilter;
 if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomplete) && ! preg_match('/\.home\.lan$/', $instancefiltercomplete)) {
 	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	}else {
+	} else {
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 		$staticdeploymentserver = new Deploymentserver($db);
 		$tmparray = $staticdeploymentserver->fetchAllDomains();
@@ -409,7 +409,8 @@ $object=new Contrat($dbmaster);
 
 // Get list of instance (not already flagged as spammer of flagged as clean)
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
-$sql.= " ce.deployment_date_start, ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu, ce.database_db as dbn";
+$sql.= " ce.deployment_date_start, ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.username_os as osu, ce.database_db as dbn,";
+$sql.= " ce.maxperday";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 if ($instancefiltercomplete) {
@@ -513,14 +514,14 @@ if ($resql) {
 						}
 					}
 
-					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'maxperday'=>$obj->maxperday, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} elseif ($instancefiltercomplete) {
 					//$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'maxperday'=>$obj->maxperday, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				} else {
-					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'osu'=>$obj->osu, 'maxperday'=>$obj->maxperday, 'dbn'=>$obj->dbn, 'deployment_date_start'=>$dbtousetosearch->jdate($obj->deployment_date_start), 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok));
 					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
 				}
@@ -545,8 +546,8 @@ $i = 0;
 foreach ($instances as $instanceid => $instancearray) {
 	$i++;
 	// We complete the file $filetobuild = $pathtospamdir.'/mailquota';
-	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n";
-	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance '.$i.' id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".$MAXPERDAYPAID."\n", FILE_APPEND);
+	echo 'Process paid instance id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".($instancearray['maxperday'] ? $instancearray['maxperday'] : $MAXPERDAYPAID)."\n";
+	file_put_contents($pathtospamdir.'/mailquota', 'Paid instance '.$i.' id='.$instancearray['id'].' ref='.$instancearray['ref'].' osu='.$instancearray['osu']." mailquota=".($instancearray['maxperday'] ? $instancearray['maxperday'] : $MAXPERDAYPAID)."\n", FILE_APPEND);
 }
 
 
@@ -658,7 +659,7 @@ if ($ok) {
 
 dol_delete_file('/tmp/batch_detect_evil_instance.tmp');
 
-print "----- Loop for test instance not matching the file signature - in trial instances\n";
+print "----- Loop for test instance not matching the file signature - in trial instances (".count($instancestrial)." instances)\n";
 foreach ($instancestrial as $instanceid => $instancearray) {
 	$error = 0;		// error for this instance
 

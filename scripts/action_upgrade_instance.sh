@@ -244,7 +244,7 @@ if [[ "$mode" == "upgrade" ]];then
 	if [ $lastversiondolibarrinstance -lt 4 ]
 	then
 		echo "Version too old."
-		exit 440
+		exit 220
 	fi
 	if [ -d "$dirforexampleforsources" ]
 	then
@@ -256,7 +256,7 @@ if [[ "$mode" == "upgrade" ]];then
 			echo "Successfully copied dolibarr folder"
 		else
 			echo "Error on copying dolibarr folder"
-			exit 431
+			exit 221
 		fi
 
 		echo "cd $instancedir/"
@@ -268,6 +268,18 @@ if [[ "$mode" == "upgrade" ]];then
 			rm documents/install.lock
 		fi
 
+		if [ ! -d "documents/admin/" ]
+		then
+			echo "mkdir documents/admin/"
+			mkdir documents/admin/
+		fi
+
+		if [ ! -d "documents/admin/tmp" ]
+		then
+			echo "mkdir documents/admin/tmp"
+			mkdir documents/admin/tmp
+		fi
+
 		echo "$instancedir/htdocs/install/"
 		cd $instancedir/htdocs/install/
 
@@ -277,34 +289,34 @@ if [[ "$mode" == "upgrade" ]];then
 		do
 			echo "upgrade from version $versionfrom.0.0 to version $versionto.0.0"
 
-			echo "php upgrade.php $versionfrom.0.0 $versionto.0.0 > output.html"
-			php upgrade.php $versionfrom.0.0 $versionto.0.0 > output.html
+			echo "php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output.html"
+			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output.html
 
 			if [ $? -eq 0 ]
 			then
-				echo "php upgrade2.php $versionfrom.0.0 $versionto.0.0 > output2.html"
-				php upgrade2.php $versionfrom.0.0 $versionto.0.0 > output2.html
+				echo "php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output2.html"
+				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output2.html
 
 				if [ $? -eq 0 ]
 				then
-					echo "php step5.php $versionfrom.0.0 $versionto.0.0 > output3.html"
-					php step5.php $versionfrom.0.0 $versionto.0.0 > output3.html
+					echo "php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/tmp/output3.html"
+					php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output3.html
 
 					if [ $? -eq 0 ]
 					then
 						echo "Successfully upgraded to version $versionto"
 					else
 						echo "Error on step5.php"
-						exit 434
+						exit 224
 					fi
 
 				else
 					echo "Error on upgrade2.php"
-					exit 433
+					exit 223
 				fi
 			else
 				echo "Error on upgrade.php"
-				exit 432
+				exit 222
 			fi
 			versionfrom=$(( $versionfrom + 1 ))
 			versionto=$(( $versionto + 1 ))

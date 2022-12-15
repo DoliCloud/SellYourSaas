@@ -210,13 +210,13 @@ if ($action == 'automigration') {
 		$param[] = "--no-tablespaces";
 		$param[] = "-C";
 		$param[] = "-h";
-		$param[] = $object->hostname_db;
+		$param[] = $hostname_db;
 		$param[] = "-P";
-		$param[] = (! empty($object->port_db) ? $object->port_db : "3306");
+		$param[] = (! empty($port_db) ? $port_db : "3306");
 		$param[] = "-u";
-		$param[] = $object->username_db;
-		$param[] = '-p"'.str_replace(array('"','`'), array('\"','\`'), $object->password_db).'"';
-		$param[] = $object->database_db;
+		$param[] = $username_db;
+		$param[] = '-p"'.str_replace(array('"','`'), array('\"','\`'), $password_db).'"';
+		$param[] = $database_db;
 		$mysqlbackupcommand=$command." ".join(" ", $param);
 
 		$result = $utils->executeCli($mysqlbackupcommand, "", 0, $mysqlbackupfilename);
