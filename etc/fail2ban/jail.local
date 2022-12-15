@@ -238,7 +238,7 @@ maxretry = 100
 [web-dol-passforgotten]
 
 ; rule against call of passwordforgottenpage (for backoffice and myaccount)
-; disable this rule by setting enabled to false on non master servers
+; you can disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulespassforgotten
@@ -251,7 +251,7 @@ maxretry = 10
 [web-dol-bruteforce]
 
 ; rule against bruteforce hacking (login + api)
-; disable this rule by setting enabled to false on non master servers
+; you can disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesbruteforce
@@ -264,7 +264,7 @@ maxretry = 10
 [web-dol-registerinstance]
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enabled to false on non master servers
+; you can disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesregisterinstance
