@@ -175,7 +175,7 @@ if ($action == 'automigration') {
 	$exitcode = 0;
 
 	//Backup old database
-	$mysqlbackupfilename=$upload_dir.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
+	$mysqlbackupfilename=$upload_dir.'/mysqldump_'.$database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
 	$mysqlbackupcommand='mysqldump -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
 	$result = $utils->executeCli($mysqlbackupcommand, "", 0, $mysqlbackupfilename);
 
