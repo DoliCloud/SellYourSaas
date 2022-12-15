@@ -262,45 +262,48 @@ if [[ "$mode" == "upgrade" ]];then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/"
         cd $instancedir/
 
-		if [ -f "documents/install.lock" ]
+		if [ ! -d "$instancedir/documents/admin/temp" ]
 		then
-			echo "rm documents/install.lock"
-			rm documents/install.lock
-		fi
-
-		if [ ! -d "documents/admin/" ]
-		then
-			echo "mkdir documents/admin/"
-			mkdir documents/admin/
-		fi
-
-		if [ ! -d "documents/admin/tmp" ]
-		then
-			echo "mkdir documents/admin/tmp"
-			mkdir documents/admin/tmp
+			echo "mkdir -p $instancedir/documents/admin/temp"
+			mkdir "$instancedir/documents/admin/temp"
+			chown -R $osusername.$osusername "$instancedir/documents/admin/temp"
 		fi
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/htdocs/install/"
-		cd $instancedir/htdocs/install/
+		cd "$instancedir/htdocs/install/"
+
+		echo `date +'%Y-%m-%d %H:%M:%S'`" clean the output file $instancedir/documents/admin/temp/output.html"
+		> "$instancedir/documents/admin/temp/output.html"
+		chown $osusername.$osusername "$instancedir/documents/admin/temp/output.html"
+
 
 		versionfrom=$lastversiondolibarrinstance
 		versionto=$(( $versionfrom + 1 ))
 		while [ $versionfrom -lt $laststableupgradeversion ]
 		do
+			if [ -f "$instancedir/documents/install.lock" ]
+			then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" rm $instancedir/documents/install.lock"
+				rm "$instancedir/documents/install.lock"
+			fi
+
 			echo `date +'%Y-%m-%d %H:%M:%S'`" upgrade from version $versionfrom.0.0 to version $versionto.0.0"
 
-			echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output.html"
-			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output.html
+			echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
+			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
+			echo >> "$instancedir/documents/admin/temp/output.html"
 
 			if [ $? -eq 0 ]
 			then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output2.html"
-				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output2.html
+				echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
+				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
+				echo >> "$instancedir/documents/admin/temp/output.html"
 
 				if [ $? -eq 0 ]
 				then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/tmp/output3.html"
-					php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/tmp/output3.html
+					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output.html"
+					php step5.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
+					echo >> "$instancedir/documents/admin/temp/output.html"
 
 					if [ $? -eq 0 ]
 					then
