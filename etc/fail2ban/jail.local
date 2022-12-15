@@ -161,7 +161,8 @@ maxretry = 5
 
 [email-dol-perday]
 
-; rule against out of limit emails (max 500 emails per day)
+; rule against out of limit emails without smtp (max 500 emails with per day)
+; Note: The regex is not found (different) when user limit is a custom limit higher than default limit
 enabled = true
 port    = http,https
 filter  = email-dolibarr-rulesall
@@ -169,7 +170,7 @@ logpath = /var/log/phpsendmail.log
 action  = %(action_mw)s
 bantime  = 86400     ; 1 day
 findtime = 86400     ; 1 day
-maxretry = 500
+maxretry = 505
 
 
 [email-dol-blacklist]

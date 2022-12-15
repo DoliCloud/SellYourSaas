@@ -71,12 +71,16 @@ if ($fp) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR Failed to open /etc/sellyoursaas-public.conf file\n", FILE_APPEND);
 	//exit(-1);
 }
+
+// Get the default limit in setup
 if (is_numeric($maxemailperday) && $maxemailperday > 0) {
 	$MAXPERDAY = (int) $maxemailperday;
 }
 if (is_numeric($maxemailperdaypaid) && $maxemailperdaypaid > 0) {
 	$MAXPERDAYPAID = (int) $maxemailperdaypaid;
 }
+// The limit for the instance
+$MAXALLOWED = 0;
 
 $dolibarrdir='';
 if ($tmpline[0] == 'dolibarrdir') {
@@ -424,7 +428,7 @@ while (!feof($handle)) {
 			$resultresexec = $utils->executeCLI($commandresexec, $outputfile, 0, null, 1);
 			$resexec = -1;
 			if (empty($resultresexec['result'])) {
-				$resexec = trim($resultresexec['output']);
+				$resexec = trim($resultresexec['output']);	// nb of email already sent in last 24h
 
 				$MAXALLOWED = $MAXPERDAYPAID;
 				if ($usernamestring) {
@@ -480,7 +484,13 @@ while (!feof($handle)) {
 	}
 
 	if ($ok) {
-		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ok\n", FILE_APPEND);
+		if ($MAXALLOWED > $MAXPERDAYPAID) {
+			// If user has a specific limit, we set a log that will not be viewed by fail2ban (not "sellyoursaas rules ok")
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules is good with a custom limit\n", FILE_APPEND);
+		} else {
+			// If user has a common limit
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ok\n", FILE_APPEND);
+		}
 	}
 }
 // This script never end
