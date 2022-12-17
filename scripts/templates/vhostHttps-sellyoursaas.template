@@ -56,10 +56,9 @@
         # Make sure proxies don't deliver the wrong content
         #Header append Vary User-Agent env=!dont-vary
 
-        DeflateFilterNote Input instream
-        DeflateFilterNote Output outstream
-        DeflateFilterNote Ratio ratio
-
+        #DeflateFilterNote Input instream
+        #DeflateFilterNote Output outstream
+        #DeflateFilterNote Ratio ratio
         #LogFormat '"%r" %{outstream}n/%{instream}n (%{ratio}n%%)' deflate
         #CustomLog deflate_log deflate
 

@@ -335,6 +335,11 @@ if [[ "$mode" == "upgrade" ]];then
 			chmod o-w documents/install.lock
 			chown $osusername.$osusername documents/install.lock 
 		fi
+		
+		# Restore user owner on all files into documents
+		# because the upgrade/upgrade2/step5 may have created new files owned by root (because they were run with root).
+		echo `date +'%Y-%m-%d %H:%M:%S'`" find $instancedir/documents ! -user $osusername -exec chown $osusername.$osusername {} \;"
+		find "$instancedir/documents" ! -user $osusername -exec chown $osusername.$osusername {} \; 
 	fi
 fi
 
