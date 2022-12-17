@@ -477,7 +477,8 @@
       - php80 is defined
       
   - name: Disable old PHP on Apache
-    command: a2dismod php7.4
+    #command: a2dismod php7.0
+    command: a2dismod php7.2 php7.3 php7.4
     when: 
       - php80 is defined
       
