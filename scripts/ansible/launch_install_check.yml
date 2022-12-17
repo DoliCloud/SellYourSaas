@@ -161,7 +161,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: PHP
       option: max_input_vars
-      value: 4000
+      value: '4000'
     when: 
       - php74 is defined
 
@@ -188,7 +188,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: 3600
+      value: '3600'
     when: 
       - php74 is defined
 
@@ -197,7 +197,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: Session
       option: session.use_strict_mode
-      value: 1
+      value: '1'
     when: 
       - php74 is defined
 
@@ -206,7 +206,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: Session
       option: session.use_only_cookies
-      value: 1
+      value: '1'
     when: 
       - php74 is defined
 
@@ -215,7 +215,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: Session
       option: session.cookie_httponly
-      value: 1
+      value: '1'
     when: 
       - php74 is defined
 
@@ -302,7 +302,7 @@
     when: 
       - php74 is defined
 
-  - name: Correct PHP version selected
+  - name: Set PHP version for CLI
     community.general.alternatives:
       name: php
       path: /usr/bin/php7.4
@@ -335,7 +335,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: PHP
       option: max_input_vars
-      value: 4000
+      value: '4000'
     when: 
       - php80 is defined
 
@@ -362,7 +362,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: 3600
+      value: '3600'
     when: 
       - php80 is defined
 
@@ -371,7 +371,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: Session
       option: session.use_strict_mode
-      value: 1
+      value: '1'
     when: 
       - php80 is defined
 
@@ -380,7 +380,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: Session
       option: session.use_only_cookies
-      value: 1
+      value: '1'
     when: 
       - php80 is defined
 
@@ -389,7 +389,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: Session
       option: session.cookie_httponly
-      value: 1
+      value: '1'
     when: 
       - php80 is defined
 
@@ -476,12 +476,31 @@
     when: 
       - php80 is defined
       
-  - name: Correct PHP version selected
+  - name: Disable old PHP on Apache
+    command: a2dismod php7.4
+    when: 
+      - php80 is defined
+      
+  - name: Activates PHP on Apache
+    command: a2enmod php8.0
+    when: 
+      - php80 is defined
+
+  - name: Set PHP version for CLI
     community.general.alternatives:
       name: php
       path: /usr/bin/php8.0
+    register: phpversionmodified
+    notify: restart-apache
     when: 
       - php80 is defined
+
+  - debug:
+      var: phpversionmodified.changed
+
+  #- name: Reload Apache configs if pyapp or Apache - files are changed
+  #  service: name=httpd state=reloaded
+  #  when: phpversionmodified.changed
 
   - name: Removed unexpected apt packages
     apt:
@@ -491,12 +510,20 @@
       - php7.4-fpm 
       - php8.0-fpm
       - php8.1-fpm
+      - php8.2-fpm
       state: absent 
     register: command_output
 
   - debug:
       var: command_output.stdout_lines
       
+
+  handlers:
+    - name: restart-apache
+      service:
+        name: apache2
+
+
   ##### Set permissions by calling perms.ksh
 - name: Call perms.ksh
   hosts: '{{target}}'
