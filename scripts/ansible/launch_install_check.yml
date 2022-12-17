@@ -262,7 +262,7 @@
       option: opcache.memory_consumption
       value: '1024'
     when: 
-      - opcode is defined
+      - php74 is defined
 
   - name: Check or update opcache.max_accelerated_files php.ini
     ini_file:
@@ -271,7 +271,7 @@
       option: opcache.max_accelerated_files
       value: '100000'
     when: 
-      - opcode is defined
+      - php74 is defined
 
   ##### cli/php.ini
   - name: Check or update auto_prepend_file cli/php.ini
@@ -302,7 +302,14 @@
     when: 
       - php74 is defined
 
+  - name: Correct PHP version selected
+    community.general.alternatives:
+      name: php
+      path: /usr/bin/php7.4
+    when: 
+      - php74 is defined
 
+      
   ##### apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
@@ -429,7 +436,7 @@
       option: opcache.memory_consumption
       value: '1024'
     when: 
-      - opcode is defined
+      - php80 is defined
 
   - name: Check or update opcache.max_accelerated_files php.ini
     ini_file:
@@ -438,7 +445,7 @@
       option: opcache.max_accelerated_files
       value: '100000'
     when: 
-      - opcode is defined
+      - php80 is defined
 
   ##### cli/php.ini
   - name: Check or update auto_prepend_file cli/php.ini
@@ -469,6 +476,12 @@
     when: 
       - php80 is defined
       
+  - name: Correct PHP version selected
+    community.general.alternatives:
+      name: php
+      path: /usr/bin/php8.0
+    when: 
+      - php80 is defined
 
   - name: Removed unexpected apt packages
     apt:
@@ -484,7 +497,6 @@
   - debug:
       var: command_output.stdout_lines
       
-     
   ##### Set permissions by calling perms.ksh
 - name: Call perms.ksh
   hosts: '{{target}}'
