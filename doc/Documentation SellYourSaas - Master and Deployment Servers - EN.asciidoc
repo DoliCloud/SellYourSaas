@@ -472,6 +472,7 @@ Ignore error on missing files.
 === Modification of /etc/skel
 
 Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys_support* with
+
 * the ssh public key of the user(s) *myunixlogin*
 * the ssh public key of the user *admin* of the master server
 
@@ -644,6 +645,7 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 Add a new disk of 500 Mb and mount it on */mnt/disklog* or create a virtual mount.
 
 Then modify the file */etc/apache2/envvars* to set *export APACHE_LOG_DIR=/mnt/disklog/*
+
 Delete the dir */home/admin/logs* and replace it with a symbolic link to */mnt/disklog*
 
 Restart Apache. All apache log files of Apache are now stored into */mnt/disklog*.
@@ -672,7 +674,7 @@ mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
 ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
 ---------------
 
-* Create the other directories:
+* Create the other directories on the deployment server:
 
 [source, bash]
 ---------------
