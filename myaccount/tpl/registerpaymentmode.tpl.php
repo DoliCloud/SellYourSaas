@@ -117,7 +117,7 @@ if ($totalInvoiced == 0) {
 			$urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-				$newnamekey = 'SELLYOURSAAS_PRICES_URL_'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				$newnamekey = 'SELLYOURSAAS_PRICES_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
 				$urlforplanprices = $conf->global->$newnamekey;
 			}
 
