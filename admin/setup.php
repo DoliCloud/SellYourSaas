@@ -134,7 +134,10 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_REFS_URL", GETPOST("SELLYOURSAAS_REFS_URL"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_ACCOUNT_URL", GETPOST("SELLYOURSAAS_ACCOUNT_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_PRICES_URL", GETPOST("SELLYOURSAAS_PRICES_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
+		foreach ($arrayofsuffixfound as $suffix) {
+			dolibarr_set_const($db, "SELLYOURSAAS_PRICES_URL".$suffix, GETPOST("SELLYOURSAAS_PRICES_URL".$suffix), 'chaine', 0, '', $conf->entity);
+		}
+		//dolibarr_set_const($db, "SELLYOURSAAS_PRICES_URL", GETPOST("SELLYOURSAAS_PRICES_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_STATUS_URL", GETPOST("SELLYOURSAAS_STATUS_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_URL", GETPOST("SELLYOURSAAS_RESELLER_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 
