@@ -442,12 +442,18 @@ print '</td>';
 print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com<br>Note: Virtual hosts for such domains must link to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasPricesUrl").'</td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_PRICES_URL" value="'.getDolGlobalString('SELLYOURSAAS_PRICES_URL').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com/prices.html</span></td>';
-print '</tr>';
+foreach ($arrayofsuffixfound as $service => $suffix) {
+	print '<!-- suffix = '.$suffix.' -->'."\n";
+
+	print '<tr class="oddeven"><td>'.($service ? $service.' - ' : '').$langs->trans("SellYourSaasPricesUrl").'</td>';
+	print '<td>';
+	$constname = 'SELLYOURSAAS_PRICES_URL'.$suffix;
+	print '<!-- constname = '.$constname.' -->';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_PRICES_URL'.$suffix.'" value="'.getDolGlobalString('SELLYOURSAAS_PRICES_URL'.$suffix).'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com/prices.html</span></td>';
+	print '</tr>';
+}
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
 print '<td>';
