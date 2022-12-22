@@ -448,10 +448,14 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 			<?php
 			$disabled='';
-			if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+			if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 				$disabled=' disabled';
 				print '<div class="alert alert-warning">';
-				print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
+				if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE')) {
+					print getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE');
+				} else {
+					print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
+				}
 				print '</div>';
 			}
 
