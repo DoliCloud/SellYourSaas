@@ -769,4 +769,4 @@ UpgradeErrorSubject=Error of the upgrade process
 MaxEmailPerDay=Max number of emails per day
 MaxEmailPerDayDesc=If empty, the default value defined into /etc/sellyoursaas.conf of the deployment server will be used.
 NonProfitOrganization=Non-profit organization
-NonProfit=No Profit
+ProfitOrganization=For-Profit organization
