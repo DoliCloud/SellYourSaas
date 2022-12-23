@@ -1155,7 +1155,7 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
    #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
    #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
    #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f postmaster@mysaasdomainname.com"
-   php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/home/admin/tools/
+   php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/admin/tools/
 
    UseCanonicalName On
    ServerName   myaccount.mysaasdomainname.com
