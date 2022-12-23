@@ -775,11 +775,11 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('stripeaccount',                       "StripeAccount",  'varchar', 197, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 'StripeAccountForCustomerHelp', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('maxnbofinstances',                 "MaxNbOfInstances",      'int', 198,   '3', 'thirdparty', 0, 0, '4',    '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$arrayoptions=array(
-			'0'=>'No',
-			'1'=>'Yes'
+			'profit'=>'Profit',
+			'nonprofit'=>'NonProfit'
 		);
 		$param=array('options'=>$arrayoptions);
-		$resultx=$extrafields->addExtraField('checkbosnonprofitorga',       "NonProfitOrganization",   'select', 199,   '3', 'thirdparty', 0, 0,'0',    $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('checkboxnonprofitorga',       "NonProfitOrganization",   'select', 199,   '3', 'thirdparty', 0, 0,'profit',    $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		//$resultx=$extrafields->addExtraField('separatorthirdpartyend',                      "Other", 'separate',199,    '', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Contract
