@@ -132,7 +132,7 @@ $country_code = trim(GETPOST('address_country', 'alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
 $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
-$checkbosnonprofitorga = (GETPOST('checkbosnonprofitorga', 'aZ09') == '1' ? 1 : 0);
+$checkboxnonprofitorga = (GETPOST('checkboxnonprofitorga', 'aZ09') == '1' ? 1 : 0);
 
 $origin = GETPOST('origin', 'aZ09');
 $partner=GETPOST('partner', 'int');
@@ -932,7 +932,7 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_source_utm'] = (empty($_COOKIE['utm_source_cookie']) ? '' : $_COOKIE['utm_source_cookie']);
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
-	//$tmpthirdparty->array_options['options_checkbosnonprofitorga'] = $checkbosnonprofitorga;		// For the moment we don't save this info
+	$tmpthirdparty->array_options['options_checkboxnonprofitorga'] = $checkboxnonprofitorga;
 
 	if ($productref == 'none') {	// If reseller
 		$tmpthirdparty->fournisseur = 1;
