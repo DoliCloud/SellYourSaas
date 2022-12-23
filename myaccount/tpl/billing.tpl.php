@@ -46,7 +46,7 @@ print '
 	<!-- END PAGE HEADER-->
 
 	    <div class="row">
-	      <div class="col-md-9">
+	      <div class="'.($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE") ? 'col-md-12' : 'col-md-9').'">
 
 	        <div class="portlet light" id="planSection">
 
@@ -229,9 +229,9 @@ print '
 
 
 
-	      </div> <!-- END COL -->
-
-			<!-- Box of payment modes -->
+	      </div> <!-- END COL -->';
+if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'nonprofit' || !getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+print'			<!-- Box of payment modes -->
 	      <div class="col-md-3">
 	        <div class="portlet light" id="paymentMethodSection">
 
@@ -364,14 +364,14 @@ print '</a></center>
 	          </div> <!-- END PORTLET-BODY -->
 
 	        </div> <!-- END PORTLET -->
-	      </div><!-- END COL -->
+	      </div><!-- END COL -->';
 
-	    </div> <!-- END ROW -->
+}
+print '  </div> <!-- END ROW -->
 
 
 	    </div>
 		</div>
 	';
-
 ?>
 <!-- END PHP TEMPLATE billing.tpl.php -->
