@@ -132,7 +132,7 @@ $country_code = trim(GETPOST('address_country', 'alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
 $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
-$checkboxnonprofitorga = (GETPOST('checkboxnonprofitorga', 'aZ09') == '1' ? 1 : 0);
+$checkboxnonprofitorga = (GETPOSTISSET('checkboxnonprofitorga') ? GETPOST('checkboxnonprofitorga', 'aZ09') : '');
 
 $origin = GETPOST('origin', 'aZ09');
 $partner=GETPOST('partner', 'int');
