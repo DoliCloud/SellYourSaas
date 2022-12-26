@@ -361,7 +361,9 @@ if (empty($welcomecid)) {
 }
 
 if ($cancel) {
-	if ($action == 'sendbecomereseller') $backtourl = 'index.php?mode=dashboard';
+	if ($action == 'sendbecomereseller') {
+		$backtourl = 'index.php?mode=dashboard';
+	}
 
 	$action = '';
 	if ($backtourl) {
