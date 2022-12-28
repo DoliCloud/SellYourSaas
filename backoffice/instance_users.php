@@ -432,7 +432,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			$lastloginadmin=$object->lastlogin_admin;
 			$lastpassadmin=$object->lastpass_admin;
 		} else {
-			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(), '', 'warnings');
+			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(), null, 'warnings');
 			$error++;
 		}
 	}

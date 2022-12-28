@@ -2630,7 +2630,7 @@ if ($action == 'updateurl') {
 	}
 } elseif ($action == 'deleteaccount') {
 	if (! GETPOST('accounttodestroy', 'alpha')) {
-		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("AccountToDelete")), '', 'errors');
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("AccountToDelete")), null, 'errors');
 	} else {
 		if (GETPOST('accounttodestroy', 'alpha') != $mythirdpartyaccount->email) {
 			setEventMessages($langs->trans("ErrorEmailMustMatch"), null, 'errors');

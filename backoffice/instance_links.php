@@ -673,7 +673,7 @@ if (empty($object->nbofusers)) {
 		}
 		else
 		{
-			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(),'','warnings');
+			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(), null, 'warnings');
 		}*/
 	}
 }
