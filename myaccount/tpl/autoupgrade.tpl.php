@@ -259,7 +259,7 @@ if ($action == "autoupgrade") {
 		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object, 'admin', $notused, $notused, 1, $comment, 120);
 		if ($exitcode < 0) {
 			$errors++;
-			$errortab[] = $langs->trans("ErrorOnUpgradeScript").' exit code = '.$exitcode;
+			$errortab[] = $langs->trans("ErrorOnUpgradeScript").' - exit code = '.$exitcode;
 			setEventMessages($langs->trans("ErrorOnUpgradeScript"), null, "errors");
 		}
 
