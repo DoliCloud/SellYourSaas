@@ -35,14 +35,13 @@ cd /tmp
 
 # Owner root on logs and backups dir
 echo "Set owner and permission on logs and backup directory"
-chown root.adm /home/admin/logs/
 [ -d /home/admin/logs ] || mkdir /home/admin/logs;
 [ -d /mnt/diskbackup ] || mkdir /mnt/diskbackup;
 [ -d /home/admin/backup ] || mkdir /home/admin/backup;
 [ -d /home/admin/backup/conf ] || mkdir /home/admin/backup/conf;
 [ -d /home/admin/backup/mysql ] || mkdir /home/admin/backup/mysql;
 [ -d /home/admin/wwwroot ] || mkdir /home/admin/wwwroot;
-chown root.adm /home/admin/logs; chmod 770 /home/admin/logs; 
+chown root.admin /home/admin/logs; chmod 770 /home/admin/logs; 
 chown admin.admin /mnt/diskbackup; 
 chown admin.admin /home/admin/backup; chown admin.admin /home/admin/backup/conf; chown admin.admin /home/admin/backup/mysql; 
 chown admin.admin /home/admin/wwwroot
