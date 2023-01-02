@@ -1009,7 +1009,7 @@ class ActionsSellyoursaas
 	}
 
 	/**
-	 * Complete list
+	 * Complete the list of contracts
 	 *
 	 * @param	array	$parameters		Array of parameters
 	 * @param	object	$object			Object
@@ -1022,7 +1022,7 @@ class ActionsSellyoursaas
 		global $contextpage;
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) { // Field "Mode paid or free" not hidden
+			if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) { // Column "Mode paid or free" not hidden
 				global $contractmpforloop;
 				if (! is_object($contractmpforloop)) {
 					$contractmpforloop = new Contrat($db);
@@ -1046,7 +1046,7 @@ class ActionsSellyoursaas
 				}
 				print '</td>';
 			}
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {    // Field "Payment mode recorded" not hidden
+			if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {    // Column "Payment mode recorded" not hidden
 				print '<td class="center">';
 				if (!empty($parameters['obj']->options_deployment_status)) {
 					dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');

@@ -1,6 +1,12 @@
 # CHANGELOG SELLYOURSAAS FOR <a href="https://www.dolibarr.org">DOLIBARR ERP CRM</a>
 
 
+## 2.0
+
+* NEW Add test on user admin for script that must be launched as "admin".
+* NEW Save the choice "I am a non profit organization" of thirdparty creation
+
+
 ## 1.3
 
  * NEW Can set max number of emails per instance

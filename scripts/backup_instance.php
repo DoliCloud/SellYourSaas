@@ -40,6 +40,11 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
 	exit(-1);
 }
+if (0 == posix_getuid()) {
+	echo "Script must NOT be ran with root (but with the 'admin' sellyoursaas account).\n";
+	print "\n";
+	exit(-1);
+}
 
 // Global variables
 $version='1.0';

@@ -3298,7 +3298,7 @@ rotate 365
         create 666 syslog adm
 }
 
-/var/log/remote_server.log /var/log/backup_backups.log {
+/var/log/remote_server.log {
         su root root
         weekly
         rotate 4
