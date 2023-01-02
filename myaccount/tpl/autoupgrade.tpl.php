@@ -256,10 +256,10 @@ if ($action == "autoupgrade") {
 	if (!$errors) {
 		$comment = 'Call of sellyoursaasRemoteAction(upgrade) on contract ref='.$object->ref;
 		$notused = '';
-		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object, 'admin', $notused, $notused, 1, $comment);
+		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object, 'admin', $notused, $notused, 1, $comment, 120);
 		if ($exitcode < 0) {
 			$errors++;
-			$errortab[] = $langs->trans("ErrorOnUpgradeScript");
+			$errortab[] = $langs->trans("ErrorOnUpgradeScript").' exit code = '.$exitcode;
 			setEventMessages($langs->trans("ErrorOnUpgradeScript"), null, "errors");
 		}
 
