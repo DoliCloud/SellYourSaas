@@ -587,10 +587,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 						if ($statuslabel == 'suspended') print ' - <span style="color: orange">'.$langs->trans("Suspended").'</span>';
 						//else print ' - <span style="color: orange">'.$langs->trans("SuspendWillBeDoneSoon").'</span>';
 					}
-					if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit' || getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+					if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
 						print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatenonprofit&id='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ConfirmInstanceValidation").'</a>';
-					}
-					if ($statuslabel == 'suspended') {
+					} else if ($statuslabel == 'suspended') {
 						if (empty($atleastonepaymentmode)) {
 							if ($contract->total_ht > 0) {
 								print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
