@@ -248,8 +248,8 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 
 [source,bash]
 ---------------
-groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
-mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
+groupadd admin; useradd -m -g admin admin;
+mkdir /home/admin/logs; chown root.admin /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
 mkdir /home/admin/backup; chown admin.admin /home/admin/backup;
 mkdir /home/admin/backup/conf; chown admin.admin /home/admin/backup/conf;
