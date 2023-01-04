@@ -58,7 +58,7 @@
       - php7.4 
       - php7.4-cli 
       - libapache2-mod-php7.4 
-      - php7.4-fpm 
+      #- php7.4-fpm 
       - php7.4-gd 
       - php7.4-imap 
       - php7.4-json 
@@ -101,7 +101,7 @@
       - php8.0 
       - php8.0-cli 
       - libapache2-mod-php8.0 
-      - php8.0-fpm 
+      #- php8.0-fpm 
       - php8.0-gd 
       - php8.0-imap 
       - php8.0-ldap 
