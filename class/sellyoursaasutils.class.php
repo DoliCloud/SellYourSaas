@@ -94,7 +94,11 @@ class SellYourSaasUtils
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE f.fk_statut = '.Facture::STATUS_DRAFT;
 		$sql.= " AND se.fk_object = f.fk_soc AND se.dolicloud = 'yesv2'";
-		$sql.= " AND f.total_ttc > 0";
+		if (getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+			$sql.= " AND f.total_ttc >= 0";
+		}else {
+			$sql.= " AND f.total_ttc > 0";
+		}
 		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".((int) $restrictonthirdpartyid);
 		$sql.= " ORDER BY f.datef, f.rowid";
 
@@ -842,6 +846,104 @@ class SellYourSaasUtils
 		return $error;
 	}
 
+	/**
+	 * Action executed by scheduler
+	 * Loop on invoice for customer that are non profit organizations.
+	 * CAN BE A CRON TASK
+	 *
+	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
+	 * @param	int		$noemailtocustomeriferror		1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
+	 * @return	int			                    		0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 */
+	public function doTakePaymentNonProfitOrganization($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0)
+	{
+		global $conf, $langs, $user;
+
+		$langs->load("agenda");
+
+		$savlog = $conf->global->SYSLOG_FILE;
+		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doTakePaymentNonProfitOrganization.log';
+
+		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+
+		$error = 0;
+		$this->output = '';
+		$this->error='';
+
+		$invoiceprocessed = array();
+		$invoiceprocessedok = array();
+		$invoiceprocessedko = array();
+
+		dol_syslog(__METHOD__." maxnbofinvoicetotry=".$maxnbofinvoicetotry." noemailtocustomeriferror=".$noemailtocustomeriferror, LOG_DEBUG);
+
+		if (!getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+			$this->output = "Nothing to do, SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE parameter isn't defined";
+			return 0;
+		}
+
+		$sql = "SELECT f.rowid, se.fk_object as socid";
+		$sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."societe_extrafields as se";
+		$sql .= " WHERE se.fk_object = f.fk_soc";
+		$sql .= " AND se.dolicloud = 'yesv2' AND se.checkboxnonprofitorga = 'nonprofit'";
+		$sql .= " AND f.fk_statut = ".Facture::STATUS_VALIDATED." AND f.paye = 0 AND f.type = 0";
+		$sql .= " ORDER BY f.datef ASC, f.rowid ASC";
+
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			$num = $this->db->num_rows($resql);
+
+			$i=0;
+			while ($i < $num) {
+				$obj = $this->db->fetch_object($resql);
+				if ($obj) {
+					if (! empty($invoiceprocessed[$obj->rowid])) {	// Invoice already processed
+						continue;
+					}
+
+					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->transaction_opened = ".$this->transaction_opened);
+
+					$this->db->begin();
+
+					$invoice = new Facture($this->db);
+					$result1 = $invoice->fetch($obj->rowid);
+
+					if ($result1 <= 0) {
+						$error++;
+						dol_syslog('Failed to get invoice id = '.$obj->rowid, LOG_ERR);
+						$this->errors[] = 'Failed to get invoice id = '.$obj->rowid;
+					} else {
+						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
+						$result = $invoice->setPaid($user);
+						if ($result > 0) {	// No error
+							$invoiceprocessedok[$obj->rowid]=$invoice->ref;
+						} else {
+							$invoiceprocessedko[$obj->rowid]=$invoice->ref;
+						}
+					}
+
+					$this->db->commit();
+
+					$invoiceprocessed[$obj->rowid]=$invoice->ref;
+				}
+
+				$i++;
+
+				if ($maxnbofinvoicetotry && $i >= $maxnbofinvoicetotry) {
+					break;
+				}
+			}
+		} else {
+			$error++;
+			$this->error = $this->db->lasterror();
+		}
+
+		$this->output = count($invoiceprocessedok).' invoice(s) set to payed among '.count($invoiceprocessed).' qualified invoice(s) processed '.(count($invoiceprocessedok)>0 ? ' : '.join(',', $invoiceprocessedok) : '').' (search done on SellYourSaas customers only)';
+		$this->output .= ' - '.count($invoiceprocessedko).' discarded '.(count($invoiceprocessedko)>0 ? ' : '.join(',', $invoiceprocessedko) : '');
+
+		$conf->global->SYSLOG_FILE = $savlog;
+
+		return $error;
+	}
 
 	/**
 	 * doTakePaymentStripeForThirdparty
