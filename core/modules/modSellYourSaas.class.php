@@ -779,7 +779,7 @@ class modSellYourSaas extends DolibarrModules
 			'nonprofit'=>'NonProfitOrganization'
 		);
 		$param=array('options'=>$arrayoptions);
-		$resultx=$extrafields->addExtraField('checkboxnonprofitorga',       "NonProfitOrganization",   'select', 199,   '3', 'thirdparty', 0, 0,'profit',    $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('checkboxnonprofitorga',       "NonProfitOrganization",   'select', 199,   '10', 'thirdparty', 0, 0, '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		//$resultx=$extrafields->addExtraField('separatorthirdpartyend',                      "Other", 'separate',199,    '', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Contract
