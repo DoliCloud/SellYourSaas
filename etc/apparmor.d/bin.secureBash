@@ -156,6 +156,8 @@
   #/usr/lib/openssh/sftp-server rix,
   /usr/lib{,32,64}/** mr,
   /usr/local/bin/ r,
+  /usr/local/bin/phpsendmail.php rix,
+  /usr/local/bin/phpsendmailprepend.php r,
   /usr/local/lib/python2.7/dist-packages/ r,
   /usr/local/sbin/ r,
   /usr/sbin/ r,
