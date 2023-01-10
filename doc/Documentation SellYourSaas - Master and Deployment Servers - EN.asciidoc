@@ -4975,6 +4975,12 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURIT
 
 Change the value 10.0.0 with version of the image you will build to deploy.
 
+Into field *sql to reset password*
+
+[source,bash]
+---------------
+UPDATE llx_user set pass='__NEWUSERPASSWORD__', pass_crypted = '__NEWUSERPASSWORDCRYPTED__' where rowid = __INSTANCEID__;
+---------------
 
 === Setup of Services
 

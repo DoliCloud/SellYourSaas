@@ -39,6 +39,7 @@ CREATE TABLE llx_packages(
 	cliafter text, 
 	cliafterpaid text, 
 	sqlafter text,
+	sqlpasswordreset text,
 	sqlafterpaid text,
 	crontoadd text,
 	version_formula text,
