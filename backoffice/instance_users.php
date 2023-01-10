@@ -39,12 +39,14 @@ require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
 require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
 require_once DOL_DOCUMENT_ROOT."/projet/class/project.class.php";
+require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
+dol_include_once('/sellyoursaas/class/packages.class.php');
 
 $langs->loadLangs(array("admin","companies","users","contracts","other","commercial","sellyoursaas@sellyoursaas"));
 
@@ -101,7 +103,22 @@ if (empty($prefix_db)) {
 
 // Security check
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
-
+// Get tmppackage
+$tmppackage = new Packages($db);
+foreach ($object->lines as $keyline => $line) {
+	$tmpproduct = new Product($db);
+	if ($line->fk_product > 0) {
+		$tmpproduct->fetch($line->fk_product, '', '', '', 1, 1, 1);
+		if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
+			if ($tmpproduct->array_options['options_package'] > 0) {
+				$tmppackage->fetch($tmpproduct->array_options['options_package']);
+				break;
+			} else {
+				dol_syslog("Error: ID of package not defined on productwith ID ".$line->fk_product);
+			}
+		}
+	}
+}
 
 /*
  *	Actions
@@ -360,10 +377,19 @@ if (empty($reshook)) {
 			}
 
 			// TODO Set definition to update password of a userinto the package
-			if ($fordolibarr) {
-				$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted_for_remote)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
-			} elseif ($forglpi) {
-				$sql="UPDATE glpi_users set password = MD5('".$newdb->escape($password)."') WHERE id = ".((int) GETPOST('remoteid', 'int'));
+			if (!empty($tmppackage->sqlpasswordreset)) {
+				$substitutionarray = array(
+					'__NEWUSERPASSWORD__' => $newdb->escape($password),
+					'__NEWUSERPASSWORDCRYPTED__' => $newdb->escape($password_crypted_for_remote),
+					'__REMOTEUSERID__' =>(int) GETPOST('remoteid', 'int')
+				);
+				$sql = make_substitutions($tmppackage->sqlpasswordreset, $substitutionarray);
+			} else {
+				if ($fordolibarr) {
+					$sql="UPDATE ".$prefix_db."user set pass='".$newdb->escape($password)."', pass_crypted = '".$newdb->escape($password_crypted_for_remote)."' where rowid = ".((int) GETPOST('remoteid', 'int'));
+				} elseif ($forglpi) {
+					$sql="UPDATE glpi_users set password = MD5('".$newdb->escape($password)."') WHERE id = ".((int) GETPOST('remoteid', 'int'));
+				}
 			}
 
 			$resql=$newdb->query($sql);
