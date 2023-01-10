@@ -377,12 +377,12 @@ if (empty($reshook)) {
 			}
 
 			// TODO Set definition to update password of a userinto the package
-			$substitutionarray=array(
-				'__NEWUSERPASSWORD__'=>$newdb->escape($password),
-				'__NEWUSERPASSWORDCRYPTED__'=>$newdb->escape($password_crypted_for_remote),
-				'__INSTANCEID__'=>(int) GETPOST('remoteid', 'int')
-			);
 			if (!empty($tmppackage->sqlpasswordreset)) {
+				$substitutionarray = array(
+					'__NEWUSERPASSWORD__' => $newdb->escape($password),
+					'__NEWUSERPASSWORDCRYPTED__' => $newdb->escape($password_crypted_for_remote),
+					'__REMOTEUSERID__' =>(int) GETPOST('remoteid', 'int')
+				);
 				$sql = make_substitutions($tmppackage->sqlpasswordreset, $substitutionarray);
 			} else {
 				if ($fordolibarr) {
