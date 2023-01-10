@@ -2920,12 +2920,39 @@ if ($welcomecid > 0) {
 		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank" rel="noopener">'.$contract->ref_customer.'</a>';
 
 		print '<br> '.$langs->trans("Username").' : '.($_SESSION['initialapplogin']?'<strong>'.$_SESSION['initialapplogin'].'</strong>':'NA').'
-		<br> '.$langs->trans("Password").' : '.($_SESSION['initialapppassword']?'<strong>'.$_SESSION['initialapppassword'].'</strong>':'NA').'
+		<br> '.$langs->trans("Password").' : ';
+		if (!empty($_SESSION['initialapppassword'])) {
+			print '<strong id="initialpasswordinstance" data-pass="hidden">'.str_repeat("*", strlen($_SESSION['initialapppassword'])).'</strong>';
+			print '&nbsp;';
+			print '<i id="initialpasswordinstanceshow" class="fa fa-eye initialpasswordinstancebutton"></i>';
+			print '<i id="initialpasswordinstancehide" class="fa fa-eye-slash initialpasswordinstancebutton" style="display:none"></i>';
+		} else {
+			print 'NA';
+		}
+		print '
 		</p>
 		<p>
 		<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).' <span class="fa fa-external-link-alt"></span></a>
 		</p>
-
+		<script>
+		jQuery(document).ready(function() {
+			$(".initialpasswordinstancebutton").on("click", function(){
+				if($("#initialpasswordinstance").attr("data-pass") == "hidden") {
+					console.log("We show the password");
+					$("#initialpasswordinstanceshow").hide();
+					$("#initialpasswordinstancehide").show();
+					$("#initialpasswordinstance").html("'.$_SESSION['initialapppassword'].'");
+					$("#initialpasswordinstance").attr("data-pass","show");
+				} else {
+					console.log("We hide the password");
+					$("#initialpasswordinstanceshow").show();
+					$("#initialpasswordinstancehide").hide();
+					$("#initialpasswordinstance").html("'.str_repeat("*", strlen($_SESSION['initialapppassword'])).'");
+					$("#initialpasswordinstance").attr("data-pass","hidden");
+				}
+			})
+		})
+		</script>
 		</div>';
 	}
 
