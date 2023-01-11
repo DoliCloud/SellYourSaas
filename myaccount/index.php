@@ -582,33 +582,29 @@ if ($action == 'updateurl') {
 
 		// Create a recurring invoice (+real invoice + contract renewal) if there is no recurring invoice yet
 		if (! $error) {
-			foreach ($listofcontractid as $contract) {
+			$result = $contract->fetch(GETPOST('contractid', 'int'));
+			if ($result > 0) {
 				dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
-				if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
-					dol_syslog("--- This contract is a redirection, we discard this contract", LOG_DEBUG, 0);
-					continue;							// If contract is a redirection, we discard check and creation of any recurring invoice
-				}
 				if ($contract->array_options['options_deployment_status'] != 'done') {
 					dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
-					continue;							// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
-				}
-				if ($contract->total_ht == 0) {
-					dol_syslog("--- Amount is null, we discard this contract", LOG_DEBUG, 0);
-					continue;							// Amount is null, so we do not create recurring invoice for that. Note: This should not happen.
+					setEventMessages("Deployment status is not 'done'", 'errors');
+					header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
 				}
 
 				// Make a test to pass loop if there is already a template invoice
 				$result = $contract->fetchObjectLinked();
 				if ($result < 0) {
 					dol_syslog("--- Error during fetchObjectLinked, we discard this contract", LOG_ERR, 0);
-					continue;							// There is an error, so we discard this contract to avoid to create template twice
+					setEventMessages("Error during fetchObjectLinked", 'errors');
+					header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);// There is an error, so we discard this contract to avoid to create template twice
 				}
 				if (! empty($contract->linkedObjectsIds['facturerec'])) {
 					$templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
 					if ($templateinvoice > 0) {			// There is already a template invoice, so we discard this contract to avoid to create template twice
 						dol_syslog("--- There is already a recurring invoice on the contract contract_id = ".$contract->id, LOG_DEBUG, 0);
-						continue;
+						setEventMessages("There is already a recurring invoice on the contract contract_id = ".$contract->id, 'errors');
+						header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);
 					}
 				}
 
@@ -638,7 +634,6 @@ if ($action == 'updateurl') {
 					$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
 					$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
 					$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
-					//$invoice_draft->fk_account          = getDolGlobalInt('STRIPE_BANK_ACCOUNT_FOR_PAYMENTS');	// stripe
 
 					$invoice_draft->fetch_thirdparty();
 
@@ -658,7 +653,7 @@ if ($action == 'updateurl') {
 					}
 				}
 
-				$frequency=1;
+				$frequency=0;
 				$frequency_unit='m';
 				$discountcode = strtoupper(trim(GETPOST('discountcode', 'aZ09')));	// If a discount code was prodived on page
 				/* If a discount code exists on contract level, it was used to prefill the payment page, so it is received into the GETPOST('discountcode', 'int').
@@ -810,13 +805,7 @@ if ($action == 'updateurl') {
 
 				// Now we convert invoice into a template
 				if (! $error) {
-					//var_dump($invoice_draft->lines);
-					//var_dump(dol_print_date($date_start,'dayhour'));
-					//exit;
-
-					//$frequency=1;
-					//$frequency_unit='m';
-					$frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
+					$frequency = 0;	// read frequency of product app
 					$frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
 					$tmp=dol_getdate($date_start?$date_start:$now);
 					$reyear=$tmp['year'];
@@ -889,40 +878,6 @@ if ($action == 'updateurl') {
 						setEventMessages($invoice_rec->error, $invoice_rec->errors, 'errors');
 					}
 
-					// A template invoice was just created, we run generation of invoice if template invoice date is already in past
-					if (! $error) {
-						dol_syslog("--- A template invoice was generated with id ".$invoicerecid.", now we run createRecurringInvoices to build real invoice", LOG_DEBUG, 0);
-						$facturerec = new FactureRec($db);
-
-						$savperm1 = $user->rights->facture->creer;
-						$savperm2 = $user->rights->facture->invoice_advance->validate;
-
-						$user->rights->facture->creer = 1;
-						if (empty($user->rights->facture->invoice_advance)) $user->rights->facture->invoice_advance=new stdClass();
-						$user->rights->facture->invoice_advance->validate = 1;
-
-						$result = $facturerec->createRecurringInvoices($invoicerecid, 1);		// Generate real invoice from pending recurring invoices
-						if ($result != 0) {
-							$error++;
-							setEventMessages($facturerec->error, $facturerec->errors, 'errors');
-						}
-
-						$user->rights->facture->creer = $savperm1;
-						$user->rights->facture->invoice_advance->validate = $savperm2;
-					}
-					if (! $error) {
-						dol_syslog("--- Now we try to set to payed for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
-						$result = $invoice->setPaid($user);
-						if ($result <= 0) {
-							$error++;
-							$errorforinvoice++;
-							dol_syslog("Error while we are setting ".$invoice->id." ".$invoice->ref." to paid with a non profit thirdparty", LOG_WARNING);
-							$this->errors[]="Error while we are setting ".$invoice->id." ".$invoice->ref." to paid with a non profit thirdparty";
-						} else {
-							dol_syslog("--- Success to set as payed", LOG_DEBUG, 0);
-						}
-					}
-
 					// Make renewals on contracts of customer
 					if (! $error) {
 						dol_syslog("--- Now we make renewal of contracts for thirdpartyid=".$mythirdpartyaccount->id." if payments were ok and contract are not unsuspended", LOG_DEBUG, 0);
@@ -935,6 +890,7 @@ if ($action == 'updateurl') {
 							setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 						}
 					}
+					header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);
 				}
 			}
 		}
