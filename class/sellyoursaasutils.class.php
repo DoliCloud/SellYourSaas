@@ -842,6 +842,7 @@ class SellYourSaasUtils
 		return $error;
 	}
 
+
 	/**
 	 * doTakePaymentStripeForThirdparty
 	 * Take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
