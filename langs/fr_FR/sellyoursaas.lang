@@ -757,3 +757,4 @@ ErrorOnUpgradeScript=Erreur à l'exécution du script de montée de version
 UpgradeErrorSubject=Erreur du processus de montée de version
 NonProfitOrganization=Organisation à but non lucratif
 NonProfit=Pas de Bénéfice
+ConfirmInstanceValidation=Confirmer la validation de l’instance
