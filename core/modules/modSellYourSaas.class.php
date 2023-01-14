@@ -785,7 +785,7 @@ class modSellYourSaas extends DolibarrModules
 		// Contract
 		$param=array('options'=>array(1=>1));
 		$resultx=$extrafields->addExtraField('separatorcontract',                "SELLYOURSAAS_NAME", 'separate', 100,     '',    'contrat', 0, 0,    '',  $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('plan',                                          "Plan",  'varchar', 102,   '64',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('plan',                                          "Plan",  'varchar', 102,   '64',    'contrat', 0, 0,    '',      '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 0, 0, array('csslist'=>'tdoverflowmax150'));
 		$param=array('options'=>array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed'));
 		$resultx=$extrafields->addExtraField('deployment_init_adminpass',   "DeploymentInitPassword",  'varchar', 103,   '64',    'contrat', 0, 0,    '',      '', 1, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('deployment_status',                 "DeploymentStatus",   'select', 104,     '',    'contrat', 0, 0,    '',  $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');

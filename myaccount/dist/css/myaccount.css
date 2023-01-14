@@ -31,7 +31,7 @@ span.pictowarning {
 }
 
 span.labelprod {
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
     height: 20px;
     display: block;
 }
