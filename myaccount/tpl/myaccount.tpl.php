@@ -160,7 +160,7 @@ if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC(
             </div>
 ';
 
-if (! GETPOST('deleteaccount')) {
+if (! GETPOST('deleteaccount') && ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'nonprofit' || !getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"))) {
 	print '<div class="center"><br>';
 	$urltoenterpaymentmode = $_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode);
 	print '<a href="'.$urltoenterpaymentmode.'" class=""><span class="fa fa-credit-card paddingright"></span>';
