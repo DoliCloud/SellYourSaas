@@ -557,8 +557,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		// Billing
 		if ($statuslabel != 'undeployed') {
+			$freemodeinstance = $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE");
+
 			print '<!-- Billing information of contract -->'."\n";
-			print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.$langs->trans("Billing").' : </span>';
+			print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.($freemodeinstance ? ($foundtemplate == 0 ? $langs->trans("Confirmation") : $langs->trans("Billing")) : $langs->trans("Billing")).' : </span>';
 			if ($foundtemplate > 1) {
 				$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 				if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
@@ -576,7 +578,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<span class="bold">'.$pricetoshow.'</span>';
 
 				// Discount and next invoice line
-				if ($foundtemplate == 0) {	// foundtemplate means there is at least one template invoice (so contract is a paying contract)
+				if ($foundtemplate == 0) {	// foundtemplate means there is at least one template invoice (so contract is a paying or validated contract)
 					if ($contract->array_options['options_date_endfreeperiod'] < $now) $color='orange';
 
 					print ' <span style="color:'.$color.'">';
@@ -587,7 +589,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 						if ($statuslabel == 'suspended') print ' - <span style="color: orange">'.$langs->trans("Suspended").'</span>';
 						//else print ' - <span style="color: orange">'.$langs->trans("SuspendWillBeDoneSoon").'</span>';
 					}
-					if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+					if ($freemodeinstance) {
 						print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatenonprofit&contractid='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ConfirmInstanceValidation").'</a>';
 					} else if ($statuslabel == 'suspended') {
 						if (empty($atleastonepaymentmode)) {
