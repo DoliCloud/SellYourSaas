@@ -590,8 +590,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 						//else print ' - <span style="color: orange">'.$langs->trans("SuspendWillBeDoneSoon").'</span>';
 					}
 					if ($freemodeinstance) {
-						print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatenonprofit&contractid='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ConfirmInstanceValidation").'</a>';
-					} else if ($statuslabel == 'suspended') {
+						print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ConfirmInstanceValidation").'</a>';
+					} elseif ($statuslabel == 'suspended') {
 						if (empty($atleastonepaymentmode)) {
 							if ($contract->total_ht > 0) {
 								print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';

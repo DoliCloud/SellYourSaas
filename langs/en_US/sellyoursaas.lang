@@ -771,4 +771,6 @@ MaxEmailPerDay=Max number of emails per day
 MaxEmailPerDayDesc=If empty, the default value defined into /etc/sellyoursaas.conf of the deployment server will be used.
 NonProfitOrganization=Non-profit organization
 ProfitOrganization=For-Profit organization
-ConfirmInstanceValidation=Confirm validation of the instance
+ConfirmInstanceValidation=Permanently validate your instance
+ConfirmInstanceValidationToRestoreInstance=Permanently validate your instance to restore it
+
