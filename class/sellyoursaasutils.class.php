@@ -354,7 +354,7 @@ class SellYourSaasUtils
 
 						// @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
 						dol_syslog("We will call getEMailTemplate for type 'contract', label 'GentleTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
-						if ($object->thirdparty->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")){
+						if ($object->thirdparty->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
 							$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminderFreeInstance');
 						} else {
 							$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminder');
@@ -2939,7 +2939,8 @@ class SellYourSaasUtils
 	 * 													'deployoption'=create/delete files+cli,
 	 * 													'rename'=change apache virtual host file,
 	 * 													'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
-	 * 													'refresh'=update status of install.lock+authorized key + loop on each line and read remote data and update qty of metrics
+	 * 													'refresh'=update status of install.lock+installmodules.lock+authorized key + loop on each line and read remote data and update qty of metrics
+	 * 													'refreshfilesonly'=update status of install.lock+installmodules.lock+authorized key
 	 * 													'refreshmetrics'=loop on each line of contract and read remote data and update qty of metrics
 	 * 													'recreateauthorizedkeys', 'deletelock', 'recreatelock'
 	 * 													'migrate',
@@ -2979,7 +2980,7 @@ class SellYourSaasUtils
 
 		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract
 		// No need for 'refreshmetrics' here.
-		if (in_array($remoteaction, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat') {
+		if (in_array($remoteaction, array('refresh', 'refreshfilesonly', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat') {
 			// SFTP refresh
 			if (function_exists("ssh2_connect")) {
 				// Set timeout for ssh2_connect
@@ -3003,7 +3004,7 @@ class SellYourSaasUtils
 						$this->errors[] = "Could not authenticate with username ".$object->array_options['options_username_os']." and password ".preg_replace('/./', '*', $object->array_options['options_password_os']);
 						$error++;
 					} else {
-						if ($remoteaction == 'refresh') {
+						if ($remoteaction == 'refresh' || $remoteaction == 'refreshfilesonly') {
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
@@ -3058,7 +3059,6 @@ class SellYourSaasUtils
 								}
 
 								// Check if authorized_key exists
-								//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
 								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
 

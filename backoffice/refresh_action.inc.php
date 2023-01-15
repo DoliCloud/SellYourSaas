@@ -322,6 +322,7 @@ if ($action == 'addauthorizedkey') {
 
 
 // We make a refresh of status of install.lock + authorized key, this does not update the qty into lines (this is done in doRefreshContracts or doRenewalContracts).
+/*
 if ($action == 'setdate') {
 	dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
@@ -335,3 +336,4 @@ if ($action == 'setdate') {
 
 	$action = 'view';
 }
+*/

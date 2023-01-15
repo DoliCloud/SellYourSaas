@@ -702,7 +702,7 @@ print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$
 print '</td>';
 print '<td></td><td>';
 if (! $object->user_id && $user->rights->sellyoursaas->write) {
-	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setdate&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refreshfilesonly&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
 }
 print '</td>';
 print '</tr>';
