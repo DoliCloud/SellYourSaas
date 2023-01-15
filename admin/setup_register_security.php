@@ -67,7 +67,7 @@ $tmpservices=array();
 $staticdeploymentserver = new Deploymentserver($db);
 if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-}else {
+} else {
 	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
 }
 foreach ($tmpservicessub as $key => $tmpservicesub) {
@@ -93,6 +93,10 @@ if ($action == 'set') {
 	$error=0;
 
 	if (! $error) {
+		if (GETPOSTISSET("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP", GETPOST("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
+
 		if (GETPOSTISSET("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", 'alpha'), 'chaine', 0, '', $conf->entity);
 		}
@@ -177,6 +181,13 @@ print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
 print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP" value="'.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">1.2.3.4,...</span></td>';
+print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';

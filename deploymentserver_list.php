@@ -811,7 +811,7 @@ while ($i < $imaxinloop) {
 		// Column nb of instances backups
 		if (!empty($arrayfields['nb_backups']['checked'])) {
 			print '<td class="right">';
-			if ($backuptotalinstances[$obj->ipaddress]) {
+			if (!empty($backuptotalinstances[$obj->ipaddress])) {
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
 					print '<span class="error">';
 				}

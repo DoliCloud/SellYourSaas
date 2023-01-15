@@ -448,7 +448,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 			<?php
 			$disabled='';
-			if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
+			if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRemoteIP(), explode(',', getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
 				$disabled=' disabled';
 				print '<div class="alert alert-warning">';
 				if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE')) {

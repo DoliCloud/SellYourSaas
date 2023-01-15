@@ -4,8 +4,8 @@
 ## 2.0
 
 * NEW Add test on user admin for script that must be launched as "admin".
-* NEW Save the choice "I am a non profit organization" of thirdparty creation
-
+* NEW Save the choice "I am a non profit organization" of thirdparty creation.
+* NEW Add SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP to set a list of IPs allowed to register even when registrations are globally closed.
 
 ## 1.3
 

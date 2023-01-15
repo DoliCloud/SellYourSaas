@@ -217,19 +217,36 @@ print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 $enabledisablehtml='';
-if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 	// Button off, click to enable
-	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=0'.$param.'">';
-	$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
-	$enabledisablehtml.='</a>';
+	$enabledisablehtml .= '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=0'.$param.'">';
+	$enabledisablehtml .= img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
+	$enabledisablehtml .= '</a>';
 } else {
 	// Button on, click to disable
-	$enabledisablehtml.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=1'.$param.'">';
-	$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
-	$enabledisablehtml.='</a>';
+	$enabledisablehtml .= '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=1'.$param.'">';
+	$enabledisablehtml .= img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+	$enabledisablehtml .= '</a>';
 }
 print $enabledisablehtml;
 print $langs->trans("EnableNewInstance");
+
+if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+	if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')) {
+		print '<br><span class="opacitymedium">'.$langs->trans("AllowedToIP").': '.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP').'</span>';
+	}
+	if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE')) {
+		print '<br><span class="opacitymedium">'.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE').'</span>';
+	}
+	/*
+	print '<br>';
+	print '<textarea class="flat inputsearch inline-block" type="text" name="SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE" rows="'.ROWS_2.'" placeholder="'.dol_escape_htmltag($langs->trans("Message")).'">';
+	print getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE');
+	print '</textarea>';
+	print '<div class="center valigntop inline-block"><input type="submit" name="saveannouncedisabled" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';
+	*/
+}
+
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 $enabledisableannounce='';
@@ -247,10 +264,10 @@ if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON)) {
 print $enabledisableannounce;
 print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
 print '<br>';
-print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_6.'">';
+print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_5.'"'.(empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) ? ' disabled="disabled"' : '').'>';
 print getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
 print '</textarea>';
-print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button small" value="'.$langs->trans("Save").'"></div>';
+print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';
 print '</td></tr>';
 print "</table></form><br>";
 
