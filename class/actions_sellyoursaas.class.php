@@ -594,7 +594,7 @@ class ActionsSellyoursaas
 				}
 			}
 
-			if (in_array($action, array('refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenance'))) {
+			if (in_array($action, array('refresh', 'refreshfilesonly', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenance'))) {
 				dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($db);
 				$result = $sellyoursaasutils->sellyoursaasRemoteAction($action, $object);
@@ -605,6 +605,7 @@ class ActionsSellyoursaas
 					//setEventMessages($this->error, $this->errors, 'errors'); // We already return errors with this->errors, no need to seEventMessages()
 				} else {
 					if ($action == 'refresh') setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
+					if ($action == 'refreshfilesonly') setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
 					if ($action == 'recreateauthorizedkeys') setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
 					if ($action == 'recreatelock') setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
 					if ($action == 'deletelock') setEventMessages($langs->trans("FilesDeleted"), null, 'mesgs');
