@@ -2980,7 +2980,8 @@ class SellYourSaasUtils
 
 		// Action 'refresh', 'recreateauthorizedkeys', 'deletelock', 'recreatelock' for contract
 		// No need for 'refreshmetrics' here.
-		if (in_array($remoteaction, array('refresh', 'refreshfilesonly', 'recreateauthorizedkeys', 'deletelock', 'recreatelock')) && get_class($object) == 'Contrat') {
+		if (in_array($remoteaction, array('refresh', 'refreshfilesonly', 'recreateauthorizedkeys', 'deletelock', 'recreatelock'))
+			&& (in_array(get_class($object), array('Contrat', 'SellYourSaasContract')))) {
 			// SFTP refresh
 			if (function_exists("ssh2_connect")) {
 				// Set timeout for ssh2_connect
@@ -3031,6 +3032,7 @@ class SellYourSaasUtils
 								$fstatlock=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
 								$dateauthorizedkeysfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 								//var_dump($datelockfile);
+								//var_dump(dateinstallmoduleslockfile);
 								//var_dump($fileauthorizedkeys2);
 
 								$object->array_options['options_filelock'] = $datelockfile;
