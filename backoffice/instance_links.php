@@ -700,7 +700,11 @@ print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->arra
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
-print '<td></td><td></td>';
+print '<td></td><td>';
+if (! $object->user_id && $user->rights->sellyoursaas->write) {
+	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=setdate&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+}
+print '</td>';
 print '</tr>';
 
 // Install.lock file

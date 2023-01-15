@@ -322,16 +322,12 @@ if ($action == 'addauthorizedkey') {
 
 
 // We make a refresh of status of install.lock + authorized key, this does not update the qty into lines (this is done in doRefreshContracts or doRenewalContracts).
-/*
-if ($action == 'refresh' || $action == 'setdate') {
+if ($action == 'setdate') {
 	dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 	$object->oldcopy=dol_clone($object, 1);
 
-	// TODO Remove this when action = refresh. Seems already done by the doActions hook.
-	// $result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract);
-
-	// Check remote files (install.lock and authorized_keys_support, recreate authorized_keys_support only if not found). Does not update lastcheck field.
+	// Check remote files (authorized_keys_support + install.lock + installmodules.lock, recreate authorized_keys_support only if not found). Does not update lastcheck field.
 	$ret=dolicloud_files_refresh($conf, $db, $object, $errors);
 
 	// Count ressources and update the cache nbusers and only this. Does not update qty into lines.
@@ -339,4 +335,3 @@ if ($action == 'refresh' || $action == 'setdate') {
 
 	$action = 'view';
 }
-*/
