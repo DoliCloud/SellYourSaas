@@ -3031,7 +3031,7 @@ Deactivate *systemd-resolver* that adds 127.0.0.53 as resolver and bypasses bind
 ---------------
 sudo systemctl disable systemd-resolved.service
 sudo systemctl stop systemd-resolved
-echo "nameserver 127.0.0.1" > /etc/resolv.conf
+rm /etc/resolv.conf; echo "nameserver 127.0.0.1" > /etc/resolv.conf
 shutdown -Fr now
 ---------------
 
@@ -5256,7 +5256,7 @@ On deployment server in */var/log/syslog* when using IMAP PHP function:
 => Check that error log file for instances is shared (instead one log file is open per instance with same unix account leading to troubles).
 
 
-==== Error when sending email in */var/log/mail.log*
+==== Error when sending email in */var/log/mail.log*, "type=A: Host not found" or "type=M: Host not found"
 
 Error when sending email in */var/log/mail.log*:
 
