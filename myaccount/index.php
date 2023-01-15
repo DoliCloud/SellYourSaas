@@ -3256,7 +3256,7 @@ if ($welcomecid > 0) {
 		<br> '.$langs->trans("Password").' : ';
 		if (!empty($_SESSION['initialapppassword'])) {
 			print '<strong id="initialpasswordinstance" data-pass="hidden">'.str_repeat("*", strlen($_SESSION['initialapppassword'])).'</strong>';
-			print '&nbsp;';
+			print '&nbsp; &nbsp;';
 			print '<i id="initialpasswordinstanceshow" class="fa fa-eye initialpasswordinstancebutton"></i>';
 			print '<i id="initialpasswordinstancehide" class="fa fa-eye-slash initialpasswordinstancebutton" style="display:none"></i>';
 		} else {
