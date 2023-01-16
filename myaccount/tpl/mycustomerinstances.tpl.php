@@ -775,7 +775,11 @@ if ($form->result['nbofthirdparties'] == 0) {
 if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 	print '<!-- RegistrationSuspendedForTheMomentPleaseTryLater -->'."\n";
 	print '<div class="alert alert-warning" style="margin-bottom: 0px">';
-	print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
+	if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE')) {
+		print getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE');
+	} else {
+		print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
+	}
 	print '</div>';
 } else {
 	print '<div class="group">';
