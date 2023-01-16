@@ -5364,13 +5364,14 @@ If you find into */var/log/auth.log* an error like:
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: ... [preauth]
 
-The client (maybe an old PHP version) uses a deprecated algorithm for negotiation. Edit the file */etc/ssh/sshd_config.d/sellyoursaas.conf* of the server by adding:
+The client (maybe an old PHP version) is using a deprecated algorithm for negotiation. Edit the file */etc/ssh/sshd_config.d/sellyoursaas.conf* of the target server by adding:
 
 [source,bash]
 ---------------
 # Legacy changes - To allow an old client to connect to
 PubkeyAcceptedKeyTypes=+ssh-rsa
 HostKeyAlgorithms +ssh-rsa
+HostKey /etc/ssh/ssh_host_rsa_key
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
 ---------------

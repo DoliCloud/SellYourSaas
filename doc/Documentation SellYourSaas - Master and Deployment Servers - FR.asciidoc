@@ -5139,17 +5139,22 @@ The value for *max_execution_time* is too low or there is a table that has an ab
 - Check the temp directory is writable by the web server user.
 
 
-==== Error when doing PHP ssh2_connect to a server
+==== Error when doing PHP ssh2_connect or just ssh to a server
 
 If you find into */var/log/auth.log* an error like:
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
 
-The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the */etc/ssh/sshd_config* of the server by adding:
+... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: ... [preauth]
+
+The client (maybe an old PHP version) is using a deprecated algorithm for negotiation. Edit the file */etc/ssh/sshd_config.d/sellyoursaas.conf* of the target server by adding:
 
 [source,bash]
 ---------------
 # Legacy changes - To allow an old client to connect to
+PubkeyAcceptedKeyTypes=+ssh-rsa
+HostKeyAlgorithms +ssh-rsa
+HostKey /etc/ssh/ssh_host_rsa_key
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
 ---------------
@@ -5160,6 +5165,25 @@ Then reload ssh with
 ---------------
 /etc/init.d/ssh reload
 ---------------
+
+To test if a couple client-server can work with one algorightm, you can try:
+
+ssh -oHostKeyAlgorithms=ssh-rsa admin@ip.of.server
+ssh -oHostKeyAlgorithms=ssh-ed25519 admin@ip.of.server
+
+
+To use a different version of lib for PHP to make ssh2_connect, you can run Recompile libssh2 and Recompile php-ssh2:
+
+[source,bash]
+---------------
+git clone https://github.com/libssh2/libssh2.git libssh2; cd libssh2; ./configure; make; make install;
+git clone https://github.com/php/pecl-networking-ssh2.git php-ssh2; cd php-ssh2; phpize; ./configure --with-ssh2; make; make install; 
+php -i | grep ssh2
+restart
+---------------
+
+Even if php -i show the new version of library, a reboot may be required to have the new lib taken into account.
+
 
 ==== Some remoteaction generates a PHP coredump
 
