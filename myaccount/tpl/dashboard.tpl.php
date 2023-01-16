@@ -264,7 +264,7 @@ else print $langs->trans("RemainderToPay");
 			$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 					&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL-'.str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']);
+	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
 	if (! empty($conf->global->$newnamekey)) {
 		$sellyoursaassupporturl = $conf->global->$newnamekey;
 	}

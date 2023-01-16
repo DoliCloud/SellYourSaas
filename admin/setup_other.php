@@ -459,14 +459,14 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<tr class="oddeven"><td>';
 	print ($service ? $service.' - ' : '').$langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
 	print '<td>';
-	print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL'.strtolower(preg_replace('/^_/', '-', $suffix)).'" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.strtolower(preg_replace('/^_/', '-', $suffix))).'">';
+	print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL'.$suffix.'" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.$suffix).'">';
 	print '</td>';
 	print '<td>';
 	print '<span class="opacitymedium small">'.$langs->trans("FillOnlyToUseAnExternalTicketSystem").'</span>';
 	print '</td>';
 	print '</tr>';
 
-	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.strtolower(preg_replace('/^_/', '-', $suffix)))) {
+	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.$suffix)) {
 		print '<tr class="oddeven"><td>';
 		print ($service ? $service.' - ' : '');
 		print $langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
