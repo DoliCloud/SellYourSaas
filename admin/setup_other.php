@@ -105,9 +105,13 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
-		if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_URL')) {
+		/*if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_URL')) {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL", GETPOST("SELLYOURSAAS_SUPPORT_URL", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		}*/
+		foreach ($arrayofsuffixfound as $suffix) {
+			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".$suffix, GETPOST("SELLYOURSAAS_PRICES_URL".$suffix), 'chaine', 0, '', $conf->entity);
 		}
+
 		if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", GETPOST("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 		}
@@ -454,23 +458,27 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>';
-print $langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
-print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL').'">';
-print '</td>';
-print '<td>';
-print '<span class="opacitymedium small">'.$langs->trans("FillOnlyToUseAnExternalTicketSystem").'</span>';
-print '</td>';
-print '</tr>';
-
-if (empty($conf->global->SELLYOURSAAS_SUPPORT_URL)) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
+foreach ($arrayofsuffixfound as $suffix) {
+	print '<tr class="oddeven"><td>';
+	print ($service ? $service.' - ' : '').$langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
 	print '<td>';
-	print '<textarea name="SELLYOURSAAS_SUPPORT_SHOW_MESSAGE" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE').'</textarea>';
+	print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL'.$suffix.'" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.$suffix).'">';
 	print '</td>';
-	print '<td></td>';
+	print '<td>';
+	print '<span class="opacitymedium small">'.$langs->trans("FillOnlyToUseAnExternalTicketSystem").'</span>';
+	print '</td>';
 	print '</tr>';
+
+	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.$suffix)) {
+		print '<tr class="oddeven"><td>';
+		print ($service ? $service.' - ' : '');
+		print $langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
+		print '<td>';
+		print '<textarea name="SELLYOURSAAS_SUPPORT_SHOW_MESSAGE" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE'.$suffix).'</textarea>';
+		print '</td>';
+		print '<td></td>';
+		print '</tr>';
+	}
 }
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ASK_DESTROY_REASON").'</td>';
