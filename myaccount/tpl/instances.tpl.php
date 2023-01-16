@@ -169,6 +169,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		$planref = $contract->array_options['options_plan'];
 		$statuslabel = $contract->array_options['options_deployment_status'];
+		$statuslabeltitle = '';
 		$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
 		$dbprefix = empty($contract->array_options['options_prefix_db']) ? '' : $contract->array_options['options_prefix_db'];
@@ -215,6 +216,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				if ($result == -2) {
 					// We overwrite status 'suspended' and status 'done' with 'unreachable' (a status only for screen output)
 					$statuslabel = 'unreachable';
+					$statuslabeltitle = $sellyoursaasutils->error;
 					$color = 'orange';
 				} else {
 					setEventMessages($langs->trans("ErrorRefreshOfResourceFailed", $contract->ref_customer).' : '.$sellyoursaasutils->error, $sellyoursaasutils->errors, 'warnings');
@@ -240,7 +242,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<span class="caption-helper floatright clearboth">';
 		//print $langs->trans("Status").' : ';
 		print '<!-- status = '.dol_escape_htmltag($statuslabel).' -->';
-		print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
+		print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;"'.($statuslabeltitle ? ' title="'.$statuslabeltitle.'"' : '').'>';
 		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 			print $langs->trans("Redirection");
 		} elseif ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
