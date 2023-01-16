@@ -106,7 +106,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		foreach ($arrayofsuffixfound as $suffix) {
-			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".preg_replace('/^_/', '-', $suffix), GETPOST("SELLYOURSAAS_PRICES_URL".preg_replace('/^_/', '-', $suffix)), 'chaine', 0, '', $conf->entity);
+			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".strtolower(preg_replace('/^_/', '-', $suffix)), GETPOST("SELLYOURSAAS_PRICES_URL".strtolower(preg_replace('/^_/', '-', $suffix))), 'chaine', 0, '', $conf->entity);
 		}
 
 		if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
@@ -459,14 +459,14 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<tr class="oddeven"><td>';
 	print ($service ? $service.' - ' : '').$langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
 	print '<td>';
-	print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL'.preg_replace('/^_/', '-', $suffix).'" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.preg_replace('/^_/', '-', $suffix)).'">';
+	print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL'.strtolower(preg_replace('/^_/', '-', $suffix)).'" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.strtolower(preg_replace('/^_/', '-', $suffix))).'">';
 	print '</td>';
 	print '<td>';
 	print '<span class="opacitymedium small">'.$langs->trans("FillOnlyToUseAnExternalTicketSystem").'</span>';
 	print '</td>';
 	print '</tr>';
 
-	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.preg_replace('/^_/', '-', $suffix))) {
+	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.strtolower(preg_replace('/^_/', '-', $suffix)))) {
 		print '<tr class="oddeven"><td>';
 		print ($service ? $service.' - ' : '');
 		print $langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
