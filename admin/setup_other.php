@@ -458,7 +458,7 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-foreach ($arrayofsuffixfound as $suffix) {
+foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<tr class="oddeven"><td>';
 	print ($service ? $service.' - ' : '').$langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
 	print '<td>';
