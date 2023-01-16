@@ -3574,7 +3574,7 @@ class SellYourSaasUtils
 					}
 				}
 			} else {
-				dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
+				dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".(empty($producttmp->array_options['options_app_or_option']) ? '' : $producttmp->array_options['options_app_or_option']));
 			}
 
 			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
