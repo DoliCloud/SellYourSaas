@@ -106,7 +106,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		foreach ($arrayofsuffixfound as $suffix) {
-			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".strtolower(preg_replace('/^_/', '-', $suffix)), GETPOST("SELLYOURSAAS_PRICES_URL".strtolower(preg_replace('/^_/', '-', $suffix))), 'chaine', 0, '', $conf->entity);
+			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".$suffix, GETPOST("SELLYOURSAAS_PRICES_URL".$suffix), 'chaine', 0, '', $conf->entity);
 		}
 
 		if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
