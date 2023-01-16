@@ -3,9 +3,12 @@
 
 ## 2.0
 
-* NEW Add test on user admin for script that must be launched as "admin".
+* NEW Add test on user admin for scripts that must be launched as "admin".
 * NEW Save the choice "I am a non profit organization" of thirdparty creation.
 * NEW Add SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP to set a list of IPs allowed to register even when registrations are globally closed.
+* NEW Can set a message on the registration page (instead of generic message), when we disable globally creation of new instances.
+* NEW Remove some warnings to prepare compatibility with PHP 8.2
+ 
 
 ## 1.3
 
