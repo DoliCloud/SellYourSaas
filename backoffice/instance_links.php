@@ -68,7 +68,10 @@ $hookmanager->initHooks(array('contractcard','globalcard'));
 
 if ($id > 0 || $ref) {
 	$result=$object->fetch($id, $ref);
-	if ($result < 0) dol_print_error($db, $object->error);
+	if ($result < 0) {
+		setEventMessages('Failed to read remote customer instance: '.$object->error, null, 'warnings');
+		$error++;
+	}
 	$id = $object->id;
 }
 
@@ -366,7 +369,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 				$formula = $obj->version_formula;
 			}
 		} else {
-			dol_print_error($db);
+			setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
+			$error++;
 		}
 		if (preg_match('/SQL:/', $formula)) {
 			// Define $stringofversion
@@ -390,7 +394,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 					$i++;
 				}
 			} else {
-				dol_print_error($newdb);
+				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
+				$error++;
 			}
 		}
 
