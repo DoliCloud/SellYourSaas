@@ -79,11 +79,11 @@ include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// 
 
 // Global variables
 $FORCE=0;
-if ($argv[2] == '--force') {
+if (!empty($argv[2]) && $argv[2] == '--force') {
 	unset($argv[2]);
 	$FORCE=1;
 }
-if ($argv[3] == '--force') {
+if (!empty($argv[3]) && $argv[3] == '--force') {
 	$FORCE=1;
 }
 
