@@ -2485,7 +2485,7 @@ GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT
 FLUSH PRIVILEGES;
 ---------------
 
-Give permission, on the *Master server*, to the account *sellyoursaas* of each deployment server, on the database *dolibarr* (so the mysql client on deployment server can connect to the database):
+Give permission, on the *Master server*, to the account *sellyoursaas* for each deployment server, on the database *dolibarr* (so the mysql client on deployment server can connect to the database):
 
 [source,sql]
 ---------------
@@ -2495,6 +2495,12 @@ GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dol
 
 FLUSH PRIVILEGES;
 ---------------
+
+--TODO Reduce permissions of this user sellyoursaas
+This is used by:
+* the batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
+* the batch *batch_detect_evil_instances.php* to SELECT contracts
+* the batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm 
 
 Note: If the user already exists, to set only the password:
 

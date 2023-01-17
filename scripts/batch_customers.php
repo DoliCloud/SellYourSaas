@@ -94,6 +94,8 @@ $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
 $ipserverdeployment='';
+$emailfrom='';
+$emailsupervision='';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -118,6 +120,12 @@ if ($fp) {
 		if ($tmpline[0] == 'ipserverdeployment') {
 			$ipserverdeployment = $tmpline[1];
 		}
+		if ($tmpline[0] == 'emailfrom') {
+			$emailfrom = $tmpline[1];
+		}
+		if ($tmpline[0] == 'emailsupervision') {
+			$emailsupervision = $tmpline[1];
+		}
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
@@ -137,8 +145,8 @@ $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepas
 if ($dbmaster->error) {
 	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
 
-	$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-	$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+	$from = $emailfrom;
+	$to = $emailsupervision;
 	// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
 	$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
