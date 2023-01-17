@@ -263,49 +263,46 @@ if ($sellyoursaassupporturl) {
 			$out .= '<br>';
 		}
 
-		// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
-		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
-			$tmpcontractid = $id;	// The last contract id found
-			if (GETPOST('supportchannel', 'alpha')) {
-				$tmparray = explode('_', GETPOST('supportchannel', 'alpha'));
-				if (!empty($tmparray[1]) && $tmparray[1] > 0) {
-					$tmpcontractid = $tmparray[1];
-					// TODO Check that $tmpcontractid is into list of own contract ids.
-				}
+		$tmpcontractid = $id;	// The last contract id found
+		if (GETPOST('supportchannel', 'alpha')) {
+			$tmparray = explode('_', GETPOST('supportchannel', 'alpha'));
+			if (!empty($tmparray[1]) && $tmparray[1] > 0) {
+				$tmpcontractid = $tmparray[1];
+				// TODO Check that $tmpcontractid is into list of own contract ids.
 			}
+		}
 
-			print '<!-- form to send a ticket -->'."\n";
-			print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
-			print '<input type="hidden" name="token" value="'.newToken().'">';
-			print '<input type="hidden" name="action" value="send">';
-			print '<input type="hidden" name="page_y" value="">';
-			print '<input type="hidden" name="mode" value="support">';
-			print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
-			print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
+		print '<!-- form to send a ticket -->'."\n";
+		print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<input type="hidden" name="action" value="send">';
+		print '<input type="hidden" name="page_y" value="">';
+		print '<input type="hidden" name="mode" value="support">';
+		print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
+		print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
 
-			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+		$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+			if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+		}
+
+		if (! empty($conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM) && preg_match('/high/', GETPOST('supportchannel', 'alpha'))) {
+			// We must use the prioritary email
+			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM;
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-				if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
-			}
-
-			if (! empty($conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM) && preg_match('/high/', GETPOST('supportchannel', 'alpha'))) {
-				// We must use the prioritary email
-				$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM;
-				if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-					$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_PREMIUM_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-					if (getDolGlobalString($newnamekey)) {
-						$sellyoursaasemail = getDolGlobalString($newnamekey);
-					}
+				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_PREMIUM_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				if (getDolGlobalString($newnamekey)) {
+					$sellyoursaasemail = getDolGlobalString($newnamekey);
 				}
 			}
-
-			$subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):'');
-
-			print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
 		}
+
+		$subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):'');
+
+		print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
 
 		// Combobox for Group of ticket
 		$formticket = new FormTicket($db);
@@ -323,7 +320,7 @@ if ($sellyoursaassupporturl) {
 		//$atleastonepublicgroup = 0;
 
 		//$atleastonepublicgroup = 0;
-		print getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') ? '<br>' : ($atleastonepublicgroup > 1 ? '<br>' : "");
+		print $atleastonepublicgroup > 1 ? '<br>' : "";
 
 		$stringtoprint = '';
 		if ($atleastonepublicgroup > 1 && GETPOST('supportchannel', 'alpha')) {
@@ -495,52 +492,50 @@ if ($sellyoursaassupporturl) {
 			print '<div id="hideforautomigration" class="hideforautomigration"><div>';
 		}
 
-		// Hidden when SELLYOURSAAS_ONLY_NON_PROFIT_ORGA is set
-		if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
-			print '<div class="hideforautomigration">';
+		print '<div class="hideforautomigration">';
 
-			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
-			print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
 
-			print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
-			print ' ';
-			print '<input type="submit" class="btn green-haze btn-circle reposition" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
+		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
+		print ' ';
+		print '<input type="submit" class="btn green-haze btn-circle reposition" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
 
-			print $out;
+		print $out;
 
-			print '<br>';
-			// Description
-			print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
+		print '<br>';
+		// Description
+		print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
 
-			// Button to send ticket/email
-			print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly reposition"';
-			if ($conf->use_javascript_ajax) {
-				print ' onClick="if (document.forms.mailform.addedfile.value != \'\') { alert(\''.dol_escape_js($langs->trans("FileWasNotUploaded")).'\'); return false; } else { return true; }"';
-			}
-			print '>';
-			print ' ';
-			print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle marginleftonly">';
-			print '</center>';
-
-			print '</div>';
-
-			print '</form>';
-
-			if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
-				print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="changemodeForm">';
-				print '<input type="hidden" id="modeforchangemmode" name="mode" value="automigration">';
-				print '<input type="hidden" name="token" value="'.newToken().'">';
-				print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
-				print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
-				print '<input type="hidden" id="ticketcategory_child_id_back" name="ticketcategory_child_id_back" value="'.GETPOST('ticketcategory_child_id', 'alpha').'">';
-				print '<input type="hidden" id="ticketcategory_back" name="ticketcategory_back" value="'.GETPOST('ticketcategory', 'alpha').'">';
-				if (!empty($subject)) {
-					print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
-				}
-				print '<input type="hidden" name="action" value="view">';
-				print '</form>';
-			}
+		// Button to send ticket/email
+		print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly reposition"';
+		if ($conf->use_javascript_ajax) {
+			print ' onClick="if (document.forms.mailform.addedfile.value != \'\') { alert(\''.dol_escape_js($langs->trans("FileWasNotUploaded")).'\'); return false; } else { return true; }"';
 		}
+		print '>';
+		print ' ';
+		print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle marginleftonly">';
+		print '</center>';
+
+		print '</div>';
+
+		print '</form>';
+
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+			print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="changemodeForm">';
+			print '<input type="hidden" id="modeforchangemmode" name="mode" value="automigration">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
+			print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
+			print '<input type="hidden" id="ticketcategory_child_id_back" name="ticketcategory_child_id_back" value="'.GETPOST('ticketcategory_child_id', 'alpha').'">';
+			print '<input type="hidden" id="ticketcategory_back" name="ticketcategory_back" value="'.GETPOST('ticketcategory', 'alpha').'">';
+			if (!empty($subject)) {
+				print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
+			}
+			print '<input type="hidden" name="action" value="view">';
+			print '</form>';
+		}
+		
 	}
 
 				print ' 	</div></div>
