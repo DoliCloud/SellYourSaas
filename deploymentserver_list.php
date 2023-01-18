@@ -713,9 +713,9 @@ while ($i < $imaxinloop) {
 			print '<div class="box-flex-container">';
 		}
 		// Output Kanban
-		$object->nb_instances = $openinstances[$obj->ipaddress];
-		$object->nb_backuptotal = $backuptotalinstances[$obj->ipaddress];
-		$object->nb_backupok = $backupokinstances[$obj->ipaddress];
+		$object->nb_instances = empty($openinstances[$obj->ipaddress]) ? 0 : $openinstances[$obj->ipaddress];
+		$object->nb_backuptotal = empty($backuptotalinstances[$obj->ipaddress]) ? 0 : $backuptotalinstances[$obj->ipaddress];
+		$object->nb_backupok = empty($backupokinstances[$obj->ipaddress]) ? 0 : $backupokinstances[$obj->ipaddress];
 		print $object->getKanbanView('');
 		if ($i == ($imaxinloop - 1)) {
 			print '</div>';
@@ -806,7 +806,7 @@ while ($i < $imaxinloop) {
 		}
 		// Column nb of instances
 		if (!empty($arrayfields['nb_instances']['checked'])) {
-			print '<td class="right">'.$openinstances[$obj->ipaddress].'</td>';
+			print '<td class="right">'.(empty($openinstances[$obj->ipaddress]) ? '' : $openinstances[$obj->ipaddress]).'</td>';
 		}
 		// Column nb of instances backups
 		if (!empty($arrayfields['nb_backups']['checked'])) {
