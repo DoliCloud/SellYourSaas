@@ -54,6 +54,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 dol_include_once('/sellyoursaas/class/packages.class.php');
+dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 
 // Re set variables specific to new environment
 $conf->global->SYSLOG_FILE_ONEPERSESSION='register';
@@ -560,10 +561,10 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 						$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 						$domainstosuggest = array();
+						$domainstosuggestcountryfilter = array();
 						if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 							$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);   // This is list of all sub domains to show into combo list
 						} else {
-							dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 							$staticdeploymentserver = new Deploymentserver($db);
 							$listofdomain = $staticdeploymentserver->fetchAllDomains();
 						}
@@ -604,10 +605,36 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 									continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
 								}
 							}
+							if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
+								$deploymentserver = new Deploymentserver($db);
+								$deploymentserver->fetch(0,$newval);
 
-							if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+								if (!empty($deploymentserver->servercountries)) {
+									$servercountries = explode(',', $deploymentserver->servercountries);
+									$ipuser = getUserRemoteIP();
+									$countryuser = dolGetCountryCodeFromIp($ipuser);
+									if (in_array($countryuser, $servercountries)) {
+										if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+										$domainstosuggestcountryfilter[] = $newval; // Servers with user country 
+									} else {
+										print '<!-- '.$newval.' disabled. Server country range '.$deploymentserver->servercountries.' does not contain '.$countryuser.' -->';
+										continue;
+									}
+								} else {
+									if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+									$domainstosuggest[] = $newval;
+								}
+							}else {
+								if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+								$domainstosuggest[] = $newval;
+							}
 
-							$domainstosuggest[] = $newval;
+						}
+						if (!empty($domainstosuggestcountryfilter)) {
+							foreach ($domainstosuggest as $key => $value) {
+								print '<!-- '.$value.' disabled. Matching server found with user location -->';
+							}
+							$domainstosuggest = $domainstosuggestcountryfilter;
 						}
 
 						// Defined a preselected domain

@@ -123,6 +123,7 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	fk_country integer,
 	fromdomainname varchar(128),
 	ipaddress varchar(128) NOT NULL,
+	servercountries text,
 	servercustomerannounce text,
 	servercustomerannouncestatus integer
 	-- END MODULEBUILDER FIELDS
@@ -133,6 +134,8 @@ ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN comment varchar(255);
 ALTER TABLE llx_sellyoursaas_whitelistip ADD COLUMN comment varchar(255);
 
 ALTER TABLE llx_sellyoursaas_blacklistdir ADD COLUMN noblacklistif varchar(255);
+
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN servercountries text;
 
 ALTER TABLE llx_sellyoursaas_blacklistdir DROP INDEX idx_sellyoursaas_blacklistto_content;
 ALTER TABLE llx_sellyoursaas_blacklistto DROP INDEX idx_sellyoursaas_blacklistto_content;
@@ -148,6 +151,7 @@ ALTER TABLE llx_sellyoursaas_blacklistto ADD UNIQUE INDEX uk_sellyoursaas_blackl
 ALTER TABLE llx_sellyoursaas_blacklistfrom ADD UNIQUE INDEX uk_sellyoursaas_blacklistfrom_content (content);
 ALTER TABLE llx_sellyoursaas_blacklistip ADD UNIQUE INDEX uk_sellyoursaas_blacklistip_content (content);
 ALTER TABLE llx_sellyoursaas_whitelistip ADD UNIQUE INDEX uk_sellyoursaas_whitelistip_content (content);
+
 
 
 ALTER TABLE llx_dolicloud_stats RENAME TO llx_sellyoursaas_stats;
