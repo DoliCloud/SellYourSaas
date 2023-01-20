@@ -752,7 +752,6 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('separatorthirdparty',       "SELLYOURSAAS_NAME", 'separate',  100,    '', 'thirdparty', 0, 0,   '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$arrayoptions=array(
 			'no'=>'No',
-			//'yesv1'=>'Yes (v1)',
 			'yesv2'=>'Yes'
 		);
 		$param=array('options'=>$arrayoptions);
