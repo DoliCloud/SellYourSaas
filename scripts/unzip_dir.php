@@ -81,8 +81,10 @@ foreach ($listofdirs as $file) {
 			print "\n";
 		}
 	}
+}
 
-	// Delete dir if empty
+// Delete dirs if empty
+foreach ($listofdirs as $file) {
 	if (is_dir($file)) {
 		print "Clean ".$file." ?\n";
 		if (count(scandir($file)) == 2) {
