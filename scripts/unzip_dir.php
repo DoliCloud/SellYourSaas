@@ -25,8 +25,12 @@
  *  \brief      Script to fix bad zips
  */
 
-$dirlist = [];
 
+/**
+ *
+ * @param string	$dirName	Name of dir
+ * @return string[]
+ */
 function dirIterator($dirName)
 {
 	$dirlist = array();
