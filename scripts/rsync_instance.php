@@ -281,15 +281,15 @@ if ($mode != 'test') {
 	if ($user->id > 0) {
 		$actioncomm=new ActionComm($db);
 		if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
-		$actioncomm->datep=dol_now('tzserver');
-		$actioncomm->percentage=100;
-		$actioncomm->label='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-		$actioncomm->note_private='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-		$actioncomm->fk_element=$object->id;
-		$actioncomm->elementtype='contract';
-		$actioncomm->type_code='AC_OTH_AUTO';
-		$actioncomm->userassigned[$user->id]=array('id'=>$user->id);
-		$actioncomm->userownerid=$user->id;
+		$actioncomm->datep = dol_now('tzserver');
+		$actioncomm->percentage = 100;
+		$actioncomm->label = 'Upgrade from CLI, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
+		$actioncomm->note_private = $actioncomm->label;
+		$actioncomm->fk_element = $object->id;
+		$actioncomm->elementtype = 'contract';
+		$actioncomm->type_code = 'AC_OTH_AUTO';
+		$actioncomm->userassigned[$user->id] = array('id'=>$user->id);
+		$actioncomm->userownerid = $user->id;
 		$actioncomm->create($user);
 	}
 }
