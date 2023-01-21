@@ -283,7 +283,7 @@ if ($mode != 'test') {
 		if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
 		$actioncomm->datep = dol_now('tzserver');
 		$actioncomm->percentage = 100;
-		$actioncomm->label = 'Upgrade from CLI, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
+		$actioncomm->label = 'Upgrade from CLI rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
 		$actioncomm->note_private = $actioncomm->label;
 		$actioncomm->fk_element = $object->id;
 		$actioncomm->elementtype = 'contract';
