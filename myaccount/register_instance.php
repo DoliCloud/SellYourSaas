@@ -262,6 +262,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
 	if (! preg_match('/disablecustomeremail/i', $newurl)) $newurl.='&disablecustomeremail='.urlencode($disablecustomeremail);
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 
 	if ($reusesocid < 0) { // -1, the thirdparty was not selected
 		// Return to dashboard, the only page where the customer is requested.
@@ -343,6 +344,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (! preg_match('/partner/i', $newurl)) $newurl.='&partner='.urlencode($partner);
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 
 	$parameters = array('tldid' => $tldid, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
 	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
@@ -548,9 +550,22 @@ if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
 $whitelisted = false;
 if (!empty($tmparraywhitelist)) {
 	foreach ($tmparraywhitelist as $val) {
-		if ($val->content == $remoteip) {
-			$whitelisted = true;
-			break;
+		if (strpos($val->content, '*') !== false) {
+			// An IP with a wild card
+			$tmpval = str_replace('*', '__STAR__', $val->content);
+			$tmpval = '^'.preg_quote($tmpval, '/').'$';
+			$tmpval = str_replace('__STAR__', '.*', $tmpval);
+
+			if (preg_match('/'.$tmpval.'/', $remoteip)) {
+				$whitelisted = true;
+				break;
+			}
+		} else {
+			// A simple IP
+			if ($val->content == $remoteip) {
+				$whitelisted = true;
+				break;
+			}
 		}
 	}
 }
