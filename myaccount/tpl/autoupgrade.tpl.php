@@ -254,6 +254,7 @@ if ($action == "autoupgrade") {
 	}
 
 	if (!$errors) {
+		// This also add an action in agenda "Remote action upgrade..." success or error
 		$comment = 'Call of sellyoursaasRemoteAction(upgrade) on contract ref='.$object->ref;
 		$notused = '';
 		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object, 'admin', $notused, $notused, 1, $comment, 120);
@@ -262,30 +263,6 @@ if ($action == "autoupgrade") {
 			$errortab[] = $langs->trans("ErrorOnUpgradeScript").' - exit code = '.$exitcode;
 			setEventMessages($langs->trans("ErrorOnUpgradeScript"), null, "errors");
 		}
-
-		// TODO: Add an entry into actioncomm
-		/*
-		print "Create event into database\n";
-		dol_syslog("Add event into database");
-
-		$user = new User($db);
-		$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
-
-		if ($user->id > 0) {
-			$actioncomm=new ActionComm($db);
-			if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
-			$actioncomm->datep=dol_now('tzserver');
-			$actioncomm->percentage=100;
-			$actioncomm->label=($errors > 0 ? 'ERROR ': '').'Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode.' from myaccount';
-			$actioncomm->note_private='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode.' from myaccount'.($errors > 0 ? ' - errors='.$errors : '') ;
-			$actioncomm->fk_element=$object->id;
-			$actioncomm->elementtype='contract';
-			$actioncomm->type_code='AC_OTH_AUTO';
-			$actioncomm->userassigned[$user->id]=array('id'=>$user->id);
-			$actioncomm->userownerid=$user->id;
-			$actioncomm->create($user);
-		}
-		*/
 	}
 }
 
