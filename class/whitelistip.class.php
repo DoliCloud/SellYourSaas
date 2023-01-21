@@ -102,7 +102,7 @@ class Whitelistip extends CommonObject
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'Ref', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>2, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'entity' => array('type'=>'integer', 'label'=>'Entity', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'visible'=>0, 'default'=>'1', 'index'=>1,),
-		'content' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>1, 'help'=>"Wild char * is allowed, for example: 1.2.3.*"),
+		'content' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>60, 'notnull'=>0, 'visible'=>1, 'help'=>"Wild char * is allowed, for example: 1.2.3.*", 'helplist'=>"Wild char * is allowed, for example: 1.2.3.*"),
 		'comment' => array('type'=>'varchar(255)', 'label'=>'Comment', 'enabled'=>'1', 'position'=>65, 'notnull'=>0, 'visible'=>1, 'csslist'=>'tdoverflowmax150'),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2,),
