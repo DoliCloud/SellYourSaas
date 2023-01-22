@@ -342,7 +342,7 @@ chmod go-rw /etc/ssh/sshd_config
 
 Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
 
-For Ubuntu 18.04: you can concat the content into file *sshd_config* but be sure to not have duplicate values.
+For Ubuntu 18.04: you can concat the content into file *sshd_config*, but be sure to not have duplicate values.
 
 [source, conf]
 ---------------
@@ -366,7 +366,7 @@ PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 
 # Define list of allowed method to authenticate
-PasswordAuthentication yes
+PasswordAuthentication no   # This will be allowed for osu users only into main sshd_config file with a Match User rule
 PubkeyAuthentication yes
 
 DenyUsers guest
@@ -380,12 +380,37 @@ AllowUsers myunixlogin
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
 
+# Warning Match rule works only insshd_config not into include files
+# You can test a Match User rule with ssd -T -C user=aaa | grep param
+#Match User osu*
+#       ChrootDirectory "/home/jail/home/"
+#       ForceCommand /usr/bin/secureBash
 #Match User osu*
 #        ChrootDirectory %h
 
 ---------------
 
 Please note: replace *myunixlogin* with the correct value before taking changes into account with:
+
+
+
+Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
+
+[source, conf]
+---------------
+# Warning Match rule works only insshd_config not into include files
+# You can test a Match User rule with ssd -T -C user=aaa | grep param
+#Match User osu*
+#       ChrootDirectory "/home/jail/home/"
+#       ForceCommand /usr/bin/secureBash
+#Match User osu*
+#        ChrootDirectory %h
+Match User osu*
+  PasswordAuthentication=yes	
+---------------
+
+
+Then reload ssh 
 
 [source, conf]
 ---------------

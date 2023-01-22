@@ -166,7 +166,7 @@ if ($fp) {
  *	Main
  */
 
-print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+print "***** ".$script_file." (".$version.") - mode = ".$mode." - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 
 if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
@@ -230,7 +230,8 @@ if ($num_rows > 1) {
 	if ($obj) $idofinstancefound = $obj->rowid;
 }
 
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
+
 $object = new SellYourSaasContract($dbmaster);
 $result=0;
 if ($idofinstancefound) {
@@ -549,6 +550,8 @@ if (empty($return_var) && empty($return_varmysql)) {
 			}
 		}
 	}
+
+	print "\n";
 
 	exit(1);
 }
