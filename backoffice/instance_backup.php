@@ -443,7 +443,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 
 // Backup command line
-$backupstringtoshow=$backupstring.' confirm --nostats --forcesync --forcedump';
+$backupstringtoshow=$backupstring.' confirm --nostats --forcersync --forcedump';
 $backupstringtoshow2=$backupstring.' confirm';
 print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-file paddingright"></span> Backup command line string <span class="opacitymedium">(to run on the server where to store the backup)</span><br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
