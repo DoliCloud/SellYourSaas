@@ -231,7 +231,7 @@ if ($num_rows > 1) {
 }
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object = new Contrat($dbmaster);
+$object = new SellYourSaasContract($dbmaster);
 $result=0;
 if ($idofinstancefound) {
 	$result=$object->fetch($idofinstancefound);
@@ -251,6 +251,7 @@ $object->password_os = $object->array_options['options_password_os'];
 $object->username_db = $object->array_options['options_username_db'];
 $object->password_db = $object->array_options['options_password_db'];
 $object->database_db = $object->array_options['options_database_db'];
+$object->hostname_db = $object->array_options['options_hostname_db'];
 $object->deployment_host = $object->array_options['options_deployment_host'];
 $object->username_web = $object->thirdparty->email;
 $object->password_web = $object->thirdparty->array_options['options_password'];
@@ -305,7 +306,8 @@ if ($dayofmysqldump == 'autoscan') {
 	}
 }
 
-// Backup files
+// Restore rsynced files
+$return_var=0;
 if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm') {
 	if (! is_dir($dirroot)) {
 		print "ERROR failed to find source dir ".$dirroot."\n";
@@ -362,10 +364,13 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]=(in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $targetdir;
 	$fullcommand=$command." ".join(" ", $param);
 	$output=array();
-	$return_var=0;
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync done'."\n";
+	if ($return_var > 0) {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync failed'."\n";
+	} else {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync done'."\n";
+	}
 
 	// Output result
 	foreach ($output as $outputline) {
@@ -384,7 +389,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	}
 }
 
+
 // Restore database
+$return_varmysql=0;
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm') {
 	$serverdb = $server;
 	if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
@@ -430,7 +437,6 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	}
 
 	$output=array();
-	$return_varmysql=0;
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
 		exec($fullcommand, $output, $return_varmysql);
