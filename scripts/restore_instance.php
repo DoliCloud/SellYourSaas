@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2012-2019 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2022 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  * Restore a backup of files (rsync) or database (mysqdump) of a deployed instance.
  * There is no report/tracking done into any database. This must be done by a parent script.
- * This script is run from the deployment servers.
+ * This script is run from the source or the target deployment servers.
  *
  * Note:
  * ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted user to have testrsync and confirmrsync working.
