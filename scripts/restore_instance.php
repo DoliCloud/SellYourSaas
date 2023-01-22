@@ -233,10 +233,15 @@ if ($num_rows > 1) {
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object = new Contrat($dbmaster);
 $result=0;
-if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
+if ($idofinstancefound) {
+	$result=$object->fetch($idofinstancefound);
+	if ($result > 0) {
+		$result = $object->fetch_thirdparty();
+	}
+}
 
 if ($result <= 0) {
-	print "Error: Instance named '".$instance."' with status 'done' could not be found.\n";
+	print "Error: Instance named '".$instance."' with status 'done' could not be found or loaded.\n";
 	exit(-2);
 }
 
