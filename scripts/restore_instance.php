@@ -277,8 +277,8 @@ if (empty($login) || empty($dirdb)) {
 }
 
 print 'Restore from '.$dirroot." to ".$targetdir.' into instance '.$instance."\n";
-print 'Target SFTP password '.$object->password_os."\n";
-print 'Target Database password '.$object->password_db."\n";
+print 'Target SFTP password '.dol_trunc($object->password_os, 2, 'right', 'UTF-8', 1).preg_replace('/./', '*', dol_substr($object->password_os, 3))."\n";
+print 'Target Database password '.dol_trunc($object->password_db, 2, 'right', 'UTF-8', 1).preg_replace('/./', '*', dol_substr($object->password_db, 3))."\n";
 
 if (! in_array($mode, array('testrsync', 'testdatabase', 'test', 'confirmrsync', 'confirmdatabase', 'confirm'))) {
 	print "Error: Bad value for last parameter (action must be testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm).\n";
