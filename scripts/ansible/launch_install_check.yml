@@ -527,7 +527,7 @@
 
 
   ##### check/complete the sshd_config file
-- name: Add a section into the sshd_config, after passing validation with sshd
+- name: Add a section into the sshd_config, after passing validation with sshd -T
   hosts: '{{target}}'
   become: yes
   become_method: sudo

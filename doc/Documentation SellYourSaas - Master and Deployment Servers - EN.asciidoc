@@ -434,8 +434,8 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 ---------------
 myunixlogin ALL=(ALL) ALL
 # You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
-myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
-myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
+#myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
+#myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
 
 This allows you to switch to *admin* or *osu...* without typing your password too:
