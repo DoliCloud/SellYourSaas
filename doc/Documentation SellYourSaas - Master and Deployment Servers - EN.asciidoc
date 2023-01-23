@@ -373,20 +373,15 @@ DenyUsers guest
 
 AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 
-AllowUsers admin osu*
-AllowUsers myunixlogin
-
 # Legacy changes - To allow an old client (like old PHP) to connect to
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
 
-# Warning Match rule works only insshd_config not into include files
-# You can test a Match User rule with ssd -T -C user=aaa | grep param
-#Match User osu*
-#       ChrootDirectory "/home/jail/home/"
-#       ForceCommand /usr/bin/secureBash
-#Match User osu*
-#        ChrootDirectory %h
+ClientAliveInterval 30
+#ClientAliveCountMax 3
+
+AllowUsers admin osu*
+AllowUsers myunixlogin
 
 ---------------
 
@@ -398,17 +393,25 @@ Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rul
 
 [source, conf]
 ---------------
+# BEGIN Block for SellYourSaas
 # Warning Match rule works only insshd_config not into include files
 # You can test a Match User rule with ssd -T -C user=aaa | grep param
 #Match User osu*
-#       ChrootDirectory "/home/jail/home/"
-#       ForceCommand /usr/bin/secureBash
+#  ChrootDirectory "/home/jail/home/"
+#  ForceCommand /usr/bin/secureBash
 #Match User osu*
-#        ChrootDirectory %h
+#  ChrootDirectory %h
 Match User osu*
-  PasswordAuthentication=yes	
+  PasswordAuthentication=yes
+# END Block for SellYourSaas
 ---------------
 
+To test a ssh config, you can run
+
+[source, conf]
+---------------
+sshd -T -C user=mylogin -C host=clienthost -C addr=clientaddr
+---------------
 
 Then reload ssh 
 
