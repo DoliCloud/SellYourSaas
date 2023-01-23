@@ -3302,7 +3302,7 @@ $showannoucefordomain = array();
 if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
 	$showannoucefordomain['_global_'] = 'SELLYOURSAAS_ANNOUNCE';
 }
-// Detect local announce
+// Detect local announce (per server)
 foreach ($listofcontractidopen as $tmpcontract) {
 	$tmpdomainname = getDomainFromURL($tmpcontract->ref_customer, 2);
 	$deploymentserver = new Deploymentserver($db);
@@ -3312,7 +3312,7 @@ foreach ($listofcontractidopen as $tmpcontract) {
 		print '<div class="note note-warning">';
 		print '<b>'.dol_print_date($deploymentserver->date_modification, 'dayhour').'</b>';
 		if ($tmpdomainname != '_global_') {
-			print ' - '.$langs->trans("Domain").' <b>'.$tmpdomainname.'</b>';
+			print ' - '.$langs->trans("InfoForDomain").' <b>*.'.$tmpdomainname.'</b>';
 		}
 		print ' : ';
 		print '<h4 class="block">';
