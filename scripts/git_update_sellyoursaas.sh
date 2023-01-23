@@ -21,6 +21,21 @@ fi
 
 error=0
 
+
+# Get domain of the GIT server with sources
+export gitserver=`grep '^gitserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$gitserver" == "x" ]]; then
+	export gitserver="github.com"
+fi
+gitserver=${gitserver//[^a-zA-Z0-9.]/}
+
+# Install fingerprint of github.com but only if it was never installed
+# If it is already present, we keep it so we will be protected if domain name is routed on another evil server
+# TODO Allow to choose the git domain name server in /etc/sellyousaas.conf 
+echo "Install the known fingerprint of github if it was never installed"
+ssh-keygen -F "$gitserver" || ssh-keyscan "$gitserver" >>~/.ssh/known_hosts
+
+
 echo "Update git dirs found into $1."
 
 for dir in `ls -d $1/dolibarr* | grep -v documents`
