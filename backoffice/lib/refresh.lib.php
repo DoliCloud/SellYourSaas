@@ -72,8 +72,6 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 				}
 
 				$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
-				//$file="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/htdocs/conf/conf.php';
-				//$file="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/htdocs/conf/conf.php';    // With PHP 5.6.27+
 
 				// Update ssl certificate
 				// Dir .ssh must have rwx------ permissions

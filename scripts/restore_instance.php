@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2012-2022 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2023 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -322,7 +322,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="-rltz";
 	//$param[]="-vv";
 	$param[]="-v";
-	$param[]="--exclude 'conf.php'";
+	$param[]="--exclude 'conf.php'";			// a conf file for dolibarr
+	$param[]="--exclude 'config_db.php'";		// a conf file for glpi
+	$param[]="--exclude 'downstream.php'";		// a conf file for glpi
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
 	$param[]="--exclude .gitignore";

@@ -223,6 +223,8 @@ if ($mode != 'confirmwithtestdir') {
 	$param[]="--exclude test/";
 }
 $param[]="--exclude htdocs/conf/conf.php*";
+$param[]="--exclude glpi_config/config_db.php*";
+$param[]="--exclude htdocs/inc/downstream.php*";
 $param[]="--exclude htdocs/custom";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('testclean','confirmclean'))) $param[]="--delete";
