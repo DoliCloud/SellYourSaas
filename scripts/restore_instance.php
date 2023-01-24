@@ -448,7 +448,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	}
 
 	$output=array();
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
+	$fullcommandwithoutpass = preg_replace('/\-p"(..).*"$/', '-p\1***hidden***', $fullcommand); // Hide password ecept the 2 first chars
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommandwithoutpass."\n";
 	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
 		exec($fullcommand, $output, $return_varmysql);
 	}
@@ -483,7 +484,7 @@ if (!sellyoursaasIsPaidInstance($object)) {
 		print "\n";
 	} else {
 		print "\n";
-		print "You may want to increase end of trial date (currently ".dol_print_date($object->array_options['options_date_endfreeperiod'], 'day')."). Do it from the backoffice if this is required.\n";
+		print "You may want to increase end of trial date of the target instance (currently ".dol_print_date($object->array_options['options_date_endfreeperiod'], 'day')."). Do it from the backoffice if this is required.\n";
 		print "\n";
 	}
 } else {
