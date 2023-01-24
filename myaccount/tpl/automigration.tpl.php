@@ -414,8 +414,8 @@ if ($action == 'view') {
                 <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</h1><br>
                 <div>
                     '.$langs->trans("AutomigrationStep1Text", $langs->transnoentitiesnoconv("Home"), $langs->transnoentitiesnoconv("Setup"), $langs->transnoentitiesnoconv("Backup"), $langs->transnoentitiesnoconv("GenerateBackup")).'
-					<br>
-					'.$langs->trans("DownloadThisFile").'
+					<br><br>
+					'.$langs->trans("DownloadThisFile").'.
                 </div>
                 <div class="center" style="padding-top:10px">
                     <img src="'.$linkstep1img.'">
@@ -445,7 +445,7 @@ if ($action == 'view') {
                 <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</small></h1><br>
                 <div>
                     '.$langs->trans("AutomigrationStep2Text", $langs->transnoentitiesnoconv("Home"), $langs->transnoentitiesnoconv("Setup"), $langs->transnoentitiesnoconv("Backup"), $langs->transnoentitiesnoconv("GenerateBackup")).'
-					<br>
+					<br><br>
 					'.$langs->trans("DownloadThisFile").'
                 </div>
                 <div class="center" style="padding-top:10px">
