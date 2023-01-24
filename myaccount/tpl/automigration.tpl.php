@@ -44,6 +44,7 @@ print '</form>';
 if ($action == 'redirectautomigrationget') {
 	// TODO Why not just changing the url in <form action="url" with <form action="url#step4" instead of making a post that do a js get redirect just after being loaded ?
 	print '<script>
+	console.log("Reload page with another url...");
 	window.location.href = "'.$_SERVER["PHP_SELF"].'?mode='.GETPOST("mode", 'alpha').'&action=view'.(GETPOST("instanceselect")?'&instanceselect='.GETPOST("instanceselect"):"").'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&backfromautomigration=backfromautomigration&ticketcategory_child_id='.GETPOST('ticketcategory_child_id', 'alpha').'&ticketcategory='.GETPOST('ticketcategory', 'alpha').(GETPOST('subject', 'alpha')?'&subject='.GETPOST('subject', 'alpha'):"").'#Step4"
 	</script>';
 }
@@ -578,6 +579,9 @@ if ($action == 'view') {
         </div>
         <!-- END STEP3-->';
 
+		// TODO Replace the upload of file with a simple form with
+		// flow.js + a PHP file called flowjs-server.php (to add inside Dolibarr) inspired from https://github.com/flowjs/flow.js/blob/master/samples/Backend%20on%20PHP.md (not the flow-php-server that is too heavy for our need)
+		// So we an upload very large files and stay on main page.
 		print '<!-- BEGIN STEP4-->
         <div class="portlet light divstep topmarginstep" id="step4">
             <h2 id="Step4">'.$langs->trans("Step", 4).' - '.$langs->trans("FileUpload").'</small></h1><br>
