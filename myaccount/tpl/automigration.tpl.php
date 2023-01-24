@@ -309,7 +309,7 @@ print'
 if ($action == 'fileverification') {
 	print '<!-- BEGIN STEP5-->';
 	print '<div class="portlet light" id="Step5">
-        <h2>'.$langs->trans("Step", 5).' - '.$langs->trans("FileVerification").'</small></h1><br>
+        <h2>'.$langs->trans("Step", 5).' - '.$langs->trans("FileVerification").'</h2><br>
         <div style="display:flex;justify-content:space-evenly;">';
 	for ($i=0; $i < 2; $i++) {
 		if ($i == 0) {
@@ -411,7 +411,7 @@ if ($action == 'view') {
 
 	print'<!-- BEGIN STEP1-->
         <div class="portlet light" id="step1">
-                <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</h1><br>
+                <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</h2><br>
                 <div>
                     '.$langs->trans("AutomigrationStep1Text", $langs->transnoentitiesnoconv("Home"), $langs->transnoentitiesnoconv("Setup"), $langs->transnoentitiesnoconv("Backup"), $langs->transnoentitiesnoconv("GenerateBackup")).'
 					<br><br>
@@ -442,7 +442,7 @@ if ($action == 'view') {
 		print '<!-- BEGIN STEP2-->
 		<div id="Step2"></div>
         <div class="portlet light divstep topmarginstep" id="step2">
-                <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</small></h1><br>
+                <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</h2><br>
                 <div>
                     '.$langs->trans("AutomigrationStep2Text", $langs->transnoentitiesnoconv("Home"), $langs->transnoentitiesnoconv("Setup"), $langs->transnoentitiesnoconv("Backup"), $langs->transnoentitiesnoconv("GenerateBackup")).'
 					<br><br>
@@ -465,7 +465,7 @@ if ($action == 'view') {
 
 		print '<!-- BEGIN STEP3-->
         <div class="portlet light divstep topmarginstep" id="step3">
-                <h2 id="Step3">'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
+                <h2 id="Step3">'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</h2><br>
                 <div style="padding-left:25px">
                 '.$langs->trans("AutomigrationStep3Text").'<br><br>
                 </div>
@@ -584,13 +584,24 @@ if ($action == 'view') {
                 <div class="grid-boxes-automigration-left valignmiddle">
                 	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2 '.$langs->trans("or").' .sql.gz):</span>
                 </div>
-                <div class="grid-boxes-automigration">
+                <div class="grid-boxes-automigration">';
+				$maxfilesizearray = getMaxFileSizeArray();
+				$maxmin = $maxfilesizearray['maxmin'];
+	if ($maxmin > 0) {
+		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
+	}
+				print '
                     <input type="file" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">
                 </div>
                 <div class="grid-boxes-automigration-left valignmiddle">
                 	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz '.$langs->trans("or").' .tar.bz2):</span>
                 </div>
-                <div class="grid-boxes-automigration">
+                <div class="grid-boxes-automigration">';
+				$maxmin = $maxfilesizearray['maxmin'];
+	if ($maxmin > 0) {
+		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
+	}
+				print '
                     <input type="file" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">
                 </div>
             </div><br>
