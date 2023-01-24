@@ -174,7 +174,7 @@ if ($action == 'automigration') {
 	$object->array_options['automigrationdocumentarchivename'] = $dirfiletomigrate;
 	$exitcode = 0;
 
-	//Sql prefix process To test 
+	//Sql prefix process To test
 	$sqlfilepath = dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate);
 	$sqlcontent = file_get_contents($sqlfilepath);
 	$matches = array();
@@ -182,7 +182,7 @@ if ($action == 'automigration') {
 	$result["result"] = preg_match('/table `([a-zA-Z0-9]+_)/i', $sqlcontent, $matches);
 	if ($result["result"] <= 0) {
 		setEventMessages($langs->trans("ErrorOnSqlPrefixProcess"), null, "errors");
-	}else {
+	} else {
 		if ($matches[1] != $prefix_db) {
 			$oldprefix = $matches[1];
 			$sqlcontentnew = preg_replace('/`'.$oldprefix.'/i', '`'.$prefix_db, $sqlcontent);
@@ -190,7 +190,7 @@ if ($action == 'automigration') {
 				$result["result"] = -1;
 				$result["output"] = $langs->trans("ErrorOnSqlPrefixProcessReplace");
 				setEventMessages($langs->trans("ErrorOnSqlPrefixProcessReplace"), null, "errors");
-			}else {
+			} else {
 				$fhandle = @fopen($sqlfilepath, 'w');
 				if ($fhandle) {
 					$result["result"] = fwrite($fhandle, $sqlcontentnew);
@@ -411,21 +411,18 @@ if ($action == 'view') {
 
 	print'<!-- BEGIN STEP1-->
         <div class="portlet light" id="step1">
-                <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</small></h1><br>
+                <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</h1><br>
                 <div>
-                    '.$langs->trans("AutomigrationStep1Text").'
+                    '.$langs->trans("AutomigrationStep1Text", $langs->transnoentitiesnoconv("Home"), $langs->transnoentitiesnoconv("Setup"), $langs->transnoentitiesnoconv("Backup"), $langs->transnoentitiesnoconv("GenerateBackup")).'
                 </div>
                 <div class="center" style="padding-top:10px">
                     <img src="'.$linkstep1img.'">
                 </div>
+				<br>
                 <div class="note note-info"><small>
                 '.$langs->trans("AutomigrationStep1Note").'
                 <div class="portlet dark" style="margin-bottom:10px">
                     mysqldump -h ip_of_old_mysql_server -P port_of_old_mysql_server -u user_database -ppassword_database > mysqldump_YYYYMMDDHHMMSS.sql
-                </div>
-                '.$langs->trans("AutomigrationStep1Note2").'
-                <div class="portlet dark" style="color:green;margin-bottom:0px">
-                    -- Dump completed on YYYY-MM-DD HH:mm:
                 </div>
                 </small>
                 </div>
