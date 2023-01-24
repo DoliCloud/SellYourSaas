@@ -3,6 +3,7 @@
 
 ## 2.0
 
+* NEW Powerfull users need to enter a password for sudo with new default setup
 * NEW Can use wildcard into list of whitelist IP (e.g. "1.2.3.*")
 * NEW Add test on user admin for scripts that must be launched as "admin".
 * NEW Save the choice "I am a non profit organization" of thirdparty creation.

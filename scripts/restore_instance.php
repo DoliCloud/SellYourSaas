@@ -62,6 +62,8 @@ $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
+$emailfrom='';
+$emailsupervision='';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -94,6 +96,12 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'emailfrom') {
+			$emailfrom = $tmpline[1];
+		}
+		if ($tmpline[0] == 'emailsupervision') {
+			$emailsupervision = $tmpline[1];
 		}
 	}
 } else {
@@ -487,11 +495,12 @@ $sendcontext = 'emailing';
 // Send result to supervision if enabled
 if (empty($return_var) && empty($return_varmysql)) {
 	if ($mode == 'confirm') {
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		$from = $emailfrom;
+		$to = $emailsupervision;
+
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
-		$msg = 'Restore done without errors by '.$script_file." ".$argv[1]." ".$argv[2]." ".$argv[3]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n";
+		$msg = 'Restore done without errors by '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." ".(empty($argv[3]) ? '' : $argv[3])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n";
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Restore instance - '.gethostname().'] Restore of user instance succeed.'."\n";
@@ -522,11 +531,12 @@ if (empty($return_var) && empty($return_varmysql)) {
 	if (! empty($return_varmysql)) print "ERROR into restore process of mysqldump: ".$return_varmysql."\n";
 
 	if ($mode == 'confirm') {
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		$from = $emailfrom;
+		$to = $emailsupervision;
+
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
-		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." ".$argv[3]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$return_var."\n".$return_varmysql;
+		$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." ".(empty($argv[3]) ? '' : $argv[3])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$return_var."\n".$return_varmysql;
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in restoring - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
