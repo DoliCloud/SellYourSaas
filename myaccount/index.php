@@ -3746,14 +3746,14 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 								print ' &nbsp; ';
 							} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
 								$daybeforeendoftrial = getDolGlobalInt('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT');
-								if ($delaybeforeendoftrial <= ($daybeforeendoftrial + 1)) {	// We add 1 to be sure that link is visible before we send the soft email remind
+								if ($delaybeforeendoftrial <= (($daybeforeendoftrial + 1) * 3600 * 24)) {	// We add 1 to be sure that link is visible before we send the soft email remind
 									// Link to validate definitely instance
 									print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
 									print $langs->trans("ConfirmInstanceValidation");
 									print '</a>';
 									print ' &nbsp; ';
 								} else {
-									print '<!-- Button to validate defintely instance will appears '.$daybeforeendoftrial.' days before end of trial -->';
+									print '<!-- Button to validate definitely instance will appears '.$daybeforeendoftrial.' days before end of trial -->';
 								}
 							}
 							print '<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
