@@ -568,7 +568,7 @@ if ($action == 'view') {
             </div><br>
 			<div id="buttonstep4migration" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ?'style="display:none;"':'').'>
 				<div class="right" style="margin-right:10px">
-					<button id="buttonstep_4" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
+					<button id="buttonstep_4" type="button" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 				</div>
 				<div>
 					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
@@ -654,19 +654,23 @@ if ($action == 'view') {
                 let i = 1;
                 while(i<=hash){
                     step = "step"+i;
-                    console.log($("#"+step).attr("id"));
+                    console.log("Show "+$("#"+step).attr("id"));
                     $("#"+step).show();
                     i++;
                 }
             }
         }
+
         $(".btnstep").on("click",function(){
 			hash = $(this).attr("id").split("_")[1];
+			console.log("We click on button "+hash);
             showStepAnchor(hash);
         })
+
 		$("#sumbmitfiles").on("click",function(){
 			$("#actionautomigration").val(\'fileverification\');
 		})
+
         var hash = $(location).attr("hash").substr(5);
         if(hash != "4"){
 			$(".divstep").hide();
