@@ -450,6 +450,9 @@ ul.kmlist {
 	list-style: disc;
 }
 
+.nobold {
+	font-weight: normal;
+}
 
 
 @-webkit-viewport {width: device-width;}
@@ -521,8 +524,9 @@ span {font-size: 18px;margin-bottom: 5px;display: block;text-align:
 left;}.top-news a {display: block;text-align: left;padding: 10px;
 position: relative;margin-bottom: 10px;}.top-news a .top-news-icon {
 right: 8px;bottom: 15px;opacity: 0.3;font-size: 35px;position: 
-absolute;filter: alpha(opacity=30);}.blog-images {margin-bottom: 0;}.
-blog-images li {padding: 0;margin: 0;display: inline;}.blog-images 
+absolute;filter: alpha(opacity=30);}.blog-images {margin-bottom: 0;}
+
+.blog-images li {padding: 0;margin: 0;display: inline;}.blog-images 
 li a:hover {text-decoration: none;}.blog-images li img {width: 50px;
 height: 50px;opacity: 0.6;margin: 0 2px 8px;}.blog-images li img:
 hover {opacity: 1;box-shadow: 0 0 0 4px #72c02c;transition: all 0.4s 
