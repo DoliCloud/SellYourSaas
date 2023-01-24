@@ -25,7 +25,7 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE automigration.tpl.php -->
 <?php
 
-$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';
+$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';	// TODO Use id of contract instead of ID of thirdparty
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
