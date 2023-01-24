@@ -782,7 +782,11 @@ class ActionsSellyoursaas
 				if ($object->array_options['options_deployment_status'] == 'done') {
 					// Show warning if in maintenance mode
 					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
-						$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						if (preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
+							$messagetoshow = $langs->trans("InstanceIsARedirectionInstance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						} else {
+							$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						}
 						$messagetoshow .= '<br><u>'.$langs->trans("MaintenanceMessage").':</u><br>';
 						$messagetoshow .= $object->array_options['options_suspendmaintenance_message'];
 						$ret .= img_warning($messagetoshow, '', 'classfortooltip marginrightonly');
