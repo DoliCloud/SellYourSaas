@@ -25,7 +25,7 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE automigration.tpl.php -->
 <?php
 
-$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';	// TODO Use id of contract instead of ID of thirdparty
+$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';	// @TODO LMR Use id of contract instead of ID of thirdparty
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
@@ -42,7 +42,7 @@ print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormba
 	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
 print '</form>';
 if ($action == 'redirectautomigrationget') {
-	// TODO Why not just changing the url in <form action="url" with <form action="url#step4" instead of making a post that do a js get redirect just after being loaded ?
+	// @TODO LMR Why not just changing the url in <form action="url" with <form action="url#step4" instead of making a post that do a js get redirect just after being loaded ?
 	print '<script>
 	console.log("Reload page with another url...");
 	window.location.href = "'.$_SERVER["PHP_SELF"].'?mode='.GETPOST("mode", 'alpha').'&action=view'.(GETPOST("instanceselect")?'&instanceselect='.GETPOST("instanceselect"):"").'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&backfromautomigration=backfromautomigration&ticketcategory_child_id='.GETPOST('ticketcategory_child_id', 'alpha').'&ticketcategory='.GETPOST('ticketcategory', 'alpha').(GETPOST('subject', 'alpha')?'&subject='.GETPOST('subject', 'alpha'):"").'#Step4"
@@ -579,7 +579,7 @@ if ($action == 'view') {
         </div>
         <!-- END STEP3-->';
 
-		// TODO Replace the upload of file with a simple form with
+		// @TODO LMR Replace the upload of file with a simple form with
 		// flow.js + a PHP file called flowjs-server.php (to add inside Dolibarr) inspired from https://github.com/flowjs/flow.js/blob/master/samples/Backend%20on%20PHP.md (not the flow-php-server that is too heavy for our need)
 		// So we an upload very large files and stay on main page.
 		print '<!-- BEGIN STEP4-->
