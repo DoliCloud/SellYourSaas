@@ -779,4 +779,4 @@ AllowedToIP=IPs always allowed
 InfoForDomain=Information for instances on domain
 UploadYourDatabaseDumpFile=Upload your database dump file
 UploadYourDocumentArchiveFile=Upload your document archive file
-FileEndingWith=File name ending with
+FileEndingWith=File

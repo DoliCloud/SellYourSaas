@@ -582,13 +582,13 @@ if ($action == 'view') {
             <h2 id="Step4">'.$langs->trans("Step", 4).' - '.$langs->trans("FileUpload").'</small></h1><br>
             <div class="grid-wrapper-automigration">
                 <div class="grid-boxes-automigration-left valignmiddle">
-                	<span class="opacitymedium normal">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2, .sql.gz):</span>
+                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2, .sql.gz):</span>
                 </div>
                 <div class="grid-boxes-automigration">
                     <input type="file" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">
                 </div>
                 <div class="grid-boxes-automigration-left valignmiddle">
-                	<span class="opacitymedium normal">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz, .tar.bz2):</span>
+                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz, .tar.bz2):</span>
                 </div>
                 <div class="grid-boxes-automigration">
                     <input type="file" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">
