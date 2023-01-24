@@ -669,7 +669,7 @@ if ($action == 'view') {
         })
 
 		$("#sumbmitfiles").on("click",function(){
-			console.log("We click on sumbmitfiles, we replace the action=redirectautomigrationget by action=fileverification"):
+			console.log("We click on sumbmitfiles, we replace the action=redirectautomigrationget by action=fileverification");
 			$("#actionautomigration").val(\'fileverification\');
 		})
 
