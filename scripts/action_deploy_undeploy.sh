@@ -974,7 +974,6 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
-			export pathforcertif=`dirname $fileforconfig1`
 			export pathforcertif=`dirname $pathforcertif`
 			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
 			export webCustomSSLCertificateKEY=$CERTIFFORCUSTOMDOMAIN.key

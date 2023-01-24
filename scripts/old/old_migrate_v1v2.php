@@ -872,7 +872,7 @@ $newsftpconnectstring=$newobject->username_os.'@'.$newobject->hostname_os.':'.$c
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
 print 'SFTP new connect string : '.$newsftpconnectstring."\n";
-print 'SFTP old password '.$oldobject->password_web."\n";
+//print 'SFTP old password '.$oldobject->password_web."\n";
 //print 'SFTP new password '.$newobject->password_web."\n";
 
 $command="rsync";

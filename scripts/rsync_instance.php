@@ -188,7 +188,7 @@ $sftpconnectstring=$object->username_os.'@'.$server.':'.$targetdir;
 
 print 'Synchro of files '.$dirroot.' to '.$targetdir."\n";
 print 'SFTP connect string : '.$sftpconnectstring."\n";
-print 'SFTP password '.$object->password_web."\n";
+//print 'SFTP password '.$object->password_os."\n";
 
 $command="rsync";
 $param=array();

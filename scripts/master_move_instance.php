@@ -205,7 +205,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "        confirm for real mode.\n";
 	print "        confirmredirect for real mode and set old instance as a redirect instance.\n";
 	print "        maintenance to switch old instance in maintenance mode before the move.\n";
-	print "MYPRODUCTREF can be set to force the name of hosting application.\n";
+	print "MYPRODUCTREF can be set to force a new hosting application service.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	print "\n";
 	exit(-1);
@@ -332,7 +332,9 @@ if (empty($productref)) {
 
 $createthirdandinstance = 0;
 
-$newobject = new Contrat($dbmaster);
+dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
+
+$newobject = new SellYourSaasContract($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
 	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
@@ -396,25 +398,32 @@ if ($mode == 'confirmredirect' || $mode == 'maintenance') {
 	}
 }
 
-// Share certificate of old instance
+// Share certificate of old instance by copying them into the common crt dir (they should already be into this directory)
+// TODO If the certificate of the source isntance are not into crt directory, we must copy them into the crt directory with read permission to admin user.
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
-	print '--- Copy current wild certificate to use it as the certificate for the custom url of the new instance (for backward compatibility)'."\n";
+	print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) of instance (generic and custom) into the crt directory. We may use them on the new instance for backward compatibility.'."\n";
 	foreach (array('.key', '.crt', '-intermediate.crt') as $ext) {
 		$srcfile = '/etc/apache2/'.$oldwilddomain.$ext;
 		$destfile = $conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.$ext;
-		print 'Copy '.$srcfile.' into '.$destfile."\n";
-		if (! dol_is_file($destfile)) {
-			dol_copy($srcfile, $destfile, '0600');
-			if (! dol_is_file($destfile)) {
-				print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files for ".$oldwilddomain." must be found into /etc/apache2\n";
-				exit(-1);
+		if (dol_is_file($destfile)) {
+			print 'Certificate file '.$destfile.' already found into crt directory. Step discarded.'."\n";
+		} else {
+			if (dol_is_file($srcfile)) {
+				print 'Copy '.$srcfile.' into '.$destfile."\n";
+				dol_copy($srcfile, $destfile, '0600');
+				if (! dol_is_file($destfile)) {
+					print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files (.key, .crt and -intermediate.crt) for ".$oldwilddomain." must be found into ".$conf->sellyoursaas->dir_output."/crt/\n";
+					exit(-1);
+				}
+			} else {
+				print 'No certificate file '.$srcfile.' found. Step discarded.'."\n";
 			}
 		}
 	}
 }
 
-print '--- Create new container for new instance'."\n";
+print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
 
 $newpass = $oldobject->array_options['options_deployment_initial_password'];
 if (empty($newpass)) $newpass = getRandomPassword(true, array('I'), 16);
@@ -456,7 +465,7 @@ if (! $error) {
 }
 
 // Reload contract to get all values up to date
-$newobject = new Contrat($dbmaster);
+$newobject = new SellYourSaasContract($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
 
 $newserver=$newobject->array_options['options_hostname_os'];
@@ -477,7 +486,7 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 	exit(-1);
 }
 
-// Set the custom url on newobject
+// Set the custom url on new object with the one of the old one
 if (! empty($oldobject->array_options['options_custom_url'])) {
 	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
 	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
@@ -532,7 +541,8 @@ dol_mkdir($tmptargetdir);
 
 
 print '--- Synchro of files '.$oldsftpconnectstring.' to '.$tmptargetdir."\n";
-print 'SFTP old password '.$oldospass."\n";
+print 'SFTP connect string : '.$oldsftpconnectstring."\n";
+//print 'SFTP old password '.$oldospass."\n";
 
 $command="rsync";
 $param=array();
@@ -589,7 +599,8 @@ $sourcedir=$tmptargetdir;
 $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
 
 print '--- Synchro of files '.$sourcedir.' to '.$newsftpconnectstring."\n";
-print 'SFTP new password '.$newpassword."\n";
+print 'SFTP connect string : '.$newsftpconnectstring."\n";
+//print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
 $param=array();
