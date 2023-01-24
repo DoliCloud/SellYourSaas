@@ -635,7 +635,7 @@ $db->close();
  */
 function print_user_table($newdb, $object)
 {
-	global $langs;
+	global $db, $langs;
 	global $id;
 
 	$sortfield = GETPOST('sortfield', 'aZ09comma');
@@ -645,8 +645,8 @@ function print_user_table($newdb, $object)
 	$arrayfields = array(
 		'rowid'=>array('label'=>"ID", 'checked'=>1, 'position'=>10),
 		'login'=>array('label'=>"Login", 'checked'=>1, 'position'=>15),
-		'lastname'=>array('label'=>"Lastname", 'checked'=>1, 'position'=>20),
-		'firstname'=>array('label'=>"Firstname", 'checked'=>1, 'position'=>50),
+		'lastname'=>array('label'=>"Lastname", 'checked'=>1, 'position'=>20, 'csslist'=>'tdoverflowmax150'),
+		'firstname'=>array('label'=>"Firstname", 'checked'=>1, 'position'=>50, 'csslist'=>'tdoverflowmax150'),
 		'admin'=>array('label'=>"Admin", 'checked'=>1, 'position'=>22),
 		'email'=>array('label'=>"Email", 'checked'=>1, 'position'=>25),
 		'pass'=>array('label'=>"Pass", 'checked'=>1, 'position'=>27),
@@ -683,7 +683,7 @@ function print_user_table($newdb, $object)
 		if ($key == 'statut') {
 			$cssforfield = ($cssforfield ? ' ' : '').'center';
 		} else {
-			$cssforfield = "";
+			$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
 			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
@@ -745,6 +745,8 @@ function print_user_table($newdb, $object)
 				print ($i+1);
 				print '</td>';
 				foreach ($arrayfields as $key => $value) {
+					$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
+
 					if (! empty($arrayfields[$key]['checked'])) {
 						if ($key == 'statut') {
 							if ($obj->statut) {
@@ -769,7 +771,7 @@ function print_user_table($newdb, $object)
 						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
 							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
 						} else {
-							print '<td>';
+							print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').' title="'.$db->escape((empty($obj->$key) ? '' : $obj->$key)).'">';
 							print (empty($obj->$key) ? '' : $obj->$key);
 							print '</td>';
 						}
