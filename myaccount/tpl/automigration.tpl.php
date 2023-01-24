@@ -524,10 +524,10 @@ if ($action == 'view') {
 			if ($statuslabel == 'undeployed') { $color = 'grey'; }
 			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
-			if ($tmpproduct->array_options['options_typesupport'] != 'none' && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				if (! $ispaid) {	// non paid instances
 					$priority = 'low';
-					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
+					$prioritylabel = '<span class="opacitymedium">'.$langs->trans("Trial").'</span>';
 				} else {
 					if ($ispaid) {	// paid with level Premium
 						if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
@@ -582,13 +582,13 @@ if ($action == 'view') {
             <h2 id="Step4">'.$langs->trans("Step", 4).' - '.$langs->trans("FileUpload").'</small></h1><br>
             <div class="grid-wrapper-automigration">
                 <div class="grid-boxes-automigration-left valignmiddle">
-                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2, .sql.gz):</span>
+                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2 '.$langs->trans("or").' .sql.gz):</span>
                 </div>
                 <div class="grid-boxes-automigration">
                     <input type="file" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">
                 </div>
                 <div class="grid-boxes-automigration-left valignmiddle">
-                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz, .tar.bz2):</span>
+                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz '.$langs->trans("or").' .tar.bz2):</span>
                 </div>
                 <div class="grid-boxes-automigration">
                     <input type="file" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">
@@ -600,7 +600,7 @@ if ($action == 'view') {
                 	<input type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
 				</div>
 				<div class="left containerflexautomigrationitem">
-					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
+					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
 				</div>
 			</div>
         </div>
