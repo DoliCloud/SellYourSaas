@@ -1053,6 +1053,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		print '<div class="alert alert-warning" style="margin-bottom: 0px">';
 		if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE')) {
 			print getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE');
+			print 'Note: '.getUserRemoteIP().' '.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP');
 		} else {
 			print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
 		}

@@ -238,13 +238,6 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 	if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE')) {
 		print '<br><span class="opacitymedium">'.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE').'</span>';
 	}
-	/*
-	print '<br>';
-	print '<textarea class="flat inputsearch inline-block" type="text" name="SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE" rows="'.ROWS_2.'" placeholder="'.dol_escape_htmltag($langs->trans("Message")).'">';
-	print getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE');
-	print '</textarea>';
-	print '<div class="center valigntop inline-block"><input type="submit" name="saveannouncedisabled" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';
-	*/
 }
 
 print '</td></tr>';
