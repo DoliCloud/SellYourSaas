@@ -5,6 +5,7 @@
 
 * FIX Renewal of letsencrypt wildcard certificate when we use more than 1 domain on the same server
 * FIX Email sent by sellyoursaas admin tools on deployment server are sent using local mail 
+* NEW Can search on os or db username or db name from the quick search
 * NEW Powerfull users need to enter a password for sudo with new default setup
 * NEW Can use wildcard into list of whitelist IP (e.g. "1.2.3.*")
 * NEW Add test on user admin for scripts that must be launched as "admin".

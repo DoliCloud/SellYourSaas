@@ -1272,8 +1272,25 @@ class ActionsSellyoursaas
 	 * @param   array           $parameters     Hook metadatas (context, etc...)
 	 * @param   string          $action         Current action (if set). Generally create or edit or null
 	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
-	 * @return  int 		      			  	<0 if KO,
-	 *                          				=0 if OK but we want to process standard actions too,
+	 * @return  int 		      			  	=0
+	 */
+	public function completeFieldsToSearchAll($parameters, &$action, $hookmanager)
+	{
+		$this->results['fieldstosearchall']['username_os'] = 'Username OS';
+		$this->results['fieldstosearchall']['database_db'] = 'Database DB';
+		$this->results['fieldstosearchall']['username_db'] = 'Username DB';
+
+		return 0;
+	}
+
+
+	/**
+	 * Overloading the restrictedArea function : check permission on an object
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0 if OK but we want to process standard actions too,
 	 *  	                            		>0 if OK and we want to replace standard actions.
 	 */
 	public function restrictedArea($parameters, &$action, $hookmanager)
