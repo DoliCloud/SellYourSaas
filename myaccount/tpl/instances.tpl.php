@@ -674,6 +674,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 							  	</form>
 				            </div>
 
+							<!-- tab ssh/sftp -->
 				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
                                 ';
@@ -686,22 +687,22 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
     				                <div class="form-body">
     				                  <div class="form-group col-md-12 row">
-    				                    <label class="col-md-3 control-label">'.$langs->trans("Hostname").'</label>
-    				                    <div class="col-md-3">
+    				                    <label class="col-md-2 control-label">'.$langs->trans("Hostname").'</label>
+    				                    <div class="col-md-4">
     				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_os'].'">
     				                    </div>
-    				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
-    				                    <div class="col-md-3">
+    				                    <label class="col-md-2 control-label">'.$langs->trans("Port").'</label>
+    				                    <div class="col-md-4">
     				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
-    				                    <label class="col-md-3 control-label">'.$langs->trans("SFTP Username").'</label>
-    				                    <div class="col-md-3">
+    				                    <label class="col-md-2 control-label">'.$langs->trans("SFTP Username").'</label>
+    				                    <div class="col-md-4">
     				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_os'].'">
     				                    </div>
-    				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
-    				                    <div class="col-md-3">
+    				                    <label class="col-md-2 control-label">'.$langs->trans("Password").'</label>
+    				                    <div class="col-md-4">
     				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_os'].'">
     				                    </div>
     				                  </div>
