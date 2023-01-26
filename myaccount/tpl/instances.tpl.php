@@ -689,21 +689,21 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-2 control-label">'.$langs->trans("Hostname").'</label>
     				                    <div class="col-md-4">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_os'].'">
+    				                      <input type="text" id="hostname_os_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_os'].'">
     				                    </div>
     				                    <label class="col-md-2 control-label">'.$langs->trans("Port").'</label>
     				                    <div class="col-md-4">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
+    				                      <input type="text" id="port_ssh_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-2 control-label">'.$langs->trans("SFTP Username").'</label>
     				                    <div class="col-md-4">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_os'].'">
+    				                      <input type="text" id="username_os_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_os'].'">
     				                    </div>
     				                    <label class="col-md-2 control-label">'.$langs->trans("Password").'</label>
     				                    <div class="col-md-4">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_os'].'">
+    				                      <input type="text" id="password_os_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_os'].'">
     				                    </div>
     				                  </div>
     				                </div>
@@ -725,6 +725,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '
 				              </div> <!-- END TAB SSH PANE -->
 
+							  <!-- tab db -->
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc").' :</p>
                                 ';
@@ -738,27 +739,27 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("Hostname").'</label>
     				                    <div class="col-md-3">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_db'].'">
+    				                      <input type="text" id="hostname_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_db'].'">
     				                    </div>
     				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
     				                    <div class="col-md-3">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_port_db'].'">
+    				                      <input type="text" id="port_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_port_db'].'">
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseName").'</label>
     				                    <div class="col-md-3">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_database_db'].'">
+    				                      <input type="text" id="name_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_database_db'].'">
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLogin").'</label>
     				                    <div class="col-md-3">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_db'].'">
+    				                      <input type="text" id="username_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_db'].'">
     				                    </div>
     				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
     				                    <div class="col-md-3">
-    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
+    				                      <input type="text" id="other_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
     				                    </div>
     				                  </div>';
 
@@ -767,11 +768,11 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 	    				                  <div class="form-group col-md-12 row">
 	    				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLoginReadOnly").'</label>
 	    				                    <div class="col-md-3">
-	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
+	    				                      <input type="text" id="username_ro_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
 	    				                    </div>
 	    				                    <label class="col-md-3 control-label">'.$langs->trans("PasswordReadOnly").'</label>
 	    				                    <div class="col-md-3">
-	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
+	    				                      <input type="text" id="other_ro_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
 	    				                    </div>
 	    				                  </div>';
 			}
@@ -796,6 +797,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '
 				              </div> <!-- END TAB DB PANE -->
 
+							<!-- tab destroy -->
 				            <div class="tab-pane" id="tab_danger_'.$contract->id.'">
 
 							<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">
