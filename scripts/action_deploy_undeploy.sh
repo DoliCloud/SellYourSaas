@@ -39,12 +39,12 @@ if [[ "x$templatesdir" != "x" ]]; then
 	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
-	export fpmpoolfile="$templatesdir/osuxxx.template"
+	export fpmpoolfiletemplate="$templatesdir/osuxxx.template"
 else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
-	export fpmpoolfile="$scriptdir/templates/osuxxx.template"
+	export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
 fi
 
 
@@ -1051,17 +1051,18 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	fi
 	
 	
-	# Deploy also the php fpm pool file
-	export phpfpmconf="/etc/apache2/sellyoursaas-fpm-pool/$fqn.conf"
-	if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
-		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm conf $phpfpmconf from $fpmpoolfile"
+	# Deploy also the php fpm pool file from the scripts/templates/osuxxx.conf
+	# A link will also be created into /etc/php/x.x/fpm/pool.d/$fqn.conf to this fpm pool file $fqn.conf
+	export phpfpmconf="/etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf"
+	if [ -d /etc/apache2/sellyoursaas-fpm-pool.d ]; then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm conf $phpfpmconf from $fpmpoolfiletemplate"
 		if [[ -s $phpfpmconf ]]
 		then
 			echo "Apache conf $phpfpmconf already exists, we delete it since it may be a file from an old instance with same name"
 			rm -f $phpfpmconf
 		fi
 	
-		echo "cat $fpmpoolfile | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+		echo "cat $fpmpoolfiletemplate | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
 				  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
 	              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
@@ -1078,7 +1079,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmconf"
-		cat $fpmpoolfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+		cat $fpmpoolfiletemplate | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
 	              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
@@ -1101,9 +1102,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo /usr/sbin/apache2ctl configtest
 	/usr/sbin/apache2ctl configtest
 	if [[ "x$?" != "x0" ]]; then
-		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn.conf to hope to restore configtest ok.
+		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn...conf to hope to restore configtest ok.
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.conf
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+		rm -f /etc/apache2/sellyoursaas-online/$fqn.website*.conf
 		echo "Failed to deployall instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 		exit 19
 	fi
@@ -1139,9 +1141,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		#a2dissite $fqn.conf
 		rm /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 
+		echo Disable conf with a2dissite $fqn.website*.conf
+		#a2dissite $fqn.conf
+		rm /etc/apache2/sellyoursaas-online/$fqn.website*.conf
+
 		echo Delete php fpm file $fqn.conf
-		if [ -f /etc/apache2/sellyoursaas-fpm-pool/$fqn.conf ]; then
-			rm /etc/apache2/sellyoursaas-fpm-pool/$fqn.conf
+		if [ -f /etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf ]; then
+			rm /etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf
 		fi
 
 		/usr/sbin/apache2ctl configtest

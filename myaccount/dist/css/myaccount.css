@@ -323,6 +323,14 @@ div.tab-content {
 	white-space: nowrap;
 }
 
+.sectionresources {
+	border: 1px solid #aaa;
+	border-radius: 1px;
+	background-color: #f8f8f8;
+	height: 350px;
+	overflow-y: scroll;
+}
+
 
 @media only screen and (max-width: 400px)	/* reduction 3 */
 {

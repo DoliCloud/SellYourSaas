@@ -331,17 +331,19 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '</div>';
 		print '</div>';
 
+		// Tab for the instance info
 		print '<!-- tabs for instance -->'."\n";
 		print '<div class="portlet-body" style="'.$displayforinstance.'">
 
 				        <div class="tabbable-custom nav-justified">
 				          <ul class="nav nav-tabs nav-justified">
 				            <li><a id="a_tab_resource_'.$contract->id.'" href="#tab_resource_'.$contract->id.'" data-toggle="tab"'.(! in_array($action, array('updateurlxxx')) ? ' class="active"' : '').'>'.$langs->trans("ResourcesAndOptions").'</a></li>';
-							print '<li><a id="a_tab_domain_'.$contract->id.'" href="#tab_domain_'.$contract->id.'" data-toggle="tab"'.($action == 'updateurlxxx' ? ' class="active"' : '').'>'.$langs->trans("Domain").'</a></li>';
-							if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_ssh_'.$contract->id.'" href="#tab_ssh_'.$contract->id.'" data-toggle="tab">'.$langs->trans("SSH").' / '.$langs->trans("SFTP").'</a></li>';
-							if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
-							if (in_array($statuslabel, array('done','suspended'))) print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("DangerZone").'</a></li>';
-							print '
+
+		print '<li><a id="a_tab_domain_'.$contract->id.'" href="#tab_domain_'.$contract->id.'" data-toggle="tab"'.($action == 'updateurlxxx' ? ' class="active"' : '').'>'.$langs->trans("Domain").'</a></li>';
+		if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_ssh_'.$contract->id.'" href="#tab_ssh_'.$contract->id.'" data-toggle="tab">'.$langs->trans("SSH").' / '.$langs->trans("SFTP").'</a></li>';
+		if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
+		if (in_array($statuslabel, array('done','suspended'))) print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("DangerZone").'</a></li>';
+		print '
 				          </ul>
 
 				          <div class="tab-content">
@@ -350,10 +352,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 								<!-- <p class="opacitymedium" style="padding: 15px; margin-bottom: 5px;">'.$langs->trans("YourResourceAndOptionsDesc").' :</p> -->
 					            <div class="areaforresources" style="padding-bottom: 12px;">';
 
-								$arrayoflines = $contract->lines;
-								//var_dump($arrayoflines);
+		$arrayoflines = $contract->lines;
+		//var_dump($arrayoflines);
 
-								// Loop on each service / option enabled
+		// Loop on each service / option enabled
 		foreach ($arrayoflines as $keyline => $line) {
 			//if ($line->statut != ContratLigne::STATUS_OPEN) continue;     // We need to show even if closed for the dashboard
 
@@ -497,13 +499,28 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		// Add new option
 		if ($statuslabel != 'processing' && $statuslabel != 'undeployed') {
-			print '<div class="resource inline-block boxresource opacitymedium small">';
+			print '<a id="switchoptionpanel" href="#switchoptionpanel">';
+			print '<div class="resource inline-block boxresource small">';
 			print '<br><br><br>';
-			print $langs->trans("SoonMoreOptionsHere");
+			print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-bottom: 4px;"></span><br>';
+			print $langs->trans("AddMoreOptions").'...';
 			print '</div>';
+			print '</a>';
 		}
 
+		// Add here the Option panel (hidden by default)
+		print '<div id="optionpanel" style="display: none">';
+		print '<br>';
+		print '<div class="areaforresources sectionresources">';
+		print '<br>';
+		print $langs->trans("SoonMoreOptionsHere").'...<br>';
+		print '<br>';
+		print '</div>';
+		print '</div>';
+
+
 		print '<br><br>';
+
 
 		// Show the current Plan (with link to change it)
 		print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
@@ -997,6 +1014,13 @@ if ($action == "confirmundeploy") {
     			console.log("Click on addanotherinstance");
     			jQuery("#formaddanotherinstance").toggle();
     		});
+
+			/* Code to toggle the show of the option section */
+			jQuery("#switchoptionpanel").click(function() {
+				console.log("We click on toggle see more options");
+				jQuery("#optionpanel").toggle();
+				return false;
+			});
 
             /* Apply constraints if sldAndSubdomain field is change */
             jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {
