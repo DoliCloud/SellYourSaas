@@ -1,5 +1,4 @@
 # Dolibarr language file - Source file is en_US - sellyoursaas
-Authorized_keyInstalled=Arquivo authorized_keys_support instalado
 ConversionContent=Conteúdo do rodapé na "página de conversão" (apenas uma vez registrado um primeiro modo de pagamento)
 AccountAlreadyExistsForEmail=Já existe uma conta para este email. Se você já é um usuário registrado e deseja criar outra instância para sua conta, faça logon no <a href="%s" target="_myaccount">painel do cliente</a> para criar outra instância.
 OldTickets=Ingressos antigos
@@ -13,6 +12,8 @@ DeploymentIPQualityDesc=Quando um cadastro é feito, é feita uma verificação 
 MyAcountDesc=Esta área é dedicada ao gerenciamento de suas assinaturas para <a href="%s" target="dolicloud"> %s </a> . Você pode criar novas instâncias de aplicativos, escolher opções, obter suas faturas de assinatura, entrar em contato com a equipe de suporte ou cancelar sua conta.
 ClosingAccountIsTemporarlyDisabledTryLater=A exclusão de instâncias existentes é suspensa temporariamente para fins de manutenção. Por favor tente mais tarde...
 SSHPublicKeyDesc=Todas as chaves públicas SSH implantadas em cada nova instância. As chaves são implantadas no arquivo .ssh/authorized_keys_support. Você pode incluir aqui o conteúdo do arquivo /home/admin/.ssh/id_rsa_sellyoursaas.pub e as chaves públicas da equipe de administradores de TI.
+CustomVirtualHostDir=Linha RequireAll de host virtual personalizado
+EnterAVirtualHostDirLine=Insira uma linha para incluir na seção RequireAll da seção Directory do arquivo virtualhost do servidor da web. Por exemplo: <br> Exigir ip 1.2.3.4/16 <br> Você deve suspender e cancelar a suspensão da instância para que isso seja efetivo.
 ErrorEMailAddressBannedForSecurityReasons=Este tipo de endereço de e-mail foi banido por motivos de segurança. Use outro endereço de e-mail ou entre em contato conosco se não puder fazer o contrário.
 RegistrationURLDesc=Para obter uma URL para registrar uma instância, você deve ter criado um serviço na categoria boa e com o tipo "Aplicativo".
 SecurityOfRegistrations=Segurança do registro
@@ -21,10 +22,18 @@ NoResourceToCountUsersFound=Esta instância não contém produtos que precisam c
 ThirdPartyModified=Modificado por terceiros
 YouCanClainAmountWhen=Você pode reivindicar o valor devido, uma vez por trimestre, e se o restante a cobrar for superior a <b> %s </b>
 SendYourInvoiceTo=Envie sua fatura para %s para <b> %s </b>
+EnableAlertEmailOnWebhookSpamReport=Ative o alerta de e-mail quando o serviço webhook SellYourSaas para relatório de spam for acionado por uma chamada externa
+EnableAlertDatadogOnWebhookSpamReport=Habilite o ping datadog quando o serviço webhook SellYourSaas para relatório de spam for acionado por uma chamada externa
 FileEditedAutomaticallyByMailWrapperOnAbuseDetection=Arquivo editado automaticamente pelo wrapper de correio na detecção de abuso
 ThePaymentModeWillBeUseToPayYourDueAmount=O modo de pagamento também pode ser usado para pagar suas faturas pendentes não pagas (%s) por um valor de %s
 SELLYOURSAAS_SALTFORPASSWORDENCRYPTION=Salt use para construir a chave de substituição __APPPASSWORD0SALTED__
 InstanceMoveInProgress=Sua instância está atualmente em um processo de atualização de hardware. Se você não recuperou o acesso após 1 hora, entre em contato com o suporte no painel do cliente.
 ActiveInstanceOfASpammer=Instância de um usuário malvado (hacker, spammer). Ainda não implantado.
 ConfirmMaintenance=Tem certeza de que deseja alternar esta instância para o modo de manutenção? O acesso não será possível para usuários comuns. <br> Nota: Se um navegador incluir a string <b> %s </b> em seu User-Agent, ele poderá ignorar o bloqueio de mensagem de manutenção.
+AutoupgradeStep1Text=Escolha a instância que deseja atualizar
+AutoupgradeStep3Text=Por favor, confirme que deseja atualizar para a última versão estável.
 MigrationSuccessNote=Aviso: Para acessar sua instância, você precisa usar o login e a senha do seu antigo Dolibarr, onde você salvou seus dados
+UpgradeErrorContent=Ocorreu um erro ao tentar atualizar automaticamente:\n&#60;adicione sua mensagem aqui&#62;
+ErrorListSupport=lista de erros
+SELLYOURSAAS_AUTOUPGRADE_CODE=Grupo de tickets para sugerir atualização automática
+BlacklistdirDesc=Lista de diretórios ou arquivos que não são permitidos em uma instância. O script batch_detect_evil_instances.php irá usá-lo para relatar avisos.

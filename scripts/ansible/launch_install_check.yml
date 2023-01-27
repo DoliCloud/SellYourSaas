@@ -526,6 +526,30 @@
         state: restarted
 
 
+  ##### check/complete the sshd_config file
+- name: Add a section into the sshd_config, after passing validation with sshd -T
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: sshd_config
+      ansible.builtin.blockinfile:
+        path: /etc/ssh/sshd_config
+        marker: "# {mark} Block for SellYourSaas"
+        state: present
+        validate: /usr/sbin/sshd -t -f %s
+        block: |
+          # Warning Match rule works only in sshd_config, not into Included files so we include this block with ansible
+          # You can test a Match User rule with ssd -T -C user=aaa | grep param
+          #Match User osu*
+          #  ChrootDirectory "/home/jail/home/"
+          #  ForceCommand /usr/bin/secureBash
+          #Match User osu*
+          #  ChrootDirectory %h
+          Match User osu*
+            PasswordAuthentication=yes
+    
   ##### Set permissions by calling perms.ksh
 - name: Call perms.ksh
   hosts: '{{target}}'

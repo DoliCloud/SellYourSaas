@@ -239,5 +239,6 @@
 		owner /mnt/diskhome/home/** rixwlk,
 		@{HOME}/dbn*/*_error.log r,		# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
 		/mnt/diskhome/home/osu*/dbn*/*_error.log r,
+		/usr/lib/openssh/sftp-server mr,
   }  
 }

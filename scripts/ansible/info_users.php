@@ -20,7 +20,7 @@
 /**
  *      \file       sellyoursaas/scripts/ansible/info_users.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to get information from a user.
+ *      \brief      Script used by an ansible script executed remotely to get information about a user.
  */
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');

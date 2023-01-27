@@ -83,6 +83,8 @@ $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
 $ipserverdeployment='';
+$emailfrom='';
+$emailsupervision='';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -106,6 +108,12 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'ipserverdeployment') {
 			$ipserverdeployment = $tmpline[1];
+		}
+		if ($tmpline[0] == 'emailfrom') {
+			$emailfrom = $tmpline[1];
+		}
+		if ($tmpline[0] == 'emailsupervision') {
+			$emailsupervision = $tmpline[1];
 		}
 	}
 } else {
@@ -808,8 +816,12 @@ $sendcontext = 'emailing';
 
 if ($nboferrors) {
 	if ($action == 'testemail') {
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		$from = $emailfrom;
+		$to = $emailsupervision;
+		// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
+		$conf->global->MAIN_MAIL_SENDMODE = 'mail';
+		$conf->global->MAIN_MAIL_SMTP_SERVER = '';
+
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
 		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;

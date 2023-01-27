@@ -25,7 +25,7 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE automigration.tpl.php -->
 <?php
 
-$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';
+$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';	// @TODO LMR Use id of contract instead of ID of thirdparty
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
@@ -40,9 +40,11 @@ print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormba
 	print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'">';
 	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
 	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
-	print '</form>';
+print '</form>';
 if ($action == 'redirectautomigrationget') {
+	// @TODO LMR Why not just changing the url in <form action="url" with <form action="url#step4" instead of making a post that do a js get redirect just after being loaded ?
 	print '<script>
+	console.log("Reload page with another url...");
 	window.location.href = "'.$_SERVER["PHP_SELF"].'?mode='.GETPOST("mode", 'alpha').'&action=view'.(GETPOST("instanceselect")?'&instanceselect='.GETPOST("instanceselect"):"").'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&backfromautomigration=backfromautomigration&ticketcategory_child_id='.GETPOST('ticketcategory_child_id', 'alpha').'&ticketcategory='.GETPOST('ticketcategory', 'alpha').(GETPOST('subject', 'alpha')?'&subject='.GETPOST('subject', 'alpha'):"").'#Step4"
 	</script>';
 }
@@ -174,7 +176,7 @@ if ($action == 'automigration') {
 	$object->array_options['automigrationdocumentarchivename'] = $dirfiletomigrate;
 	$exitcode = 0;
 
-	//Sql prefix process To test 
+	//Sql prefix process To test
 	$sqlfilepath = dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate);
 	$sqlcontent = file_get_contents($sqlfilepath);
 	$matches = array();
@@ -182,7 +184,7 @@ if ($action == 'automigration') {
 	$result["result"] = preg_match('/table `([a-zA-Z0-9]+_)/i', $sqlcontent, $matches);
 	if ($result["result"] <= 0) {
 		setEventMessages($langs->trans("ErrorOnSqlPrefixProcess"), null, "errors");
-	}else {
+	} else {
 		if ($matches[1] != $prefix_db) {
 			$oldprefix = $matches[1];
 			$sqlcontentnew = preg_replace('/`'.$oldprefix.'/i', '`'.$prefix_db, $sqlcontent);
@@ -190,7 +192,7 @@ if ($action == 'automigration') {
 				$result["result"] = -1;
 				$result["output"] = $langs->trans("ErrorOnSqlPrefixProcessReplace");
 				setEventMessages($langs->trans("ErrorOnSqlPrefixProcessReplace"), null, "errors");
-			}else {
+			} else {
 				$fhandle = @fopen($sqlfilepath, 'w');
 				if ($fhandle) {
 					$result["result"] = fwrite($fhandle, $sqlcontentnew);
@@ -309,7 +311,7 @@ print'
 if ($action == 'fileverification') {
 	print '<!-- BEGIN STEP5-->';
 	print '<div class="portlet light" id="Step5">
-        <h2>'.$langs->trans("Step", 5).' - '.$langs->trans("FileVerification").'</small></h1><br>
+        <h2>'.$langs->trans("Step", 5).' - '.$langs->trans("FileVerification").'</h2><br>
         <div style="display:flex;justify-content:space-evenly;">';
 	for ($i=0; $i < 2; $i++) {
 		if ($i == 0) {
@@ -411,21 +413,20 @@ if ($action == 'view') {
 
 	print'<!-- BEGIN STEP1-->
         <div class="portlet light" id="step1">
-                <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</small></h1><br>
+                <h2>'.$langs->trans("Step", 1).' - '.$langs->trans("BackupOldDatabase").'</h2><br>
                 <div>
-                    '.$langs->trans("AutomigrationStep1Text").'
+                    '.$langs->trans("AutomigrationStep1Text", $langs->transnoentitiesnoconv("Home"), $langs->transnoentitiesnoconv("Setup"), $langs->transnoentitiesnoconv("Backup"), $langs->transnoentitiesnoconv("GenerateBackup")).'
+					<br><br>
+					'.$langs->trans("DownloadThisFile").'.
                 </div>
                 <div class="center" style="padding-top:10px">
                     <img src="'.$linkstep1img.'">
                 </div>
+				<br>
                 <div class="note note-info"><small>
                 '.$langs->trans("AutomigrationStep1Note").'
                 <div class="portlet dark" style="margin-bottom:10px">
                     mysqldump -h ip_of_old_mysql_server -P port_of_old_mysql_server -u user_database -ppassword_database > mysqldump_YYYYMMDDHHMMSS.sql
-                </div>
-                '.$langs->trans("AutomigrationStep1Note2").'
-                <div class="portlet dark" style="color:green;margin-bottom:0px">
-                    -- Dump completed on YYYY-MM-DD HH:mm:
                 </div>
                 </small>
                 </div>
@@ -443,9 +444,11 @@ if ($action == 'view') {
 		print '<!-- BEGIN STEP2-->
 		<div id="Step2"></div>
         <div class="portlet light divstep topmarginstep" id="step2">
-                <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</small></h1><br>
+                <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</h2><br>
                 <div>
-                    '.$langs->trans("AutomigrationStep2Text").'
+                    '.$langs->trans("AutomigrationStep2Text", $langs->transnoentitiesnoconv("Home"), $langs->transnoentitiesnoconv("Setup"), $langs->transnoentitiesnoconv("Backup"), $langs->transnoentitiesnoconv("GenerateBackup")).'
+					<br><br>
+					'.$langs->trans("DownloadThisFile").'
                 </div>
                 <div class="center" style="padding-top:10px">
                     <img src="'.$linkstep2img.'">
@@ -464,7 +467,7 @@ if ($action == 'view') {
 
 		print '<!-- BEGIN STEP3-->
         <div class="portlet light divstep topmarginstep" id="step3">
-                <h2 id="Step3">'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</small></h1><br>
+                <h2 id="Step3">'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</h2><br>
                 <div style="padding-left:25px">
                 '.$langs->trans("AutomigrationStep3Text").'<br><br>
                 </div>
@@ -523,10 +526,10 @@ if ($action == 'view') {
 			if ($statuslabel == 'undeployed') { $color = 'grey'; }
 			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
-			if ($tmpproduct->array_options['options_typesupport'] != 'none' && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				if (! $ispaid) {	// non paid instances
 					$priority = 'low';
-					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
+					$prioritylabel = '<span class="opacitymedium">'.$langs->trans("Trial").'</span>';
 				} else {
 					if ($ispaid) {	// paid with level Premium
 						if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
@@ -576,20 +579,34 @@ if ($action == 'view') {
         </div>
         <!-- END STEP3-->';
 
+		// @TODO LMR Replace the upload of file with a simple form with
+		// flow.js + a PHP file called flowjs-server.php (to add inside Dolibarr) inspired from https://github.com/flowjs/flow.js/blob/master/samples/Backend%20on%20PHP.md (not the flow-php-server that is too heavy for our need)
+		// So we an upload very large files and stay on main page.
 		print '<!-- BEGIN STEP4-->
         <div class="portlet light divstep topmarginstep" id="step4">
             <h2 id="Step4">'.$langs->trans("Step", 4).' - '.$langs->trans("FileUpload").'</small></h1><br>
             <div class="grid-wrapper-automigration">
-                <div class="grid-boxes-automigration-left">
-                <h4>Upload here your database data :</h4>
+                <div class="grid-boxes-automigration-left valignmiddle">
+                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2 '.$langs->trans("or").' .sql.gz):</span>
                 </div>
-                <div class="grid-boxes-automigration">
+                <div class="grid-boxes-automigration">';
+				$maxfilesizearray = getMaxFileSizeArray();
+				$maxmin = $maxfilesizearray['maxmin'];
+	if ($maxmin > 0) {
+		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
+	}
+				print '
                     <input type="file" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">
                 </div>
-                <div class="grid-boxes-automigration-left">
-                <h4>Upload here your document directory data :</h4>
+                <div class="grid-boxes-automigration-left valignmiddle">
+                	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz '.$langs->trans("or").' .tar.bz2):</span>
                 </div>
-                <div class="grid-boxes-automigration">
+                <div class="grid-boxes-automigration">';
+				$maxmin = $maxfilesizearray['maxmin'];
+	if ($maxmin > 0) {
+		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
+	}
+				print '
                     <input type="file" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">
                 </div>
             </div><br>
@@ -599,7 +616,7 @@ if ($action == 'view') {
                 	<input type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
 				</div>
 				<div class="left containerflexautomigrationitem">
-					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
+					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
 				</div>
 			</div>
         </div>
@@ -642,19 +659,24 @@ if ($action == 'view') {
                 let i = 1;
                 while(i<=hash){
                     step = "step"+i;
-                    console.log($("#"+step).attr("id"));
+                    console.log("Show "+$("#"+step).attr("id"));
                     $("#"+step).show();
                     i++;
                 }
             }
         }
+
         $(".btnstep").on("click",function(){
 			hash = $(this).attr("id").split("_")[1];
+			console.log("We click on button "+hash);
             showStepAnchor(hash);
         })
+
 		$("#sumbmitfiles").on("click",function(){
+			console.log("We click on sumbmitfiles, we replace the action=redirectautomigrationget by action=fileverification");
 			$("#actionautomigration").val(\'fileverification\');
 		})
+
         var hash = $(location).attr("hash").substr(5);
         if(hash != "4"){
 			$(".divstep").hide();

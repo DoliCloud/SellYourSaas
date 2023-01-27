@@ -872,7 +872,7 @@ $newsftpconnectstring=$newobject->username_os.'@'.$newobject->hostname_os.':'.$c
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
 print 'SFTP new connect string : '.$newsftpconnectstring."\n";
-print 'SFTP old password '.$oldobject->password_web."\n";
+//print 'SFTP old password '.$oldobject->password_web."\n";
 //print 'SFTP new password '.$newobject->password_web."\n";
 
 $command="rsync";
@@ -891,6 +891,9 @@ $param[]="--exclude .gitignore";
 $param[]="--exclude .settings";
 $param[]="--exclude .project";
 $param[]="--exclude htdocs/conf/conf.php";
+$param[]="--exclude glpi_config/config_db.php";
+$param[]="--exclude htdocs/inc/downstream.php";
+$param[]="--exclude ";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";

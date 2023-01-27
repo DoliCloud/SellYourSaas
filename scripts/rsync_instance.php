@@ -188,7 +188,7 @@ $sftpconnectstring=$object->username_os.'@'.$server.':'.$targetdir;
 
 print 'Synchro of files '.$dirroot.' to '.$targetdir."\n";
 print 'SFTP connect string : '.$sftpconnectstring."\n";
-print 'SFTP password '.$object->password_web."\n";
+//print 'SFTP password '.$object->password_os."\n";
 
 $command="rsync";
 $param=array();
@@ -223,6 +223,8 @@ if ($mode != 'confirmwithtestdir') {
 	$param[]="--exclude test/";
 }
 $param[]="--exclude htdocs/conf/conf.php*";
+$param[]="--exclude glpi_config/config_db.php*";
+$param[]="--exclude htdocs/inc/downstream.php*";
 $param[]="--exclude htdocs/custom";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('testclean','confirmclean'))) $param[]="--delete";
@@ -281,15 +283,15 @@ if ($mode != 'test') {
 	if ($user->id > 0) {
 		$actioncomm=new ActionComm($db);
 		if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
-		$actioncomm->datep=dol_now('tzserver');
-		$actioncomm->percentage=100;
-		$actioncomm->label='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-		$actioncomm->note_private='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-		$actioncomm->fk_element=$object->id;
-		$actioncomm->elementtype='contract';
-		$actioncomm->type_code='AC_OTH_AUTO';
-		$actioncomm->userassigned[$user->id]=array('id'=>$user->id);
-		$actioncomm->userownerid=$user->id;
+		$actioncomm->datep = dol_now('tzserver');
+		$actioncomm->percentage = 100;
+		$actioncomm->label = 'Upgrade from CLI rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
+		$actioncomm->note_private = $actioncomm->label;
+		$actioncomm->fk_element = $object->id;
+		$actioncomm->elementtype = 'contract';
+		$actioncomm->type_code = 'AC_OTH_AUTO';
+		$actioncomm->userassigned[$user->id] = array('id'=>$user->id);
+		$actioncomm->userownerid = $user->id;
 		$actioncomm->create($user);
 	}
 }

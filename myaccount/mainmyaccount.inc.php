@@ -4,7 +4,7 @@
  * Copyright (C) 2004-2021  Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2004       Sebastien Di Cintio     <sdicintio@ressource-toi.org>
  * Copyright (C) 2004       Benoit Mortier          <benoit.mortier@opensides.be>
- * Copyright (C) 2005-2015  Regis Houssin           <regis.houssin@capnetworks.com>
+ * Copyright (C) 2005-2021  Regis Houssin           <regis.houssin@inodbox.com>
  * Copyright (C) 2011-2014  Philippe Grand          <philippe.grand@atoo-net.com>
  * Copyright (C) 2008       Matteli
  * Copyright (C) 2011-2016  Juanjo Menent           <jmenent@2byte.es>
@@ -125,7 +125,7 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
 		// If CSP not forced from the page
 
 		// A default security policy that keep usage of js external component like ckeditor, stripe, google, working
-		//	$contentsecuritypolicy = "font-src *; img-src *; style-src * 'unsafe-inline' 'unsafe-eval'; default-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; script-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; frame-src 'self' *.stripe.com; connect-src 'self';";
+		//	$contentsecuritypolicy = "frame-ancestors 'self'; font-src *; img-src *; style-src * 'unsafe-inline' 'unsafe-eval'; default-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; script-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; frame-src 'self' *.stripe.com; connect-src 'self';";
 		$contentsecuritypolicy = getDolGlobalString('MAIN_SECURITY_FORCECSP');
 
 		if (!is_object($hookmanager)) {
@@ -144,7 +144,7 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
 
 		if (!empty($contentsecuritypolicy)) {
 			// For example, to restrict 'script', 'object', 'frames' or 'img' to some domains:
-			// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; frame-src https://youtube.com; img-src: https://static.example.com
+			// frame-ancestors 'self'; script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; frame-src https://youtube.com; img-src https://static.example.com
 			// For example, to restrict everything to one domain, except 'object', ...:
 			// default-src https://cdn.example.net; object-src 'none'
 			// For example, to restrict everything to itself except img that can be on other servers:
@@ -224,15 +224,19 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		print '<meta name="viewport" content="width=device-width, initial-scale=1.0">'."\n";	// Scale for mobile device
 		print '<meta name="author" content="Dolibarr Development Team">'."\n";
 		print '<meta name="anti-csrf-token" content="'.newToken().'">'."\n";
-
+		if (getDolGlobalInt('MAIN_FEATURES_LEVEL')) {
+			print '<meta name="MAIN_FEATURES_LEVEL" content="'.getDolGlobalInt('MAIN_FEATURES_LEVEL').'">'."\n";
+		}
 		// Favicon. Note, even if we remove this meta, the browser and android webview try to find a favicon.ico
-		$favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
+		$favicon = getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
-		if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
-		if ($favicon) {
+		if (getDolGlobalString('MAIN_FAVICON_URL')) {
+			$favicon = getDolGlobalString('MAIN_FAVICON_URL');
+		}
+		if ($favicon && empty($conf->dol_use_jmobile)) {
 			$href = 'img/'.$favicon;
 			if (preg_match('/^http/i', $favicon)) $href = $favicon;
-			print '<link rel="shortcut icon" href="'.$href.'">'."\n";
+			print '<link rel="shortcut icon" type="image/x-icon" href="'.$href.'">'."\n";
 		}
 
 		// Displays title
@@ -255,13 +259,14 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		if (GETPOST('version', 'int')) {
 			$ext='version='.GETPOST('version', 'int');	// usefull to force no cache on css/js
 		}
+		// Refresh value of MAIN_IHM_PARAMS_REV before forging the parameter line.
+		if (GETPOST('dol_resetcache')) {
+			dolibarr_set_const($db, "MAIN_IHM_PARAMS_REV", ((int) $conf->global->MAIN_IHM_PARAMS_REV) + 1, 'chaine', 0, '', $conf->entity);
+		}
 
 		$themeparam = '?lang='.$langs->defaultlang.'&amp;theme='.$conf->theme.(GETPOST('optioncss', 'aZ09') ? '&amp;optioncss='.GETPOST('optioncss', 'aZ09', 1) : '').(empty($user->id) ? '' : ('&amp;userid='.$user->id)).'&amp;entity='.$conf->entity;
 
-		$themeparam .= ($ext ? '&amp;'.$ext : '');
-		if (!empty($_SESSION['dol_resetcache'])) {
-			$themeparam .= '&amp;dol_resetcache='.$_SESSION['dol_resetcache'];
-		}
+		$themeparam .= ($ext ? '&amp;'.$ext : '').'&amp;revision='.getDolGlobalInt("MAIN_IHM_PARAMS_REV");
 		if (GETPOSTISSET('dol_hide_topmenu')) {
 			$themeparam .= '&amp;dol_hide_topmenu='.GETPOST('dol_hide_topmenu', 'int');
 		}
@@ -420,7 +425,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 
 			// Global js function
 			print '<!-- Includes JS of Dolibarr -->'."\n";
-			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
+			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php?lang='.$langs->defaultlang.($ext?'?'.$ext:'').'"></script>'."\n";
 
 			// JS forced by page in top_htmlhead (relative url starting with /)
 			if (is_array($arrayofjs)) {

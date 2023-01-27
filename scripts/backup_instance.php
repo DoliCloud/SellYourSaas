@@ -266,6 +266,7 @@ if ($num_rows > 1) {
 }
 
 dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
+
 $object = new SellYourSaasContract($dbmaster);
 $result=0;
 if ($idofinstancefound) {
@@ -314,8 +315,6 @@ if (empty($login) || empty($dirdb)) {
 //$fromserver = (in_array($server, array('127.0.0.1','localhost')) ? $server : $login.'@'.$server.":");
 $fromserver = $login.'@'.$server.":";
 print 'Backup instance '.$instance.' from '.$fromserver.' to '.$dirroot.'/'.$login." (mode=".$mode.")\n";
-//print 'SFTP password '.$object->password_web."\n";
-//print 'Database password '.$object->password_db."\n";
 
 //$listofdir=array($dirroot.'/'.$login, $dirroot.'/'.$login.'/documents', $dirroot.'/'.$login.'/system', $dirroot.'/'.$login.'/htdocs', $dirroot.'/'.$login.'/scripts');
 if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase') {

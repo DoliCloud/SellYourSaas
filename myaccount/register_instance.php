@@ -124,6 +124,7 @@ if (empty($user->id)) {
 
 $action = GETPOST('action', 'alpha');
 $orgname = dol_trunc(ucfirst(trim(GETPOST('orgName', 'alpha'))), 250, 'right', 'UTF-8', 1);
+$phone   = dol_trunc(ucfirst(trim(GETPOST('phone', 'alpha'))), 20, 'right', 'UTF-8', 1);
 $email = dol_trunc(trim(GETPOST('username', 'alpha')), 255, 'right', 'UTF-8', 1);
 $domainemail = preg_replace('/^.*@/', '', $email);
 $password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
@@ -262,6 +263,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
 	if (! preg_match('/disablecustomeremail/i', $newurl)) $newurl.='&disablecustomeremail='.urlencode($disablecustomeremail);
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 
 	if ($reusesocid < 0) { // -1, the thirdparty was not selected
 		// Return to dashboard, the only page where the customer is requested.
@@ -335,6 +337,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 
 	if (! preg_match('/\?/', $newurl)) $newurl.='?';
 	if (! preg_match('/orgName/i', $newurl)) $newurl.='&orgName='.urlencode($orgname);
+	if (! preg_match('/phone/i', $newurl)) $newurl.='&phone='.urlencode($phone);
 	if (! preg_match('/username/i', $newurl)) $newurl.='&username='.urlencode($email);
 	if (! preg_match('/address_country/i', $newurl)) $newurl.='&address_country='.urlencode($country_code);
 	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) $newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
@@ -343,6 +346,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (! preg_match('/partner/i', $newurl)) $newurl.='&partner='.urlencode($partner);
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 
 	$parameters = array('tldid' => $tldid, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
 	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
@@ -376,6 +380,11 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		setEventMessages($langs->trans("ErrorFieldMustHaveXChar", $langs->transnoentitiesnoconv("NameOfCompany"), 2), null, 'errors');
 		header("Location: ".$newurl);
 		exit(-25);
+	}
+	if (! empty($phone) && ! isValidPhone($phone)) {
+		setEventMessages($langs->trans("ErrorBadPhone", $langs->transnoentitiesnoconv("Phone"), 2), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-30);
 	}
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
@@ -548,9 +557,22 @@ if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
 $whitelisted = false;
 if (!empty($tmparraywhitelist)) {
 	foreach ($tmparraywhitelist as $val) {
-		if ($val->content == $remoteip) {
-			$whitelisted = true;
-			break;
+		if (strpos($val->content, '*') !== false) {
+			// An IP with a wild card
+			$tmpval = str_replace('*', '__STAR__', $val->content);
+			$tmpval = '^'.preg_quote($tmpval, '/').'$';
+			$tmpval = str_replace('__STAR__', '.*', $tmpval);
+
+			if (preg_match('/'.$tmpval.'/', $remoteip)) {
+				$whitelisted = true;
+				break;
+			}
+		} else {
+			// A simple IP
+			if ($val->content == $remoteip) {
+				$whitelisted = true;
+				break;
+			}
 		}
 	}
 }
@@ -922,6 +944,7 @@ if ($reusecontractid) {
 	$password_crypted = dol_hash($password);
 
 	$tmpthirdparty->name = $orgname;
+	$tmpthirdparty->phone = $phone;
 	$tmpthirdparty->email = $email;
 	$tmpthirdparty->client = 2;
 	$tmpthirdparty->tva_assuj = 1;

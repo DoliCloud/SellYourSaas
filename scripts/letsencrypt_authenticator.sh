@@ -1,15 +1,23 @@
 #!/bin/bash
+#-------------------------------------------
+# A manual hook for letsencrypt renewal with DNS
+#-------------------------------------------
 
 verbose=true
 echo ----- letsencrypt_authenticator.sh -----
 echo "CERTBOT_DOMAIN=$CERTBOT_DOMAIN"
 echo "CERTBOT_ALL_DOMAINS=$CERTBOT_ALL_DOMAINS"
-export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-#export subdomain=$CERTBOT_DOMAIN
+export subdomain=$CERTBOT_DOMAIN
+if [[ "x$gitserver" == "x" ]]; then
+	export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+fi
+subdomain=${subdomain//[^a-zA-Z0-9.]/}
+
+
 zone_file="/etc/bind/${subdomain}.hosts"
 echo "zone_file=$zone_file"
 
-#current_certificates="/etc/letsencrypt/live/with1.doliasso.org/*pem"
+#current_certificates="/etc/letsencrypt/live/withX.mydomain.com/*pem"
 
 #LET'S ENCRYPT VARIABLES
 #

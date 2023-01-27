@@ -48,7 +48,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->editor_name = 'SellYourSaas team';
 		$this->editor_url = 'https://www.sellyoursaas.org';
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.2';
+		$this->version = '2.0';
 		// Key used in llx_const table to save module status enabled/disabled (where SELLYOURSAAS is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Name of image file used for this module.
@@ -752,7 +752,6 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('separatorthirdparty',       "SELLYOURSAAS_NAME", 'separate',  100,    '', 'thirdparty', 0, 0,   '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$arrayoptions=array(
 			'no'=>'No',
-			//'yesv1'=>'Yes (v1)',
 			'yesv2'=>'Yes'
 		);
 		$param=array('options'=>$arrayoptions);
@@ -768,9 +767,10 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('password',                        "DashboardPassword", 'password', 150, '128', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('oldpassword',                  "OldDashboardPassword",  'varchar', 151, '128', 'thirdparty', 0, 0, '',     '', 0, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('pass_temp',                    "HashForPasswordReset",  'varchar', 152, '128', 'thirdparty', 0, 0, '',     '', 1, '',  0, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('optinmessages',          "OptinForCommercialMessages",  'boolean', 160,   '',  'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('flagdelsessionsbefore',      "LastPasswordChangeDate", 'datetime', 153,    '', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('optinmessages',          "OptinForCommercialMessages",  'boolean', 160,    '', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('emailccinvoice',                    "EmailCCInvoices",  'varchar', 180, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('manualcollection',                 "ManualCollection",  'boolean', 194,   '',  'thirdparty', 0, 0, '',     '', 1, '',  1, 'If checked, the batch SellYourSaasValidateDraftInvoices will never validate invoices of this customer', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('manualcollection',                 "ManualCollection",  'boolean', 194,    '', 'thirdparty', 0, 0, '',     '', 1, '',  1, 'If checked, the batch SellYourSaasValidateDraftInvoices will never validate invoices of this customer', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('commission',                      "PartnerCommission",      'int', 195,   '3', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('stripeaccount',                       "StripeAccount",  'varchar', 197, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 'StripeAccountForCustomerHelp', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('maxnbofinstances',                 "MaxNbOfInstances",      'int', 198,   '3', 'thirdparty', 0, 0, '4',    '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');

@@ -782,7 +782,11 @@ class ActionsSellyoursaas
 				if ($object->array_options['options_deployment_status'] == 'done') {
 					// Show warning if in maintenance mode
 					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
-						$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						if (preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
+							$messagetoshow = $langs->trans("InstanceIsARedirectionInstance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						} else {
+							$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+						}
 						$messagetoshow .= '<br><u>'.$langs->trans("MaintenanceMessage").':</u><br>';
 						$messagetoshow .= $object->array_options['options_suspendmaintenance_message'];
 						$ret .= img_warning($messagetoshow, '', 'classfortooltip marginrightonly');
@@ -1268,8 +1272,25 @@ class ActionsSellyoursaas
 	 * @param   array           $parameters     Hook metadatas (context, etc...)
 	 * @param   string          $action         Current action (if set). Generally create or edit or null
 	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
-	 * @return  int 		      			  	<0 if KO,
-	 *                          				=0 if OK but we want to process standard actions too,
+	 * @return  int 		      			  	=0
+	 */
+	public function completeFieldsToSearchAll($parameters, &$action, $hookmanager)
+	{
+		$this->results['fieldstosearchall']['username_os'] = 'Username OS';
+		$this->results['fieldstosearchall']['database_db'] = 'Database DB';
+		$this->results['fieldstosearchall']['username_db'] = 'Username DB';
+
+		return 0;
+	}
+
+
+	/**
+	 * Overloading the restrictedArea function : check permission on an object
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0 if OK but we want to process standard actions too,
 	 *  	                            		>0 if OK and we want to replace standard actions.
 	 */
 	public function restrictedArea($parameters, &$action, $hookmanager)

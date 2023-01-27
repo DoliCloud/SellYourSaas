@@ -189,6 +189,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">1.2.3.4,...</span></td>';
 print '</tr>';
 
+// Option to say that only non profit organisation can register. The checkbox become mandatory
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';
 if ($conf->use_javascript_ajax) {

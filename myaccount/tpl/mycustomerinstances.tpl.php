@@ -772,10 +772,10 @@ if ($form->result['nbofthirdparties'] == 0) {
 	//var_dump($arrayofplans);
 	//natcasesort($arrayofplans);
 
-if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
 	print '<!-- RegistrationSuspendedForTheMomentPleaseTryLater -->'."\n";
 	print '<div class="alert alert-warning" style="margin-bottom: 0px">';
-	if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE')) {
+	if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
 		print getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE');
 	} else {
 		print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");

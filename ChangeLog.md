@@ -3,12 +3,17 @@
 
 ## 2.0
 
+* FIX Renewal of letsencrypt wildcard certificate when we use more than 1 domain on the same server
+* FIX Email sent by sellyoursaas admin tools on deployment server are sent using local mail 
+* NEW Can search on os or db username or db name from the quick search
+* NEW Powerfull users need to enter a password for sudo with new default setup
+* NEW Can use wildcard into list of whitelist IP (e.g. "1.2.3.*")
 * NEW Add test on user admin for scripts that must be launched as "admin".
 * NEW Save the choice "I am a non profit organization" of thirdparty creation.
 * NEW Add SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP to set a list of IPs allowed to register even when registrations are globally closed.
 * NEW Can set a message on the registration page (instead of generic message), when we disable globally creation of new instances.
 * NEW Remove some warnings to prepare compatibility with PHP 8.2
- 
+
 
 ## 1.3
 

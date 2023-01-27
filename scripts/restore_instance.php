@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2012-2019 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2023 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  * Restore a backup of files (rsync) or database (mysqdump) of a deployed instance.
  * There is no report/tracking done into any database. This must be done by a parent script.
- * This script is run from the deployment servers.
+ * This script is run from the source or the target deployment servers.
  *
  * Note:
  * ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted user to have testrsync and confirmrsync working.
@@ -62,6 +62,8 @@ $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
+$emailfrom='';
+$emailsupervision='';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -94,6 +96,12 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'emailfrom') {
+			$emailfrom = $tmpline[1];
+		}
+		if ($tmpline[0] == 'emailsupervision') {
+			$emailsupervision = $tmpline[1];
 		}
 	}
 } else {
@@ -166,7 +174,7 @@ if ($fp) {
  *	Main
  */
 
-print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+print "***** ".$script_file." (".$version.") - mode = ".$mode." - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 
 if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
@@ -230,13 +238,19 @@ if ($num_rows > 1) {
 	if ($obj) $idofinstancefound = $obj->rowid;
 }
 
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object = new Contrat($dbmaster);
+dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
+
+$object = new SellYourSaasContract($dbmaster);
 $result=0;
-if ($idofinstancefound) $result=$object->fetch($idofinstancefound);
+if ($idofinstancefound) {
+	$result=$object->fetch($idofinstancefound);
+	if ($result > 0) {
+		$result = $object->fetch_thirdparty();
+	}
+}
 
 if ($result <= 0) {
-	print "Error: Instance named '".$instance."' with status 'done' could not be found.\n";
+	print "Error: Instance named '".$instance."' with status 'done' could not be found or loaded.\n";
 	exit(-2);
 }
 
@@ -246,6 +260,7 @@ $object->password_os = $object->array_options['options_password_os'];
 $object->username_db = $object->array_options['options_username_db'];
 $object->password_db = $object->array_options['options_password_db'];
 $object->database_db = $object->array_options['options_database_db'];
+$object->hostname_db = $object->array_options['options_hostname_db'];
 $object->deployment_host = $object->array_options['options_deployment_host'];
 $object->username_web = $object->thirdparty->email;
 $object->password_web = $object->thirdparty->array_options['options_password'];
@@ -272,8 +287,8 @@ if (empty($login) || empty($dirdb)) {
 }
 
 print 'Restore from '.$dirroot." to ".$targetdir.' into instance '.$instance."\n";
-print 'Target SFTP password '.$object->password_os."\n";
-print 'Target Database password '.$object->password_db."\n";
+print 'Target SFTP password '.dol_trunc($object->password_os, 2, 'right', 'UTF-8', 1).preg_replace('/./', '*', dol_substr($object->password_os, 3))."\n";
+print 'Target Database password '.dol_trunc($object->password_db, 2, 'right', 'UTF-8', 1).preg_replace('/./', '*', dol_substr($object->password_db, 3))."\n";
 
 if (! in_array($mode, array('testrsync', 'testdatabase', 'test', 'confirmrsync', 'confirmdatabase', 'confirm'))) {
 	print "Error: Bad value for last parameter (action must be testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm).\n";
@@ -300,7 +315,8 @@ if ($dayofmysqldump == 'autoscan') {
 	}
 }
 
-// Backup files
+// Restore rsynced files
+$return_var=0;
 if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm') {
 	if (! is_dir($dirroot)) {
 		print "ERROR failed to find source dir ".$dirroot."\n";
@@ -314,7 +330,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="-rltz";
 	//$param[]="-vv";
 	$param[]="-v";
-	$param[]="--exclude 'conf.php'";
+	$param[]="--exclude 'conf.php'";			// a conf file for dolibarr
+	$param[]="--exclude 'config_db.php'";		// a conf file for glpi
+	$param[]="--exclude 'downstream.php'";		// a conf file for glpi
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
 	$param[]="--exclude .gitignore";
@@ -357,10 +375,13 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]=(in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $targetdir;
 	$fullcommand=$command." ".join(" ", $param);
 	$output=array();
-	$return_var=0;
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync done'."\n";
+	if ($return_var > 0) {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync failed'."\n";
+	} else {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync done'."\n";
+	}
 
 	// Output result
 	foreach ($output as $outputline) {
@@ -379,7 +400,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	}
 }
 
+
 // Restore database
+$return_varmysql=0;
 if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || $mode == 'confirm') {
 	$serverdb = $server;
 	if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
@@ -425,8 +448,8 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	}
 
 	$output=array();
-	$return_varmysql=0;
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
+	$fullcommandwithoutpass = preg_replace('/\-p"(..).*"$/', '-p\1***hidden***', $fullcommand); // Hide password ecept the 2 first chars
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommandwithoutpass."\n";
 	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
 		exec($fullcommand, $output, $return_varmysql);
 	}
@@ -461,7 +484,7 @@ if (!sellyoursaasIsPaidInstance($object)) {
 		print "\n";
 	} else {
 		print "\n";
-		print "You may want to increase end of trial date (currently ".dol_print_date($object->array_options['options_date_endfreeperiod'], 'day')."). Do it from the backoffice if this is required.\n";
+		print "You may want to increase end of trial date of the target instance (currently ".dol_print_date($object->array_options['options_date_endfreeperiod'], 'day')."). Do it from the backoffice if this is required.\n";
 		print "\n";
 	}
 } else {
@@ -473,11 +496,15 @@ $sendcontext = 'emailing';
 // Send result to supervision if enabled
 if (empty($return_var) && empty($return_varmysql)) {
 	if ($mode == 'confirm') {
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		$from = $emailfrom;
+		$to = $emailsupervision;
+		// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
+		$conf->global->MAIN_MAIL_SENDMODE = 'mail';
+		$conf->global->MAIN_MAIL_SMTP_SERVER = '';
+
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
-		$msg = 'Restore done without errors by '.$script_file." ".$argv[1]." ".$argv[2]." ".$argv[3]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n";
+		$msg = 'Restore done without errors by '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." ".(empty($argv[3]) ? '' : $argv[3])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n";
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Restore instance - '.gethostname().'] Restore of user instance succeed.'."\n";
@@ -508,11 +535,15 @@ if (empty($return_var) && empty($return_varmysql)) {
 	if (! empty($return_varmysql)) print "ERROR into restore process of mysqldump: ".$return_varmysql."\n";
 
 	if ($mode == 'confirm') {
-		$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-		$to = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
+		$from = $emailfrom;
+		$to = $emailsupervision;
+		// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
+		$conf->global->MAIN_MAIL_SENDMODE = 'mail';
+		$conf->global->MAIN_MAIL_SMTP_SERVER = '';
+
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
-		$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." ".$argv[3]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$return_var."\n".$return_varmysql;
+		$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." ".(empty($argv[3]) ? '' : $argv[3])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$return_var."\n".$return_varmysql;
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in restoring - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
@@ -538,6 +569,8 @@ if (empty($return_var) && empty($return_varmysql)) {
 			}
 		}
 	}
+
+	print "\n";
 
 	exit(1);
 }
