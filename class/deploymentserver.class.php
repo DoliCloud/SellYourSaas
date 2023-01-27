@@ -122,6 +122,7 @@ class Deploymentserver extends CommonObject
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'date_modification' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2),
 		'ipaddress' => array('type'=>'varchar(128)', 'label'=>'IP', 'enabled'=>'1', 'position'=>51, 'notnull'=>1, 'visible'=>1, 'showoncombobox'=>1),
+		'servercountries' => array('type'=>'text', 'label'=>'ServedCountriesServer', 'enabled'=>'1', 'position'=>60, 'notnull'=>0,'visible'=>1, 'help'=>'ServedCountriesServerInfo'),
 		//'nb_instances' => array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'enabled'=>'1', 'position'=>60, 'visible'=>1, 'index'=>1),
 		//'fk_country' => array('type'=>'integer:Ccountry:core/class/ccountry.class.php', 'label'=>'Country', 'enabled'=>'1', 'position'=>52, 'notnull'=>0, 'visible'=>-1, 'picto'=>'country', 'css'=>'maxwidth500 '),
 		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
@@ -139,6 +140,7 @@ class Deploymentserver extends CommonObject
 	public $fk_country;
 	public $fromdomainname;
 	public $ipaddress;
+	public $servercountries;
 	public $servercustomerannouncestatus;
 	public $servercustomerannounce;
 	// END MODULEBUILDER PROPERTIES

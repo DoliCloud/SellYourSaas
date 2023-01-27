@@ -1124,6 +1124,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		$tldid=GETPOST('tldid', 'alpha');
 
 		$domainstosuggest = array();   // This is list of all sub domains to show into combo list. Can be: with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
+		$domainstosuggestcountryfilter = array();
 		if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 			$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 		} else {
@@ -1158,10 +1159,35 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 
 			// Restriction defined on package
 			// Managed later with the "optionvisible..." css
+			if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
+				$deploymentserver = new Deploymentserver($db);
+				$deploymentserver->fetch(0, $newval);
 
-			if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
-
-			$domainstosuggest[] = $newval;
+				if (!empty($deploymentserver->servercountries)) {
+					$servercountries = explode(',', $deploymentserver->servercountries);
+					$ipuser = getUserRemoteIP();
+					$countryuser = dolGetCountryCodeFromIp($ipuser);
+					if (in_array($countryuser, $servercountries)) {
+						if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+						$domainstosuggestcountryfilter[] = $newval; // Servers with user country
+					} else {
+						print '<!-- '.$newval.' disabled. Server country range '.$deploymentserver->servercountries.' does not contain '.$countryuser.' -->';
+						continue;
+					}
+				} else {
+					if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+					$domainstosuggest[] = $newval;
+				}
+			} else {
+				if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+				$domainstosuggest[] = $newval;
+			}
+		}
+		if (!empty($domainstosuggestcountryfilter)) {
+			foreach ($domainstosuggest as $key => $value) {
+				print '<!-- '.$value.' disabled. Matching server found with user location -->';
+			}
+			$domainstosuggest = $domainstosuggestcountryfilter;
 		}
 
 		// Defined a preselected domain
