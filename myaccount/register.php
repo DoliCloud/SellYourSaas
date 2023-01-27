@@ -484,10 +484,26 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				</div>
 			</div>
 
-			<div class="control-group  required">
-				<label class="control-label" for="orgName" trans="1"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
-				<div class="controls">
-					<input type="text"<?php echo $disabled; ?> name="orgName" maxlength="250" value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" id="orgName" />
+			<div class="group">
+				<div class="horizontal-fld">
+					<div class="control-group  required">
+						<label class="control-label" for="orgName"
+							   trans="1"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
+						<div class="controls">
+							<input type="text"<?php echo $disabled; ?> name="orgName" maxlength="250"
+								   value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" id="orgName"/>
+						</div>
+					</div>
+				</div>
+
+				<div class="horizontal-fld">
+					<div class='control-group'>
+						<label class='control-label' for='phone' trans='1'><span class="fa fa-phone opacityhigh"></span> <?php echo $langs->trans('Phone') ?></label>
+						<div class="controls">
+							<input type="text"<?php echo $disabled; ?> name="phone" maxlength="250"
+								   value="<?php echo GETPOST('phone', 'alpha'); ?>" id="phone"/>
+						</div>
+					</div>
 				</div>
 			</div>
 				<?php
@@ -555,7 +571,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				  <label trans="1"><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
 				  <div class="linked-flds">
 					<span class="opacitymedium">https://</span>
-					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" />
+					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
 					<select<?php echo $disabled; ?> name="tldid" id="tldid" >
 						<?php
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)

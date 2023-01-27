@@ -124,6 +124,7 @@ if (empty($user->id)) {
 
 $action = GETPOST('action', 'alpha');
 $orgname = dol_trunc(ucfirst(trim(GETPOST('orgName', 'alpha'))), 250, 'right', 'UTF-8', 1);
+$phone   = dol_trunc(ucfirst(trim(GETPOST('phone', 'alpha'))), 20, 'right', 'UTF-8', 1);
 $email = dol_trunc(trim(GETPOST('username', 'alpha')), 255, 'right', 'UTF-8', 1);
 $domainemail = preg_replace('/^.*@/', '', $email);
 $password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
@@ -336,6 +337,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 
 	if (! preg_match('/\?/', $newurl)) $newurl.='?';
 	if (! preg_match('/orgName/i', $newurl)) $newurl.='&orgName='.urlencode($orgname);
+	if (! preg_match('/phone/i', $newurl)) $newurl.='&phone='.urlencode($phone);
 	if (! preg_match('/username/i', $newurl)) $newurl.='&username='.urlencode($email);
 	if (! preg_match('/address_country/i', $newurl)) $newurl.='&address_country='.urlencode($country_code);
 	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) $newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
@@ -378,6 +380,11 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		setEventMessages($langs->trans("ErrorFieldMustHaveXChar", $langs->transnoentitiesnoconv("NameOfCompany"), 2), null, 'errors');
 		header("Location: ".$newurl);
 		exit(-25);
+	}
+	if (! empty($phone) && ! isValidPhone($phone)) {
+		setEventMessages($langs->trans("ErrorBadPhone", $langs->transnoentitiesnoconv("Phone"), 2), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-30);
 	}
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
@@ -937,6 +944,7 @@ if ($reusecontractid) {
 	$password_crypted = dol_hash($password);
 
 	$tmpthirdparty->name = $orgname;
+	$tmpthirdparty->phone = $phone;
 	$tmpthirdparty->email = $email;
 	$tmpthirdparty->client = 2;
 	$tmpthirdparty->tva_assuj = 1;
