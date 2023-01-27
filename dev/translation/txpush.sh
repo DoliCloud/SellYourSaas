@@ -1,16 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 #------------------------------------------------------
 # Script to push language files to Transifex
 #
 # Laurent Destailleur (eldy) - eldy@users.sourceforge.net
 #------------------------------------------------------
-# Usage: txpush.sh (source|xx_XX) [-r dolimed.file] [-f]
+# Usage: txpush.sh (source|xx_XX) [-r sellyoursaas-application.file] [-f]
 #------------------------------------------------------
 
 
-#echo TX_TOKEN=$TX_TOKEN
-
 export project='sellyoursaas-application'
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR/../..
 
 # Syntax
 if [ "x$1" = "x" ]
@@ -24,7 +25,7 @@ fi
 
 if [ ! -d ".tx" ]
 then
-	echo "Script must be ran from root directory of project with command ./dev/translation/txpush.sh"
+	echo "Script must be ran from the root directory of the project with command ./dev/translation/txpush.sh"
 	exit
 fi
 

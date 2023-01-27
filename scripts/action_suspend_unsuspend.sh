@@ -51,27 +51,27 @@ if [ "x$1" == "x" ]; then
 fi
 if [ "x$2" == "x" ]; then
 	echo "Missing parameter 2 - osusername" 1>&2
-	exit 20
+	exit 2
 fi
 if [ "x$3" == "x" ]; then
 	echo "Missing parameter 3 - ospassword" 1>&2
-	exit 30
+	exit 3
 fi
 if [ "x$4" == "x" ]; then
 	echo "Missing parameter 4 - instancename" 1>&2
-	exit 40
+	exit 4
 fi
 if [ "x$5" == "x" ]; then
 	echo "Missing parameter 5 - domainname" 1>&2
-	exit 50
+	exit 5
 fi
 if [ "x$6" == "x" ]; then
 	echo "Missing parameter 6 - dbname" 1>&2
-	exit 60
+	exit 6
 fi
 if [ "x$7" == "x" ]; then
 	echo "Missing parameter 7 - dbport" 1>&2
-	exit 70
+	exit 7
 fi
 if [ "x${22}" == "x" ]; then
 	echo "Missing parameter 22 - EMAILFROM" 1>&2
@@ -769,6 +769,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 		cat $cronfile >> /tmp/$dbname.tmp
 		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+		echo rm -f /tmp/$dbname.tmp
+		rm -f /tmp/$dbname.tmp
 	else
 		echo cron file /var/spool/cron/crontabs/$osusername does not exists yet
 		echo cp $cronfile /var/spool/cron/crontabs/$osusername
@@ -789,9 +791,10 @@ if [[ "$mode" == "suspend" ]]; then
 		cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 		echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
 		cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
-		#echo rm -f /var/spool/cron/crontabs/$osusername
 		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+		echo rm -f /tmp/$dbname.tmp
+		rm -f /tmp/$dbname.tmp
 	else
 		echo cron file /var/spool/cron/crontabs/$osusername already removed or empty
 	fi 

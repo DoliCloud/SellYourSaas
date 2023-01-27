@@ -159,6 +159,19 @@ findtime = 3600      ; 1 hour
 maxretry = 5
 
 
+[email-dol-perday]
+
+; rule against out of limit emails without smtp (max 500 emails with per day)
+; Note: The regex is not found (different) when user limit is a custom limit higher than default limit
+enabled = true
+port    = http,https
+filter  = email-dolibarr-rulesall
+logpath = /var/log/phpsendmail.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 86400     ; 1 day
+maxretry = 505
+
 
 [email-dol-blacklist]
 
@@ -172,17 +185,17 @@ bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
 maxretry = 1
 
-[email-dol-perday]
+[email-dol-quota]
 
-; rule against out of limit emails (max 500 emails per day)
+; rule against email ko - quota reached
 enabled = true
 port    = http,https
-filter  = email-dolibarr-rulesall
+filter  = email-dolibarr-ruleskoquota
 logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
+action = %(action_mw)s
 bantime  = 86400     ; 1 day
 findtime = 86400     ; 1 day
-maxretry = 500
+maxretry = 1
 
 [email-dol-perhour]
 
@@ -208,9 +221,24 @@ bantime  = 4320000   ; 50 days
 findtime = 60        ; 1 minute
 maxretry = 10
 
+
+[web-accesslog-limit403]
+
+; rule against call of 403 forbidden access (for all servers)
+enabled = true
+port    = http,https
+filter  = web-accesslog-limit403
+logpath = /var/log/apache2/other_vhosts_access.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
+maxretry = 100
+
+
 [web-dol-passforgotten]
 
-; rule against call of passwordforgottenpage
+; rule against call of passwordforgottenpage (for backoffice and myaccount)
+; you can disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulespassforgotten
@@ -223,6 +251,7 @@ maxretry = 10
 [web-dol-bruteforce]
 
 ; rule against bruteforce hacking (login + api)
+; you can disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesbruteforce
@@ -235,11 +264,11 @@ maxretry = 10
 [web-dol-registerinstance]
 
 ; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enabled to false on non master servers
+; you can disable this rule by setting enabled to false on non master servers
 enabled = true
 port    = http,https
 filter  = web-dolibarr-rulesregisterinstance
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_register.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day

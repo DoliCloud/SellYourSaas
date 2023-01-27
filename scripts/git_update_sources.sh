@@ -18,9 +18,14 @@ export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/se
 
 export currentpath=$(dirname "$0")
 
+if [ "$(id -u)" == "0" ]; then
+   echo "This script must be run as admin (on master server), not as root" 1>&2
+   exit 1
+fi
+
 echo "Update git dirs found into $1 and generate the tgz image."
 
-for dir in `ls -d $1/* | grep -v "tgz\|zstd"`
+for dir in $(find "$1" -mindepth 1 -maxdepth 1 -type d)
 do
 	# If a subdir is given, discard if not subdir
 	if [ "x$2" != "x" -a "x$2" != "xall" ]; then
@@ -30,7 +35,7 @@ do
 	fi
 
     echo -- Process dir $dir
-    cd $dir
+    cd $dir || continue
 	if [ $? -eq 0 ]; then
 		export gitdir=`basename $dir`
 
@@ -54,14 +59,16 @@ do
 		echo "Clean some dirs to save disk spaces"
 		rm -fr documents/*
 		rm -fr dev/ test/ doc/ htdocs/includes/ckeditor/ckeditor/adapters htdocs/includes/ckeditor/ckeditor/samples
+		rm -fr htdocs/public/test
 		rm -fr htdocs/includes/sabre/sabre/*/tests htdocs/includes/stripe/tests htdocs/includes/stripe/stripe-php/tests
 		rm -fr htdocs/includes/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* htdocs/includes/tecnickcom/tcpdf/fonts/freefont-* htdocs/includes/tecnickcom/tcpdf/fonts/ae_fonts_*
 		#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
 		rm -fr files/_cache/*
 		# We remove subdir of build. We need files into build root only.
-		find build/* -type d -exec rm -fr {} \;
+		#find build/* -type d -delete
+		find build/* -depth -type d -exec rm -fr {} \;
 		echo "Clean some files to save disk spaces"
-		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -exec rm -f {} \;
+		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -delete
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php"

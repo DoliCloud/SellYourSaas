@@ -150,7 +150,7 @@ if ($connection) {
 		if ($mode == 'confirm' || $mode == 'confirmsaasplex') {
 			$output=array();
 			$return_var=0;
-			print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
+			print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 			exec($fullcommand, $output, $return_var);
 			foreach ($output as $line) print $line."\n";
 		}
@@ -162,7 +162,7 @@ if ($connection) {
 		{
 			$output=array();
 			$return_var=0;
-			print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
+			print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 			exec($fullcommand, $output, $return_var);
 			foreach($output as $line) print $line."\n";
 		}*/

@@ -77,11 +77,13 @@ if ($urlfaq || $urlstatus) {
 	<!-- END PAGE HEAD -->
 	<!-- END PAGE HEADER-->';
 
-	$sellyoursaassupporturl = $conf->global->SELLYOURSAAS_SUPPORT_URL;
+	$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) $sellyoursaassupporturl = $conf->global->$newnamekey;
+		$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
+	if (! empty($conf->global->$newnamekey)) {
+		$sellyoursaassupporturl = $conf->global->$newnamekey;
+	}
 }
 
 if ($sellyoursaassupporturl) {
@@ -101,17 +103,22 @@ if ($sellyoursaassupporturl) {
 
 				      <div class="portlet-title">
 				        <div class="caption">';
+	if (!empty(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE'))) {
+		print '<span>'.$langs->trans(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')).'</span><br><br>';
+	} else {
+		print '<span class="opacitymedium"><br>'.$langs->trans("AskForSupport").'...</span><br><br>';
+	}
 
-					print '<!-- form to select channel -->'."\n";
-					print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-					print '<input type="hidden" name="token" value="'.newToken().'">';
-					print '<input type="hidden" name="mode" value="support">';
-					print '<input type="hidden" name="action" value="presend">';
+	print '<!-- form to select channel -->'."\n";
+	print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
+	print '<input type="hidden" name="mode" value="support">';
+	print '<input type="hidden" name="action" value="presend">';
 
-					print '<span class="opacitymedium">'.$langs->trans("SelectYourSupportChannel").'</span><br>';
+	print '<span class="supportemailfield bold">'.$langs->trans("SupportChannel").'</span>'."\n";
 
-					print '<select id="supportchannel" name="supportchannel" class="minwidth600">';
-					print '<option value="">&nbsp;</option>';
+	print '<select id="supportchannel" name="supportchannel" class="minwidth600">';
+	print '<option value="">&nbsp;</option>';
 	if (count($listofcontractid) == 0) {
 		// Should not happen
 	} else {
@@ -119,25 +126,25 @@ if ($sellyoursaassupporturl) {
 		$atleastonefound=0;
 
 		foreach ($listofcontractid as $id => $contract) {
-							$planref = $contract->array_options['options_plan'];
-							$statuslabel = $contract->array_options['options_deployment_status'];
-							$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
+			$planref = $contract->array_options['options_plan'];
+			$statuslabel = $contract->array_options['options_deployment_status'];
+			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
-							$dbprefix = $contract->array_options['options_db_prefix'];
-							if (empty($dbprefix)) $dbprefix = 'llx_';
+			$dbprefix = empty($contract->array_options['options_prefix_db']) ? '' : $contract->array_options['options_prefix_db'];
+			if (empty($dbprefix)) $dbprefix = 'llx_';
 
 			if ($statuslabel == 'undeployed') {
 				continue;
 			}
 
-							// Get info about PLAN of Contract
-							$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
+			// Get info about PLAN of Contract
+			$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
 
-							$planid = 0;
-							$freeperioddays = 0;
-							$directaccess = 0;
+			$planid = 0;
+			$freeperioddays = 0;
+			$directaccess = 0;
 
-							$tmpproduct = new Product($db);
+			$tmpproduct = new Product($db);
 			foreach ($contract->lines as $keyline => $line) {
 				if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
 									$statuslabel = 'suspended';
@@ -218,13 +225,12 @@ if ($sellyoursaassupporturl) {
 	print '</select>';
 	print ajax_combobox("supportchannel");
 
-	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">';
+	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">';
 
 	print '</form>';
 
-	if ($action == 'presend' && GETPOST('supportchannel', 'alpha')) {
-		print '<br><br>';
 
+	if (($action == 'presend' && GETPOST('supportchannel', 'alpha')) || getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 		$trackid = '';
 		dol_init_file_process($upload_dir, $trackid);
 
@@ -236,10 +242,12 @@ if ($sellyoursaassupporturl) {
 		// List of files
 		$listofpaths = dol_dir_list($upload_dir, 'files', 0, '', '', 'name', SORT_ASC, 0);
 
+		$out = '';
 		$out .= '<input type="hidden" class="removedfilehidden" name="removedfile" value="">'."\n";
 		$out .= '<script type="text/javascript" language="javascript">';
 		$out .= 'jQuery(document).ready(function () {';
 		$out .= '    jQuery(".removedfile").click(function() {';
+		$out .= '        console.log("click on .removedfile");';
 		$out .= '        jQuery(".removedfilehidden").val(jQuery(this).val());';
 		$out .= '    });';
 		$out .= '})';
@@ -253,25 +261,7 @@ if ($sellyoursaassupporturl) {
 			}
 		} else {
 			$out .= '<br>';
-			//$out .= $langs->trans("NoAttachedFiles").'<br>';
 		}
-
-		/*
-		print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<input type="hidden" name="action" value="addfile">';
-		print $hiddeninputs;
-		print $out;
-		print '<input type="file" class="flat" id="addedfile" name="addedfile" value="'.$langs->trans("Upload").'" />';
-		print ' ';
-		print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
-		print '</form>';
-		*/
-
-		print '<!-- form to send a ticket -->'."\n";
-		print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<input type="hidden" name="action" value="send">';
 
 		$tmpcontractid = $id;	// The last contract id found
 		if (GETPOST('supportchannel', 'alpha')) {
@@ -282,14 +272,18 @@ if ($sellyoursaassupporturl) {
 			}
 		}
 
-		// Add link to add file
+		print '<!-- form to send a ticket -->'."\n";
+		print '<form id="mailform" class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+		print '<input type="hidden" name="token" value="'.newToken().'">';
+		print '<input type="hidden" name="action" value="send">';
+		print '<input type="hidden" name="page_y" value="">';
 		print '<input type="hidden" name="mode" value="support">';
 		print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
 		print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
 
 		$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 			$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 			if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
 		}
@@ -298,18 +292,17 @@ if ($sellyoursaassupporturl) {
 			// We must use the prioritary email
 			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM;
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_PREMIUM_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-				if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+				if (getDolGlobalString($newnamekey)) {
+					$sellyoursaasemail = getDolGlobalString($newnamekey);
+				}
 			}
 		}
 
 		$subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):'');
 
 		print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
-
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" autofocus class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
 		// Combobox for Group of ticket
 		$formticket = new FormTicket($db);
@@ -318,24 +311,34 @@ if ($sellyoursaassupporturl) {
 		$ticketstat = new Ticket($db);
 		$ticketstat->loadCacheCategoriesTickets();
 		if (is_array($ticketstat->cache_category_tickets) && count($ticketstat->cache_category_tickets)) {
-			foreach($ticketstat->cache_category_tickets as $tg) {
+			foreach ($ticketstat->cache_category_tickets as $tg) {
 				if (!empty($tg['public'])) {
 					$atleastonepublicgroup++;
 				}
 			}
 		}
+		//$atleastonepublicgroup = 0;
 
-		if ($atleastonepublicgroup) {
-			$stringtoprint = $formticket->selectGroupTickets('', 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
-			//$stringtoprint .= ajax_combobox('groupticket');
+		//$atleastonepublicgroup = 0;
+		print $atleastonepublicgroup > 1 ? '<br>' : "";
+
+		$stringtoprint = '';
+		if ($atleastonepublicgroup > 1 && GETPOST('supportchannel', 'alpha')) {
+			//$stringtoprint = '<br>';
+			$stringtoprint .= $formticket->selectGroupTickets(GETPOST('ticketcategory', 'int'), 'ticketcategory', 'public=1', 0, 0, 1, 0, '', 1, $langs);
 			$stringtoprint .= '<br>';
 		}
 
-		$stringtoprint .= '<!-- Script to manage change of ticket group -->
+		$stringtoprint .= "<!-- Script to manage change of ticket group -->
 		<script>
+		var preselectedticketcategory = '".GETPOST('ticketcategory', 'alpha')."';
+		var automigrationcode = '".getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE', '0')."'
+		";
+
+		$stringtoprint .= '
 		jQuery(document).ready(function() {
 			function groupticketchange(){
-				idgroupticket = $("#ticketcategory_select").val();
+				idgroupticket = $("#ticketcategory").val();
 				console.log("We called groupticketchange and have selected id="+idgroupticket+", so we try to load list KM linked to event");
 
 				$("#KWwithajax").html("");
@@ -354,9 +357,10 @@ if ($sellyoursaassupporturl) {
 							}
 							if (urllist != "") {
 								console.log(urllist)
-								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul>\');
+								$("#KWwithajax").html(\'<div class="opacitymedium margintoponly">'.dol_escape_htmltag($langs->trans("KMFoundForTicketGroup")).':</div><ul class="kmlist">\'+urllist+\'<ul><br>\');
 								$("#KWwithajax").show();
 							}
+							$("#form").focus();
 						 },
 						 error : function(output) {
 							console.log("error");
@@ -365,39 +369,146 @@ if ($sellyoursaassupporturl) {
 				}
 			};
 
-			$("#ticketcategory_select").bind("change",function() { groupticketchange(); });
+			$("#ticketcategory").bind("change",function() {
+				console.log("We change group of ticket");
+				groupticketchange();';
 
-			MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-			var trackChange = function(element) {
-			var observer = new MutationObserver(function(mutations, observer) {
-				if (mutations[0].attributeName == "value") {
-				$(element).trigger("change");
-				}
-			});
-			observer.observe(element, {
-				attributes: true
-			});
+			$stringtoprint .= '
+				tmp = $("#ticketcategory_select_child_id").val();
+				$("#ticketcategory_child_id_back").val(tmp);
+				tmp = $("#ticketcategory_select").val();
+				console.log($("#ticketcategory_back"));
+				$("#ticketcategory_back").val(tmp);
+				';
+			$stringtoprint .= '
+					if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
+						console.log("We hide for automigration");
+						$(".hideforautomigration").hide();
+						$(".showforautoupgrade").hide();
+						$(".showforautomigration").show();
+						$("#modeforchangemmode").val("automigration")
+					} else if ("'.getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE', '0').'" == $("#ticketcategory").val()){
+						console.log("We hide for autoupgrade");
+						$(".hideforautomigration").hide();
+						$(".showforautomigration").hide();
+						$(".showforautoupgrade").show();
+						$("#modeforchangemmode").val("autoupgrade")
+					} else {';
+
+			$stringtoprint .= '
+						if ($("#ticketcategory").val() != "") {
+							console.log("We show full form");
+							$(".hideforautomigration").show();
+							$(".showforautomigration").hide();
+							$(".hideforautoupgrade").show();
+							$(".showforautoupgrade").hide();
+							$("#from").focus();
+						} else if($("#ticketcategory").val() == "") {
+							console.log("We hide all");
+							$(".hideforautomigration").hide();
+							$(".showforautomigration").hide();
+							$(".hideforautoupgrade").hide();
+							$(".showforautoupgrade").hide();
+						}
+						$("#buttonforautomigrationwithhidden").hide();
+					}';
+			$stringtoprint .= '
+			});';
+
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+			if (GETPOST('backfromautomigration', 'alpha')) {
+				$stringtoprint .= '
+				console.log("We show for automigration");
+				$(".hideforautomigration").show();
+				$(".showforautomigration").hide();
+				$("#buttonforautomigrationwithhidden").show();';
 			}
+			$stringtoprint .= 'if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
+				console.log("We hide for automigration");
+				$(".hideforautomigration").show();
+				$(".showforautomigration").hide();
+				$("#buttonforautomigrationwithhidden").show();
+			}';
+			$stringtoprint .= '
+			$("#hideautomigrationdiv").on("click",function(){
+				console.log("We cancel the automigration");
+				$(".hideforautomigration").show();
+				$(".showforautomigration").hide();
+				$("#buttonforautomigrationwithhidden").show();
+				$("#form").focus();
+			})';
 
-			trackChange($("#ticketcategory_select")[0]);
+			$stringtoprint .= '
+			$("input[name=\'subject\']").on("change",function(){
+				$("#subject_back").val($(this).val());
+			})';
+		}
+		if (!empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+			$stringtoprint .= '
+			$("#hideautoupgradediv").on("click",function(){
+				console.log("We cancel the autoupgrade");
+				$(".hideforautomigration").show();
+				$(".showforautoupgrade").hide();
+				$("#form").focus();
+			})';
+		}
+
+		$stringtoprint .= "
+			/* If we have something selected */
+			console.log('supportchannel = ".GETPOST('supportchannel', 'alpha')."');
+			console.log('ticketcategory = ".GETPOST('ticketcategory', 'alpha')."');
+			if (('".GETPOST('supportchannel', 'alpha')."' == '' || ('".GETPOST('ticketcategory')."' == '')) && (".$atleastonepublicgroup." > 1) && (preselectedticketcategory == '' || preselectedticketcategory == automigrationcode)) {
+				$('.hideforautomigration').hide();
+			}
 		});
-		</script>'."\n";
-		$stringtoprint .= '<div class="supportemailfield " id="KWwithajax"></div>';
+		</script>"."\n";
+
+		$stringtoprint .= '<div class="supportemailfield" id="KWwithajax"></div>';
 		$stringtoprint .= '<br>';
 		print $stringtoprint;
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+			print '<div id="showforautomigration" class="showforautomigration" style="display:none;">';
+			print '<br><br>';
+			print '<div style="display:flex;justify-content: space-evenly;">';
+			print '<button id="hideautomigrationgoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("GoToAutomigration").'</button>&ensp;';
+			print '<button id="hideautomigrationdiv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("AutomigrationErrorOrNoAutomigration").'</button>';
+			print '</div>';
+			print '<br>';
+			print '</div>';
+		}
+
+		if (!empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+			print '<div id="showforautoupgrade" class="showforautoupgrade" style="display:none;">';
+			print '<br>';
+			print '<div style="display:flex;justify-content: space-evenly;">';
+			print '<button id="hideautoupgradegoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("GoToAutoUpgrade").'</button>&ensp;';
+			print '<button id="hideautoupgradediv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("AutoupgradeErrorOrNoAutoupgrade").'</button>';
+			print '</div>';
+			print '<br>';
+			print '</div>';
+		}
+
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+			print '<div id="hideforautomigration" class="hideforautomigration"><div>';
+		}
+
+		print '<div class="hideforautomigration">';
+
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
-		print '<input type="submit" class="btn green-haze btn-circle" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
+		print '<input type="submit" class="btn green-haze btn-circle reposition" id="addfile" name="addfile" value="'.$langs->trans("MailingAddFile").'" />';
 
 		print $out;
-		print '<br>';
 
+		print '<br>';
 		// Description
 		print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
 
 		// Button to send ticket/email
-		print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly"';
+		print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly reposition"';
 		if ($conf->use_javascript_ajax) {
 			print ' onClick="if (document.forms.mailform.addedfile.value != \'\') { alert(\''.dol_escape_js($langs->trans("FileWasNotUploaded")).'\'); return false; } else { return true; }"';
 		}
@@ -406,7 +517,25 @@ if ($sellyoursaassupporturl) {
 		print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle marginleftonly">';
 		print '</center>';
 
+		print '</div>';
+
 		print '</form>';
+
+		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+			print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="changemodeForm">';
+			print '<input type="hidden" id="modeforchangemmode" name="mode" value="automigration">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
+			print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
+			print '<input type="hidden" id="ticketcategory_child_id_back" name="ticketcategory_child_id_back" value="'.GETPOST('ticketcategory_child_id', 'alpha').'">';
+			print '<input type="hidden" id="ticketcategory_back" name="ticketcategory_back" value="'.GETPOST('ticketcategory', 'alpha').'">';
+			if (!empty($subject)) {
+				print '<input type="hidden" id="subject_back" name="subject_back" value="'.$subject.'">';
+			}
+			print '<input type="hidden" name="action" value="view">';
+			print '</form>';
+		}
+		
 	}
 
 				print ' 	</div></div>
@@ -463,7 +592,7 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
 	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut";
 	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
 	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";		// $socid is id of third party account
-	$sql .= $db->order('t.fk_statut','ASC');
+	$sql .= $db->order('t.fk_statut', 'ASC');
 
 	$resql=$db->query($sql);
 	if ($resql) {
@@ -511,7 +640,7 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
 			print $langs->trans("SoonAvailable");
 		}
 		print '</div>';
-	}else {
+	} else {
 		dol_print_error($db);
 	}
 	print '</div></div>';
@@ -524,6 +653,45 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
 	    </div>
 		</div>
     ';
+
+
+// Code to manage reposition
+print '<script>';
+print "\n/* JS CODE TO ENABLE reposition management (does not work if a redirect is done after action of submission) */\n";
+print '
+	jQuery(document).ready(function() {
+				/* If page_y set, we set scollbar with it */
+				page_y=getParameterByName(\'page_y\', 0);				/* search in GET parameter */
+				if (page_y == 0) page_y = jQuery("#page_y").text();		/* search in POST parameter that is filed at bottom of page */
+				if (page_y > 0)
+				{
+					console.log("page_y found is "+page_y);
+					$(\'html, body\').scrollTop(page_y);
+				}
+
+				/* Set handler to add page_y param on output (click on href links or submit button) */
+				jQuery(".reposition").click(function() {
+					var page_y = $(document).scrollTop();
+
+					if (page_y > 0)
+					{
+						if (this.href)
+						{
+							console.log("We click on tag with .reposition class. this.ref was "+this.href);
+							var hrefarray = this.href.split("#", 2);
+							hrefarray[0]=hrefarray[0].replace(/&page_y=(\d+)/, \'\');		/* remove page_y param if already present */
+							this.href=hrefarray[0]+\'&page_y=\'+page_y;
+							console.log("We click on tag with .reposition class. this.ref is now "+this.href);
+						}
+						else
+						{
+							console.log("We click on tag with .reposition class but element is not an <a> html tag, so we try to update input form field with name=page_y with value "+page_y);
+							jQuery("input[type=hidden][name=page_y]").val(page_y);
+						}
+					}
+				});
+	});
+	</script>'."\n";
 
 ?>
 <!-- END PHP TEMPLATE support.tpl.php -->

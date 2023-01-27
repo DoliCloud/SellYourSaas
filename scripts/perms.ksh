@@ -1,5 +1,7 @@
 #!/bin/bash
 #--------------------------------------------------------#
+# Script to force permission on expected default values
+#--------------------------------------------------------#
 
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
@@ -16,6 +18,11 @@ echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
+export pathtospamdir=`grep '^pathtospamdir=' /etc/sellyoursaas-public.conf | cut -d '=' -f 2`
+if [ "x$pathtospamdir" == "x" ]; then
+	export pathtospamdir="/tmp/spam"
+fi
+
 # Go into a safe dir
 cd /tmp
 
@@ -26,17 +33,33 @@ cd /tmp
 #echo "Remplacement group apache par www-data"
 #find . -group apache -exec chgrp www-data {} \;
 
-# Owner root
-echo "Set owner and permission on logs directory"
-chown root.adm /home/admin/logs/
+# Owner root on logs and backups dir
+echo "Set owner and permission on logs and backup directory"
+[ -d /home/admin/logs ] || mkdir /home/admin/logs;
+[ -d /mnt/diskbackup ] || mkdir /mnt/diskbackup;
+[ -d /home/admin/backup ] || mkdir /home/admin/backup;
+[ -d /home/admin/backup/conf ] || mkdir /home/admin/backup/conf;
+[ -d /home/admin/backup/mysql ] || mkdir /home/admin/backup/mysql;
+[ -d /home/admin/wwwroot ] || mkdir /home/admin/wwwroot;
+chown root.admin /home/admin/logs; chmod 770 /home/admin/logs; 
+chown admin.admin /mnt/diskbackup; 
+chown admin.admin /home/admin/backup; chown admin.admin /home/admin/backup/conf; chown admin.admin /home/admin/backup/mysql; 
+chown admin.admin /home/admin/wwwroot
+
+# Permissions on private key files
+[ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas
+
 
 echo "Set owner and permission on /home/admin/wwwroot/dolibarr_documents/ (except sellyoursaas)"
 chmod g+ws /home/admin/wwwroot/dolibarr_documents/
 chown admin.www-data /home/admin/wwwroot/dolibarr_documents
 for fic in `ls /home/admin/wwwroot/dolibarr_documents | grep -v sellyoursaas`; 
 do 
-	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/$fic
-	chmod -R ug+w /home/admin/wwwroot/dolibarr_documents/$fic
+	chown -R admin.www-data "/home/admin/wwwroot/dolibarr_documents/$fic"
+	chmod -R ug+rw "/home/admin/wwwroot/dolibarr_documents/$fic"
+	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod u+wx {} \;
+	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod g+ws {} \;
 done
 if [ -d /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf ]; then
 	chown www-data.www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
@@ -52,22 +75,37 @@ if [[ "x$masterserver" == "x1" ]]; then
 fi
 
 echo Set owner and permission on /etc/sellyoursaas.conf
+if [ ! -s /etc/sellyoursaas.conf ]; then
+	echo > /etc/sellyoursaas.conf
+fi
 chown -R root.admin /etc/sellyoursaas.conf
 chmod g-wx /etc/sellyoursaas.conf
 chmod o-rwx /etc/sellyoursaas.conf
+
+echo Set owner and permission on /etc/sellyoursaas-pubic.conf
+if [ ! -s /etc/sellyoursaas-public.conf ]; then
+	echo > /etc/sellyoursaas-public.conf
+fi
+chown -R root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 chmod -R a-w /home/admin/wwwroot/dolibarr
 chmod -R u+w /home/admin/wwwroot/dolibarr/.git
 
-echo Set owner and permission on /home/admin/wwwroot/dolibarr_nltechno
-chmod -R a-w /home/admin/wwwroot/dolibarr_nltechno 2>/dev/null
-chmod -R u+w /home/admin/wwwroot/dolibarr_nltechno/.git 2>/dev/null
+if [ -d /home/admin/wwwroot/dolibarr_nltechno ]; then
+	echo Set owner and permission on /home/admin/wwwroot/dolibarr_nltechno
+	chmod -R a-w /home/admin/wwwroot/dolibarr_nltechno 2>/dev/null
+	chmod -R u+w /home/admin/wwwroot/dolibarr_nltechno/.git 2>/dev/null
+fi
 
-echo Set owner and permission on /home/admin/wwwroot/dolibarr_sellyoursaas
-chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas
-chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git
+if [ -d /home/admin/wwwroot/dolibarr_sellyoursaas ]; then
+	echo Set owner and permission on /home/admin/wwwroot/dolibarr_sellyoursaas
+	chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas 2>/dev/null
+	chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git 2>/dev/null
+fi
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
@@ -83,7 +121,7 @@ do
 	chmod o-rwx /etc/apache2/$fic
 done
 
-if [[ "x$instanceserver" != "x0" ]]; then
+if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
 	IFS=$(echo -en "\n\b")
 	echo We are on a deployment server, so we clean log files 
 	echo "Clean web server _error logs"
@@ -97,14 +135,30 @@ fi
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, so we clean old temp files 
-	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -exec rm {} \;
+	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -delete
 fi
 
 echo "Nettoyage vieux fichiers log"
-echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
-find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -exec rm {} \;
+echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
+find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 
 echo "Nettoyage vieux /tmp"
-echo find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
-find /tmp -mtime +30 -name 'phpsendmail*.log' -exec rm {} \;
+echo find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
+find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 
+echo "Check files for antispam system and create them if not found"
+[ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
+chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+
+[ -d $pathtospamdir ] || mkdir $pathtospamdir;
+[ -s $pathtospamdir/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail $pathtospamdir/;
+[ -s $pathtospamdir/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip $pathtospamdir/;
+[ -s $pathtospamdir/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom $pathtospamdir/;
+[ -s $pathtospamdir/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
+chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/*
+chown admin.www-data $pathtospamdir/*

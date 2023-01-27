@@ -24,8 +24,8 @@
 /**
  * getNextInstanceInChain
  *
- * @param Contrat  $object  Instance
- * @return NULL|Contrat
+ * @param 	Contrat  		$object  	Instance
+ * @return 	Contrat|null				Next contract if found
  */
 function getNextInstanceInChain($object)
 {
@@ -51,8 +51,8 @@ function getNextInstanceInChain($object)
 /**
  * getPreviousInstanceInChain
  *
- * @param Contrat   $object     Instance
- * @return NULL|Contrat
+ * @param 	Contrat   		$object     Instance
+ * @return 	Contrat|null				Previous contract if found
  */
 function getPreviousInstanceInChain($object)
 {
@@ -76,29 +76,47 @@ function getListOfInstancesInChain($object)
 {
 	global $conf, $langs, $user, $db;
 
+	$MAXPROTECTION = 100;
+
 	$arrayofinstances = array();
 	$arrayofinstances[$object->id] = $object;
 
 	// Get next contracts
 	$nextcontract = getNextInstanceInChain($object);
-	if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
+	if ($nextcontract) {
+		$arrayofinstances[$nextcontract->id] = $nextcontract;
+	}
 	$i = 0;
-	while ($nextcontract && $i < 1000) {
+	while ($nextcontract && $i < $MAXPROTECTION) {
 		$i++;
-		if (array_key_exists($nextcontract->id, $arrayofinstances)) continue;
 		$nextcontract = getNextInstanceInChain($nextcontract);
-		if ($nextcontract) $arrayofinstances[$nextcontract->id] = $nextcontract;
+		if ($nextcontract) {
+			if (!array_key_exists($nextcontract->id, $arrayofinstances)) {
+				$arrayofinstances[$nextcontract->id] = $nextcontract;
+			}
+		}
+	}
+	if ($i == $MAXPROTECTION) {
+		dol_syslog("getNextInstanceInChain We reach loop of ".$MAXPROTECTION, LOG_WARNING);
 	}
 
 	// Get previous contracts
 	$previouscontract = getPreviousInstanceInChain($object);
-	if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
+	if ($previouscontract) {
+		$arrayofinstances[$previouscontract->id] = $previouscontract;
+	}
 	$i = 0;
-	while ($previouscontract && $i < 1000) {
+	while ($previouscontract && $i < $MAXPROTECTION) {
 		$i++;
-		if (array_key_exists($previouscontract->id, $arrayofinstances)) continue;
 		$previouscontract = getPreviousInstanceInChain($previouscontract);
-		if ($previouscontract) $arrayofinstances[$previouscontract->id] = $previouscontract;
+		if ($previouscontract) {
+			if (!array_key_exists($previouscontract->id, $arrayofinstances)) {
+				$arrayofinstances[$previouscontract->id] = $previouscontract;
+			}
+		}
+	}
+	if ($i == $MAXPROTECTION) {
+		dol_syslog("getPreviousInstanceInChain We reach loop of ".$MAXPROTECTION, LOG_WARNING);
 	}
 
 	$arrayofinstances = dol_sort_array($arrayofinstances, 'date_creation', 'asc');
@@ -143,19 +161,17 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	if (empty($lastpassadmin)) {
 		if (! empty($object->array_options['options_deployment_init_adminpass'])) {
 			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
-			$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-			$links.='Link to application (initial install pass) : ';
+			$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application (initial install pass)<br><div class="urllink">';
 		} else {
 			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
-			$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-			$links.='Link to application : ';
+			$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application<br><div class="urllink">';
 		}
 	} else {
 		$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
-		$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dollink">'.$url.'</a>';
-		$links.='Link to application (last logged admin) : ';
+		$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application (last logged admin)<br><div class="urllink">';
 	}
-	$links.=$link.'<br>';
+	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
+	$links .= $link.'</div>';
 
 	$links.='<br>';
 
@@ -179,9 +195,10 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
 		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
 	}
-	$link='<a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.$url.'</a>';
-	$links.='Link to customer dashboard : ';
-	$links.=$link.'<br>';
+
+	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
+	$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to customer dashboard<br><div class="urllink">';
+	$links .= $link.'</div>';
 
 	$links.='<br>';
 
@@ -285,7 +302,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlbackupcommand", 0);
 	$links.='<br>';
 
-	// Mysql Restore
+	// Mysql to Restore a dump
 	//$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/filetorestore.sql';
 	$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < filetorestore.sql';
 	$links.='<span class="fa fa-database"></span> ';
@@ -295,7 +312,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Rsync to Restore Program directory
-	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' '.$archivestringwithdb.'/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/';
+	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' htdocs/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite application dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
@@ -313,7 +330,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Rsync to Deploy module
-	$sftpdeploystring='rsync -n -v -a --exclude \'*.cache\' --exclude \'conf\.php\' pathtohtdocsmodule/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/custom/namemodule';
+	$sftpdeploystring='rsync -n -v -a --exclude \'*.cache\' --exclude \'conf\.php\' pathtohtdocsofmodule/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/custom/namemodule';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to install or overwrite module';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';

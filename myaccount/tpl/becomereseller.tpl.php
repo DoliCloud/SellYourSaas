@@ -91,19 +91,17 @@ print '
 		print '<input type="hidden" name="mode" value="becomereseller">';
 		print '<input type="hidden" name="action" value="sendbecomereseller">';
 
-		$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+		// Set email to use when applying for reseller program
+		$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 	if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
 }
 
-		if (preg_match('/high/', GETPOST('supportchannel', 'alpha'))) $sellyoursaasemail = preg_replace('/@/', '+premium@', $sellyoursaasemail);
 		$subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):(preg_match('/fr/i', $langs->defaultlang)?$langs->trans("BecomeReseller"):$langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
 
 		$commissiondefault = (empty($conf->global->SELLYOURSAAS_DEFAULT_COMMISSION) ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
-
-		print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
 
 		print $langs->trans("MailFrom").' : <input type="text" required name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
 

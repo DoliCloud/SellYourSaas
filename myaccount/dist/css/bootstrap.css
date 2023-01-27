@@ -2676,7 +2676,7 @@ fieldset[disabled] a.btn {
   pointer-events: none;
 }
 
-.btn-primary {
+.btn-primary, .btn-primary:focus {
   color: #fff;
   background-color: #0275d8;
   border-color: #0275d8;

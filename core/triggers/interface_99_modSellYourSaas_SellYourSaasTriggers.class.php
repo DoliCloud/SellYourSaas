@@ -246,12 +246,10 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				}
 
 				// Do we change end of trial ?
-				if (isset($object->oldcopy)
-					&& $object->oldcopy->array_options['options_date_endfreeperiod'] != $object->array_options['options_date_endfreeperiod']) {
+				if (isset($object->oldcopy) && $object->oldcopy->array_options['options_date_endfreeperiod'] != $object->array_options['options_date_endfreeperiod']) {
 					dol_syslog("We found a change in date of end of trial, so we check if you can and, if yes, we make the update of contract");
 
-					if ($object->oldcopy->array_options['options_date_endfreeperiod']
-						&& ($object->oldcopy->array_options['options_date_endfreeperiod'] < $object->array_options['options_date_endfreeperiod'])) {
+					if ($object->oldcopy->array_options['options_date_endfreeperiod'] && ($object->oldcopy->array_options['options_date_endfreeperiod'] < $object->array_options['options_date_endfreeperiod'])) {
 						// Check there is no recurring invoice. If yes, we refuse to increase value.
 						$object->fetchObjectLinked();
 						//var_dump($object->linkedObjects);
@@ -265,10 +263,14 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 
 					foreach ($object->lines as $line) {
 						if ($line->date_end < $object->array_options['options_date_endfreeperiod']) {
+							$line->oldcopy = dol_clone($line);
+
 							$line->date_end = $object->array_options['options_date_endfreeperiod'];
-							$line->date_fin_validite = $object->array_options['options_date_endfreeperiod'];
+							$line->date_fin_validite = $object->array_options['options_date_endfreeperiod'];	// deprecated
+
 							$line->update($user);
-							break;	// No need to loop on all, there is also a trigger that update all other when we update one
+							break;	// No need to loop on all, the constant CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES should be enabled by module SELLYOURSAAS
+									// so the line->update() will update also all other lines when we update one line.
 						}
 					}
 				}

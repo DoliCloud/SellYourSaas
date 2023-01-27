@@ -1,4 +1,5 @@
 = Document installation et exploitation SellYourSaas
+This document describes the technical and functional implementation of a server to host a web portal for SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
 :source-highlighter: rouge
 :companyname: Teclib
 :corpname: Teclib
@@ -10,7 +11,6 @@
 :city: Bordeaux
 :toc: manual
 :toc-placement: preamble
-This document describes the technical and functional implementation of a server to host a web portal for SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
 
 
@@ -247,13 +247,6 @@ Add a swap on */swap/swap.img* if the disk is not SSD, otherwise on the non SSD 
 https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory-swap-file-on-a-vps#4
 
 
-== Installation des outils externe
-
-=== Installation of webmin (optional for supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-
 == Installation des composants systèmes et applicatifs
 
 === Installation des packages
@@ -263,7 +256,7 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd memcached ncdu
+sudo apt install ntp git gzip zip zstd memcached ncdu ufw sudo
 sudo apt install mariadb-server mariadb-client
 sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
 sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
@@ -280,11 +273,10 @@ sudo apt install mailutils postfix
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install systemd-timesyncd git gzip zip zstd memcached ncdu
+sudo apt install systemd-timesyncd git gzip zip zstd memcached ncdu ufw sudo
 sudo apt install mariadb-server mariadb-client 
 sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
-sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install bind9
+sudo apt install watchdog cpulimit apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
 sudo apt install libreoffice-common libreoffice-writer
@@ -298,8 +290,8 @@ On active les *modules* pour un fonctionnement avec PHP FPM:
 
 [source,bash]
 ---------------
-a2enmod access_compat actions alias auth_basic authn_core authn_file authz_core authz_groupfile authz_host authz_user autoindex cgi deflate dir env a2enmod expires fcgid filter headers http2 mime mpm_event negotiation proxy proxy_fcgi proxy_http reqtimeout rewrite setenvif socache_shmcb ssl status vhost_alias
-a2enmod php7.2|php7.4
+a2enmod expires fcgid filter headers http2 mime mpm_event negotiation proxy proxy_fcgi proxy_http reqtimeout rewrite setenvif socache_shmcb ssl status vhost_alias
+a2enmod access_compat actions alias auth_basic authn_core authn_file authz_core authz_groupfile authz_host authz_user autoindex cgi deflate dir env 
 ---------------
 
 On active les *configurations* pour un fonctionnement avec PHP FPM:
@@ -371,7 +363,7 @@ ufw enable
 
 
 * Installation of fail2ban and activation of the following fail2ban rules:
-  *apache-shellshock*, *php-url-fopen*, *webmin-auth*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
+  *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
   
 * As well as the specific rules for sellyoursaas:
@@ -489,11 +481,6 @@ enabled = true
 
 
 [sshd]
-
-enabled = true
-
-
-[webmin-auth]
 
 enabled = true
 
@@ -774,6 +761,8 @@ vi /etc/default/saslauthd  pour mettre START=yes
 
 Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix or
 
+[source,bash]
+---------------
 apt-get install opendkim opendkim-tools
 
 mkdir -p /etc/opendkim/
@@ -784,58 +773,80 @@ openssl genrsa -out /etc/opendkim/opendkim.key 1024
 openssl rsa -in /etc/opendkim/opendkim.key -pubout -out /etc/opendkim/opendkim.pub.key
 chmod "u=rw,o=,g=" /etc/opendkim/opendkim.key
 chown opendkim:opendkim /etc/opendkim/opendkim.key
+---------------
 
 
 Edit the file */etc/opendkim.conf*
 
+[source,bash]
+---------------
 Domain                  mysellyoursaasdomain.com
 KeyFile                 /etc/opendkim/opendkim.key
 Selector                dkim
 Socket                  inet:12345@localhost
+---------------
 
 Choose the value for 'dkim'
 
 
 Edit the file */etc/default/opendkim*
 
+[source,bash]
+---------------
 SOCKET="inet:12345@localhost" # listen on loopback on port 12345
+---------------
 
 
 Create file */etc/opendkim/KeyTable*
 
+[source,bash]
+---------------
 # nom de domaine        nom de domaine  selector   fichier clef priv
 dkim._domainkey.mysellyoursaasdomain.com            mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
 mysellyoursaasdomain.com             				mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
+---------------
 
 Reuse the value for 'dkim'
 
 
 Create file */etc/opendkim/SigningTable*
 
+[source,bash]
+---------------
 # nom de domaine        nom de domaine  selector   fichier clef priv
 *@mysellyoursaasdomain.com             mysellyoursaasdomain.com
+---------------
 
 
 Create file */etc/opendkim/TrustedHosts*
 
+[source,bash]
+---------------
 127.0.0.1
 localhost
 mysellyoursaasdomain.com
+---------------
 
 
 Edit postfix file */etc/postfix/main.cf*
 
+[source,bash]
+---------------
 milter_default_action = accept
 milter_protocol = 6
 smtpd_milters = inet:localhost:12345
 non_smtpd_milters = inet:localhost:12345
+---------------
 
 
 
 To test DKIM, send an email to  check-auth@verifier.port25.com, you will receive a response with success or failure.
 To test SPF + DKIM + spam analysis of an email,  send an email to email suggested by  https://www.mail-tester.com
 
+[source,bash]
+---------------
 mail -aFrom:test@mysellyoursaasdomain.com test-email@test-email-service.com
+---------------
 
 
 
@@ -872,8 +883,8 @@ Create a file */etc/postfix/generic* to add binding between email used to send e
 
 [source,bash]
 ---------------
-root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
+root@myshortservername.mysaasdomainname.com		noreply@mysaasdomainname.com
+admin@myshortservername.mysaasdomainname.com	noreply@mysaasdomainname.com
 ---------------
 
 Compile the file with:
@@ -887,7 +898,7 @@ echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
-Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomain.com*:
+Edit the file */etc/mailname* to set the long FQDN of the server *myshortservername.mysaasdomainname.com*:
 
 [source,bash]
 ---------------
@@ -1149,7 +1160,7 @@ FLUSH PRIVILEGES;
 
 === Securisation rep session PHP
 
-Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php/sessions*
+Vérifier ou Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php/sessions*
 
 
 === Create a virtual host for the web portal
@@ -1275,17 +1286,6 @@ su root syslog
 
 [source,conf]
 ---------------
-/var/log/backup_backups.log {
-        su root root
-        weekly
-        rotate 4
-        compress
-        delaycompress
-        missingok
-        notifempty
-        create 600 root root
-}
-
 /home/admin/wwwroot/dolibarr_documents/*.log {
         su admin www-data
         daily
@@ -1496,11 +1496,6 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/c
 
 == Installation of external tools
 
-=== Installation de webmin (optional for supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-
 === Installation of DataDog (optional for supervision)
 
 * Create an account on DataDog.
@@ -1681,5 +1676,9 @@ PidFile                 /run/opendkim/opendkim.pid
 The PIDFile is defined into the */lib/systemd/system/opendkim.service* but seems not taken into account correctly. You must force it into the /etc/opendkim.conf
 
 
+== Error postfix/cleanup[14215]: warning: connect to Milter service inet:localhost:12345: Connection refused
 
+We can see this error into */var/log/syslog.log*.
+
+Check the configuration file */etc/default/opendkim* and verify that the socket is SOCKET="inet:12345@localhost"
 

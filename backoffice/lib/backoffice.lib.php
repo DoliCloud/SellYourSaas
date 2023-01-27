@@ -16,9 +16,9 @@
  */
 
 /**
- *       \file       htdocs/sellyoursaas/backoffice/lib/refresh.lib.php
+ *       \file       htdocs/sellyoursaas/backoffice/lib/backoffice.lib.php
  *       \ingroup    sellyoursaas
- *       \brief      Library for sellyoursaas backoofice lib
+ *       \brief      Library for sellyoursaas backoffice lib
  */
 
 
@@ -34,17 +34,25 @@ function sellYourSaasBackofficePrepareHead()
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = 'index.php';
+	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/index.php', 1);
 	$head[$h][1] = $langs->trans("Home");
 	$head[$h][2] = 'home';
 	$h++;
 
-	$head[$h][0] = 'deployment_servers.php';
-	$head[$h][1] = $langs->trans("DeploymentServers");
-	$head[$h][2] = 'deploymentservers';
-	$h++;
+	if (empty(getDolGlobalString("SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION"))) {
+		$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
+		$head[$h][1] = $langs->trans("DeploymentServers");
+		$head[$h][2] = 'deploymentservers';
+		$h++;
+	}else {
+		$head[$h][0] = '/custom/sellyoursaas/deploymentserver_list.php';
+		$head[$h][0] = dol_buildpath('/sellyoursaas/deploymentserver_list.php', 1);
+		$head[$h][1] = $langs->trans("DeploymentServers");
+		$head[$h][2] = 'deploymentservers';
+		$h++; 
+	}
 
-	$head[$h][0] = 'setup_antispam.php';
+	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php', 1);
 	$head[$h][1] = $langs->trans("AntiSpam");
 	$head[$h][2] = 'antispam';
 	$h++;
@@ -54,11 +62,10 @@ function sellYourSaasBackofficePrepareHead()
 	$head[$h][2] = 'customreports';
 	$h++;
 
-	$head[$h][0] = 'notes.php';
+	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
 	$head[$h][1] = $langs->trans("Notes");
 	$head[$h][2] = 'notes';
 	$h++;
 
 	return $head;
 }
-

@@ -20,7 +20,7 @@
 /**
  *      \file       sellyoursaas/scripts/ansible/info_users.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to get information from a user.
+ *      \brief      Script used by an ansible script executed remotely to get information about a user.
  */
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');
@@ -163,7 +163,7 @@ if (empty($db)) $db=$dbmaster;
 //$user->getrights();
 
 if ($mode == 'test') {
-	print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
+	print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 }
 if (! isset($argv[2])) {	// Check parameters
 	print 'Tool to return some information for a user.'."\n";
@@ -205,8 +205,11 @@ if ($resql) {
 				}
 			}
 		}
+	} elseif ($num_rows == 0) {
+		fwrite(STDERR, 'Login '.$login.' not found in Dolibarr Master.'."\n");
+		exit(0);
 	} else {
-		fwrite(STDERR, 'Bad number of record found when searching the login'."\n");
+		fwrite(STDERR, 'Bad number of record found when searching the login in Dolibarr Master'."\n");
 		exit(1);
 	}
 } else {

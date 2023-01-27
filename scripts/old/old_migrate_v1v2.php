@@ -110,7 +110,13 @@ if (! empty($oldinstance) && ! preg_match('/\.on\.dolicloud\.com$/', $oldinstanc
 }
 // Forge complete name of instance
 if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance)) {
-	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+	} else {
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$staticdeploymentserver = new Deploymentserver($db);
+		$tmparray = $staticdeploymentserver->fetchAllDomains();
+	}
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
 	$newinstance=$newinstance.".".$tmpstring;   // Automatically concat first domain name
 }
@@ -121,7 +127,15 @@ if ($result <= 0) {
 	print "Error: old instance ".$oldinstance." not found.\n";
 	exit(-2);
 }
-if (empty($oldobject->instance) || empty($oldobject->username_web) || empty($oldobject->password_web) || empty($oldobject->database_db)) {
+
+$oldobjectusername_os = $oldobject->array_options['options_username_os'];
+$oldobjectpassword_os = $oldobject->array_options['options_password_os'];
+$oldobjecthostname_os = $oldobject->array_options['options_hostname_os'];
+$oldbjectusername_db = $oldobject->array_options['options_username_db'];
+$oldobjectpassword_db = $oldobject->array_options['options_password_db'];
+$oldobjectdatabase_db = $oldobject->array_options['options_database_db'];
+
+if (empty($oldinstance) || empty($oldobjectusername_os) || empty($oldobjectpassword_os) || empty($oldobjectdatabase_db)) {
 	print "Error: Some properties for old instance ".$oldinstance." was not registered into database.\n";
 	exit(-3);
 }
@@ -604,7 +618,7 @@ if ($result <= 0 || $newobject->statut == 0) {
 			$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
 			$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
 			$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
-			$invoice_draft->fk_account          = $conf->global->STRIPE_BANK_ACCOUNT_FOR_PAYMENTS;	// stripe
+			$invoice_draft->fk_account          = getDolGlobalInt('STRIPE_BANK_ACCOUNT_FOR_PAYMENTS');	// stripe
 
 			$invoice_draft->fetch_thirdparty();
 
@@ -818,16 +832,16 @@ if ($result <= 0 || $newobject->statut == 0) {
 	exit(-9);
 }
 
-$newobject->instance = $newinstance;
-$newobject->username_web = $newobject->array_options['options_username_os'];
-$newobject->password_web = $newobject->array_options['options_password_os'];
-$newobject->hostname_web = $newobject->array_options['options_hostname_os'];
-$newobject->username_db  = $newobject->array_options['options_username_db'];
-$newobject->password_db  = $newobject->array_options['options_password_db'];
-$newobject->database_db  = $newobject->array_options['options_database_db'];
+$newobjectinstance = $newinstance;
+$newobjectusername_os = $newobject->array_options['options_username_os'];
+$newobjectpassword_os = $newobject->array_options['options_password_os'];
+$newobjecthostname_os = $newobject->array_options['options_hostname_os'];
+$newobjectusername_db = $newobject->array_options['options_username_db'];
+$newobjectpassword_db = $newobject->array_options['options_password_db'];
+$newobjectdatabase_db = $newobject->array_options['options_database_db'];
 
-if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db)) {
-	print "Error: Some properties for instance ".$newinstance." was not registered into database (missing instance, username_web, password_web or database_db.\n";
+if (empty($newobjectinstance) || empty($newobjectusername_os) || empty($newobjectpassword_os) || empty($newobjectdatabase_db)) {
+	print "Error: Some properties for instance ".$newinstance." was not registered into database (missing instance, username_os, password_os or database_db.\n";
 	exit(-3);
 }
 
@@ -844,7 +858,7 @@ $newpasswordbase=$newobject->password_db;
 
 $sourcedir=$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.$olddirdb;
 $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb;
-$oldserver=$oldobject->hostname_web;
+$oldserver=$oldobject->hostname_os;
 $newserver=$newobject->array_options['options_hostname_os'];
 
 if (empty($oldlogin) || empty($olddirdb)) {
@@ -852,13 +866,13 @@ if (empty($oldlogin) || empty($olddirdb)) {
 	exit(-5);
 }
 
-$oldsftpconnectstring=$oldobject->username_web.'@'.$oldobject->hostname_web.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $olddirdb);
-$newsftpconnectstring=$newobject->username_web.'@'.$newobject->hostname_web.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdirdb);
+$oldsftpconnectstring=$oldobject->username_os.'@'.$oldobject->hostname_os.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $olddirdb);
+$newsftpconnectstring=$newobject->username_os.'@'.$newobject->hostname_os.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdirdb);
 
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
 print 'SFTP new connect string : '.$newsftpconnectstring."\n";
-print 'SFTP old password '.$oldobject->password_web."\n";
+//print 'SFTP old password '.$oldobject->password_web."\n";
 //print 'SFTP new password '.$newobject->password_web."\n";
 
 $command="rsync";
@@ -877,6 +891,9 @@ $param[]="--exclude .gitignore";
 $param[]="--exclude .settings";
 $param[]="--exclude .project";
 $param[]="--exclude htdocs/conf/conf.php";
+$param[]="--exclude glpi_config/config_db.php";
+$param[]="--exclude htdocs/inc/downstream.php";
+$param[]="--exclude ";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
@@ -928,7 +945,7 @@ print "\n";
 print "-> Files owner were modified for instance ".$newobject->ref_customer.": ".$targetdir." to user ".$newlogin."\n";
 
 
-print '--- Dump database '.$oldobject->database_db.' into /tmp/mysqldump_'.$oldobject->database_db.'_'.gmstrftime('%d').".sql\n";
+print '--- Dump database '.$oldobject->database_db.' into /tmp/mysqldump_'.$oldobject->database_db.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
 $command="mysqldump";
 $param=array();
@@ -949,13 +966,13 @@ $param[]="--hex-blob";
 $param[]="--default-character-set=utf8";
 
 $fullcommand=$command." ".join(" ", $param);
-$fullcommand.=' > /tmp/mysqldump_'.$oldobject->database_db.'_'.gmstrftime('%d').'.sql';
+$fullcommand.=' > /tmp/mysqldump_'.$oldobject->database_db.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').'.sql';
 $output=array();
 $return_varmysql=0;
-print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 if ($mode != 'test') {
 	exec($fullcommand, $output, $return_varmysql);
-	print strftime("%Y%m%d-%H%M%S").' mysqldump done (return='.$return_varmysql.')'."\n";
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysqldump done (return='.$return_varmysql.')'."\n";
 }
 
 // Output result
@@ -980,10 +997,10 @@ $fullcommand=$command." ".join(" ", $param);
 $fullcommand.=' -e "REPLACE INTO llx_const (name, entity, value, type, visible) values(\'MAIN_ONLY_LOGIN_ALLOWED\', 0, \'nobody\', \'chaine\', 0);"';	//  UPDATE llx_user SET statut = 0 where login=\'admin\'"
 $output=array();
 $return_varmysql2=0;
-print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 if ($mode != 'test') {
 	exec($fullcommand, $output, $return_varmysql2);
-	print strftime("%Y%m%d-%H%M%S").' mysql done (return='.$return_varmysql2.')'."\n";
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql done (return='.$return_varmysql2.')'."\n";
 }
 
 // Output result
@@ -999,7 +1016,7 @@ print '--- Load database '.$newobject->database_db.' from /tmp/mysqldump_'.$oldo
 $fullcommanda='echo "drop table llx_accounting_account;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
 $output=array();
 $return_varload=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanda."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanda."\n";
 if ($mode == 'confirm') {
 	exec($fullcommanda, $output, $return_varload);
 	foreach ($output as $line) print $line."\n";
@@ -1008,18 +1025,18 @@ if ($mode == 'confirm') {
 $fullcommandb='echo "drop table llx_accounting_system;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
 $output=array();
 $return_varload=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommandb."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommandb."\n";
 if ($mode == 'confirm') {
 	exec($fullcommandb, $output, $return_varload);
 	foreach ($output as $line) print $line."\n";
 }
 
-$fullcommand="cat /tmp/mysqldump_".$oldobject->database_db.'_'.gmstrftime('%d').".sql | mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db;
-print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
+$fullcommand="cat /tmp/mysqldump_".$oldobject->database_db.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db;
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm') {
 	$output=array();
 	$return_varload=0;
-	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_varload);
 	foreach ($output as $line) print $line."\n";
 }
@@ -1027,7 +1044,7 @@ if ($mode == 'confirm') {
 $fullcommandc='echo "UPDATE llx_const set value = \''.$newlogin.'\' WHERE name = \'CRON_KEY\';" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
 $output=array();
 $return_varcron=0;
-print strftime("%Y%m%d-%H%M%S").' Update cron key '.$fullcommandc."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Update cron key '.$fullcommandc."\n";
 if ($mode == 'confirm') {
 	exec($fullcommandc, $output, $return_varcron);
 	foreach ($output as $line) print $line."\n";

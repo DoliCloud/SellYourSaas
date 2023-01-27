@@ -60,7 +60,7 @@ option n then p (then choose the partition number, first and last sector) then w
 fdisk -l
 
 fsck -N /dev/vdxY
-mkfs.ext4 /dev/vdxY
+mkfs.btrfs /dev/vdxY
 ---------------
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
@@ -76,7 +76,7 @@ blkid
 
 [source, bash]
 ---------------
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0 (does not block the server from starting)
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0 (does not block the server from starting)
 ---------------
 
 * Mount disk
@@ -108,7 +108,7 @@ To add -noatime to the filesystem in the */etc/fstab* file:
 
 [source, bash]
 ---------------
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX ext4 noatime,nofail 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0
 ---------------
 
 To take the change into account:
@@ -124,7 +124,7 @@ To check:
 ---------------
 cat /proc/mounts | grep diskX
 ---------------
-cat /proc/
+
 Rem: If you need to recover data files from another disk, use:
 
 [source, bash]
@@ -445,7 +445,7 @@ There are two scenario depending on your version of Ubuntu. Follow the instructi
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install ntp git gzip zip zstd ncdu
+sudo apt install ntp git gzip zip zstd ncdu duc
 sudo apt install rkhunter chkrootkit
 sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
@@ -463,6 +463,15 @@ sudo apt install fail2ban
 ---------------
 
 
+Delete all snap packages (we don't need snap for backup servers):
+
+[source,bash]
+---------------
+sudo apt remove --purge --assume-yes snapd
+systemctl daemon-reload
+---------------
+
+
 === Disabling automatic update
 
 Uninstall the package *unattended-upgrades* if it was installed.
@@ -475,17 +484,19 @@ apt remove unattended-upgrades
 
 === Installation of the firewall ===
 
-* Create a firewall to accept input of SSH only and allow output for NTP and DNS
+* Create a firewall to accept input of SSH only and allow output for NTP and DNS and HTTPS
 
 [source, bash]
 ---------------
 ufw allow 22
 ufw allow out ntp
 ufw allow out 53
+ufw allow out 443
 ufw status
 ufw enable
 ---------------
 
+Port 22 is for SSH, NTP is 123/upd, 53 if for DNS, 443 is to allow for monitoring agent reports
 
 
 === Installation of fail2ban ===
@@ -765,29 +776,20 @@ sudo systemctl status apport.service
 Note: Reports are into */var/crash*
 
 
+=== Installation of cron tasks
+
+Delete very old files every sunday by adding the cron task:
+
+[source,bash]
+---------------
+0 18 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +100 -delete > /var/log/find_delete_old_files.log 2>&1
+0 18 * * 1 find /mnt/diskbackup/*/ -type d -empty -delete > /var/log/find_delete_empty_dir.log 2>&1
+---------------
+
+
 <<<<
 
 == Installation d'outils externes
-
-=== Installation de webmin (optionnel pour supervision)
-
-* Installation et activation de webmin et ajout de la restriction *allow* avec les IPs dans */etc/webmin/miniserv.conf*
-
-* Si la fonction sauvegarde de toutes les bases de Webmin est active, modifier les fichiers */usr/share/webmin/mysql/backup.pl*  et  */usr/share/webmin/mysql/backup_db.cgi*
-
-[source,perl]
----------------
-foreach $db (@dbs) {
----------------
-
-in
-
-[source,perl]
----------------
-foreach $db (@dbs) {
-    # @CHANGE LDR
-    if ($db =~ /^dbn/) { next; }
----------------
 
 === Installation of DataDog (optionnel pour supervision)
 
@@ -921,6 +923,42 @@ mount /dev/sdXY /mnt
 ---------------
 
 Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
+
+
+=== Use of btrfs to create a subvolume vor each backup dir of each server
+
+Then you create a subvolume for each directory you want to be able to make snapshots.
+
+To list existing subvolumes:
+
+[source,bash]
+---------------
+btrfs subvolume list /mnt/diskbackup
+---------------
+
+To create a subvolume for a server
+
+[source,bash]
+---------------
+btrfs subvolume create /mnt/diskbackup/xxx   # with xxx = home_serverX or backup_serverX
+chown admin.admin /mnt/diskbackup/xxx
+chmod -R o-rw /mnt/diskbackup/xxx
+---------------
+
+To create a readonly snapshot
+
+[source,bash]
+---------------
+btrfs subvolume snapshot -r /mnt/diskbackup/xxx /mnt/diskbackup/.snapshots/xxx
+---------------
+
+To delete a readonly snapshot
+
+[source,bash]
+---------------
+btrfs subvolume delete /mnt/diskbackup/.snapshots/xxx
+---------------
+
 
 
 <<<<<<<

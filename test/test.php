@@ -1,6 +1,17 @@
 #!/usr/bin/php
 <?php
 
+$sapi_type = php_sapi_name();
+$script_file = basename(__FILE__);
+$path = __DIR__.'/';
+
+// Test if batch mode
+if (substr($sapi_type, 0, 3) == 'cgi') {
+	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
+	exit(-1);
+}
+
+
 $domainemails = array('yhaoo.com','yahoo.com','dolibarr.fr');
 
 foreach ($domainemails as $domainemail) {

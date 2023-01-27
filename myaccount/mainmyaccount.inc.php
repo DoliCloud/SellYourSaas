@@ -1,10 +1,10 @@
 <?php
 /* Copyright (C) 2002-2007  Rodolphe Quiedeville    <rodolphe@quiedeville.org>
  * Copyright (C) 2003       Xavier Dutoit           <doli@sydesy.com>
- * Copyright (C) 2004-2015  Laurent Destailleur     <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2021  Laurent Destailleur     <eldy@users.sourceforge.net>
  * Copyright (C) 2004       Sebastien Di Cintio     <sdicintio@ressource-toi.org>
  * Copyright (C) 2004       Benoit Mortier          <benoit.mortier@opensides.be>
- * Copyright (C) 2005-2015  Regis Houssin           <regis.houssin@capnetworks.com>
+ * Copyright (C) 2005-2021  Regis Houssin           <regis.houssin@inodbox.com>
  * Copyright (C) 2011-2014  Philippe Grand          <philippe.grand@atoo-net.com>
  * Copyright (C) 2008       Matteli
  * Copyright (C) 2011-2016  Juanjo Menent           <jmenent@2byte.es>
@@ -23,7 +23,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /**
@@ -56,12 +56,13 @@ if (! function_exists("llxHeader")) {
 	 * @param	string			$morequerystring	Query string to add to the link "print" to get same parameters (use only if autodetect fails)
 	 * @param   string  		$morecssonbody      More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
 	 * @param	string			$replacemainareaby	Replace call to main_area() by a print of this string
-	 * @param	int				$disablenofollow	Disable the "nofollow" on page
+	 * @param	int				$disablenofollow	Disable the "nofollow" on meta robot header
+	 * @param	int				$disablenoindex		Disable the "noindex" on meta robot header
 	 * @return	void
 	 */
-	function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0)
+	function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0)
 	{
-		global $conf;
+		global $conf, $hookmanager;
 
 		// html header
 		top_htmlhead_sellyoursaas($head, $title, $disablejs, $disablehead, $arrayofjs, $arrayofcss);
@@ -105,33 +106,72 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
 	}
 
 	// Security options
+
+	// X-Content-Type-Options
 	header("X-Content-Type-Options: nosniff"); 	// With the nosniff option, if the server says the content is text/html, the browser will render it as text/html (note that most browsers now force this option to on)
+
+	// X-Frame-Options
 	if (!defined('XFRAMEOPTIONS_ALLOWALL')) {
 		header("X-Frame-Options: SAMEORIGIN"); 	// Frames allowed only if on same domain (stop some XSS attacks)
 	} else {
-		header("X-Frame-Options: ALLOWALL");	// So we can include page into an iframe
+		header("X-Frame-Options: ALLOWALL");
 	}
-	if (!defined('FORCECSP')) {
-		$contentsecuritypolicy = empty($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY) ? '' : $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
+
+	// X-XSS-Protection
+	//header("X-XSS-Protection: 1");      		// XSS filtering protection of some browsers (note: use of Content-Security-Policy is more efficient). Disabled as deprecated.
+
+	// Content-Security-Policy
+	if (!defined('MAIN_SECURITY_FORCECSP')) {
+		// If CSP not forced from the page
+
+		// A default security policy that keep usage of js external component like ckeditor, stripe, google, working
+		//	$contentsecuritypolicy = "frame-ancestors 'self'; font-src *; img-src *; style-src * 'unsafe-inline' 'unsafe-eval'; default-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; script-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; frame-src 'self' *.stripe.com; connect-src 'self';";
+		$contentsecuritypolicy = getDolGlobalString('MAIN_SECURITY_FORCECSP');
+
+		if (!is_object($hookmanager)) {
+			include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+			$hookmanager = new HookManager($db);
+		}
+		$hookmanager->initHooks(array("main"));
+
+		$parameters = array('contentsecuritypolicy'=>$contentsecuritypolicy);
+		$result = $hookmanager->executeHooks('setContentSecurityPolicy', $parameters); // Note that $action and $object may have been modified by some hooks
+		if ($result > 0) {
+			$contentsecuritypolicy = $hookmanager->resPrint; // Replace CSP
+		} else {
+			$contentsecuritypolicy .= $hookmanager->resPrint; // Concat CSP
+		}
 
 		if (!empty($contentsecuritypolicy)) {
 			// For example, to restrict 'script', 'object', 'frames' or 'img' to some domains:
-			// script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; frame-src https://youtube.com; img-src: https://static.example.com
+			// frame-ancestors 'self'; script-src https://api.google.com https://anotherhost.com; object-src https://youtube.com; frame-src https://youtube.com; img-src https://static.example.com
 			// For example, to restrict everything to one domain, except 'object', ...:
 			// default-src https://cdn.example.net; object-src 'none'
 			// For example, to restrict everything to itself except img that can be on other servers:
 			// default-src 'self'; img-src *;
-			// Pre-existing site that uses too much inline code to fix but wants to ensure resources are loaded only over https and disable plugins:
-			// default-src http: https: 'unsafe-eval' 'unsafe-inline'; object-src 'none'
+			// Pre-existing site that uses too much js code to fix but wants to ensure resources are loaded only over https and disable plugins:
+			// default-src https: 'unsafe-inline' 'unsafe-eval'; object-src 'none'
 			header("Content-Security-Policy: ".$contentsecuritypolicy);
 		}
-	} elseif (constant('FORCECSP')) {
-		header("Content-Security-Policy: ".constant('FORCECSP'));
+	} else {
+		header("Content-Security-Policy: ".constant('MAIN_SECURITY_FORCECSP'));
+	}
+
+	// Referrer-Policy
+	// Say if we must provide the referrer when we jump onto another web page.
+	// Default browser are 'strict-origin-when-cross-origin' (only domain is sent on other domain switching), we want more so we use 'same-origin' so browser doesn't send any referrer when going into another web site domain.
+	if (!defined('MAIN_SECURITY_FORCERP')) {
+		$referrerpolicy = getDolGlobalString('MAIN_SECURITY_FORCERP', "same-origin");
+
+		header("Referrer-Policy: ".$referrerpolicy);
 	}
 
 	if ($forcenocache) {
 		header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
 	}
+
+	// No need to add this token in header, we use instead the one into the forms.
+	//header("anti-csrf-token: ".newToken());
 }
 
 /**
@@ -144,11 +184,12 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
  * @param 	int    	$disablehead	 Disable head output
  * @param 	array  	$arrayofjs		 Array of complementary js files
  * @param 	array  	$arrayofcss		 Array of complementary css files
- * @param 	int    	$disablejmobile	 Disable jmobile (No more used)
- * @param   int     $disablenofollow Disable no follow tag
+ * @param 	int    	$disableforlogin Do not load heavy js and css for login pages
+ * @param   int     $disablenofollow Disable nofollow tag for meta robots
+ * @param   int     $disablenoindex  Disable noindex tag for meta robots
  * @return	void
  */
-function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $disablejmobile = 0, $disablenofollow = 0)
+function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $disableforlogin = 0, $disablenofollow = 0, $disablenoindex = 0)
 {
 	global $db, $conf, $langs, $user, $mysoc, $hookmanager;
 
@@ -160,13 +201,10 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 
 	print '<!doctype html>'."\n";
 
-	if (! empty($conf->global->MAIN_USE_CACHE_MANIFEST)) {
-		print '<html lang="'.substr($langs->defaultlang, 0, 2).'" manifest="'.DOL_URL_ROOT.'/cache.manifest">'."\n";
-	} else {
-		print '<html lang="'.substr($langs->defaultlang, 0, 2).'">'."\n";
-		print '<!-- You language detected: '.$langs->defaultlang." -->\n";
-	}
+	print '<html lang="'.substr($langs->defaultlang, 0, 2).'">'."\n";
+	print '<!-- You language detected: '.$langs->defaultlang." -->\n";
 
+	//print '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr">'."\n";
 	if (empty($disablehead)) {
 		if (!is_object($hookmanager)) {
 			$hookmanager = new HookManager($db);
@@ -182,18 +220,23 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 
 		// Displays meta
 		print '<meta charset="utf-8">'."\n";
-		print '<meta name="robots" content="noindex'.($disablenofollow?'':',nofollow').'">'."\n";      				// Do not index
+		print '<meta name="robots" content="'.($disablenoindex ? 'index' : 'noindex').($disablenofollow ? ',follow' : ',nofollow').'">'."\n"; // Do not index
 		print '<meta name="viewport" content="width=device-width, initial-scale=1.0">'."\n";	// Scale for mobile device
 		print '<meta name="author" content="Dolibarr Development Team">'."\n";
-
+		print '<meta name="anti-csrf-token" content="'.newToken().'">'."\n";
+		if (getDolGlobalInt('MAIN_FEATURES_LEVEL')) {
+			print '<meta name="MAIN_FEATURES_LEVEL" content="'.getDolGlobalInt('MAIN_FEATURES_LEVEL').'">'."\n";
+		}
 		// Favicon. Note, even if we remove this meta, the browser and android webview try to find a favicon.ico
-		$favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
+		$favicon = getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
-		if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
-		if ($favicon) {
+		if (getDolGlobalString('MAIN_FAVICON_URL')) {
+			$favicon = getDolGlobalString('MAIN_FAVICON_URL');
+		}
+		if ($favicon && empty($conf->dol_use_jmobile)) {
 			$href = 'img/'.$favicon;
 			if (preg_match('/^http/i', $favicon)) $href = $favicon;
-			print '<link rel="shortcut icon" href="'.$href.'">'."\n";
+			print '<link rel="shortcut icon" type="image/x-icon" href="'.$href.'">'."\n";
 		}
 
 		// Displays title
@@ -202,9 +245,12 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			$appli=$conf->global->MAIN_APPLICATION_TITLE;
 		}
 
-		if ($title && ! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) print '<title>'.dol_htmlentities($title).'</title>';
-		elseif ($title) print '<title>'.dol_htmlentities($appli.' - '.$title).'</title>';
-		else print "<title>".dol_htmlentities($appli)."</title>";
+		print '<title>';
+		if ($title && !empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) print dol_htmlentities($title);
+		elseif ($title) print dol_htmlentities($appli.' - '.$title);
+		else print dol_htmlentities($appli);
+		print '</title>';
+
 		print "\n";
 
 		//$ext='';
@@ -213,12 +259,14 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		if (GETPOST('version', 'int')) {
 			$ext='version='.GETPOST('version', 'int');	// usefull to force no cache on css/js
 		}
-
-		$themeparam='?lang='.$langs->defaultlang.'&amp;theme='.$conf->theme.(GETPOST('optioncss', 'aZ09')?'&amp;optioncss='.GETPOST('optioncss', 'aZ09', 1):'').'&amp;userid='.$user->id.'&amp;entity='.$conf->entity;
-		$themeparam .= ($ext ? '&amp;'.$ext : '');
-		if (!empty($_SESSION['dol_resetcache'])) {
-			$themeparam .= '&amp;dol_resetcache='.$_SESSION['dol_resetcache'];
+		// Refresh value of MAIN_IHM_PARAMS_REV before forging the parameter line.
+		if (GETPOST('dol_resetcache')) {
+			dolibarr_set_const($db, "MAIN_IHM_PARAMS_REV", ((int) $conf->global->MAIN_IHM_PARAMS_REV) + 1, 'chaine', 0, '', $conf->entity);
 		}
+
+		$themeparam = '?lang='.$langs->defaultlang.'&amp;theme='.$conf->theme.(GETPOST('optioncss', 'aZ09') ? '&amp;optioncss='.GETPOST('optioncss', 'aZ09', 1) : '').(empty($user->id) ? '' : ('&amp;userid='.$user->id)).'&amp;entity='.$conf->entity;
+
+		$themeparam .= ($ext ? '&amp;'.$ext : '').'&amp;revision='.getDolGlobalInt("MAIN_IHM_PARAMS_REV");
 		if (GETPOSTISSET('dol_hide_topmenu')) {
 			$themeparam .= '&amp;dol_hide_topmenu='.GETPOST('dol_hide_topmenu', 'int');
 		}
@@ -252,7 +300,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				$jquerytheme = $conf->global->MAIN_USE_JQUERY_THEME;
 			}
 			if (constant('JS_JQUERY_UI')) {
-				print '<link rel="stylesheet" type="text/css" href="'.JS_JQUERY_UI.'css/'.$jquerytheme.'/jquery-ui.min.css'.($ext?'?'.$ext:'').'">'."\n";  // JQuery
+				print '<link rel="stylesheet" type="text/css" href="'.JS_JQUERY_UI.'css/'.$jquerytheme.'/jquery-ui.min.css'.($ext ? '?'.$ext : '').'">'."\n"; // Forced JQuery
 			} else {
 				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/css/'.$jquerytheme.'/jquery-ui.css'.($ext?'?'.$ext:'').'">'."\n";    // JQuery
 			}
@@ -309,16 +357,17 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			} else {
 				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
-			if (!defined('DISABLE_JQUERY_TABLEDND')) {
-				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/tablednd/jquery.tablednd.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
-			}
 			// jQuery jnotify
 			if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY) && ! defined('DISABLE_JQUERY_JNOTIFY')) {
 				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
 			}
+			// Table drag and drop lines
+			if (empty($disableforlogin) && !defined('DISABLE_JQUERY_TABLEDND')) {
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/tablednd/jquery.tablednd.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+			}
 			// Chart
-			if ((empty($conf->global->MAIN_JS_GRAPH) || $conf->global->MAIN_JS_GRAPH == 'chart') && !defined('DISABLE_JS_GRAPH')) {
-				print '<script src="'.DOL_URL_ROOT.'/includes/nnnick/chartjs/dist/Chart.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+			if (empty($disableforlogin) && (empty($conf->global->MAIN_JS_GRAPH) || $conf->global->MAIN_JS_GRAPH == 'chart') && !defined('DISABLE_JS_GRAPH')) {
+				print '<script src="'.DOL_URL_ROOT.'/includes/nnnick/chartjs/dist/chart.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			}
 			if (!defined('DISABLE_SELECT2') && (!empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {
 				// jQuery plugin "mutiselect", "multiple-select", "select2", ...
@@ -332,7 +381,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 
 		if (! $disablejs && ! empty($conf->use_javascript_ajax)) {
 			// CKEditor
-			if ((!empty($conf->fckeditor->enabled) && (empty($conf->global->FCKEDITOR_EDITORNAME) || $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor') && !defined('DISABLE_CKEDITOR')) || defined('FORCE_CKEDITOR')) {
+			if (empty($disableforlogin) && (isModEnabled('fckeditor') && (empty($conf->global->FCKEDITOR_EDITORNAME) || $conf->global->FCKEDITOR_EDITORNAME == 'ckeditor') && !defined('DISABLE_CKEDITOR')) || defined('FORCE_CKEDITOR')) {
 				print '<!-- Includes JS for CKEditor -->'."\n";
 				$pathckeditor = DOL_URL_ROOT . '/includes/ckeditor/ckeditor/';
 				$jsckeditor='ckeditor.js';
@@ -342,20 +391,27 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				}
 				print '<script>';
 				print '/* enable ckeditor by mainmyaccount.inc.php */';
-				print 'var CKEDITOR_BASEPATH = \''.$pathckeditor.'\';'."\n";
+				print 'var CKEDITOR_BASEPATH = \''.dol_escape_js($pathckeditor).'\';'."\n";
 				// $themesubdir='' in standard usage
 				$themesubdir = '';
-				print 'var ckeditorConfig = \''.dol_buildpath($themesubdir.'/theme/'.$conf->theme.'/ckeditor/config.js'.($ext?'?'.$ext:''), 1).'\';'."\n";
+				print 'var ckeditorConfig = \''.dol_escape_js(dol_buildpath($themesubdir.'/theme/'.$conf->theme.'/ckeditor/config.js'.($ext ? '?'.$ext : ''), 1)).'\';'."\n"; // $themesubdir='' in standard usage
 				print 'var ckeditorFilebrowserBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print 'var ckeditorFilebrowserImageBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Type=Image&Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print '</script>'."\n";
 				print '<script src="'.$pathckeditor.$jsckeditor.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script>';
+				if (GETPOST('mode', 'aZ09') == 'Full_inline') {
+					print 'CKEDITOR.disableAutoInline = false;'."\n";
+				} else {
+					print 'CKEDITOR.disableAutoInline = true;'."\n";
+				}
+				print '</script>'."\n";
 			}
 
 			// Browser notifications (if NOREQUIREMENU is on, it is mostly a page for popup, so we do not enable notif too. We hide also for public pages).
 			if (!defined('NOBROWSERNOTIF') && !defined('NOREQUIREMENU') && !defined('NOLOGIN')) {
 				$enablebrowsernotif=false;
-				if (!empty($conf->agenda->enabled) && !empty($conf->global->AGENDA_REMINDER_BROWSER)) {
+				if (isModEnabled('agenda') && !empty($conf->global->AGENDA_REMINDER_BROWSER)) {
 					$enablebrowsernotif = true;
 				}
 				if ($conf->browser->layout == 'phone') {
@@ -369,7 +425,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 
 			// Global js function
 			print '<!-- Includes JS of Dolibarr -->'."\n";
-			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
+			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php?lang='.$langs->defaultlang.($ext?'?'.$ext:'').'"></script>'."\n";
 
 			// JS forced by page in top_htmlhead (relative url starting with /)
 			if (is_array($arrayofjs)) {
@@ -561,15 +617,20 @@ if (! function_exists('dol_getprefix')) {
 			global $conf;
 
 			if (! empty($conf->global->MAIL_PREFIX_FOR_EMAIL_ID)) {	// If MAIL_PREFIX_FOR_EMAIL_ID is set (a value initialized with a random value is recommended)
-				if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
-				elseif (isset($_SERVER["SERVER_NAME"])) return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
+				if ($conf->global->MAIL_PREFIX_FOR_EMAIL_ID != 'SERVER_NAME') {
+					return 'sellyoursaas'.$conf->global->MAIL_PREFIX_FOR_EMAIL_ID;
+				} elseif (isset($_SERVER["SERVER_NAME"])) {
+					return 'sellyoursaas'.$_SERVER["SERVER_NAME"];
+				}
 			}
 
 			// The recommended value (may be not defined for old versions)
-			if (! empty($conf->file->instance_unique_id)) return 'sellyoursaas'.$conf->file->instance_unique_id;
+			if (! empty($conf->file->instance_unique_id)) {
+				return sha1('sellyoursaas'.$conf->file->instance_unique_id);
+			}
 
 			// For backward compatibility
-			return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+			return sha1('sellyoursaas'.DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
 		}
 
 		// If prefix is for session (no need to have $conf loaded)
@@ -578,15 +639,15 @@ if (! function_exists('dol_getprefix')) {
 
 		// The recommended value (may be not defined for old versions)
 		if (!empty($tmp_instance_unique_id)) {
-			return 'sellyoursaas'.$tmp_instance_unique_id;
+			return sha1('sellyoursaas'.$tmp_instance_unique_id);
 		}
 
 		// For backward compatibility
 		if (isset($_SERVER["SERVER_NAME"]) && isset($_SERVER["DOCUMENT_ROOT"])) {
-			return 'sellyoursaas'.dol_hash($_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+			return sha1('sellyoursaas'.$_SERVER["SERVER_NAME"].$_SERVER["DOCUMENT_ROOT"].DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
 		}
 
-		return 'sellyoursaas'.dol_hash(DOL_DOCUMENT_ROOT.DOL_URL_ROOT, '3');
+		return sha1('sellyoursaas'.DOL_DOCUMENT_ROOT.DOL_URL_ROOT);
 	}
 }
 

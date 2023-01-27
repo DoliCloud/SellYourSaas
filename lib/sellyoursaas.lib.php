@@ -64,6 +64,21 @@ function cmp($a, $b)
 }
 
 /**
+ * To compare on date property (reverse)
+ *
+ * @param 	int 	$a		Date A
+ * @param 	int 	$b		Date B
+ * @return 	boolean			Result of comparison
+ */
+function cmpr_invoice_object_date_desc($a, $b)
+{
+	if ($a->date == $b->date) {
+		return strcmp($b->id, $a->id);
+	}
+	return strcmp($b->date, $a->date);
+}
+
+/**
  * Return if a thirdparty has a payment mode set as a default payment mode.
  *
  * @param 	int	$thirdpartyidtotest		Third party id
@@ -98,7 +113,7 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	$sql = 'SELECT rowid, default_rib FROM '.MAIN_DB_PREFIX."societe_rib";
 	$sql.= " WHERE type in ('ban', 'card', 'paypal')";
 	$sql.= " AND fk_soc = ".$thirdpartyidtotest;
-	$sql.= " AND (type = 'ban' OR (type='card' AND status = ".$servicestatusstripe.") OR (type='paypal' AND status = ".$servicestatuspaypal."))";
+	$sql.= " AND (type = 'ban' OR (type = 'card' AND status = ".$servicestatusstripe.") OR (type = 'paypal' AND status = ".$servicestatuspaypal."))";
 	$sql.= " ORDER BY default_rib DESC, tms DESC";
 
 	$resqltmp = $db->query($sql);
@@ -243,7 +258,7 @@ function sellyoursaasHasOpenInvoices($contract)
 	$contract->fetchObjectLinked();
 	$atleastoneopeninvoice=0;
 
-	if (is_array($contract->linkedObjects['facture'])) {
+	if (isset($contract->linkedObjects['facture']) && is_array($contract->linkedObjects['facture'])) {
 		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
 			if ($invoice->statut == Facture::STATUS_CLOSED) continue;
 			if ($invoice->statut == Facture::STATUS_ABANDONED) continue;
@@ -401,4 +416,292 @@ function getRootUrlForAccount($object)
 	}
 
 	return $ret;
+}
+
+/**
+ * Prepare array with list of tabs
+ *
+ * @return  array				Array of tabs to show
+ */
+function sellyoursaas_admin_prepare_head()
+{
+	global $langs, $conf, $user;
+
+	$langs->load("sellyoursaas");
+	$h = 0;
+	$head = array();
+
+	$head[$h][0] = "setup.php";
+	$head[$h][1] = $langs->trans("ParametersOnMasterServer");
+	$head[$h][2] = "setup";
+	$h++;
+
+	$head[$h][0] = "setup_deploy_server.php";
+	$head[$h][1] = $langs->trans("ParametersOnDeploymentServers");
+	$head[$h][2] = "setup_deploy_server";
+	$h++;
+
+	$head[$h][0] = "setup_register_security.php";
+	$head[$h][1] = $langs->trans("SecurityOfRegistrations");
+	$head[$h][2] = "setup_register_security";
+	$h++;
+
+	$head[$h][0] = "setup_automation.php";
+	$head[$h][1] = $langs->trans("Automation");
+	$head[$h][2] = "setup_automation";
+	$h++;
+
+	$head[$h][0] = "setup_other.php";
+	$head[$h][1] = $langs->trans("Other");
+	$head[$h][2] = "setup_other";
+	$h++;
+
+	// Show more tabs from modules
+	// Entries must be declared in modules descriptor with line
+	// $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
+	// $this->tabs = array('entity:-tabname);   												to remove a tab
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'useradmin');
+
+	complete_head_from_modules($conf, $langs, null, $head, $h, 'useradmin', 'remove');
+
+	return $head;
+}
+
+
+/**
+ * Function with remote API call to check registration data quality
+ *
+ * @param	string		$remoteip		User remote IP
+ * @param	boolean		$whitelisted	true or flase
+ * @param	string		$email			User remote email
+ * @return 	string[]					Array with ipquality, emailquality, vpnproba, abusetest, fraudscoreip, fraudscoreemail
+ */
+function getRemoteCheck($remoteip, $whitelisted, $email)
+{
+	global $conf;
+
+	$vpnproba = '';
+	$ipquality = '';
+	$emailquality = '';
+	$fraudscoreip = 0;
+	$fraudscoreemail = 0;
+	$abusetest = 0;
+
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+
+	dol_syslog("getRemoteCheck");
+
+	// TODO Insert evaluation by disposablemail here
+
+
+	// Evaluate VPN probability with Getintel
+	if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON)) {
+		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
+		if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
+		$url = 'http://check.getipintel.net/check.php?ip='.urlencode($remoteip).'&contact='.urlencode($emailforvpncheck).'&flag=f';
+		$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
+		/* The proxy check system will return negative values on error. For standard format (non-json), an additional HTTP 400 status code is returned
+		 -1 Invalid no input
+		 -2 Invalid IP address
+		 -3 Unroutable address / private address
+		 -4 Unable to reach database, most likely the database is being updated. Keep an eye on twitter for more information.
+		 -5 Your connecting IP has been banned from the system or you do not have permission to access a particular service. Did you exceed your query limits? Did you use an invalid email address? If you want more information, please use the contact links below.
+		 -6 You did not provide any contact information with your query or the contact information is invalid.
+		 If you exceed the number of allowed queries, you'll receive a HTTP 429 error.
+		 */
+		if (is_array($result) && $result['http_code'] == 200 && isset($result['content'])) {
+			$vpnproba = (float) price2num($result['content'], 2, 1);
+			$vpnproba = round($vpnproba, 2);
+			$ipquality .= 'geti-vpn='.$vpnproba.';';
+		} else {
+			$vpnproba = '';
+			$ipquality .= 'geti-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
+		}
+
+		// Refused if VPN probability from GetIP is too high
+		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+			$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED = 85;
+
+			if (empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+				// If not other check, we get default $fraudscoreip = 99
+				$fraudscoreip = 99;		// getintel is very important because we did not do other tests with IPQuality
+			} else {
+				$fraudscoreip = 1;		// getintel is not very important, we set a fraudscore always lower than the threshold
+			}
+
+			// We test if fraudscore is accepted or not
+			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED.' with a fraudscore '.$fraudscoreip.' >= '.$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED);
+				$abusetest = 1;
+			}
+		}
+	}
+
+	// Evaluate VPN probability with IPQualityScore but also TOR or bad networks and email
+	if (!empty($conf->global->SELLYOURSAAS_IPQUALITY_ON) && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
+		// Retrieve additional (optional) data points which help us enhance fraud scores.
+		$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
+		$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
+
+		// Set the strictness for this query. (0 (least strict) - 3 (most strict))
+		$strictness = 1;
+
+		// You may want to allow public access points like coffee shops, schools, corporations, etc...
+		$allow_public_access_points = 'true';
+
+		// Reduce scoring penalties for mixed quality IP addresses shared by good and bad users.
+		$lighter_penalties = 'true';
+
+		// Create parameters array.
+		$parameters = array(
+			'user_agent' => $user_agent,
+			'user_language' => $user_language,
+			'strictness' => $strictness,
+			'allow_public_access_points' => $allow_public_access_points,
+			'lighter_penalties' => $lighter_penalties
+		);
+
+		/* User & Transaction Scoring
+		 * Score additional information from a user, order, or transaction for risk analysis
+		 * Please see the documentation and example code to include this feature in your scoring:
+		 * https://www.ipqualityscore.com/documentation/proxy-detection/transaction-scoring
+		 * This feature requires a Premium plan or greater
+		 */
+		$transaction_parameters = array();
+
+		// Format Parameters
+		if (is_array($transaction_parameters) && count($transaction_parameters)) {
+			$formatted_parameters = http_build_query(array_merge($parameters, $transaction_parameters));
+		} else {
+			$formatted_parameters = http_build_query($parameters);
+		}
+
+		// Create API URL for IP Check
+		$url = sprintf(
+			'https://www.ipqualityscore.com/api/json/ip/%s/%s?%s',
+			$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
+			urlencode($remoteip),
+			$formatted_parameters
+			);
+
+		$result = getURLContent($url);
+		if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
+			try {
+				dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
+				$jsonreponse = json_decode($result['content'], true);
+				dol_syslog("For ip ".$remoteip.": fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
+				if ($jsonreponse['success']) {
+					if ($jsonreponse['recent_abuse'] && !empty($conf->global->SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP)) {	// Not recommanded if users are using shared IP
+						dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
+						$abusetest = 2;
+					}
+					if ($jsonreponse['tor'] || $jsonreponse['active_tor']) {
+						// So recommanded that is it enabled always, no option to disable this
+						dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP - host=".$jsonreponse['host']);
+						$abusetest = 3;
+					}
+					$ipquality .= 'ipq-tor='.(($jsonreponse['tor'] || $jsonreponse['active_tor']) ? 1 : 0).';';
+					$ipquality .= 'ipq-vpn='.(($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0).';';
+					$ipquality .= 'ipq-recent_abuse='.($jsonreponse['recent_abuse'] ? 1 : 0).';';
+					$ipquality .= 'ipq-fraud_score='.$jsonreponse['fraud_score'].';';
+					$ipquality .= 'ipq-host='.$jsonreponse['host'].';';
+					$fraudscoreip = (int) $jsonreponse['fraud_score'];
+
+					if ($vpnproba === '') {
+						// If vpn proba was not found with getip, we use the one found from ipqualityscore
+						$vpnproba = (($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0);
+						$vpnproba = round($vpnproba, 2);
+					}
+				} else {
+					$ipquality .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
+				}
+			} catch (Exception $e) {
+				$ipquality .= 'ipq-check failed. Exception '.dol_trunc($e->getMessage(), 100).';';
+			}
+		} else {
+			$ipquality .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
+		}
+
+		// Refused if VPN probability from IPQuality is too high
+		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+			$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED = 85;
+
+			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - IPQuality VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED.' with a fraudscore '.$fraudscoreip.' >= '.$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED);
+				$abusetest = 1;
+			}
+		}
+
+
+		// Create API URL for Email Check
+		$url = sprintf(
+			'https://www.ipqualityscore.com/api/json/email/%s/%s?%s',
+			$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
+			urlencode($email),
+			$formatted_parameters
+			);
+
+		$result = getURLContent($url);
+		if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
+			try {
+				dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
+				$jsonreponse = json_decode($result['content'], true);
+				dol_syslog("For email ".$email.": valid=".$jsonreponse['valid']." - disposable=".$jsonreponse['disposable']." - dns_valid=".$jsonreponse['dns_valid']." - timed_out=".$jsonreponse['timed_out']);
+				if ($jsonreponse['success']) {
+					$emailquality .= 'ipq-valid='.$jsonreponse['valid'].';';
+					$emailquality .= 'ipq-disposable='.$jsonreponse['disposable'].';';
+					$emailquality .= 'ipq-dns_valid='.$jsonreponse['dns_valid'].';';
+					$emailquality .= 'ipq-timed_out='.$jsonreponse['timed_out'].';';
+					$emailquality .= 'ipq-recent_abuse='.$jsonreponse['recent_abuse'].';';
+				} else {
+					$emailquality .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
+				}
+			} catch (Exception $e) {
+				$emailquality .= 'ipq-check failed. Exception '.dol_trunc($e->getMessage(), 100).';';
+			}
+		} else {
+			$emailquality .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
+		}
+
+		// Refused if Email fraud probability is too high
+		if (!$whitelisted && empty($abusetest)) {
+			if ($jsonreponse['recent_abuse'] === false && ($jsonreponse['valid'] === true || ($jsonreponse['timed_out'] === true && $jsonreponse['disposable'] === false && $jsonreponse['dns_valid'] === true))) {
+				// Email valid
+			} else {
+				dol_syslog("Instance creation blocked for email ".$email." - Email fraud probability ".$fraudscoreemail." is higher or equal than ".$conf->global->SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED);
+				// TODO Enable this
+				// $abusetest = 6;
+			}
+		}
+	}
+
+
+	// SELLYOURSAAS_BLACKLIST_IP_MASKS and SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN are hidden constants.
+	// Deprecated. Use instead the List of blacklist ips into menu. This is done a begin of page
+
+	// Block for some IPs
+	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
+		$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
+		foreach ($arrayofblacklistips as $blacklistip) {
+			if ($remoteip == $blacklistip) {
+				dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");
+				$abusetest = 4;
+			}
+		}
+	}
+
+	// Block for some IPs if VPN proba is higher that a threshold
+	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
+		if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
+			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+			foreach ($arrayofblacklistips as $blacklistip) {
+				if ($remoteip == $blacklistip) {
+					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
+					$abusetest = 5;
+				}
+			}
+		}
+	}
+
+	return array('ipquality'=>$ipquality, 'emailquality'=>$emailquality, 'vpnproba'=>$vpnproba, 'abusetest'=>$abusetest, 'fraudscoreip'=>$fraudscoreip, 'fraudscoreemail'=>$fraudscoreemail);
 }

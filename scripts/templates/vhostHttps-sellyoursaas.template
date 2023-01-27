@@ -6,7 +6,7 @@
         </IfModule>
         
         # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
-        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__webAppPath__/
+        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__webAppPath__/:/usr/local/bin/
         
         ServerName __webAppDomain__
         ServerAdmin __webAdminEmail__
@@ -20,7 +20,7 @@
         AssignUserID __osUsername__ __osGroupname__
         </IfModule>
 
-		# __ AllowOverride __ is defined into package.
+		# __ AllowOverride __ is defined on package.
 		# __ IncludeFromContract __ is defined on contract. 
 		# For example: "Require ip 1.2.3.4"
 		# or "IncludeOptional /etc/apache2/sellyoursaas-online/__webAppDomain__-directory-options.conf"
@@ -38,6 +38,8 @@
 
         #ErrorLog __osUserPath__/__webAppLogName___error.log
         #TransferLog /var/log/apache2/__webAppLogName___access_log
+        CustomLog ${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined
+        CustomLog /var/log/apache2/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
         
         # Compress returned resources of type php pages, text file export, css and javascript
         AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript
@@ -54,10 +56,9 @@
         # Make sure proxies don't deliver the wrong content
         #Header append Vary User-Agent env=!dont-vary
 
-        DeflateFilterNote Input instream
-        DeflateFilterNote Output outstream
-        DeflateFilterNote Ratio ratio
-
+        #DeflateFilterNote Input instream
+        #DeflateFilterNote Output outstream
+        #DeflateFilterNote Ratio ratio
         #LogFormat '"%r" %{outstream}n/%{instream}n (%{ratio}n%%)' deflate
         #CustomLog deflate_log deflate
 

@@ -24,7 +24,7 @@ export currentpath=$(dirname "$0")
 
 cd $currentpath/ansible
 
-echo "Execute ansible for host group $1 and targets $2"
+echo "Execute ansible for host group $1 and targets $target"
 pwd
 
 #command="ansible-playbook -K launch_git_update_sellyoursaas.yml -i hosts-$1 -e 'target="$target"' --limit=*.mydomain.com"

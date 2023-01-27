@@ -200,12 +200,12 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an instance from an old server to a new server.\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomain.com newinstance.withY.mysaasdomain.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmredirect|maintenance) [MYPRODUCTREF]\n";
 	print "Mode is test for a test mode.\n";
 	print "        confirm for real mode.\n";
 	print "        confirmredirect for real mode and set old instance as a redirect instance.\n";
 	print "        maintenance to switch old instance in maintenance mode before the move.\n";
-	print "MYPRODUCTREF can be set to force the name of hosting application.\n";
+	print "MYPRODUCTREF can be set to force a new hosting application service.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	print "\n";
 	exit(-1);
@@ -259,7 +259,13 @@ if (empty($db)) $db=$dbmaster;
 
 // Forge complete name of instance
 if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match('/\.home\.lan$/', $newinstance)) {
-	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+	} else {
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$staticdeploymentserver = new Deploymentserver($db);
+		$tmparray = $staticdeploymentserver->fetchAllDomains();
+	}
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
 	$newinstance = $newinstance.".".$tmpstring;   // Automatically concat first domain name
 }
@@ -326,7 +332,9 @@ if (empty($productref)) {
 
 $createthirdandinstance = 0;
 
-$newobject = new Contrat($dbmaster);
+dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
+
+$newobject = new SellYourSaasContract($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
 	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
@@ -337,15 +345,15 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 }
 
 $newobject->instance = $newinstance;
-$newobject->username_web = $oldobject->array_options['options_username_os'];
-$newobject->password_web = $oldobject->array_options['options_password_os'];
-$newobject->hostname_web = $oldobject->array_options['options_hostname_os'];
-$newobject->username_db  = $oldobject->array_options['options_username_db'];
-$newobject->password_db  = $oldobject->array_options['options_password_db'];
-$newobject->database_db  = $oldobject->array_options['options_database_db'];
+$newobject->username_os = $oldobject->array_options['options_username_os'];
+$newobject->password_os = $oldobject->array_options['options_password_os'];
+$newobject->hostname_os = $oldobject->array_options['options_hostname_os'];
+$newobject->username_db = $oldobject->array_options['options_username_db'];
+$newobject->password_db = $oldobject->array_options['options_password_db'];
+$newobject->database_db = $oldobject->array_options['options_database_db'];
 
-if (empty($newobject->instance) || empty($newobject->username_web) || empty($newobject->password_web) || empty($newobject->database_db)) {
-	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_web, password_web or database_db).\n";
+if (empty($newobject->instance) || empty($newobject->username_os) || empty($newobject->password_os) || empty($newobject->database_db)) {
+	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_os, password_os or database_db).\n";
 	print "\n";
 	exit(-3);
 }
@@ -390,25 +398,32 @@ if ($mode == 'confirmredirect' || $mode == 'maintenance') {
 	}
 }
 
-// Share certificate of old instance
+// Share certificate of old instance by copying them into the common crt dir (they should already be into this directory)
+// TODO If the certificate of the source isntance are not into crt directory, we must copy them into the crt directory with read permission to admin user.
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
-	print '--- Copy current wild certificate to use it as the certificate for the custom url of the new instance (for backward compatibility)'."\n";
+	print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) of instance (generic and custom) into the crt directory. We may use them on the new instance for backward compatibility.'."\n";
 	foreach (array('.key', '.crt', '-intermediate.crt') as $ext) {
 		$srcfile = '/etc/apache2/'.$oldwilddomain.$ext;
 		$destfile = $conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.$ext;
-		print 'Copy '.$srcfile.' into '.$destfile."\n";
-		if (! dol_is_file($destfile)) {
-			dol_copy($srcfile, $destfile, '0600');
-			if (! dol_is_file($destfile)) {
-				print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files for ".$oldwilddomain." must be found into /etc/apache2\n";
-				exit(-1);
+		if (dol_is_file($destfile)) {
+			print 'Certificate file '.$destfile.' already found into crt directory. Step discarded.'."\n";
+		} else {
+			if (dol_is_file($srcfile)) {
+				print 'Copy '.$srcfile.' into '.$destfile."\n";
+				dol_copy($srcfile, $destfile, '0600');
+				if (! dol_is_file($destfile)) {
+					print "Error: To be able to move an instance from ".$oldinstance." into another server, the SSL certificate files (.key, .crt and -intermediate.crt) for ".$oldwilddomain." must be found into ".$conf->sellyoursaas->dir_output."/crt/\n";
+					exit(-1);
+				}
+			} else {
+				print 'No certificate file '.$srcfile.' found. Step discarded.'."\n";
 			}
 		}
 	}
 }
 
-print '--- Create new container for new instance'."\n";
+print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
 
 $newpass = $oldobject->array_options['options_deployment_initial_password'];
 if (empty($newpass)) $newpass = getRandomPassword(true, array('I'), 16);
@@ -450,7 +465,7 @@ if (! $error) {
 }
 
 // Reload contract to get all values up to date
-$newobject = new Contrat($dbmaster);
+$newobject = new SellYourSaasContract($dbmaster);
 $result=$newobject->fetch('', '', $newinstance);
 
 $newserver=$newobject->array_options['options_hostname_os'];
@@ -471,7 +486,7 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 	exit(-1);
 }
 
-// Set the custom url on newobject
+// Set the custom url on new object with the one of the old one
 if (! empty($oldobject->array_options['options_custom_url'])) {
 	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
 	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
@@ -526,7 +541,8 @@ dol_mkdir($tmptargetdir);
 
 
 print '--- Synchro of files '.$oldsftpconnectstring.' to '.$tmptargetdir."\n";
-print 'SFTP old password '.$oldospass."\n";
+print 'SFTP connect string : '.$oldsftpconnectstring."\n";
+//print 'SFTP old password '.$oldospass."\n";
 
 $command="rsync";
 $param=array();
@@ -541,7 +557,10 @@ $param[]="--exclude .git";
 $param[]="--exclude .gitignore";
 $param[]="--exclude .settings";
 $param[]="--exclude .project";
+$param[]="--exclude *.pdf_preview.png";
 $param[]="--exclude htdocs/conf/conf.php";
+$param[]="--exclude glpi_config/config_db.php";
+$param[]="--exclude htdocs/inc/downstream.php";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
@@ -580,7 +599,8 @@ $sourcedir=$tmptargetdir;
 $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
 
 print '--- Synchro of files '.$sourcedir.' to '.$newsftpconnectstring."\n";
-print 'SFTP new password '.$newpassword."\n";
+print 'SFTP connect string : '.$newsftpconnectstring."\n";
+//print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
 $param=array();
@@ -596,6 +616,8 @@ $param[]="--exclude .gitignore";
 $param[]="--exclude .settings";
 $param[]="--exclude .project";
 $param[]="--exclude htdocs/conf/conf.php";
+$param[]="--exclude glpi_config/config_db.php";
+$param[]="--exclude htdocs/inc/downstream.php";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
 if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
@@ -644,8 +666,8 @@ if ($mode == 'confirmunlock')
 	$connection = ssh2_connect($newserver, $server_port);
 	if ($connection)
 	{
-		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $newobject->username_web, $newobject->password_web))
+		//print $object->instance." ".$object->username_os." ".$object->password_os."<br>\n";
+		if (! @ssh2_auth_password($connection, $newobject->username_os, $newobject->password_os))
 		{
 			dol_syslog("Could not authenticate with username ".$username." . and password ".preg_replace('/./', '*', $password), LOG_ERR);
 			exit(-5);
@@ -656,7 +678,7 @@ if ($mode == 'confirmunlock')
 
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/','',$newdatabasedb);
-			$fileinstalllock=$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_web.'/'.$dir.'/documents/install.lock';
+			$fileinstalllock=$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 
 			print 'Remove file '.$fileinstalllock."\n";
 
@@ -701,7 +723,7 @@ print "-> Files owner were modified for instance ".$newobject->ref_customer.": "
 */
 
 
-print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
 $command="mysqldump";
 $param=array();
@@ -723,10 +745,10 @@ $param[]="--hex-blob";
 $param[]="--default-character-set=utf8";
 
 $fullcommand = $command." ".join(" ", $param);
-$fullcommandredirectionfile = $tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').'.sql';
+$fullcommandredirectionfile = $tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').'.sql';
 $output = array();
 $return_varmysql = 0;
-print strftime("%Y%m%d-%H%M%S").' '.$fullcommand." > ".$fullcommandredirectionfile."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand." > ".$fullcommandredirectionfile."\n";
 
 $outputfile = $conf->admin->dir_temp.'/out.tmp';
 $resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, $fullcommandredirectionfile);
@@ -734,7 +756,7 @@ $resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, $fullcommandredi
 $return_varmysql = $resultarray['result'];
 $content_grabbed = $resultarray['output'];
 
-print strftime("%Y%m%d-%H%M%S").' mysqldump done (return='.$return_varmysql.')'."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysqldump done (return='.$return_varmysql.')'."\n";
 
 // Output result
 print $content_grabbed."\n";
@@ -756,13 +778,13 @@ $sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newo
 $sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
 
 
-print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.gmstrftime('%d').".sql\n";
+print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 //print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
 $fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropa."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropa."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
@@ -771,12 +793,18 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	$content_grabbed = $resultarray['output'];
 
 	print $content_grabbed."\n";
+	// If table already not exist, return_var is 1
+	// If technical error, return_var is also 1, so we disable this test
+	/*if ($return_var) {
+		print "Error on droping table into the new instance\n";
+		exit(-2);
+	}*/
 }
 
 $fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h'.$newserverbase.' -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
-print strftime("%Y%m%d-%H%M%S").' Drop table to prevent load error with '.$fullcommanddropb."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropb."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
@@ -785,14 +813,20 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') 
 	$content_grabbed = $resultarray['output'];
 
 	print $content_grabbed."\n";
+	// If table already not exist, return_var is 1
+	// If technical error, return_var is also 1, so we disable this test
+	/*if ($return_var) {
+		print "Error on droping table into the new instance\n";
+		exit(-2);
+	}*/
 }
 
-$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.gmstrftime('%d').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
-print strftime("%Y%m%d-%H%M%S")." Load dump with ".$fullcommand."\n";
+$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -A -h".$newserverbase." -u".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'maintenance') {
 	$output=array();
 	$return_var=0;
-	print strftime("%Y%m%d-%H%M%S").' '.$fullcommand."\n";
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 
 	$outputfile = $conf->admin->dir_temp.'/out.tmp';
 	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);

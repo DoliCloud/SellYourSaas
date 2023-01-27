@@ -117,7 +117,7 @@ if ($totalInvoiced == 0) {
 			$urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-				$newnamekey = 'SELLYOURSAAS_PRICES_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				$newnamekey = 'SELLYOURSAAS_PRICES_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
 				$urlforplanprices = $conf->global->$newnamekey;
 			}
 
@@ -138,7 +138,7 @@ if ($totalInvoiced == 0) {
 		// Show input text for the discount code
 		if ($acceptdiscountcode) {
 			print '<br>';
-			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'" class="maxwidth150"><br>';
+			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'" class="maxwidth200"><br>';
 			print '<div class="discountcodetext margintoponly" id="discountcodetext" autocomplete="off"></div>';
 			//var_dump($listofcontractid);
 			print '<script type="text/javascript" language="javascript">'."\n";
@@ -309,7 +309,7 @@ if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_
 	print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("Save").'</button>';
 }
 
-print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/working.gif'.'">';
+print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/working.gif">';
 print ' ';
 print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 
@@ -594,7 +594,11 @@ print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" cl
 print '
 	</div>';
 
+
+// SEPA Payment mode
+
 print '
+	<!-- SEPA Payment mode -->
 	<div class="linksepa" style="display: none;">
 		<div class="center quatrevingtpercent center">';
 if ($mythirdpartyaccount->isInEEC()) {
@@ -645,10 +649,10 @@ if ($mythirdpartyaccount->isInEEC()) {
 	}
 
 	$enabledformtoentersepa = getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA');
+	$enabledformtoentersepaforids = explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID'));	// To test by enabling only on a given thirdparty, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = id of thirparty.
 	//$enabledformtoentersepa = 1;
 
-	// To test by enabling only on a given thirdparty, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = id of thirparty.
-	if ($enabledformtoentersepa || $mythirdpartyaccount->id == getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID')) {
+	if ($enabledformtoentersepa || in_array($mythirdpartyaccount->id, $enabledformtoentersepaforids)) {
 		// Form to enter SEPA
 		print '<br>';
 		print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
@@ -659,12 +663,15 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BIC").' </td><td class="valignmiddle start"><input type="text" name="bic" id="bic" value="'.dol_escape_htmltag($bic).'" class="maxwidth125"></td></tr>';
 		print '</table>';
 
+		print '<br>';
+
+		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name, $mysoc->name).'</div>';
+
 		print '<br><br>';
 		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
 		print ' ';
 		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
-	}
-	else {
+	} else {
 		if (! $foundban) {
 			print '<br>';
 			//print $langs->trans("SEPAPaymentModeAvailableForYealyAndCeeSubscriptionOnly");
@@ -721,9 +728,9 @@ print '
 				jQuery(".linksepa").show();
 				jQuery("#bankname").focus();
 			});';
-	if (GETPOST('type', 'aZ09') == 'SepaMandate') {
-		print 'jQuery("#linksepa").trigger("click");';
-	}
+if (GETPOST('type', 'aZ09') == 'SepaMandate') {
+	print 'jQuery("#linksepa").trigger("click");';
+}
 	print '
 		});
 		</script>';

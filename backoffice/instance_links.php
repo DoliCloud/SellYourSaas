@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2004-2019 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2004-2022 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -38,12 +38,14 @@ if (! $res) die("Include of main fails");
 require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
 require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+require_once DOL_DOCUMENT_ROOT."/projet/class/project.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 
 $langs->loadLangs(array("admin","companies","users","contracts","other","commercial","sellyoursaas@sellyoursaas"));
 
@@ -56,16 +58,20 @@ $id			= GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
 $refold     = GETPOST('refold', 'alpha');
 
-$error=0; $errors=array();
+$error = 0;
+$errors=array();
 
-$object = new Contrat($db);
+$object = new SellYourSaasContract($db);
 
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('contractcard','globalcard'));
 
 if ($id > 0 || $ref) {
 	$result=$object->fetch($id, $ref);
-	if ($result < 0) dol_print_error($db, $object->error);
+	if ($result < 0) {
+		setEventMessages('Failed to read remote customer instance: '.$object->error, null, 'warnings');
+		$error++;
+	}
 	$id = $object->id;
 }
 
@@ -79,8 +85,12 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
  *	Actions
  */
 
-$parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
+$parameters=array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
+
 if (empty($reshook)) {
 	// Cancel
 	if (GETPOST('cancel', 'alpha') && ! empty($backtopage)) {
@@ -88,21 +98,52 @@ if (empty($reshook)) {
 		exit;
 	}
 
-	// Add action to create file, etc...
+	// Manage action 'addauthorizedkey', 'addinstalllock', etc...
 	require 'refresh_action.inc.php';
 
 	if ($action == 'markasspamandclose') {
+		$db->begin();
+
 		$idtoclose = GETPOST('idtoclose', 'int');
 		$tmpcontract = new Contrat($db);
 		$tmpcontract->fetch($idtoclose);
-		$tmpcontract->array_options['spammer'] = 1;
+		$tmpcontract->array_options['options_spammer'] = 1;
 		$tmpcontract->update($user, 1);
 
 		$result = $tmpcontract->closeAll($user, 0, 'Closed by spammer inspector.');
 		if ($result > 0) {
-			setEventMessages("OK", null, 'mesgs');
+			dol_include_once("/sellyoursaas/class/blacklistip.class.php");
+
+			$blacklistip = new Blacklistip($db);
+			$result = $blacklistip->fetch(0, $tmpcontract->array_options['options_deployment_ip']);
+			if ($result == 0) {
+				// If record does not exist yet
+				$blacklistip->status = Blacklistip::STATUS_ENABLED;
+				$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
+				$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
+				$blacklistip->comment = "Flagged as Spammer (from the backoffice by ".$user->login."), after manual analyzis of the user activity";
+
+				$result2 = $blacklistip->create($user);
+				if ($result2 <= 0) {
+					setEventMessages($blacklistip->error, $blacklistip->errors, 'errors');
+					$error++;
+				}
+			} elseif ($result > 0) {
+				setEventMessages("IP was already blacklisted", null, 'mesgs');
+			}
+
+			if (!$error) {
+				setEventMessages("Suspended", null, 'mesgs');
+			}
 		} else {
+			$error++;
 			setEventMessages($tmpcontract->error, $tmpcontract->errors, 'errors');
+		}
+
+		if ($error) {
+			$db->rollback();
+		} else {
+			$db->commit();
 		}
 	}
 
@@ -125,7 +166,7 @@ if (empty($reshook)) {
 
 		$server = (! empty($hostname_db) ? $hostname_db : $server);
 
-		$newdb=getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
+		$newdb = getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
 
 		if ($newdb) {
 			$urlmyaccount = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
@@ -156,8 +197,10 @@ if (empty($reshook)) {
 			} else {
 				setEventMessages($tmpcontract->error, $tmpcontract->errors, 'errors');
 			}
+
+			$newdb->close();
 		} else {
-			dol_print_error($newdb);
+			dol_print_error('', 'Failed to get DoliDB');
 		}
 	}
 
@@ -245,9 +288,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->hostname_os  = $hostname_os;
 	$object->username_web = $username_web;
 	$object->password_web = $password_web;
-	$object->hostname_web = $hostname_os;
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 	$newdb->prefix_db = $prefix_db;
 
 	$stringofversion = '';
@@ -261,6 +303,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 		$fordolibarr = 1;
 		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+			$fordolibarr = 0;
 			$forglpi = 1;
 		}
 
@@ -292,25 +335,75 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			$resql=$newdb->query($sql);
 			if ($resql) {
 				$obj = $newdb->fetch_object($resql);
-				$object->lastlogin_admin = $obj->login;
-				$object->lastpass_admin = $obj->pass;
-				$lastloginadmin = $object->lastlogin_admin;
-				$lastpassadmin = $object->lastpass_admin;
+				if ($obj) {
+					$object->lastlogin_admin = $obj->login;
+					$object->lastpass_admin = $obj->pass;
+					$lastloginadmin = $object->lastlogin_admin;
+					$lastpassadmin = $object->lastpass_admin;
+				}
+
+				$newdb->free($resql);
 			} else {
 				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
 			}
 		}
 
+		// Replace __INSTANCEDBPREFIX__
+		$substitarray=array(
+			'__INSTANCEDBPREFIX__' => $prefix_db
+		);
+
 		// Get $stringofversion and $stringoflistofmodules
-		// TODO Put the defintion in a sql into package
+		$formula = '';
+		$sqltogetpackage = 'SELECT p.version_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
+		$sqltogetpackage .= ' WHERE cd.fk_contrat = '.((int) $object->id);
+		$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
+		$sqltogetpackage .= " AND pe.app_or_option = 'app'";
+		$sqltogetpackage .= ' AND pe.package = p.rowid';
+		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one line
+
+		$resqltogetpackage = $db->query($sqltogetpackage);
+		if ($resqltogetpackage) {
+			$obj = $db->fetch_object($resqltogetpackage);
+			if ($obj) {
+				$formula = $obj->version_formula;
+			}
+		} else {
+			setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
+			$error++;
+		}
+		if (preg_match('/SQL:/', $formula)) {
+			// Define $stringofversion
+			$formula = preg_replace('/SQL:/', '', $formula);
+			$formula = make_substitutions($formula, $substitarray);
+			// 'MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
+			$resqlformula = $newdb->query($formula);
+
+			if ($resqlformula) {
+				$num = $newdb->num_rows($resqlformula);
+
+				$i=0;
+				while ($i < $num) {
+					$obj = $newdb->fetch_object($resqlformula);
+					$stringofversion .= ($i > 0 ? ' / ' : '');
+					if ($obj) {
+						$stringofversion .= $obj->name.'='.$obj->value;
+					} else {
+						$stringofversion .= $langs->trans("Unknown");
+					}
+					$i++;
+				}
+			} else {
+				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
+				$error++;
+			}
+		}
+
 		if ($fordolibarr) {
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
-
-			// Define $stringofversion
-			$stringofversion = 'MAIN_VERSION_LAST_INSTALL='.$confinstance->global->MAIN_VERSION_LAST_INSTALL.' / MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
-
 			// Define $stringoflistofmodules
+			// TODO Put the defintion in a sql into package
 			$i=0;
 			foreach ($confinstance->global as $key => $val) {
 				if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && ! empty($val)) {
@@ -323,10 +416,10 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	}
 
 
-	if (is_object($object->db2)) {
+	/*if (is_object($object->db2)) {
 		$savdb=$object->db;
 		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
-	}
+	}*/
 
 
 	$object->fetch_thirdparty();
@@ -350,7 +443,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// Thirdparty
 	$morehtmlref.='<br>'.$langs->trans('ThirdParty') . ' : ' . $object->thirdparty->getNomUrl(1);
 	// Project
-	if (! empty($conf->projet->enabled)) {
+	if (! empty($conf->project->enabled)) {
 		$langs->load("projects");
 		$morehtmlref.='<br>'.$langs->trans('Project') . ' : ';
 		if (0) {
@@ -396,11 +489,10 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	$backupdir=$conf->global->DOLICLOUD_BACKUP_PATH;
 
-	$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-	$login=$object->username_web;
-	$password=$object->password_web;
-
-	$server=$object->ref_customer;
+	$dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
+	$login = $username_web;
+	$password = $password_web;
+	$server = $object->ref_customer;
 
 	// Barre d'actions
 	/*  if (! $user->societe_id)
@@ -459,8 +551,8 @@ if (empty($object->nbofusers)) {
 					/*'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,*/
 					'__INSTANCEDBPREFIX__'=>$generateddbprefix,
 					'__DOL_DATA_ROOT__'=>DOL_DATA_ROOT,
-					'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
-					'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
+					'__INSTALLHOURS__'=>dol_print_date($now, '%H'),			// GMT
+					'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),		// GMT
 					'__OSHOSTNAME__'=>$generatedunixhostname,
 					'__OSUSERNAME__'=>$generatedunixlogin,
 					'__OSPASSWORD__'=>$generatedunixpassword,
@@ -493,10 +585,10 @@ if (empty($object->nbofusers)) {
 				if ($tmparray[0] == 'SQL') {
 					$sqlformula = make_substitutions($tmparray[1], $substitarray);
 
-					//$serverdeployment = $this->getRemoveServerDeploymentIp($domainname);
+					//$serverdeployment = $this->getRemoteServerDeploymentIp($domainname);
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 
-					dol_syslog("Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
+					dol_syslog("instance_links.php: Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
 
 					$serverdb = $serverdeployment;
 					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
@@ -515,7 +607,7 @@ if (empty($object->nbofusers)) {
 					} else {
 						$sqlformula = trim($sqlformula);
 
-						dol_syslog("Execute sql=".$sqlformula);
+						dol_syslog("instance_links.php: Execute sql=".$sqlformula);
 
 						$resql = $dbinstance->query($sqlformula);
 						if ($resql) {
@@ -529,7 +621,7 @@ if (empty($object->nbofusers)) {
 									$error++;
 									/*$this->error = 'SQL to get resource return nothing';
 									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('SQL to get resource return nothing', null, 'errors');
+									setEventMessages('instance_links.php: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 								}
 							} else {
 								// If request is a SELECT nb, fieldlogin as comment
@@ -557,7 +649,7 @@ if (empty($object->nbofusers)) {
 									$error++;
 									/*$this->error = 'SQL to get resource return nothing';
 									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('SQL to get resource return nothing', null, 'errors');
+									setEventMessages('instance_links.php: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
 								}
 							}
 
@@ -586,7 +678,7 @@ if (empty($object->nbofusers)) {
 		}
 		else
 		{
-			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(),'','warnings');
+			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(), null, 'warnings');
 		}*/
 	}
 }
@@ -599,7 +691,7 @@ print '<div class="fichecenter">';
 print '<table class="noborder centpercent tableforfield">';
 
 // Nb of users
-print '<tr><td width="20%">'.$langs->trans("NbOfUsers").'</td><td><font size="+2">'.round($object->nbofusers).'</font></td>';
+print '<tr><td width="20%">'.$langs->trans("NbOfUsers").'</td><td><font size="+2">'.(isset($object->nbofusers) ? round($object->nbofusers) : '').'</font></td>';
 print '<td></td><td>';
 if (! $object->user_id && $user->rights->sellyoursaas->write) {
 	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refresh&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
@@ -609,25 +701,36 @@ print '</tr>';
 
 // Authorized key file
 print '<tr>';
-print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
+print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
-print '<td></td><td></td>';
+print '<td></td><td>';
+if (! $object->user_id && $user->rights->sellyoursaas->write) {
+	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refreshfilesonly&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+}
+print '</td>';
 print '</tr>';
 
 // Install.lock file
 print '<tr>';
-print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - '.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuser'):$langs->trans("No"));
+print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
 print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
 
+// Installmodules.lock file
+print '<tr>';
+print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstallmoduleslock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ($object->array_options['options_fileinstallmoduleslock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstallmoduleslock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
+print '</td>';
+print '<td></td><td></td>';
+print '</tr>';
 
 // Version
-
 print '<tr>';
 print '<td>'.$langs->trans("Version").'</td>';
 print '<td colspan="3">'.$stringofversion.'</td>';
@@ -636,7 +739,7 @@ print '</tr>';
 // Modules
 print '<tr>';
 print '<td>'.$langs->trans("Modules").'</td>';
-print '<td colspan="3">'.$stringoflistofmodules.'</td>';
+print '<td colspan="3"><span class="small">'.$stringoflistofmodules.'</span></td>';
 print '</tr>';
 
 print "</table><br>";
@@ -649,45 +752,45 @@ print '<br>';
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 
-//if (! empty($object->array_options['options_cookieregister_previous_instance']))
-//{
-	// Get all instances in chain
-	$arraylistofinstances = getListOfInstancesInChain($object);
+// Get all instances in chain
+$arraylistofinstances = getListOfInstancesInChain($object);
 
-	print '<br>';
-	print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
+print '<br>';
+print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
 
-	print '<div class="div-table-responsive-no-min">';
-	print '<table class="noborder" width="100%">';
+print '<div class="div-table-responsive-no-min">';
+print '<table class="noborder entpercent">';
 
-	print '<tr>';
-	print '<td>'.$langs->trans("Instance").'</td>';
-	print '<td>'.$langs->trans("RefCustomer").'</td>';
-	print '<td>'.$langs->trans("RegistrationCounter").'</td>';
-	print '<td>'.$langs->trans("IP").'</td>';
-	print '<td>'.$langs->trans("DeploymentIPVPNProba").'</td>';
-	print '<td>'.$langs->trans("Date").'</td>';
-	print '<td>'.$langs->trans("Status").'</td>';
-	print '<td></td>';
-	print '</tr>';
+print '<tr>';
+print '<td>'.$langs->trans("Instance").'</td>';
+print '<td>'.$langs->trans("RefCustomer").'</td>';
+print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($langs->trans("RegistrationCounter")).'">'.$langs->trans("RegistrationCounter").'</td>';
+print '<td>'.$langs->trans("IP");
+print ' &nbsp; <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.img_picto('', 'download', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("GetFileOfIps").'</span></a>';
+print '</td>';
+print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($langs->trans("DeploymentIPVPNProba")).'">'.$langs->trans("DeploymentIPVPNProba").'</td>';
+print '<td>'.$langs->trans("Date").'</td>';
+print '<td>'.$langs->trans("Status").'</td>';
+print '<td></td>';
+print '</tr>';
 
-	$arrayofips=array();
+$arrayofips=array();
 
 foreach ($arraylistofinstances as $instance) {
 	$arrayofips[] = $instance->array_options['options_deployment_ip'];
 
 	// Nb of users
 	print '<tr>';
-	print '<td>'.$instance->getNomUrl(1).'</td>';
+	print '<td class="nowraponall">'.$instance->getNomUrl(1).'</td>';
 	print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
 	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
-	print '<td>'.$instance->array_options['options_deployment_ip'].'</td>';
+	print '<td>'.dol_print_ip($instance->array_options['options_deployment_ip'], 0).'</td>';
 	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
-	print '<td>'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour').'</td>';
+	print '<td class="nowraponall">'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';
 	print '<td align="right">';
 	if ($user->rights->sellyoursaas->write) {
-		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.$langs->trans("MarkAsSpamAndClose").'</a>';
+		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("MarkAsSpamAndClose").'</span></a>';
 		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
 			print ' &nbsp; ';
 			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
@@ -699,23 +802,26 @@ foreach ($arraylistofinstances as $instance) {
 	print '</tr>';
 }
 
-	print '<tr class="liste_total">';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td>';
-	print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=getiplist&token='.newToken().'">'.$langs->trans("GetFileOfIps").'</a>';
-	print '</td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '<td></td>';
-	print '</tr>';
+/*
+print '<tr class="liste_total">';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '<td>';
+print '</td>';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '<td></td>';
+print '</tr>';
+*/
 
-	print '</table>';
-	print '</div>';
-//}
+print '</table>';
+print '</div>';
 
+if (is_object($newdb) && $newdb->connected) {
+	$newdb->close();
+}
 
 llxFooter();
 

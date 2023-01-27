@@ -4,6 +4,7 @@
 # To run the script:
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1 apache=1'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php80=1 apache=1'
 #
 
 
@@ -25,7 +26,8 @@
       - zip 
       - zstd 
       - memcached 
-      - ncdu 
+      - ncdu
+      - duc
       - acl
       - snapd
     register: command_output
@@ -49,14 +51,14 @@
       var: command_output.stdout_lines
 
 
-  ##### For PHP
+  ##### For PHP 7.4
   - name: Launch apt for php packages
     apt:
       pkg:
       - php7.4 
       - php7.4-cli 
       - libapache2-mod-php7.4 
-      - php7.4-fpm 
+      #- php7.4-fpm 
       - php7.4-gd 
       - php7.4-imap 
       - php7.4-json 
@@ -92,6 +94,49 @@
   - debug:
       var: command_output.stdout_lines
 
+  ##### For PHP 8.0
+  - name: Launch apt for php packages
+    apt:
+      pkg:
+      - php8.0 
+      - php8.0-cli 
+      - libapache2-mod-php8.0 
+      #- php8.0-fpm 
+      - php8.0-gd 
+      - php8.0-imap 
+      - php8.0-ldap 
+      - php8.0-mysql 
+      - php8.0-curl 
+      - php8.0-memcached 
+      - php8.0-imagick 
+      - php8.0-intl 
+      - php8.0-xml 
+      - php8.0-zip 
+      - php8.0-bz2 
+      - php8.0-ssh2 
+      - php8.0-mbstring 
+      - php8.0-dev
+    register: command_output
+    when: 
+      - php80 is defined
+
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: Launch apt for GLPI packages
+    apt:
+      pkg:
+      - php8.0-readline
+      - php8.0-xmlrpc
+    register: command_output
+    when: 
+      - php80 is defined
+
+  - debug:
+      var: command_output.stdout_lines
+
+
+  ##### apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
@@ -108,7 +153,6 @@
       section: PHP
       option: post_max_size
       value: 25M
-      backup: yes
     when: 
       - php74 is defined
 
@@ -117,8 +161,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: PHP
       option: max_input_vars
-      value: 4000
-      backup: yes
+      value: '4000'
     when: 
       - php74 is defined
 
@@ -128,57 +171,60 @@
       section: PHP
       option: memory_limit
       value: 256M
-      backup: yes
+    when: 
+      - php74 is defined
+
+  - name: Check or update disable_functions php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: PHP
+      option: disable_functions
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
     when: 
       - php74 is defined
 
   - name: Check or update session.gc_maxlifetime php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.gc_maxlifetime
-      value: 3600
-      backup: yes
+      value: '3600'
     when: 
       - php74 is defined
 
   - name: Check or update session.use_strict_mode php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.use_strict_mode
-      value: 1
-      backup: yes
+      value: '1'
     when: 
       - php74 is defined
 
   - name: Check or update session.use_only_cookies php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.use_only_cookies
-      value: 1
-      backup: yes
+      value: '1'
     when: 
       - php74 is defined
 
   - name: Check or update session.cookie_httponly php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.cookie_httponly
-      value: 1
-      backup: yes
+      value: '1'
     when: 
       - php74 is defined
 
   - name: Check or update session.cookie_samesite php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: Session
       option: session.cookie_samesite
       value: Lax
-      backup: yes
     when: 
       - php74 is defined
 
@@ -188,30 +234,46 @@
       section: PHP
       option: auto_prepend_file
       value: /usr/local/bin/phpsendmailprepend.php
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update sendmail_path php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: 'mail function'
       option: sendmail_path
       value: /usr/local/bin/phpsendmail.php
-      backup: yes
     when: 
       - php74 is defined
 
   - name: Check or update mail.log php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
-      section: PHP
+      section: 'mail function'
       option: mail.log
       value: /var/log/phpmail.log
-      backup: yes
     when: 
       - php74 is defined
 
+  - name: Check or update opcache.memory_consumption php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: opcache
+      option: opcache.memory_consumption
+      value: '1024'
+    when: 
+      - php74 is defined
+
+  - name: Check or update opcache.max_accelerated_files php.ini
+    ini_file:
+      path: /etc/php/7.4/apache2/php.ini
+      section: opcache
+      option: opcache.max_accelerated_files
+      value: '100000'
+    when: 
+      - php74 is defined
+
+  ##### cli/php.ini
   - name: Check or update auto_prepend_file cli/php.ini
     ini_file:
       path: /etc/php/7.4/cli/php.ini
@@ -228,7 +290,6 @@
       section: PHP
       option: sendmail_path
       value: /usr/local/bin/phpsendmail.php
-      backup: yes
     when: 
       - php74 is defined
 
@@ -238,23 +299,267 @@
       section: PHP
       option: mail.log
       value: /var/log/phpmail.log
-      backup: yes
     when: 
       - php74 is defined
 
+  - name: Set PHP version for CLI
+    community.general.alternatives:
+      name: php
+      path: /usr/bin/php7.4
+    when: 
+      - php74 is defined
 
       
+  ##### apache2/php.ini
+  - name: Check or update upload_max_filesize php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: PHP
+      option: upload_max_filesize
+      value: 20M
+      backup: yes
+    when: 
+      - php80 is defined
+
+  - name: Check or update post_max_size php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: PHP
+      option: post_max_size
+      value: 25M
+    when: 
+      - php80 is defined
+
+  - name: Check or update max_input_vars php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: PHP
+      option: max_input_vars
+      value: '4000'
+    when: 
+      - php80 is defined
+
+  - name: Check or update memory_limit php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: PHP
+      option: memory_limit
+      value: 256M
+    when: 
+      - php80 is defined
+
+  - name: Check or update disable_functions php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: PHP
+      option: disable_functions
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
+    when: 
+      - php80 is defined
+
+  - name: Check or update session.gc_maxlifetime php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: Session
+      option: session.gc_maxlifetime
+      value: '3600'
+    when: 
+      - php80 is defined
+
+  - name: Check or update session.use_strict_mode php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: Session
+      option: session.use_strict_mode
+      value: '1'
+    when: 
+      - php80 is defined
+
+  - name: Check or update session.use_only_cookies php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: Session
+      option: session.use_only_cookies
+      value: '1'
+    when: 
+      - php80 is defined
+
+  - name: Check or update session.cookie_httponly php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: Session
+      option: session.cookie_httponly
+      value: '1'
+    when: 
+      - php80 is defined
+
+  - name: Check or update session.cookie_samesite php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: Session
+      option: session.cookie_samesite
+      value: Lax
+    when: 
+      - php80 is defined
+
+  - name: Check or update auto_prepend_file php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+    when: 
+      - php80 is defined
+
+  - name: Check or update sendmail_path php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: 'mail function'
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+    when: 
+      - php80 is defined
+
+  - name: Check or update mail.log php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: 'mail function'
+      option: mail.log
+      value: /var/log/phpmail.log
+    when: 
+      - php80 is defined
+
+  - name: Check or update opcache.memory_consumption php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: opcache
+      option: opcache.memory_consumption
+      value: '1024'
+    when: 
+      - php80 is defined
+
+  - name: Check or update opcache.max_accelerated_files php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: opcache
+      option: opcache.max_accelerated_files
+      value: '100000'
+    when: 
+      - php80 is defined
+
+  ##### cli/php.ini
+  - name: Check or update auto_prepend_file cli/php.ini
+    ini_file:
+      path: /etc/php/8.0/cli/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+      backup: yes
+    when: 
+      - php80 is defined
+
+  - name: Check or update sendmail_path cli/php.ini
+    ini_file:
+      path: /etc/php/8.0/cli/php.ini
+      section: PHP
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+    when: 
+      - php80 is defined
+
+  - name: Check or update mail.log cli/php.ini
+    ini_file:
+      path: /etc/php/8.0/cli/php.ini
+      section: PHP
+      option: mail.log
+      value: /var/log/phpmail.log
+    when: 
+      - php80 is defined
+      
+  - name: Disable old PHP on Apache
+    command: a2dismod php7.0 php7.2 php7.3 php7.4
+    ignore_errors: true
+    when: 
+      - php80 is defined
+      
+  - name: Activates PHP on Apache
+    command: a2enmod php8.0
+    when: 
+      - php80 is defined
+
+  - name: Set PHP version for CLI
+    community.general.alternatives:
+      name: php
+      path: /usr/bin/php8.0
+    register: phpversionmodified
+    notify: restart-apache
+    when: 
+      - php80 is defined
+
+  - debug:
+      var: phpversionmodified.changed
+
+  #- name: Reload Apache configs if pyapp or Apache - files are changed
+  #  service: name=httpd state=reloaded
+  #  when: phpversionmodified.changed
+
   - name: Removed unexpected apt packages
     apt:
       pkg:
+      - php7.2-fpm 
       - php7.3-fpm 
       - php7.4-fpm 
       - php8.0-fpm
       - php8.1-fpm
+      - php8.2-fpm
       state: absent 
     register: command_output
 
   - debug:
       var: command_output.stdout_lines
       
-     
+
+  handlers:
+    - name: restart-apache
+      service:
+        name: apache2
+        state: restarted
+
+
+  ##### check/complete the sshd_config file
+- name: Add a section into the sshd_config, after passing validation with sshd -T
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: sshd_config
+      ansible.builtin.blockinfile:
+        path: /etc/ssh/sshd_config
+        marker: "# {mark} Block for SellYourSaas"
+        state: present
+        validate: /usr/sbin/sshd -t -f %s
+        block: |
+          # Warning Match rule works only in sshd_config, not into Included files so we include this block with ansible
+          # You can test a Match User rule with ssd -T -C user=aaa | grep param
+          #Match User osu*
+          #  ChrootDirectory "/home/jail/home/"
+          #  ForceCommand /usr/bin/secureBash
+          #Match User osu*
+          #  ChrootDirectory %h
+          Match User osu*
+            PasswordAuthentication=yes
+    
+  ##### Set permissions by calling perms.ksh
+- name: Call perms.ksh
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Launch perms.sh
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh confirm"
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines  

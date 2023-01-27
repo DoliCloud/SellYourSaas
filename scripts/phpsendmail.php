@@ -18,24 +18,103 @@ $logfile = '/var/log/phpsendmail.log';
 //$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
 $pathtospamdir = '/tmp/spam';
 
-
 //* Get the email content
 $mail='';
 $toline = ''; $ccline = ''; $bccline = '';
 $nbto = 0; $nbcc = 0; $nbbcc = 0;
 $fromline = '';
 $referenceline = '';
+$messageidline = '';
 $emailfrom = '';
 
 
+// Rules
+$MAXOK = 10;
+$MAXPERDAY = 250;	// By default, will be overwritten with sellyoursaas-public.conf
+
+file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start phpsendmail.php\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " SERVER_NAME = ".(empty($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'])."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " DOCUMENT_ROOT = ".(empty($_SERVER['DOCUMENT_ROOT']) ? '' : $_SERVER['DOCUMENT_ROOT'])."\n", FILE_APPEND);
+
+$fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
+// Get $maxemailperday
+$maxemailperday = 0;
+$maxemailperdaypaid = 0;
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas-public.conf')));
+	fclose($fp);
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'maxemailperday') {
+			$maxemailperday = $tmpline[1];
+		}
+		if ($tmpline[0] == 'maxemailperdaypaid') {
+			$maxemailperdaypaid = $tmpline[1];
+		}
+		if ($tmpline[0] == 'pathtospamdir') {
+			$pathtospamdir = $tmpline[1];
+		}
+	}
+} else {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR Failed to open /etc/sellyoursaas-public.conf file\n", FILE_APPEND);
+	//exit(-1);
+}
+if (is_numeric($maxemailperday) && $maxemailperday > 0) {
+	$MAXPERDAY = (int) $maxemailperday;
+}
+if (is_numeric($maxemailperdaypaid) && $maxemailperdaypaid > 0) {
+	$MAXPERDAYPAID = (int) $maxemailperdaypaid;
+}
+
+$processownerid = posix_getuid();
+$tmparray = posix_getpwuid($processownerid);
+$usernamestring = $tmparray['name'];
+file_put_contents($logfile, date('Y-m-d H:i:s') . " processownerid=".$processownerid." usernamestring=".$usernamestring."\n", FILE_APPEND);
+
+if (empty($MAXPERDAY)) {
+	$MAXPERDAY=1000;
+}
+if (empty($MAXPERDAYPAID)) {
+	$MAXPERDAYPAID=1000;
+}
+
 // Main
 
+file_put_contents($logfile, date('Y-m-d H:i:s') . " php.ini file loaded is ".php_ini_loaded_file()."\n", FILE_APPEND);
+
 if (function_exists('shell_exec')) {
-	file_put_contents($logfile, "shell_exec is available. ok\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " shell_exec is available. ok\n", FILE_APPEND);
 } else {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " The method shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " The function shell_exec is not available in shell context - exit 1\n", FILE_APPEND);
 	exit(1);
 }
+/*$disabledfunction = ini_get('disable_functions');
+if ($disabledfunction) {
+	if (strpos($disabledfunction, 'shell_exec') === false) {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " shell_exec is not disabled. ok\n", FILE_APPEND);
+	} else {
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " The function shell_exec is disabled by disable_functions - exit 1\n", FILE_APPEND);
+		exit(1);
+	}
+} else {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " failed to get disable_functions.\n", FILE_APPEND);
+}
+*/
+
+
+// Load $instanceofuser
+$instanceofuser = getInstancesOfUser($pathtospamdir);
+
+// Load $blacklistips
+$blacklistips = getBlackListIps($pathtospamdir);
+
+
+
+// TODO Check quota of email for the UID $processownerid / $usernamestring
+//export usernamestring=`grep "x:$processownerid:" /etc/passwd | cut -f1 -d:`
+//echo "$now usernamestring=$usernamestring" >> "/var/log/phpsendmail.log"
+
+
 
 $pointer = fopen('php://stdin', 'r');
 
@@ -45,17 +124,17 @@ while ($line = fgets($pointer)) {
 		if (preg_match('/^to:\s/i', $line)) {
 			$toline .= trim($line)."\n";
 			$linetmp = preg_replace('/^to:\s*/i', '', trim($line));
-			$tmpto=preg_split("/[\s,]+/", $linetmp);
+			$tmpto=preg_split("/[\s,;]+/", $linetmp);
 			$nbto+=count($tmpto);
 		} elseif (preg_match('/^cc:\s/i', $line)) {
 			$ccline .= trim($line)."\n";
 			$linetmp = preg_replace('/^cc:\s*/i', '', trim($line));
-			$tmpcc=preg_split("/[\s,]+/", $linetmp);
+			$tmpcc=preg_split("/[\s,;]+/", $linetmp);
 			$nbcc+=count($tmpcc);
 		} elseif (preg_match('/^bcc:\s/i', $line)) {
 			$bccline .= trim($line)."\n";
 			$linetmp = preg_replace('/^bcc:\s*/i', '', trim($line));
-			$tmpbcc=preg_split("/[\s,]+/", $linetmp);
+			$tmpbcc=preg_split("/[\s,;]+/", $linetmp);
 			$nbbcc+=count($tmpbcc);
 		}
 
@@ -63,9 +142,13 @@ while ($line = fgets($pointer)) {
 		if (preg_match('/^from:\s.*<(.*)>/i', $line, $reg)) {
 			$fromline .= trim($line)."\n";
 			$emailfrom = $reg[1];
-		} elseif (preg_match('/^from:\s+([^\s*])/i', $line, $reg)) {
+		} elseif (preg_match('/^from:\s+([^\s]*)/i', $line, $reg)) {
 			$fromline .= trim($line)."\n";
 			$emailfrom = trim($reg[1]);
+		}
+
+		if (preg_match('/^message-id:\s/i', $line)) {
+			$messageidline .= trim($line)."\n";
 		}
 
 		if (preg_match('/^references:\s/i', $line)) {
@@ -103,11 +186,35 @@ if (! $optionffound) {
 $ip = empty($_SERVER["REMOTE_ADDR"]) ? '' : $_SERVER["REMOTE_ADDR"];
 if (empty($ip)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
-	// exit(2);		// We do not exit, this can occurs sometime
+	// exit(7);		// We do not exit, this can occurs sometime
 }
 
-// Rules
-$MAXOK = 10;
+// Count other existing file starting with '/tmp/phpsendmail-'.posix_getuid()
+// and return error if nb is higher than 500
+$commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
+
+// Execute the command
+// We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
+//$resexec = shell_exec("id");
+//file_put_contents($logfile, date('Y-m-d H:i:s')." id = ".$resexec."\n", FILE_APPEND);
+$resexec = shell_exec($commandcheck);
+$resexec = (int) (empty($resexec) ? 0 : trim($resexec));
+
+$MAXALLOWED = $MAXPERDAYPAID;
+if ($usernamestring) {
+	if (in_array($usernamestring, array_keys($instanceofuser))) {
+		$MAXALLOWED = $instanceofuser[$usernamestring]['mailquota'];
+	} else {
+		$MAXALLOWED = $MAXPERDAY;
+	}
+}
+
+file_put_contents($logfile, date('Y-m-d H:i:s')." Nb of processes found with ".$commandcheck." = ".$resexec." (we accept ".$MAXALLOWED.")\n", FILE_APPEND);
+
+if ($resexec > $MAXALLOWED) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko quota reached - exit 6. User has reached its quota of '.$MAXALLOWED.".\n", FILE_APPEND);
+	exit(6);
+}
 
 
 //* Write the log
@@ -117,24 +224,21 @@ if ($ccline)  file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ccline, F
 if ($bccline) file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $bccline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $fromline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' Email detected into From: '. $emailfrom."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $messageidline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APPEND);
-file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - ".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' PWD=' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - REQUEST_URI=".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
 
-$blacklistofips = @file_get_contents($pathtospamdir.'/blacklistip');
-if ($blacklistofips === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofips can't be read.\n", FILE_APPEND);
-} elseif (! empty($ip)) {
-	$blacklistofipsarray = explode("\n", $blacklistofips);
-	if (is_array($blacklistofipsarray) && in_array($ip, $blacklistofipsarray)) {
-		file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 2. Blacklisted ip '.$ip." found into file blacklistip\n", FILE_APPEND);
-		exit(3);
-	}
+// Check if IP is in blacklist
+if (is_array($blacklistips) && in_array($ip, $blacklistips)) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 2. Blacklisted ip '.$ip." found into file ".$pathtospamdir."/blacklistip\n", FILE_APPEND);
+	exit(3);
 }
+
 
 $blacklistoffroms = @file_get_contents($pathtospamdir.'/blacklistfrom');
 if ($blacklistoffroms === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistoffroms can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/blacklistfrom can't be read.\n", FILE_APPEND);
 } elseif (! empty($emailfrom)) {
 	$blacklistoffromsarray = explode("\n", $blacklistoffroms);
 	if (is_array($blacklistoffromsarray) && in_array($emailfrom, $blacklistoffromsarray)) {
@@ -143,9 +247,24 @@ if ($blacklistoffroms === false) {
 	}
 }
 
+$blacklistofdirs = @file_get_contents($pathtospamdir.'/blacklistdir');
+if ($blacklistofdirs === false) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/blacklistdir can't be read.\n", FILE_APPEND);
+} elseif (! empty($_SERVER["REQUEST_URI"])) {
+	$blacklistofdirsarray = explode("\n", $blacklistofdirs);
+	if (is_array($blacklistofdirsarray)) {
+		foreach ($blacklistofdirsarray as $blacklistofdir) {
+			if ($blacklistofdir && preg_match('/'.preg_quote(trim($blacklistofdir), '/').'/', $_SERVER["REQUEST_URI"])) {
+				file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 7. Blacklisted dir '.$_SERVER["REQUEST_URI"]." contains blacklistdir key ".$blacklistofdir."\n", FILE_APPEND);
+				exit(7);
+			}
+		}
+	}
+}
+
 $blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
 if ($blacklistofcontents === false) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR blacklistofcontents can't be read.\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/blacklistcontent can't be read.\n", FILE_APPEND);
 } elseif (! empty($mail)) {
 	//file_put_contents($logfile, date('Y-m-d H:i:s') . " blacklistofcontents = ".$blacklistofcontents."\n", FILE_APPEND);
 	$blacklistofcontentsarray = explode("\n", $blacklistofcontents);
@@ -155,6 +274,8 @@ if ($blacklistofcontents === false) {
 			// Save spam mail content and ip
 			file_put_contents($pathtospamdir.'/blacklistmail', $mail."\n", FILE_APPEND);
 			chmod($pathtospamdir."/blacklistmail", 0666);
+
+			// Add ip to blacklistip
 			if (! empty($ip)) {
 				file_put_contents($pathtospamdir.'/blacklistip', $ip."\n", FILE_APPEND);
 				chmod($pathtospamdir."/blacklistip", 0666);
@@ -176,9 +297,9 @@ if (empty($fromline) && empty($emailfrom)) {
 
 
 
-file_put_contents($logfile, $command."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' .$command."\n", FILE_APPEND);
 
-// Execute the command
+// Execute the command to send email
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
 $resexec =  shell_exec($command);
 
@@ -186,4 +307,63 @@ if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEN
 if (empty($ip)) file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
 if (empty($ip)) file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
 
+time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
+
 return $resexec;
+
+
+
+
+/**
+ * getInstancesOfUser()
+ *
+ * @param	string	$pathtospamdir		Spam directory
+ * @return	array						Array of instances in mailquota (so paid instances). Key is osu... user. Value is an array.
+ */
+function getInstancesOfUser($pathtospamdir)
+{
+	$instanceofuser = array();
+	// Loop on each line of $pathtospamdir/mailquota
+	$fp = @fopen($pathtospamdir."/mailquota", "r");
+	if ($fp) {
+		while (($buffer = fgets($fp, 1024)) !== false) {
+			$reg = array();
+			if (preg_match('/\sid=(\d+)\sref=([^\s]+)\sosu=([^\s]+)\smailquota=(\d+)/', $buffer, $reg)) {
+				$instanceofuser[$reg[3]] = array('id'=>$reg[1], 'ref='=>$reg[2], 'osu'=>$reg[3], 'mailquota'=>$reg[4]);
+			}
+		}
+		if (!feof($fp)) {
+			echo "Erreur: fgets() a échoué\n";
+		}
+		fclose($fp);
+	}
+	return $instanceofuser;
+}
+
+/**
+ * getBlackListIps()
+ *
+ * @param	string	$pathtospamdir		Spam directory
+ * @return	array						Array of blacklisted IPs. Key and value are the IP.
+ */
+function getBlackListIps($pathtospamdir)
+{
+	$blacklistips = array();
+	// Loop on each line of $pathtospamdir/mailquota
+	$fp = @fopen($pathtospamdir."/blacklistip", "r");
+	if ($fp) {
+		while (($buffer = fgets($fp, 1024)) !== false) {
+			//$reg = array();
+			//if (preg_match('(.*)', $buffer, $reg)) {
+			//	$blacklistips[$reg[1]] = $reg[1];
+			//}
+			$buffer = trim($buffer);
+			$blacklistips[$buffer] = $buffer;
+		}
+		if (!feof($fp)) {
+			echo "Erreur: fgets() a échoué\n";
+		}
+		fclose($fp);
+	}
+	return $blacklistips;
+}

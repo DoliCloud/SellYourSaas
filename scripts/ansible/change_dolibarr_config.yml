@@ -1,0 +1,21 @@
+---
+# Script to change value of an entry into sellyoursaas.conf
+#
+# Examples to run the script:
+# ansible-playbook -K change_sellyoursaas_config.yml -i hosts-xxx -e 'target=targethost option=<your_option> value=<new_value>'
+# ansible-playbook -K change_sellyoursaas_config.yml -i hosts-xxx -e 'target=targethost option=<your_option> value=<new_value>' --limit=*.mydomain.com
+#
+
+- name: Change value in conf
+  hosts: '{{target}}'
+  become: yes
+
+  tasks:
+  - name: Change conf value
+    ini_file:
+      path: /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+      section: null
+      option: "${{option}}"
+      value: "'{{value}}';"
+      no_extra_spaces: yes
+      backup: yes

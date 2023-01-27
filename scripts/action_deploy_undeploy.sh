@@ -8,10 +8,11 @@
 # And allow apache to sudo on this script by doing visudo to add line:
 #www-data        ALL=(ALL) NOPASSWD: /usr/bin/create_deploy_undeploy.sh
 #
-# deployall   create user and instance
-# deploy      create only instance
-# undeployall remove user and instance
-# undeploy    remove only instance (must be easy to restore) - rest can be done later with clean.sh
+# deployall    create user/dir + dns + files + config + apache virtual host + cron + database creation + cli
+# deploy       create dns + files + config + apache virtual host + cron + database creation + cli
+# deployoption create files + cli
+# undeployall  remove user and instance
+# undeploy     remove only instance (must be easy to restore) - rest can be done later with clean.sh
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 export nowlog=`date +'%Y%m%d-%H%M%S'`
@@ -38,12 +39,12 @@ if [[ "x$templatesdir" != "x" ]]; then
 	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
-	export fpmpoolfile="$templatesdir/osuxxx.template"
+	export fpmpoolfiletemplate="$templatesdir/osuxxx.template"
 else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
-	export fpmpoolfile="$scriptdir/templates/osuxxx.template"
+	export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
 fi
 
 
@@ -289,6 +290,7 @@ if [[ ! -d $archivedir ]]; then
 fi
 
 archivetestinstances=`grep '^archivetestinstances=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+archivepaidinstances=1
 
 testorconfirm="confirm"
 
@@ -691,7 +693,7 @@ fi
 
 # Deploy files
 
-if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
+if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption" ]]; then
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Deploy files"
 	
@@ -755,7 +757,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	echo "Force permissions and owner on $targetdir/$osusername/$dbname"
 	chown -R $osusername.$osusername $targetdir/$osusername/$dbname
-	chmod -R go-rwx $targetdir/$osusername/$dbname
+	chmod -R go-rwxs $targetdir/$osusername/$dbname
 fi
 
 
@@ -792,33 +794,35 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			echo The target archive directory $archivedir/$osusername/$dbname already exists, so we overwrite files into existing archive
 			echo cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
 			cp -pr $targetdir/$osusername/$dbname $archivedir/$osusername
+			
 			if [[ $testorconfirm == "confirm" ]]
 			then
 				rm -fr $targetdir/$osusername/$dbname
 			fi
 		else														# This is the common case of archiving after an undeploy
-			#echo mv -f $targetdir/$osusername/$dbname $archivedir/$osusername/$dbname
 			echo `date +'%Y-%m-%d %H:%M:%S'`
 			if [[ $testorconfirm == "confirm" ]]
 			then
 				mkdir $archivedir/$osusername
 				mkdir $archivedir/$osusername/$dbname
+				
+				
 				if [[ "x$ispaidinstance" == "x1" ]]; then
-					if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-						echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-						tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
-					else
-						echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
-						tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+					if [[ "x$archivepaidinstances" == "x0" ]]; then
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+							echo "Archive of test instances are disabled. We discard the tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname"
+						else
+							echo "Archive of test instances are disabled. We discard the tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname"
+						fi
+					else 
+						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
+							echo tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+							tar c -I zstd --exclude-vcs -f $archivedir/$osusername/$osusername.tar.zst $targetdir/$osusername/$dbname
+						else
+							echo tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
+						fi
 					fi
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo rm -fr $targetdir/$osusername/$dbname
-					rm -fr $targetdir/$osusername/$dbname
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo chown -R root $archivedir/$osusername
-					chown -R root $archivedir/$osusername
-					echo chmod -R o-rwx $archivedir/$osusername
-					chmod -R o-rwx $archivedir/$osusername
 				else
 					if [[ "x$archivetestinstances" == "x0" ]]; then
 						if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -835,15 +839,16 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 							tar cz --exclude-vcs -f $archivedir/$osusername/$osusername.tar.gz $targetdir/$osusername/$dbname
 						fi
 					fi
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo rm -fr $targetdir/$osusername/$dbname
-					rm -fr $targetdir/$osusername/$dbname
-					echo `date +'%Y-%m-%d %H:%M:%S'`
-					echo chown -R root $archivedir/$osusername
-					chown -R root $archivedir/$osusername
-					echo chmod -R o-rwx $archivedir/$osusername
-					chmod -R o-rwx $archivedir/$osusername
 				fi
+
+				echo `date +'%Y-%m-%d %H:%M:%S'`
+				echo rm -fr $targetdir/$osusername/$dbname
+				rm -fr $targetdir/$osusername/$dbname
+				echo `date +'%Y-%m-%d %H:%M:%S'`
+				echo chown -R root $archivedir/$osusername
+				chown -R root $archivedir/$osusername
+				echo chmod -R o-rwx $archivedir/$osusername
+				chmod -R o-rwx $archivedir/$osusername
 			fi
 		fi
 	else
@@ -969,7 +974,6 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
-			export pathforcertif=`dirname $fileforconfig1`
 			export pathforcertif=`dirname $pathforcertif`
 			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
 			export webCustomSSLCertificateKEY=$CERTIFFORCUSTOMDOMAIN.key
@@ -1047,17 +1051,18 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	fi
 	
 	
-	# Deploy also the php fpm pool file
-	export phpfpmconf="/etc/apache2/sellyoursaas-fpm-pool/$fqn.conf"
-	if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
-		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm conf $phpfpmconf from $fpmpoolfile"
+	# Deploy also the php fpm pool file from the scripts/templates/osuxxx.conf
+	# A link will also be created into /etc/php/x.x/fpm/pool.d/$fqn.conf to this fpm pool file $fqn.conf
+	export phpfpmconf="/etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf"
+	if [ -d /etc/apache2/sellyoursaas-fpm-pool.d ]; then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm conf $phpfpmconf from $fpmpoolfiletemplate"
 		if [[ -s $phpfpmconf ]]
 		then
 			echo "Apache conf $phpfpmconf already exists, we delete it since it may be a file from an old instance with same name"
 			rm -f $phpfpmconf
 		fi
 	
-		echo "cat $fpmpoolfile | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+		echo "cat $fpmpoolfiletemplate | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
 				  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
 	              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
@@ -1074,7 +1079,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmconf"
-		cat $fpmpoolfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+		cat $fpmpoolfiletemplate | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
 	              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
@@ -1097,9 +1102,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo /usr/sbin/apache2ctl configtest
 	/usr/sbin/apache2ctl configtest
 	if [[ "x$?" != "x0" ]]; then
-		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn.conf to hope to restore configtest ok.
+		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn...conf to hope to restore configtest ok.
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.conf
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+		rm -f /etc/apache2/sellyoursaas-online/$fqn.website*.conf
 		echo "Failed to deployall instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 		exit 19
 	fi
@@ -1135,9 +1141,13 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		#a2dissite $fqn.conf
 		rm /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 
+		echo Disable conf with a2dissite $fqn.website*.conf
+		#a2dissite $fqn.conf
+		rm /etc/apache2/sellyoursaas-online/$fqn.website*.conf
+
 		echo Delete php fpm file $fqn.conf
-		if [ -f /etc/apache2/sellyoursaas-fpm-pool/$fqn.conf ]; then
-			rm /etc/apache2/sellyoursaas-fpm-pool/$fqn.conf
+		if [ -f /etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf ]; then
+			rm /etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf
 		fi
 
 		/usr/sbin/apache2ctl configtest
@@ -1209,7 +1219,6 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 		cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 
-		#cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
 		#echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		#cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		echo rm -f /var/spool/cron/crontabs/$osusername
@@ -1251,18 +1260,24 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
 	if [ $dbforcesetpassword == "1" ]; then
 		Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+		Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
+		Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
 	else
 		Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
+		Q3a=""
+		Q3b=""
 		# If we use mysql and not mariadb, we set password differently
 		dpkg -l | grep mariadb > /dev/null
 		if [ $? == "1" ]; then
 			# For mysql
 			Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+			Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
+			Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
 		fi
 	fi
 	
 	Q4="FLUSH PRIVILEGES; "
-	SQL="${Q1}${Q2}${Q3}${Q4}"
+	SQL="${Q1}${Q2}${Q3}${Q3a}${Q3b}${Q4}"
 	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
@@ -1345,14 +1360,14 @@ fi
 
 # Execute after CLI
 
-if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
+if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption" ]]; then
 	if [[ "x$cliafter" != "x" ]]; then
 		if [ -f $cliafter ]; then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Execute script with . $cliafter"
 			. $cliafter
 			if [[ "x$?" != "x0" ]]; then
 				echo Error when running the CLI script $cliafter 
-				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in undeployment" $EMAILTO
+				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 				exit 26
 			fi
 		fi
@@ -1360,10 +1375,12 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 fi
 
 
-if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
-	
+if [[ "$mode" == "undeploy" ]]; then
+	echo "$mode $instancename.$domainname" >> $targetdir/$osusername/$mode-$instancename.$domainname.txt
 	echo "$mode $instancename.$domainname" >> $archivedir/$osusername/$mode-$instancename.$domainname.txt
-
+fi
+if [[ "$mode" == "undeployall" ]]; then
+	echo "$mode $instancename.$domainname" >> $archivedir/$osusername/$mode-$instancename.$domainname.txt
 fi
 
 

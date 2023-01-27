@@ -82,7 +82,7 @@ if ($key != $conf->global->SELLYOURSAAS_SECURITY_KEY) {
  */
 
 $tmpfile = DOL_DATA_ROOT.'/dolibarr_sellyoursaas_spamreport.log';
-$date = strftime("%Y-%m-%d %H:%M:%S", time());
+$date = dol_print_date(dol_now('gmt'), "%Y-%m-%d %H:%M:%S", 'gmt');
 $body = file_get_contents('php://input');
 
 file_put_contents($tmpfile, "\n***** Spam report received ".$date."*****\n", FILE_APPEND);
@@ -139,6 +139,7 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 			$arraytags=null;
 
 			// Add metric in Datadog
+			file_put_contents($tmpfile, "Ping metric spamreported ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog\n", FILE_APPEND);
 			if ($mode != 'test' && $mode != 'nodatadog') {
 				$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
 			}
@@ -161,7 +162,7 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 
 				$statsd->event($titleofevent,
 					array(
-						'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true)."\n".$body,
+						'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".$body."\n".var_export($_SERVER, true),
 						'alert_type' => 'warning',
 						'source_type_name' => 'API',
 						'host'       => gethostname()
@@ -169,10 +170,10 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 				);
 			}
 
-			file_put_contents($tmpfile, "Ping ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog\n", FILE_APPEND);
+			file_put_contents($tmpfile, "Ping event ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog\n", FILE_APPEND);
 			echo "Ping ".($mode != 'test' ? 'sent' : 'not sent (test mode)')." to DataDog<br>\n";
 		} catch (Exception $e) {
-
+			// Nothing in exception
 		}
 	} else {
 		file_put_contents($tmpfile, "Datadog ping not sent (datadog ping on spamreport disabled)\n", FILE_APPEND);

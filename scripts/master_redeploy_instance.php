@@ -159,7 +159,7 @@ if ($fp) {
  *	Main
  */
 
-print "***** ".$script_file." (".$version.") - ".strftime("%Y%m%d-%H%M%S")." *****\n";
+print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 
 if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
@@ -179,7 +179,7 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user from master server.\n";
 	print "Usage:   $script_file  server  instance  [test|confirm]\n";
-	print "Example: $script_file  with1.mysaasdomain.com  all  test\n";
+	print "Example: $script_file  with1.mysaasdomainname.com  all  test\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -191,7 +191,13 @@ if (! in_array($mode, array('test', 'confirm'))) {
 
 // Forge complete name of instance
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
-	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+	} else {
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$staticdeploymentserver = new Deploymentserver($db);
+		$tmparray = $staticdeploymentserver->fetchAllDomains();
+	}
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
 	$instance = $instance.".".$tmpstring;   // Automatically concat first domain name
 }
@@ -238,34 +244,32 @@ while ($i < $num_rows) {
 	}
 
 	$object->instance = $object->ref_customer;
-	$object->username_web = $object->array_options['options_username_os'];
-	$object->password_web = $object->array_options['options_password_os'];
+	$object->username_os = $object->array_options['options_username_os'];
+	$object->password_os = $object->array_options['options_password_os'];
 	$object->username_db = $object->array_options['options_username_db'];
 	$object->password_db = $object->array_options['options_password_db'];
 	$object->database_db = $object->array_options['options_database_db'];
 	$object->deployment_host = $object->array_options['options_deployment_host'];
+	$object->username_web = $object->thirdparty->email;
+	$object->password_web = $object->thirdparty->array_options['options_password'];
 
-	if (empty($object->instance) && empty($object->username_web) && empty($object->password_web) && empty($object->database_db)) {
+	if (empty($object->instance) && empty($object->username_os) && empty($object->password_os) && empty($object->database_db)) {
 		print "Error: properties for instance ".$instance." was not registered into database.\n";
 		exit(-5);
 	}
 
-	$dirdb=preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-	$login=$object->username_web;
-	$password=$object->password_web;
+	$dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 
-	$server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
+	$server = ($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
 
-	if (empty($login) || empty($dirdb)) {
+	if (empty($object->array_options['options_username_os']) || empty($dirdb)) {
 		print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
 		exit(-6);
 	}
 
-	$now=dol_now();
+	$now = dol_now();
 
 	// WIP
-
-
 }
 
 

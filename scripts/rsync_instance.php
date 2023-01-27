@@ -121,7 +121,7 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "Update an instance on remote server with new ref version.\n";
-	print "Usage: $script_file source_root_dir sellyoursaas_instance (test|confirm|confirmunlock|diff|diffadd|diffchange|clean|confirmclean)\n";
+	print "Usage: $script_file source_root_dir sellyoursaas_instance (test|confirm|confirmunlock|diff|diffadd|diffchange|testclean|confirmclean|confirmwithtestdir)\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -133,7 +133,13 @@ if (0 == posix_getuid() && empty($conf->global->SELLYOURSAAS_SCRIPT_BYPASS_ROOT_
 
 // Forge complete name of instance
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
-	$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+	} else {
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$staticdeploymentserver = new Deploymentserver($db);
+		$tmparray = $staticdeploymentserver->fetchAllDomains();
+	}
 	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
 	$instance = $instance.".".$tmpstring;   // Automatically concat first domain name
 }
@@ -149,14 +155,14 @@ if ($result <= 0) {
 }
 
 $object->instance = $object->ref_customer;
-$object->username_web = $object->array_options['options_username_os'];
-$object->password_web = $object->array_options['options_password_os'];
+$object->username_os = $object->array_options['options_username_os'];
+$object->password_os = $object->array_options['options_password_os'];
 $object->username_db = $object->array_options['options_username_db'];
 $object->password_db = $object->array_options['options_password_db'];
 $object->database_db = $object->array_options['options_database_db'];
 
 
-if (empty($object->instance) || empty($object->username_web) || empty($object->password_web) || empty($object->database_db)) {
+if (empty($object->instance) || empty($object->username_os) || empty($object->password_os) || empty($object->database_db)) {
 	print "Error: Some properties for instance ".$instance." was not registered into database.\n";
 	exit(-3);
 }
@@ -166,8 +172,8 @@ if (! is_file($dirroot.'/README.md')) {
 }
 
 $dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
-$login = $object->username_web;
-$password = $object->password_web;
+$login = $object->username_os;
+$password = $object->password_os;
 
 $targetdir = $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
 $server = $object->array_options['options_hostname_os'];
@@ -178,15 +184,15 @@ if (empty($login) || empty($dirdb)) {
 	exit(-5);
 }
 
-$sftpconnectstring=$object->username_web.'@'.$server.':'.$targetdir;
+$sftpconnectstring=$object->username_os.'@'.$server.':'.$targetdir;
 
 print 'Synchro of files '.$dirroot.' to '.$targetdir."\n";
 print 'SFTP connect string : '.$sftpconnectstring."\n";
-print 'SFTP password '.$object->password_web."\n";
+//print 'SFTP password '.$object->password_os."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode, array('confirm','confirmunlock','confirmclean'))) $param[]="-n";
+if (! in_array($mode, array('confirm','confirmunlock','confirmwithtestdir','confirmclean'))) $param[]="-n";
 //$param[]="-a";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
 else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
@@ -213,11 +219,15 @@ $param[]="--exclude build/exe/";
 $param[]="--exclude dev/";
 $param[]="--exclude documents/";
 $param[]="--include htdocs/modulebuilder/template/test/";
-$param[]="--exclude test/";
+if ($mode != 'confirmwithtestdir') {
+	$param[]="--exclude test/";
+}
 $param[]="--exclude htdocs/conf/conf.php*";
+$param[]="--exclude glpi_config/config_db.php*";
+$param[]="--exclude htdocs/inc/downstream.php*";
 $param[]="--exclude htdocs/custom";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
-if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
+if (in_array($mode, array('testclean','confirmclean'))) $param[]="--delete";
 $param[]="-e 'ssh -p ".$server_port." -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 $param[]=$dirroot.'/';
@@ -242,8 +252,8 @@ if ($mode == 'confirmunlock') {
 
 	$connection = ssh2_connect($server, $server_port);
 	if ($connection) {
-		//print $object->instance." ".$object->username_web." ".$object->password_web."<br>\n";
-		if (! @ssh2_auth_password($connection, $object->username_web, $object->password_web)) {
+		//print $object->instance." ".$object->username_os." ".$object->password_os."<br>\n";
+		if (! @ssh2_auth_password($connection, $object->username_os, $object->password_os)) {
 			dol_syslog("Could not authenticate with username ".$username." . and password ".preg_replace('/./', '*', $password), LOG_ERR);
 			exit(-5);
 		} else {
@@ -251,7 +261,7 @@ if ($mode == 'confirmunlock') {
 
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
-			$fileinstalllock=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_web.'/'.$dir.'/documents/install.lock';
+			$fileinstalllock=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 
 			print 'Remove file '.$fileinstalllock."\n";
 
@@ -273,15 +283,15 @@ if ($mode != 'test') {
 	if ($user->id > 0) {
 		$actioncomm=new ActionComm($db);
 		if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
-		$actioncomm->datep=dol_now('tzserver');
-		$actioncomm->percentage=100;
-		$actioncomm->label='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-		$actioncomm->note_private='Upgrade instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
-		$actioncomm->fk_element=$object->id;
-		$actioncomm->elementtype='contract';
-		$actioncomm->type_code='AC_OTH_AUTO';
-		$actioncomm->userassigned[$user->id]=array('id'=>$user->id);
-		$actioncomm->userownerid=$user->id;
+		$actioncomm->datep = dol_now('tzserver');
+		$actioncomm->percentage = 100;
+		$actioncomm->label = 'Upgrade from CLI rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
+		$actioncomm->note_private = $actioncomm->label;
+		$actioncomm->fk_element = $object->id;
+		$actioncomm->elementtype = 'contract';
+		$actioncomm->type_code = 'AC_OTH_AUTO';
+		$actioncomm->userassigned[$user->id] = array('id'=>$user->id);
+		$actioncomm->userownerid = $user->id;
 		$actioncomm->create($user);
 	}
 }

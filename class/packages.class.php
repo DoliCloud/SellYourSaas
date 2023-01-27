@@ -44,6 +44,8 @@ class Packages extends CommonObject
 	 */
 	public $table_element = 'packages';
 
+	public $module = 'sellyoursaas';
+
 	/**
 	 * @var array  Does packages support multicompany module ? 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
 	 */
@@ -108,7 +110,8 @@ class Packages extends CommonObject
 		'cliafter' => array('type'=>'text', 'label'=>'Shell after deployment', 'visible'=>3, 'enabled'=>1, 'position'=>65, 'notnull'=>-1, 'help'=>"Cli shell executed after deployment.<br><br>For example, you can use the following shell sequence to enable a module:<br>rm -fr __INSTANCEDIR__/documents/install.lock;<br>cd __INSTANCEDIR__/htdocs/install/;<br>php __INSTANCEDIR__/htdocs/install/upgrade2.php 0.0.0 0.0.0 MAIN_MODULE_MYMODULE;<br>touch __INSTANCEDIR__/documents/install.lock;<br>chown -R __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents;"),
 		'cliafterpaid' => array('type'=>'text', 'label'=>'Shell after switch to paid (not yet available)', 'visible'=>3, 'enabled'=>1, 'position'=>66, 'notnull'=>-1, 'help'=>"Cli shell executed after entering a payment (or on deployment if customer already a paying customer)."),
 		'sqlafter' => array('type'=>'text', 'label'=>'Sql after deployment', 'visible'=>3, 'enabled'=>1, 'position'=>70, 'notnull'=>-1, 'help'=>'Sql executed after deployment.<br><br>Can use substitution vars like<br>__APPORGNAME__<br>__APPEMAIL__<br>__APPDOMAIN__<br>__APPCOUNTRYIDCODELABEL__<br>__SMTP_SPF_STRING__<br>__OSUSERNAME__<br>__APPPASSWORD0__<br>__APPPASSWORD0SALTED__<br>__APPPASSWORDSHA256__<br>__APPPASSWORDSHA256SALTED__<br>...'),
-		'sqlafterpaid' => array('type'=>'text', 'label'=>'Sql after switch to paid (not yet available)', 'visible'=>3, 'enabled'=>1, 'position'=>71, 'notnull'=>-1, 'help'=>'Sql executed after entering a payement (or on deployment if customer already a paying customer)'),
+		'sqlpasswordreset' => array('type'=>'text', 'label'=>'Sql to reset password of a deployed instance user', 'visible'=>3, 'enabled'=>1, 'position'=>71, 'notnull'=>-1, 'help'=>'Sql executed after clicking on cogs on backoffice/instance_users.php after a deployment <br><br> Can use substitution vars like<br>__REMOTEUSERID__<br>__NEWUSERPASSWORD__<br>__NEWUSERPASSWORDCRYPTED__'),
+		'sqlafterpaid' => array('type'=>'text', 'label'=>'Sql after switch to paid (not yet available)', 'visible'=>3, 'enabled'=>1, 'position'=>72, 'notnull'=>-1, 'help'=>'Sql executed after entering a payment (or on deployment if customer already a paying customer)'),
 		'allowoverride' => array('type'=>'varchar(255)', 'label'=>'Option string for virtual host', 'visible'=>-1, 'enabled'=>1, 'position'=>75, 'notnull'=>-1, 'help'=>'Any string to add into the Apache virtual host file. For example, keep empty to not allow apache override<br>Use "AllowOverride All" to allow override.'),
 		'version_formula' => array('type'=>'text', 'label'=>"VersionFormula",  'visible'=>3, 'enabled'=>1, 'position'=>76, 'help'=>'VersionFormulaExamples', 'lang'=>'sellyoursaas@sellyoursaas'),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'visible'=>-2, 'enabled'=>1, 'position'=>500, 'notnull'=>1,),
@@ -143,6 +146,7 @@ class Packages extends CommonObject
 	public $cliafter;
 	public $cliafterpaid;
 	public $sqlafter;
+	public $sqlpasswordreset;
 	public $sqlafterpaid;
 	public $allowoverride;
 	public $register_text;
@@ -425,27 +429,20 @@ class Packages extends CommonObject
 			if ($this->db->num_rows($result)) {
 				$obj = $this->db->fetch_object($result);
 				$this->id = $obj->rowid;
-				if ($obj->fk_user_author) {
+				if ($obj->fk_user_creat) {
 					$cuser = new User($this->db);
-					$cuser->fetch($obj->fk_user_author);
+					$cuser->fetch($obj->fk_user_creat);
 					$this->user_creation = $cuser;
 				}
 
-				if ($obj->fk_user_valid) {
+				if ($obj->fk_user_modif) {
 					$vuser = new User($this->db);
-					$vuser->fetch($obj->fk_user_valid);
-					$this->user_validation = $vuser;
-				}
-
-				if ($obj->fk_user_cloture) {
-					$cluser = new User($this->db);
-					$cluser->fetch($obj->fk_user_cloture);
-					$this->user_cloture = $cluser;
+					$vuser->fetch($obj->fk_user_modif);
+					$this->user_modification = $vuser;
 				}
 
 				$this->date_creation     = $this->db->jdate($obj->datec);
 				$this->date_modification = $this->db->jdate($obj->datem);
-				$this->date_validation   = $this->db->jdate($obj->datev);
 			}
 
 			$this->db->free($result);

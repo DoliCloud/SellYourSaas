@@ -88,22 +88,25 @@ require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/packages.class.php');
+dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
+dol_include_once('/sellyoursaas/class/blacklistip.class.php');
+dol_include_once('/sellyoursaas/class/whitelistip.class.php');
 
 // Re set variables specific to new environment
-$conf->global->SYSLOG_FILE_ONEPERSESSION=1;
+$conf->global->SYSLOG_FILE_ONEPERSESSION='register';
 
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
-$langs->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+$langs->loadLangs(array("main", "companies", "sellyoursaas@sellyoursaas", "errors"));
 
 if ($langs->defaultlang == 'en_US') {
 	$langsen = $langs;
 } else {
 	$langsen=new Translate('', $conf);
 	$langsen->setDefaultLang('en_US');
-	$langsen->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+	$langsen->loadLangs(array("main", "companies", "sellyoursaas@sellyoursaas", "errors"));
 }
 
 
@@ -130,6 +133,7 @@ $country_code = trim(GETPOST('address_country', 'alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
 $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
+$checkboxnonprofitorga = (GETPOSTISSET('checkboxnonprofitorga') ? GETPOST('checkboxnonprofitorga', 'aZ09') : '');
 
 $origin = GETPOST('origin', 'aZ09');
 $partner=GETPOST('partner', 'int');
@@ -240,9 +244,9 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
 	if (! preg_match('/\?/', $newurl)) $newurl.='?';
 	$newurl.='&mode=instances';
-	$newurl.='&reusecontractid='.$reusecontractid;
+	$newurl.='&reusecontractid='.((int) $reusecontractid);
 } elseif ($reusesocid) {		// When we use the "Add another instance" from myaccount dashboard
-	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we already load the $tmpproduct
+	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we have already load the $tmpproduct
 		$tmpproduct = new Product($db);
 		$tmpproduct->fetch($service, '', '', '', 1, 1, 1);
 		$productref = $tmpproduct->ref;
@@ -259,6 +263,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
 	if (! preg_match('/disablecustomeremail/i', $newurl)) $newurl.='&disablecustomeremail='.urlencode($disablecustomeremail);
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 
 	if ($reusesocid < 0) { // -1, the thirdparty was not selected
 		// Return to dashboard, the only page where the customer is requested.
@@ -299,6 +304,15 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		}
 		exit(-13);
 	}
+	if ($productref != 'none' && empty($tldid)) {
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Subdomain")), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Subdomain"))."\n";
+		}
+		exit(-14);
+	}
 	if (empty($password) || empty($password2)) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
@@ -306,7 +320,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		} else {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password"))."\n";
 		}
-		exit(-14);
+		exit(-15);
 	}
 	if ($password != $password2) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -315,7 +329,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		} else {
 			print $langs->trans("ErrorPasswordMismatch")."\n";
 		}
-		exit(-15);
+		exit(-16);
 	}
 } else { // When we deploy from the register.php page
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
@@ -332,6 +346,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (! preg_match('/partner/i', $newurl)) $newurl.='&partner='.urlencode($partner);
 	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
 	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 
 	$parameters = array('tldid' => $tldid, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
 	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
@@ -387,19 +402,25 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		header("Location: ".$newurl);
 		exit(-28);
 	}
-	if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
-		$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
-		if (! empty($listofbanned)) {
-			foreach ($listofbanned as $banned) {
-				if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
-					setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
-					header("Location: ".$newurl);
-					exit(-29);
+
+	// Possibility to block email adresses from a regex into global setup
+	// TODO: should be possible to use the blacklist list.
+	if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
+		if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
+			$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
+			if (! empty($listofbanned)) {
+				foreach ($listofbanned as $banned) {
+					if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
+						setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons", $email), null, 'errors');
+						header("Location: ".$newurl);
+						exit(-29);
+					}
 				}
 			}
 		}
 	}
-	if (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED) && ! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY)) {
+
+	if (getDolGlobalInt('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED') && getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY')) {
 		$allowed = false;
 		$disposable = false;
 		$allowedemail = (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED) ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
@@ -508,7 +529,7 @@ dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontracti
 
 
 if (empty($remoteip)) {
-	dol_syslog("InstanceCreationBlockedForSecurityPurpose empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
+	dol_syslog("InstanceCreationBlockedForSecurityPurpose: empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
 	$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
 	if (substr($sapi_type, 0, 3) != 'cli') {
 		setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
@@ -519,9 +540,60 @@ if (empty($remoteip)) {
 	exit(-60);
 }
 
+$tmpblacklistip = new Blacklistip($db);
+$tmparrayblacklist = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparrayblacklist) && $tmparrayblacklist < 0) {
+	echo "Erreur: failed to get blacklistip elements.\n";
+	exit(-61);
+}
+$tmpwhitelistip = new Whitelistip($db);
+$tmparraywhitelist = $tmpwhitelistip->fetchAll('', '', 1000, 0, array('status'=>1));
+if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
+	echo "Erreur: failed to get whitelistip elements.\n";
+	exit(-61);
+}
+
+// Set if IP is whitelisted
+$whitelisted = false;
+if (!empty($tmparraywhitelist)) {
+	foreach ($tmparraywhitelist as $val) {
+		if (strpos($val->content, '*') !== false) {
+			// An IP with a wild card
+			$tmpval = str_replace('*', '__STAR__', $val->content);
+			$tmpval = '^'.preg_quote($tmpval, '/').'$';
+			$tmpval = str_replace('__STAR__', '.*', $tmpval);
+
+			if (preg_match('/'.$tmpval.'/', $remoteip)) {
+				$whitelisted = true;
+				break;
+			}
+		} else {
+			// A simple IP
+			if ($val->content == $remoteip) {
+				$whitelisted = true;
+				break;
+			}
+		}
+	}
+}
+
+if (!$whitelisted && !empty($tmparrayblacklist)) {
+	foreach ($tmparrayblacklist as $val) {
+		if ($val->content == $remoteip) {
+			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip ".$remoteip." is in blacklistip", LOG_WARNING);
+			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+			if (substr($sapi_type, 0, 3) != 'cli') {
+				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action'), null, 'errors');
+				header("Location: ".$newurl);
+			} else {
+				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action')."\n";
+			}
+			exit(-62);
+		}
+	}
+}
+
 // TODO Move other check on abuse here
-
-
 
 
 
@@ -595,6 +667,7 @@ if ($reusecontractid) {
 } else {
 	// Check number of instance with same IP deployed (Rem: for partners, ip are the one of their customer)
 	$MAXDEPLOYMENTPERIP = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP) ? 20 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP);
+	$MAXDEPLOYMENTPERIPVPN = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN);
 
 	$nbofinstancewithsameip=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
@@ -602,15 +675,40 @@ if ($reusecontractid) {
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
-		if ($objselect) $nbofinstancewithsameip = $objselect->nb;
+		if ($objselect) {
+			$nbofinstancewithsameip = $objselect->nb;
+		}
 	}
-	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1)");
-	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
+	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1 or whitelisted)");
+	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
+		dol_syslog("TooManyInstancesForSameIp - ".$remoteip);
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("TooManyInstancesForSameIp"), null, 'errors');
+			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIp")."\n";
+			print $langs->trans("TooManyInstancesForSameIp", $remoteip)."\n";
+		}
+		exit(-70);
+	}
+
+	$nbofinstancewithsameipvpn=-1;
+	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."' AND deployment_vpn_proba = 1";
+	$select.= " AND deployment_status IN ('processing', 'done')";
+	$resselect = $db->query($select);
+	if ($resselect) {
+		$objselect = $db->fetch_object($resselect);
+		if ($objselect) {
+			$nbofinstancewithsameipvpn = $objselect->nb;
+		}
+	}
+	dol_syslog("nbofinstancewithsameipvpn = ".$nbofinstancewithsameipvpn." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPVPN." except if ip is 127.0.0.1 or whitelisted)");
+	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameipvpn < 0) || ($nbofinstancewithsameipvpn > $MAXDEPLOYMENTPERIPVPN))) {
+		dol_syslog("TooManyInstancesForSameIp - ".$remoteip);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("TooManyInstancesForSameIp", $remoteip)."\n";
 		}
 		exit(-70);
 	}
@@ -626,37 +724,44 @@ if ($reusecontractid) {
 		$objselect = $db->fetch_object($resselect);
 		if ($objselect) $nbofinstancewithsameip = $objselect->nb;
 	}
-	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1)");
-	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
+	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1. Whitelist ip does not bypass this test)");
+	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIPPERHOUR))) {
+		dol_syslog("TooManyInstancesForSameIpThisHour - ".$remoteip);
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour"), null, 'errors');
+			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIpThisHour")."\n";
+			print $langs->trans("TooManyInstancesForSameIpThisHour", $remoteip)."\n";
 		}
 		exit(-71);
 	}
 
 	// Check if some deployment are already in process and ask to wait
-	$MAXDEPLOYMENTPARALLEL = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPARALLEL);
+	$MAXDEPLOYMENTPARALLEL = getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 2);
+	if ($MAXDEPLOYMENTPARALLEL <= 0) {	// Protection to avoid problems
+		$MAXDEPLOYMENTPARALLEL = 1;
+	}
 
 	$tmp=explode('.', $sldAndSubdomain.$tldid, 2);
 	$sldAndSubdomain=$tmp[0];
 	$domainname=$tmp[1];
 	$sellyoursaasutils = new SellYourSaasUtils($db);
-	$serverdeployement = $sellyoursaasutils->getRemoveServerDeploymentIp($domainname);
+	$serverdeployement = $sellyoursaasutils->getRemoteServerDeploymentIp($domainname);
 
-	$nbofinstanceindeployment=-1;
+	$nbofinstanceindeployment = -1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
 	$select .= " WHERE deployment_host = '".$db->escape($serverdeployement)."'";
 	$select .= " AND deployment_status IN ('processing')";
+	$select .= " AND deployment_date_start >= DATE_SUB(NOW(), INTERVAL 1 DAY)";	// We ignore deployment started more than 24h ago: They are finished even if not correctly flagged as 'done'.
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
 		if ($objselect) $nbofinstanceindeployment = $objselect->nb;
+	} else {
+		dol_print_error($db, 'Bad sql request');
 	}
-	dol_syslog("nbofinstanceindeployment = ".$nbofinstanceindeployment." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPARALLEL." except if ip is 127.0.0.1)");
-	if ($remoteip != '127.0.0.1' && (($nbofinstanceindeployment < 0) || ($nbofinstanceindeployment > $MAXDEPLOYMENTPARALLEL))) {
+	dol_syslog("nbofinstanceindeployment = ".$nbofinstanceindeployment." for ip ".$remoteip." (must be lower than ".$MAXDEPLOYMENTPARALLEL." except if ip is 127.0.0.1)");
+	if ($remoteip != '127.0.0.1' && (($nbofinstanceindeployment < 0) || ($nbofinstanceindeployment >= $MAXDEPLOYMENTPARALLEL))) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyRequestPleaseTryLater"), null, 'errors');
 			header("Location: ".$newurl);
@@ -714,16 +819,20 @@ if ($reusecontractid) {
 
 		$email = $tmpthirdparty->email;
 
-		// Check number of instances
+		// Check number of instances for the same thirdparty account
 		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
 
 		$listofcontractid = array();
-		$sql = 'SELECT c.rowid as rowid';
-		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid, '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
-		$sql.= " WHERE c.fk_soc = s.rowid AND s.rowid = ".((int) $tmpthirdparty->id);
-		$sql.= " AND d.fk_contrat = c.rowid";
-		$sql.= " AND c.entity = ".((int) $conf->entity);
-		$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
+		$listofcontractidopen = array();
+		$sql = 'SELECT c.rowid as rowid, ce.deployment_status';
+		$sql .= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
+		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ce ON ce.fk_object = c.rowid,';
+		//$sql .= ' '.MAIN_DB_PREFIX.'contratdet as d,';
+		$sql .= ' '.MAIN_DB_PREFIX.'societe as s';
+		$sql .= " WHERE c.fk_soc = s.rowid AND s.rowid = ".((int) $tmpthirdparty->id);
+		//$sql .= " AND d.fk_contrat = c.rowid";
+		$sql .= " AND c.entity = ".((int) $conf->entity);
+		$sql .= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 		$resql=$db->query($sql);
 		if ($resql) {
 			$num_rows = $db->num_rows($resql);
@@ -732,12 +841,15 @@ if ($reusecontractid) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
 					$listofcontractid[$obj->rowid]=$obj->rowid;
+					if (in_array($obj->deployment_status, array('processing', 'done'))) {
+						$listofcontractidopen[$obj->rowid] = $obj->rowid;
+					}
 				}
 				$i++;
 			}
 		}
 
-		if (count($listofcontractid) >= $MAXINSTANCESPERACCOUNT) {
+		if (count($listofcontractidopen) >= $MAXINSTANCESPERACCOUNT) {
 			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
@@ -823,7 +935,8 @@ if ($reusecontractid) {
 	$generateddbport = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
 
-	// Create thirdparty
+
+	// Create the new thirdparty
 
 	$tmpthirdparty->oldcopy = dol_clone($tmpthirdparty);
 
@@ -839,9 +952,10 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_date_registration'] = dol_now();
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin?'-'.$origin:'');
-	$tmpthirdparty->array_options['options_source_utm'] = $_COOKIE['utm_source_cookie'];
+	$tmpthirdparty->array_options['options_source_utm'] = (empty($_COOKIE['utm_source_cookie']) ? '' : $_COOKIE['utm_source_cookie']);
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
+	$tmpthirdparty->array_options['options_checkboxnonprofitorga'] = $checkboxnonprofitorga;
 
 	if ($productref == 'none') {	// If reseller
 		$tmpthirdparty->fournisseur = 1;
@@ -857,9 +971,17 @@ if ($reusecontractid) {
 		}*/
 	}
 
+	$reg = array();
+	if (!empty($_COOKIE['utm_source_cookie']) && preg_match('/^partner(\d+)$/', $_COOKIE['utm_source_cookie'], $reg)) {
+		// The source is from a partner
+		if (getDolGlobalInt('SELLYOURSAAS_LINK_TO_PARTNER_IF_FIRST_SOURCE')) {
+			$tmpthirdparty->parent = ((int) $reg[1]);		// Add link to parent/reseller id with the id of first source in all web site
+		}
+	}
+
 
 	// Start transaction
-	$db->begin();
+	$db->begin('register_instance create/update thirdparty');
 
 	if ($tmpthirdparty->id > 0) {
 		if (empty($reusesocid)) {
@@ -877,6 +999,8 @@ if ($reusecontractid) {
 			}
 		}
 	} else {
+		dol_syslog("register_instance.php We will create the thirdparty");
+
 		// Set lang to backoffice language
 		$savlangs = $langs;
 		$langs = $langsen;
@@ -886,7 +1010,7 @@ if ($reusecontractid) {
 			$tmpthirdparty->code_fournisseur = -1;
 		}
 		if ($partner > 0) {
-			$tmpthirdparty->parent = $partner;		// Add link to parent/reseller
+			$tmpthirdparty->parent = $partner;		// Add link to parent/reseller id with the id of partner explicitely into registration link
 		}
 
 		$result = $tmpthirdparty->create($user);
@@ -907,6 +1031,8 @@ if ($reusecontractid) {
 	}
 
 	if (! empty($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG)) {
+		dol_syslog("register_instance.php We will set customer into the categroy");
+
 		$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG), 'customer');
 		if ($result < 0) {
 			$db->rollback();
@@ -954,6 +1080,7 @@ if ($reusecontractid) {
 	$date_start = $now;
 	$date_end = dol_time_plus_duree($date_start, $freeperioddays, 'd');
 
+
 	// Create contract/instance
 
 	if (! $error && $productref != 'none') {
@@ -964,24 +1091,36 @@ if ($reusecontractid) {
 		$contract->commercial_signature_id = $user->id;
 		$contract->commercial_suivi_id = $user->id;
 		$contract->date_contrat = $now;
-		$contract->note_private = 'Contract created from the online instance registration form.';
+		$contract->note_private = 'Contract created from the online instance registration form or the customer dashboard. forcesubdomain was '.(GETPOST('forcesubdomain')?GETPOST('forcesubdomain'):' empty').'.';
 
 		$tmp=explode('.', $contract->ref_customer, 2);
 		$sldAndSubdomain=$tmp[0];
 		$domainname=$tmp[1];
-
 		$sellyoursaasutils = new SellYourSaasUtils($db);
-		$serverdeployement = $sellyoursaasutils->getRemoveServerDeploymentIp($domainname);
+		$onlyifopen = 1;
+		if (GETPOST('forcesubdomain')) {
+			$onlyifopen = 0;
+		}
+		$serverdeployement = $sellyoursaasutils->getRemoteServerDeploymentIp($domainname, $onlyifopen);
+		if (empty($serverdeployement)) {
+			$db->rollback();
+
+			dol_print_error_email('BADDOMAIN', 'Trying to deploy on a not valid domain '.$domainname.' (not exists or closed).', null, 'alert alert-error');
+			exit(-94);
+		}
+		//$deploymentserver = new Deploymentserver($db);
+		//$deploymentserver->fetch(null, $domainname);
 
 		$contract->array_options['options_plan'] = $productref;
 		$contract->array_options['options_deployment_status'] = 'processing';
+		//$contract->array_options['options_deployment_server'] = $deploymentserver->id;
+		$contract->array_options['options_deployment_host'] = $serverdeployement;
 		$contract->array_options['options_deployment_date_start'] = $now;
 		$contract->array_options['options_deployment_init_email'] = $email;
 		$contract->array_options['options_deployment_init_adminpass'] = $password;
 		$contract->array_options['options_date_endfreeperiod'] = $date_end;
 		$contract->array_options['options_undeployment_date'] = '';
 		$contract->array_options['options_undeployment_ip'] = '';
-		$contract->array_options['options_deployment_host'] = $serverdeployement;
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;
@@ -1003,34 +1142,16 @@ if ($reusecontractid) {
 		if (preg_match('/glpi|flyve/i', $productref) && GETPOST("tz_string")) {
 			$contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.GETPOST("tz_string").'"';
 		}
+
+		$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
+		$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
+
 		$contract->array_options['options_timezone'] = GETPOST("tz_string");
 		$contract->array_options['options_deployment_ip'] = $remoteip;
-		$contract->array_options['options_deployment_ua'] = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : dol_trunc($_SERVER["HTTP_USER_AGENT"], 250));
+		$contract->array_options['options_deployment_ua'] = (($user_agent || $user_language) ? dol_trunc($user_agent.(($user_agent && $user_language) ? ' - ' : '').$user_language, 250) : '');
 
-		$contract->array_options['options_deployment_ipquality'] = '';
-
-		// Evaluate VPN probability with Getintel
-		$vpnproba = '';
-		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
-		if (! empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) $emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
-		$url = 'http://check.getipintel.net/check.php?ip='.$remoteip.'&contact='.urlencode($emailforvpncheck).'&flag=f';
-		$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
-		/* The proxy check system will return negative values on error. For standard format (non-json), an additional HTTP 400 status code is returned
-			-1 Invalid no input
-			-2 Invalid IP address
-			-3 Unroutable address / private address
-			-4 Unable to reach database, most likely the database is being updated. Keep an eye on twitter for more information.
-			-5 Your connecting IP has been banned from the system or you do not have permission to access a particular service. Did you exceed your query limits? Did you use an invalid email address? If you want more information, please use the contact links below.
-			-6 You did not provide any contact information with your query or the contact information is invalid.
-			If you exceed the number of allowed queries, you'll receive a HTTP 429 error.
-		 */
-		if (is_array($result) && $result['http_code'] == 200 && isset($result['content'])) {
-			$vpnproba = price2num($result['content'], 2, 1);
-			$contract->array_options['options_deployment_ipquality'] .= 'geti-vpn='.round($vpnproba, 2).';';
-		} else {
-			$contract->array_options['options_deployment_ipquality'] .= 'geti-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
-		}
-		$contract->array_options['options_deployment_vpn_proba'] = round($vpnproba, 2);
+		$contract->array_options['options_deployment_ipquality'] = 'remoteip='.$remoteip.': ';
+		$contract->array_options['options_deployment_emailquality'] = 'email='.$email.': ';
 
 		$prefix=dol_getprefix('');
 		$cookieregistrationa='DOLREGISTERA_'.$prefix;
@@ -1043,137 +1164,36 @@ if ($reusecontractid) {
 			$contract->array_options['options_cookieregister_previous_instance'] = dol_decode($_COOKIE[$cookieregistrationb]);
 		}
 
-		// Add security controls
-		$abusetest = 0;
+		// Add security controls - call getRemoteCheck()
+		$resultremotecheck = getRemoteCheck($remoteip, $whitelisted, $email);
 
-		// Refused if VPN probability is too high
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
-			if ($vpnproba >= $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED);
-				$abusetest = 1;
-			}
-		}
+		$contract->array_options['options_deployment_vpn_proba'] = $resultremotecheck['vpnproba'];
+		$contract->array_options['options_deployment_ipquality'] = $resultremotecheck['ipquality'];
+		$contract->array_options['options_deployment_emailquality'] = $resultremotecheck['emailquality'];
 
-		// Evaluate IP Quality, TOR or bad networks with IPQuality
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
-			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+		$vpnproba = $resultremotecheck['vpnproba'];
+		$fraudscoreip = $resultremotecheck['fraudscoreip'];
+		$fraudscoreemail = $resultremotecheck['fraudscoreemail'];
+		$abusetest = $resultremotecheck['abusetest'];
 
-			// Retrieve additional (optional) data points which help us enhance fraud scores.
-			$user_agent = $_SERVER['HTTP_USER_AGENT'];
-			$user_language = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-
-			// Set the strictness for this query. (0 (least strict) - 3 (most strict))
-			$strictness = 1;
-
-			// You may want to allow public access points like coffee shops, schools, corporations, etc...
-			$allow_public_access_points = 'true';
-
-			// Reduce scoring penalties for mixed quality IP addresses shared by good and bad users.
-			$lighter_penalties = 'true';
-
-			// Create parameters array.
-			$parameters = array(
-				'user_agent' => $user_agent,
-				'user_language' => $user_language,
-				'strictness' => $strictness,
-				'allow_public_access_points' => $allow_public_access_points,
-				'lighter_penalties' => $lighter_penalties
-			);
-
-			/* User & Transaction Scoring
-			 * Score additional information from a user, order, or transaction for risk analysis
-			 * Please see the documentation and example code to include this feature in your scoring:
-			 * https://www.ipqualityscore.com/documentation/proxy-detection/transaction-scoring
-			 * This feature requires a Premium plan or greater
-			 */
-			$transaction_parameters = array();
-
-			// Format Parameters
-			if (is_array($transaction_parameters) && count($transaction_parameters)) {
-				$formatted_parameters = http_build_query(array_merge($parameters, $transaction_parameters));
-			} else {
-				$formatted_parameters = http_build_query($parameters);
-			}
-
-			// Create API URL
-			$url = sprintf(
-				'https://www.ipqualityscore.com/api/json/ip/%s/%s?%s',
-				$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
-				$remoteip,
-				$formatted_parameters
-				);
-
-			$result = getURLContent($url);
-			if (is_array($result) && $result['http_code'] == 200 && !empty($result['content'])) {
-				try {
-					dol_syslog("Result of call of ipqualityscore: ".$result['content'], LOG_DEBUG);
-					$jsonreponse = json_decode($result['content'], true);
-					dol_syslog("For ".$remoteip.", fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
-					if ($jsonreponse['success']) {
-						if ($jsonreponse['recent_abuse'] && !empty($conf->global->SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP)) {	// Not recommanded if users are using shared IP
-							dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
-							$abusetest = 2;
-						}
-						if ($jsonreponse['tor'] || $jsonreponse['active_tor']) {
-							dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP - host=".$jsonreponse['host']);
-							$abusetest = 3;
-						}
-						$contract->array_options['options_deployment_ipquality'] .= 'ipq-tor='.(($jsonreponse['tor'] || $jsonreponse['active_tor']) ? 1 : 0).';';
-						$contract->array_options['options_deployment_ipquality'] .= 'ipq-vpn='.(($jsonreponse['vpn'] || $jsonreponse['active_vpn']) ? 1 : 0).';';
-						$contract->array_options['options_deployment_ipquality'] .= 'ipq-recent_abuse='.($jsonreponse['recent_abuse'] ? 1 : 0).';';
-						$contract->array_options['options_deployment_ipquality'] .= 'ipq-fraud_score='.$jsonreponse['fraud_score'].';';
-						$contract->array_options['options_deployment_ipquality'] .= 'ipq-host='.$jsonreponse['host'].';';
-					} else {
-						$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. Success property not found. '.dol_trunc($result['content'], 100).';';
-					}
-				} catch (Exception $e) {
-					$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. Exception '.dol_trunc($e->getMessage(), 100).';';
-				}
-			} else {
-				$contract->array_options['options_deployment_ipquality'] .= 'ipq-check failed. http_code = '.dol_trunc($result['http_code'], 100).';';
-			}
-		}
-
+		// Clean data
 		$contract->array_options['options_deployment_ipquality'] = dol_trunc($contract->array_options['options_deployment_ipquality'], 250);
-
+		$contract->array_options['options_deployment_emailquality'] = dol_trunc($contract->array_options['options_deployment_emailquality'], 250);
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
-
-		// Block for some IPs
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
-			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
-			foreach ($arrayofblacklistips as $blacklistip) {
-				if ($remoteip == $blacklistip) {
-					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");
-					$abusetest = 4;
-				}
-			}
-		}
-
-		// Block for some IPs if VPN proba is higher that an threshold
-		if (empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
-			if ($vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
-				$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
-				foreach ($arrayofblacklistips as $blacklistip) {
-					if ($remoteip == $blacklistip) {
-						dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
-						$abusetest = 5;
-					}
-				}
-			}
-		}
+		//dol_syslog("options_deployment_emailquality = ".$contract->array_options['options_deployment_emailquality'], LOG_DEBUG);
 
 		if ($abusetest) {
 			$db->rollback();
 
-			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', $conf->global->MAIN_INFO_SOCIETE_MAIL);
 			dol_syslog("InstanceCreationBlockedForSecurityPurpose ip ".$remoteip." is refused with value abusetest=".$abusetest, LOG_DEBUG);
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
-				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip), null, 'errors');
+				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, $abusetest), null, 'errors');
 				//http_response_code(403);
 				header("Location: ".$newurl);
 			} else {
-				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip)."\n";
+				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, $abusetest)."\n";
 			}
 			exit(-95);
 		}
@@ -1207,7 +1227,7 @@ if ($reusecontractid) {
 		//var_dump($tmpproduct->tva_tx);
 		//var_dump($vat);exit;
 
-		$price = $tmpproduct->price;
+		$price = getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$partner."_".$tmpproduct->id) : $tmpproduct->price;
 		$discount = $tmpthirdparty->remise_percent;
 
 		$productidtocreate = $tmpproduct->id;
@@ -1244,7 +1264,11 @@ if ($reusecontractid) {
 			$localtax1_tx = get_default_localtax($mysoc, $object, 1, $prodid);
 			$localtax2_tx = get_default_localtax($mysoc, $object, 2, $prodid);
 
-			$price = $tmpsubproduct->price;
+			if (preg_match('/user/i', $tmpsubproduct->ref) || preg_match('/user/i', $tmpsubproduct->array_options['options_resource_label'])) {
+				$price = getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$partner."_".$tmpproduct->id) : $tmpsubproduct->price;
+			} else {
+				$price = getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$tmpsubproduct->id."_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$tmpsubproduct->id."_".$partner."_".$tmpproduct->id) : $tmpsubproduct->price;
+			}
 			$desc = '';
 			if (empty($conf->global->SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT)) {
 				$desc = $tmpsubproduct->description;
@@ -1508,6 +1532,7 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 
+$head = '';
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
 $head.='<!-- Bootstrap core CSS -->
 <link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
@@ -1539,7 +1564,7 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 		$constlogoalt = 'SELLYOURSAAS_LOGO_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 		$constlogosmallalt = 'SELLYOURSAAS_LOGO_SMALL_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 
-		if (! empty($conf->global->$constlogoalt)) {
+		if (getDolGlobalString($constlogoalt)) {
 			$constlogo=$constlogoalt;
 			$constlogosmall=$constlogosmallalt;
 		}
@@ -1553,7 +1578,7 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/'.$conf->global->$constlogo);
 			}
 		} else {
-			$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.$conf->global->SELLYOURSAAS_LOGO_SMALL);
+			$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.getDolGlobalString('SELLYOURSAAS_LOGO_SMALL', 'notdefined.png'));
 		}
 
 		if (GETPOST('partner', 'alpha')) {

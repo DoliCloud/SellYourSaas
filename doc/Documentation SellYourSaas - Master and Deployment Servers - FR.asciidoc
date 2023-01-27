@@ -62,7 +62,7 @@ Financé par les sociétés Open Source https://www.dolicloud.com[DoliCloud] et 
     * ... 
      
 
-Le projet est disponible de manière communautaire depuis 2020 sur GitHub: https://github.com/eldy/sellyoursaas
+Le projet est disponible de manière communautaire depuis 2020 sur GitHub: https://github.com/dolicloud/sellyoursaas
 
 Il est composé:
 
@@ -248,9 +248,12 @@ Créer le compte utilisateur *admin*. Il sera utilisé pour installer et adminis
 
 [source,bash]
 ---------------
-groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
-mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
+groupadd admin; useradd -m -g admin admin;
+mkdir /home/admin/logs; chown root.admin /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /home/admin/backup; chown admin.admin /home/admin/backup;
+mkdir /home/admin/backup/conf; chown admin.admin /home/admin/backup/conf;
+mkdir /home/admin/backup/mysql; chown admin.admin /home/admin/backup/mysql;
 mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 ---------------
 
@@ -302,6 +305,10 @@ Pour ubuntu 18.04: il faut concaténner le contenu cité dans le *sshd_config* m
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+Port 22
+
+# MaxAuthTries 6
+MaxAuthTries 10
 # MaxSessions 10
 MaxSessions 25
 
@@ -425,7 +432,16 @@ sudo chmod -R go-rwx /etc/skel/.ssh
 sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
-Ainsi tout nouveau compte account created (those of customer instances) will be accessible by the administrator(s).
+Ainsi, l'administrateur pourra accéder à tout nouveau compte créé (ceux des instances clients).
+
+Créez également un fichier de configuration mysql dans */etc/skel/.my.cnf* afin de permettre aux clients finaux de
+votre SellYourSaas d'utiliser le client mysql en console depuis une connexion shell ssh.
+
+[source, bash]
+---------------
+printf '[client]\nprotocol=tcp' >> /etc/skel/.my.cnf
+---------------
+
 
 
 
@@ -629,7 +645,7 @@ apt install git
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
 chown -R admin.admin /home/admin/wwwroot/dolibarr
 ---------------
 
@@ -638,7 +654,7 @@ chown -R admin.admin /home/admin/wwwroot/dolibarr
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 
@@ -658,29 +674,43 @@ avec le contenu suivant
 
 [source,conf]
 ---------------
+# File /etc/sellyoursaas.conf
+
 # domain du service
 domain=mysaasdomainname.com
 
 # If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
-# If deployment server: IPs allowed to request a deployment
-allowed_hosts=127.0.0.1,ipduservermaster
 
-# Set to 1 if this server is the master server
+# Set to 1 if this server is the master server, 
+# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 masterserver=1
-# Set to 1 if this server host instances for the pool (deployment server)
+# Set to 1 if this server host instances for the pool (deployment server), 
+# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 instanceserver=1
 # Set to 1 if this server hosts a dns for the pool (deployment server)
 dnsserver=1
+
+# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
+archivetestinstances=1
+
 # Set to its own IP if it is a deployment server. Keep empty for master only server.
-ipserverdeployment=ip.du.server.deployment
+ipserverdeployment=ip.of.deployment.server
+
+# If deployment server: IPs allowed to request a deployment
+allowed_hosts=127.0.0.1,ipofmasterserver
+
+# email from
+emailfrom=noreply@mysaasdomainname.com
+# email supervision
+emailsupervision=supervision@mysaasdomainname.com
 
 # Set location of the master database
-databasehost=ip.du.serveur.master ou localhost si serveur master
+databasehost=ipOfMasterServer or localhost if on master server
 # Set port of the master database (default is 3306)
 databaseport=3306
 # Set database name of the master server
-database=databaseduservermaster
+database=databaseNameOnMasterServer
 # Set a credential for an access to the master database (each server can have a different account to access the master database)
 databaseuser=sellyoursaas
 databasepass=xxxxx
@@ -693,17 +723,28 @@ databaseportdeployment=3306
 databaseuserdeployment=sellyoursaas
 databasepassdeployment=xxxxx
 
-# Set this to 1 or 0 to archive or not the test instances during undeployment (if 0, test are destroyed with no archive step)
-archivetestinstances=1
+# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+usecompressformatforarchive=zstd
 
 # Set this to directory where dolibarr repository is installed
 dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+
 # Set directory where backup are stored
 backupdir=/mnt/diskbackup/backup
 # Set directory where archives of tests instances are stored
 archivedirtest=/mnt/diskbackup/archives-test
 # Set directory where archives of paid instances are stored
 archivedirpaid=/mnt/diskbackup/archives-paid
+
+# Set option to exclude some tables for some instances in backup
+#backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
+# Can set the frequency of rsync
+#backuprsyncdayfrequency=1
+# Can set the frequency of sql dump
+#backupdumpdayfrequency=1
+
 # Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=gzip
 
@@ -713,20 +754,20 @@ remoteserverlistenip=0.0.0.0
 remoteserverlistenport=8080
 
 remotebackupserver=ip.of.remote.backup.ssh.server
+remotebackupuser=admin
 remotebackupdir=/mnt/diskbackup
 
-# Advanced Options to use different paths in deployment server
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
 # Option to use different path for dataroot
 #olddoldataroot=/home/admin/wwwroot/dolibarr_documents
 #newdoldataroot=/new/path/of/documents
 # Options to change the directory of vhostfile templates
 #templatesdir=/path/of/vhostfile/templates
+
 # Options to change the SSL certificates names in Apache virtualhost
 #websslcertificatecrt=with.sellyoursaas.com.crt
 #websslcertificatekey=with.sellyoursaas.com.key
 #websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+
 # Options for Jailkit
 #chrootdir=/home/jail/chroot
 #privatejailtemplatename=privatejail
@@ -736,6 +777,39 @@ remotebackupdir=/mnt/diskbackup
 Mettre *masterserver* à 1, *dnsserver* et *instanceserver* à 0 sur le Master
 Mettre *masterserver* à 0, *dnsserver* et *instanceserver* à 1 sur les serveurs de déploiement des instances.
 Ne pas oublier de définir une valeur pour *databasepass*. On réutilisera cette valeur plus tard.
+
+
+* Créer un fichier */etc/sellyoursaas-public.conf* sur le serveur (sur le serveur *Master* et les *Serveurs de Déploiement*)
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas-public.conf
+chown root.admin /etc/sellyoursaas-public.conf
+chmod a+r /etc/sellyoursaas-public.conf
+chmod a-wx /etc/sellyoursaas-public.conf
+---------------
+
+avec le contenu suivant:
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas-public.conf
+
+# Options for antispam system
+maxemailperday=500
+
+# Option to use a different path for spam (for public script)
+#pathtospamdir=/tmp/spam
+---------------
+
+
+* Créer aussi le répertoire vide:
+
+[source,conf]
+---------------
+mkdir -p /etc/sellyoursaas.d
+---------------
+
 
 
 === Installation du partage nfs
@@ -919,7 +993,7 @@ a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
 a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias 
 a2enmod mpm_itk mpm_prefork
-a2enmod php7.0|php7.2|php7.4
+a2enmod php7.0|php7.2|php7.4|php8.1
 ---------------
 
 
@@ -1007,7 +1081,7 @@ Sur le *Serveur Master*:
         AuthUserFile /etc/apache2/.htpasswd
         Require valid-user
         # Or if you prefer restrict to some ip, you can add lines "Require ip x.y.z.w" into a .conf file into this directory:
-        IncludeOptional /etc/sellyoursaas-allowed-ip.d/*.conf
+        IncludeOptional /etc/sellyoursaas.d/*.conf
         </Directory>
 
         #leaving /public, /api and /dav accessible to everyone
@@ -1081,7 +1155,7 @@ Vous pouvez créer un autre virtual host pour le HTTPS port 443
    #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
    #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
    #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f postmaster@mysaasdomainname.com"
-   php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/home/admin/tools/
+   php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/usr/share/GeoIP:/home/admin/tools/
 
    UseCanonicalName On
    ServerName   myaccount.mysaasdomainname.com
@@ -1284,15 +1358,12 @@ systemctl stop remote-server-launcher.service
   
 * Ainsi que les règles spécifiques à sellyoursaas:
   
-  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
-
-
-Pour cela, créer d'abord un fichier */etc/fail2ban/jail.local* avec ce contenu:
+  *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*, 
+  *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
 NOTE: Les règles disponibles peuvent varier selon la version de l'OS installé.
 
-NOTE: Penser à modifier aussi *mybusinessips* par votre ou vos ips séparés par des espaces ainsi que le paramètre *destemail* par l'email de supervision de votre société.
-
+Pour cela, créer d'abord un fichier */etc/fail2ban/jail.local* avec ce contenu:
 
 [source,bash]
 ---------------
@@ -1458,94 +1529,35 @@ bantime  = 7200      ; 2 hours
 findtime = 3600      ; 1 hour
 maxretry = 5
 
-
-
-[email-dol-blacklist]
-
-; rule against email ko - blacklist ip, email or content
-enabled = true
-port    = http,https
-filter  = email-dolibarr-ruleskoblacklist
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 1
-
-[email-dol-perday]
-
-; rule against out of limit emails (max 500 emails per day)
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesall
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 86400     ; 1 day
-maxretry = 500
-
-[email-dol-perhour]
-
-; rule against intensive email ko - too high number of recipient
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesko
-logpath = /var/log/phpsendmail.log
-action = %(action_mw)s
-bantime  = 7200      ; 2 hour
-findtime = 3600      ; 1 hour
-maxretry = 5
-
-[email-dol-perhouradmin]
-
-; rule against out of limit emails (max 10 from admin)
-enabled = true
-port    = http,https
-filter  = email-dolibarr-rulesadmin
-logpath = /var/log/phpsendmail.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 60        ; 1 minute
-maxretry = 10
-
-[web-dol-passforgotten]
-
-; rule against call of passwordforgottenpage
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulespassforgotten
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
-[web-dol-bruteforce]
-
-; rule against bruteforce hacking (login + api)
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulesbruteforce
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 3600      ; 1 hour
-maxretry = 10
-
-[web-dol-registerinstance]
-
-; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enabled to false on non master servers
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulesregisterinstance
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
 ---------------
+
+NOTE: Modifier le fichier pour modifier *mybusinessips* par votre ou vos IPs séparés par des espaces ainsi que le paramètre *destemail* par l'email de supervision de votre société.
+
+
+Puis placer les fichiers de règles fournis avec le projet dans *etc/fail2ban/jail.d* dans le répertoire du même nom */etc/fail2ban/jail.d* en créant un lien:
+
+*For all servers:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
+---------------
+
+*Add also this for Master servers only:*
+
+[source, bash]
+---------------
+cd /etc/fail2ban/jail.d
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
+ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+---------------
+
 
 Puis placer les fichiers de filtres fournis avec le projet dans *etc/fail2ban/filter.d* dans le répertoire du même nom */etc/fail2ban/filter.d* en créant un lien:
 
@@ -1749,20 +1761,107 @@ Test que l'exécution par la crontab fonctionne correctement en lançant sous ro
 /etc/cron.daily/afick_cron
 ---------------
 
-Ignore if you have error when sending emails, sending emails is setup later.
+Ignorez si vous avez des erreurs d'envoi d'email, l'envoi d'emails est configuré plus tard.
 
 
-=== Configuration de cpulimit (optionnel)
+=== Setup de cpulimit (optional)
 
-* Lancement de cpulimit au démarrage pour exécuter:
+* Launch a cpulimit daemon at startup for example with *cpulimit_daemon_launcher.sh*
 
 [source,conf]
 ---------------
-cpulimit launched with script  cpulimit --exe=apache2 --limit=20
+#!/bin/sh
+#
+# Script to start CPU limit daemon
+#
+set -e
+
+case "$1" in
+start)
+if [ $(ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | wc -l) -eq 0 ]; then
+    nohup /usr/bin/cpulimit_daemon.sh >/dev/null 2>&1 &
+    ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon started successfully"; else print " * cpulimit daemon can not be started" }'
+else
+    echo " * cpulimit daemon can't be started, because it is already running"
+fi
+;;
+stop)
+CPULIMIT_DAEMON=$(ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | wc -l)
+CPULIMIT_INSTANCE=$(ps -eo pid,args | gawk '$2=="cpulimit" {print $1}' | wc -l)
+CPULIMIT_ALL=$((CPULIMIT_DAEMON + CPULIMIT_INSTANCE))
+if [ $CPULIMIT_ALL -gt 0 ]; then
+    if [ $CPULIMIT_DAEMON -gt 0 ]; then
+        ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print $1}' | xargs kill -9   # kill cpulimit daemon
+    fi
+
+    if [ $CPULIMIT_INSTANCE -gt 0 ]; then
+        ps -eo pid,args | gawk '$2=="cpulimit" {print $1}' | xargs kill -9                    # release cpulimited process to normal priority
+    fi
+    ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon can not be stopped"; else print " * cpulimit daemon stopped successfully" }'
+else
+    echo " * cpulimit daemon can't be stopped, because it is not running"
+fi
+;;
+restart)
+$0 stop
+sleep 3
+$0 start
+;;
+status)
+ps -eo pid,args | gawk '$3=="/usr/bin/cpulimit_daemon.sh"  {print}' | wc -l | gawk '{ if ($1 == 1) print " * cpulimit daemon is running"; else print " * cpulimit daemon is not running" }'
+;;
+esac
+exit 0
 ---------------
 
-Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 
+This will execute the daemon */usr/bin/cpulimit_daemon.sh*
+
+[source,conf]
+---------------
+#!/bin/bash
+# ==============================================================
+# CPU limit daemon - set PID's max. percentage CPU consumptions
+# ==============================================================
+
+# Variables
+CPU_LIMIT=40       	# Maximum percentage CPU consumption by each PID
+DAEMON_INTERVAL=3  	# Daemon check interval in seconds
+BLACK_PROCESSES_LIST=   # Limit only processes defined in this variable. If variable is empty (default) all violating processes are limited.
+WHITE_PROCESSES_LIST=   # Limit all processes except processes defined in this variable. If variable is empty (default) all violating processes are limited.
+
+# Check if one of the variables BLACK_PROCESSES_LIST or WHITE_PROCESSES_LIST is defined.
+if [[ -n "$BLACK_PROCESSES_LIST" &&  -n "$WHITE_PROCESSES_LIST" ]] ; then    # If both variables are defined then error is produced.
+   echo "At least one or both of the variables BLACK_PROCESSES_LIST or WHITE_PROCESSES_LIST must be empty."
+   exit 1
+elif [[ -n "$BLACK_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+   NEW_PIDS_COMMAND="top -b -n1 -c | grep -E '$BLACK_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+elif [[ -n "$WHITE_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+   NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6' | grep -E -v '$WHITE_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+else
+   NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6 && \$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
+fi
+
+# Search and limit violating PIDs
+while sleep $DAEMON_INTERVAL
+do
+   NEW_PIDS=$(eval "$NEW_PIDS_COMMAND")                                                                    # Violating PIDs
+   LIMITED_PIDS=$(ps -eo args | gawk '$1=="cpulimit" {print $3}')                                          # Already limited PIDs
+   QUEUE_PIDS=$(comm -23 <(echo "$NEW_PIDS" | sort -u) <(echo "$LIMITED_PIDS" | sort -u) | grep -v '^$')   # PIDs in queue
+
+   for i in $QUEUE_PIDS
+   do
+       cpulimit -p $i -l $CPU_LIMIT -z &   # Limit new violating processes
+   done
+done
+---------------
+
+See script *cpulimit_daemon* to put into */etc/init.d*.
+
+
+=== Ajouter des quotas disk par utilisateurs (optionnal)
+
+Note: Some global quotas can be set with the *ulimit* tool in */etc/security/limits.conf* (see next chapter on ulimit)
 
 
 === Configuration de /etc/security/limits.conf (optionnel)
@@ -1773,6 +1872,10 @@ Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 ---------------
 mysql           soft     nofile           4096
 mysql           hard     nofile           32768
+
+# Set max size of block written into a file (domain is UIDstart:UIDend with UIDend empty)
+#65535:           soft     fsize            1000000
+#65535:           hard     fsize            1000000
 ---------------
 
 Pour voir les limites:
@@ -1790,8 +1893,8 @@ et l'email à utiliser qui est officiellement valide.
 
 [source,bash]
 ---------------
-root@myshortservername.mysaasdomain.com		noreply@mysaasdomain.com
-admin@myshortservername.mysaasdomain.com	noreply@mysaasdomain.com
+root@myshortservername.mysaasdomainname.com		noreply@mysaasdomainname.com
+admin@myshortservername.mysaasdomainname.com	noreply@mysaasdomainname.com
 ---------------
 
 Compiler le fichier par:
@@ -1805,7 +1908,7 @@ echo >> /etc/postfix/access_to; postmap /etc/postfix/access_to
 echo >> /etc/postfix/access_from; postmap /etc/postfix/access_from
 ---------------
 
-Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomain.com*:
+Editer le fichier */etc/mailname* pour mettre le nom long FQDN du serveur *myshortservername.mysaasdomainname.com*:
 
 [source,bash]
 ---------------
@@ -2937,7 +3040,8 @@ $ORIGIN withX.mysaasdomainname.com.
                 NS              ns2withX.mysaasdomainname.com.
                 IN      TXT     "v=spf1 mx ~all"
 
-@               IN      A       ip.of.deployment.server		; mettre ip du serveur de déploiement qui héberge les applications déployées
+@               IN      A       ip.of.deployment.server		; ip du serveur de déploiement qui héberge les applications déployées
+*               IN      A       ip.of.deployment.server		; ip du serveur de déploiement qui héberge les applications déployées
 
 $ORIGIN withX.mysaasdomainname.com.
 
@@ -3068,12 +3172,24 @@ Sur les *Serveurs de déploiement*:
 
 Le wrapper PHP d'envoi de mail permet d'intercepter tout mail envoyé avec PHP (afin de faire une analyse antiSpam et d'intégrer une log qui pourra être exploiter par fail2ban) avant d'envoyer le mail réellement.
 
-Créer les liens de 2 outils de préprocessing PHP
+Pour les *Versions de PHP inférieures à 8.1* :
+
+Créer les liens symboliques de 2 outils de pré-processing PHP
 
 [source,bash]
 ---------------
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
 ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
+---------------
+
+Pour les *Versions de PHP supérieures ou égales à 8.1* :
+
+Créer les liens physiques de 2 outils de pré-processing PHP
+
+[source,bash]
+---------------
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
 Modifier le fichier *php.ini* (celui de *apache* et celui de *cli*) avec:
@@ -3103,7 +3219,7 @@ chown syslog.adm /var/log/phpmail.log /var/log/phpsendmail.log
 chmod a+rw /var/log/phpmail.log /var/log/phpsendmail.log
 ---------------
 
-Create a directory for blacklist files used by *phpsendmail.php*
+Créer un répertoire pour le répertoire des fichiers blacklist utilisés par *phpsendmail.php*
 
 [source,bash]
 ---------------
@@ -3116,18 +3232,18 @@ Et copier les dans le répertoire local:
 
 [source,bash]
 ---------------
-mkdir /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /tmp/spam;
-chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
-
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent;
-chmod -R a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
+
+mkdir /tmp/spam;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
+cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
+chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
 ---------------
 
 === Configuration de logrotate
@@ -3182,7 +3298,7 @@ rotate 365
         create 666 syslog adm
 }
 
-/var/log/remote_server.log /var/log/backup_backups.log {
+/var/log/remote_server.log {
         su root root
         weekly
         rotate 4
@@ -3569,8 +3685,8 @@ Sur le *Serveur Master*:
 
 [source,ini]
 ---------------
-a2ensite admin.mysaasdomain.com
-a2ensite myaccount.mysaasdomain.com
+a2ensite admin.mysaasdomainname.com
+a2ensite myaccount.mysaasdomainname.com
 /etc/init.d/apache2 restart
 ---------------
 
@@ -3611,9 +3727,11 @@ $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
 
 * Installer la base de données de MaxMind:
 
-mkdir /home/admin/tools/maxmind/
+mkdir /home/admin/tools/maxmind/ -p
 
 Copier le GeoLite2-Country.mmdb obtenu depuis le site de maxmind.com
+
+(ou wget https://cdn.jsdelivr.net/npm/geolite2-country@1.0.2/GeoLite2-Country.mmdb.gz)
 
 chmod -R o-w /home/admin/tools/maxmind
 
@@ -4199,7 +4317,7 @@ Pour mettre à jour Ubuntu 16.04 vers 18.04 sur un serveur SellYourSaas:
 apt dist-upgrade
 
 apt install php-mysql
-a2enmode php7.2
+a2enmod php7.2
 apt remove php-fpm php7-fpm
 ---------------
 
@@ -5021,17 +5139,22 @@ The value for *max_execution_time* is too low or there is a table that has an ab
 - Check the temp directory is writable by the web server user.
 
 
-==== Error when doing PHP ssh2_connect to a server
+==== Error when doing PHP ssh2_connect or just ssh to a server
 
 If you find into */var/log/auth.log* an error like:
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
 
-The client (may be an old PHP version) uses a too old algorithm for negotiation. Edit the */etc/ssh/sshd_config* of the server by adding:
+... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: ... [preauth]
+
+The client (maybe an old PHP version) is using a deprecated algorithm for negotiation. Edit the file */etc/ssh/sshd_config.d/sellyoursaas.conf* of the target server by adding:
 
 [source,bash]
 ---------------
 # Legacy changes - To allow an old client to connect to
+PubkeyAcceptedKeyTypes=+ssh-rsa
+HostKeyAlgorithms +ssh-rsa
+HostKey /etc/ssh/ssh_host_rsa_key
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
 ---------------
@@ -5042,6 +5165,25 @@ Then reload ssh with
 ---------------
 /etc/init.d/ssh reload
 ---------------
+
+To test if a couple client-server can work with one algorightm, you can try:
+
+ssh -oHostKeyAlgorithms=ssh-rsa admin@ip.of.server
+ssh -oHostKeyAlgorithms=ssh-ed25519 admin@ip.of.server
+
+
+To use a different version of lib for PHP to make ssh2_connect, you can run Recompile libssh2 and Recompile php-ssh2:
+
+[source,bash]
+---------------
+git clone https://github.com/libssh2/libssh2.git libssh2; cd libssh2; ./configure; make; make install;
+git clone https://github.com/php/pecl-networking-ssh2.git php-ssh2; cd php-ssh2; phpize; ./configure --with-ssh2; make; make install; 
+php -i | grep ssh2
+restart
+---------------
+
+Even if php -i show the new version of library, a reboot may be required to have the new lib taken into account.
+
 
 ==== Some remoteaction generates a PHP coredump
 

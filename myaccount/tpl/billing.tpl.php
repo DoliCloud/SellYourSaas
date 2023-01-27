@@ -46,7 +46,7 @@ print '
 	<!-- END PAGE HEADER-->
 
 	    <div class="row">
-	      <div class="col-md-9">
+	      <div class="'.($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE") ? 'col-md-12' : 'col-md-9').'">
 
 	        <div class="portlet light" id="planSection">
 
@@ -82,7 +82,7 @@ if (count($listofcontractid) > 0) {
 		if ($statuslabel == 'processing') $color = 'orange';
 		if ($statuslabel == 'suspended') $color = 'orange';
 
-		$dbprefix = $contract->array_options['options_db_prefix'];
+		$dbprefix = $contract->array_options['options_prefix_db'];
 		if (empty($dbprefix)) $dbprefix = 'llx_';
 
 		print '
@@ -111,7 +111,8 @@ if (count($listofcontractid) > 0) {
 		$contract->fetchObjectLinked();
 		$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
 		if (is_array($contract->linkedObjects['facture']) && count($contract->linkedObjects['facture']) > 0) {
-			usort($contract->linkedObjects['facture'], "cmp");
+			//var_dump($contract->linkedObjects['facture']);
+			usort($contract->linkedObjects['facture'], "cmpr_invoice_object_date_desc");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 			//var_dump($contract->linkedObjects['facture']);
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');
@@ -228,9 +229,9 @@ print '
 
 
 
-	      </div> <!-- END COL -->
-
-			<!-- Box of payment modes -->
+	      </div> <!-- END COL -->';
+if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'nonprofit' || !getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+print'			<!-- Box of payment modes -->
 	      <div class="col-md-3">
 	        <div class="portlet light" id="paymentMethodSection">
 
@@ -304,7 +305,7 @@ if ($nbpaymentmodeok > 0) {
 			print '<tr>';
 			print '<td>';
 			print $companypaymentmodetemp->email;
-			print '<br>'.'Preaproval key: '.$companypaymentmodetemp->preapproval_key;
+			print '<br>Preaproval key: '.$companypaymentmodetemp->preapproval_key;
 			print '</td>';
 			print '<td>';
 			print dol_print_date($companypaymentmodetemp->starting_date, 'day').'/'.dol_print_date($companypaymentmodetemp->ending_date, 'day');
@@ -363,14 +364,14 @@ print '</a></center>
 	          </div> <!-- END PORTLET-BODY -->
 
 	        </div> <!-- END PORTLET -->
-	      </div><!-- END COL -->
+	      </div><!-- END COL -->';
 
-	    </div> <!-- END ROW -->
+}
+print '  </div> <!-- END ROW -->
 
 
 	    </div>
 		</div>
 	';
-
 ?>
 <!-- END PHP TEMPLATE billing.tpl.php -->

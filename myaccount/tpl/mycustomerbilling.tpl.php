@@ -307,14 +307,14 @@ while ($i < min($num, $limit2)) {
 	else $commission = 0;
 
 	print '
-				<tr>
-              <td>
-		         ';
+						<tr>
+		              <td title="'.dol_escape_htmltag($tmpthirdparty->name).'" class="tdoverflowmax200">
+				         ';
 	print $tmpthirdparty->name;
 	//.' '.$form->textwithpicto('', $langs->trans("CurrentCommission").': '.($commissionpercent?$commissionpercent:0).'%', 1).'
 	print '</td>
-                      <td class="nowraponall">
-                        ';
+		                      <td class="nowraponall">
+		                        ';
 	$titleinvoice = $tmpinvoice->ref.($tmpinvoice->ref_supplier ? ' ('.$tmpinvoice->ref_supplier.')' : '');
 
 	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
@@ -332,15 +332,15 @@ while ($i < min($num, $limit2)) {
 	}
 
 	print '
-              </td>
-                      <td>
-                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
-                      </td>
-              <td align="right">
-                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
-              </td>
-              <td>
-                ';
+		              </td>
+		                      <td>
+		                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
+		                      </td>
+		              <td align="right">
+		                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
+		              </td>
+		              <td>
+		                ';
 	//$s = $tmpinvoice->getLibStatut(2, $alreadypayed + $amount_credit_notes_included);
 	$s = $tmpinvoice->getLibStatut(2, -1);
 	$s = preg_replace('/'.$langs->trans("BillShortStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
@@ -348,15 +348,15 @@ while ($i < min($num, $limit2)) {
 
 	print $s;
 	print '
-              </td>
-              <td align="right">
-                '.($commissionpercent?$commissionpercent:0).'
-              </td>
-              <td align="right">
-                '.price($commission).'
-              </td>
-		    </tr>
-	        ';
+		              </td>
+		              <td align="right">
+		                '.($commissionpercent?$commissionpercent:0).'
+		              </td>
+		              <td align="right">
+		                '.price($commission).'
+		              </td>
+				    </tr>
+			        ';
 
 	$i++;
 }
@@ -364,9 +364,9 @@ while ($i < min($num, $limit2)) {
 if ($nbtotalofrecords > $limit2) {
 	// Show navigation previous - next
 	print '<tr><td colspan="6" class="center">';
-	if ($page2 > 0) print '<a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2-1).'">'.$langs->trans("Previous").'</a>';
+	if ($page2 > 0) print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2-1).'">'.$langs->trans("Previous").'</a>';
 	if ($page2 > 0 && (($page2 + 1) * $limit2) <= $nbtotalofrecords) print ' &nbsp; ... &nbsp; ';
-	if ((($page2 + 1) * $limit2) <= $nbtotalofrecords) print '<a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2+1).'">'.$langs->trans("Next").'</a>';
+	if ((($page2 + 1) * $limit2) <= $nbtotalofrecords) print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2+1).'">'.$langs->trans("Next").'</a>';
 	print '<br><br>';
 	print '</td>';
 	print '<td class="right">...<br><br></td>';
@@ -384,28 +384,28 @@ if ($nbtotalofrecords > $limit2) {
 		$sql.=' AND paye = 1';
 
 		$resql = $db->query($sql);
-		if ($resql) {
-			$obj = $db->fetch_object($resql);
-			$totalamountcommission = $obj->total;
-		} else {
-			dol_print_error($db);
-		}
+if ($resql) {
+	$obj = $db->fetch_object($resql);
+	$totalamountcommission = $obj->total;
+} else {
+	dol_print_error($db);
+}
 
 		print '<!-- Total of commissions earned -->';
 		print '<tr class="liste_titre"><td colspan="6">'.$langs->trans("Total").'</td>';
 		print '<td align="right"><strong>'.price($commoldystem + $totalamountcommission).'</strong></td>';
 		print '</tr>';
 
-		if ($totalpaidht) {
-			print '<tr style="background-color: #f0f0F0;">';
-			print '<td colspan="2">'.$langs->trans("AlreadyPaid").'</td>';
-			print '<td></td>';
-			print '<td></td>';
-			print '<td></td>';
-			print '<td></td>';
-			print '<td align="right">'.price($totalpaidht).'</td>';
-			print '</tr>';
-		}
+if ($totalpaidht) {
+	print '<tr style="background-color: #f0f0F0;">';
+	print '<td colspan="2">'.$langs->trans("AlreadyPaid").'</td>';
+	print '<td></td>';
+	print '<td></td>';
+	print '<td></td>';
+	print '<td></td>';
+	print '<td align="right">'.price($totalpaidht).'</td>';
+	print '</tr>';
+}
 
 		print '<tr style="background-color: #f0f0F0;">';
 		print '<td colspan="2">'.$langs->trans("RemainderToBill").'</td>';
@@ -423,20 +423,20 @@ if ($nbtotalofrecords > $limit2) {
 		$labelforcompany = $mysoc->name. ' ('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Country").': '.$langs->trans("Country".$mysoc->country_code).')';
 
 		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
-		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
-				$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-				if (getDolGlobalString($newnamekey)) {
-					$emailforresellerinvoice = getDolGlobalString($newnamekey);
-				}
-		}
+		$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+	if (getDolGlobalString($newnamekey)) {
+			$emailforresellerinvoice = getDolGlobalString($newnamekey);
+	}
+}
 
-		if (empty($emailforresellerinvoice)) {
-			$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
-		}
-		if (empty($emailforresellerinvoice)) {
-			$emailforresellerinvoice = $mysoc->email;
-		}
+if (empty($emailforresellerinvoice)) {
+	$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
+}
+if (empty($emailforresellerinvoice)) {
+	$emailforresellerinvoice = $mysoc->email;
+}
 		print $langs->trans("SendYourInvoiceTo", $labelforcompany, $emailforresellerinvoice);
 		print '</div>';
 

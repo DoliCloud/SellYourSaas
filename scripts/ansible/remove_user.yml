@@ -11,7 +11,7 @@
   become: yes
   become_user: root
   tasks:
-  - name: Create system user
+  - name: Remove system user
     user:
       name: '{{ login }}'
       state: absent
@@ -21,11 +21,13 @@
       path: /etc/ssh/sshd_config.d/sellyoursaas.conf
       line: "AllowUsers {{ login }}"
       state: absent
+    register: removelineinsshconf
 
   - name: Restart SSH service to flush that user from in-memory configuration
     service:
       name: ssh
       state: restarted
+    when: removelineinsshconf.changed
 
   - name: Remove IP file from sellyoursaas.d
     ansible.builtin.file:

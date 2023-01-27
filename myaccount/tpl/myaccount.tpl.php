@@ -113,11 +113,22 @@ else $placeholderforvat=$langs->trans("EnterVATHere");
 					print '
 						<br>
 	                  <input type="hidden" name="vatassuj_old" value="'.($mythirdpartyaccount->tva_assuj).'">
-	                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj?' checked="checked"':'').'" id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
+	                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj?' checked="checked"':'').' id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
 						<br>
 	                  <input type="hidden" name="vatnumber_old" value="'.$mythirdpartyaccount->tva_intra.'">
 	                  <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" id="vatnumber" placeholder="'.$placeholderforvat.'">
 	                    ';
+					print "\n";
+					print '<script>';
+					print '$( document ).ready(function() {'."\n";
+					print '$("#vatnumber").keyup(function() {'."\n";
+					print "   console.log('We change the vatnumber='+$('#vatnumber').val());\n";
+					print "   if ($('#vatnumber').val() != '')  { $('#vatassuj').prop('checked', true ); }\n";
+					print '});'."\n";
+					print '});'."\n";
+					print '</script>';
+					print "\n";
+
 if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC() && (GETPOST('admin', 'alpha'))) {
 	if (! empty($conf->use_javascript_ajax)) {
 		print "\n";
@@ -149,7 +160,7 @@ if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC(
             </div>
 ';
 
-if (! GETPOST('deleteaccount')) {
+if (! GETPOST('deleteaccount') && ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'nonprofit' || !getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"))) {
 	print '<div class="center"><br>';
 	$urltoenterpaymentmode = $_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode);
 	print '<a href="'.$urltoenterpaymentmode.'" class=""><span class="fa fa-credit-card paddingright"></span>';

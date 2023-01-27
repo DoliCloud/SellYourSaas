@@ -69,7 +69,7 @@ incPath="${BackupPath}inc-files/"
 cd ${BackupPath}
 
 #Deleting the lockfile if it is there for last two days.
-find $LOCKFILE -type f -mtime +2 -exec rm {} \;
+find $LOCKFILE -type f -mtime +2 -delete
 
 echo -e "\n\n[ $(date) ]: Incremental Backup is about to start." >> $LOGFILE
 COUNTER=0
