@@ -248,6 +248,7 @@ GoToApplication=Go to application instance
 ResourcesAndOptions=Resources and Options
 YourResourceAndOptionsDesc=List of resources and options of this instance
 TheURLDomainOfYourInstance=The URL/domain name of your instance
+URLDesc=Your URL, or domain name, is the address string to enter into your browser to go on your application instance 
 SSHFTPDesc=Secure FTP (SFTP) est un protocol simple et sécurisé pour accéder aux fichiers de votre instance (Par exemple par WinSCP ou FileZilla, des clients SFtp populaires pour Windows). Afin d accèder aux fichiers, vous aurez besoin des identifiants suivant:
 DBDesc=You can access the database of your application with any software compatible with Mysql/MariaDB with the following credentials
 Server=Server

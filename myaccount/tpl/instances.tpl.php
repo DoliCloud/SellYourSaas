@@ -336,7 +336,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<div class="portlet-body" style="'.$displayforinstance.'">
 
 				        <div class="tabbable-custom nav-justified">
-				          <ul class="nav nav-tabs nav-justified">
+				          <ul class="nav nav-tabs nav-justified centpercent">
 				            <li><a id="a_tab_resource_'.$contract->id.'" href="#tab_resource_'.$contract->id.'" data-toggle="tab"'.(! in_array($action, array('updateurlxxx')) ? ' class="active"' : '').'>'.$langs->trans("ResourcesAndOptions").'</a></li>';
 
 		print '<li><a id="a_tab_domain_'.$contract->id.'" href="#tab_domain_'.$contract->id.'" data-toggle="tab"'.($action == 'updateurlxxx' ? ' class="active"' : '').'>'.$langs->trans("Domain").'</a></li>';
@@ -661,32 +661,43 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 							<!-- tab domain -->
 				            <div class="tab-pane" id="tab_domain_'.$contract->id.'">
-								<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">
+								<p class="opacitymedium" style="padding: 15px">'.$langs->trans("URLDesc").'...</p>
+								<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST" role="form">
                                     <input type="hidden" name="token" value="'.newToken().'">
 									<input type="hidden" name="mode" value="instances"/>
 									<input type="hidden" name="action" value="updateurl" />
 									<input type="hidden" name="contractid" value="'.$contract->id.'" />
 									<input type="hidden" name="tab" value="domain_'.$contract->id.'" />
 
-								<div class="col-md-9">
-					                <div class="opacitymedium" style="padding-top: 5px">'.$langs->trans("TheURLDomainOfYourInstance").' :</div>
-									<input type="text" class="urlofinstance minwidth400" disabled="disabled" value="https://'.$contract->ref_customer.'">
+									<div class="form-body">
+    				                  <div class="form-group col-md-12 row">
+					                <label class="col-md-5 control-label">'.$langs->trans("TheURLDomainOfYourInstance").'</label>
+									<div class="col-md-5">
+										<div class="widthcentpercentminusx inline-block nowraponall">
+										<input type="text" class="urlofinstance minwidth400" disabled="disabled" value="https://'.$contract->ref_customer.'">
+										'.showValueWithClipboardCPButton('https://'.$contract->ref_customer, 0, 'none').'
+										</div>
+									</div>
 								';
 
 		if (! empty($contract->array_options['options_custom_url'])) {
 			$arrayofcustom = explode(' ', $contract->array_options['options_custom_url']);
 			foreach ($arrayofcustom as $customurl) {	// Loop on each custom url
 				print '
-										<br><br>
-										<div class="opacitymedium" style="padding-top: 5px">'.$langs->trans("YourCustomUrl").' :</div>
-										<input type="text" class="urlofinstancecustom minwidth400" disabled="disabled" value="https://'.$customurl.'">
+										<label class="col-md-5 control-label">'.$langs->trans("YourCustomUrl").'</label>
+										<div class="col-md-5">
+											<div class="widthcentpercentminusx inline-block nowraponall">
+											<input type="text" class="urlofinstancecustom minwidth400" disabled="disabled" value="https://'.$customurl.'">
+										'.showValueWithClipboardCPButton('https://'.$customurl, 0, 'none').'
+											</div>
+										</div>
 									';
 			}
 		}
 
 								//print '<input type="submit" class="btn btn-warning default change-domain-link" name="changedomain" value="'.$langs->trans("ChangeDomain").'">';
 								print '
-								</div>
+									</div></div>
 
 							  	</form>
 				            </div>
@@ -706,21 +717,33 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-2 control-label">'.$langs->trans("Hostname").'</label>
     				                    <div class="col-md-4">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="hostname_os_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_os'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_hostname_os'], 0, 'none').'
+											</div>
     				                    </div>
     				                    <label class="col-md-2 control-label">'.$langs->trans("Port").'</label>
-    				                    <div class="col-md-4">
+    				                    <div class="col-md-4 widthcentpercentminusxx inline-block nowraponall">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="port_ssh_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
+										'.showValueWithClipboardCPButton($ssh_server_port, 0, 'none').'
+											</div>
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-2 control-label">'.$langs->trans("SFTP Username").'</label>
     				                    <div class="col-md-4">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="username_os_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_os'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_username_os'], 0, 'none').'
+											</div>
     				                    </div>
     				                    <label class="col-md-2 control-label">'.$langs->trans("Password").'</label>
     				                    <div class="col-md-4">
-    				                      <input type="text" id="password_os_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_os'].'">
+											<div class="widthcentpercentminusx inline-block nowraponall">
+	   				                      <input type="text" id="password_os_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_os'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_password_os'], 0, 'none').'
+											</div>
     				                    </div>
     				                  </div>
     				                </div>
@@ -756,27 +779,42 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("Hostname").'</label>
     				                    <div class="col-md-3">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="hostname_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_db'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_hostname_db'], 0, 'none').'
+											</div>
     				                    </div>
     				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
     				                    <div class="col-md-3">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="port_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_port_db'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_port_db'], 0, 'none').'
+											</div>
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseName").'</label>
     				                    <div class="col-md-3">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="name_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_database_db'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_database_db'], 0, 'none').'
+											</div>
     				                    </div>
     				                  </div>
     				                  <div class="form-group col-md-12 row">
     				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLogin").'</label>
     				                    <div class="col-md-3">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="username_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_db'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_username_db'], 0, 'none').'
+											</div>
     				                    </div>
     				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
     				                    <div class="col-md-3">
+											<div class="widthcentpercentminusx inline-block nowraponall">
     				                      <input type="text" id="other_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_password_db'], 0, 'none').'
+											</div>
     				                    </div>
     				                  </div>';
 
@@ -785,11 +823,17 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 	    				                  <div class="form-group col-md-12 row">
 	    				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLoginReadOnly").'</label>
 	    				                    <div class="col-md-3">
+												<div class="widthcentpercentminusx inline-block nowraponall">
 	    				                      <input type="text" id="username_ro_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_username_ro_db'], 0, 'none').'
+												</div>
 	    				                    </div>
 	    				                    <label class="col-md-3 control-label">'.$langs->trans("PasswordReadOnly").'</label>
 	    				                    <div class="col-md-3">
+												<div class="widthcentpercentminusx inline-block nowraponall">
 	    				                      <input type="text" id="other_ro_db_'.$contract->id.'" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
+										'.showValueWithClipboardCPButton($contract->array_options['options_password_ro_db'], 0, 'none').'
+												</div>
 	    				                    </div>
 	    				                  </div>';
 			}
