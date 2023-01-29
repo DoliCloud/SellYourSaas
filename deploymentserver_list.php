@@ -807,7 +807,7 @@ while ($i < $imaxinloop) {
 		// Column nb of instances
 		if (!empty($arrayfields['nb_instances']['checked'])) {
 			print '<td class="right">';
-			print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status=done&search_options_deployment_host='.urlencode($obj->ipaddress).'">';
+			print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_deployment_host='.urlencode($obj->ipaddress).'">';
 			print (empty($openinstances[$obj->ipaddress]) ? '' : $openinstances[$obj->ipaddress]);
 			print '</a>';
 			print '</td>';
@@ -817,7 +817,7 @@ while ($i < $imaxinloop) {
 			print '<td class="right">';
 			if (!empty($backuptotalinstances[$obj->ipaddress])) {
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
-					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status=done&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->options_deployment_host).'">';
+					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->options_deployment_host).'">';
 					print img_warning($langs->trans("Errors"), '', 'paddingrightonly');
 					print '<span class="error">';
 				}
