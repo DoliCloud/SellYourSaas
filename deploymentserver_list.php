@@ -806,18 +806,27 @@ while ($i < $imaxinloop) {
 		}
 		// Column nb of instances
 		if (!empty($arrayfields['nb_instances']['checked'])) {
-			print '<td class="right">'.(empty($openinstances[$obj->ipaddress]) ? '' : $openinstances[$obj->ipaddress]).'</td>';
+			print '<td class="right">';
+			print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_host='.urlencode($obj->ipaddress).'">';
+			print (empty($openinstances[$obj->ipaddress]) ? '' : $openinstances[$obj->ipaddress]);
+			print '</a>';
+			print '</td>';
 		}
 		// Column nb of instances backups
 		if (!empty($arrayfields['nb_backups']['checked'])) {
 			print '<td class="right">';
 			if (!empty($backuptotalinstances[$obj->ipaddress])) {
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
+					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status=done&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->options_deployment_host).'">';
+					print img_warning($langs->trans("Errors"), '', 'paddingrightonly');
 					print '<span class="error">';
 				}
-				print $backupokinstances[$obj->ipaddress].'/'.$backuptotalinstances[$obj->ipaddress];
+				print $backupokinstances[$obj->ipaddress];
+				print '/';
+				print $backuptotalinstances[$obj->ipaddress];
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
 					print '</span>';
+					print '</a>';
 				}
 			}
 			print '</td>';
