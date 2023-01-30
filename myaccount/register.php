@@ -496,7 +496,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						</div>
 					</div>
 				</div>
-				<?php if (getDolGlobalInt('SELLYOURSAAS_REGISTER_HIDE_PHONE')) { ?>
+				<?php if (! getDolGlobalInt('SELLYOURSAAS_REGISTER_HIDE_PHONE')) { ?>
 				<div class="horizontal-fld">
 					<div class='control-group'>
 						<label class='control-label' for='phone' trans='1'><span class="fa fa-phone opacityhigh"></span> <?php echo $langs->trans('Phone') ?></label>
