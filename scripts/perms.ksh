@@ -8,10 +8,16 @@ if [ "$(id -u)" != "0" ]; then
 	exit 100
 fi
 
-# possibility to change the directory of instances are stored
+# possibility to change the directory where instances are stored
 export targetdir=`grep '^targetdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$targetdir" == "x" ]]; then
 	export targetdir="/home/jail/home"
+fi
+
+# possibility to change the directory where backup instances are stored
+export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$backupdir" == "x" ]]; then
+	export backupdir="/mnt/diskbackup/backup"
 fi
 
 echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
@@ -162,3 +168,8 @@ chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_loca
 [ -s $pathtospamdir/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
 chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/*
 chown admin.www-data $pathtospamdir/*
+
+
+echo "Nettoyage des repertoires de backup vides sous $backupdir/osu*"
+find $backupdir/osu*/ -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
+
