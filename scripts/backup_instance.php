@@ -362,6 +362,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		$param=array();
 		if ($mode != 'confirm' && $mode != 'confirmrsync') $param[]="-n";
 		//$param[]="-a";
+		$param[]="-4";
+		$param[]="--prune-empty-dirs";
 		$param[]="-rlt";
 		//$param[]="-vv";
 		$param[]="-v";

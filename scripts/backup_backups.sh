@@ -87,7 +87,7 @@ fi
 
 export DISTRIB_RELEASE=`lsb_release -r -s`
 
-export OPTIONS="-4 --stats -rlt --chmod=u=rwX";
+export OPTIONS="-4 --prune-empty-dirs --stats -rlt --chmod=u=rwX";
 if [ "x$DISTRIB_RELEASE" == "x20.10" -o "x$DISTRIB_RELEASE" == "x22.04" ]; then
 	# Version must be > 20.10 on both side to allow --open-noatime !
 	#export OPTIONS="$OPTIONS --open-noatime" 

@@ -169,8 +169,9 @@ chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_loca
 chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/*
 chown admin.www-data $pathtospamdir/*
 
-if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
-	IFS=$(echo -en "\n\b")
-	echo "We are on a deployment server, so we try to delete empty dirs into backup directory under $backupdir/osu*"
-	find $backupdir/osu*/ -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
-fi
+# Disabled: We prefer --prune-empty-dirs
+#if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
+#	IFS=$(echo -en "\n\b")
+#	echo "We are on a deployment server, so we try to delete empty dirs into backup directory under $backupdir/osu*"
+#	find $backupdir/osu*/ -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
+#fi

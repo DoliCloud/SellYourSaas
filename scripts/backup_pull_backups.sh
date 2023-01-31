@@ -60,8 +60,8 @@ fi
 export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
-#export OPTIONS=" -4 --stats -rlt --chmod=u=rwX";
-export OPTIONS=" -4 --stats -rlt --no-specials";
+#export OPTIONS=" -4 --prune-empty-dirs --stats -rlt --chmod=u=rwX";
+export OPTIONS=" -4 --prune-empty-dirs --stats -rlt --no-specials";
 if [ "x$testorconfirm" == "xconfirmdelete" ]; then
 	export OPTIONS="$OPTIONS --delete --delete-excluded"
 fi
