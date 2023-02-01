@@ -27,7 +27,7 @@ div.block header h1 {
 
 .customregisterinformation{
     display: flex;
-    flex-direction:column;
+    flex-direction: column-reverse;
     justify-content: space-around;
     padding-left: 100px;
     padding-right: 100px;
@@ -44,9 +44,10 @@ div.block header h1 {
     display:flex
 }
 .customregisterheader > h1{
-    margin:auto;
+    margin: auto;
     margin-top: 7px;
-    padding-left:100px
+    padding-left: 100px;
+    padding-top: 10px !important;
 }
 .defaultheader{
 	display:none;
@@ -54,6 +55,11 @@ div.block header h1 {
 .page-header-top{
 	display:none;
 }
+
+.btnalreadyanaccount {
+    border: 1px solid #fff;
+}
+
 
 /* For other sizes */
 
