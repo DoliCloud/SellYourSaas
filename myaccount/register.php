@@ -86,6 +86,9 @@ $reusesocid = GETPOST('reusesocid', 'int');
 $fromsocid = GETPOST('fromsocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
 $extcss=GETPOST('extcss', 'alpha');
+if (empty($extcss)) {
+	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
+}
 
 // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
@@ -239,13 +242,9 @@ if ($favicon) {
 	if (preg_match('/^http/i', $favicon)) $href = $favicon;
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
-$head.='<!-- Bootstrap core CSS -->
-<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
-if ($extcss) {
-	$head.='<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
-} else {
-	$head.='<link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">';
-}
+$head .= '<!-- Bootstrap core CSS -->';
+$head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
+$head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
 $arrayofjs=array(
