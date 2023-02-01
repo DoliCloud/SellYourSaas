@@ -150,6 +150,11 @@ $productid=GETPOST('service', 'int');
 $plan=GETPOST('plan', 'alpha');
 $productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):($plan?$plan:''));
 $extcss=GETPOST('extcss', 'alpha');
+if (empty($extcss)) {
+	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
+} elseif ($extcss == 'generic') {
+	$extcss = 'dist/css/myaccount.css';
+}
 
 // If ran from command line
 if (substr($sapi_type, 0, 3) == 'cli') {
@@ -1534,9 +1539,9 @@ if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVIC
 
 $head = '';
 if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
-$head.='<!-- Bootstrap core CSS -->
-<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
-<link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">';
+$head .= '<!-- Bootstrap core CSS -->';
+$head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
+$head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 
 $title = $langs->trans("Registration").($tmpproduct->label?' ('.$tmpproduct->label.')':'');
 
