@@ -25,7 +25,14 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE automigration.tpl.php -->
 <?php
 
-$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';	// @TODO LMR Use id of contract instead of ID of thirdparty
+$idcontract = "0";
+if (GETPOST('instanceselect', 'alpha')) {
+	$instanceselect = GETPOST('instanceselect', 'alpha');
+	$instanceselect = explode("_", $instanceselect);
+	$idcontract = $instanceselect[1];
+}
+
+$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$idcontract.'.tmp';
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
@@ -41,13 +48,6 @@ print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormba
 	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
 	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
 print '</form>';
-if ($action == 'redirectautomigrationget') {
-	// @TODO LMR Why not just changing the url in <form action="url" with <form action="url#step4" instead of making a post that do a js get redirect just after being loaded ?
-	print '<script>
-	console.log("Reload page with another url...");
-	window.location.href = "'.$_SERVER["PHP_SELF"].'?mode='.GETPOST("mode", 'alpha').'&action=view'.(GETPOST("instanceselect")?'&instanceselect='.GETPOST("instanceselect"):"").'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&backfromautomigration=backfromautomigration&ticketcategory_child_id='.GETPOST('ticketcategory_child_id', 'alpha').'&ticketcategory='.GETPOST('ticketcategory', 'alpha').(GETPOST('subject', 'alpha')?'&subject='.GETPOST('subject', 'alpha'):"").'#Step4"
-	</script>';
-}
 
 if (!empty($_POST['addfile'])) {
 	// Set tmp user directory
@@ -406,10 +406,10 @@ if ($action == 'fileverification') {
     <!-- END STEP5-->';
 }
 if ($action == 'view') {
-	print '<form id="formautomigration" name="formautomigration" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+	print '<form id="formautomigration" name="formautomigration" action="'.$_SERVER["PHP_SELF"].'#step4" method="POST" enctype="multipart/form-data">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="mode" value="automigration">';
-	print '<input type="hidden" id="actionautomigration" name="action" value="redirectautomigrationget">';
+	print '<input type="hidden" id="actionautomigration" name="action" value="view">';
 
 	print'<!-- BEGIN STEP1-->
         <div class="portlet light" id="step1">
