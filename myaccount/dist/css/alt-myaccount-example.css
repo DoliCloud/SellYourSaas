@@ -86,6 +86,7 @@ form#formregister {
 	.customregisterinformation {
 	    padding-left: 10px;
     	padding-right: 10px;
+    	flex-direction: column;
 	}
     .customregisterinformation > *{
         max-width:90%;
