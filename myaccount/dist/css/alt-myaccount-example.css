@@ -36,6 +36,9 @@ div.block header h1 {
     align-self: center;
     /* padding-left:200px; */
 }
+form#formregister {
+	padding-right: 100px;
+}
 .customcompanylogo{
     display:block;
 }
@@ -85,6 +88,11 @@ div.block header h1 {
         max-width:90%;
         padding-left:0px;
     }
+    
+    form#formregister {
+		padding-right: unset;
+	}
+
     .customcompanylogo{
         -webkit-box-ordinal-group: 1;
         -moz-box-ordinal-group: 1;

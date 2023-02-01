@@ -572,8 +572,10 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				<div class="fld select-domain required">
 				  <label trans="1"><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
 				  <div class="linked-flds">
+					  <span class="nowraponall">
 					<span class="opacitymedium">https://</span>
 					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
+					</span>
 					<select<?php echo $disabled; ?> name="tldid" id="tldid" >
 						<?php
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
