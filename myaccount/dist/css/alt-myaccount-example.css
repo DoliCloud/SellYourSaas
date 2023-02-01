@@ -11,6 +11,9 @@ a{
 	color: #FFF;		
 }
 
+div.block header {
+	background-color: #4c4970;
+}
 div.block header h1 {
 	margin-bottom: 0; 
 }
