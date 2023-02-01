@@ -5,6 +5,7 @@
 
 * FIX Renewal of letsencrypt wildcard certificate when we use more than 1 domain on the same server
 * FIX Email sent by sellyoursaas admin tools on deployment server are sent using local mail
+* NEW Can set the alternative style into config SELLYOURSAAS_EXTCSS instead of URL
 * NEW Add --prune-empty-dirs on backup scripts to save inodes
 * NEW Add a link to switch directly to the list of backup errors from the counter on list of deployment server
 * NEW Add a copy/paste picto after each field in the SSH/SFTP/Database info tabs 

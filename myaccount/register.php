@@ -88,7 +88,10 @@ $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
 $extcss=GETPOST('extcss', 'alpha');
 if (empty($extcss)) {
 	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
+} elseif ($extcss == 'generic') {
+	$extcss = 'dist/css/myaccount.css';
 }
+
 
 // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
