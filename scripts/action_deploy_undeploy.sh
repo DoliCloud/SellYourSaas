@@ -1187,12 +1187,15 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	then
 		if [[ -f /var/spool/cron/crontabs/$osusername ]]; then
 			echo merge existing $cronfile with existing /var/spool/cron/crontabs/$osusername
-			# We remove the line that contains the dbname into the tmp file
-			echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
-			cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
+			# We remove the line that contains the dbname, TZ and comment into the tmp file
+			echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname | grep -v 'TZ=' | grep -v '^#' > /tmp/$dbname.tmp"
+			cat /var/spool/cron/crontabs/$osusername | grep -v "$dbname" | grep -v "TZ=" | grep -v "^#" > /tmp/$dbname.tmp
 			# Now we add the lines to use for this instance into the tmp file
 			echo "cat $cronfile >> /tmp/$dbname.tmp"
 			cat $cronfile >> /tmp/$dbname.tmp
+			# Then we add an empty line (otherwise the last line is ignored)
+			echo "echo >> /tmp/$dbname.tmp"
+			echo >> /tmp/$dbname.tmp
 			echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 			cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 			echo rm -f /tmp/$dbname.tmp
