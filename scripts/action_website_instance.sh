@@ -34,10 +34,12 @@ if [[ "x$templatesdir" != "x" ]]; then
 	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
+	export vhostfilewebsite="$templatesdir/vhostHttps-sellyoursaas-dolibarrwebsite.template"
 else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+	export vhostfilewebsite="$templatesdir/vhostHttps-sellyoursaas-dolibarrwebsite.template"
 fi
 
 if [ "$(id -u)" != "0" ]; then
@@ -230,14 +232,14 @@ testorconfirm="confirm"
 if [[ "$mode" == "deploywebsite" ]]; then
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf"
-	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfilewebsite"
 	if [[ -s $apacheconf ]]
 	then
 		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
 		rm -f $apacheconf
 	fi
 
-	echo "cat $vhostfile | sed -e 's/__webSiteDomain__/www.$CUSTOMDOMAIN/g' | \
+	echo "cat $vhostfilewebsite | sed -e 's/__webSiteDomain__/www.$CUSTOMDOMAIN/g' | \
 			  sed -e 's/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g' | \
 			  sed -e 's/__webAppLogName__/$CUSTOMDOMAIN/g' | \
               sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
@@ -254,7 +256,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
-	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+	cat $vhostfilewebsite | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
               sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
@@ -273,10 +275,10 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
-	#echo Enable conf with a2ensite $fqn.conf
+	#echo Enable conf with a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
 	#a2ensite $fqn.conf
-	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online 
-	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
+	ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 	
 fi
 
