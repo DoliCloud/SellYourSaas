@@ -59,7 +59,7 @@ if ($urlfaq || $urlstatus) {
 }
 
 	print '
-	<div class="page-content-wrapper">
+	<div class="page-content-wrapper" id="supportform">
 			<div class="page-content">
 
 
@@ -535,7 +535,6 @@ if ($sellyoursaassupporturl) {
 			print '<input type="hidden" name="action" value="view">';
 			print '</form>';
 		}
-		
 	}
 
 				print ' 	</div></div>
