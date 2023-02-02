@@ -4832,6 +4832,17 @@ lsof -p PID_of_ps_grep_mysqld
 to see files and DBs treated in relog. They are open either by date of the inodes or by alphabetical order in the dbn folder... (do it several times to determine which)
 
 
+=== Check that batch of user instances are executed.
+
+All cron files are stored into */var/spool/cron/crontabs*. When an instnace is suspended, the cron file is moved into */var/spool/cron/crontabs.disabled*
+
+You can run the following command to see when user instance cron was started:
+
+[source,bash]
+---------------
+cat /var/log/auth.log | grep "session opened for user osu" | grep CRON
+---------------
+
 
 === Deactivation of all user instances
 
