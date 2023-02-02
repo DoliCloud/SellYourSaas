@@ -494,7 +494,10 @@ if ($sellyoursaassupporturl) {
 
 		print '<div class="hideforautomigration">';
 
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
+		// From
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
+
+		// Topic
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
