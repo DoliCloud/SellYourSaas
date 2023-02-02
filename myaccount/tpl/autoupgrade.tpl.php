@@ -479,8 +479,7 @@ if ($action == "instanceverification") {
 			if ($statuslabel == 'undeployed') { $color = 'grey'; }
 			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
 
-			if ($tmpproduct->array_options['options_typesupport'] != 'none'
-				&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				if (! $ispaid) {	// non paid instances
 					$priority = 'low';
 					$prioritylabel = '<span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span> <span class="opacitymedium">'.$langs->trans("Trial").'</span>';
