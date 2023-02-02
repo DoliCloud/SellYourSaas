@@ -141,8 +141,11 @@ export sshaccesstype=${39}
 export automigrationtmpdir=${41}
 export automigrationdocumentarchivename=${42}
 
-export ErrorLog='#ErrorLog'
+export CUSTOMDOMAIN=${46}
 
+
+
+export ErrorLog='#ErrorLog'
 
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
@@ -203,6 +206,7 @@ echo "ispaidinstance = $ispaidinstance"
 echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
 echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
+echo "CUSTOMDOMAIN = $CUSTOMDOMAIN"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
@@ -214,14 +218,73 @@ echo "automigrationtmpdir = $automigrationtmpdir"
 echo "automigrationdocumentarchivename = $automigrationdocumentarchivename"
 
 
+
 testorconfirm="confirm"
 
 
 # TODO
 
 # Create / Remove the virtual hostinto available dir. 
+# Create/Disable Apache virtual host
 
-# Add link into enabled
+if [[ "$mode" == "deploywebsite" ]]; then
+
+	export apacheconf="/etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
+	if [[ -s $apacheconf ]]
+	then
+		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		rm -f $apacheconf
+	fi
+
+	echo "cat $vhostfile | sed -e 's/__webSiteDomain__/www.$CUSTOMDOMAIN/g' | \
+			  sed -e 's/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g' | \
+			  sed -e 's/__webAppLogName__/$CUSTOMDOMAIN/g' | \
+              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+			  sed -e 's/__osUsername__/$osusername/g' | \
+			  sed -e 's/__osGroupname__/$osusername/g' | \
+			  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
+			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+			  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
+			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
+			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
+			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+			  sed -e "s/__webAppLogName__/$instancename/g" | \
+              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+			  sed -e "s/__osUsername__/$osusername/g" | \
+			  sed -e "s/__osGroupname__/$osusername/g" | \
+			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
+			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+			  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
+			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
+			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
+			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+
+
+	#echo Enable conf with a2ensite $fqn.conf
+	#a2ensite $fqn.conf
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online 
+	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
+	
+fi
+
+
+
+# Add link into enabled dir
+
+
 
 # Launch creation of ssl certificate
 

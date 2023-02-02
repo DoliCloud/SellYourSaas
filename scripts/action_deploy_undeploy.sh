@@ -155,8 +155,11 @@ if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
 	INCLUDEFROMCONTRACT=""
 fi
 
-export ErrorLog='#ErrorLog'
+export CUSTOMDOMAIN=${46}
 
+
+
+export ErrorLog='#ErrorLog'
 
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname

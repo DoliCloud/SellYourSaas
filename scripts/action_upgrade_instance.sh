@@ -149,8 +149,11 @@ export dirforexampleforsources=${43}
 export laststableupgradeversion=${44}
 export lastversiondolibarrinstance=${45}
 
-export ErrorLog='#ErrorLog'
+export CUSTOMDOMAIN=${46}
 
+
+
+export ErrorLog='#ErrorLog'
 
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname

@@ -141,8 +141,11 @@ export sshaccesstype=${39}
 export automigrationtmpdir=${41}
 export automigrationdocumentarchivename=${42}
 
-export ErrorLog='#ErrorLog'
+export CUSTOMDOMAIN=${46}
 
+
+
+export ErrorLog='#ErrorLog'
 
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
