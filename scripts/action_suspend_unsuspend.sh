@@ -770,8 +770,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 		echo "cat $cronfile >> /tmp/$dbname.tmp"
 		cat $cronfile >> /tmp/$dbname.tmp
 		# Then we add an empty line (otherwise the last line is ignored)
-		echo "echo >> /tmp/$dbname.tmp"
-		echo >> /tmp/$dbname.tmp
+		#echo "echo >> /tmp/$dbname.tmp"
+		#echo >> /tmp/$dbname.tmp
 		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		echo rm -f /tmp/$dbname.tmp
@@ -794,8 +794,10 @@ if [[ "$mode" == "suspend" ]]; then
 		rm -f /var/spool/cron/crontabs.disabled/$osusername
 		echo cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 		cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
+		# We remove the line that contains the dbname
 		echo "cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp"
 		cat /var/spool/cron/crontabs/$osusername | grep -v $dbname > /tmp/$dbname.tmp
+		# Copy the file without the dbname line
 		echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 		echo rm -f /tmp/$dbname.tmp

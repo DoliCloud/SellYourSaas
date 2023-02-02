@@ -1194,8 +1194,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			echo "cat $cronfile >> /tmp/$dbname.tmp"
 			cat $cronfile >> /tmp/$dbname.tmp
 			# Then we add an empty line (otherwise the last line is ignored)
-			echo "echo >> /tmp/$dbname.tmp"
-			echo >> /tmp/$dbname.tmp
+			#echo "echo >> /tmp/$dbname.tmp"
+			#echo >> /tmp/$dbname.tmp
 			echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 			cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
 			echo rm -f /tmp/$dbname.tmp
@@ -1222,8 +1222,7 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 		cp /var/spool/cron/crontabs/$osusername /var/spool/cron/crontabs.disabled/$osusername
 
-		#echo cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
-		#cp /tmp/$dbname.tmp /var/spool/cron/crontabs/$osusername
+		# Remove the cron file
 		echo rm -f /var/spool/cron/crontabs/$osusername
 		rm -f /var/spool/cron/crontabs/$osusername
 	else
