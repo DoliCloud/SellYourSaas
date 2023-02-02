@@ -29,7 +29,7 @@ $upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccou
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
-$backtopagesupport = $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautomigration=backfromautomigration&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'&subject'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha'));
+$backtopagesupport = $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautomigration=backfromautomigration&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?GETPOST('ticketcategory_child_id', 'alpha'):'').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?GETPOST('ticketcategory', 'alpha'):'').'&subject'.(GETPOST('subject_back', 'alpha')?GETPOST('subject', 'alpha'):'').'#supportform';
 
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormbacksupport">';
 	print '<input type="hidden" name="action" value="presend">';
