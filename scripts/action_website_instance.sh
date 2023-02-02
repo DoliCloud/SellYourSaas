@@ -79,14 +79,6 @@ if [ "x${23}" == "x" ]; then
 	echo "Missing parameter 23 - REMOTEIP" 1>&2
 	exit 23
 fi
-if [ "x$41" == "x" ]; then
-        echo "Missing parameter 41 - automigrationtmpdir"
-        exit 41
-fi
-if [ "x$42" == "x" ]; then
-        echo "Missing parameter 42 - automigrationdocumentarchivename"
-        exit 42
-fi
 
 
 export mode=$1
@@ -140,10 +132,8 @@ export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
 export sshaccesstype=${39}
 
-export automigrationtmpdir=${41}
-export automigrationdocumentarchivename=${42}
-
-export CUSTOMDOMAIN=${46}
+# The value from the virtualhost of website (with of without www., we remove it)
+export CUSTOMDOMAIN=${46/www./ }
 
 
 
@@ -152,7 +142,6 @@ export ErrorLog='#ErrorLog'
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
-export CRONHEAD=${VIRTUALHOSTHEAD/php_value date.timezone /TZ=}
 
 # possibility to change the ssl certificates name
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -213,18 +202,11 @@ echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
 echo "instancedir = $instancedir"
-echo "fqn = $fqn"
-echo "fqnold = $fqnold"
-echo "CRONHEAD = $CRONHEAD"
-echo "automigrationtmpdir = $automigrationtmpdir"
-echo "automigrationdocumentarchivename = $automigrationdocumentarchivename"
 
 
 
 testorconfirm="confirm"
 
-
-# TODO
 
 # Create / Remove the virtual hostinto available dir. 
 # Create/Disable Apache virtual host
@@ -276,12 +258,14 @@ if [[ "$mode" == "deploywebsite" ]]; then
 
 
 	#echo Enable conf with a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
-	#a2ensite $fqn.conf
+	#a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
 	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
 	ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 	
 fi
 
+
+# TODO
 
 
 # Add link into enabled dir
