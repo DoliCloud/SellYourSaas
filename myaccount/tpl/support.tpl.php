@@ -24,11 +24,11 @@ if (empty($conf) || ! is_object($conf)) {
 ?>
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
-	require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
-	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
-	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticket.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
+require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticket.class.php';
 
-	$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
+$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
 
 if (!empty($_POST['addfile'])) {
 	// Set tmp user directory
@@ -45,10 +45,10 @@ if (!empty($_POST["removedfile"])) {
 	$action = "presend";
 }
 
-	// Print warning to read FAQ before
-	print '<!-- Message to read FAQ and get status -->'."\n";
+// Print warning to read FAQ before
+print '<!-- Message to read FAQ and get status -->'."\n";
 if ($urlfaq || $urlstatus) {
-	print '<div class="alert alert-success note note-success">'."\n";
+	print '<div class="alert alert-success note note-success" id="supportform">'."\n";
 	if ($urlfaq) {
 		print '<h4 class="block">'.$langs->trans("PleaseReadFAQFirst", $urlfaq).'</h4>'."\n";
 	}
@@ -58,8 +58,8 @@ if ($urlfaq || $urlstatus) {
 	print '</div>'."\n";
 }
 
-	print '
-	<div class="page-content-wrapper" id="supportform">
+print '
+	<div class="page-content-wrapper">
 			<div class="page-content">
 
 
