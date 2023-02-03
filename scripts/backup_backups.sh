@@ -96,13 +96,13 @@ else
 	export OPTIONS="$OPTIONS --noatime"
 fi
 if [ "x$2" == "x--delete" ]; then
-	export OPTIONS="$OPTIONS --delete"
+	export OPTIONS="$OPTIONS --delete --delete-excluded"
 fi
 if [ "x$3" == "x--delete" ]; then
-	export OPTIONS="$OPTIONS --delete"
+	export OPTIONS="$OPTIONS --delete --delete-excluded"
 fi
 if [ "x$4" == "x--delete" ]; then
-	export OPTIONS="$OPTIONS --delete"
+	export OPTIONS="$OPTIONS --delete --delete-excluded"
 fi
 
 

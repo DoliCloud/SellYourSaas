@@ -11,7 +11,7 @@
         ServerName __WebSiteDomain__
         ServerAdmin __webAdminEmail__
         ServerAlias __WebSiteAlias__
-        DocumentRoot __osUserPath__/documents/website/workgroup-it.com
+        DocumentRoot __osUserPath__/documents/website/__WebSiteDomain__
 
         AddDefaultCharset UTF-8
 
