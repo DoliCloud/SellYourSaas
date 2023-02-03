@@ -128,7 +128,7 @@ if (in_array($tmparray[0], array('backup'))) {
 	else fwrite($fh, date('Y-m-d H:i:s').' sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
 	fwrite($fh, "getcwd() = ".getcwd()."\n");
 
-	exec('sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir.' confirm --forcersync --forcedump 2>&1', $output, $return_var);
+	exec('sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir.' confirm --quick --forcersync --forcedump 2>&1', $output, $return_var);
 
 	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
 	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output)."\n");
