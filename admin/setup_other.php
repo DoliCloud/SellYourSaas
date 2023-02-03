@@ -122,6 +122,7 @@ if ($action == 'set') {
 
 		// Save images
 		$dirforimage=$conf->mycompany->dir_output.'/logos/';
+		$reg = array();
 		foreach ($_FILES as $postkey => $postvar) {
 			$suffix = '';
 			if (preg_match('/^logoblack/', $postkey, $reg)) {
