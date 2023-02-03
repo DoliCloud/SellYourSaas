@@ -5657,4 +5657,15 @@ You may have updated the apparmor profile of apache but apache was not restarted
 Try to stop and kill all apache process not stopped. Restart apache.
 
 
+==== Error missing profile snap.certbot.certbot
+
+If you have such an error:
+
+[source,bash]
+---------------
+missing profile snap.certbot.certbot.
+Please make sure that the snapd.apparmor service is enabled and started
+---------------
+
+It means the package snapd is not install. Launch "apt install snapd" to fix this.
 

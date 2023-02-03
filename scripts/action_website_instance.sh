@@ -228,7 +228,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
               sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
               sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
 			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
-			  sed -e 's/__osUsername__/$osusername/g' | \
+			  sed -e 's/__instanceName__/$instancename/g' | \
+			  sed -e 's/__domainName__/$domainname/g' | \
 			  sed -e 's/__osGroupname__/$osusername/g' | \
 			  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
 			  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
@@ -245,6 +246,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
               sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
               sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
 			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+			  sed -e "s/__instanceName__/$instancename/g" | \
+			  sed -e "s/__domainName__/$domainname/g" | \
 			  sed -e "s/__osUsername__/$osusername/g" | \
 			  sed -e "s/__osGroupname__/$osusername/g" | \
 			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \

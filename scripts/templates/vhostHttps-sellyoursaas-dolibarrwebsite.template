@@ -52,61 +52,41 @@
 
         #ErrorLog __osUserPath__/websites_error.log
         #TransferLog /var/log/apache2/websites_access_log
-        CustomLog ${APACHE_LOG_DIR}/websites_vhosts_access.log vhost_combined
+        #CustomLog ${APACHE_LOG_DIR}/websites_vhosts_access.log vhost_combined
         #CustomLog /var/log/apache2/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
+        CustomLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/websites_vhosts_access.log 1G"
+        ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/websites_vhosts_error.log 1G"
 
         # Compress returned resources of type php pages, text file export, css and javascript
         AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript
-
-        # Netscape 4.x has some problems...
-        BrowserMatch ^Mozilla/4 gzip-only-text/html
-
-        # Netscape 4.06-4.08 have some more problems
-        BrowserMatch ^Mozilla/4\.0[678] no-gzip
-
-        # MSIE masquerades as Netscape, but it is fine
-        BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-
-        # Make sure proxies don't deliver the wrong content
-        #Header append Vary User-Agent env=!dont-vary
-
-        #DeflateFilterNote Input instream
-        #DeflateFilterNote Output outstream
-        #DeflateFilterNote Ratio ratio
-        #LogFormat '"%r" %{outstream}n/%{instream}n (%{ratio}n%%)' deflate
-        #CustomLog deflate_log deflate
-
-        #   SSL Engine Switch:
-        #   Enable/Disable SSL for this virtual host.
-        SSLEngine on
-
-
-                RewriteEngine On
-                # This will enable the Rewrite capabilities
-
-                RewriteCond %{HTTPS} !=on
-                # This checks to make sure the connection is not already HTTPS
-
-                RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
-                # This rule will redirect users from their original location, to the same location but using HTTPS.
-                # i.e.  http://www.example.com/foo/ to https://www.example.com/foo/
-                # The leading slash is made optional so that this will work either in httpd.conf
-                # or .htaccess context
-
 
         <FilesMatch "\.(cgi|shtml|phtml|php)$">
                 SSLOptions +StdEnvVars
         </FilesMatch>
 
-        BrowserMatch ".*MSIE.*" \
-                nokeepalive ssl-unclean-shutdown \
-                downgrade-1.0 force-response-1.0
 
-# To replace with custom certificate for domain
-SSLCertificateFile /etc/apache2/with.sellyoursaas.com.crt
-SSLCertificateKeyFile /etc/apache2/with.sellyoursaas.com.key
-SSLCertificateChainFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
-SSLCACertificateFile /etc/apache2/with.sellyoursaas.com-intermediate.crt
+		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.crt">
+	        #   SSL Engine Switch:
+	        #   Enable/Disable SSL for this virtual host.
+	        SSLEngine on
+	
+	        RewriteEngine On
+	        # This will enable the Rewrite capabilities
+	
+	        RewriteCond %{HTTPS} !=on
+	        # This checks to make sure the connection is not already HTTPS
+	
+	        RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
+	        # This rule will redirect users from their original location, to the same location but using HTTPS.
+	        # i.e.  http://www.example.com/foo/ to https://www.example.com/foo/
+	        # The leading slash is made optional so that this will work either in httpd.conf
+	        # or .htaccess context
+	
+	        SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.crt
+	        SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.key
+	        SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__-intermediate.crt
+	        SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__-intermediate.crt
+        </IfFile>
 
 </VirtualHost>
      

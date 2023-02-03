@@ -79,6 +79,8 @@
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
     /var/log/apache2/other_vhosts_pid.log w,
+    /var/log/apache2/websites_vhosts_access.log w,
+    /var/log/apache2/websites_vhosts_error.log w,
     /var/log/phpmail.log w,
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
@@ -120,6 +122,8 @@
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
     /var/log/apache2/other_vhosts_pid.log w,
+    /var/log/apache2/websites_vhosts_access.log w,
+    /var/log/apache2/websites_vhosts_error.log w,
   }
 
   ^sellyoursaas-instances flags=(attach_disconnected) {
@@ -195,6 +199,8 @@
     /var/log/apache2/other_vhosts_access.log w,
     /var/log/apache2/other_vhosts_error.log w,
     /var/log/apache2/other_vhosts_pid.log w,
+    /var/log/apache2/websites_vhosts_access.log w,
+    /var/log/apache2/websites_vhosts_error.log w,
     /var/log/phpmail.log w,
     /var/log/phpsendmail.log rw,
     /var/spool/postfix/public/pickup rw,
