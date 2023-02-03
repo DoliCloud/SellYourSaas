@@ -117,7 +117,6 @@ fi
 export errstring=""
 export ret=0
 export ret1=0
-export ret2=0
 
 cd "$scriptdir"
 
@@ -132,16 +131,16 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	# Source
 	export SERVSOURCE=$remotebackupserver
 	export SERVPORTSOURCE=$remotebackupserverport
-	export DIRSOURCE1="$remotebackupdir";
+	export DIRSOURCE="$remotebackupdir";
 	
 	# Target
-	export DIRDESTI1="$backupdir";
+	export DIRDESTI="$backupdir";
 
 	export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
 	export OPTIONS="$OPTIONS --exclude=.debris --exclude=*.qcow --exclude=*.qcow2 --exclude=*.fsa --exclude=VirtualBox*VMs/"
 	
 	# Note: for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
-	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE1/* $DIRDESTI1";
+	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE/* $DIRDESTI1";
 	echo "$command";
 
 	> /tmp/$script.generic.err
@@ -150,10 +149,10 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
         nberror=`cat /tmp/$script.generic.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
 	    cat /tmp/$script.generic.err
 		if [ "x$nberror" != "x0" ]; then
-		  	echo "ERROR Failed to make rsync for $DIRSOURCE1"
+		  	echo "ERROR Failed to make rsync for $DIRSOURCE"
 	  		echo
 	   		export ret1=$(($ret1 + 1));
-	   		export errstring="${0} $1 $2 $3 $4 -> Dir $DIRSOURCE1 "`date '+%Y-%m-%d %H:%M:%S'`
+	   		export errstring="${0} $1 $2 $3 $4 -> Dir $DIRSOURCE "`date '+%Y-%m-%d %H:%M:%S'`
 	   	else
 	   	    export errstring="$3 $4 -> No files found"
             echo "${0} $1 $2 $3 $4 -> No files found"
@@ -173,63 +172,40 @@ else
 	# Source
 	export SERVSOURCE=$remotebackupserver
 	export SERVPORTSOURCE=$remotebackupserverport
-	export DIRSOURCE1="$remotebackupdir/home*";
-	export DIRSOURCE2="$remotebackupdir/backup*";
+	export DIRSOURCE="$remotebackupdir";
 	
 	# Target
-	export DIRDESTI1="$backupdir";
-	export DIRDESTI2="$backupdir";
+	export DIRDESTI="$backupdir";
 		
 	
 	# Loop on each target server
 	for SERVSOURCECURSOR in `echo $SERVSOURCE | sed -e 's/,/ /g'`
 	do
-		# Case of /mnt/diskbackup/home*x
-		echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of system backup on $SERVSOURCECURSOR:$DIRSOURCE1$i to $DIRDESTI1 ..."
+		# First get the list of backup directories
+		export command="rsync --list-only $USER@$SERVSOURCECURSOR:$DIRSOURCE/"
+		echo "$command > /tmp/backup_list_dirs"
+		echo "$command > /tmp/backup_list_dirs" >>/tmp/$script.log
+		$command > /tmp/backup_list_dirs
 	
-	    export errstring="${0} $1 $2 -> "
-	    
-		for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-			echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE1$i"
-			export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
-			
-			# Note: for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
-			export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE1$i $DIRDESTI1";
-			echo "$command";
-	
-			> /tmp/$script.err
-			$command >>/tmp/$script.log 2>/tmp/$script.err
-			if [ "x$?" != "x0" ]; then
-		        nberror=`cat /tmp/$script.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
-	    	    cat /tmp/$script.err
-				if [ "x$nberror" != "x0" ]; then
-				  	echo "ERROR Failed to make rsync for $DIRSOURCE1$i"
-			  		echo
-			   		export ret1=$(($ret1 + 1));
-			   		export errstring="$errstring<br>Dir $SERVSOURCECURSOR:$DIRSOURCE1$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
-			   	else
-	                echo "No files found"
-	                echo
-			   	fi
-			else
-				echo "OK"
-				echo
-			fi
-		done
-	
-		echo End of copy of home dirs /mnt/diskbackup/home*x
-		sleep 2
-	
-		export ret2=0
-		if [ "x$ret1" == "x0" ]; then
-			echo
+		# Now loop on each backup directory
+		for fic in `cat /tmp/backup_list_dirs | awk ' $1 ~ /^d/ && $5 !~ /^\./ { print $5 } '`; do 
 	
 			# Case of /mnt/diskbackup/backup*x
-			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE2$i to $DIRDESTI2 ..."
-	
-			for i in 'a' 'b' 'c' 'd' 'e' 'f' 'g' 'h' 'i' 'j' 'k' 'l' 'm' 'n' 'o' 'p' 'q' 'r' 's' 't' 'u' 'v' 'w' 'x' 'y' 'z' '0' '1' '2' '3' '4' '5' '6' '7' '8' '9' ; do
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE2$i"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE/$fic to $DIRDESTI/$fic ..."
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE/$fic to $DIRDESTI/$fic ..." >>/tmp/$script.log
 
+			# Now get the list of sub directories
+			export command="rsync --list-only $USER@$SERVSOURCECURSOR:$DIRSOURCE/$fic/"
+			echo "$command > /tmp/backup_list_dirs_$fic"
+			echo "$command > /tmp/backup_list_dirs_$fic" >>/tmp/$script.log
+			$command > /tmp/backup_list_dirs_$fic
+
+			# Now loop on each backup sub directory
+			for fic2 in `cat /tmp/backup_list_dirs_$fic | awk ' $1 ~ /^d/ && $5 !~ /^\./ { print $5 } '`; do
+					echo >>/tmp/$script.log
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2/"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2/" >>/tmp/$script.log
+					
 					# Test if we force backup on a given dir
 					#if [ "x$2" != "x" ]; then
 					#	if [ "x$2" != "xosu$i" ]; then
@@ -240,19 +216,20 @@ else
 					export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
 
 					# Note for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
-			        export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE2$i $DIRDESTI2";
-		        	echo "$command";
+			        export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2 $DIRDESTI/$fic";
+		        	echo "$command"
+		        	echo "$command" >>/tmp/$script.log
 
 					> /tmp/$script.err
 			        $command >>/tmp/$script.log 2>/tmp/$script.err
 			        if [ "x$?" != "x0" ]; then
-				        nberror=`cat /tmp/$script.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
+				        nberror=`cat /tmp/$script.err | grep -v "[Receiver] write error: Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
     	    			cat /tmp/$script.err
 						if [ "x$nberror" != "x0" ]; then
-				        	echo "ERROR Failed to make rsync for $DIRSOURCE2$i"
+				        	echo "ERROR Failed to make rsync for $DIRSOURCE/$fic/$fic2"
 				        	echo
-				        	export ret2=$(($ret2 + 1));
-			    	    	export errstring="$errstring<br>Dir $SERVSOURCECURSOR:$DIRSOURCE2$i "`date '+%Y-%m-%d %H:%M:%S'`" $command"
+				        	export ret1=$(($ret1 + 1));
+			    	    	export errstring="$errstring<br>Dir $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2 "`date '+%Y-%m-%d %H:%M:%S'`" $command"
 			    	    else
 			                echo "No files found"
 			                echo
@@ -261,28 +238,27 @@ else
 						echo "OK"
 						echo
 			        fi
-
-					sleep 2
-				echo
 			done
+
+			sleep 2
 			
-			echo End of copy of home dirs /mnt/diskbackup/backup*x
-		fi
+			echo End of copy of dir /mnt/diskbackup/$fic
+		done
 		
 		echo
-		echo -e `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 ret2=$ret2 errstring=$errstring"
+		echo -e `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 errstring=$errstring"
 		echo
 	
 	done
 fi
 
 
-if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
-	echo "Send email to $EMAILTO to inform about backup error ret1=$ret1 ret2=$ret2"
+if [ "x$ret1" != "x0" ]; then
+	echo "Send email to $EMAILTO to inform about backup error ret1=$ret1"
 	
-	#echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1 ret2=$ret2\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
+	#echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
 	
-	export body="Backup pulled from a backup by "`hostname`" failed - End ret1=$ret1 ret2=$ret2<br>$errstring"
+	export body="Backup pulled from a backup by "`hostname`" failed - End ret1=$ret1<br>$errstring"
 	export subject="[Warning] Backup pulled from a backup - "`hostname`" failed" 
 	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8'; 
 	# Run php with -r (no need of ? tag)
@@ -298,9 +274,9 @@ if [ "x$ret1" != "x0" -o "x$ret2" != "x0" ]; then
 else 
 	echo "Send email to $EMAILTO to inform about backup success"
 
-	#echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0 ret2=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
+	#echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
 
-	export body="Backup pulled from a backup by "`hostname`" succeed - End ret1=$ret1 ret2=$ret2<br>$errstring"
+	export body="Backup pulled from a backup by "`hostname`" succeed - End ret1=$ret1<br>$errstring"
 	export subject="[Backup pulled from a Backup - "`hostname`"] Backup pulled from a backup succeed" 
 	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8'; 
 	# Run php with -r (no need of ? tag)
