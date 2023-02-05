@@ -15,6 +15,7 @@ if [ "x$1" == "x" ]; then
 fi
 
 export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export usespecialdolibarrtagtodeploy=`grep '^usespecialdolibarrtagtodeploy=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export currentpath=$(dirname "$0")
 
@@ -50,6 +51,11 @@ do
 	        	git pull
 	        fi
 	        echo Result of git pull = $?
+
+			if [ -n "${usespecialdolibarrtagtodeploy}" ]; then
+				echo "A special version of dolibarr is set (${usespecialdolibarrtagtodeploy}), checkout on it."
+				git checkout ${usespecialdolibarrtagtodeploy}
+			fi
 
 	    	git rev-parse HEAD > gitcommit.txt
 	    else
