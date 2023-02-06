@@ -52,9 +52,8 @@
 
         #ErrorLog __osUserPath__/websites_error.log
         #TransferLog /var/log/apache2/websites_access_log
-        #CustomLog ${APACHE_LOG_DIR}/websites_vhosts_access.log vhost_combined
-        #CustomLog /var/log/apache2/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
-        CustomLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/websites_vhosts_access.log 1G"
+        CustomLog ${APACHE_LOG_DIR}/websites_vhosts_access.log vhost_combined
+        #CustomLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/websites_vhosts_access.log 1G"
         ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/websites_vhosts_error.log 1G"
 
         # Compress returned resources of type php pages, text file export, css and javascript
@@ -64,10 +63,18 @@
                 SSLOptions +StdEnvVars
         </FilesMatch>
 
+
         # This will enable the Rewrite capabilities
         RewriteEngine On
         RewriteCond %{HTTP_HOST} !^www\. [NC]
         RewriteRule ^(.*)$ %{REQUEST_SCHEME}://www.%{HTTP_HOST}$1 [R=301,L]
+        
+        
+        #RewriteCond %{HTTP_HOST} ^public\. [NC]
+        ProxyPass /public https://__instanceName____domainName__/public
+        ProxyPassReverse https://__instanceName____domainName__/public /public
+        ProxyRequests off
+        SSLProxyEngine on
         
         
 		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.crt">
