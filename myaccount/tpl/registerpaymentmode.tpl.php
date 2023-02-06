@@ -658,8 +658,8 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
 		print '<span class="opacitymedium">'.$langs->trans("NewBAN").'</div>';
 		print '<table class="center">';
-		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BankName").' </td><td class="valignmiddle start"><input type="text" name="bankname" id="bankname" value="'.dol_escape_htmltag($bankname).'"></td></tr>';
-		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("IBAN").' </td><td class="valignmiddle start"><input type="text" name="iban" id="iban" value="'.dol_escape_htmltag($iban).'"></td></tr>';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BankName").' </td><td class="valignmiddle start"><input type="text" class="maxwidth150onsmartphone" name="bankname" id="bankname" value="'.dol_escape_htmltag($bankname).'"></td></tr>';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("IBAN").' </td><td class="valignmiddle start"><input type="text" class="maxwidth150onsmartphone" name="iban" id="iban" value="'.dol_escape_htmltag($iban).'"></td></tr>';
 		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BIC").' </td><td class="valignmiddle start"><input type="text" name="bic" id="bic" value="'.dol_escape_htmltag($bic).'" class="maxwidth125"></td></tr>';
 		print '</table>';
 
