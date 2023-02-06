@@ -398,7 +398,7 @@ div.tab-content {
 
 /* Force values for small screen */
 
-@media only screen and (min-width: 769px)
+@media only screen and (max-width: 768px)
 {
     .maxwidth150onsmartphone { max-width: 150px; }
 }
