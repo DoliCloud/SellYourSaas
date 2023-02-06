@@ -70,12 +70,14 @@
         RewriteRule ^(.*)$ %{REQUEST_SCHEME}://www.%{HTTP_HOST}$1 [R=301,L]
         
         
+        #SSLProxyEngine on
+        # Use ProxyPass
+        #ProxyPass /public https://__instanceName____domainName__/public
+        #ProxyPassReverse https://__instanceName____domainName__/public /public
+        #ProxyRequests off
+        # or use RewriteCond/Rule with [P] flag
         #RewriteCond %{HTTP_HOST} ^public\. [NC]
-        ProxyPass /public https://__instanceName____domainName__/public
-        ProxyPassReverse https://__instanceName____domainName__/public /public
-        ProxyRequests off
-        SSLProxyEngine on
-        
+        #RewriteRule "(.*)$" "https://testldr4.with4.dolicloud.com/$1" [P]
         
 		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.crt">
 	        #   SSL Engine Switch:
