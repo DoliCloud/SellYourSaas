@@ -371,16 +371,16 @@ if ($action == "instanceverification") {
 		print '</form>';
 		print '</div>';
 	} else {
-		print '<h2 class="center" style="color:green">';
+		print '<br><h2 class="center" style="color:green">';
 		print $langs->trans("AutoupgradeSucess");
-		print '</h2><br>';
+		print '</h2><br><br>';
 		print '<div>';
 		print $langs->trans("AutoupgradeSucessText");
 		print '&nbsp;<a href="https://'.$object->ref_customer.'">'.$object->ref_customer.'</a>';
 		print '</div><br>';
 		print '<div style="color:#bbaf01">';
 		print $langs->trans("AutoupgradeSucessNote");
-		print '</div>';
+		print '</div><br>';
 	}
 	print '</div>';
 	print '<!-- END STEP4-->';
