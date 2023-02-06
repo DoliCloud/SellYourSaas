@@ -123,7 +123,7 @@ cd "$scriptdir"
 
 
 if [ "x$3" != "x" -a "x$4" != "x" ]; then
-	>/tmp/$script.generic.log 
+	>/var/log/$script.generic.log 
 
 	# Generic usage
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in generic mode" 
@@ -143,11 +143,11 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE/* $DIRDESTI1";
 	echo "$command";
 
-	> /tmp/$script.generic.err
-	$command >/tmp/$script.generic.log 2>/tmp/$script.generic.err
+	> /var/log/$script.generic.err
+	$command >/var/log/$script.generic.log 2>/var/log/$script.generic.err
 	if [ "x$?" != "x0" ]; then
-        nberror=`cat /tmp/$script.generic.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
-	    cat /tmp/$script.generic.err
+        nberror=`cat /var/log/$script.generic.err | grep -v "Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
+	    cat /var/log/$script.generic.err
 		if [ "x$nberror" != "x0" ]; then
 		  	echo "ERROR Failed to make rsync for $DIRSOURCE"
 	  		echo
@@ -164,7 +164,7 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 		echo
 	fi
 else
-	>/tmp/$script.log 
+	>/var/log/$script.log 
 
 	# Usage for sellyoursaas
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in SellYourSaas mode (using parameters from /etc/sellyoursaas.conf)" 
@@ -184,7 +184,7 @@ else
 		# First get the list of backup directories
 		export command="rsync --list-only $USER@$SERVSOURCECURSOR:$DIRSOURCE/"
 		echo "$command > /tmp/backup_list_dirs"
-		echo "$command > /tmp/backup_list_dirs" >>/tmp/$script.log
+		echo "$command > /tmp/backup_list_dirs" >>/var/log/$script.log
 		$command > /tmp/backup_list_dirs
 	
 		# Now loop on each backup directory
@@ -192,19 +192,19 @@ else
 	
 			# Case of /mnt/diskbackup/backup*x
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE/$fic to $DIRDESTI/$fic ..."
-			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE/$fic to $DIRDESTI/$fic ..." >>/tmp/$script.log
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE/$fic to $DIRDESTI/$fic ..." >>/var/log/$script.log
 
 			# Now get the list of sub directories
 			export command="rsync --list-only $USER@$SERVSOURCECURSOR:$DIRSOURCE/$fic/"
 			echo "$command > /tmp/backup_list_dirs_$fic"
-			echo "$command > /tmp/backup_list_dirs_$fic" >>/tmp/$script.log
+			echo "$command > /tmp/backup_list_dirs_$fic" >>/var/log/$script.log
 			$command > /tmp/backup_list_dirs_$fic
 
 			# Now loop on each backup sub directory
 			for fic2 in `cat /tmp/backup_list_dirs_$fic | awk ' $1 ~ /^d/ && $5 !~ /^\./ { print $5 } '`; do
-					echo >>/tmp/$script.log
+					echo >>/var/log/$script.log
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2/"
-					echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2/" >>/tmp/$script.log
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2/" >>/var/log/$script.log
 					
 					# Test if we force backup on a given dir
 					#if [ "x$2" != "x" ]; then
@@ -218,13 +218,13 @@ else
 					# Note for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
 			        export command="rsync -x $OPTIONS $USER@$SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2 $DIRDESTI/$fic";
 		        	echo "$command"
-		        	echo "$command" >>/tmp/$script.log
+		        	echo "$command" >>/var/log/$script.log
 
-					> /tmp/$script.err
-			        $command >>/tmp/$script.log 2>/tmp/$script.err
+					> /var/log/$script.err
+			        $command >>/var/log/$script.log 2>/var/log/$script.err
 			        if [ "x$?" != "x0" ]; then
-				        nberror=`cat /tmp/$script.err | grep -v "[Receiver] write error: Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
-    	    			cat /tmp/$script.err
+				        nberror=`cat /var/log/$script.err | grep -v "[Receiver] write error: Broken pipe" | grep -v "No such file or directory" | grep -v "some files/attrs were not transferred" | wc -l`
+    	    			cat /var/log/$script.err
 						if [ "x$nberror" != "x0" ]; then
 				        	echo "ERROR Failed to make rsync for $DIRSOURCE/$fic/$fic2"
 				        	echo
