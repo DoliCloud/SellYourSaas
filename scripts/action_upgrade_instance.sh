@@ -268,7 +268,7 @@ if [[ "$mode" == "upgrade" ]];then
 		if [ ! -d "$instancedir/documents/admin/temp" ]
 		then
 			echo "mkdir -p $instancedir/documents/admin/temp"
-			mkdir "$instancedir/documents/admin/temp"
+			mkdir -p "$instancedir/documents/admin/temp"
 			chown -R $osusername.$osusername "$instancedir/documents/admin/temp"
 		fi
 
