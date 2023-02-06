@@ -393,11 +393,16 @@ div.tab-content {
 	input#username {
     	width: 300px;
 	}
+}
 
+
+/* Force values for small screen */
+
+@media only screen and (min-width: 769px)
+{
     .maxwidth150onsmartphone { max-width: 150px; }
 }
 
-/* Force values for small screen */
 @media only screen and (max-width: 560px)
 {
 	.width500 { width: 260px; }
