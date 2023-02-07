@@ -513,7 +513,53 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<br>';
 		print '<div class="areaforresources sectionresources">';
 		print '<br>';
-		print $langs->trans("SoonMoreOptionsHere").'...<br>';
+
+		// Hard coded option: Custom domain name
+		print '<div class="tagtable centpercent"><div class="tagtr">';
+		print '<div class="tagtd">';
+		print $langs->trans("OptionYourCustomDomainName").'<br>';
+		print '<span class="small">';
+		print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
+		print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
+		print '<input disabled="disabled" type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
+		print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
+		print '</span>';
+		print '</div>';
+		print '<div class="tagtd center">';
+		// TODO Use same frequency than into the template invoice
+		$nbmonth = 1;
+		print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+		print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
+		print '<input type="submit" name="activateoption" disabled="disabled" value="'.$langs->trans("Enable").'">';
+		print '</div>';
+		print '</div></div>';
+
+		print '<hr>';
+
+		// Hard coded option: A website
+		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES')) {
+			print '<div class="tagtable"><div class="tagtr">';
+			print '<div class="tagtd">';
+			print $langs->trans("OptionYourWebsite");
+			print '<span class="small">';
+			print $langs->trans("OptionYourWebsiteDesc").'<br>';
+			print $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
+			print '</span>';
+			// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
+			print '</div>';
+			print '<div class="tagtd">';
+			print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
+			print '</div>';
+			print '</div></div>';
+
+			print '<hr>';
+		}
+
+		// TODO Add option from options services into databases
+
+
+
+		print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';
 		print '<br>';
 		print '</div>';
 		print '</div>';

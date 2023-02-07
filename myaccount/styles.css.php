@@ -452,6 +452,13 @@ input.input-field {
 	opacity: 0.4;
 }
 
+
+.tagtable, .table-border { display: table; }
+.tagtr, .table-border-row  { display: table-row; }
+.tagtd, .table-border-col, .table-key-border-col, .table-val-border-col { display: table-cell; }
+
+
+
 /* For smartphones */
 
 @media (max-width: 760px) {
