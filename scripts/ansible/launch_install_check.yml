@@ -142,7 +142,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: PHP
       option: upload_max_filesize
-      value: 20M
+      value: 25M
       backup: yes
     when: 
       - php74 is defined
@@ -152,7 +152,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: PHP
       option: post_max_size
-      value: 25M
+      value: 30M
     when: 
       - php74 is defined
 
@@ -316,7 +316,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: PHP
       option: upload_max_filesize
-      value: 20M
+      value: 25M
       backup: yes
     when: 
       - php80 is defined
@@ -326,7 +326,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: PHP
       option: post_max_size
-      value: 25M
+      value: 30M
     when: 
       - php80 is defined
 
