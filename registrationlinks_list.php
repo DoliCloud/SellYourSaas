@@ -217,6 +217,7 @@ if (empty($conf->global->SELLYOURSAAS_DEFAULT_PRODUCT_CATEG)) {
 // --------------------------------------------------------------------
 $sql = 'SELECT ';
 $sql .= $object->getFieldList('t');
+$sql .= ", t.tosell as status, t.tobuy as status_buy, t.tobatch as status_batch";
 // Add fields from extrafields
 if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 	foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $val) {
@@ -537,6 +538,9 @@ while ($i < $imaxinloop) {
 
 	// Store properties in $object
 	$object->setVarsFromFetchObj($obj);
+	$object->status = $obj->status;
+	$object->status_buy = $obj->status_buy;
+	$object->status_batch = $obj->status_batch;
 
 	if ($mode == 'kanban') {
 		if ($i == 0) {
@@ -589,7 +593,9 @@ while ($i < $imaxinloop) {
 					print ' title="'.dol_escape_htmltag($object->$key).'"';
 				}
 				print '>';
-				if ($key == 'status') {
+				if ($key == 'ref') {
+					print $object->getNomUrl(1);
+				} elseif ($key == 'status') {
 					print $object->getLibStatut(5);
 				} elseif ($key == 'rowid') {
 					print $object->showOutputField($val, $key, $object->id, '');
