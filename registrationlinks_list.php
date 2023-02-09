@@ -452,6 +452,9 @@ print $hookmanager->resPrint;
 // Link
 print '<td class="liste_titre">';
 print '</td>';
+// Status
+print '<td class="liste_titre">';
+print '</td>';
 // Action column
 if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 	print '<td class="liste_titre maxwidthsearch">';
@@ -492,6 +495,10 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
 // Link
 print '<th>';
 print $langs->trans("URL");
+print '</th>';
+// Status
+print '<th class="center">';
+print $langs->trans("Status");
 print '</th>';
 // Hook fields
 $parameters = array('arrayfields'=>$arrayfields, 'param'=>$param, 'sortfield'=>$sortfield, 'sortorder'=>$sortorder, 'totalarray'=>&$totalarray);
@@ -621,6 +628,10 @@ while ($i < $imaxinloop) {
 		$parameters = array('arrayfields'=>$arrayfields, 'object'=>$object, 'obj'=>$obj, 'i'=>$i, 'totalarray'=>&$totalarray);
 		$reshook=$hookmanager->executeHooks('printFieldListValue', $parameters, $object);    // Note that $action and $object may have been modified by hook
 		print $hookmanager->resPrint;
+		// Status
+		print '<td class="center">';
+		print $object->getLibStatut(5, 0);
+		print '</td>';
 		// Action column
 		if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 			print '<td class="nowrap center">';
