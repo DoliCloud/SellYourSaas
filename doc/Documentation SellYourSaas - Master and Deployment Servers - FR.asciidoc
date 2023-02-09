@@ -3558,7 +3558,7 @@ mv /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/00
 				    Order allow,deny
 				    Deny from env=bad_bots
 				    Allow from all
-				    Require all granted
+				    Require local
 				</Location>
 				
         </VirtualHost>
