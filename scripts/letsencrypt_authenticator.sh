@@ -11,7 +11,7 @@ export subdomain=$CERTBOT_DOMAIN
 if [[ "x$gitserver" == "x" ]]; then
 	export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 fi
-subdomain=${subdomain//[^a-zA-Z0-9.]/}
+subdomain=${subdomain//[^a-zA-Z0-9.-]/}
 
 
 zone_file="/etc/bind/${subdomain}.hosts"
