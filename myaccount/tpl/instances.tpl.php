@@ -515,7 +515,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<br>';
 
 		// Hard coded option: Custom domain name
-		print '<div class="tagtable centpercent"><div class="tagtr">';
+		print '<div class="tagtable centpercent divcustomdomain hidden"><div class="tagtr">';
 		print '<div class="tagtd">';
 		print $langs->trans("OptionYourCustomDomainName").'<br>';
 		print '<span class="small">';
@@ -538,7 +538,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		// Hard coded option: A website
 		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES')) {
-			print '<div class="tagtable"><div class="tagtr">';
+			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 			print '<div class="tagtd">';
 			print $langs->trans("OptionYourWebsite");
 			print '<span class="small">';
@@ -593,7 +593,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
 			$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 			$sqlproducts.= ")";
-			$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
+			$sqlproducts.= " AND (p.rowid = ".((int) $planid)." OR 1 = 1)";		// TODO Restrict on plans compatible with current plan...
 			$sqlproducts.= " ORDER BY pe.position ASC";
 			$resqlproducts = $db->query($sqlproducts);
 			if ($resqlproducts) {
