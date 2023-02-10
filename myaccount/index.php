@@ -1175,12 +1175,16 @@ if ($action == 'updateurl') {
 		$db->begin();	// Start transaction
 
 		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
-		$mythirdpartyaccount->email = $email;
+
 		$mythirdpartyaccount->phone = $phone;
 		$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
 		$mythirdpartyaccount->array_options['options_lastname'] = $lastname;
 		$mythirdpartyaccount->array_options['options_optinmessages'] = GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0;
 		$mythirdpartyaccount->array_options['options_emailccinvoice'] = $emailccinvoice;
+
+		$mythirdpartyaccount->array_options['options_email_temp'] = $email;
+		// TODO Disable this, and instead then later an email to ask confirmation
+		$mythirdpartyaccount->email = $email;
 
 		$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
 
@@ -1188,6 +1192,8 @@ if ($action == 'updateurl') {
 			setEventMessages($langs->trans("RecordSaved"), null, 'mesgs');
 
 			$db->commit();
+
+			// TODO Send email to ask to confirm email to validate its change
 
 			header("Location: ".$_SERVER['PHP_SELF']."?mode=myaccount#updatemythirdpartylogin");
 			exit;
@@ -1218,6 +1224,7 @@ if ($action == 'updateurl') {
 	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
 
 	$mythirdpartyaccount->array_options['options_password'] = $password;
+	$mythirdpartyaccount->array_options['flagdelsessionsbefore'] = dol_now() - 5;
 
 	$result = $mythirdpartyaccount->update($mythirdpartyaccount->id, $user);
 
