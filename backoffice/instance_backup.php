@@ -170,10 +170,6 @@ if ($ispaid) {
 
 $tmparray = explode('.', $object->ref_customer);
 
-// Set certif file key with read mode so admin will be able to read it. Note: Other certif files are already in read only
-// TODO Certif file may be a custom one
-//$moveinstancestringtoshow .= "chmod a+r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
-//$moveinstancestringtoshow .= "# First, copy the certificate files of old instances into the directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt (must be readable to admin user)\n";
 $moveinstancestringtoshow .= "su - admin\n";
 $moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm|confirmredirect|confirmmaintenance)'."\n";
 // Remove read in certif file.
