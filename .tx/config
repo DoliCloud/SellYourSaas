@@ -1,10 +1,10 @@
 [main]
-host = https://www.transifex.com
+host     = https://www.transifex.com
 lang_map = uz: uz_UZ, sw: sw_SW, sr@latin: sr_RS
 
-[sellyoursaas-application.sellyoursaas]
+[o:dolicloud:p:sellyoursaas-application:r:sellyoursaas]
 file_filter = langs/<lang>/sellyoursaas.lang
 source_file = langs/en_US/sellyoursaas.lang
 source_lang = en_US
-type = MOZILLAPROPERTIES
+type        = MOZILLAPROPERTIES
 
