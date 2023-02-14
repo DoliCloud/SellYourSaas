@@ -88,6 +88,7 @@ if (!empty($argv[3]) && $argv[3] == '--force') {
 }
 
 // Read /etc/sellyoursaas.conf file
+$domain='';
 $databasehost='localhost';
 $databaseport='3306';
 $database='';
@@ -102,6 +103,9 @@ if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'domain') {
+			$domain = dol_string_nospecial($tmpline[1]);
+		}
 		if ($tmpline[0] == 'databasehost') {
 			$databasehost = $tmpline[1];
 		}
@@ -130,6 +134,12 @@ if ($fp) {
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit(-1);
+}
+if (empty($emailfrom)) {
+	$emailfrom="noreply@".$domain;
+}
+if (empty($emailsupervision)) {
+	$emailsupervision="supervision@".$domain;
 }
 
 $sendcontext = 'emailing';

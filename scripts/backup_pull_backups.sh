@@ -57,8 +57,15 @@ else
 	export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 fi
 
+export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILFROM=`grep '^emailfrom=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export EMAILTO=`grep '^emailsupervision=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [ "x$EMAILFROM" == "x" ]; then
+	export EMAILFROM=noreply@$DOMAIN
+fi
+if [ "x$EMAILTO" == "x" ]; then
+	export EMAILTO=supervision@$DOMAIN
+fi
 
 #export OPTIONS=" -4 --prune-empty-dirs --stats -rlt --chmod=u=rwX";
 export OPTIONS=" -4 --prune-empty-dirs --stats -rlt --no-specials";

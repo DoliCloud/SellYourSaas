@@ -2488,6 +2488,7 @@ mysqld --print-defaults
 ---------------
 
 To see the default value
+
 [source,bash]
 ---------------
 SHOW VARIABLES LIKE 'default_authentication_plugin';

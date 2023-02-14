@@ -55,6 +55,7 @@ $mode=isset($argv[4])?$argv[4]:'';
 define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Read /etc/sellyoursaas.conf file
+$domain='';
 $databasehost='localhost';
 $databaseport='3306';
 $database='';
@@ -70,44 +71,54 @@ if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'domain') {
+			$domain = dol_string_nospecial($tmpline[1]);
+		}
 		if ($tmpline[0] == 'ipserverdeployment') {
-			$ipserverdeployment = $tmpline[1];
+			$ipserverdeployment = dol_string_nospecial($tmpline[1]);
 		}
 		if ($tmpline[0] == 'instanceserver') {
-			$instanceserver = $tmpline[1];
+			$instanceserver = (int) $tmpline[1];
 		}
 		if ($tmpline[0] == 'databasehost') {
-			$databasehost = $tmpline[1];
+			$databasehost = dol_string_nospecial($tmpline[1]);
 		}
 		if ($tmpline[0] == 'databaseport') {
-			$databaseport = $tmpline[1];
+			$databaseport = (int) $tmpline[1];
 		}
 		if ($tmpline[0] == 'database') {
-			$database = $tmpline[1];
+			$database = dol_string_nospecial($tmpline[1]);
 		}
 		if ($tmpline[0] == 'databaseuser') {
-			$databaseuser = $tmpline[1];
+			$databaseuser = dol_string_nospecial($tmpline[1]);
 		}
 		if ($tmpline[0] == 'databasepass') {
 			$databasepass = $tmpline[1];
 		}
 		if ($tmpline[0] == 'dolibarrdir') {
-			$dolibarrdir = $tmpline[1];
+			$dolibarrdir = dol_sanitizePathName($tmpline[1]);
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
-			$usecompressformatforarchive = $tmpline[1];
+			$usecompressformatforarchive = dol_string_nospecial($tmpline[1]);
 		}
 		if ($tmpline[0] == 'emailfrom') {
-			$emailfrom = $tmpline[1];
+			$emailfrom = dol_sanitizeEmail($tmpline[1]);
 		}
 		if ($tmpline[0] == 'emailsupervision') {
-			$emailsupervision = $tmpline[1];
+			$emailsupervision = dol_sanitizeEmail($tmpline[1]);
 		}
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit(-1);
 }
+if (empty($emailfrom)) {
+	$emailfrom="noreply@".$domain;
+}
+if (empty($emailsupervision)) {
+	$emailsupervision="supervision@".$domain;
+}
+
 
 if (empty($dolibarrdir)) {
 	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";

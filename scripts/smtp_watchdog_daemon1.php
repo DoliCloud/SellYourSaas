@@ -107,7 +107,12 @@ if ($fp) {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit(-1);
 }
-
+if (empty($EMAILFROM)) {
+	$EMAILFROM="noreply@".$DOMAIN;
+}
+if (empty($EMAILTO)) {
+	$EMAILTO="supervision@".$DOMAIN;
+}
 
 // Load Dolibarr environment
 $res=0;
