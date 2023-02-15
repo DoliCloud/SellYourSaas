@@ -610,7 +610,8 @@ if ($action == 'view') {
 				print '&nbsp;<span id="sqldumpfilespan">No file selected.</span>';
 				print '<input type="hidden" id="sqldumpfilename" name="sqldumpfilename">';
 				print '<input type="hidden" id="sqldumpfiletype" name="sqldumpfiletype">';
-				print '<br><button type="button" style="display:none;" data-inputfile="sqldumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="cancelsqldumpfile">Cancel</button>';
+				print '<br><div class="progress-bar sqldumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
+				print '<button type="button" style="display:none;" data-inputfile="sqldumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="cancelsqldumpfile">Cancel</button>';
 				print '</span>';
 				print '</div>
                 <div class="grid-boxes-automigration-left valignmiddle">
@@ -626,7 +627,8 @@ if ($action == 'view') {
 				print '&nbsp;<span id="documentdumpfilespan">No file selected.</span>';
 				print '<input type="hidden" id="documentdumpfilename" name="documentdumpfilename">';
 				print '<input type="hidden" id="documentdumpfiletype" name="documentdumpfiletype">';
-				print '<br><button type="button" style="display:none;" data-inputfile="documentdumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="canceldocumentdumpfile">Cancel</button>';
+				print '<br><div class="progress-bar documentdumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
+				print '<button type="button" style="display:none;" data-inputfile="documentdumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="canceldocumentdumpfile">Cancel</button>';
 				print '</span>';
 				print '</div>
             </div><br>
@@ -669,16 +671,17 @@ if ($action == 'view') {
 				console.log("focusinputfile = "+focusinputfile)
 			})
 			$(".cancelfileinput").on("click", function(){
-				filename = $(this).data("fileidentifier")
-				file = flow.getFromUniqueIdentifier(filename)
-				file.cancel()
-				console.log("We remove file "+filename)
+				filename = $(this).data("fileidentifier");
+				file = flow.getFromUniqueIdentifier(filename);
+				file.cancel();
+				$("#"+file.uniqueIdentifier+"pgbar").hide();
+				console.log("We remove file "+filename);
 				$("#"+$(this).data("inputfile")+"span").text("No file selected.");
-				$(this).hide()
+				$(this).hide();
 				filessubmitted--;
 				$("#sumbmitfiles").hide();
-				$("#"+focusinputfile+"name").val("")
-				$("#"+focusinputfile+"type").val("")
+				$("#"+focusinputfile+"name").val("");
+				$("#"+focusinputfile+"type").val("");
 			})
 			flow.assignBrowse(document.getElementById("browseButtonsqldump"), false, true, {"accept":".sql, .sql.bz2, .sql.gz"});
 			flow.assignBrowse(document.getElementById("browseButtondocument"), false, true, {"accept":".zip, .tar.gz, .tar.bz2"});
@@ -688,6 +691,8 @@ if ($action == 'view') {
 				$("#cancel"+focusinputfile).data("fileidentifier", file.uniqueIdentifier)
 				console.log($("#cancel"+focusinputfile).data("fileidentifier"));
 				$("#cancel"+focusinputfile).show()
+				$("."+focusinputfile+"pgbar").show();
+				$("."+focusinputfile+"pgbar").attr("id",file.uniqueIdentifier+"pgbar")
 				$("#"+focusinputfile+"name").val(file.name)
 				$("#"+focusinputfile+"type").val(file.file.type)
 			});
@@ -695,8 +700,18 @@ if ($action == 'view') {
 				console.log("Trigger event file submitted");
 				flow.upload()
 			});
+			flow.on("progress", function(){
+				console.log("testprogress",flow.files);
+				flow.files.forEach(function(element){
+					console.log(element.progress());
+					width = Math.round(element.progress()*100)
+					width = width.toString()
+					$("#"+element.uniqueIdentifier+"pgbar").width(width+"%")
+					$("#"+element.uniqueIdentifier+"pgbar").children("span").text(width+"%")
+				});
+			});
 			flow.on("fileSuccess", function(file,message){
-				console.log(file,message);
+				console.log("The file has been uploaded successfully",file,message);
 				filessubmitted++;
 				if(filessubmitted >= 2){
 					$("#sumbmitfiles").show();
@@ -705,7 +720,7 @@ if ($action == 'view') {
 				}
 			});
 			flow.on("fileError", function(file, message){
-				console.log(file, message);
+				console.log("Error on file upload",file, message);
 			});
 		} else {
 			console.log("We remove flowjs inputs")
