@@ -1910,7 +1910,9 @@ wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick
 tar -xvf afick-3.7.0.tgz; 
 cd afick-3.7.0; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf /etc/afick.conf; ln -fs /opt/afick/bin/afick.pl /usr/bin/afick.pl;
 mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron
-vi /etc/cron.daily/afick_cron to replace line AFICK="/usr/bin/afick.pl" with AFICK="/opt/afick/bin/afick.pl"
+vi /etc/cron.daily/afick_cron to replace lines 
+  AFICK="/usr/bin/afick.pl" with AFICK="/opt/afick/bin/afick.pl"
+  /usr/bin/afick_archive.pl with /opt/afick/bin/afick_archive.pl
 ---------------
 
 
