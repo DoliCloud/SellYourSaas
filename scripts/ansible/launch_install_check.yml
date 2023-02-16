@@ -8,6 +8,20 @@
 #
 
 
+
+- name: Check/Fix OS unix accounts
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Add user admin to the www-data group
+    user: 
+      name: "admin"
+      groups: www-data
+      append: yes     
+
+
 - name: Apt install packages
   hosts: '{{target}}'
   become: yes

@@ -19,7 +19,7 @@
   - debug:
       var: command_output.stdout_lines
 
-  - name: Add user {{login}} to the admin group
+  - name: Add user {{login}} to the sudo group
     user: 
       name: "{{login}}"
       groups: sudo
@@ -27,7 +27,7 @@
     when: 
       - allowroot is defined
       
-  - name: Remove user {{login}} of the admin group
+  - name: Remove user {{login}} of the sudo group
     become: true
     command: "gpasswd -d {{login}} sudo"
     register: command_result
