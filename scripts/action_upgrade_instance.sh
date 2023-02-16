@@ -282,7 +282,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 		versionfrom=$lastversiondolibarrinstance
 		versionto=$(( $versionfrom + 1 ))
-		while [ $versionfrom -lt $laststableupgradeversion ]
+		while [ $versionfrom -le $laststableupgradeversion ]
 		do
 			if [ -f "$instancedir/documents/install.lock" ]
 			then
@@ -290,7 +290,7 @@ if [[ "$mode" == "upgrade" ]];then
 				rm "$instancedir/documents/install.lock"
 			fi
 
-			echo `date +'%Y-%m-%d %H:%M:%S'`" upgrade from version $versionfrom.0.0 to version $versionto.0.0"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" upgrade from version $versionfrom.0.0 to version $versionto.0.0 (or last minor version)"
 
 			echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
 			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
