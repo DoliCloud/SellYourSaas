@@ -511,7 +511,8 @@ if (empty($return_var) && empty($return_varmysql)) {
 		$to = $emailsupervision;
 		// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
 		$conf->global->MAIN_MAIL_SENDMODE = 'mail';
-		$conf->global->MAIN_MAIL_SMTP_SERVER = '';
+		$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
+		$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 
@@ -553,7 +554,8 @@ if (empty($return_var) && empty($return_varmysql)) {
 		$to = $emailsupervision;
 		// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
 		$conf->global->MAIN_MAIL_SENDMODE = 'mail';
-		$conf->global->MAIN_MAIL_SMTP_SERVER = '';
+		$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
+		$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
 		// Supervision tools are generic for all domain. No way to target a specific supervision email.
 

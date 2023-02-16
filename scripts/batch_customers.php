@@ -156,8 +156,11 @@ if ($dbmaster->error) {
 	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
 
 	$from = $emailfrom;
-	$to = $emailsupervision;
-	// Supervision tools are generic for all domain. No way to target a specific supervision email.
+	$to = $emailsupervision;	// Supervision tools are generic for all domain. No way to target a specific supervision email.
+	// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
+	$conf->global->MAIN_MAIL_SENDMODE = 'mail';
+	$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
+	$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
 	$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$dbmaster->error;
 
@@ -772,6 +775,7 @@ if (! $nboferrors) {
 			$to = $emailsupervision;
 			// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
 			$conf->global->MAIN_MAIL_SENDMODE = 'mail';
+			$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
 			$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
 			$msg = 'Backup done without errors on '.gethostname().' by '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
@@ -806,7 +810,8 @@ if (! $nboferrors) {
 			$to = $emailsupervision;
 			// Force to use local sending (MAIN_MAIL_SENDMODE is the one of the master server. It may be to an external SMTP server not allowed to the deployment server)
 			$conf->global->MAIN_MAIL_SENDMODE = 'mail';
-			$conf->global->MAIN_MAIL_SMTP_SERVER = '';
+			$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
+			$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
 			// Supervision tools are generic for all domains. No way to target a specific supervision email.
 
