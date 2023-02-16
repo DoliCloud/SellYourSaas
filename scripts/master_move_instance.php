@@ -343,13 +343,8 @@ if ($mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 
-	if ($mode == 'confirmredirect') {
-		$comment = 'https://'.$newinstance;
-		print '--- Switch old instance in redirect maintenance mode (redirect to '.$comment.")\n";
-	} else {
-		$comment = 'Suspended from script before moving instance into another server';
-		print '--- Switch old instance in maintenance mode'."\n";
-	}
+	$comment = 'Suspended. A move of the instance into another server is in progress or has been completed.';
+	print '--- Switch old instance in maintenance mode'."\n";
 
 	$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', $comment, 300);
 	if ($result <= 0) {
@@ -927,15 +922,51 @@ print $sql."\n";
 
 print "\n";
 
+
+
 if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
 	print "DON'T FORGET TO REDIRECT INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
 	print "https://".$newobject->ref_customer."\n";
 	print "\n";
+} else {
+	// Switch old instance in redirect mode
+	if ($mode == 'confirmredirect') {
+		dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
+		$sellyoursaasutils = new SellYourSaasUtils($db);
+
+		$comment = 'https://'.$newinstance;
+		print '--- Switch old instance in redirect maintenance mode (redirect to '.$comment.")\n";
+
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', $comment, 300);
+		if ($result <= 0) {
+			print "Error calling sellyoursaasRemoteAction: ".$sellyoursaasutils->error."\n";
+			print "\n";
+			exit(-1);
+		}
+
+		$oldobject->array_options['options_suspendmaintenance_message'] = $comment;
+		$result = $oldobject->update($user);
+		if ($result < 0) {
+			print "Error updating contract with redirect url: ".$oldobject->error."\n";
+			print "\n";
+			exit(-1);
+		}
+	}
 }
 
-print "NOW TO GET A FULL REDIRECT, YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
-print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
-print "THEN RELOAD DNS WITH rndc reload ".$oldwilddomain."\n";
+$dnschangedone = 0;
+if ($mode == 'confirmredirect' && $mode == 'confirmmaintenance') {
+	// Change the DNS on deployment server
+	// TODO
+
+	//$dnschangedone = 1;
+}
+
+if (!$dnschangedone) {
+	print "NOW TO GET A COMPLETELY WORKING REDIRECT, YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
+	print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
+	print "THEN RELOAD DNS WITH rndc reload ".$oldwilddomain."\n";
+}
 print "\n";
 print "Finished.\n";
 print "\n";
