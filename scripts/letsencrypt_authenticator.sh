@@ -8,9 +8,10 @@ echo ----- letsencrypt_authenticator.sh -----
 echo "CERTBOT_DOMAIN=$CERTBOT_DOMAIN"
 echo "CERTBOT_ALL_DOMAINS=$CERTBOT_ALL_DOMAINS"
 export subdomain=$CERTBOT_DOMAIN
-if [[ "x$gitserver" == "x" ]]; then
+if [[ "x$subdomain" == "x" ]]; then
 	export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 fi
+# Sanitize variable
 subdomain=${subdomain//[^a-zA-Z0-9.-]/}
 
 

@@ -165,7 +165,7 @@ $utils = new Utils($db);
 print "***** ".$script_file." ".$version." *****\n";
 
 if (empty($newinstance) || empty($mode)) {
-	print "Move an instance from an old server to a new server.\n";
+	print "Move an existing instance from an old server to a new server.\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
 	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmredirect|confirmmaintenance) [MYPRODUCTREF]\n";
@@ -383,6 +383,8 @@ if ($CERTIFFORCUSTOMDOMAIN) {
 			} else {
 				// Try to get certificate files from the old deployment server
 				print ' Rsync from admin@'.$oldoshost.' to get file '.basename($srcfilecustom)."\n";
+
+				// May need to make chmod go+x live archive before
 
 				$command="rsync";
 				$param=array();
