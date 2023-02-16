@@ -94,7 +94,7 @@ INSERT INTO llx_c_email_templates (module,type_template,label,lang,position,topi
 -- Example of groups of tickets
 
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-COMMERCIAL',5,'Commercial question or Billing problem',1,0,NULL,0,NULL,1);
---INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-MIGRATION',10,'Migration of my local instance into DoliCloud',1,0,NULL,0,NULL,1);
+--INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-MIGRATION',10,'Migration of my local instance',1,0,NULL,0,NULL,1);
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-UPGRADE',12,'Update my instance to a higher version',1,0,NULL,0,NULL,1);
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-LOGINPASS',15,'Problem of login or password lost',1,0,NULL,0,NULL,1);
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-HELP',20,'Question on application usage - How to',1,0,NULL,0,NULL,1);
