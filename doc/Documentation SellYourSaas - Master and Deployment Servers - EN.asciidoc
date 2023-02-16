@@ -306,12 +306,13 @@ mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
 Check in /etc/passwd that the id of this user *admin* is greater than or equal to 1000.
 
 
-Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
+Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to login remotely to server.
 
 [source, bash]
 ---------------
 adduser myunixlogin
 ---------------
+
 
 ==== Default shell
 
@@ -473,7 +474,7 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Define or redefine the password for *root*, *admin* with a secure password.
+Define or redefine the password for *root*, *admin* with a secured password saved into your password manager.
 
 [source,bash]
 ---------------
@@ -529,7 +530,7 @@ Add at the end of */etc/bash.bashrc*:
 
 [source, bash]
 ---------------
-alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,cmd'
+alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,context,cmd'
 ---------------
 
 
@@ -3782,8 +3783,6 @@ and add the following content:
 <?php
 $dolibarr_main_document_root='/home/admin/wwwroot/dolibarr/htdocs';
 $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
-
-$dolibarr_main_instance_unique_id='...';	// Use the same ID than the master server.
 ---------------
 
 
