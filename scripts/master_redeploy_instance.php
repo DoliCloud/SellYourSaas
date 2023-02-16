@@ -49,6 +49,7 @@ $mode=isset($argv[3])?$argv[3]:'';
 define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Read /etc/sellyoursaas.conf file
+$masterserver='';
 $databasehost='localhost';
 $databaseport='3306';
 $database='';
@@ -62,6 +63,9 @@ if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'masterserver') {
+			$masterserver = $tmpline[1];
+		}
 		if ($tmpline[0] == 'ipserverdeployment') {
 			$ipserverdeployment = $tmpline[1];
 		}
@@ -97,6 +101,11 @@ if ($fp) {
 
 if (empty($dolibarrdir)) {
 	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+if (empty($masterserver)) {
+	print "Failed to find 'masterserver' entry into /etc/sellyoursaas.conf file. This script must be run on master server.\n";
+	print "\n";
 	exit(-1);
 }
 

@@ -102,6 +102,11 @@ if (empty($dolibarrdir)) {
 	print "\n";
 	exit(-1);
 }
+if (empty($masterserver)) {
+	print "Failed to find 'masterserver' entry into /etc/sellyoursaas.conf file. This script must be run on master server.\n";
+	print "\n";
+	exit(-1);
+}
 
 // Load Dolibarr environment
 $res=0;

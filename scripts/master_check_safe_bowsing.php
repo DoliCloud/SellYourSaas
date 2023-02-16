@@ -20,9 +20,9 @@
  */
 
 /**
- *      \file       sellyoursaas/scripts/rsync_instance.php
+ *      \file       sellyoursaas/scripts/master_check_safe_browsing.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to upgrade an instant
+ *      \brief      Script to test the Google Safe browsing status of some URLs
  */
 
 if (!defined('NOSESSION')) define('NOSESSION', '1');

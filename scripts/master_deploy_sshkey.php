@@ -79,7 +79,7 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print 'Redeploy the public keys found into the setup (SELLYOURSAAS_PUBLIC_KEY) to the authorized_keys_support file of all customers on deployment servers.'."\n";
+	print 'Redeploy the public keys found into the setup (SELLYOURSAAS_PUBLIC_KEY) to the authorized_keys_support file of all customers on 1 or all deployment servers.'."\n";
 	print 'Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).'."\n";
 	print "This script must be ran from the master server.\n";
 	print "\n";

@@ -43,6 +43,91 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 //if (! defined('NOREQUIREUSER'))            define('NOREQUIREUSER', '1');                                // Do not load object $user
 
 
+// Read /etc/sellyoursaas.conf file
+$masterserver='';
+$ipserverdeployment='';
+$instanceserver='';
+$databasehost='localhost';
+$databaseport='3306';
+$database='';
+$databaseuser='sellyoursaas';
+$databasepass='';
+$dolibarrdir='';
+$usecompressformatforarchive='gzip';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'masterserver') {
+			$masterserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'ipserverdeployment') {
+			$ipserverdeployment = $tmpline[1];
+		}
+		if ($tmpline[0] == 'instanceserver') {
+			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasehost') {
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport') {
+			$databaseport = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database') {
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseuser') {
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass') {
+			$databasepass = $tmpline[1];
+		}
+		if ($tmpline[0] == 'dolibarrdir') {
+			$dolibarrdir = $tmpline[1];
+		}
+		if ($tmpline[0] == 'usecompressformatforarchive') {
+			$usecompressformatforarchive = $tmpline[1];
+		}
+	}
+} else {
+	print "Failed to open /etc/sellyoursaas.conf file\n";
+	print "\n";
+	exit(-1);
+}
+
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	print "\n";
+	exit(-1);
+}
+if (empty($masterserver)) {
+	print "Failed to find 'masterserver' entry into /etc/sellyoursaas.conf file. This script must be run on master server.\n";
+	print "\n";
+	exit(-1);
+}
+
+// Load Dolibarr environment
+$res=0;
+// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+// Try master.inc.php using relative path
+if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include $dolibarrdir."/htdocs/master.inc.php";
+if (! $res) {
+	print ("Include of master fails");
+	exit(-1);
+}
+
+
 print 'Script to create missing payment after successful Stripe payment but no recording into database.';
 
 /*
