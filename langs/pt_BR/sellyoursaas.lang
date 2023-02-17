@@ -7,6 +7,7 @@ DeploymentDate=Data de implantação
 SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT=Número máximo de instâncias por padrão para novo cliente em potencial ou cliente
 PleaseReadFAQFirst=Antes de enviar qualquer ticket de suporte, verifique se a resposta ainda não está disponível aqui: <br> <br> <center> <a href="%s" target="_faq"> FAQs (Perguntas Frequentes) </a> </center>
 RecreateAuthorizedKey=Criar arquivo allowed_keys
+InstanceInMaintenanceMode=Instance is in maintenance mode !<br>Use a browser with value '<b>%s</b>' into its User-Agent string to bypass it.
 DeploymentIPQuality=Índice de qualidade de IP
 DeploymentIPQualityDesc=Quando um cadastro é feito, é feita uma verificação no IP do assinante para: <br> - http://check.getipintel.net/check.php?ip=IP&contact=&flag=f <br> e/ou <br> - https://www. ipqualityscore.com
 MyAcountDesc=Esta área é dedicada ao gerenciamento de suas assinaturas para <a href="%s" target="dolicloud"> %s </a> . Você pode criar novas instâncias de aplicativos, escolher opções, obter suas faturas de assinatura, entrar em contato com a equipe de suporte ou cancelar sua conta.
