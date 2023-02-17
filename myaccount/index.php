@@ -563,7 +563,7 @@ if ($action == 'updateurl') {
 
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 	$action = '';
-} elseif ($action == 'validatenonprofit') {
+} elseif ($action == 'validatefreemode') {
 	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 	if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit'
 		|| getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
