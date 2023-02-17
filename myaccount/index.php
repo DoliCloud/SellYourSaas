@@ -3747,7 +3747,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							print '<p class="pforbutton">';
 							if ($contract->total_ht > 0) {
 								// Link to add payment and to swith to instance
-								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak marginrightonly">';
 								print $langs->trans("AddAPaymentMode");
 								print '</a>';
 								print ' &nbsp; ';
@@ -3755,7 +3755,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 								$daybeforeendoftrial = getDolGlobalInt('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT');
 								if ($delaybeforeendoftrial <= (($daybeforeendoftrial + 1) * 3600 * 24)) {	// We add 1 to be sure that link is visible before we send the soft email remind
 									// Link to validate definitely instance
-									print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
+									print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
 									print $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
 									print '</a>';
 									print ' &nbsp; ';
@@ -3778,14 +3778,14 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 						if ($mode != 'registerpaymentmode') {
 							if ($contract->total_ht > 0) {
 								print '<p>';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak marginrightonly">';
 								print $langs->trans("AddAPaymentModeToRestoreInstance");
 								print '</a>';
 								print '</p>';
 							} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
 								// Link to validate definitely instance
 								print '<p>';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
+								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
 								print $langs->trans("ConfirmInstanceValidationToRestoreInstance");
 								print '</a>';
 								print '</p>';
