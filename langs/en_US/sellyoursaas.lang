@@ -776,6 +776,7 @@ NonProfitOrganization=Non-profit organization
 ProfitOrganization=For-Profit organization
 ConfirmInstanceValidation=Permanently validate your instance
 ConfirmInstanceValidationToRestoreInstance=Permanently validate your instance to restore it
+ConfirmInstanceValidationToAvoidSuspensionAfterTrial=Permanently validate your instance (avoid suspension at end of trial)
 SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP=List of IPs allowed to register even when registrations are globally closed
 AllowedToIP=IPs always allowed
 ServedCountriesServer=Only these countries

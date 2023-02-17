@@ -3756,7 +3756,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 								if ($delaybeforeendoftrial <= (($daybeforeendoftrial + 1) * 3600 * 24)) {	// We add 1 to be sure that link is visible before we send the soft email remind
 									// Link to validate definitely instance
 									print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
-									print $langs->trans("ConfirmInstanceValidation");
+									print $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
 									print '</a>';
 									print ' &nbsp; ';
 								} else {
@@ -3811,14 +3811,22 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 						if ($contract->total_ht > 0) {
 							print '<p>';
 							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
-							print $langs->trans("AddAPaymentModeToRestoreInstance");
+							if (! $isASuspendedContract) {
+								print $langs->trans("AddAPaymentMode");
+							} else {
+								print $langs->trans("AddAPaymentModeToRestoreInstance");
+							}
 							print '</a>';
 							print '</p>';
 						} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
 							// Link to validate definitely instance
 							print '<p>';
 							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
-							print $langs->trans("ConfirmInstanceValidationToRestoreInstance");
+							if (! $isASuspendedContract) {
+								print $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
+							} else {
+								print $langs->trans("ConfirmInstanceValidationToRestoreInstance");
+							}
 							print '</a>';
 							print '</p>';
 						}
