@@ -317,7 +317,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 						$pricetoshow .= price($templateinvoice->total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT");
 						$priceinvoicedht = $templateinvoice->total_ht;
 					}
-					if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] != 'done') $pricetoshow = $langs->trans("InvoicingSuspended"); // Replace price
+					if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] != 'done') {
+						$pricetoshow = $langs->trans("InvoicingSuspended"); // Replace price
+					}
 				}
 				if ((! $templateinvoice->suspended) && $contract->array_options['options_deployment_status'] == 'done') {
 					$datenextinvoice = $templateinvoice->date_when;

@@ -394,7 +394,7 @@ if [[ "$mode" == "rename" ]]; then
 	fi 
 
 
-	echo mkdir $targetdir/$osusername/$dbname to be sure apache can create its error log file
+	echo mkdir -p $targetdir/$osusername/$dbname to be sure apache can create its error log file
 	mkdir -p $targetdir/$osusername/$dbname
 
 	
