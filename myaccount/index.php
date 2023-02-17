@@ -3830,6 +3830,9 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							print '</a>';
 							print '</p>';
 						}
+						if (! $isASuspendedContract) {
+							print '<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
+						}
 					}
 					print '
 						</div>
