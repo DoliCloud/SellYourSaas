@@ -3750,7 +3750,6 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak marginrightonly">';
 								print $langs->trans("AddAPaymentMode");
 								print '</a>';
-								print ' &nbsp; ';
 							} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
 								$daybeforeendoftrial = getDolGlobalInt('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT');
 								if ($delaybeforeendoftrial <= (($daybeforeendoftrial + 1) * 3600 * 24)) {	// We add 1 to be sure that link is visible before we send the soft email remind
@@ -3812,7 +3811,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 					if ($mode != 'registerpaymentmode')	{
 						$s = '';
 						if ($contract->total_ht > 0) {
-							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
+							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak marginrightonly">';
 							if (! $isASuspendedContract) {
 								$s .= $langs->trans("AddAPaymentMode");
 							} else {
@@ -3821,7 +3820,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							$s .= '</a>';
 						} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
 							// Link to validate definitely instance
-							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
+							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
 							if (! $isASuspendedContract) {
 								$s .= $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
 							} else {
