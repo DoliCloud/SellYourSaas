@@ -3738,7 +3738,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 				if ($delaybeforeendoftrial > 0) {
 					// Trial not yet expired
 					if (! $isASuspendedContract) {
-						//$firstline = reset($contract->lines);
+						// XDaysBeforeEndOfTrial
 						print '
 							<!-- XDaysBeforeEndOfTrial -->
 							<div class="note note-warning">
@@ -3770,7 +3770,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							</div>
 						';
 					} else {
-						//$firstline = reset($contract->lines);
+						// TrialInstanceWasSuspended
 						print '
 							<!-- TrialInstanceWasSuspended -->
 							<div class="note note-warning">
@@ -3790,6 +3790,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 								print '</a>';
 								print '</p>';
 							}
+							//print '<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
 						}
 						print '
 							</div>
@@ -3801,24 +3802,33 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 
 					$messageforinstance[$contract->ref_customer] = 1;
 
-					//$firstline = reset($contract->lines);
+					// XDaysAfterEndOfTrial
 					print '
 						<!-- XDaysAfterEndOfTrial -->
 						<div class="note note-warning">
 						<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("XDaysAfterEndOfTrial", '{s1}', abs($delayindays))).' !</h4>';
-					if ($mode != 'registerpaymentmode' && $contract->total_ht > 0) {
-						print '
-							<p>
-							<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
-						print $langs->trans("AddAPaymentModeToRestoreInstance");
-						print '</a>
-							</p>';
+					if ($mode != 'registerpaymentmode')	{
+						if ($contract->total_ht > 0) {
+							print '<p>';
+							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
+							print $langs->trans("AddAPaymentModeToRestoreInstance");
+							print '</a>';
+							print '</p>';
+						} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
+							// Link to validate definitely instance
+							print '<p>';
+							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
+							print $langs->trans("ConfirmInstanceValidationToRestoreInstance");
+							print '</a>';
+							print '</p>';
+						}
 					}
 					print '
 						</div>
 					';
 				}
 			} else {
+				// If there is at least one payment mode for customer
 				if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 					// If not a redirect instance
 					if ($delaybeforeendoftrial > 0) {

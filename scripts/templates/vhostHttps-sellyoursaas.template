@@ -89,17 +89,17 @@
                 nokeepalive ssl-unclean-shutdown \
                 downgrade-1.0 force-response-1.0
 
-        <IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
-			SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt
-			SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.key
-			SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt__webAppDomain__-intermediate.crt
-			SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
-        </IfFile>
-        <IfFile !"/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
+        #<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
+		#	SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt
+		#	SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.key
+		#	SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt__webAppDomain__-intermediate.crt
+		#	SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
+        #</IfFile>
+        #<IfFile !"/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
 			SSLCertificateFile /etc/apache2/__webSSLCertificateCRT__
 			SSLCertificateKeyFile /etc/apache2/__webSSLCertificateKEY__
 			SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
 			SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
-        </IfFile>
+        #</IfFile>
 
 </VirtualHost>
