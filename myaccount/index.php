@@ -3757,7 +3757,6 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 									print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
 									print $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
 									print '</a>';
-									print ' &nbsp; ';
 								} else {
 									print '<!-- Button to validate definitely instance will appears '.$daybeforeendoftrial.' days before end of trial -->';
 								}
