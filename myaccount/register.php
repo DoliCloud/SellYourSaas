@@ -731,6 +731,20 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<?php } ?>
 			<br>
 
+			<?php if (getDolGlobalString('SELLYOURSAAS_TERMSANDCONDITIONS')) { ?>
+				<!-- mandatory checkbox for terms and conditions -->
+				<section id="checkboxtermsandconditions">
+					<div class="group required">
+						<input type="checkbox" id="checkboxtermsandconditions" name="checkboxtermsandconditions" class="valignmiddle inline" style="margin-top: 0" value="1" required="1"<?php echo (GETPOST('checkboxtermsandconditions') ? ' checked="checked"' : ''); ?>>
+						<label for="checkboxtermsandconditions" class="valignmiddle small inline"><?php
+							$urlfortermofuse = 'https://www.'.getDolGlobalString(SELLYOURSAAS_MAIN_DOMAIN_NAME).'/'.getDolGlobalString(SELLYOURSAAS_TERMSANDCONDITIONS);
+							echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse);
+							?></label>
+					</div>
+				</section>
+			<?php } ?>
+			<br>
+
 	   </div>
 
 		  <section id="formActions">
