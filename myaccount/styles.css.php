@@ -335,6 +335,9 @@ margin-top: 20px;
 .marginbottom {
     margin-bottom: 5px;
 }
+.nomarginbottom {
+	margin-bottom: 0px;
+}
 
 div#waitMask {
 	text-align: center;

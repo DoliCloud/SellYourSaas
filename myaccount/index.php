@@ -3776,21 +3776,23 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							<div class="note note-warning">
 							<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("TrialInstanceWasSuspended", '{s1}')).' !</h4>';
 						if ($mode != 'registerpaymentmode') {
+							$s = '';
 							if ($contract->total_ht > 0) {
-								print '<p>';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak marginrightonly">';
-								print $langs->trans("AddAPaymentModeToRestoreInstance");
-								print '</a>';
-								print '</p>';
+								$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak marginrightonly">';
+								$s .= $langs->trans("AddAPaymentModeToRestoreInstance");
+								$s .= '</a>';
 							} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
 								// Link to validate definitely instance
-								print '<p>';
-								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
-								print $langs->trans("ConfirmInstanceValidationToRestoreInstance");
-								print '</a>';
+								$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
+								$s .= $langs->trans("ConfirmInstanceValidationToRestoreInstance");
+								$s .= '</a>';
+							}
+							//$s .= '<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
+							if ($s) {
+								print '<p class="pforbutton">';
+								print $s;
 								print '</p>';
 							}
-							//print '<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
 						}
 						print '
 							</div>
@@ -3808,30 +3810,32 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 						<div class="note note-warning">
 						<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("XDaysAfterEndOfTrial", '{s1}', abs($delayindays))).' !</h4>';
 					if ($mode != 'registerpaymentmode')	{
+						$s = '';
 						if ($contract->total_ht > 0) {
-							print '<p>';
-							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
+							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak">';
 							if (! $isASuspendedContract) {
-								print $langs->trans("AddAPaymentMode");
+								$s .= $langs->trans("AddAPaymentMode");
 							} else {
-								print $langs->trans("AddAPaymentModeToRestoreInstance");
+								$s .= $langs->trans("AddAPaymentModeToRestoreInstance");
 							}
-							print '</a>';
-							print '</p>';
+							$s .= '</a>';
 						} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
 							// Link to validate definitely instance
-							print '<p>';
-							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
+							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak">';
 							if (! $isASuspendedContract) {
-								print $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
+								$s .= $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
 							} else {
-								print $langs->trans("ConfirmInstanceValidationToRestoreInstance");
+								$s .= $langs->trans("ConfirmInstanceValidationToRestoreInstance");
 							}
-							print '</a>';
-							print '</p>';
+							$s .= '</a>';
 						}
 						if (! $isASuspendedContract) {
-							print '<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
+							$s .= '<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'">'.$langs->trans("TakeMeToApp").' <span class="fa fa-external-link-alt"></span></a>';
+						}
+						if ($s) {
+							print '<p class="pforbutton">';
+							print $s;
+							print '</p>';
 						}
 					}
 					print '
@@ -3902,9 +3906,13 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 						print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
 					}
 					if (empty($atleastonepaymentmode)) {
-						print '<br><a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
+						print '<p class="pforbutton margintop nomarginbottom">';
+						print '<a class="paddingtop" href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
+						print '</p>';
 					} elseif (GETPOST('mode', 'alpha') != 'registerpaymentmode') {
-						print '<br>'.$langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
+						print '<p class="pforbutton margintop nomarginbottom">';
+						print $langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
+						print '</p>';
 					}
 					print '     </h4>'."\n";
 					print '</div>'."\n";
