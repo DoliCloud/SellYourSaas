@@ -1,8 +1,0 @@
-#
-# List of package to install on a server
-#
-
-apt-get install apache2
-apt-get install cpulimit
-apt-get install fail2ban
-

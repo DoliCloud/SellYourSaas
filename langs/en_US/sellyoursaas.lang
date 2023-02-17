@@ -454,7 +454,7 @@ EvilUser=Unfair user or spammer
 DisableEmailToCustomer=Do not send email to customer
 CommissionsOnOldSystem=Commissions on old system
 InvoiceBeforeAreAvailableOnDemandAt=Invoices before the %s are available on email requests at %s
-MyAcountDesc=This area is dedicated to managing your subscriptions to <a href="%s" target="dolicloud">%s</a>. You can create new instances of applications, choose options, get your subscription invoices, contact the support team or cancel your account.
+MyAcountDesc=This area is dedicated to managing your subscriptions to <a href="%s" target="sellyoursaas">%s</a>. You can create new instances of applications, choose options, get your subscription invoices, contact the support team or cancel your account.
 YourCustomUrl=Your custom URL
 CustomURL=Custom URL
 NextInvoice=Next invoice

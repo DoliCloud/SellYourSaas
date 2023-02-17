@@ -1,1 +1,0 @@
-- mettre fail2ban + rule sur phpsendmail.log à générer grace au wrapper phpsendmail maison.

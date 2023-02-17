@@ -429,13 +429,6 @@ function dolicloud_prepare_head($object, $prefix = '')
 	// $this->tabs = array('entity:-tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to remove a tab
 	complete_head_from_modules($conf, $langs, $object, $head, $h, 'contact');
 
-	/*
-	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/dolicloud_info.php',1).'?id='.$object->id;
-	$head[$h][1] = $langs->trans("Info");
-	$head[$h][2] = 'info';
-	$h++;
-	*/
-
 	return $head;
 }
 

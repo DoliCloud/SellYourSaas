@@ -1,2 +1,0 @@
-#
-# Add entry into DNS

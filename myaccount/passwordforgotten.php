@@ -221,8 +221,6 @@ if (empty($reshook)) {
 
 					$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, '(PasswordAssistance)');
 
-					//$mesg.='You may find more information on all different user/password reset process onto <a href="https://www.dolicloud.com/en-faq-i-forgot-my-login-or-password">the following page</a>';
-
 					$substitutionarray = getCommonSubstitutionArray($langs, 0, null, $thirdparty);
 					complete_substitutions_array($substitutionarray, $langs, $thirdparty);
 

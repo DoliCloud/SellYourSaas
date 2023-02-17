@@ -1248,9 +1248,6 @@ if ($reusecontractid) {
 		}
 	}
 
-	//var_dump('user:'.$dolicloudcustomer->price_user);
-	//var_dump('instance:'.$dolicloudcustomer->price_instance);
-
 	$j=1;
 
 	// Create contract line for other products
