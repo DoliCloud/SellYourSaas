@@ -96,7 +96,7 @@ if ($action == 'set') {
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_SEPA')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA', GETPOST("SELLYOURSAAS_ENABLE_SEPA", 'int'), 'chaine', 0, '', $conf->entity);
 		}
-		dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID", 'int'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', GETPOST("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE", 'int'), 'chaine', 0, '', $conf->entity);
 
