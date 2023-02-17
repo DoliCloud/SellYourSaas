@@ -482,7 +482,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 
 $today=dol_now();
 
-$error=''; $errors=array();
+$error=0; $errors=array();
 $servicetouse=strtolower($conf->global->SELLYOURSAAS_NAME);
 
 if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'updatecountsonly') {	// updatedatabase = updatestatsonly + updatecountsonly

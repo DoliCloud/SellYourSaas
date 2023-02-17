@@ -153,6 +153,8 @@ export errstring=""
 export atleastoneerror=0
 declare -A ret1
 declare -A ret2
+totalinstancessaved=0
+totalinstancesfailed=0
 
 
 # the following line is to have an empty dir to clear the last incremental directories
@@ -232,9 +234,11 @@ if [[ "x$instanceserver" != "x0" ]]; then
 		        if [ "x$rescommand" != "x0" ]; then
 		        	ret2[$SERVDESTICURSOR]=$((${ret2[$SERVDESTICURSOR]} + 1));
 		        	echo "ERROR Failed to make rsync for $DIRSOURCE2/osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}."
-				   	echo "Command was: $command"
+		        	echo "Command was: $command"
+		        	((totalinstancesfailed += nbofdir))
 		        	export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" Dir osu$i to $SERVDESTICURSOR. ret=${ret2[$SERVDESTICURSOR]}. Command was: $command\n"
 		        else
+		          ((totalinstancessaved += nbofdir))
 		        	echo
 		        	# Success of backup of backup, we try to calculate disk usage for each dir
 		        	echo `date +'%Y-%m-%d %H:%M:%S'`" Scan dir named $DIRSOURCE2/osu$i*"
@@ -280,6 +284,7 @@ echo
 
 # Loop on each targeted server for return code
 export atleastoneerror=0
+
 for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 do
 	echo `date +'%Y-%m-%d %H:%M:%S'`" End for $SERVDESTICURSOR ret1[$SERVDESTICURSOR]=${ret1[$SERVDESTICURSOR]} ret2[$SERVDESTICURSOR]=${ret2[$SERVDESTICURSOR]}"
@@ -299,7 +304,7 @@ rmdir $HOME/emptydir
 # Send email if there is one error
 if [ "x$atleastoneerror" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nErrors or warnings are:\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
+	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nNb. instances successfully saved: $totalinstancessaved\nNb. instances unsuccessfully saved: $totalinstancesfailed\nErrors or warnings are:\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
 	
 	exit 1
 fi
@@ -308,7 +313,7 @@ if [ "x$3" != "x" ]; then
 	echo "Script was called for only one of few given instances. No email or supervision event sent on success in such situation."
 else
 	echo "Send email to $EMAILTO to inform about backup success"
-	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed.\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed.\nNb. instances successfully saved: $totalinstancessaved\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 fi
 echo
 

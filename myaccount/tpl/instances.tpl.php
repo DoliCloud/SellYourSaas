@@ -501,7 +501,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		// Add new option
 		if ($statuslabel != 'processing' && $statuslabel != 'undeployed') {
-			print '<a id="switchoptionpanel" href="#switchoptionpanel">';
+			print '<a id="switchoptionpanel_'.$keyline.'" class="switchoptionpanel" href="#switchoptionpanel_'.$keyline.'">';
 			print '<div class="resource inline-block boxresource small">';
 			print '<br><br><br>';
 			print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-bottom: 4px;"></span><br>';
@@ -511,7 +511,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		}
 
 		// Add here the Option panel (hidden by default)
-		print '<div id="optionpanel" style="display: none">';
+		print '<div id="optionpanel_'.$keyline.'" class="optionpanel hidden">';
 		print '<br>';
 		print '<div class="areaforresources sectionresources">';
 		print '<br>';
@@ -1108,10 +1108,14 @@ if ($action == "confirmundeploy") {
     		});
 
 			/* Code to toggle the show of the option section */
-			jQuery("#switchoptionpanel").click(function() {
+			jQuery(".switchoptionpanel").click(function() {
 				console.log("We click on toggle see more options");
-				jQuery("#optionpanel").toggle();
-				return false;
+				var id = parseInt($(this).attr("id").match(/[0-9]+$/g));
+				if (jQuery("#optionpanel_" + id + ":hidden").length){
+					jQuery("#optionpanel_" + id).removeClass("hidden");
+				} else {
+					jQuery("#optionpanel_" + id).addClass("hidden");
+				}
 			});
 
             /* Apply constraints if sldAndSubdomain field is change */

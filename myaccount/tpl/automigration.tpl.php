@@ -25,7 +25,14 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE automigration.tpl.php -->
 <?php
 
-$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$mythirdpartyaccount->id.'.tmp';	// @TODO LMR Use id of contract instead of ID of thirdparty
+$idcontract = "0";
+if (GETPOST('instanceselect', 'alpha')) {
+	$instanceselect = GETPOST('instanceselect', 'alpha');
+	$instanceselect = explode("_", $instanceselect);
+	$idcontract = $instanceselect[1];
+}
+
+$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$idcontract.'.tmp';
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
@@ -41,23 +48,25 @@ print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormba
 	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
 	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
 print '</form>';
-if ($action == 'redirectautomigrationget') {
-	// @TODO LMR Why not just changing the url in <form action="url" with <form action="url#step4" instead of making a post that do a js get redirect just after being loaded ?
-	print '<script>
-	console.log("Reload page with another url...");
-	window.location.href = "'.$_SERVER["PHP_SELF"].'?mode='.GETPOST("mode", 'alpha').'&action=view'.(GETPOST("instanceselect")?'&instanceselect='.GETPOST("instanceselect"):"").'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&backfromautomigration=backfromautomigration&ticketcategory_child_id='.GETPOST('ticketcategory_child_id', 'alpha').'&ticketcategory='.GETPOST('ticketcategory', 'alpha').(GETPOST('subject', 'alpha')?'&subject='.GETPOST('subject', 'alpha'):"").'#Step4"
-	</script>';
-}
 
-if (!empty($_POST['addfile'])) {
+if (!empty($_POST['addfile']) && empty($_POST['flowjsprocess'])) {
 	// Set tmp user directory
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 	dol_add_file_process($upload_dir, 1, 0);
 }
 
 if ($action == 'fileverification') {
-	$filenames = $_FILES['addedfile']['name'];
-	$types = $_FILES['addedfile']['type'];
+	$filenames = array();
+	$types = array();
+	if (!empty($_POST['flowjsprocess'])) {
+		$filenames["sql"] = GETPOST("sqldumpfilename", "alpha");
+		$filenames["document"] = GETPOST("documentdumpfilename", "alpha");
+		$types["sql"] = GETPOST("sqldumpfiletype", "alpha");
+		$types["document"] = GETPOST("documentdumpfiletype", "alpha");
+	} else {
+		$filenames = $_FILES['addedfile']['name'];
+		$types = $_FILES['addedfile']['type'];
+	}
 	$fileverification=array(array("error"=>array()),array("error"=>array()));
 	$filetoverify = array();
 	foreach ($filenames as $key => $filename) {
@@ -406,10 +415,10 @@ if ($action == 'fileverification') {
     <!-- END STEP5-->';
 }
 if ($action == 'view') {
-	print '<form id="formautomigration" name="formautomigration" action="'.$_SERVER["PHP_SELF"].'" method="POST" enctype="multipart/form-data">';
+	print '<form id="formautomigration" name="formautomigration" action="'.$_SERVER["PHP_SELF"].'#step4" method="POST" enctype="multipart/form-data">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="mode" value="automigration">';
-	print '<input type="hidden" id="actionautomigration" name="action" value="redirectautomigrationget">';
+	print '<input type="hidden" id="actionautomigration" name="action" value="view">';
 
 	print'<!-- BEGIN STEP1-->
         <div class="portlet light" id="step1">
@@ -462,6 +471,7 @@ if ($action == 'view') {
 						<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
 					</div>
 				</div>
+        </div>
         </div>
         <!-- END STEP2-->';
 
@@ -590,26 +600,39 @@ if ($action == 'view') {
                 	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2 '.$langs->trans("or").' .sql.gz):</span>
                 </div>
                 <div class="grid-boxes-automigration">';
-				$maxfilesizearray = getMaxFileSizeArray();
+				/*$maxfilesizearray = getMaxFileSizeArray();
 				$maxmin = $maxfilesizearray['maxmin'];
 	if ($maxmin > 0) {
 		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
-	}
-				print '
-                    <input type="file" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">
-                </div>
+	}*/
+				print '<input type="file" class="nobrowserflowjssupport" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">';
+				print '<span class="browserflowjssupport"><button type="button" data-inputfile="sqldumpfile" class="browsefileinput" id="browseButtonsqldump">Browse...</button>';
+				print '&nbsp;<span id="sqldumpfilespan">No file selected.</span>';
+				print '<input type="hidden" id="sqldumpfilename" name="sqldumpfilename">';
+				print '<input type="hidden" id="sqldumpfiletype" name="sqldumpfiletype">';
+				print '<br><div class="progress-bar sqldumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
+				print '<button type="button" style="display:none;" data-inputfile="sqldumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="cancelsqldumpfile">Cancel</button>';
+				print '</span>';
+				print '</div>
                 <div class="grid-boxes-automigration-left valignmiddle">
                 	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz '.$langs->trans("or").' .tar.bz2):</span>
                 </div>
                 <div class="grid-boxes-automigration">';
-				$maxmin = $maxfilesizearray['maxmin'];
+				/*$maxmin = $maxfilesizearray['maxmin'];
 	if ($maxmin > 0) {
 		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
-	}
-				print '
-                    <input type="file" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">
-                </div>
+	}*/
+				print '<input type="file" class="nobrowserflowjssupport" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">';
+				print '<span class="browserflowjssupport"><button type="button" data-inputfile="documentdumpfile" class="browsefileinput" id="browseButtondocument">Browse...</button>';
+				print '&nbsp;<span id="documentdumpfilespan">No file selected.</span>';
+				print '<input type="hidden" id="documentdumpfilename" name="documentdumpfilename">';
+				print '<input type="hidden" id="documentdumpfiletype" name="documentdumpfiletype">';
+				print '<br><div class="progress-bar documentdumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
+				print '<button type="button" style="display:none;" data-inputfile="documentdumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="canceldocumentdumpfile">Cancel</button>';
+				print '</span>';
+				print '</div>
             </div><br>
+			<input type="hidden" class="flowjsprocess" id="flowjsprocess" name="flowjsprocess" value="true">
 
 			<div id="sumbmitfiles" class="containerflexautomigration" style="display:none;">
 				<div class="right containerflexautomigrationitem" style="margin-right:10px">
@@ -619,7 +642,7 @@ if ($action == 'view') {
 					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
 				</div>
 			</div>
-        </div>
+        </div>			
         <!-- END STEP4-->';
 	print '<input type="hidden" name="contractid" value="'.GETPOST('contractid', 'alpha').'">';
 	print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
@@ -628,6 +651,84 @@ if ($action == 'view') {
 	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
 	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
 	print'</form>';
+
+	print '
+	<script>
+	jQuery(document).ready(function() {
+		var flow = new Flow({
+			target:"source/core/ajax/flowjs-server.php", 
+			query:{module:"sellyoursaas",upload_dir:"'.$upload_dir.'"},
+			testChunks:false
+		});
+		if(flow.support){
+			// Only if the browser support flowjs 
+			var focusinputfile = "";
+			var filessubmitted = 0;
+			console.log("We remove and hide html inputs for flowjs process")
+			$(".nobrowserflowjssupport").remove();
+			$(".browsefileinput").on("click", function(){
+				focusinputfile = $(this).data("inputfile");
+				console.log("focusinputfile = "+focusinputfile)
+			})
+			$(".cancelfileinput").on("click", function(){
+				filename = $(this).data("fileidentifier");
+				file = flow.getFromUniqueIdentifier(filename);
+				file.cancel();
+				$("#"+file.uniqueIdentifier+"pgbar").hide();
+				console.log("We remove file "+filename);
+				$("#"+$(this).data("inputfile")+"span").text("No file selected.");
+				$(this).hide();
+				filessubmitted--;
+				$("#sumbmitfiles").hide();
+				$("#"+focusinputfile+"name").val("");
+				$("#"+focusinputfile+"type").val("");
+			})
+			flow.assignBrowse(document.getElementById("browseButtonsqldump"), false, true, {"accept":".sql, .sql.bz2, .sql.gz"});
+			flow.assignBrowse(document.getElementById("browseButtondocument"), false, true, {"accept":".zip, .tar.gz, .tar.bz2"});
+			flow.on("fileAdded", function(file, event){
+				console.log("Trigger event file added", file, event);
+				$("#"+focusinputfile+"span").text(file.name);
+				$("#cancel"+focusinputfile).data("fileidentifier", file.uniqueIdentifier)
+				console.log($("#cancel"+focusinputfile).data("fileidentifier"));
+				$("#cancel"+focusinputfile).show()
+				$("."+focusinputfile+"pgbar").show();
+				$("."+focusinputfile+"pgbar").attr("id",file.uniqueIdentifier+"pgbar")
+				$("#"+focusinputfile+"name").val(file.name)
+				$("#"+focusinputfile+"type").val(file.file.type)
+			});
+			flow.on("filesSubmitted", function(array,message){
+				console.log("Trigger event file submitted");
+				flow.upload()
+			});
+			flow.on("progress", function(){
+				console.log("testprogress",flow.files);
+				flow.files.forEach(function(element){
+					console.log(element.progress());
+					width = Math.round(element.progress()*100)
+					width = width.toString()
+					$("#"+element.uniqueIdentifier+"pgbar").width(width+"%")
+					$("#"+element.uniqueIdentifier+"pgbar").children("span").text(width+"%")
+				});
+			});
+			flow.on("fileSuccess", function(file,message){
+				console.log("The file has been uploaded successfully",file,message);
+				filessubmitted++;
+				if(filessubmitted >= 2){
+					$("#sumbmitfiles").show();
+				} else {
+					$("#sumbmitfiles").hide();
+				}
+			});
+			flow.on("fileError", function(file, message){
+				console.log("Error on file upload",file, message);
+			});
+		} else {
+			console.log("We remove flowjs inputs")
+			$(".browserflowjssupport").remove();
+			$(".flowjsprocess").remove();
+		}
+	})
+	</script>';
 
 	print'<script>
     jQuery(document).ready(function() {

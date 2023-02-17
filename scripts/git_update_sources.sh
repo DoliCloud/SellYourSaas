@@ -57,6 +57,8 @@ do
 	    fi
 	   
 		echo "Clean some dirs to save disk spaces"
+		has_install_lock=''
+		if [[ -f documents/install.lock ]]; then has_install_lock='1'; fi
 		rm -fr documents/*
 		rm -fr dev/ test/ doc/ htdocs/includes/ckeditor/ckeditor/adapters htdocs/includes/ckeditor/ckeditor/samples
 		rm -fr htdocs/public/test
@@ -87,8 +89,11 @@ do
 			# Delete archive in other format
 			rm $dir/../$gitdir.tar.zst 2>/dev/null
 		fi
-	
-	    cd -
+
+		# restore previously deleted install.lock
+		if [[ -n "$has_install_lock" ]]; then touch 'documents/install.lock'; fi
+
+		cd -
 	fi
 done
 
