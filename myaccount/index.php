@@ -3995,6 +3995,8 @@ print '
 	<!-- Placed at the end of the document so the pages load faster -->
 	<script src="dist/js/popper.min.js"></script>
 	<script src="dist/js/bootstrap.min.js"></script>
+	<script src="dist/js/flowJs/flow.js"></script>
+
 ';
 
 

@@ -276,7 +276,9 @@ color: #334;
 .signUpAlert {width: 90%;margin: 0 auto;}
 header.inverse  h1 { padding-top: 5px; }
 .center { text-align: center; }
+.taligncenter { text-align: center; }
 .valignmiddle { vertical-align: middle; }
+.valigntop { vertical-align: top; }
 
 #logo {
     text-align: center;	max-width:200px; max-height: 60px;
