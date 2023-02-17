@@ -240,7 +240,7 @@ while (!feof($handle)) {
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 		$utils = new Utils($db);
-		$result = $utils->executeCli($command, $outputfile);
+		$result = $utils->executeCLI($command, $outputfile);
 
 		if (empty($result['result'])) {
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Extract processid from line...\n", FILE_APPEND);
@@ -266,7 +266,7 @@ while (!feof($handle)) {
 			// echo "/usr/bin/lynx -dump -width 500 http://127.0.0.1/server-status | grep \" $processid \"" >> /var/log/phpsendmail.log 2>&1
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandlynx=".$commandlynx."\n", FILE_APPEND);
 
-			$resultlynx = $utils->executeCli($commandlynx, $outputfile, 0, null, 1);
+			$resultlynx = $utils->executeCLI($commandlynx, $outputfile, 0, null, 1);
 			if (empty($resultlynx['result'])) {
 				$xxx = trim($resultlynx['output']);
 				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$xxx."\n", FILE_APPEND);
@@ -283,7 +283,7 @@ while (!feof($handle)) {
 			$commandns = 'netstat -npt | grep \':25\s\|:2525\s\|:465\s\|:587\s\'';	// -napt show also the LISTEN processes
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandns=".$commandns."\n", FILE_APPEND);
 
-			$resultns = $utils->executeCli($commandns, $outputfile, 0, null, 1);
+			$resultns = $utils->executeCLI($commandns, $outputfile, 0, null, 1);
 			if (empty($resultns['result'])) {
 				$xxx = trim($resultns['output']);
 				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ".$xxx."\n", FILE_APPEND);
@@ -307,7 +307,7 @@ while (!feof($handle)) {
 
 				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " commandps=".$commandps."\n", FILE_APPEND);
 
-				$resultps = $utils->executeCli($commandps, $outputfile, 0, null, 1);
+				$resultps = $utils->executeCLI($commandps, $outputfile, 0, null, 1);
 				if (empty($resultps['result'])) {
 					$processownerid = trim($resultps['output']);
 				} else {

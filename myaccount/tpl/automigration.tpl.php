@@ -230,7 +230,7 @@ if ($action == 'automigration') {
 		$param[] = $database_db;
 		$mysqlbackupcommand=$command." ".join(" ", $param);
 
-		$result = $utils->executeCli($mysqlbackupcommand, "", 0, $mysqlbackupfilename);
+		$result = $utils->executeCLI($mysqlbackupcommand, "", 0, $mysqlbackupfilename);
 
 		if ($result["result"] != 0) {
 			if (empty($result["output"])) {
@@ -241,7 +241,7 @@ if ($action == 'automigration') {
 		//Drop llx_accounting_system and llx_accounting_account to prevent load error
 		if ($result["result"] == 0) {
 			$mysqlcommand='echo "drop table llx_accounting_system;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
-			$result = $utils->executeCli($mysqlcommand, "", 0, null);
+			$result = $utils->executeCLI($mysqlcommand, "", 0, null);
 			if ($result["result"] != 0) {
 				if (empty($result["output"])) {
 					$result["output"] = $langs->trans("ErrorOnDatabaseBackup");
@@ -249,7 +249,7 @@ if ($action == 'automigration') {
 				setEventMessages($langs->trans("ErrorOnDropingTables"), null, "errors");
 			} else {
 				$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
-				$result = $utils->executeCli($mysqlcommand, "", 0, null);
+				$result = $utils->executeCLI($mysqlcommand, "", 0, null);
 				if ($result["result"] != 0) {
 					if (empty($result["output"])) {
 						$result["output"] = $langs->trans("ErrorOnDropingTables");
@@ -257,7 +257,7 @@ if ($action == 'automigration') {
 					setEventMessages($langs->trans("ErrorOnDropingTables"), null, "errors");
 				} else {
 					$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db;
-					$result = $utils->executeCli($mysqlcommand, "", 0, null);
+					$result = $utils->executeCLI($mysqlcommand, "", 0, null);
 					if ($result["result"] != 0) {
 						if (empty($result["output"])) {
 							$result["output"] = $langs->trans("ErrorOnDropingTables");
@@ -269,7 +269,7 @@ if ($action == 'automigration') {
 
 			if ($result["result"] == 0) {
 				$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.escapeshellcmd(dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate));
-				$result = $utils->executeCli($mysqlcommand, "", 0, null, 1);
+				$result = $utils->executeCLI($mysqlcommand, "", 0, null, 1);
 				if ($result["result"] != 0) {
 					if (empty($result["output"])) {
 						$result["output"] = $langs->trans("ErrorOnDatabaseMigration");
@@ -288,7 +288,7 @@ if ($action == 'automigration') {
 
 				if ($result["result"] != 0) {
 					$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.$mysqlbackupfilename;
-					$utils->executeCli($mysqlcommand, "", 0, null, 1);
+					$utils->executeCLI($mysqlcommand, "", 0, null, 1);
 				}
 			}
 		}
@@ -642,7 +642,7 @@ if ($action == 'view') {
 					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
 				</div>
 			</div>
-        </div>			
+        </div>
         <!-- END STEP4-->';
 	print '<input type="hidden" name="contractid" value="'.GETPOST('contractid', 'alpha').'">';
 	print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
@@ -656,12 +656,12 @@ if ($action == 'view') {
 	<script>
 	jQuery(document).ready(function() {
 		var flow = new Flow({
-			target:"source/core/ajax/flowjs-server.php", 
+			target:"source/core/ajax/flowjs-server.php",
 			query:{module:"sellyoursaas",upload_dir:"'.$upload_dir.'"},
 			testChunks:false
 		});
 		if(flow.support){
-			// Only if the browser support flowjs 
+			// Only if the browser support flowjs
 			var focusinputfile = "";
 			var filessubmitted = 0;
 			console.log("We remove and hide html inputs for flowjs process")
