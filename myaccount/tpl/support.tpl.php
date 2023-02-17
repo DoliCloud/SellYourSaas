@@ -463,9 +463,11 @@ if ($sellyoursaassupporturl) {
 		});
 		</script>"."\n";
 
-		$stringtoprint .= '<div class="supportemailfield" id="KWwithajax"></div>';
+		$stringtoprint .= '<div class="supportemailfield paddingtop" id="KWwithajax"></div>';
 		$stringtoprint .= '<br>';
+
 		print $stringtoprint;
+
 		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
 			print '<div id="showforautomigration" class="showforautomigration" style="display:none;">';
 			print '<br><br>';
