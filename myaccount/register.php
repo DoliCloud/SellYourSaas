@@ -742,15 +742,15 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						?></label>
 					</div>
 				</section>
+				<br>
 			<?php } ?>
-			<br>
 
 	   </div>
 
 		  <section id="formActions">
 			<?php
+			// TODO Remove this, we should be able to use SELLYOURSAAS_TERMSANDCONDITIONS instead
 			$urlfortermofuse = '';
-			// TODO Remove once a generic feature exists
 			if ($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME == 'dolicloud.com') {
 				$urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/en-terms-and-conditions.php';
 				if (preg_match('/^fr/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/fr-conditions-utilisations.php';
