@@ -701,12 +701,11 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				<?php
 			}
 			?>
-
-
-
-			<!-- Selection of domain to create instance -->
-			<?php if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) { ?>
 			<br>
+
+
+			<?php if (getDolGlobalInt('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) { ?>
+			<!-- checkbox for optin messages -->
 			<section id="optinmessagesid">
 				<input type="checkbox" id="optinmessages" name="optinmessages" class="valignmiddle inline" style="margin-top: 0" value="1">
 				<label for="optinmessages" class="valignmiddle small inline opacitymedium"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>
@@ -715,7 +714,6 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 			<?php if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) { ?>
 			<!-- Checkbox for non profit orga -->
-			<br>
 			<section id="checkboxnonprofitorgaid">
 			<div class="group required">
 				<input type="checkbox" id="checkboxnonprofitorga" name="checkboxnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="1" required=""<?php echo (GETPOST('checkboxnonprofitorga') ? ' checked="checked"' : ''); ?>>
@@ -729,22 +727,22 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			</div>
 			</section>
 			<?php } ?>
-			<br>
 
 			<?php if (getDolGlobalString('SELLYOURSAAS_TERMSANDCONDITIONS')) { ?>
-				<!-- mandatory checkbox for terms and conditions -->
-				<section id="checkboxtermsandconditions">
-					<div class="group required">
-						<input type="checkbox" id="checkboxtermsandconditions" name="checkboxtermsandconditions" class="valignmiddle inline" style="margin-top: 0" value="1" required="1"<?php echo (GETPOST('checkboxtermsandconditions') ? ' checked="checked"' : ''); ?>>
-						<label for="checkboxtermsandconditions" class="valignmiddle small inline"><?php
-							$urlfortermofuse = 'https://www.'.getDolGlobalString(SELLYOURSAAS_MAIN_DOMAIN_NAME).'/'.getDolGlobalString(SELLYOURSAAS_TERMSANDCONDITIONS);
-							echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse);
-						?></label>
-					</div>
-				</section>
-				<br>
+			<!-- mandatory checkbox for terms and conditions -->
+			<section id="checkboxtermsandconditions">
+				<div class="group required">
+					<input type="checkbox" id="checkboxtermsandconditions" name="checkboxtermsandconditions" class="valignmiddle inline" style="margin-top: 0" value="1" required="1"<?php echo (GETPOST('checkboxtermsandconditions') ? ' checked="checked"' : ''); ?>>
+					<label for="checkboxtermsandconditions" class="valignmiddle small inline"><?php
+						$urlfortermofuse = 'https://www.'.getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/'.getDolGlobalString('SELLYOURSAAS_TERMSANDCONDITIONS');
+						echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse);
+					?></label>
+				</div>
+			</section>
 			<?php } ?>
-
+			
+			<br>
+			
 	   </div>
 
 		  <section id="formActions">
@@ -775,6 +773,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				}
 				?>
 			  </div>
+			  <br>
 		  </section>
 
 
