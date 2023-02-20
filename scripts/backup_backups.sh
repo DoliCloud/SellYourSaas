@@ -304,7 +304,7 @@ rmdir $HOME/emptydir
 # Send email if there is one error
 if [ "x$atleastoneerror" != "x0" ]; then
 	echo "Send email to $EMAILTO to warn about backup error"
-	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nNb. instances successfully saved: $totalinstancessaved\nNb. instances unsuccessfully saved: $totalinstancesfailed\nErrors or warnings are:\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
+	echo -e "Failed to make copy backup to remote backup server(s) $SERVDESTI.\nNumber of instances successfully saved: $totalinstancessaved\nNumber of instances unsuccessfully saved: $totalinstancesfailed\nErrors or warnings are:\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup of backup to remote server(s) failed for "`hostname` $EMAILTO
 	
 	exit 1
 fi
@@ -313,7 +313,7 @@ if [ "x$3" != "x" ]; then
 	echo "Script was called for only one of few given instances. No email or supervision event sent on success in such situation."
 else
 	echo "Send email to $EMAILTO to inform about backup success"
-	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed.\nNb. instances successfully saved: $totalinstancessaved\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
+	echo -e "The backup of backup for "`hostname`" to remote backup server $SERVDESTI succeed.\nNumber of instances successfully saved: $totalinstancessaved\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup of Backup - "`hostname`"] Backup of backup to remote server succeed" $EMAILTO
 fi
 echo
 
