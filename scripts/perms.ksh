@@ -32,7 +32,6 @@ fi
 # Go into a safe dir
 cd /tmp
 
-
 #echo "Remplacement user apache par www-data"
 #find . -user apache -exec chown www-data {} \;
 
@@ -119,13 +118,15 @@ if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
 	chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 fi
 
-echo Set owner and permission on SSL certificates /etc/apache2/*.key
+echo Set owner and permission on SSL certificates /etc/apache2/*.key and /etc/lestencrypt
 for fic in `ls /etc/apache2/ | grep '.key$'`; 
 do 
 	chown root.www-data /etc/apache2/$fic
 	chmod ug+r /etc/apache2/$fic
 	chmod o-rwx /etc/apache2/$fic
 done
+chmod go+x /etc/letsencrypt/archive
+chmod go+x /etc/letsencrypt/live
 
 if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
 	IFS=$(echo -en "\n\b")
