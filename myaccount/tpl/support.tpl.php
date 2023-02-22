@@ -345,7 +345,7 @@ if ($sellyoursaassupporturl) {
 
 				if (idgroupticket != "") {
 					$.ajax({ url: \'/ajax/fetchKnowledgeRecord.php\',
-						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\', lang:\''.dol_escape_htmltag($langs->defaultlang).'\'},
+						 data: { action: \'getKnowledgeRecord\', idticketgroup: idgroupticket, token: \''.newToken().'\', lang:\''.dol_escape_htmltag($langs->defaultlang).'\', public:1 },
 						 type: \'GET\',
 						 success: function(response) {
 							var urllist = \'\';
