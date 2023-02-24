@@ -31,15 +31,17 @@ if (empty($conf) || ! is_object($conf)) {
 $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 $forcesubdomain = GETPOST('forcesubdomain', 'alpha');
 
-// List of available plans/products
 $arrayofplans=array();
 $arrayofplansfull=array();
+$arrayofoptions=array();
+$arrayofoptionsfull=array();
+
+// List of available plans/products
 $sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pa.restrict_domains';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 $sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
-$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
+$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
 $sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
-$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
 $sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
 $sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
 $sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
@@ -49,9 +51,6 @@ $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"
 $sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
 $sqlproducts.= ")";
 $sqlproducts.= " ORDER BY pe.position ASC";
-//$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
-//$sqlproducts.=' AND p.rowid = 202';
-//print $sqlproducts;
 
 $resqlproducts = $db->query($sqlproducts);
 if ($resqlproducts) {
@@ -105,6 +104,7 @@ if ($resqlproducts) {
 				} elseif ($tmpprod->duration == '1y') {
 					$tmpduration.=' / '.$langs->trans("DurationYear");
 				} else {
+					$regs = array();
 					preg_match('/^([0-9]+)([a-z]{1})$/', $tmpprod->duration, $regs);
 					if (! empty($regs[1]) && ! empty($regs[2])) {
 						$tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
@@ -126,6 +126,102 @@ if ($resqlproducts) {
 		$i++;
 	}
 } else dol_print_error($db);
+
+
+// List of available options
+$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pa.restrict_domains';
+$sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
+$sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
+$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
+$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'option'";
+$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
+$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
+$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
+$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
+$sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
+$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
+$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
+$sqlproducts.= ")";
+$sqlproducts.= " ORDER BY pe.position ASC";
+
+$resqloptions = $db->query($sqlproducts);
+if ($resqloptions) {
+	$num = $db->num_rows($resqloptions);
+
+	$tmpprod = new Product($db);
+	$tmpprodchild = new Product($db);
+	$i=0;
+	while ($i < $num) {
+		$obj = $db->fetch_object($resqloptions);
+		if ($obj) {
+			$tmpprod->fetch($obj->rowid, '', '', '', 1, 1, 0);
+			//$tmpprod->sousprods = array();
+			//$tmpprod->get_sousproduits_arbo();
+			//$tmparray = $tmpprod->get_arbo_each_prod(1, 1);
+
+			$label = $obj->label;
+
+			$priceinstance=array();
+			$priceinstance_ttc=array();
+
+			$priceinstance['fix'] = $obj->price;
+			$priceinstance_ttc['fix'] = $obj->price_ttc;
+			$priceinstance['user'] = 0;
+			$priceinstance_ttc['user'] = 0;
+
+			/*
+			if (count($tmparray) > 0) {
+				foreach ($tmparray as $key => $value) {
+					$tmpprodchild->fetch($value['id']);
+					if (preg_match('/user/i', $tmpprodchild->ref) || preg_match('/user/i', $tmpprodchild->array_options['options_resource_label'])) {
+						$priceinstance['user'] += $tmpprodchild->price;
+						$priceinstance_ttc['user'] += $tmpprodchild->price_ttc;
+					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
+						// Don't add system services to global price, these are options with calculated quantities
+					} else {
+						$priceinstance['fix'] += $tmpprodchild->price;
+						$priceinstance_ttc['fix'] += $tmpprodchild->price_ttc;
+					}
+					//var_dump($tmpprodchild->id.' '.$tmpprodchild->array_options['options_app_or_option'].' '.$tmpprodchild->price_ttc.' -> '.$priceuser.' / '.$priceuser_ttc);
+				}
+			}
+			*/
+
+			$pricetoshow = price2num($priceinstance['fix'], 'MT');
+			if (empty($pricetoshow)) $pricetoshow = 0;
+			$arrayofoptions[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
+
+			$tmpduration = '';
+			if ($tmpprod->duration) {
+				if ($tmpprod->duration == '1m') {
+					$tmpduration.=' / '.$langs->trans("Month");
+				} elseif ($tmpprod->duration == '1y') {
+					$tmpduration.=' / '.$langs->trans("DurationYear");
+				} else {
+					$regs = array();
+					preg_match('/^([0-9]+)([a-z]{1})$/', $tmpprod->duration, $regs);
+					if (! empty($regs[1]) && ! empty($regs[2])) {
+						$tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
+					}
+				}
+			}
+
+			if ($tmpprod->duration) $arrayofoptions[$obj->rowid].=$tmpduration;
+			if ($priceinstance['user']) {
+				$arrayofoptions[$obj->rowid].=' + '.price(price2num($priceinstance['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
+				if ($tmpprod->duration) $arrayofoptions[$obj->rowid].=$tmpduration;
+			}
+			$arrayofoptions[$obj->rowid].=')';
+
+			$arrayofoptionsfull[$obj->rowid]['id'] = $obj->rowid;
+			$arrayofoptionsfull[$obj->rowid]['label'] = $arrayofoptions[$obj->rowid];
+			$arrayofoptionsfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
+			$arrayofoptionsfull[$obj->rowid]['product'] = $tmpprod;
+		}
+		$i++;
+	}
+} else dol_print_error($db);
+
 
 
 print '
@@ -499,9 +595,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '</div>';
 		}
 
-		// Add new option
+		// Add new option box
 		if ($statuslabel != 'processing' && $statuslabel != 'undeployed') {
-			print '<a id="switchoptionpanel_'.$keyline.'" class="switchoptionpanel" href="#switchoptionpanel_'.$keyline.'">';
+			print '<a id="switchoptionpanel_'.$id.'" class="switchoptionpanel" href="#">';
 			print '<div class="resource inline-block boxresource small">';
 			print '<br><br><br>';
 			print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-bottom: 4px;"></span><br>';
@@ -511,7 +607,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		}
 
 		// Add here the Option panel (hidden by default)
-		print '<div id="optionpanel_'.$keyline.'" class="optionpanel hidden">';
+		print '<div id="optionpanel_'.$id.'" class="optionpanel hidden">';
 		print '<br>';
 		print '<div class="areaforresources sectionresources">';
 		print '<br>';
@@ -557,8 +653,37 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<hr>';
 		}
 
-		// TODO Add option from options services into databases
 
+		// TODO Add option from options services into databases
+		foreach ($arrayofoptionsfull as $key => $val) {
+			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
+			print '<div class="tagtd">';
+			$tmpprod = $val['product'];
+			print $tmpprod->show_photos('product', $conf->product->multidir_output[$conf->entity]);
+			print '</div>';
+			print '<div class="tagtd">';
+			$label = $val['label'];
+			$desc = $val['description'];
+			if (!empty($tmpprod->multilangs[$langs->defaultlang])) {
+				$label = $tmpprod->multilangs[$langs->defaultlang]['label'];
+				$description = $tmpprod->multilangs[$langs->defaultlang]['description'];
+			} elseif (!empty($tmpprod->multilangs['en_US'])) {
+				$label = $tmpprod->multilangs['en_US']['label'];
+				$description = $tmpprod->multilangs['en_US']['description'];
+			}
+			print $label;
+			print '<span class="small">';
+			print $description.'<br>';
+			print '</span>';
+			// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
+			print '</div>';
+			print '<div class="tagtd">';
+			print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
+			print '</div>';
+			print '</div></div>';
+
+			print '<hr>';
+		}
 
 
 		print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';
@@ -1116,6 +1241,7 @@ if ($action == "confirmundeploy") {
 				} else {
 					jQuery("#optionpanel_" + id).addClass("hidden");
 				}
+				return false;
 			});
 
             /* Apply constraints if sldAndSubdomain field is change */
