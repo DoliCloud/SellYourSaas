@@ -655,9 +655,20 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		// TODO Add option from options services into databases
 
 		foreach ($arrayofoptionsfull as $key => $val) {
+			$tmpproduct = $val['product'];
+
+			$conditionok = 0;
+			if (isset($tmpproduct['array_options']['option_condition']) && $tmpproduct['array_options']['option_condition'] != '') {
+				$contitionok = 1;
+				// There is a condition to show the option, we check it
+			}
+
+			if (!$conditionok) {
+				continue;
+			}
+
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 			print '<div class="tagtd width50 paddinright marginrightonly valignmiddle">';
-			$tmpproduct = $val['product'];
 
 			$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
 
