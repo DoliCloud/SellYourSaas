@@ -188,8 +188,7 @@ if ($resqloptions) {
 
 			$pricetoshow = price2num($priceoption['fix'], 'MT');
 			if (empty($pricetoshow)) $pricetoshow = 0;
-			$labelprice = $label;
-			$labelprice .= ' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
+			$labelprice = price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 			$tmpduration = '';
 			if ($tmpprod->duration) {
 				if ($tmpprod->duration == '1m') {
@@ -210,7 +209,6 @@ if ($resqloptions) {
 				$labelprice.=' + '.price(price2num($priceoption['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
 				if ($tmpprod->duration) $labelprice.=$tmpduration;
 			}
-			$labelprice.=')';
 
 			$arrayofoptionsfull[$obj->rowid]['id'] = $obj->rowid;
 			$arrayofoptionsfull[$obj->rowid]['label'] = $arrayofoptions[$obj->rowid];
@@ -658,7 +656,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		foreach ($arrayofoptionsfull as $key => $val) {
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd width50 paddinright">';
+			print '<div class="tagtd width50 paddinright marginrightonly valignmiddle">';
 			$tmpproduct = $val['product'];
 
 			$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
