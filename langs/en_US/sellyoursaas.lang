@@ -793,4 +793,5 @@ OptionYourCustomDomainNameStep1=Step 1: Enter the name to use as the custom URL 
 OptionYourCustomDomainNameStep2=Step 2: Add an entry in your DNS provider setup with type CNAME pointing to <b>%s</b> 
 OptionYourWebsite=Enable a website
 OptionYourWebsiteDesc=You can activate here a public website built using the Dolibarr website CMS
-OptionYourWebsiteStep1=Choose the website to publish on internet and click on <b>%s</b> 
+OptionYourWebsiteStep1=Choose the website to publish on internet and click on <b>%s</b>
+IWantToTest=I want to test 

@@ -666,7 +666,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd width50 paddinright marginrightonly valignmiddle">';
+			print '<div class="tagtd width50 paddingright marginrightonly valignmiddle">';
 
 			$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
 
@@ -702,11 +702,20 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 			// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
 			print '</div>';
-			print '<div class="tagtd valignmiddle width100">';
+			print '<div class="tagtd valignmiddle width100 paddingleft paddingright">';
 			if ($arrayofoptionsfull[$key]['labelprice']) {
 				print $arrayofoptionsfull[$key]['labelprice'].'<br>';
 			}
-			print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
+			// Button to subscribe
+			if (!empty($tmpproduct->array_options['options_package'])) {
+				// If there is a package, sho wlink to subscribe
+			} else {
+				// If no package
+				if ($producturl) {
+					print '<a class="btn btn-primary wordbreak" href="'.$producturl.'" target="_blank" rel="noopener">'.$langs->trans("IWantToTest").'...</a><br>';
+				}
+				//print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
+			}
 			print '</div>';
 			print '</div></div>';
 
