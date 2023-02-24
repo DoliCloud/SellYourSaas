@@ -630,8 +630,6 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '</div>';
 		print '</div></div>';
 
-		print '<hr>';
-
 		// Hard coded option: A website
 		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES')) {
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
@@ -658,7 +656,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$tmpproduct = $val['product'];
 
 			$conditionok = 0;
-			if (isset($tmpproduct->array_options['option_condition']) && $tmpproduct->array_options['option_condition'] != '') {
+			if (isset($tmpproduct->array_options['options_option_condition']) && $tmpproduct->array_options['options_option_condition'] != '') {
 				$conditionok = 1;
 				// There is a condition to show the option, we check it
 			}
