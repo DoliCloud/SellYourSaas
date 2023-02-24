@@ -148,12 +148,12 @@ $resqloptions = $db->query($sqlproducts);
 if ($resqloptions) {
 	$num = $db->num_rows($resqloptions);
 
-	$tmpprod = new Product($db);
-	$tmpprodchild = new Product($db);
 	$i=0;
 	while ($i < $num) {
 		$obj = $db->fetch_object($resqloptions);
 		if ($obj) {
+			$tmpprod = new Product($db);
+			//$tmpprodchild = new Product($db);
 			$tmpprod->fetch($obj->rowid, '', '', '', 1, 1, 0);
 			//$tmpprod->sousprods = array();
 			//$tmpprod->get_sousproduits_arbo();
@@ -657,27 +657,38 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		// TODO Add option from options services into databases
 		foreach ($arrayofoptionsfull as $key => $val) {
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd">';
-			$tmpprod = $val['product'];
-			print $tmpprod->show_photos('product', $conf->product->multidir_output[$conf->entity]);
-			print '</div>';
-			print '<div class="tagtd">';
-			$label = $val['label'];
-			$desc = $val['description'];
-			if (!empty($tmpprod->multilangs[$langs->defaultlang])) {
-				$label = $tmpprod->multilangs[$langs->defaultlang]['label'];
-				$description = $tmpprod->multilangs[$langs->defaultlang]['description'];
-			} elseif (!empty($tmpprod->multilangs['en_US'])) {
-				$label = $tmpprod->multilangs['en_US']['label'];
-				$description = $tmpprod->multilangs['en_US']['description'];
+			print '<div class="tagtd width50">';
+			$tmpproduct = $val['product'];
+
+			$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
+
+			if (empty($htmlforphoto) || $htmlforphoto == '<!-- Photo -->' || $htmlforphoto == '<!-- Photo -->'."\n") {
+				print '<!--no photo defined -->';
+				print '<table width="100%" valign="top" align="center" border="0" cellpadding="2" cellspacing="2"><tr><td width="100%" class="photo">';
+				print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png" title="'.dol_escape_htmltag($alt).'">';
+				print '</td></tr></table>';
+			} else {
+				print $htmlforphoto;
 			}
-			print $label;
+
+			print '</div>';
+			print '<div class="tagtd valignmiddle">';
+			$label = $tmpprod->label;
+			$desc = $tmpprod->description;
+			if (!empty($tmpproduct->multilangs[$langs->defaultlang])) {
+				$label = $tmpproduct->multilangs[$langs->defaultlang]['label'];
+				$description = $tmpproduct->multilangs[$langs->defaultlang]['description'];
+			} elseif (!empty($tmpproduct->multilangs['en_US'])) {
+				$label = $tmpproduct->multilangs['en_US']['label'];
+				$description = $tmpproduct->multilangs['en_US']['description'];
+			}
+			print $label.'<br>';
 			print '<span class="small">';
 			print $description.'<br>';
 			print '</span>';
 			// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
 			print '</div>';
-			print '<div class="tagtd">';
+			print '<div class="tagtd valignmiddle">';
 			print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
 			print '</div>';
 			print '</div></div>';
