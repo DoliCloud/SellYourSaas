@@ -293,7 +293,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 			}
 		}
-		$color = "green"; $displayforinstance = "";
+		$color = "#4DB3A2"; $displayforinstance = "";
 		if ($statuslabel == 'processing') { $color = 'orange'; }
 		if ($statuslabel == 'suspended') { $color = 'orange'; }
 		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
@@ -808,7 +808,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 				// Discount and next invoice line
 				if ($foundtemplate == 0) {	// foundtemplate means there is at least one template invoice (so contract is a paying or validated contract)
-					if ($contract->array_options['options_date_endfreeperiod'] < $now) $color='orange';
+					if ($contract->array_options['options_date_endfreeperiod'] < $now) {
+						$color='orange';
+					}
 
 					print ' <span style="color:'.$color.'">';
 					if ($contract->array_options['options_date_endfreeperiod'] > 0) print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));

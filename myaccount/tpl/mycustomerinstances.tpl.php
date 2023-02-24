@@ -132,7 +132,7 @@ if (count($listofcontractidreseller) == 0) {
 				}
 			}
 		}
-		$color = "green"; $displayforinstance = "";
+		$color = "#4DB3A2"; $displayforinstance = "";
 		if ($statuslabel == 'processing') { $color = 'orange'; }
 		if ($statuslabel == 'suspended') { $color = 'orange'; }
 		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
