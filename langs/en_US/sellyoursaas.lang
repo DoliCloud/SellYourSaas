@@ -794,4 +794,6 @@ OptionYourCustomDomainNameStep2=Step 2: Add an entry in your DNS provider setup 
 OptionYourWebsite=Enable a website
 OptionYourWebsiteDesc=You can activate here a public website built using the Dolibarr website CMS
 OptionYourWebsiteStep1=Choose the website to publish on internet and click on <b>%s</b>
-IWantToTest=I want to test 
+IWantToTest=I want to test
+OptionCondition=Condition to see option
+HelpOnOptionCondition=Enter the condtion to have the option visilbe into customer dashboard. Example: 1=always visible. 0=Never visible
