@@ -33,7 +33,6 @@ $forcesubdomain = GETPOST('forcesubdomain', 'alpha');
 
 $arrayofplans=array();
 $arrayofplansfull=array();
-$arrayofoptions=array();
 $arrayofoptionsfull=array();
 
 // List of available plans/products
@@ -161,36 +160,36 @@ if ($resqloptions) {
 
 			$label = $obj->label;
 
-			$priceinstance=array();
-			$priceinstance_ttc=array();
+			$priceoption=array();
+			$priceoption_ttc=array();
 
-			$priceinstance['fix'] = $obj->price;
-			$priceinstance_ttc['fix'] = $obj->price_ttc;
-			$priceinstance['user'] = 0;
-			$priceinstance_ttc['user'] = 0;
+			$priceoption['fix'] = $obj->price;
+			$priceoption_ttc['fix'] = $obj->price_ttc;
+			$priceoption['user'] = 0;
+			$priceoption_ttc['user'] = 0;
 
 			/*
 			if (count($tmparray) > 0) {
 				foreach ($tmparray as $key => $value) {
 					$tmpprodchild->fetch($value['id']);
 					if (preg_match('/user/i', $tmpprodchild->ref) || preg_match('/user/i', $tmpprodchild->array_options['options_resource_label'])) {
-						$priceinstance['user'] += $tmpprodchild->price;
-						$priceinstance_ttc['user'] += $tmpprodchild->price_ttc;
+						$priceoption['user'] += $tmpprodchild->price;
+						$priceoption_ttc['user'] += $tmpprodchild->price_ttc;
 					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
 						// Don't add system services to global price, these are options with calculated quantities
 					} else {
-						$priceinstance['fix'] += $tmpprodchild->price;
-						$priceinstance_ttc['fix'] += $tmpprodchild->price_ttc;
+						$priceoption['fix'] += $tmpprodchild->price;
+						$priceoption_ttc['fix'] += $tmpprodchild->price_ttc;
 					}
 					//var_dump($tmpprodchild->id.' '.$tmpprodchild->array_options['options_app_or_option'].' '.$tmpprodchild->price_ttc.' -> '.$priceuser.' / '.$priceuser_ttc);
 				}
 			}
 			*/
 
-			$pricetoshow = price2num($priceinstance['fix'], 'MT');
+			$pricetoshow = price2num($priceoption['fix'], 'MT');
 			if (empty($pricetoshow)) $pricetoshow = 0;
-			$arrayofoptions[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
-
+			$labelprice = $label;
+			$labelprice .= ' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 			$tmpduration = '';
 			if ($tmpprod->duration) {
 				if ($tmpprod->duration == '1m') {
@@ -206,17 +205,18 @@ if ($resqloptions) {
 				}
 			}
 
-			if ($tmpprod->duration) $arrayofoptions[$obj->rowid].=$tmpduration;
-			if ($priceinstance['user']) {
-				$arrayofoptions[$obj->rowid].=' + '.price(price2num($priceinstance['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
-				if ($tmpprod->duration) $arrayofoptions[$obj->rowid].=$tmpduration;
+			if ($tmpprod->duration) $labelprice.=$tmpduration;
+			if ($priceoption['user']) {
+				$labelprice.=' + '.price(price2num($priceoption['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
+				if ($tmpprod->duration) $labelprice.=$tmpduration;
 			}
-			$arrayofoptions[$obj->rowid].=')';
+			$labelprice.=')';
 
 			$arrayofoptionsfull[$obj->rowid]['id'] = $obj->rowid;
 			$arrayofoptionsfull[$obj->rowid]['label'] = $arrayofoptions[$obj->rowid];
 			$arrayofoptionsfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
 			$arrayofoptionsfull[$obj->rowid]['product'] = $tmpprod;
+			$arrayofoptionsfull[$obj->rowid]['labelprice'] =($pricetoshow ? $labelprice : '');
 		}
 		$i++;
 	}
@@ -655,9 +655,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 
 		// TODO Add option from options services into databases
+
 		foreach ($arrayofoptionsfull as $key => $val) {
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd width50">';
+			print '<div class="tagtd width50 paddinright">';
 			$tmpproduct = $val['product'];
 
 			$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
@@ -675,6 +676,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<div class="tagtd valignmiddle">';
 			$label = $tmpprod->label;
 			$desc = $tmpprod->description;
+			$producturl = $tmpproduct->url;
 			if (!empty($tmpproduct->multilangs[$langs->defaultlang])) {
 				$label = $tmpproduct->multilangs[$langs->defaultlang]['label'];
 				$description = $tmpproduct->multilangs[$langs->defaultlang]['description'];
@@ -683,12 +685,20 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				$description = $tmpproduct->multilangs['en_US']['description'];
 			}
 			print $label.'<br>';
-			print '<span class="small">';
-			print $description.'<br>';
-			print '</span>';
+			if ($description) {
+				print '<span class="small">';
+				print $description.'<br>';
+				print '</span>';
+			}
+			if ($producturl) {
+				print '<a href="'.$producturl.'" target="_blank" rel="noopener">'.$langs->trans("MoreInformation").'...</a><br>';
+			}
 			// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
 			print '</div>';
-			print '<div class="tagtd valignmiddle">';
+			print '<div class="tagtd valignmiddle width100">';
+			if ($arrayofoptionsfull[$key]['labelprice']) {
+				print $arrayofoptionsfull[$key]['labelprice'].'<br>';
+			}
 			print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
 			print '</div>';
 			print '</div></div>';
