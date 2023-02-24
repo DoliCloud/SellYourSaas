@@ -213,7 +213,10 @@ a.btnalreadyanaccount {
 .font-green-sharp {
     color: #4DB3A2 !important;
 }
-
+.background-green-sharp {
+    background-color: #4DB3A2;
+    color: #fff;
+}
 .uppercase {
     text-transform: uppercase !important;
 }
@@ -610,6 +613,7 @@ absolute;filter: alpha(opacity=30);}.blog-images {margin-bottom: 0;}
 
 .blog-images li {padding: 0;margin: 0;display: inline;}.blog-images 
 li a:hover {text-decoration: none;}
+
 .blog-images li img {width: 50px;
 height: 50px;opacity: 0.6;margin: 0 2px 8px;}.blog-images li img:hover {opacity: 1;box-shadow: 0 0 0 4px #72c02c;transition: all 0.4s 
 ease-in-out 0s;-moz-transition: all 0.4s ease-in-out 0s;
@@ -662,19 +666,19 @@ text-align: left;}.number-stats .stat-right .stat-chart {float: left
 padding: 10px 0;border-bottom: 1px solid #F1F4F7;}.general-item-list 
 > .item:last-child {border-bottom: 0;}
 .general-item-list > .item > .item-head {margin-bottom: 5px;}.general-item-list > .item > .item-head:before, .general-item-list > .item > .item-head:after {
-content: " ";display: table;}.general-item-list > .item > .item-head:
-after {clear: both;}.general-item-list > .item > .item-head > .item-details {display: inline-block;float: left;}.general-item-list >
+content: " ";display: table;}
+.general-item-list > .item > .item-head:after {clear: both;}.general-item-list > .item > .item-head > .item-details {display: inline-block;float: left;}.general-item-list >
 .item > .item-head > .item-details > .item-pic {height: 35px;
 margin-right: 10px;-webkit-border-radius: 100%;-moz-border-radius: 
 100%;-ms-border-radius: 100%;-o-border-radius: 100%;border-radius: 
-100%;}.general-item-list > .item > .item-head > .item-details > .item-name {display: inline-block;margin-right: 10px;}.
-general-item-list > .item > .item-head > .item-details > .item-label 
+100%;}.general-item-list > .item > .item-head > .item-details > .item-name {display: inline-block;margin-right: 10px;}
+.general-item-list > .item > .item-head > .item-details > .item-label 
 {color: #C0C9CC;}.general-item-list > .item > .item-head > .item-status {color: #C0C9CC;top: 10px;position: relative;display: 
 inline-block;float: right;}.general-item-list > .item > .item-head > 
 .item-status > .badge {margin-top: -2px;}.general-item-list > .item >
 .item-body {color: #96a5aa;}.file-drop-zone {border: 2px dashed #ddd
-;padding: 30px;text-align: center;}.file-drop-zone.
-file-drop-zone-over {border-color: #aaa;}[class^="fa-"],[class^=
+;padding: 30px;text-align: center;}
+.file-drop-zone.file-drop-zone-over {border-color: #aaa;}[class^="fa-"],[class^=
 "glyphicon-"],[class^="icon-"],[class*=" fa-"],[class*=" glyphicon-"
 ],[class*=" icon-"] {display: inline-block;margin-top: 1px;font-size:
 14px;
