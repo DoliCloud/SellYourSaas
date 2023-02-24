@@ -726,7 +726,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('separatorproduct',          "SELLYOURSAAS_NAME", 'separate',   100,     '',  'product', 0, 1, '',   $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('app'=>'Application','system'=>'System','option'=>'Option'));
 		$resultx=$extrafields->addExtraField('app_or_option',                   "AppOrOption",   'select',   110,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnAppOrOption',         '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('option_condition',            "OptionCondition",  'varchar',   255,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnOptionCondition',     '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('option_condition',            "OptionCondition",  'varchar',   111,  '200',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnOptionCondition',     '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('availabelforresellers', "AvailableForResellers",  'boolean',   111,     '',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('Packages:sellyoursaas/class/packages.class.php'=>null));
 		$resultx=$extrafields->addExtraField('package', 	        	            "Package",     'link',   111,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'IfSomethingMustBeDeployed', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');

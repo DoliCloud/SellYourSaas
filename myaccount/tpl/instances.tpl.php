@@ -658,8 +658,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$tmpproduct = $val['product'];
 
 			$conditionok = 0;
-			if (isset($tmpproduct['array_options']['option_condition']) && $tmpproduct['array_options']['option_condition'] != '') {
-				$contitionok = 1;
+			if (isset($tmpproduct->array_options['option_condition']) && $tmpproduct->array_options['option_condition'] != '') {
+				$conditionok = 1;
 				// There is a condition to show the option, we check it
 			}
 
