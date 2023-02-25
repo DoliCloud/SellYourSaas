@@ -232,7 +232,8 @@ while (!feof($handle)) {
 
 
 	if (!empty($smtpportcalled) && !empty($smtpipcalled)) {
-		$command = "ss -e -H -p -t state all '( dport = $smtpportcalled ') dst [$smtpipcalled] ";
+		// -H option available only on recent ubuntu
+		$command = "ss -e -H -p -t state all '( dport = $smtpportcalled )' dst [$smtpipcalled] ";
 		if (!empty($smtpportcaller)) {
 			$command = "ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled )' dst [$smtpipcalled]";
 		}

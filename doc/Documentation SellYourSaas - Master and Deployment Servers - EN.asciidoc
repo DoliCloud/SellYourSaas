@@ -925,7 +925,7 @@ NFS sharing will allow the *Deployment* servers to recover the application image
 
 ==== On the Master server
 
-Install the NFS server and share on */home/admin/wwwroot/dolibarr_documents/sellyoursaas*
+Install the NFS server and sharing on */home/admin/wwwroot/dolibarr_documents/sellyoursaas*
 
 [source, bash]
 ---------------
@@ -1009,7 +1009,7 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 and try the automatic mount
- 
+
 [source, bash]
 ---------------
 mount -a
