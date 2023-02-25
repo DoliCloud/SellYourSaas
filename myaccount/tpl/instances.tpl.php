@@ -921,10 +921,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 							<!-- tab ssh/sftp -->
 				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
-				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
-                                ';
+				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc");
+		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
+			// Show message "To connect, you will need the following information:"
+			print '<br>'.$langs->trans("SSHFTPDesc2").' :';
+		}
+								print '</p>';
 
-		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
+		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
 			$ssh_server_port = (!empty($contract->array_options['options_port_os']) ? $contract->array_options['options_port_os'] : (empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? 22 : $conf->global->SELLYOURSAAS_SSH_SERVER_PORT));
 			print '
     				                <form class="form-horizontal" role="form">
@@ -973,7 +977,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
-				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'</p>';
 			} else {
 				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
 			}
