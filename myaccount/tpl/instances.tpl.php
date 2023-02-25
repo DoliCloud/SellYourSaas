@@ -988,7 +988,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 							  <!-- tab db -->
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
-				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc").' :</p>
+				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc");
+		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
+			// Show message "To connect, you will need the following information:"
+			print '<br>'.$langs->trans("DBDesc2").' :';
+		}
+								print '</p>
                                 ';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
@@ -1070,7 +1075,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
-				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+				print '<p class="opacitymedium" style="padding: 15px">'.img_warning('default', '', 'pictowarning pictofixedwidth').$langs->trans("SorryFeatureNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'...</p>';
 			} else {
 				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
 			}
