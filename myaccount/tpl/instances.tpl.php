@@ -977,7 +977,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
-				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'</p>';
+				print '<p class="opacitymedium" style="padding: 15px">'.img_warning('default', '', 'pictowarning pictofixedwidth').$langs->trans("SorryFeatureNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'</p>';
 			} else {
 				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
 			}
