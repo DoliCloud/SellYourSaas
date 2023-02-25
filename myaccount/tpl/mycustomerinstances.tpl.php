@@ -406,7 +406,7 @@ if (count($listofcontractidreseller) == 0) {
 
 		// Show the current Plan (with link to change it)
 		print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
-		if ($action == 'changeplan' && $planid > 0 && $id == GETPOST('id', 'int')) {
+		if (1 == 2 && $initialaction == 'changeplan' && $planid > 0 && $id == GETPOST('id', 'int')) {
 			print '<input type="hidden" name="mode" value="instances"/>';
 			print '<input type="hidden" name="action" value="updateplan" />';
 			print '<input type="hidden" name="contractid" value="'.$contract->id.'" />';
@@ -420,6 +420,7 @@ if (count($listofcontractidreseller) == 0) {
 			$sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 			$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
+			$sqlproducts.= " AND pe.availabelforresellers > 0";		// available in dashboard (customers + resellers)
 			$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
 			$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
 			$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
