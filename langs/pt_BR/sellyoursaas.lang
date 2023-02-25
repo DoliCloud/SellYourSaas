@@ -7,10 +7,8 @@ DeploymentDate=Data de implantação
 SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT=Número máximo de instâncias por padrão para novo cliente em potencial ou cliente
 PleaseReadFAQFirst=Antes de enviar qualquer ticket de suporte, verifique se a resposta ainda não está disponível aqui: <br> <br> <center> <a href="%s" target="_faq"> FAQs (Perguntas Frequentes) </a> </center>
 RecreateAuthorizedKey=Criar arquivo allowed_keys
-InstanceInMaintenanceMode=Instance is in maintenance mode !<br>Use a browser with value '<b>%s</b>' into its User-Agent string to bypass it.
 DeploymentIPQuality=Índice de qualidade de IP
 DeploymentIPQualityDesc=Quando um cadastro é feito, é feita uma verificação no IP do assinante para: <br> - http://check.getipintel.net/check.php?ip=IP&contact=&flag=f <br> e/ou <br> - https://www. ipqualityscore.com
-MyAcountDesc=Esta área é dedicada ao gerenciamento de suas assinaturas para <a href="%s" target="dolicloud"> %s </a> . Você pode criar novas instâncias de aplicativos, escolher opções, obter suas faturas de assinatura, entrar em contato com a equipe de suporte ou cancelar sua conta.
 ClosingAccountIsTemporarlyDisabledTryLater=A exclusão de instâncias existentes é suspensa temporariamente para fins de manutenção. Por favor tente mais tarde...
 SSHPublicKeyDesc=Todas as chaves públicas SSH implantadas em cada nova instância. As chaves são implantadas no arquivo .ssh/authorized_keys_support. Você pode incluir aqui o conteúdo do arquivo /home/admin/.ssh/id_rsa_sellyoursaas.pub e as chaves públicas da equipe de administradores de TI.
 CustomVirtualHostDir=Linha RequireAll de host virtual personalizado
@@ -31,6 +29,7 @@ SELLYOURSAAS_SALTFORPASSWORDENCRYPTION=Salt use para construir a chave de substi
 InstanceMoveInProgress=Sua instância está atualmente em um processo de atualização de hardware. Se você não recuperou o acesso após 1 hora, entre em contato com o suporte no painel do cliente.
 ActiveInstanceOfASpammer=Instância de um usuário malvado (hacker, spammer). Ainda não implantado.
 ConfirmMaintenance=Tem certeza de que deseja alternar esta instância para o modo de manutenção? O acesso não será possível para usuários comuns. <br> Nota: Se um navegador incluir a string <b> %s </b> em seu User-Agent, ele poderá ignorar o bloqueio de mensagem de manutenção.
+AutomigrationStep1Note=Observação para usuários avançados: Se você tiver problemas ao executar este comando (por exemplo, porque seu antigo provedor de hospedagem não permite executar o comando de backup por conta própria), você pode gerar o arquivo de backup do banco de dados de qualquer outro computador em que um software cliente MySql esteja instalado. Para isso, execute o seguinte comando:
 AutoupgradeStep1Text=Escolha a instância que deseja atualizar
 AutoupgradeStep3Text=Por favor, confirme que deseja atualizar para a última versão estável.
 MigrationSuccessNote=Aviso: Para acessar sua instância, você precisa usar o login e a senha do seu antigo Dolibarr, onde você salvou seus dados
