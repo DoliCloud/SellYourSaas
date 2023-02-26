@@ -173,7 +173,6 @@ bantime  = 86400     ; 1 day
 findtime = 86400     ; 1 day
 maxretry = 505
 
-
 [email-dol-blacklist]
 
 ; rule against email ko - blacklist ip, email or content
@@ -236,19 +235,6 @@ findtime = 86400     ; 1 day
 maxretry = 100
 
 
-[web-dol-passforgotten]
-
-; rule against call of passwordforgottenpage (for backoffice and myaccount)
-; you can disable this rule by setting enabled to false on non master servers
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulespassforgotten
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
 [web-dol-bruteforce]
 
 ; rule against bruteforce hacking (login + api)
@@ -260,6 +246,32 @@ logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
 action  = %(action_mw)s
 bantime  = 86400     ; 1 day
 findtime = 3600      ; 1 hour
+maxretry = 10
+
+[web-dol-limitpublic]
+
+; rule against DOS on public pages
+; you can disable this rule by setting enabled to false on non master servers
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulesbruteforce
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
+action  = %(action_mw)s
+bantime  = 86400     ; 1 day
+findtime = 3600      ; 1 hour
+maxretry = 200
+
+[web-dol-passforgotten]
+
+; rule against call of passwordforgottenpage (for backoffice and myaccount)
+; you can disable this rule by setting enabled to false on non master servers
+enabled = true
+port    = http,https
+filter  = web-dolibarr-rulespassforgotten
+logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
+action  = %(action_mw)s
+bantime  = 4320000   ; 50 days
+findtime = 86400     ; 1 day
 maxretry = 10
 
 [web-dol-registerinstance]
