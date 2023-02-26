@@ -4231,7 +4231,7 @@ The following explains the operations to clone a deployment server into another 
 
 Choose name of server, for example:  withX.mysaasdomainname.com
 
-Choose the snapshot or image to use and copy the content of file */scripts/post_inst_script.sh* into area *post installation script*.
+Choose the snapshot or image to use and copy the content of file */scripts/post_inst_script.sh* into area *post-installation script*.
 
 Once the server is created, double check it does have an associated IP visible in OVH dashboard. If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field "Fixed IP" empty so it is set by OVH. Reboot the server.
 
