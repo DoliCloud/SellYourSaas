@@ -163,6 +163,7 @@ chown admin.www-data $pathtospamdir/*
 
 
 # Create some links
+echo "Create links for fail2ban conf"
 cd /etc/fail2ban/filter.d
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
@@ -176,6 +177,7 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
 
 # Clean some files
+echo "Clean some files"
 if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
 	IFS=$(echo -en "\n\b")
 	echo We are on a deployment server, so we clean log files 
