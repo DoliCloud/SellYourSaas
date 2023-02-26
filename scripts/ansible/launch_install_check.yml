@@ -564,8 +564,8 @@
           Match User osu*
             PasswordAuthentication=yes
     
-  ##### Set permissions by calling perms.ksh
-- name: Call perms.ksh
+  ##### Set permissions, create some dirs and files by calling perms.ksh
+- name: Call perms.ksh to set permissions, create some dirs and files
   hosts: '{{target}}'
   become: yes
   become_method: sudo
