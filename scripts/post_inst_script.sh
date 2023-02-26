@@ -32,9 +32,21 @@ echo "Disable cron end" >>/tmp/post_inst_script.log
 echo "Stop postfix begin"
 echo "Stop postfix begin" >>/tmp/post_inst_script.log
 
-/etc/init.d/postfix stop
+/etc/init.d/postfix stop >>/tmp/post_inst_script.log
+echo result = $? >>/tmp/post_inst_script.log
 
 echo "Stop postfix end"
 echo "Stop postfix end" >>/tmp/post_inst_script.log
+
+if [ -f /etc/init.d/datadog-agent ]; then
+	echo "Stop datadog begin"
+	echo "Stop datadog begin" >>/tmp/post_inst_script.log
+	
+	/etc/init.d/datadog-agent stop >>/tmp/post_inst_script.log
+	echo result = $? >>/tmp/post_inst_script.log
+	
+	echo "Stop datadog end"
+	echo "Stop datadog end" >>/tmp/post_inst_script.log
+fi
 
 exit 0
