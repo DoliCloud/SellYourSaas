@@ -165,16 +165,36 @@ chown admin.www-data $pathtospamdir/*
 # Create some links
 echo "Create links for fail2ban conf"
 cd /etc/fail2ban/filter.d
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-accesslog-limit403.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-ruleslimitpublic.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoblacklist.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-ruleskoquota.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesko.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/email-dolibarr-rulesadmin.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-limit403.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-accesslog-limit403.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-ruleslimitpublic.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-ruleslimitpublic.conf
+fi
+if [ ! -e /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf ]; then
+	ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
+fi
 
 # Clean some files
 echo "Clean some files"
