@@ -29,4 +29,12 @@ systemctl disable cron 2>&1 >>/tmp/post_inst_script.log
 echo "Disable cron end"
 echo "Disable cron end" >>/tmp/post_inst_script.log
 
+echo "Stop postfix begin"
+echo "Stop postfix begin" >>/tmp/post_inst_script.log
+
+/etc/init.d/postfix stop
+
+echo "Stop postfix end"
+echo "Stop postfix end" >>/tmp/post_inst_script.log
+
 exit 0

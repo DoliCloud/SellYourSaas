@@ -5307,6 +5307,23 @@ Check that your security group match the following setup
 image::Example_setup_security_group_horizon.png[Example of setup of security group on horizon]
 
 
+==== Access to the console use the wrong keyboard
+
+If after logged on a console, the keyboard is not in correct language, you can try this:
+
+[source,bash]
+---------------
+loadkeys fr
+---------------
+
+You can also try 
+
+[source,bash]
+---------------
+dpkg-reconfigure keyboard-configuration
+---------------
+
+
 ==== ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
 On deployment server in */var/log/syslog* when using IMAP PHP function:
@@ -5513,20 +5530,31 @@ ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run
 Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter *--protocol tcp*.
 
 
-==== Access to the console use the wrong keyboard
+==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
 
-If after logged on a console, the keyboard is not in correct language, you can try this:
+Try to read the *max_allowed_packet* of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_allowed_packet%';
+---------------
+
+You can change this in live from mysql command tool:
 
 [source,bash]
 ---------------
-loadkeys fr
+set global net_buffer_length=100000;
+set global max_allowed_packet=100000000;
 ---------------
 
-You can also try 
+You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
 
 [source,bash]
 ---------------
-dpkg-reconfigure keyboard-configuration
+# increase net_buffer_length to 100K and max_allowed_packet to 100M to 
+# avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
+net_buffer_length=100000 
+max_allowed_packet=100000000
 ---------------
 
 
@@ -5599,34 +5627,6 @@ instances:
         
     mount_point_blacklist:
       - /run/docker/
----------------
-
-
-==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
-
-Try to read the *max_allowed_packet* of your database with:  
-
-[source,sql]
----------------
-show variables like '%max_allowed_packet%';
----------------
-
-You can change this in live from mysql command tool:
-
-[source,bash]
----------------
-set global net_buffer_length=100000;
-set global max_allowed_packet=100000000;
----------------
-
-You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
-
-[source,bash]
----------------
-# increase net_buffer_length to 100K and max_allowed_packet to 100M to 
-# avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
-net_buffer_length=100000 
-max_allowed_packet=100000000
 ---------------
 
 
