@@ -152,6 +152,7 @@ enabled  = true
 
 port     = 3306
 logpath  = /var/log/mysql/error.log
+           /var/log/syslog
 #backend  = %(mysql_backend)s
 enabled = true
 bantime  = 7200      ; 2 hours

@@ -1722,6 +1722,7 @@ enabled  = true
 
 port     = 3306
 logpath  = /var/log/mysql/error.log
+           /var/log/syslog
 #backend  = %(mysql_backend)s
 enabled = true
 bantime  = 7200      ; 2 hours
@@ -2434,11 +2435,23 @@ bind-address = 0.0.0.0
 
 Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
+
+
+Comment the line into */etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf* (if not the error log file will not be isolated into the /var/log/mysql/mysql.log file):
+
+[source,bash]
+--------------
+#skip_log_error
+--------------
+
+
+
 Restart the database server
 [source,bash]
 --------------
 /etc/init.d/mysql restart
 --------------
+
 
 
 ==== Set mysql root password
