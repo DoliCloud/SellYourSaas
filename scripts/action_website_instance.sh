@@ -215,7 +215,7 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "deploywebsite" ]]; then
 
-	export apacheconf="/etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf"
+	export apacheconf="/etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf"
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfilewebsite"
 	if [[ -s $apacheconf ]]
 	then
