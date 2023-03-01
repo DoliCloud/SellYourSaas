@@ -3006,6 +3006,64 @@ if ($action == 'updateurl') {
 			}
 		}
 	}
+} elseif ($action == 'deploywebsite') {
+	$errors = 0;
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+	$object = $listofcontractid[GETPOST('contractid', 'int')];
+	$websiteidoption = GETPOST('websiteidoption', 'int');
+	$domainnamewebsite = GETPOST('domainnamewebsite', 'alpha');
+	if (empty($websiteidoption)) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Website")), null, 'errors');
+		$errors++;
+	}
+	if (empty($domainnamewebsite)) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Domain")), null, 'errors');
+		$errors++;
+	}
+	if (!preg_match('/^(((?!\-))(xn\-\-)?[a-z0-9\-_]{0,61}[a-z0-9]{1,1}\.)*(xn\-\-)?([a-z0-9\-]{1,61}|[a-z0-9\-]{1,30})\.[a-z]{2,}$/', $domainnamewebsite)){
+		setEventMessages($langs->trans("ErrorInvalidField", $langs->transnoentitiesnoconv("Domain")), null, 'errors');
+		$errors++;
+	}
+	if (!$errors) {
+		$type_db = $conf->db->type;
+		$hostname_db  = $object->array_options['options_hostname_db'];
+		$username_db  = $object->array_options['options_username_db'];
+		$password_db  = $object->array_options['options_password_db'];
+		$database_db  = $object->array_options['options_database_db'];
+		$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+		$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+		$hostname_os  = $object->array_options['options_hostname_os'];
+		$username_os  = $object->array_options['options_username_os'];
+		$password_os  = $object->array_options['options_password_os'];
+		$username_web = $object->thirdparty->email;
+		$password_web = $object->thirdparty->array_options['options_password'];
+		
+		$tmp = explode('.', $object->ref_customer, 2);
+		$object->instance = $tmp[0];
+
+		$object->hostname_db  = $hostname_db;
+		$object->username_db  = $username_db;
+		$object->password_db  = $password_db;
+		$object->database_db  = $database_db;
+		$object->port_db      = $port_db;
+		$object->prefix_db    = $prefix_db;
+		$object->username_os  = $username_os;
+		$object->password_os  = $password_os;
+		$object->hostname_os  = $hostname_os;
+		$object->username_web = $username_web;
+		$object->password_web = $password_web;
+		
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb->prefix_db = $prefix_db;
+		include_once DOL_DOCUMENT_ROOT."/website/class/website.class.php";
+		$website = new Website($newdb);
+		$website->fetch($websiteidoption);
+
+		$object->array_options["websitename"] = $website->ref;
+		$object->array_options["domainnamewebsite"] = $domainnamewebsite;
+		$sellyoursaasutils->sellyoursaasRemoteAction("deploywebsite", $object);
+	}
+
 }
 
 

@@ -134,6 +134,8 @@ export sshaccesstype=${39}
 
 # The value from the virtualhost of website (with of without www., we remove it)
 export CUSTOMDOMAIN=${46/www./ }
+# The website name in document dir
+export WEBSITENAME=${47}
 
 
 
@@ -223,6 +225,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 
 	echo "cat $vhostfilewebsite | sed -e 's/__webSiteDomain__/www.$CUSTOMDOMAIN/g' | \
 			  sed -e 's/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g' | \
+			  sed -e 's/__webSiteName__/$WEBSITENAME/g' | \
 			  sed -e 's/__webAppLogName__/$CUSTOMDOMAIN/g' | \
               sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
               sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
@@ -241,6 +244,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfilewebsite | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+			  sed -e "s/__webSiteName__/$WEBSITENAME/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
               sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
               sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
