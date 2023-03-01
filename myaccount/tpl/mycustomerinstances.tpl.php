@@ -132,7 +132,7 @@ if (count($listofcontractidreseller) == 0) {
 				}
 			}
 		}
-		$color = "green"; $displayforinstance = "";
+		$color = "#4DB3A2"; $displayforinstance = "";
 		if ($statuslabel == 'processing') { $color = 'orange'; }
 		if ($statuslabel == 'suspended') { $color = 'orange'; }
 		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
@@ -406,7 +406,7 @@ if (count($listofcontractidreseller) == 0) {
 
 		// Show the current Plan (with link to change it)
 		print '<span class="caption-helper"><span class="opacitymedium">'.$langs->trans("YourSubscriptionPlan").' : </span>';
-		if ($action == 'changeplan' && $planid > 0 && $id == GETPOST('id', 'int')) {
+		if (1 == 2 && $initialaction == 'changeplan' && $planid > 0 && $id == GETPOST('id', 'int')) {
 			print '<input type="hidden" name="mode" value="instances"/>';
 			print '<input type="hidden" name="action" value="updateplan" />';
 			print '<input type="hidden" name="contractid" value="'.$contract->id.'" />';
@@ -420,6 +420,7 @@ if (count($listofcontractidreseller) == 0) {
 			$sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
 			$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
+			$sqlproducts.= " AND pe.availabelforresellers > 0";		// available in dashboard (customers + resellers)
 			$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
 			$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
 			$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
@@ -557,8 +558,12 @@ if (count($listofcontractidreseller) == 0) {
     								  </div>
     				              </div>
                             <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
-                            <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc").' :</p>
-                            ';
+				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc");
+		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
+			// Show message "To connect, you will need the following information:"
+			print '<br>'.$langs->trans("SSHFTPDesc2").' :';
+		}
+								print '</p>';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
 			$ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
@@ -598,9 +603,9 @@ if (count($listofcontractidreseller) == 0) {
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
-								print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+				print '<p class="opacitymedium" style="padding: 15px">'.img_warning('default', '', 'pictowarning pictofixedwidth').$langs->trans("SorryFeatureNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'...</p>';
 			} else {
-									print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
+				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
 			}
 		}
 
@@ -608,7 +613,12 @@ if (count($listofcontractidreseller) == 0) {
 				              </div> <!-- END TAB SSH PANE -->
 
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
-				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc").' :</p>
+				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc");
+		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
+			// Show message "To connect, you will need the following information:"
+			print '<br>'.$langs->trans("DBDesc2").' :';
+		}
+								print '</p>
                                 ';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
@@ -669,7 +679,7 @@ if (count($listofcontractidreseller) == 0) {
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
-				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableDuringTestPeriod").'</p>';
+				print '<p class="opacitymedium" style="padding: 15px">'.img_warning('default', '', 'pictowarning pictofixedwidth').$langs->trans("SorryFeatureNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'...</p>';
 			} else {
 				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
 			}

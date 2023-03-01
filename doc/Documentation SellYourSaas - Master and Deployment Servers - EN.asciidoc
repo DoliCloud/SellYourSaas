@@ -925,7 +925,7 @@ NFS sharing will allow the *Deployment* servers to recover the application image
 
 ==== On the Master server
 
-Install the NFS server and share on */home/admin/wwwroot/dolibarr_documents/sellyoursaas*
+Install the NFS server and sharing on */home/admin/wwwroot/dolibarr_documents/sellyoursaas*
 
 [source, bash]
 ---------------
@@ -1009,7 +1009,7 @@ i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admi
 ---------------
 
 and try the automatic mount
- 
+
 [source, bash]
 ---------------
 mount -a
@@ -1722,6 +1722,7 @@ enabled  = true
 
 port     = 3306
 logpath  = /var/log/mysql/error.log
+           /var/log/syslog
 #backend  = %(mysql_backend)s
 enabled = true
 bantime  = 7200      ; 2 hours
@@ -2434,11 +2435,23 @@ bind-address = 0.0.0.0
 
 Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
+
+
+Comment the line into */etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf* (if not the error log file will not be isolated into the /var/log/mysql/mysql.log file):
+
+[source,bash]
+--------------
+#skip_log_error
+--------------
+
+
+
 Restart the database server
 [source,bash]
 --------------
 /etc/init.d/mysql restart
 --------------
+
 
 
 ==== Set mysql root password
@@ -4231,7 +4244,7 @@ The following explains the operations to clone a deployment server into another 
 
 Choose name of server, for example:  withX.mysaasdomainname.com
 
-Choose the snapshot or image to use and copy the content of file */scripts/post_inst_script.sh* into area *post installation script*.
+Choose the snapshot or image to use and copy the content of file */scripts/post_inst_script.sh* into area *post-installation script*.
 
 Once the server is created, double check it does have an associated IP visible in OVH dashboard. If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field "Fixed IP" empty so it is set by OVH. Reboot the server.
 
@@ -5307,6 +5320,23 @@ Check that your security group match the following setup
 image::Example_setup_security_group_horizon.png[Example of setup of security group on horizon]
 
 
+==== Access to the console use the wrong keyboard
+
+If after logged on a console, the keyboard is not in correct language, you can try this:
+
+[source,bash]
+---------------
+loadkeys fr
+---------------
+
+You can also try 
+
+[source,bash]
+---------------
+dpkg-reconfigure keyboard-configuration
+---------------
+
+
 ==== ERROR "IMAP toolkit crash: unselectable socket in ssl_getdata()"
 
 On deployment server in */var/log/syslog* when using IMAP PHP function:
@@ -5513,20 +5543,31 @@ ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run
 Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter *--protocol tcp*.
 
 
-==== Access to the console use the wrong keyboard
+==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
 
-If after logged on a console, the keyboard is not in correct language, you can try this:
+Try to read the *max_allowed_packet* of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_allowed_packet%';
+---------------
+
+You can change this in live from mysql command tool:
 
 [source,bash]
 ---------------
-loadkeys fr
+set global net_buffer_length=100000;
+set global max_allowed_packet=100000000;
 ---------------
 
-You can also try 
+You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
 
 [source,bash]
 ---------------
-dpkg-reconfigure keyboard-configuration
+# increase net_buffer_length to 100K and max_allowed_packet to 100M to 
+# avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
+net_buffer_length=100000 
+max_allowed_packet=100000000
 ---------------
 
 
@@ -5599,34 +5640,6 @@ instances:
         
     mount_point_blacklist:
       - /run/docker/
----------------
-
-
-==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
-
-Try to read the *max_allowed_packet* of your database with:  
-
-[source,sql]
----------------
-show variables like '%max_allowed_packet%';
----------------
-
-You can change this in live from mysql command tool:
-
-[source,bash]
----------------
-set global net_buffer_length=100000;
-set global max_allowed_packet=100000000;
----------------
-
-You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
-
-[source,bash]
----------------
-# increase net_buffer_length to 100K and max_allowed_packet to 100M to 
-# avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
-net_buffer_length=100000 
-max_allowed_packet=100000000
 ---------------
 
 

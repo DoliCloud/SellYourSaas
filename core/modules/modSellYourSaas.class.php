@@ -726,6 +726,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('separatorproduct',          "SELLYOURSAAS_NAME", 'separate',   100,     '',  'product', 0, 1, '',   $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('app'=>'Application','system'=>'System','option'=>'Option'));
 		$resultx=$extrafields->addExtraField('app_or_option',                   "AppOrOption",   'select',   110,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnAppOrOption',         '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('option_condition',            "OptionCondition",  'varchar',   111,  '200',  'product', 0, 0,   '', $param, 1, '',  1, 'HelpOnOptionCondition',     '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('availabelforresellers', "AvailableForResellers",  'boolean',   111,     '',  'product', 0, 0,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('Packages:sellyoursaas/class/packages.class.php'=>null));
 		$resultx=$extrafields->addExtraField('package', 	        	            "Package",     'link',   111,     '',  'product', 0, 0,   '', $param, 1, '',  1, 'IfSomethingMustBeDeployed', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
@@ -835,7 +836,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('cookieregister_previous_instance', "RegistrationPreviousInstance", 'varchar', 171, '128',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('discountcode', 	    	 			             "DiscountCode", 'varchar', 200, '255',    'contrat', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('suspendmaintenance_message', 		          "Maintenance message", 'varchar', 210, '255',    'contrat', 0, 0,  '',      '', 1, '', -2, '', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('commentonqty', 	    	                         "CommentOnQty",  'text',   220, '8192',   'contrat', 0, 0,  '',      '', 1, '',  1, 'CommentOnQtyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 0, 0, array('csslist'=>'tdoverflowmax150'));
+		$resultx=$extrafields->addExtraField('commentonqty', 	    	                         "CommentOnQty",  'text',   220, '8192',   'contrat', 0, 0,  '',      '', 1, '', -1, 'CommentOnQtyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled', 0, 0, array('csslist'=>'tdoverflowmax150'));
 		$resultx=$extrafields->addExtraField('spammer',                                              "EvilUser", 'varchar', 300,   '8',    'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('reasonundeploy',                                "ReasonUninstall", 'varchar', 300,  '255',   'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('commentundeploy',                            "CommentOfUninstall", 'text',    300, '8192',   'contrat', 0, 0,  '',      '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
@@ -850,7 +851,7 @@ class modSellYourSaas extends DolibarrModules
 
 		// Invoice rec
 		$resultx=$extrafields->addExtraField('discountcode', 	    	     "DiscountCode",  'varchar',  200,  '255', 'facture_rec', 0, 0,  '',      '', 1, '',  1, 'DiscountCodeDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('commentonqty', 	    	     "CommentOnQty",  'text',     220, '8192', 'facture_rec', 0, 0,  '',      '', 1, '',  1, 'CommentOnQtyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('commentonqty', 	    	     "CommentOnQty",  'text',     220, '8192', 'facture_rec', 0, 0,  '',      '', 1, '', -1, 'CommentOnQtyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 
 		// Users
 		$resultx=$extrafields->addExtraField('rsapublicmain', 	    	     "PublicRSAKey",  'text',     100,    '2000', 'user', 0, 0,  '',      '', 1, '',  1, 'PublicRSAKeyDesc', '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
