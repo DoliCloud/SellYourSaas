@@ -3061,7 +3061,17 @@ if ($action == 'updateurl') {
 
 		$object->array_options["websitename"] = $website->ref;
 		$object->array_options["domainnamewebsite"] = $domainnamewebsite;
-		$sellyoursaasutils->sellyoursaasRemoteAction("deploywebsite", $object);
+		//$result = $sellyoursaasutils->sellyoursaasRemoteAction("deploywebsite", $object);
+		$result = -1;
+		if ($result > 0) {
+			# TODO: Update FacturRec && Contrat
+		} else {
+			setEventMessages($langs->trans("ErrorDeployWebsite"), null, 'errors');
+			$errors ++;
+		}
+		if ($errors) {
+			header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
+		}
 	}
 
 }

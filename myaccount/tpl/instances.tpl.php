@@ -610,7 +610,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		// Add here the Option panel (hidden by default)
 
-		print '<div id="optionpanel_'.$keyline.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" ? '' :'hidden').'">';
+		print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' :'hidden').'">';
 		print '<br>';
 		print '<div class="areaforresources sectionresources">';
 		print '<br>';
