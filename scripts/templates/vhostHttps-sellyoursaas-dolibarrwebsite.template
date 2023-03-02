@@ -8,9 +8,9 @@
         # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
         php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__osUserPath__/:/usr/local/bin/:/dev/urandom
 
-        ServerName __WebSiteDomain__
+        ServerName __webSiteDomain__
         ServerAdmin __webAdminEmail__
-        ServerAlias __WebSiteAlias__
+        ServerAlias __webSiteAlias__
         DocumentRoot __osUserPath__/documents/website/__webSiteNamePath__
 
         AddDefaultCharset UTF-8
@@ -79,7 +79,7 @@
         #RewriteCond %{HTTP_HOST} ^public\. [NC]
         #RewriteRule "(.*)$" "https://testldr4.with4.dolicloud.com/$1" [P]
         
-		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.crt">
+		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__.crt">
 	        #   SSL Engine Switch:
 	        #   Enable/Disable SSL for this virtual host.
 	        SSLEngine on
@@ -92,10 +92,10 @@
 	        # The leading slash is made optional so that this will work either in httpd.conf
 	        # or .htaccess context
 	
-	        SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.crt
-	        SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__.key
-	        SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__-intermediate.crt
-	        SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__WebSiteDomain__-intermediate.crt
+	        SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__.crt
+	        SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__.key
+	        SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__-intermediate.crt
+	        SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__-intermediate.crt
         </IfFile>
 
 </VirtualHost>
