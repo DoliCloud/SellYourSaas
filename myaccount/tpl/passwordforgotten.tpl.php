@@ -220,7 +220,7 @@ if ($message) {
 	print $message;
 	print '</font>';
 	?>
-	</div><br>
+	</div><br><br>
 	<?php
 }
 ?>
