@@ -10,7 +10,7 @@
 
         ServerName __webSiteDomain__
         ServerAdmin __webAdminEmail__
-        ServerAlias __webSiteAlias__
+        ServerAlias __webSiteAliases__
         DocumentRoot __osUserPath__/documents/website/__webSiteNamePath__
 
         AddDefaultCharset UTF-8
