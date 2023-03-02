@@ -205,6 +205,7 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 </div> <!-- end div login-line1 -->
 
 
+<br>
 <div id="login_line2" style="clear: both">
 
 <?php
