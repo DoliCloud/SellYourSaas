@@ -810,12 +810,12 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 	print '
     		<div class="horizontal-fld clearboth margintoponly">
     		<div class="control-group required">
-    		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" maxlength="128" required />
+    		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" spellcheck="false" autocapitalize="off" />
     		</div>
     		</div>
     		<div class="horizontal-fld margintoponly">
     		<div class="control-group required">
-    		<label class="control-label" for="password2" trans="1">'.$langs->trans("PasswordRetype").'</label><input name="password2" type="password" maxlength="128" required />
+    		<label class="control-label" for="password2" trans="1">'.$langs->trans("PasswordRetype").'</label><input name="password2" type="password" minlength="8" maxlength="128" autocomplete="new-password" spellcheck="false" autocapitalize="off" />
     		</div>
     		</div>
     		</div> <!-- end group -->
