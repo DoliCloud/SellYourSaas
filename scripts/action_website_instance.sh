@@ -242,9 +242,9 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
-	cat $vhostfilewebsite | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
-			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
-			  sed -e "s/__webSiteName__/$WEBSITENAME/g" | \
+	cat $vhostfilewebsite | sed -e "s/__webSiteDomain__/$CUSTOMDOMAIN/g" | \
+			  sed -e "s/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g" | \
+			  sed -e "s/__webSiteNamePath__/$WEBSITENAME/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
               sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
               sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
