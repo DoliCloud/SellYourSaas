@@ -186,8 +186,12 @@ if (empty($reshook)) {
 			$thirdparty = new Societe($db);
 			$result = $thirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $username);
 
+			// The message to show if user found or not.
+			$messagegenericresult = '<div class="warning">'.$langs->trans("IfEmailExistPasswordRequestSent").'</div>';
+
 			if ($result <= 0) {
-				$message = '<div class="error">'.$langs->trans("ErrorLoginDoesNotExists", $username).'</div>';
+				usleep(50000);	// Wait 50ms to have a similar delay when user not found and found
+				$message = $messagegenericresult;
 				$username='';
 			} else {
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
@@ -232,7 +236,7 @@ if (empty($reshook)) {
 					$newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_MAIN_EMAIL, $mesg, array(), array(), array(), '', '', 0, -1, '', '', $trackid, '', 'standard');
 
 					if ($newemail->sendfile() > 0) {
-						$message = '<div class="ok">'.$langs->trans("PasswordChangeRequestSent", $username, $username).'</div>';
+						$message = $messagegenericresult;
 						$username='';
 					} else {
 						$message.= '<div class="error">'.$newemail->error.'</div>';
