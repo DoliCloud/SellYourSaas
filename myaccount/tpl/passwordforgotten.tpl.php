@@ -136,7 +136,7 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 	<?php
 	if (empty($asknewpass)) {
 		?>
-	<input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-field input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  autofocus="autofocus" />
+	<input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-field input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  required autofocus="autofocus" />
 	<br><br>
 		<?php
 	} else {
