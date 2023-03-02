@@ -19,6 +19,7 @@
 // $title
 // $urllogo
 // $focus_element
+// $message
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
@@ -107,7 +108,7 @@ $(document).ready(function () {
 <div id="login_right">
 
 <?php
-if (! preg_match('/class="ok"/', $message)) {
+if (! preg_match('/class="(ok|warning)"/', $message)) {
 	?>
 <table class="center">
 <!-- Login -->
@@ -196,6 +197,7 @@ if ($message) {
 	<div class="center">
 	<?php
 	if (preg_match('/class="ok"/', $message)) print '<font class="ok">';
+	elseif (preg_match('/class="warning"/', $message)) print '<font class="warning">';
 	else print '<font class="error">';
 	print $message;
 	print '</font>';
@@ -209,7 +211,7 @@ if ($message) {
 <div class="form-actions center">
 
 <?php
-if (empty($asknewpass) && ! preg_match('/class="ok"/', $message)) {
+if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 	?>
 <!-- Button SendNewPassword -->
 <input type="submit" class="btn btn-primary" name="password" value="&nbsp; <?php echo $langs->trans('SendNewPasswordLink'); ?> &nbsp;" tabindex="4" />
@@ -252,7 +254,7 @@ if (empty($asknewpass) && ! preg_match('/class="ok"/', $message)) {
 <?php if ($mode == 'dolibarr' || ! $disabled) { ?>
 	<span class="passwordmessagedesc opacitymedium">
 	<?php
-	if (empty($asknewpass) && ! preg_match('/class="ok"/', $message)) {
+	if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 		echo $langs->trans('SendNewPasswordDesc');
 	}
 	?>
