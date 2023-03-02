@@ -1301,18 +1301,7 @@ if ($reusecontractid) {
 
 
 // -----------------------------------------------------------------------------------------------------------------------
-// Create unix user and directories, DNS, virtual host and database
-//
-// With old method:
-// Check the user www-data is allowed to "sudo /usr/bin/create_test_instance.sh"
-// If you get error "sudo: PERM_ROOT: setresuid(0, -1, -1): Operation not permitted", check module mpm_itk
-//<IfModule mpm_itk_module>
-//LimitUIDRange 0 5000
-//LimitGIDRange 0 5000
-//</IfModule>
-// If you get error "sudo: sorry, you must have a tty to run sudo", disable key "Defaults requiretty" from /etc/sudoers
-//
-// With new method, call the deploy server
+// Create unix user and directories, DNS, virtual host and databaseby calling the remote action to deploy
 // -----------------------------------------------------------------------------------------------------------------------
 
 if (! $error && $productref != 'none') {
