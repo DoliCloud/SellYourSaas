@@ -266,8 +266,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
 
 	#echo Enable conf with a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
 	#a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
-	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
-	ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
+	ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 	
 fi
 
