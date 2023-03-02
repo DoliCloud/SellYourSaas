@@ -98,6 +98,23 @@ $(document).ready(function () {
 
 		<header class="inverse">
 		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
+
+<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo empty($conf->global->MAIN_LOGIN_BACKGROUND)?'':' backgroundsemitransparent'; ?>">
+<?php if ($mode == 'dolibarr' || ! $disabled) { ?>
+	<span class="passwordmessagedesc opacitymedium">
+	<?php
+	if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
+		echo $langs->trans('SendNewPasswordDesc');
+	}
+	?>
+	</span>
+<?php } else { ?>
+	<div class="warning" align="center">
+	<?php echo $langs->trans('AuthenticationDoesNotAllowSendNewPassword', $mode); ?>
+	</div>
+<?php } ?>
+</div>
+
 		</header>
 
 
@@ -196,8 +213,8 @@ if ($message) {
 	?>
 	<div class="center">
 	<?php
-	if (preg_match('/class="ok"/', $message)) print '<font class="ok">';
-	elseif (preg_match('/class="warning"/', $message)) print '<font class="warning">';
+	if (preg_match('/class="ok"/', $message)) print '<br><font class="ok">';
+	elseif (preg_match('/class="warning"/', $message)) print '<br><font class="warning">';
 	else print '<font class="error">';
 	print $message;
 	print '</font>';
@@ -249,22 +266,6 @@ if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 </form>
 
 <br>
-
-<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo empty($conf->global->MAIN_LOGIN_BACKGROUND)?'':' backgroundsemitransparent'; ?>" style="max-width: 70%">
-<?php if ($mode == 'dolibarr' || ! $disabled) { ?>
-	<span class="passwordmessagedesc opacitymedium">
-	<?php
-	if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
-		echo $langs->trans('SendNewPasswordDesc');
-	}
-	?>
-	</span>
-<?php } else { ?>
-	<div class="warning" align="center">
-	<?php echo $langs->trans('AuthenticationDoesNotAllowSendNewPassword', $mode); ?>
-	</div>
-<?php } ?>
-</div>
 <br>
 
 <!-- authentication mode = <?php echo $main_authentication ?> -->
