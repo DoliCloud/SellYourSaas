@@ -104,7 +104,7 @@ $(document).ready(function () {
 	<span class="passwordmessagedesc opacitymedium">
 	<?php
 	if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
-		echo $langs->trans('SendNewPasswordDesc');
+		echo str_replace('<br>', ' ', $langs->trans('SendNewPasswordDesc'));
 	}
 	?>
 	</span>
@@ -231,17 +231,17 @@ if ($message) {
 if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 	?>
 <!-- Button SendNewPassword -->
-<input type="submit" class="btn btn-primary" name="password" value="&nbsp; <?php echo $langs->trans('SendNewPasswordLink'); ?> &nbsp;" tabindex="4" />
+<input type="submit" style="margin-top: 8px;" class="btn btn-primary" name="password" value="&nbsp; <?php echo $langs->trans('SendNewPasswordLink'); ?> &nbsp;" tabindex="4" />
 	<?php
 } elseif (! empty($asknewpass) && $asknewpass == 1) {
 	?>
 <!-- Button ConfirmReset -->
-<input type="submit" class="btn btn-primary" name="confirmpasswordreset" value="&nbsp; <?php echo $langs->trans('ConfirmPasswordReset'); ?> &nbsp;" tabindex="4" />
+<input type="submit" style="margin-top: 8px;" class="btn btn-primary" name="confirmpasswordreset" value="&nbsp; <?php echo $langs->trans('ConfirmPasswordReset'); ?> &nbsp;" tabindex="4" />
 	<?php
 }
 ?>
 
-<div align="center" style="margin-top: 8px;">
+<div align="center" style="margin-top: 8px; margin-bottom: 8px;"">
 	<?php
 	$moreparam='';
 	if (! empty($conf->dol_hide_topmenu))   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
