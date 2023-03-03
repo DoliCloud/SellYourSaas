@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2011 Laurent Destailleur         <eldy@users.sourceforge.net>
+/* Copyright (C) 2011-2023 Laurent Destailleur         <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 /**
  *	\file			htdocs/sellyoursaas/core/substitutions/functions_sellyoursaas.lib.php
  *	\brief			A set of functions for Dolibarr
- *					This file contains functions for plugin sellyoursaas.
+ *					This file contains the functions for substitions of the plugin sellyoursaas.
  */
 
 
