@@ -167,7 +167,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
 		// Replace url inside var $substitutionarray['__ONLINE_PAYMENT_URL__'] to use options_domain_registration_page instead of SELLYOURSAAS_MAIN_DOMAIN_NAME
 		// A common value looks like  https://admin.mysellyoursaasdomain.com/public/payment/newpayment.php?source=invoice&ref=XXXX&securekey=zzzzzzz
-		$newsubstiturl = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], (empty($substitutionarray['__ONLINE_PAYMENT_URL__']) ? '' : $substitutionarray['__ONLINE_PAYMENT_URL__']));
+		$newsubstiturl = preg_replace('/'.preg_quote($savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME, '/').'/', $tmpobject->array_options['options_domain_registration_page'], (empty($substitutionarray['__ONLINE_PAYMENT_URL__']) ? '' : $substitutionarray['__ONLINE_PAYMENT_URL__']));
 		dol_syslog("newsubstiturl = ".$newsubstiturl);
 		$substitutionarray['__ONLINE_PAYMENT_URL__'] = $newsubstiturl;
 
