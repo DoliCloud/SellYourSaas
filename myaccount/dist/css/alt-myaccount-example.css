@@ -52,8 +52,10 @@ form#formregister {
 .customregisterheader > h1{
     margin: auto;
     margin-top: 7px;
+    margin-bottom: 7px !important;
     padding-left: 100px;
-    padding-top: 10px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
 }
 .defaultheader{
 	display:none;
