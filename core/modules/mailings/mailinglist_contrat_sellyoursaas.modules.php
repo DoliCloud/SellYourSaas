@@ -76,7 +76,7 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		$s .= '<br>';
 
 		$s .= img_picto('', 'product');
-		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
+		$s .= $form->select_produits(GETPOST('contract_sellyoursaas_productid', 'int'), 'contract_sellyoursaas_productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 		$s .= '<br>';
 
 		$s .= '<input value="'.GETPOST('contractpricetotal', 'int').'" name="contractpricetotal" class="width100 right marginrightonly" placeholder="'.$langs->trans("UnitPriceOfLine").'">';
@@ -115,7 +115,7 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		$cibles = array();
 		$j = 0;
 
-		$productid = GETPOST('productid', 'int');
+		$productid = GETPOST('contract_sellyoursaas_productid', 'int');
 		$contractpricetotal = price2num(GETPOST('contractpricetotal'));
 		$quantityproduct = price2num(GETPOST('quantityproduct'));
 		$discountproduct = price2num(GETPOST('discountproduct'));
