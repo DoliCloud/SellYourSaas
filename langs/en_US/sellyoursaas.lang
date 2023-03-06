@@ -800,3 +800,4 @@ IWantToTest=I want to test
 OptionCondition=Condition to see option
 HelpOnOptionCondition=Enter the condtion to have the option visilbe into customer dashboard. Example: 1=always visible. 0=Never visible
 NewEmailToConfirm=New email to confirm
+UnitPriceOfLine=Unit price of line
