@@ -59,10 +59,9 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 		$s .= '<br>';
 
-		$s .= $langs->trans("Price").': ';
-		$s .= '<input value="'.GETPOST('contractpricetotal', 'int').'" name="contractpricetotal">&nbsp;';
-		$s .= $langs->trans("Quantity").': ';
-		$s .= '<input value="'.GETPOST('quantityproduct', 'int').'" name="quantityproduct">';
+		$s .= '<input value="'.GETPOST('contractpricetotal', 'int').'" name="contractpricetotal" class="width100 right marginrightonly" placeholder="'.$langs->trans("UnitPriceOfLine").'">';
+		$s .= '<input value="'.GETPOST('quantityproduct', 'int').'" name="quantityproduct" class="width100 right marginrightonly" placeholder="'.$langs->trans("Quantity").'">';
+		$s .= '<input value="'.GETPOST('discountproduct', 'int').'" name="discountproduct" class="width100 right marginrightonly" placeholder="'.$langs->trans("Discount").'">';
 		return $s;
 	}
 
@@ -84,7 +83,7 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 	 *  This is the main function that returns the array of emails
 	 *
 	 *  @param	int		$mailing_id    	Id of emailing
-	 *  @param	array	$filtersarray   Requete sql de selection des destinataires
+	 *  @param	array	$filtersarray   Some filter parameters to select targeted recipients
 	 *  @return int           			<0 if error, number of emails added if ok
 	 */
 	public function add_to_target($mailing_id, $filtersarray = array())
@@ -97,30 +96,40 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		$j = 0;
 
 		$productid = GETPOST('productid', 'int');
-		$contractpricetotal = GETPOST('contractpricetotal', 'int');
-		$quantityproduct = GETPOST('quantityproduct', 'int');
+		$contractpricetotal = price2num(GETPOST('contractpricetotal'));
+		$quantityproduct = price2num(GETPOST('quantityproduct'));
+		$discountproduct = price2num(GETPOST('discountproduct'));
 
 		$sql = " SELECT s.rowid as id, s.email, s.nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label";
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
-		if ($contractpricetotal > 0 || $productid > 0 || $quantityproduct > 0) {
+		if ($contractpricetotal > 0 || $productid > 0 || $quantityproduct > 0 || $discountproduct != '') {
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facture_rec as fr on fr.fk_soc = s.rowid";
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facturedet_rec as fdr on fdr.fk_facture = fr.rowid";
 		}
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
 		if ($quantityproduct > 0) {
-			$sql .= " AND fdr.qty = '".$this->db->escape($quantityproduct)."'";
+			$sql .= " AND fdr.qty = ".((float) $quantityproduct);
 		}
 		if ($productid > 0) {
-			$sql .= " AND fdr.fk_product = '".$this->db->escape($productid)."'";
+			$sql .= " AND fdr.fk_product = ".((int) $productid);
+		}
+		if ($discountproduct != '') {
+			if (empty($discountproduct)) {
+				$sql .= " AND (fdr.remise_percent IS NULL or fdr.remise_percent = 0)";
+			} else {
+				$sql .= " AND fdr.remise_percent = ".((float) $discountproduct);
+			}
 		}
 		if ($contractpricetotal > 0) {
-			$sql .= " AND fr.total_ht = '".$this->db->escape($contractpricetotal)."'";
+			$sql .= " AND fdr.subprice = ".((float) $contractpricetotal);
 		}
 
 		$sql.= " ORDER BY email";
 		//print $sql;
+
+		$this->sql = $sql;
 
 		// Stocke destinataires dans cibles
 		$result=$this->db->query($sql);

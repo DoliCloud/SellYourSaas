@@ -229,6 +229,8 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$sql.= " ORDER BY email";
 		//print $sql;
 
+		$this->sql = $sql;
+
 		// Stocke destinataires dans cibles
 		$result=$this->db->query($sql);
 		if ($result) {
