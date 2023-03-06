@@ -51,6 +51,10 @@ body.bodywebsite { margin: 0; }
 
 .navbar-brand { margin-left: 15px; }
 
+.passwordmessagedesc {
+	font-size: 0.85em;
+}
+
 .opacitymedium { opacity: 0.5; }
 .opacityhigh { opacity: 0.2; }
 /* input[type='text'],input[type='password'] { width: 250px; } */

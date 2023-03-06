@@ -19,6 +19,7 @@
 // $title
 // $urllogo
 // $focus_element
+// $message
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
@@ -97,6 +98,23 @@ $(document).ready(function () {
 
 		<header class="inverse">
 		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
+
+<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo empty($conf->global->MAIN_LOGIN_BACKGROUND)?'':' backgroundsemitransparent'; ?>">
+<?php if ($mode == 'dolibarr' || ! $disabled) { ?>
+	<span class="passwordmessagedesc opacitymedium">
+	<?php
+	if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
+		echo str_replace('<br>', ' ', $langs->trans('SendNewPasswordDesc'));
+	}
+	?>
+	</span>
+<?php } else { ?>
+	<div class="warning" align="center">
+	<?php echo $langs->trans('AuthenticationDoesNotAllowSendNewPassword', $mode); ?>
+	</div>
+<?php } ?>
+</div>
+
 		</header>
 
 
@@ -107,7 +125,7 @@ $(document).ready(function () {
 <div id="login_right">
 
 <?php
-if (! preg_match('/class="ok"/', $message)) {
+if (! preg_match('/class="(ok|warning)"/', $message)) {
 	?>
 <table class="center">
 <!-- Login -->
@@ -118,7 +136,7 @@ if (! preg_match('/class="ok"/', $message)) {
 	<?php
 	if (empty($asknewpass)) {
 		?>
-	<input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-field input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  autofocus="autofocus" />
+	<input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" <?php echo $disabled; ?> name="username" class="flat input-field input-icon-user usernamepasswordforgotten" value="<?php echo dol_escape_htmltag($username); ?>" tabindex="1"  required autofocus="autofocus" />
 	<br><br>
 		<?php
 	} else {
@@ -127,10 +145,10 @@ if (! preg_match('/class="ok"/', $message)) {
 		print '<input type="hidden" name="id" value="'.$id.'">';
 		print '<input type="hidden" name="hashreset" value="'.$hashreset.'">';
 
-		print '<input type="password" maxlength="128" id="newpassword1" placeholder="'.$langs->trans("NewPassword").'" name="newpassword1" class="flat input-icon-user" tabindex="2" autofocus="autofocus" />';
+		print '<input type="password" minlength="8" maxlength="128" id="newpassword1" placeholder="'.$langs->trans("NewPassword").'" name="newpassword1" class="flat input-icon-user" tabindex="2" required autofocus="autofocus" autocomplete="new-password" spellcheck="false" autocapitalize="off" />';
 		print '<br><br>';
 
-		print '<input type="password" maxlength="128" id="newpassword2" placeholder="'.$langs->trans("PasswordRetype").'" name="newpassword2" class="flat input-icon-user" tabindex="3" />';
+		print '<input type="password" minlength="8" maxlength="128" id="newpassword2" placeholder="'.$langs->trans("PasswordRetype").'" name="newpassword2" class="flat input-icon-user" tabindex="3" required autocomplete="new-password" spellcheck="false" autocapitalize="off" />';
 		print '<br><br>';
 	}
 	?>
@@ -187,6 +205,7 @@ if (! preg_match('/class="ok"/', $message)) {
 </div> <!-- end div login-line1 -->
 
 
+<br>
 <div id="login_line2" style="clear: both">
 
 <?php
@@ -195,12 +214,13 @@ if ($message) {
 	?>
 	<div class="center">
 	<?php
-	if (preg_match('/class="ok"/', $message)) print '<font class="ok">';
+	if (preg_match('/class="ok"/', $message)) print '<br><font class="ok">';
+	elseif (preg_match('/class="warning"/', $message)) print '<br><font class="warning">';
 	else print '<font class="error">';
 	print $message;
 	print '</font>';
 	?>
-	</div><br>
+	</div><br><br>
 	<?php
 }
 ?>
@@ -209,20 +229,20 @@ if ($message) {
 <div class="form-actions center">
 
 <?php
-if (empty($asknewpass) && ! preg_match('/class="ok"/', $message)) {
+if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 	?>
 <!-- Button SendNewPassword -->
-<input type="submit" class="btn btn-primary" name="password" value="&nbsp; <?php echo $langs->trans('SendNewPasswordLink'); ?> &nbsp;" tabindex="4" />
+<input type="submit" style="margin-top: 8px;" class="btn btn-primary" name="password" value="&nbsp; <?php echo $langs->trans('SendNewPasswordLink'); ?> &nbsp;" tabindex="4" />
 	<?php
 } elseif (! empty($asknewpass) && $asknewpass == 1) {
 	?>
 <!-- Button ConfirmReset -->
-<input type="submit" class="btn btn-primary" name="confirmpasswordreset" value="&nbsp; <?php echo $langs->trans('ConfirmPasswordReset'); ?> &nbsp;" tabindex="4" />
+<input type="submit" style="margin-top: 8px;" class="btn btn-primary" name="confirmpasswordreset" value="&nbsp; <?php echo $langs->trans('ConfirmPasswordReset'); ?> &nbsp;" tabindex="4" />
 	<?php
 }
 ?>
 
-<div align="center" style="margin-top: 8px;">
+<div align="center" style="margin-top: 8px; margin-bottom: 8px;"">
 	<?php
 	$moreparam='';
 	if (! empty($conf->dol_hide_topmenu))   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
@@ -247,22 +267,6 @@ if (empty($asknewpass) && ! preg_match('/class="ok"/', $message)) {
 </form>
 
 <br>
-
-<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo empty($conf->global->MAIN_LOGIN_BACKGROUND)?'':' backgroundsemitransparent'; ?>" style="max-width: 70%">
-<?php if ($mode == 'dolibarr' || ! $disabled) { ?>
-	<span class="passwordmessagedesc opacitymedium">
-	<?php
-	if (empty($asknewpass) && ! preg_match('/class="ok"/', $message)) {
-		echo $langs->trans('SendNewPasswordDesc');
-	}
-	?>
-	</span>
-<?php } else { ?>
-	<div class="warning" align="center">
-	<?php echo $langs->trans('AuthenticationDoesNotAllowSendNewPassword', $mode); ?>
-	</div>
-<?php } ?>
-</div>
 <br>
 
 <!-- authentication mode = <?php echo $main_authentication ?> -->

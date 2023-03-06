@@ -766,7 +766,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('lastname',                                 "LastName",  'varchar', 106,  '64', 'thirdparty', 0, 0, '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$param=array('options'=>array('auto'=>null));
 		$resultx=$extrafields->addExtraField('password',                        "DashboardPassword", 'password', 150, '128', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
-		$resultx=$extrafields->addExtraField('oldpassword',                  "OldDashboardPassword",  'varchar', 151, '128', 'thirdparty', 0, 0, '',     '', 0, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
+		$resultx=$extrafields->addExtraField('oldpassword',                  "OldDashboardPassword",  'varchar', 151, '128', 'thirdparty', 0, 0, '',     '', 0, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('pass_temp',                    "HashForPasswordReset",  'varchar', 152, '128', 'thirdparty', 0, 0, '',     '', 1, '',  0, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('email_temp',                      "NewEmailToConfirm",  'varchar', 153, '128', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
 		$resultx=$extrafields->addExtraField('flagdelsessionsbefore',      "LastPasswordChangeDate", 'datetimegmt', 155, '', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', '$conf->sellyoursaas->enabled');
