@@ -20,7 +20,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 {
 	public $name = 'mailinglist_contrat_sellyoursaas';
-	public $desc = 'Contrat of sellyoursaas';
+	public $desc = 'Prospects or Customers SellYourSaas with open recurring invoice';
 	public $require_admin = 0;
 
 	public $enabled = '$conf->sellyoursaas->enabled';
@@ -51,11 +51,31 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		global $langs; //TODO:
 		$langs->load("members");
 
-		$form=new Form($this->db);
-		$formother=new FormAdmin($this->db);
-		$s = "";
+		$form = new Form($this->db);
+		$formother = new FormAdmin($this->db);
 
-		$s .= $langs->trans("Product").': ';
+		$arraystatus=array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed');
+
+		$s = '';
+
+		$s .= $langs->trans("Language").': ';
+
+		$s .= $formother->select_language(GETPOST('contract_sellyoursaas_lang_id', 'array'), 'contract_sellyoursaas_lang_id', 0, null, $langs->trans("Language"), 0, 0, '', 0, 0, 1);
+
+		/*
+		$s .= ' &nbsp; ';
+
+		$s .= $langs->trans("DeploymentStatus").': ';
+		$s .= '<select name="contract_sellyoursaas_filter" class="flat">';
+		$s .= '<option value="none">&nbsp;</option>';
+		foreach ($arraystatus as $key => $status) {
+			$s .= '<option value="'.$key.'"'.(GETPOST('contract_sellyoursaas_filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
+		}
+		$s .= '</select>';
+		*/
+		$s .= '<br>';
+
+		$s .= img_picto('', 'product');
 		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 		$s .= '<br>';
 
@@ -100,15 +120,27 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		$quantityproduct = price2num(GETPOST('quantityproduct'));
 		$discountproduct = price2num(GETPOST('discountproduct'));
 
-		$sql = " SELECT s.rowid as id, s.email, s.nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label";
+		$sql = " SELECT DISTINCT s.rowid as id, s.email, s.nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label";
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
+
+		/*if ((! empty($_POST['contract_sellyoursaas_filter']) && $_POST['contract_sellyoursaas_filter'] != 'none') || (! empty($_POST['filterip']) && $_POST['filterip'] != 'none') || ($productid > 0)) {
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
+		}*/
+
 		if ($contractpricetotal > 0 || $productid > 0 || $quantityproduct > 0 || $discountproduct != '') {
-			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facture_rec as fr on fr.fk_soc = s.rowid";
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facture_rec as fr on fr.fk_soc = s.rowid and fr.suspended = 0";
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facturedet_rec as fdr on fdr.fk_facture = fr.rowid";
 		}
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
+		if (GETPOST('contract_sellyoursaas_lang_id') && GETPOST('contract_sellyoursaas_lang_id') != 'none') {
+			$sql.= natural_search('default_lang', join(',', GETPOST('contract_sellyoursaas_lang_id', 'array')), 3);
+		}
+		/*if (GETPOST('contract_sellyoursaas_filter') && GETPOST('contract_sellyoursaas_filter') != 'none') {
+			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('contract_sellyoursaas_filter'))."'";
+		}*/
 		if ($quantityproduct > 0) {
 			$sql .= " AND fdr.qty = ".((float) $quantityproduct);
 		}
