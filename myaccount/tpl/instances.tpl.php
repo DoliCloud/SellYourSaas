@@ -649,6 +649,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$password_os  = $contract->array_options['options_password_os'];
 			$username_web = $contract->thirdparty->email;
 			$password_web = $contract->thirdparty->array_options['options_password'];
+			$iphostwebsite = $contract->array_options['options_deployment_host'];
 			
 			$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 			$newdb->prefix_db = $prefix_db;
@@ -665,7 +666,6 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 			print '<div class="tagtd">';
-			// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
 			if (empty($websitemodenabled)) {
 				print $langs->trans("OptionYourWebsiteNoEnabled").'<br>';
 			}else {
@@ -693,7 +693,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</select>';
 				print ajax_combobox("websiteidoption");
 				print '<div id="domainnamewebsite" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'">';
-				print '<br><span>'.$langs->trans("PurshaseDomainName").'&nbsp;</span><button type="button" id="domainpurchasedbutton" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">'.$langs->trans("Confirm").'</button>';
+				print '<br><span>'.$langs->trans("PurshaseDomainName", $iphostwebsite).'&nbsp;</span><button type="button" id="domainpurchasedbutton" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">'.$langs->trans("Confirm").'</button>';
 				print '<div id="domainpurchased" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'>';
 				print '<br><span class="bold">'.$langs->trans("Domain").'&nbsp;</span>';
 				print '<input name="domainnamewebsite" id="domainnamewebsiteinput" value="'.GETPOST("domainnamewebsite", "alpha").'">&nbsp;';

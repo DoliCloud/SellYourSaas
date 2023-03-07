@@ -799,7 +799,7 @@ OptionYourWebsiteDesc=You can activate here a public website built using the Dol
 OptionYourWebsiteStep1=Choose the website to publish on internet and click on <b>%s</b> 
 OptionYourWebsiteNoEnabled=The module website isn't enabled on this instance.<br>To subscribe to this service please enable it first.
 ErrorInvalidField = The field "%s" has an invalid value
-PurshaseDomainName = If you haven't already, please purchase a domain name for your website. <br>Then click on the button when it's done.
+PurshaseDomainName = If you haven't already, please purchase a domain name for your website.<br>Make the domain name point on this IP address : <b>%s</b> <br>Then click on the button when it's done.
 IWantToTest=I want to test
 OptionCondition=Condition to see option
 HelpOnOptionCondition=Enter the condtion to have the option visilbe into customer dashboard. Example: 1=always visible. 0=Never visible
