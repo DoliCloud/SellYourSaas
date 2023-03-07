@@ -1275,6 +1275,7 @@ if ($action == 'updateurl') {
 
 		$db->begin();
 
+		// First update or insert payment mode 'ban'
 		if (! $error) {
 			$companybankid = $companybankaccount->create($user);
 
@@ -1301,7 +1302,7 @@ if ($action == 'updateurl') {
 					$resultbanksetdefault = $companybankaccount->setAsDefault(0, '');
 					if ($resultbanksetdefault > 0) {
 						setEventMessages($langs->trans("BankSaved"), null, 'mesgs');
-						setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
+						//setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
 					} else {
 						setEventMessages($companybankaccount->error, $companybankaccount->errors, 'errors');
 						$error++;
@@ -1317,6 +1318,7 @@ if ($action == 'updateurl') {
 			}
 		}
 
+		// Then create record on Stripe side
 		if (!$error && isModEnabled('stripe')) {
 			$companybankaccount->fetch(GETPOST('bankid'));
 			$service = 'StripeTest';
@@ -1350,6 +1352,26 @@ if ($action == 'updateurl') {
 						setEventMessages("SEPA on Stripe", "SEPA IBAN is now linked to customer account !");
 					}
 				}
+			}
+		}
+
+		if (!$error) {
+			$id_payment_mode_ban = dol_getIdFromCode($db, 'PRE', 'c_paiement', 'code', 'id', 1);
+
+			// Update recurring invoice to the payment mode direct debit.
+			if ($id_payment_mode_ban > 0) {
+				$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
+				$sql .= " SET fk_cond_reglement = ".((int) $id_payment_mode_ban);
+				$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
+
+				$result = $db->query($sql);
+				if ($result < 0) {
+					$error++;
+					setEventMessages($db->lasterror(), null, 'errors');
+				}
+			} else {
+				$error++;
+				setEventMessages("Failed to get payment mode ID for Direct Debit (code PRE). We can't continue.", null, 'errors');
 			}
 		}
 
