@@ -1361,7 +1361,7 @@ if ($action == 'updateurl') {
 			// Update recurring invoice to the payment mode direct debit.
 			if ($id_payment_mode_ban > 0) {
 				$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
-				$sql .= " SET fk_cond_reglement = ".((int) $id_payment_mode_ban);
+				$sql .= " SET fk_mode_reglement = ".((int) $id_payment_mode_ban);
 				$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
 
 				$result = $db->query($sql);
@@ -1477,7 +1477,7 @@ if ($action == 'updateurl') {
 						// Update recurring invoice to the payment mode direct debit.
 						if ($id_payment_mode_cb > 0) {
 							$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
-							$sql .= " SET fk_cond_reglement = ".((int) $id_payment_mode_cb);
+							$sql .= " SET fk_mode_reglement = ".((int) $id_payment_mode_cb);
 							$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
 
 							$result = $db->query($sql);
