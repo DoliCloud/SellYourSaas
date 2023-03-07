@@ -86,35 +86,37 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s.='<br> ';
 
 		$s.=$langs->trans("DeploymentStatus").': ';
-		$s.='<select name="filter" class="flat">';
+		$s.='<select name="filter" id="sellyoursaas_filter" class="flat">';
 		$s.='<option value="none">&nbsp;</option>';
 		foreach ($arraystatus as $key => $status) {
 			$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
 		}
 		$s.='</select>';
+		$s .= ajax_combobox("sellyoursaas_filter");
 
 		$s.=' ';
 
 		$listofipwithinstances=array();
-		$sql = "SELECT DISTINCT deployment_host";
-		$sql .= " FROM ".MAIN_DB_PREFIX."contrat_extrafields";
-		$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+		$sql = "SELECT rowid, ref, ipaddress, status, servercountries";
+		$sql .= " FROM ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver";
 		$resql=$this->db->query($sql);
 		if ($resql) {
 			while ($obj = $this->db->fetch_object($resql)) {
-				$listofipwithinstances[]=$obj->deployment_host;
+				$listofipwithinstances[$obj->rowid] = array('ref'=>$obj->ref, 'ipaddress'=>$obj->ipaddress, 'status'=>$obj->status, 'servercountries'=>$obj->servercountries);
 			}
 			$this->db->free($resql);
 		} else dol_print_error($this->db);
 
 		$s.=$langs->trans("DeploymentHost").': ';
-		$s.='<select name="filterip" class="flat">';
+		$s.='<select name="filterip" id="sellyoursaas_filterip" class="flat">';
 		$s.='<option value="none">&nbsp;</option>';
-		foreach ($listofipwithinstances as $val) {
-			$s.='<option value="'.$val.'"'.(GETPOST('filterip', 'alpha') == $val ? ' selected':'').'>'.$val.'</option>';
+		foreach ($listofipwithinstances as $key => $val) {
+			$label = $val['ref'].' - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')');
+			$labelhtml = $val['ref'].'<span class="opacitymedium"> - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')').'</span>';
+			$s.='<option value="'.$val['ipaddress'].'"'.(GETPOST('filterip', 'alpha') == $val['ipaddress'] ? ' selected':'').' data-html="'.dol_escape_htmltag($labelhtml).'">'.dol_escape_htmltag($label).'</option>';
 		}
 		$s.='</select>';
-
+		$s .= ajax_combobox("sellyoursaas_filterip");
 		$s.='<br> ';
 
 		/*$listofpackages=array();
