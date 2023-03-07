@@ -112,7 +112,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s.='<option value="none">&nbsp;</option>';
 		foreach ($listofipwithinstances as $key => $val) {
 			$label = $val['ref'].' - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')');
-			$labelhtml = $val['ref'].'<span class="opacitymedium"> - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')').'</span>';
+			$labelhtml = $val['ref'].'<span class="opacitymedium"> - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : ' ('.$val['servercountries'].')').'</span>';
 			$s.='<option value="'.$val['ipaddress'].'"'.(GETPOST('filterip', 'alpha') == $val['ipaddress'] ? ' selected':'').' data-html="'.dol_escape_htmltag($labelhtml).'">'.dol_escape_htmltag($label).'</option>';
 		}
 		$s.='</select>';

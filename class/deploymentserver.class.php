@@ -117,8 +117,8 @@ class Deploymentserver extends CommonObject
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>-1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref' => array('type'=>'varchar(128)', 'label'=>'SellYourSaasSubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Reference of object', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
-		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>12, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo",),
-		'servercountries' => array('type'=>'text', 'label'=>'ServedCountriesServer', 'enabled'=>'1', 'position'=>13, 'notnull'=>0,'visible'=>1, 'help'=>'ServedCountriesServerInfo'),
+		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>12, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo", 'csslist'=>'tdoverflowmax100'),
+		'servercountries' => array('type'=>'text', 'label'=>'ServedCountriesServer', 'enabled'=>'1', 'position'=>13, 'notnull'=>0,'visible'=>1, 'help'=>'ServedCountriesServerInfo', 'csslist'=>'tdoverflowmax100'),
 		'entity' =>array('type'=>'integer', 'label'=>'Entity', 'default'=>1, 'enabled'=>1, 'visible'=>0, 'notnull'=>1, 'position'=>20, 'index'=>1),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'enabled'=>'1', 'position'=>500, 'notnull'=>1, 'visible'=>-2,),
 		'date_modification' => array('type'=>'timestamp', 'label'=>'DateModification', 'enabled'=>'1', 'position'=>501, 'notnull'=>0, 'visible'=>-2),
