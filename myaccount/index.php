@@ -3006,10 +3006,11 @@ if ($action == 'updateurl') {
 			}
 		}
 	}
-} elseif ($action == 'deploywebsite') {
+} elseif ($action == 'deploywebsite' && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
 	$errors = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
-	$object = $listofcontractid[GETPOST('contractid', 'int')];
+	$contractid = GETPOST('contractid', 'int');
+	$object = $listofcontractid[$contractid];
 	$websiteidoption = GETPOST('websiteidoption', 'int');
 	$domainnamewebsite = GETPOST('domainnamewebsite', 'alpha');
 	if (empty($websiteidoption)) {
@@ -3062,18 +3063,71 @@ if ($action == 'updateurl') {
 		$object->array_options["websitename"] = $website->ref;
 		$object->array_options["domainnamewebsite"] = $domainnamewebsite;
 		//$result = $sellyoursaasutils->sellyoursaasRemoteAction("deploywebsite", $object);
-		$result = -1;
+		$result = 1;
 		if ($result > 0) {
-			# TODO: Update FacturRec && Contrat
+			$productid = getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT");
+			$product = new Product($db);
+			$product->fetch($productid);
+			$tmparray = sellyoursaasGetExpirationDate($object, 0);
+			$duration_value = $tmparray['duration_value'];
+			$duration_unit = $tmparray['duration_unit'];
+			$date_start = dol_now();
+			$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
+
+			$foundlinecontract = 0;
+			foreach ($object->lines as $key => $line) {
+				if ($line->description == $domainnamewebsite && $line->fk_product == $productid) {
+					$foundlinecontract ++;
+				}
+			}
+			if (!$foundlinecontract) {
+				$idlinecontract = $object->addLine($domainnamewebsite, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end);
+				if ($idlinecontract <= 0) {
+					// TODO: Send mail auto to inform admins error line creation
+					$errors ++;
+				}
+				if (!$errors) {
+					$object->fetch($contractid);
+					$result = $object->active_line($user, $idlinecontract, $date_start, '', 'Activation after website deployment');
+					if (!$result) {
+						// TODO: Send mail auto to inform admins errror activation line
+						$errors ++;
+					}
+				}
+			}
+
+			if (!$errors) {
+				$object->fetchObjectLinked();
+				$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
+				if (count($arrayfacturerec) != 1) {
+					// TODO: Send mail auto to inform admins multiples faturerec contract
+					$errors ++;
+				} else {
+					$facturerec = $arrayfacturerec[0];
+					$foundlinefacturerec = 0;
+					foreach ($facturerec->lines as $key => $line) {
+						if ($line->description == $domainnamewebsite && $line->fk_product == $productid) {
+							$foundlinefacturerec ++;
+						}
+					}
+					if (!$foundlinefacturerec) {
+						$result = $facturerec->addLine($domainnamewebsite, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+						if (!$result) {
+							// TODO: Send mail auto to inform admins errror line creation facturRec
+							$errors ++;
+						}
+					}
+				}
+			}
 		} else {
+			// In case on website deployment error
 			setEventMessages($langs->trans("ErrorDeployWebsite"), null, 'errors');
-			$errors ++;
-		}
-		if ($errors) {
 			header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		}
-	}
 
+		setEventMessages($langs->trans("DeploymentWebsiteDone"), null, 'mesgs');
+		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
+	}
 }
 
 

@@ -636,7 +636,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '</div></div>';
 
 		// Hard coded option: A website
-		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES')) {
+		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
 			$type_db = $conf->db->type;
 			$hostname_db  = $contract->array_options['options_hostname_db'];
 			$username_db  = $contract->array_options['options_username_db'];
@@ -703,7 +703,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</form>';
 				print '<script>
 				$("#websiteidoption").on("change", function(){
-					if($("#domainnamewebsite:hidden").length){
+					if($("#websiteidoption").val() != "" || $("#domainnamewebsite:hidden").length){
 						$("#domainnamewebsite").removeClass("hidden");
 					} else {
 						$("#domainnamewebsite").addClass("hidden");
