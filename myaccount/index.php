@@ -1467,7 +1467,28 @@ if ($action == 'updateurl') {
 					if ($result < 0) {
 						$error++;
 						setEventMessages($companypaymentmode->error, $companypaymentmode->errors, 'errors');
-						$action='createcard';     // Force chargement page création
+						$action='createcard';     // Force load of create page
+					}
+
+					// Set the default payment mode for recurring invoice to Credit card.
+					if (!$error) {
+						$id_payment_mode_cb = dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
+
+						// Update recurring invoice to the payment mode direct debit.
+						if ($id_payment_mode_cb > 0) {
+							$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
+							$sql .= " SET fk_cond_reglement = ".((int) $id_payment_mode_cb);
+							$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
+
+							$result = $db->query($sql);
+							if ($result < 0) {
+								$error++;
+								setEventMessages($db->lasterror(), null, 'errors');
+							}
+						} else {
+							$error++;
+							setEventMessages("Failed to get payment mode ID for Credit Card (code CB). We can't continue.", null, 'errors');
+						}
 					}
 
 					if (! $error) {
