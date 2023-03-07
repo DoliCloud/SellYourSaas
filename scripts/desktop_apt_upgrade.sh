@@ -9,6 +9,7 @@
 source /etc/lsb-release
 
 if [ "x$2" == "x" ]; then
+   echo "***** Execute an apt upgrade on remote servers *****"
    echo "Usage:   $0  hostfile  [hostgrouporname]  (reboot)"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  master,deployment"

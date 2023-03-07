@@ -2,7 +2,7 @@
 #---------------------------------------------------------
 # Script to run remotely the script clean.sh
 #
-# /pathto/clean_remote.sh hostfile [hostgrouporname]
+# /pathto/desktop_clean.sh hostfile [hostgrouporname]
 #---------------------------------------------------------
 
 #set -e
@@ -10,6 +10,7 @@
 source /etc/lsb-release
 
 if [ "x$2" == "x" ]; then
+   echo "***** Launch the script clean.sh on remote servers *****"
    echo "Usage:   $0  hostfile  [hostgrouporname]"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment'"
    echo "Example: $0  myhostfile  deployment"
