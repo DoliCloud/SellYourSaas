@@ -1349,7 +1349,7 @@ if ($action == 'updateurl') {
 						$error++;
 						setEventMessages($stripe->error, $stripe->errors, 'errors');
 					} else {
-						setEventMessages("SEPA on Stripe", "SEPA IBAN is now linked to customer account !");
+						dol_syslog("SEPA IBAN is now linked to the customer Stripe account");
 					}
 				}
 			}
