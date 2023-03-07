@@ -231,7 +231,7 @@ print '
 
 	      </div> <!-- END COL -->';
 if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'nonprofit' || !getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
-print'			<!-- Box of payment modes -->
+	print'			<!-- Box of payment modes -->
 	      <div class="col-md-3">
 	        <div class="portlet light" id="paymentMethodSection">
 
@@ -245,127 +245,120 @@ print'			<!-- Box of payment modes -->
 	          <div class="portlet-body">
 	            <p>';
 
-$urltoenterpaymentmode = $_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode);
+	$urltoenterpaymentmode = $_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode);
 
-if ($nbpaymentmodeok > 0) {
-	print '<table class="centpercent">';
-	print '<!-- '.$companypaymentmodetemp->id.' -->';
+	if ($nbpaymentmodeok > 0) {
+		print '<table class="centpercent">';
+		print '<!-- '.$companypaymentmodetemp->id.' -->';
 
-	$i = 0;
-	foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
-		if ($i > 0) print '<tr><td colspan="3"><br></td></tr>';
-		if ($companypaymentmodetemp->type == 'card') {
-			print '<tr>';
-			print '<td>';
-			print '<!-- '.$companypaymentmodetemp->id.' -->';
-			print img_credit_card($companypaymentmodetemp->type_card);
-			print '</td>';
-			print '<td class="wordbreak" style="word-break: break-word" colspan="2">';
-			print $langs->trans("CreditCard");
-			print '</td>';
-			print '</tr>';
-			print '<tr>';
-			print '<td>';
-			print '....'.$companypaymentmodetemp->last_four;
-			print '</td>';
-			print '<td></td>';
-			print '<td>';
-			print sprintf("%02d", $companypaymentmodetemp->exp_date_month).'/'.$companypaymentmodetemp->exp_date_year;
-			print '</td>';
-			print '</tr>';
-			// Warning if expiring
-			if ($companypaymentmodetemp->exp_date_year < $nowyear ||
-			($companypaymentmodetemp->exp_date_year == $nowyear && $companypaymentmodetemp->exp_date_month <= $nowmonth)) {
-				print '<tr><td colspan="3" style="color: orange">';
-				print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon", $urltoenterpaymentmode);
+		$i = 0;
+		foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
+			if ($i > 0) print '<tr><td colspan="3"><br></td></tr>';
+			if ($companypaymentmodetemp->type == 'card') {
+				print '<tr>';
+				print '<td colspan="3" class="wordbreak">';
+				print '<!-- '.$companypaymentmodetemp->id.' -->';
+				print img_credit_card($companypaymentmodetemp->type_card);
+				print $langs->trans("CreditCard");
+				print '</td>';
+				print '</tr>';
+				print '<tr>';
+				print '<td>';
+				print '....'.$companypaymentmodetemp->last_four;
+				print '</td>';
+				print '<td></td>';
+				print '<td>';
+				print sprintf("%02d", $companypaymentmodetemp->exp_date_month).'/'.$companypaymentmodetemp->exp_date_year;
+				print '</td>';
+				print '</tr>';
+				// Warning if expiring
+				if ($companypaymentmodetemp->exp_date_year < $nowyear ||
+				($companypaymentmodetemp->exp_date_year == $nowyear && $companypaymentmodetemp->exp_date_month <= $nowmonth)) {
+					print '<tr><td colspan="3" style="color: orange">';
+					print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon", $urltoenterpaymentmode);
+					print '</td></tr>';
+				}
+				if (GETPOST('debug', 'int')) {
+					include_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';
+					$stripe = new Stripe($db);
+					$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
+					$customer = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 0);
+
+					print '<tr><td>';
+					print 'Stripe customer: '.$customer->id;
+					print '</td><td colspan="2">';
+					print 'Stripe card: '.$companypaymentmodetemp->stripe_card_ref;
+					print '</td></tr>';
+				}
+			} elseif ($companypaymentmodetemp->type == 'paypal') {
+				print '<tr>';
+				print '<td colspan="3" class="wordbreak">';
+				print '<!-- '.$companypaymentmodetemp->id.' -->';
+				print img_picto('', 'paypal');
+				print $langs->trans("Paypal");
+				print '</td>';
+				print '</tr>';
+				print '<tr>';
+				print '<td>';
+				print $companypaymentmodetemp->email;
+				print '<br>Preaproval key: '.$companypaymentmodetemp->preapproval_key;
+				print '</td>';
+				print '<td>';
+				print dol_print_date($companypaymentmodetemp->starting_date, 'day').'/'.dol_print_date($companypaymentmodetemp->ending_date, 'day');
+				print '</td>';
+				print '</tr>';
+				// Warning if expiring
+				if (dol_time_plus_duree($companypaymentmodetemp->ending_date, -1, 'm') < $nowyear) {
+					print '<tr><td colspan="3" style="color: orange">';
+					print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon", $urltoenterpaymentmode);
+					print '</td></tr>';
+				}
+			} elseif ($companypaymentmodetemp->type == 'ban') {
+				print '<tr>';
+				print '<td colspan="3" class="wordbreak">';
+				print img_picto('', 'bank', '',  false, 0, 0, '', 'fa-2x');
+				print $langs->trans("PaymentTypeShortPRE");
+				print '</td>';
+				print '</tr>';
+
+				print '<tr><td colspan="3">';
+				print $langs->trans("IBAN").': <span class="small">'.$companypaymentmodetemp->iban_prefix.'</span><br>';
+				if ($companypaymentmodetemp->rum) print $langs->trans("RUM").': <span class="small">'.$companypaymentmodetemp->rum.'</span>';
 				print '</td></tr>';
+			} else {
+				print '<tr>';
+				print '<td>';
+				print $companypaymentmodetemp->type;
+				print '</td>';
+				print '<td>';
+				print $companypaymentmodetemp->label;
+				print '</td>';
+				print '<td>';
+				print '</td>';
+				print '</tr>';
 			}
-			if (GETPOST('debug', 'int')) {
-				include_once DOL_DOCUMENT_ROOT.'/stripe/class/stripe.class.php';
-				$stripe = new Stripe($db);
-				$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
-				$customer = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatusstripe, 0);
 
-				print '<tr><td>';
-				print 'Stripe customer: '.$customer->id;
-				print '</td><td colspan="2">';
-				print 'Stripe card: '.$companypaymentmodetemp->stripe_card_ref;
-				print '</td></tr>';
-			}
-		} elseif ($companypaymentmodetemp->type == 'paypal') {
-			print '<tr>';
-			print '<td>';
-			print '<!-- '.$companypaymentmodetemp->id.' -->';
-			print img_picto('', 'paypal');
-			print '</td>';
-			print '<td class="wordbreak" style="word-break: break-word" colspan="2">';
-			print $langs->trans("Paypal");
-			print '</td>';
-			print '</tr>';
-			print '<tr>';
-			print '<td>';
-			print $companypaymentmodetemp->email;
-			print '<br>Preaproval key: '.$companypaymentmodetemp->preapproval_key;
-			print '</td>';
-			print '<td>';
-			print dol_print_date($companypaymentmodetemp->starting_date, 'day').'/'.dol_print_date($companypaymentmodetemp->ending_date, 'day');
-			print '</td>';
-			print '</tr>';
-			// Warning if expiring
-			if (dol_time_plus_duree($companypaymentmodetemp->ending_date, -1, 'm') < $nowyear) {
-				print '<tr><td colspan="3" style="color: orange">';
-				print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon", $urltoenterpaymentmode);
-				print '</td></tr>';
-			}
-		} elseif ($companypaymentmodetemp->type == 'ban') {
-			print '<tr>';
-			print '<td>';
-			print img_picto('', 'bank', '',  false, 0, 0, '', '');
-			print '</td>';
-			print '<td class="wordbreak" style="word-break: break-word" colspan="2">';
-			print $langs->trans("PaymentTypeShortPRE");
-			print '</td>';
-			print '</tr>';
-
-			print '<tr><td colspan="3">';
-			print $langs->trans("IBAN").': <span class="small">'.$companypaymentmodetemp->iban_prefix.'</span><br>';
-			if ($companypaymentmodetemp->rum) print $langs->trans("RUM").': <span class="small">'.$companypaymentmodetemp->rum.'</span>';
-			print '</td></tr>';
-		} else {
-			print '<tr>';
-			print '<td>';
-			print $companypaymentmodetemp->type;
-			print '</td>';
-			print '<td>';
-			print $companypaymentmodetemp->label;
-			print '</td>';
-			print '<td>';
-			print '</td>';
-			print '</tr>';
+			$i++;
 		}
 
-		$i++;
+		print '</table>';
+	} else {
+		print $langs->trans("NoPaymentMethodOnFile");
+		if ($nbofinstancessuspended || $ispaid || $atleastonecontractwithtrialended) print ' '.img_warning();
 	}
 
-	print '</table>';
-} else {
-	print $langs->trans("NoPaymentMethodOnFile");
-	if ($nbofinstancessuspended || $ispaid || $atleastonecontractwithtrialended) print ' '.img_warning();
-}
-
-print '
+	print '
 	                <br><br>
 	                <center><a href="'.$urltoenterpaymentmode.'" class="wordbreak btn default green-stripe">';
-if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode").'...';
-else print $langs->trans("AddAPaymentMode").'...';
-print '</a></center>
+	if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode").'...';
+	else print $langs->trans("AddAPaymentMode").'...';
+	print '</a></center>
 
 	            </p>
 	          </div> <!-- END PORTLET-BODY -->
 
 	        </div> <!-- END PORTLET -->
 	      </div><!-- END COL -->';
-
 }
 print '  </div> <!-- END ROW -->
 
