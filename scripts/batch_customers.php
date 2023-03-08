@@ -815,7 +815,7 @@ if (! $nboferrors) {
 
 			// Supervision tools are generic for all domains. No way to target a specific supervision email.
 
-			$msg = 'Error in '.$script_file." ".$argv[1]." ".$argv[2]." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
+			$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
 			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
