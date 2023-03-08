@@ -52,6 +52,7 @@ chown admin.admin /home/admin/backup; chown admin.admin /home/admin/backup/conf;
 chown admin.admin /home/admin/wwwroot
 
 # Permissions on SSH config and private key files
+echo "Set owner and permission on admin ssh files"
 [ -s /home/admin/.ssh/config ] && chmod go-rwx /home/admin/.ssh/config && chown admin.admin /home/admin/.ssh/config
 [ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa && chown admin.admin /home/admin/.ssh/id_rsa
 [ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas && chown admin.admin /home/admin/.ssh/id_rsa_sellyoursaas 
