@@ -1302,7 +1302,7 @@ class SellYourSaasUtils
 									$paiement->note_public = 'SellYourSaas payment '.dol_print_date($now, 'standard').' using '.$paymentmethod.($ipaddress?' from ip '.$ipaddress:'').' - Transaction ID = '.$TRANSACTIONID;
 									$paiement->note_private = 'SellYourSaas payment '.dol_print_date($now, 'standard').' using '.$paymentmethod.($ipaddress?' from ip '.$ipaddress:'').' - Transaction ID = '.$TRANSACTIONID;
 									$paiement->ext_payment_id = $charge->id.':'.$customer->id.'@'.$stripearrayofkeys['publishable_key'];
-									$paiement->ext_payment_site = 'stripe';
+									$paiement->ext_payment_site = $service;
 
 									if (! $errorforinvoice) {
 										dol_syslog('* Record payment for invoice id '.$invoice->id.'. It includes closing of invoice and regenerating document');
