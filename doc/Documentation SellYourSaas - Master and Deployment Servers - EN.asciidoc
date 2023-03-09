@@ -3974,7 +3974,8 @@ init_config:
     # service: <SERVICE>
 
 instances:
-  - url: localhost  # url used to connect to the memcached instance
+
+    url: localhost  # url used to connect to the memcached instance
 ---------------
 
 
@@ -4062,6 +4063,30 @@ instances:
     url: https://supervision.withX.mysaasdomain.org
     disable_ssl_validation: false
     min_collection_interval: 86400
+---------------
+
+Note: Replace withX by correct prefix of the deployment server.
+
+
+* On *deployment servers* only, copy the datadog config file to supervize *SSL certificates*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/disk.d/conf.yaml.default /etc/datadog-agent/conf.d/disk.d/conf.yaml
+---------------
+
+Edit it to exclude some filesystems:
+
+[source,bash]
+---------------
+
+instances:
+
+  mount_point_exclude:
+    - /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+    
+  include_all_devices: false
+    
 ---------------
 
 Note: Replace withX by correct prefix of the deployment server.
