@@ -915,7 +915,7 @@ Require ip ip.user.1
 Require ip ip.user.2
 ---------------
 
-Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufx.sh* to have the change taken into account on the firewall.
+Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufw.sh* to have the change taken into account on the firewall.
 
 
 === Installing the nfs share

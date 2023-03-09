@@ -97,7 +97,7 @@ ufw allow out 2049/udp
 # SSH
 export atleastoneipfound=0
 
-if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
+if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2"  || "x$webserver" == "x2" ]]; then
 	# If value is 2, we want a restriction per user found into a file (Value = 1 means access to everybody)
 	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-ssh.conf 2>/dev/null`
 	do
