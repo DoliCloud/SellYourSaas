@@ -152,7 +152,7 @@ fi
 # MySQL
 export atleastoneipfound=0
 
-if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
+if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" || "x$webserver" == "x2" ]]; then
 	# If value is 2, we want a restriction per user found into a file (Value = 1 means access to everybody)
 	for fic in `ls /etc/sellyoursaas.d/*-allowed-ip.conf /etc/sellyoursaas.d/*-allowed-ip-mysql.conf 2>/dev/null`
 	do
@@ -184,8 +184,10 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" ]]; then
 	done
 	
 	# Allow MySQL to myself (for example this is required with Scaleway)
-	echo Allow MySQL to the restricted ip $ipserverdeployment
-	ufw allow from $ipserverdeployment to any port 3306 proto tcp
+	if [[ "x$ipserverdeployment" != "x" ]]; then
+		echo Allow MySQL to the restricted ip $ipserverdeployment
+		ufw allow from $ipserverdeployment to any port 3306 proto tcp
+	fi
 fi
 
 if [[ "x$atleastoneipfound" == "x1" ]]; then
