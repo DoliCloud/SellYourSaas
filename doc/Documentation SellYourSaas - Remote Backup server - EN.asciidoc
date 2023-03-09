@@ -784,6 +784,7 @@ Delete very old files every sunday by adding the cron task:
 ---------------
 0 18 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +50 -ls -delete > /var/log/find_delete_old_files.log 2>&1
 0 18 * * 1 find /mnt/diskbackup/*/backupold_* -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
+55 23 * * * btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-$(date +%j); btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-$(date +%j); rm -fr /mnt/diskbackup/.snapshots/diskbackup-$(date +%j)/.snapshots; btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-$(date +%j) ro true;
 ---------------
 
 
@@ -925,7 +926,7 @@ mount /dev/sdXY /mnt
 Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
 
 
-=== Use of btrfs to create a subvolume vor each backup dir of each server
+=== Use of btrfs to create a subvolume for each backup dir of each server (optional)
 
 Then you create a subvolume for each directory you want to be able to make snapshots.
 
@@ -943,20 +944,45 @@ To create a subvolume for a server
 btrfs subvolume create /mnt/diskbackup/xxx   # with xxx = home_serverX or backup_serverX
 chown admin.admin /mnt/diskbackup/xxx
 chmod -R o-rw /mnt/diskbackup/xxx
+cp -ax --reflink=always src/. dest
 ---------------
+
+To convert an existing directory into a subvolume
+
+[source,bash]
+---------------
+su - admin
+
+mv /mnt/diskbackup/xxx /mnt/diskbackup/xxx-old
+btrfs subvolume create /mnt/diskbackup/xxx   # with xxx = home_serverX or backup_serverX
+cp -ax --reflink=always /mnt/diskbackup/xxx-old/. /mnt/diskbackup/xxx
+rm -fr /mnt/diskbackup/xxx-old
+
+chown admin.admin /mnt/diskbackup/xxx
+chmod -R o-rw /mnt/diskbackup/xxx
+
+---------------
+
+
+-- Example of CLI to move not dir into btrfs subvolume
+-- btrfs subvolume show /mnt/diskbackup/not 2>&1 | grep -c "Not a Btrfs subvolume" && mv /mnt/diskbackup/not /mnt/diskbackup/not-old && btrfs subvolume create /mnt/diskbackup/not && cp -ax --reflink=always /mnt/diskbackup/not-old/. /mnt/diskbackup/not && rm -fr /mnt/diskbackup/not-old  
+
+
 
 To create a readonly snapshot
 
 [source,bash]
 ---------------
-btrfs subvolume snapshot -r /mnt/diskbackup/xxx /mnt/diskbackup/.snapshots/xxx
+btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +%j`; 
+rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +%j`/.snapshots;
+btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +%j` ro true;
 ---------------
 
 To delete a readonly snapshot
 
 [source,bash]
 ---------------
-btrfs subvolume delete /mnt/diskbackup/.snapshots/xxx
+btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +%j`;
 ---------------
 
 
