@@ -24,6 +24,8 @@ if [[ "x$instanceserver" == "x" ]]; then
 	exit 3
 fi
 
+webserver=`grep '^webserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 allowed_hosts=`grep '^allowed_hosts=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$allowed_hosts" == "x" && "x$instanceserver" != "x" && "x$instanceserver" != "x0" ]]; then
 	echo Parameter allowed_host not found or empty. This is not possible when the server is an instanceserver.
@@ -133,8 +135,10 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2"  || "x$webserver" =
 	done
 	
 	# Allow SSH to myself (for example this is required with Scaleway)
-	echo Allow SSH to the restricted ip $ipserverdeployment
-	ufw allow from $ipserverdeployment to any port $port_ssh proto tcp
+	if [[ "x$ipserverdeployment" != "x" ]]; then
+		echo Allow SSH to the restricted ip of deployment server $ipserverdeployment
+		ufw allow from $ipserverdeployment to any port $port_ssh proto tcp
+	fi
 fi
 
 if [[ "x$atleastoneipfound" == "x1" ]]; then
