@@ -233,7 +233,7 @@ if (empty($reshook)) {
 					$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
 					$mesg = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
 
-					$newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_MAIN_EMAIL, $mesg, array(), array(), array(), '', '', 0, -1, '', '', $trackid, '', 'standard');
+					$newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_NOREPLY_EMAIL, $mesg, array(), array(), array(), '', '', 0, -1, '', '', $trackid, '', 'standard');
 
 					if ($newemail->sendfile() > 0) {
 						$message = $messagegenericresult;
