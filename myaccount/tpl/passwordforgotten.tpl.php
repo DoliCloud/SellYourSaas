@@ -132,7 +132,7 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 <tr>
 <td class="nowrap valignmiddle" style="text-align: center;">
 	<?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
-<span class="span-icon-user fa fa-user">
+<span class="span-icon-user fa fa-user"></span>
 	<?php
 	if (empty($asknewpass)) {
 		?>
@@ -152,7 +152,6 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 		print '<br><br>';
 	}
 	?>
-</span>
 </td>
 </tr>
 
@@ -245,10 +244,11 @@ if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 <div align="center" style="margin-top: 8px; margin-bottom: 8px;"">
 	<?php
 	$moreparam='';
-	if (! empty($conf->dol_hide_topmenu))   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
-	if (! empty($conf->dol_hide_leftmenu))  $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_leftmenu='.$conf->dol_hide_leftmenu;
-	if (! empty($conf->dol_no_mouse_hover)) $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_no_mouse_hover='.$conf->dol_no_mouse_hover;
-	if (! empty($conf->dol_use_jmobile))    $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_use_jmobile='.$conf->dol_use_jmobile;
+	if (!empty($conf->dol_hide_topmenu))   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
+	if (!empty($conf->dol_hide_leftmenu))  $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_leftmenu='.$conf->dol_hide_leftmenu;
+	if (!empty($conf->dol_no_mouse_hover)) $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_no_mouse_hover='.$conf->dol_no_mouse_hover;
+	if (!empty($conf->dol_use_jmobile))    $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_use_jmobile='.$conf->dol_use_jmobile;
+	if (!empty($username)) $moreparam .= (strpos($moreparam, '?')===false?'?':'&').'username='.urlencode($username);
 
 	print '<a class="alogin" href="'.$dol_url_root.'/index.php'.$moreparam.'">('.((empty($asknewpass) || $asknewpass == 2)? $langs->trans('BackToLoginPage') : $langs->trans("Cancel")).')</a>';
 	?>
