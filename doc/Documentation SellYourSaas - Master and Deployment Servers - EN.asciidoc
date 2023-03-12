@@ -5430,6 +5430,13 @@ You can get more information by running
 sudo fail2ban-client -vvv -x start
 
 
+If error is:
+ERROR: cannot import name 'MutableMapping' from 'collections' (/usr/lib/python3.10/collections/__init__.py)
+
+You must upgrade fail2ban version with the verison into "universe" repository:
+Check the universe repository is enabled into */etc/apt/sources.list*, then run *apt update; apt upgrade;*
+
+
 ==== Problem when starting mariadb / mariadb stop after a timetout
 
 Launching mariadb launches the database but the command never returns to the command line prompt and the database is automatically stopped after few minutes.
