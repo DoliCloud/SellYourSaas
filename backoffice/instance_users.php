@@ -208,7 +208,7 @@ if (empty($reshook)) {
 				$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
 				$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
 				$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
-				$sql .= " '".$newdb->escape($password)."')";
+				$sql .= " '".$newdb->escape(dolEncrypt($password))."')";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
 					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
