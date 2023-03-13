@@ -208,7 +208,7 @@ if (empty($reshook)) {
 				$sql .= " null,";
 				$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
 				$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
-				$sql .= " '".$newdb->escape(dolEncrypt($password))."')";
+				$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."')";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
 					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
