@@ -239,7 +239,6 @@ if (empty($reshook)) {
 					}
 				}
 
-
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 			} else {
 				// TODO
