@@ -4120,7 +4120,7 @@ script is regularly completed but still check only few part of your installation
 
 - If the deployed application is Dolibarr try to upload a file from menu Home - Setup - Security - Upload file.
 
-- If the deployed application is Dolibarr try to make a backup from the internal backup tool.
+- If the deployed application is Dolibarr try to make a backup (mysqldump) from its internal backup tool (menu Home - Admin tools - Backup).
 
 - If the deployed application is Dolibarr, you can check a call of page https://myinstances/public/test/test_exec.php
 
