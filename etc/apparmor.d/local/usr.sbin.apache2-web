@@ -209,6 +209,7 @@
     /var/www/html/index.html r,
     /{usr/,}bin/bash rix,
     /{usr/,}bin/cat rix,
+    /{usr/,}bin/dash rix,
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
