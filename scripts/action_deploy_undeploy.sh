@@ -703,7 +703,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	echo "Create dir for instance = $targetdir/$osusername/$dbname"
 	mkdir -p $targetdir/$osusername/$dbname
 	
-	echo "Check dirwithsources1=$dirwithsources1 targetdirwithsources1=$targetdirwithsources1"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources1=$dirwithsources1 targetdirwithsources1=$targetdirwithsources1"
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
@@ -721,7 +721,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			fi
 		fi
 	fi
-	echo "Check dirwithsources2=$dirwithsources2 targetdirwithsources2=$targetdirwithsources2"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources2=$dirwithsources2 targetdirwithsources2=$targetdirwithsources2"
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
@@ -739,7 +739,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			fi
 		fi
 	fi
-	echo "Check dirwithsources3=$dirwithsources3 targetdirwithsources3=$targetdirwithsources3"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources3=$dirwithsources3 targetdirwithsources3=$targetdirwithsources3"
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
@@ -758,8 +758,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 		fi
 	fi
 
-	echo "Force permissions and owner on $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Force permissions and owner on $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername.$osusername $targetdir/$osusername/$dbname"
 	chown -R $osusername.$osusername $targetdir/$osusername/$dbname
+	echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
 	chmod -R go-rwxs $targetdir/$osusername/$dbname
 fi
 
