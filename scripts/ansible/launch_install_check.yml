@@ -42,6 +42,7 @@
       - memcached 
       - ncdu
       - duc
+      - iotop
       - acl
       - snapd
     register: command_output
