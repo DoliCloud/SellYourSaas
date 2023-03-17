@@ -87,7 +87,7 @@ ufw allow out 43/tcp
 # DNS
 ufw allow out 53/tcp
 ufw allow out 53/udp
-# NFS (only 2049 is required in out, not 111)
+# NFS (only 2049 is required for NFS)
 ufw allow out 2049/tcp
 ufw allow out 2049/udp
 
@@ -217,8 +217,8 @@ ufw allow in 953/udp
 # To see master NFS server
 if [[ "x$masterserver" != "x0" ]]; then
 	echo Enable NFS entry to allow access to master from instance servers
-	ufw allow in 111/tcp
-	ufw allow in 111/udp
+	#ufw allow in 111/tcp
+	#ufw allow in 111/udp
 	ufw allow in 2049/tcp
 	ufw allow in 2049/udp
 else
