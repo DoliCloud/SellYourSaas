@@ -87,9 +87,9 @@ ufw allow out 43/tcp
 # DNS
 ufw allow out 53/tcp
 ufw allow out 53/udp
-# NFS (only 2049 is required for NFS)
+# NFS (only 2049/tcp is required for NFS)
 ufw allow out 2049/tcp
-ufw allow out 2049/udp
+#ufw allow out 2049/udp
 
 
 # From external source to local - In
@@ -220,7 +220,7 @@ if [[ "x$masterserver" != "x0" ]]; then
 	#ufw allow in 111/tcp
 	#ufw allow in 111/udp
 	ufw allow in 2049/tcp
-	ufw allow in 2049/udp
+	#ufw allow in 2049/udp
 else
 	ufw delete allow in 111/tcp
 	ufw delete allow in 111/udp
