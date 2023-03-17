@@ -963,7 +963,7 @@ and comment out this line: RPCMOUNTDOPTS=--manage-gids, add this instead:
 
 [source, bash]
 ---------------
-RPCMOUNTDOPTS="--port 33333"
+RPCMOUNTDOPTS="--port 33333 --no-nfs-version 3"
 ---------------
 
 [source, bash]
@@ -973,7 +973,10 @@ service nfs-kernel-server restart
 rpcinfo -p
 ---------------
 
-You should see mountd on port 33333. If not, restart server.
+You should see mountd on port 33333, portmapper on port 111 and nfs on port 2049. If not, restart server.
+Warning: LISTEN is done on port 2049, so you can see it with "netstat -ultpn | grep 2049" or "ss -ultpn | grep 2049" but not with "lsof -P -i -n" (this is a special kernel embedded service). And you won't see link
+doing a grep on the server even with netstat or ss.
+On the deployment server, you can see when the NFS share is linked on network with "netstat -n | grep ipservermaster" 
 
 [source, bash]
 ---------------
