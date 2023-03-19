@@ -459,6 +459,7 @@ InvoiceBeforeAreAvailableOnDemandAt=Invoices before the %s are available on emai
 MyAcountDesc=This area is dedicated to managing your subscriptions to <a href="%s" target="sellyoursaas">%s</a>. You can create new instances of applications, choose options, get your subscription invoices, contact the support team or cancel your account.
 YourCustomUrl=Your custom URL
 CustomURL=Custom URL
+CustomUrlDesc=Having a custom URL will add another virtualhost file /etc/apache2/sellyoursaas-(available|online)/yourname.withX.domainname.com.custom.conf (ending with .custom.conf)
 NextInvoice=Next invoice
 AccessEnabled=Access enabled
 OtherOptionsAndParameters=Other options and parameters
