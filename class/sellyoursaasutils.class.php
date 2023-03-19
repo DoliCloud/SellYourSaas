@@ -3339,18 +3339,22 @@ class SellYourSaasUtils
 
 				$SSLON='On';	// Is SSL enabled on the custom url virtual host ?
 
-				$CERTIFFORCUSTOMDOMAIN =$customurl;
-				if ($CERTIFFORCUSTOMDOMAIN) {
-					// Kept for backward compatibility
-					if (preg_match('/on\.dolicloud\.com$/', $CERTIFFORCUSTOMDOMAIN)) {
-						$CERTIFFORCUSTOMDOMAIN='on.dolicloud.com';
+				$CERTIFFORCUSTOMDOMAIN = "";
+				if ($customurl) {
+					$pooldomainname = getDomainFromURL($customurl, 2);
+
+					// Check if SSL certificate for $customurl exists into master crt directory.
+					if (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$customurl.'.crt')) {
+						$CERTIFFORCUSTOMDOMAIN = $customurl;
+					} elseif (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$pooldomainname.'.crt')) {
+						$CERTIFFORCUSTOMDOMAIN = $pooldomainname;
 					} else {
-						// Check if SSL certificate for $customurl exists. If it does not exist, return an error to ask to upload certificate first.
-						if (! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt')) {
-							// TODO Return error to ask to upload a certificate first.
-							$CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
-							$SSLON='Off';
-						}
+						// If it does not exist, return an error to ask to upload certificate first.
+						/* include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+						 $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
+						 // TODO Show an error or warning to ask to upload a certificate first or let go and create with letsencrypt ?.
+						 */
+						$SSLON='Off';	// To avoid error of SSL certificate not found
 					}
 				}
 
@@ -3612,20 +3616,22 @@ class SellYourSaasUtils
 					$customvirtualhostline= $contract->array_options['options_custom_virtualhostline'];
 					$SSLON='On';	// Is SSL enabled on the custom url virtual host ?
 
-					$CERTIFFORCUSTOMDOMAIN=$customurl;
-					if ($CERTIFFORCUSTOMDOMAIN) {
-						// Kept for backward compatibility
-						if (preg_match('/on\.dolicloud\.com$/', $CERTIFFORCUSTOMDOMAIN)) {
-							$CERTIFFORCUSTOMDOMAIN='on.dolicloud.com';
-						} else {
-							// Check if SSL certificate for $customurl exists. If it does not exist, return an error to ask to upload certificate first.
-							if (! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt')) {
-								include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-								$CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
-								$SSLON='Off';
+					$CERTIFFORCUSTOMDOMAIN = "";
+					if ($customurl) {
+						$pooldomainname = getDomainFromURL($customurl, 2);
 
-								// TODO Show an error or warning to ask to upload a certificate first.
-							}
+						// Check if SSL certificate for $customurl exists into master crt directory.
+						if (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$customurl.'.crt')) {
+							$CERTIFFORCUSTOMDOMAIN = $customurl;
+						} elseif (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$pooldomainname.'.crt')) {
+							$CERTIFFORCUSTOMDOMAIN = $pooldomainname;
+						} else {
+							// If it does not exist, return an error to ask to upload certificate first.
+							/* include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+							 $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
+							 // TODO Show an error or warning to ask to upload a certificate first or let go and create with letsencrypt ?.
+							 */
+							$SSLON='Off';	// To avoid error of SSL certificate not found
 						}
 					}
 
