@@ -95,10 +95,11 @@ foreach ($conf->global as $key => $val) {
 		if ($val) {
 			$return[$key] = $val;
 			$newkey = preg_replace('/_ON/', '', $key);
-			if (!empty($conf->global->$newkey)) {
-				$return[$newkey] = $conf->global->$newkey;
-				$arrayofdifferentmessages[] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));
-				$return[$newkey.'_trans'] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));
+			$valkey = trim(getDolGlobalString($newkey));
+			if ($valkey) {
+				$return[$newkey] = $valkey;
+				$arrayofdifferentmessages[] = $tmplangs->trans(str_replace(array('(', ')'), '', $valkey));
+				$return[$newkey.'_trans'] = $tmplangs->trans(str_replace(array('(', ')'), '', $valkey));
 			}
 		}
 	}
