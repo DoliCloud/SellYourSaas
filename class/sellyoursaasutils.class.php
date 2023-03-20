@@ -1754,7 +1754,7 @@ class SellYourSaasUtils
 
 					// Test if there is at least 1 open invoice
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
-					if (is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
+					if (isset($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						usort($object->linkedObjects['facture'], "cmp");	// function cmp compare objects on ->date and is defined into sellyoursaas.lib.php.
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
