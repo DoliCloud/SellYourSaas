@@ -3341,6 +3341,7 @@ class SellYourSaasUtils
 
 				$CERTIFFORCUSTOMDOMAIN = "";
 				if ($customurl) {
+					include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 					$pooldomainname = getDomainFromURL($customurl, 2);
 
 					// Check if SSL certificate for $customurl exists into master crt directory.
@@ -3350,8 +3351,7 @@ class SellYourSaasUtils
 						$CERTIFFORCUSTOMDOMAIN = $pooldomainname;
 					} else {
 						// If it does not exist, return an error to ask to upload certificate first.
-						/* include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-						 $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
+						/* $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
 						 // TODO Show an error or warning to ask to upload a certificate first or let go and create with letsencrypt ?.
 						 */
 						$SSLON='Off';	// To avoid error of SSL certificate not found
@@ -3618,6 +3618,7 @@ class SellYourSaasUtils
 
 					$CERTIFFORCUSTOMDOMAIN = "";
 					if ($customurl) {
+						include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 						$pooldomainname = getDomainFromURL($customurl, 2);
 
 						// Check if SSL certificate for $customurl exists into master crt directory.
@@ -3627,8 +3628,7 @@ class SellYourSaasUtils
 							$CERTIFFORCUSTOMDOMAIN = $pooldomainname;
 						} else {
 							// If it does not exist, return an error to ask to upload certificate first.
-							/* include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-							 $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
+							/* $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
 							 // TODO Show an error or warning to ask to upload a certificate first or let go and create with letsencrypt ?.
 							 */
 							$SSLON='Off';	// To avoid error of SSL certificate not found
