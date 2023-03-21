@@ -755,14 +755,15 @@ while ($i < $imaxinloop) {
 				$cssforfield .= ($cssforfield ? ' ' : '').'right';
 			}
 			//if (in_array($key, array('fk_soc', 'fk_user', 'fk_warehouse'))) $cssforfield = 'tdoverflowmax100';
-
 			if (!empty($arrayfields['t.'.$key]['checked'])) {
 				print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '');
 				if (preg_match('/tdoverflow/', $cssforfield)) {
 					print ' title="'.dol_escape_htmltag($object->$key).'"';
 				}
 				print '>';
-				if ($key == 'status') {
+				if ($key == 'servercustomerannouncestatus') {
+					print ajax_object_onoff($object, 'servercustomerannouncestatus', 'servercustomerannouncestatus', 'On', 'Off');
+				} elseif ($key == 'status') {
 					print $object->getLibStatut(5);
 				} elseif ($key == 'rowid') {
 					print $object->showOutputField($val, $key, $object->id, '');
