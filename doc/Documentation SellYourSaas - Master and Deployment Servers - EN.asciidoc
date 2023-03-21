@@ -5528,7 +5528,7 @@ restart
 Even if php -i show the new version of library, a reboot may be required to have the new lib taken into account.
 
 
-==== Some remote action generates a PHP coredump
+==== Some remote action generates a PHP coredump or return a page "No answer received"
 
 This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
 You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1
