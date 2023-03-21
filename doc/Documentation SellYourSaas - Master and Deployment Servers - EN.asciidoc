@@ -2143,7 +2143,7 @@ mysql           hard     nofile           32768
 #65535:           hard     cpu              5000
 ---------------
 
-Note: To get/see the current limits of OS and connected user:
+Note: To get/see the current limits of OS for the connected user:
 
 [source,bash]
 ---------------
