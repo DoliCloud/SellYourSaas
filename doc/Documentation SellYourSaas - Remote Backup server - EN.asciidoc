@@ -32,7 +32,7 @@ This document present how to install a remote server for Backups in a SellYourSa
 
 === Choice of machine and OS and create it
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*)
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04* or *22.04*)
 
 * Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
 
