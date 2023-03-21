@@ -4226,14 +4226,14 @@ so the old URL will still works (temporarily until the old instance is closed)
 umount /mnt/disk/
 ---------------
 
-Note: To see open files on a disk if umount fails:
+Note: To see open files on a disk if umount fails because drive is busy:
 
 [source,bash]
 ---------------
 lsof | grep "/mnt/disk"
 ---------------
 
-* Detach the disk from the server. Ensure its name does not contain white space or special characters. Change the disk size from the Public Cloud manager and re-attach it to the server.
+* Ensure the name of disk does not contain white space or special characters. Change the disk size from the Public Cloud manager and re-attach it to the server.
 
 * Increase the partition size by running:
 
@@ -4244,7 +4244,7 @@ parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print all
 resizepart 
 Y		  (the num of the part)
-999GB    (Don't input the default value but the max value in column "End" of the disk that was shown by "print all")
+999GB    (Don't input the default value but the max value of disk size found on line "Disk...:" that was shown by "print all")
 q
 ---------------
 
@@ -4254,6 +4254,8 @@ q
 ---------------
 mount /mnt/disk/
 resize2fs /dev/vdX9
+or
+btrfs filesystem resize max /mnt/disk
 ---------------
 
 
