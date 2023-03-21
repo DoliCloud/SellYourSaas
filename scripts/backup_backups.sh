@@ -23,7 +23,7 @@ if [ "x$1" == "x" ]; then
 	echo "Usage: ${0} (test|confirm) [month|week|none] [osuX] [--delete]"
 	echo "With  month (default) is to keep 1 month of backup using --backup option of rsync"
 	echo "      week is to keep 1 week of backup using --backup option of rsync"
-	echo "      none is to not archive old version using the --backup option of rsync. For example when you do it using snapshot on backup server (recommended)."
+	echo "      none is to not archive old versions using the --backup option of rsync. For example when you already do it using snapshots on backup server (recommended)."
 	echo "You can also set a group of 4 first letters on username to backup the backup of a limited number of users."
 	exit 101
 fi
@@ -184,7 +184,7 @@ do
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of $DIRSOURCE1 to remote $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-	if [ "x$HISTO" == "x" ]; then
+	if [ "x$HISTODIR" == "x" ]; then
 		export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
 	else
 		export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
@@ -235,7 +235,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 			do
 				export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-				if [ "x$HISTO" == "x" ]; then
+				if [ "x$HISTODIR" == "x" ]; then
 		    	    export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
 		    	else 
 		    	    export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
