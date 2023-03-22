@@ -1039,6 +1039,12 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 					# If links does not exists, we disable SSL
 					SSLON="Off"
 			#fi
+
+			
+			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
+			export webCustomSSLCertificateKEY=webSSLCertificateKEY
+			export webCustomSSLCertificateIntermediate=webSSLCertificateIntermediate
+			
 		fi
 
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \

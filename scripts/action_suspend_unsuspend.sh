@@ -356,6 +356,11 @@ if [[ "$mode" == "rename" ]]; then
 					# If links does not exists, we disable SSL
 					SSLON="Off"
 			#fi
+			
+			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
+			export webCustomSSLCertificateKEY=webSSLCertificateKEY
+			export webCustomSSLCertificateIntermediate=webSSLCertificateIntermediate
+			
 		fi
 		
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
