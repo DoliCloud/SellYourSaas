@@ -1050,6 +1050,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		# If the certificate file is not found, we disable SSL
 		if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
 			SSLON="Off"
+		else
+			SSLON="On"
 		fi
 
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \

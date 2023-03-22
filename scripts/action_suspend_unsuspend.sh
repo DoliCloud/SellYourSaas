@@ -369,6 +369,8 @@ if [[ "$mode" == "rename" ]]; then
 		# If the certificate file is not found, we disable SSL
 		if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
 			SSLON="Off"
+		else
+			SSLON="On"
 		fi
 		
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
