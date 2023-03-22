@@ -5398,7 +5398,7 @@ Error when sending email in */var/log/mail.log*
 
 	fatal: file /etc/postfix/main.cf: parameter mail_owner: unknown user name value: postfix
 	
-=> If the user *postfix* really exists into /etc/passwd, the trouble may be apparmor that does not allow reading the file */etc/passwd*
+=> If the user *postfix* really exists into */etc/passwd*, the trouble may be apparmor that does not allow reading the file */etc/passwd*
 
 Check in file /etc/apparmor.d/usr.sbin.apache2 that /etc/passwd is not denied.
 
