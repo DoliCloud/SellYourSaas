@@ -1048,7 +1048,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		fi
 
 		# If the certificate file is not found, we disable SSL
-		if [[ -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+		if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
 			SSLON="Off"
 		fi
 
