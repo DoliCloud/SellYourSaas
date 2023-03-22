@@ -92,7 +92,7 @@
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
-    /mnt/diskhome/home/osup0tp51lsi/dbnt9228o9n/documents/website/amselectronique.fr/.well-known/acme-challenge/
+    /mnt/diskhome/home/osu*/dbn*/documents/website/*/.well-known/** r,
     owner /mnt/diskhome/home/osu*/** rw,
     owner /run/systemd/notify w,
     owner /var/spool/postfix/maildrop/ rw,
