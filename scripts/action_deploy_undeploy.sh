@@ -1042,8 +1042,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 			
 			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
-			export webCustomSSLCertificateKEY=webSSLCertificateKEY
-			export webCustomSSLCertificateIntermediate=webSSLCertificateIntermediate
+			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
+			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 			
 		fi
 

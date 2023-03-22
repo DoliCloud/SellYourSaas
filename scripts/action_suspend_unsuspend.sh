@@ -212,6 +212,9 @@ echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
 echo "instancedir = $instancedir"
+echo "webSSLCertificateCRT = $webSSLCertificateCRT"
+echo "webSSLCertificateKEY = $webSSLCertificateKEY"
+echo "webSSLCertificateIntermediate = $webSSLCertificateIntermediate"
 echo "fqn = $fqn"
 echo "fqnold = $fqnold"
 echo "CRONHEAD = $CRONHEAD"
@@ -358,8 +361,8 @@ if [[ "$mode" == "rename" ]]; then
 			#fi
 			
 			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
-			export webCustomSSLCertificateKEY=webSSLCertificateKEY
-			export webCustomSSLCertificateIntermediate=webSSLCertificateIntermediate
+			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
+			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 			
 		fi
 		
