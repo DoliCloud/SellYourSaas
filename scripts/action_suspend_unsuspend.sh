@@ -120,6 +120,9 @@ export contractlineid=${28}
 export EMAILFROM=${29}
 # CERTIFFORCUSTOMDOMAIN. Example: withY.mysaasdomain.com, myowndomain.com 
 export CERTIFFORCUSTOMDOMAIN=${30}
+if [ "x$CERTIFFORCUSTOMDOMAIN" == "x-" ]; then
+	CERTIFFORCUSTOMDOMAIN=""
+fi
 export archivedir=${31}
 export SSLON=${32}
 export apachereload=${33}

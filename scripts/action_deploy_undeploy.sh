@@ -134,7 +134,11 @@ if [ "x$customurl" == "x-" ]; then
 fi
 export contractlineid=${28}
 export EMAILFROM=${29}
+# CERTIFFORCUSTOMDOMAIN. Example: withY.mysaasdomain.com, myowndomain.com 
 export CERTIFFORCUSTOMDOMAIN=${30}
+if [ "x$CERTIFFORCUSTOMDOMAIN" == "x-" ]; then
+	CERTIFFORCUSTOMDOMAIN=""
+fi
 export archivedir=${31}
 export SSLON=${32}
 export apachereload=${33}
@@ -969,8 +973,13 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 	if [[ "x$customurl" != "x" ]]; then
 	
-		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
+
+		export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
+		export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+
+		# Delete old custom conf file
+		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
 		if [[ -s $apacheconf ]]
 		then
 			echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
@@ -979,38 +988,57 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
-			export pathforcertif=`dirname $pathforcertif`
+			# If a name for a custom CERTIF was forced, we use this one as SSL certiticate
 			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
 			export webCustomSSLCertificateKEY=$CERTIFFORCUSTOMDOMAIN.key
 			export webCustomSSLCertificateIntermediate=$CERTIFFORCUSTOMDOMAIN-intermediate.crt
 		
-			if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
-				echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to $pathforcertif/crt/$webCustomSSLCertificateCRT"
-				ln -fs $pathforcertif/crt/$webCustomSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
-				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to /etc/apache2/$webSSLCertificateCRT"
-					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
+			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateCRT ]]; then
+				# If file or link does not exist
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateCRT to $pathforcertiflocal/$webCustomSSLCertificateCRT"
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateCRT $pathforcertiflocal/$webCustomSSLCertificateCRT
+				# It is better to link to a bad certificate than linking to non existing file, so
+				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateCRT ]]; then
+					echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateCRT"
+					echo "ln -fs /etc/apache2/$webSSLCertificateCRT $pathforcertiflocal/$webCustomSSLCertificateCRT"
+					ln -fs /etc/apache2/$webSSLCertificateCRT $pathforcertiflocal/$webCustomSSLCertificateCRT
 				fi
 			fi
-			if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
-				echo "Create link /etc/apache2/$webCustomSSLCertificateKEY to $pathforcertif/crt/$webCustomSSLCertificateKEY"
-				ln -fs $pathforcertif/crt/$webCustomSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
-				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateKEY to /etc/apache2/$webSSLCertificateKEY"
-					ln -fs /etc/apache2/$webSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
+			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
+				# If file or link does not exist
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateKEY to $pathforcertiflocal/$webCustomSSLCertificateKEY"
+				cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
+				# It is better to link to a bad certificate than linking to non existing file, so
+				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
+					echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateKEY"
+					echo "ln -fs /etc/apache2/$webSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY"
+					ln -fs /etc/apache2/$webSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
 				fi
 			fi
-			if [[ ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
-				echo "Create link /etc/apache2/$webCustomSSLCertificateIntermediate to $pathforcertif/crt/$webCustomSSLCertificateIntermediate"
-				ln -fs $pathforcertif/crt/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
-				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateIntermediate to /etc/apache2/$webSSLCertificateIntermediate"
-					ln -fs /etc/apache2/$webSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
+			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
+				# If file or link does not exist
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateIntermediate to $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
+				cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
+				# It is better to link to a bad certificate than linking to non existing file, so
+				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
+					echo "Previous cp not valid, so we recreate it from /etc/apache2/$webSSLCertificateIntermediate"
+					echo "ln -fs /etc/apache2/$webSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
+					ln -fs /etc/apache2/$webSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
 				fi
 			fi
+		else 
+			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
+			export domainnameorcustomurl = `echo $customurl | cut -d "." -f 1`
+			# We must create it using letsencrypt if not yet created
+			#if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn.crt ]]; then
+					# Generate the letsencrypt certificate
+					
+					# certbot certonly --webroot -w $instancedir -d $customurl 
+					# create links					
+
+					# If links does not exists, we disable SSL
+					SSLON="Off"
+			#fi
 		fi
 
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
