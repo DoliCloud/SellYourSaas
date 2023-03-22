@@ -1044,7 +1044,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
-			
+			export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 		fi
 
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \

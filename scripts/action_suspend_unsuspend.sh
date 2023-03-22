@@ -363,7 +363,7 @@ if [[ "$mode" == "rename" ]]; then
 			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
-			
+			export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 		fi
 		
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
