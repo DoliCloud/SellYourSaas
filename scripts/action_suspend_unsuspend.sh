@@ -308,7 +308,7 @@ if [[ "$mode" == "rename" ]]; then
 	
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists and create them if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
-			# If a name for a custom CERTIF was forced, we use this one as SSL certiticate
+			# If a name for a custom CERTIF stored on master was forced, we use this one as SSL certiticate
 			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
 			export webCustomSSLCertificateKEY=$CERTIFFORCUSTOMDOMAIN.key
 			export webCustomSSLCertificateIntermediate=$CERTIFFORCUSTOMDOMAIN-intermediate.crt
@@ -357,13 +357,18 @@ if [[ "$mode" == "rename" ]]; then
 					# create links					
 
 					# If links does not exists, we disable SSL
-					SSLON="Off"
+					#SSLON="Off"
 			#fi
 			
 			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 			export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
+		fi
+		
+		# If the certificate file is not found, we disable SSL
+		if [[ -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+			SSLON="Off"
 		fi
 		
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"

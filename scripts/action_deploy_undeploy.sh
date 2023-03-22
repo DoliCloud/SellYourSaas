@@ -988,7 +988,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
-			# If a name for a custom CERTIF was forced, we use this one as SSL certiticate
+			# If a name for a custom CERTIF stored on master was forced, we use this one as SSL certiticate
 			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
 			export webCustomSSLCertificateKEY=$CERTIFFORCUSTOMDOMAIN.key
 			export webCustomSSLCertificateIntermediate=$CERTIFFORCUSTOMDOMAIN-intermediate.crt
@@ -1037,7 +1037,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 					# create links					
 
 					# If links does not exists, we disable SSL
-					SSLON="Off"
+					#SSLON="Off"
 			#fi
 
 			
@@ -1045,6 +1045,11 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 			export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
+		fi
+
+		# If the certificate file is not found, we disable SSL
+		if [[ -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+			SSLON="Off"
 		fi
 
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
