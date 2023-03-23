@@ -6,7 +6,12 @@ if (!defined('NOREQUIREHTML'))  define('NOREQUIREHTML', '1');
 if (!defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX', '1');
 if (!defined('NOREQUIRESOC'))   define('NOREQUIRESOC', '1');
 if (!defined('NOCSRFCHECK'))    define('NOCSRFCHECK', '1');
-if (!defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+if (!defined('NOIPCHECK')) {
+	define('NOIPCHECK', '1'); // Do not check IP defined into conf $dolibarr_main_restrict_ip
+}
+if (!defined('NOBROWSERNOTIF')) {
+	define('NOBROWSERNOTIF', '1');
+}
 
 // Add specific definition to allow a dedicated session management
 require '../mainmyaccount.inc.php';
@@ -31,6 +36,12 @@ $idticketgroup = GETPOST('idticketgroup', 'aZ09');
 $idticketgroup = GETPOST('idticketgroup', 'aZ09');
 $lang = GETPOST('lang', 'aZ09');
 
+// Security check
+if (!defined("NOLOGIN")) {	// No need for restrictedArea if not logged. Later the select will filter on public articles for public categories only if not logged.
+	//  restrictedArea($user, 'knowledgemanagement', 0, 'knowledgemanagement_knowledgerecord', 'knowledgerecord');
+}
+
+
 /*
  * Actions
  */
@@ -43,27 +54,34 @@ $lang = GETPOST('lang', 'aZ09');
  */
 
 if ($action == "getKnowledgeRecord") {
-    $response = '';
-    $sql = "SELECT kr.rowid, kr.ref, kr.question, kr.answer,l.url,ctc.code";
-    $sql .= " FROM ".MAIN_DB_PREFIX."links as l";
-    $sql .= " INNER JOIN ".MAIN_DB_PREFIX."knowledgemanagement_knowledgerecord as kr ON kr.rowid = l.objectid";
-    $sql .= " INNER JOIN ".MAIN_DB_PREFIX."c_ticket_category as ctc ON ctc.rowid = kr.fk_c_ticket_category";
-    $sql .= " WHERE ctc.code = '".$db->escape($idticketgroup)."'";
-    $sql .= " AND ctc.active = 1 AND ctc.public = 1 AND (kr.lang = '".$db->escape($lang)."' OR kr.lang IS NULL OR kr.lang = '')";
-    $sql .= " AND kr.status = 1";
-    $resql = $db->query($sql);
-    if ($resql) {
-        $num = $db->num_rows($resql);
-        $i = 0;
-        $response = array();
-        while ($i < $num) {
-            $obj = $db->fetch_object($resql);
-            $response[] = array('title'=>$obj->question,'ref'=>$obj->url,'answer'=>$obj->answer,'url'=>$obj->url);
-            $i++;
-        }
-    } else{
-        dol_print_error($db);
-    }
-    $response =json_encode($response);
-    echo $response;
+	$response = '';
+	$sql = "SELECT kr.rowid, kr.ref, kr.question, kr.answer,l.url,ctc.code";
+	$sql .= " FROM ".MAIN_DB_PREFIX."links as l";	// Links
+	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."knowledgemanagement_knowledgerecord as kr ON kr.rowid = l.objectid";
+	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."c_ticket_category as ctc ON ctc.rowid = kr.fk_c_ticket_category";
+	$sql .= " WHERE ctc.code = '".$db->escape($idticketgroup)."'";
+	$sql .= " AND ctc.active = 1";
+	//if (defined("NOLOGIN")) {
+		$sql .= " AND ctc.public = 1";
+	//}
+	$sql .= " AND (kr.lang = '".$db->escape($lang)."' OR kr.lang IS NULL OR kr.lang = '')";
+	$sql .= " AND kr.status = 1";
+	//$sql .= " AND (kr.answer IS NOT NULL AND kr.answer <> '')";
+	//print $sql;
+
+	$resql = $db->query($sql);
+	if ($resql) {
+		$num = $db->num_rows($resql);
+		$i = 0;
+		$response = array();
+		while ($i < $num) {
+			$obj = $db->fetch_object($resql);
+			$response[] = array('title'=>$obj->question,'ref'=>$obj->url,'answer'=>$obj->answer,'url'=>$obj->url);
+			$i++;
+		}
+	} else {
+		dol_print_error($db);
+	}
+	$response =json_encode($response);
+	echo $response;
 }
