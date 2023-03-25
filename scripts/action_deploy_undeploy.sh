@@ -735,7 +735,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						cd $dirwithsources1/.
 						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz ."
 						#cp -r $dirwithsources1/. $targetdirwithsources1
-						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz $dirwithsources1/.
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz .
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources1.tgz" ]; then
@@ -781,7 +781,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						cd $dirwithsources2/.
 						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz ."
 						#cp -r $dirwithsources2/. $targetdirwithsources2
-						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz $dirwithsources2/.
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz .
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources2.tgz" ]; then
@@ -827,7 +827,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						cd $dirwithsources3/.
 						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz ."
 						#cp -r $dirwithsources3/. $targetdirwithsources3
-						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz $dirwithsources3/.
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz .
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources3.tgz" ]; then
