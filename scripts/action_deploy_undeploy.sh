@@ -733,7 +733,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
 						mkdir -p "/tmp/cache$dirwithsources1"
 						#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
-						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz $dirwithsources1/."
+						cd $dirwithsources1/.
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz ."
 						#cp -r $dirwithsources1/. $targetdirwithsources1
 						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz $dirwithsources1/.
 					fi 
@@ -778,7 +779,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
 						mkdir -p "/tmp/cache$dirwithsources2"
 						#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
-						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz $dirwithsources2/."
+						cd $dirwithsources2/.
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz ."
 						#cp -r $dirwithsources2/. $targetdirwithsources2
 						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz $dirwithsources2/.
 					fi 
@@ -823,7 +825,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
 						mkdir -p "/tmp/cache$dirwithsources3"
 						#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
-						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz $dirwithsources3/."
+						cd $dirwithsources3/.
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz ."
 						#cp -r $dirwithsources3/. $targetdirwithsources3
 						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz $dirwithsources3/.
 					fi 
