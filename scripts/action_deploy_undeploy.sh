@@ -32,6 +32,7 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
+export currentpath=$(dirname "$0")
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -712,14 +713,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
 			if [[ -f $dirwithsources1.tar.zst ]]; then
-				echo "tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 				tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
 				if [ -f $dirwithsources1.tgz ]; then
-					echo "tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
+					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
 					tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
 				else
-					echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
+					echo "cp -pr  $dirwithsources1/. $targetdirwithsources1"
 					cp -pr  $dirwithsources1/. $targetdirwithsources1
 				fi
 			fi
@@ -730,15 +731,15 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
 			if [[ -f $dirwithsources2.tar.zst ]]; then
-				echo "tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 				tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
 				if [ -f $dirwithsources2.tgz ]; then
-					echo "tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
+					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
 					tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
 				else
 					datesource=`date -r $dirwithsources2 +"%Y%m%d"`
-					if [ -f "/tmp/cache$dirwithsources2.tgz" ]
+					if [ -f "/tmp/cache$dirwithsources2.tgz" ]; then
 						# compare date of file with date of source dir
 						datecache=`date -r /tmp/cache$dirwithsources2.tgz +"%Y%m%d"`
 					else 
@@ -747,21 +748,25 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					echo "datesource=$datesource datecache=$datecache"
 
 					if [ ! -f "/tmp/cache$dirwithsources2.tgz" -o $datesource -gt $datecache ]; then
-						echo "Cache does not exists or is too old, we recreate it"
+						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
 						mkdir -p "/tmp/cache$dirwithsources2"
-						echo "cp -r $dirwithsources2/ /tmp/cache$dirwithsources2"
+						#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude /tmp/cache$dirwithsources2.tgz $dirwithsources2/."
 						#cp -r $dirwithsources2/. $targetdirwithsources2
-						#tar -cvf $dirwithsources2/ /tmp/cache$dirwithsources2.tgz
+						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude /tmp/cache$dirwithsources2.tgz $dirwithsources2/.
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources2.tgz" ]; then
 						# If cache does not exists. Should not happen
-						echo "cp -r  $dirwithsources2/ $targetdirwithsources2"
-						cp -r  $dirwithsources2/. $targetdirwithsources2
+                        echo "Warning: Both remote and local cache does not exists. Should not happen."
+                        echo "cp -r  $dirwithsources2/. $targetdirwithsources2"
+                        cp -r  $dirwithsources2/. $targetdirwithsources2
 					else 
 						# If cache exists.
-						echo "TODO detar the cache file"
-					fi
+                        echo "Local cache found. We uncompress it."
+                        echo "tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
+                        tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
+                    fi
 				fi
 			fi
 		fi
@@ -771,14 +776,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
 			if [[ -f $dirwithsources3.tar.zst ]]; then
-				echo "tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 				tar -I zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
 				if [ -f $dirwithsources3.tgz ]; then
-					echo "tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
+					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
 					tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
 				else
-					echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
+					echo "cp -pr  $dirwithsources3/. $targetdirwithsources3"
 					cp -pr  $dirwithsources3/. $targetdirwithsources3
 				fi
 			fi
