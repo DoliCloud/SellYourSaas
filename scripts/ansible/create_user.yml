@@ -3,10 +3,11 @@
 #
 # To run the script:
 # ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user'
-# notice the double quotes around the key so spaces are interpreted as part of it
-# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userip=www.xxx.yyy.zzz userpublickey="publickey"'
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userroot=0 userpublickey="publickey"'
 # you can specify an IP for that user with the syntax above
-# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userip=www.xxx.yyy.zzz userpublickey="publickey"' --limit=*.mydomain.com
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userip=www.xxx.yyy.zzz userroot=0 userpublickey="publickey"' --limit=*.mydomain.com
+# you can specify if user can get root access with the syntax above
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userpublickey="publickey" userpassword="thepass"' --limit=*.mydomain.com
 #
 
 - name: Create user on target system(s)
@@ -71,6 +72,20 @@
       - userpublickey is defined
       - userpublickey|length > 0
 
+  - name: Add line for root access into file /etc/sudoers.d/{{login}}
+    lineinfile:
+      path: /etc/sudoers.d/{{ login }}
+      line: "{{ login }} ALL=(ALL) ALL"
+      owner: root
+      group: root
+      mode: '0440'
+      create: yes
+    when:
+      - userpublickey is defined
+      - userpublickey|length > 0
+      - userroot is defined > 0
+      - userroot|length > 0
+
   - name: Add first line into file /etc/sudoers.d/{{login}}
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
@@ -79,6 +94,9 @@
       group: root
       mode: '0440'
       create: yes
+    when:
+      - userpublickey is defined
+      - userpublickey|length > 0
 
   - name: Add second line into file /etc/sudoers.d/{{login}}
     lineinfile:
@@ -88,6 +106,9 @@
       group: root
       mode: '0440'
       create: yes
+    when:
+      - userpublickey is defined
+      - userpublickey|length > 0
 
   - name: Add user to AllowUsers in SSH sellyoursaas conf
     lineinfile:
@@ -101,7 +122,7 @@
       name: ssh
       state: restarted
     when: addlineinsshconf.changed
-      
+
   - name: If IP was provided, we delete the login-allowed-ip.conf file
     ansible.builtin.file:
       path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"

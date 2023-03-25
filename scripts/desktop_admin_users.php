@@ -76,7 +76,7 @@ if (! isset($argv[4])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed desktop.\n";
 	print "\n";
-	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userip=userip] [userpublickey=\"userpublickey\"] \n";
+	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userip=userip] [userroot=0|1] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
 	print "\n";
 	exit(-1);
 }
@@ -99,14 +99,16 @@ $hostfile = isset($argv[3]) ? $argv[3] : '';
 $target = empty($argv[4]) ? '' : $argv[4];
 
 $loginforansible = isset($argv[5]) ? $argv[5] : '';
-if (strpos('=', $loginforansible) !== false) {
+if (strpos($loginforansible, '=') !== false) {
 	$loginforansible = "";
 }
 
 // optional params
 $userip = '';
 $userpublickey = '';
-for ($i = 5; $i <= 7; $i++) {
+$userpassword = '';
+$userroot = '';
+for ($i = 5; $i <= 10; $i++) {
 	$moreparam = empty($argv[$i]) ? '' : $argv[$i];
 	//print $moreparam."\n";
 	if ($moreparam) {
@@ -118,19 +120,29 @@ for ($i = 5; $i <= 7; $i++) {
 			if ($arrayparam[0] == 'userpublickey') {
 				$userpublickey = $arrayparam[1];
 			}
+			if ($arrayparam[0] == 'userpassword') {
+				$userpassword = $arrayparam[1];
+			}
+			if ($arrayparam[0] == 'userroot') {
+				$userroot = $arrayparam[1];
+			}
 		}
 	}
 }
 
-if ($action == 'create' && empty($userpublickey)) {
-	echo "Error: To create a adminsys user login, the parameter userpublickey is mandatory.\n";
+if ($action == 'create' && ($userroot === '' || empty($userpublickey))) {
+	echo "Error: To create a personal user login, the parameter userroot and userpublickey are mandatory.\n";
+	exit(-1);
+}
+if ($userroot && empty($userpassword)) {
+	echo "Error: To create a personal user login allowed to get root access, the parameter userpassword is mandatory.\n";
 	exit(-1);
 }
 
 $scriptyaml = '';
 if ($action == 'create') {
 	$scriptyaml = 'create_user.yml';
-} elseif ($action == 'allowroot' || $action == 'disallowroot' || $action == 'reactivate') {
+} elseif ($action == 'reactivate') {
 	$scriptyaml = 'reactivate_user.yml';
 } elseif ($action == 'deactivate') {
 	$scriptyaml = 'deactivate_user.yml';
@@ -139,7 +151,7 @@ if ($action == 'create') {
 } elseif ($action == 'remove') {
 	$scriptyaml = 'remove_user.yml';
 } else {
-	echo "Error: Bad parameter action. Must be (create|allowroot|disallowroot|deactivate|reactivate|remove).\n";
+	echo "Error: Bad parameter action. Must be (create|deactivate|reactivate|remove).\n";
 	exit(-1);
 }
 
@@ -159,14 +171,14 @@ $command .= " -e 'target=".$target." login=".$login;
 if ($userip) {
 	$command .= " userip=\"".$userip."\"";
 }
+if ($userroot) {
+	$command .= " userroot=\"".$userroot."\"";
+}
 if ($userpublickey) {
 	$command .= " userpublickey=\"".$userpublickey."\"";
 }
-if ($action == 'allowroot') {
-	$command .= " allowroot=1";
-}
-if ($action == 'disallowroot') {
-	$command .= " disallowroot=1";
+if ($userpassword) {
+	$command .= " userpassword=\"".$userpassword."\"";
 }
 $command .= "'";
 
