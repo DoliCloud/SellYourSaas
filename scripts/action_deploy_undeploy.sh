@@ -32,7 +32,6 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
-export currentpath=$(dirname "$0")
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -734,9 +733,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						mkdir -p "/tmp/cache$dirwithsources1"
 						#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
 						cd $dirwithsources1/.
-						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz ."
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz ."
 						#cp -r $dirwithsources1/. $targetdirwithsources1
-						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz $dirwithsources1/.
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz $dirwithsources1/.
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources1.tgz" ]; then
@@ -780,9 +779,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						mkdir -p "/tmp/cache$dirwithsources2"
 						#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
 						cd $dirwithsources2/.
-						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz ."
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz ."
 						#cp -r $dirwithsources2/. $targetdirwithsources2
-						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz $dirwithsources2/.
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz $dirwithsources2/.
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources2.tgz" ]; then
@@ -826,9 +825,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						mkdir -p "/tmp/cache$dirwithsources3"
 						#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
 						cd $dirwithsources3/.
-						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz ."
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz ."
 						#cp -r $dirwithsources3/. $targetdirwithsources3
-						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz $dirwithsources3/.
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz $dirwithsources3/.
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources3.tgz" ]; then
