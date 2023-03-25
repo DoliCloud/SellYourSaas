@@ -135,7 +135,7 @@ if ($action == 'create' && ($userroot === '' || empty($userpublickey))) {
 	exit(-1);
 }
 if ($userroot && empty($userpassword)) {
-	echo "Error: To create a personal user login allowed to get root access, the parameter userpassword is mandatory.\n";
+	echo "Error: To create a personal user login allowed to get root access (userroot=1), the parameter userpassword is mandatory.\n";
 	exit(-1);
 }
 
@@ -152,6 +152,8 @@ if ($action == 'create') {
 	$scriptyaml = 'remove_user.yml';
 } else {
 	echo "Error: Bad parameter action. Must be (create|deactivate|reactivate|remove).\n";
+	echo "\n";
+	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userip=userip] [userroot=0|1] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
 	exit(-1);
 }
 
@@ -178,7 +180,11 @@ if ($userpublickey) {
 	$command .= " userpublickey=\"".$userpublickey."\"";
 }
 if ($userpassword) {
-	$command .= " userpassword=\"".$userpassword."\"";
+	$salt = generateSalt(16); // génère un sel aléatoire de 16 caractères
+	//$hash = '$6$' . $salt . '$' . hash('sha512', $salt . $userpassword, false); // utilise la fonction hash() pour hasher le mot de passe avec le sel et encode le résultat dans le format du fichier /etc/shadow
+	$hash = crypt($userpassword, "$6$".$salt); // utilise la fonction crypt() pour hasher le mot de passe avec le sel
+
+	$command .= " userpassword=\"".$hash."\"";
 }
 $command .= "'";
 
@@ -195,3 +201,21 @@ foreach ($resarray as $line) {
 chdir($currentdir);
 
 exit(0);
+
+
+
+/**
+ * Generate a salt
+ *
+ * @param	int		$length		Length of salt
+ * @return	string				Salt
+ */
+function generateSalt($length)
+{
+	$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+	$salt = '';
+	for ($i = 0; $i < $length; $i++) {
+		$salt .= $chars[rand(0, strlen($chars) - 1)];
+	}
+	return $salt;
+}

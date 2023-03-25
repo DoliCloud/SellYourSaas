@@ -7,7 +7,7 @@
 # you can specify an IP for that user with the syntax above
 # ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userip=www.xxx.yyy.zzz userroot=0 userpublickey="publickey"' --limit=*.mydomain.com
 # you can specify if user can get root access with the syntax above
-# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userpublickey="publickey" userpassword="thepass"' --limit=*.mydomain.com
+# ansible-playbook -K create_user.yml -i hosts-xxx -e 'target=targethost login=user userpublickey="publickey" userpassword="passencrypted"' --limit=*.mydomain.com
 #
 
 - name: Create user on target system(s)
@@ -140,3 +140,15 @@
     when: 
       - userip is defined
       - userip|length > 0
+   
+  # At the end, update password
+  - name: Update password
+    user:
+      name: '{{ login }}'
+      shell: /bin/bash
+      comment: "User created from desktop_admin_users.php"
+      password: '{{ userpassword }}'
+      update_password: always
+    when: 
+      - userpassword is defined
+      - userpassword|length > 0
