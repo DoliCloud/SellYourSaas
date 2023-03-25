@@ -72,11 +72,11 @@ if (! $res) die("Include of master fails");
 
 $date = new DateTime();
 print "***** ".$script_file." (".$version.") - ".$date->format('Ymd-H:i:s')." *****\n";
-if (! isset($argv[3])) {	// Check parameters
+if (! isset($argv[4])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed desktop.\n";
 	print "\n";
-	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) login hostfile target [userip=userip] [userpublickey=\"userpublickey\"]\n";
+	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userip=userip] [userpublickey=\"userpublickey\"] \n";
 	print "\n";
 	exit(-1);
 }
@@ -96,12 +96,17 @@ $now = time();
 $action = isset($argv[1]) ? $argv[1] : '';
 $login = isset($argv[2]) ? $argv[2] : '';
 $hostfile = isset($argv[3]) ? $argv[3] : '';
+$target = empty($argv[4]) ? '' : $argv[4];
+
+$loginforansible = isset($argv[5]) ? $argv[5] : '';
+if (strpos('=', $loginforansible) !== false) {
+	$loginforansible = "";
+}
 
 // optional params
 $userip = '';
 $userpublickey = '';
-$target = empty($argv[4]) ? '' : $argv[4];
-for ($i = 4; $i <= 6; $i++) {
+for ($i = 5; $i <= 7; $i++) {
 	$moreparam = empty($argv[$i]) ? '' : $argv[$i];
 	//print $moreparam."\n";
 	if ($moreparam) {
@@ -115,6 +120,11 @@ for ($i = 4; $i <= 6; $i++) {
 			}
 		}
 	}
+}
+
+if ($action == 'create' && empty($userpublickey)) {
+	echo "Error: To create a adminsys user login, the parameter userpublickey is mandatory.\n";
+	exit(-1);
 }
 
 $scriptyaml = '';
@@ -141,7 +151,11 @@ $currentdir = getcwd();
 
 chdir($path.'/ansible');
 
-$command = "ansible-playbook -v -K ".$scriptyaml." -i hosts-".$hostfile." -e 'target=".$target." login=".$login;
+$command = "ansible-playbook -v -K ".$scriptyaml." -i hosts-".$hostfile;
+if ($loginforansible) {
+	$command .= " --user=".$loginforansible;
+}
+$command .= " -e 'target=".$target." login=".$login;
 if ($userip) {
 	$command .= " userip=\"".$userip."\"";
 }
