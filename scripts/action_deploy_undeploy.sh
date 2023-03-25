@@ -720,9 +720,36 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
 					tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
 				else
-					echo "cp -pr  $dirwithsources1/. $targetdirwithsources1"
-					cp -pr  $dirwithsources1/. $targetdirwithsources1
-				fi
+					datesource=`date -r $dirwithsources1 +"%Y%m%d"`
+					if [ -f "/tmp/cache$dirwithsources1.tgz" ]; then
+						# compare date of file with date of source dir
+						datecache=`date -r /tmp/cache$dirwithsources1.tgz +"%Y%m%d"`
+					else 
+						datecache=0
+					fi
+					echo "datesource=$datesource datecache=$datecache"
+
+					if [ ! -f "/tmp/cache$dirwithsources1.tgz" -o $datesource -gt $datecache ]; then
+						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
+						mkdir -p "/tmp/cache$dirwithsources1"
+						#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz $dirwithsources1/."
+						#cp -r $dirwithsources1/. $targetdirwithsources1
+						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz $dirwithsources1/.
+					fi 
+
+					if [ ! -f "/tmp/cache$dirwithsources1.tgz" ]; then
+						# If cache does not exists. Should not happen
+                        echo "Warning: Both remote and local cache does not exists. Should not happen."
+                        echo "cp -r  $dirwithsources1/. $targetdirwithsources1"
+                        cp -r  $dirwithsources1/. $targetdirwithsources1
+					else 
+						# If cache exists.
+                        echo "Local cache found. We uncompress it."
+                        echo "tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
+                        tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
+                    fi
+          		fi
 			fi
 		fi
 	fi
@@ -751,9 +778,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
 						mkdir -p "/tmp/cache$dirwithsources2"
 						#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
-						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude /tmp/cache$dirwithsources2.tgz $dirwithsources2/."
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz $dirwithsources2/."
 						#cp -r $dirwithsources2/. $targetdirwithsources2
-						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude /tmp/cache$dirwithsources2.tgz $dirwithsources2/.
+						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz $dirwithsources2/.
 					fi 
 
 					if [ ! -f "/tmp/cache$dirwithsources2.tgz" ]; then
@@ -783,8 +810,35 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
 					tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
 				else
-					echo "cp -pr  $dirwithsources3/. $targetdirwithsources3"
-					cp -pr  $dirwithsources3/. $targetdirwithsources3
+					datesource=`date -r $dirwithsources3 +"%Y%m%d"`
+					if [ -f "/tmp/cache$dirwithsources3.tgz" ]; then
+						# compare date of file with date of source dir
+						datecache=`date -r /tmp/cache$dirwithsources3.tgz +"%Y%m%d"`
+					else 
+						datecache=0
+					fi
+					echo "datesource=$datesource datecache=$datecache"
+
+					if [ ! -f "/tmp/cache$dirwithsources3.tgz" -o $datesource -gt $datecache ]; then
+						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
+						mkdir -p "/tmp/cache$dirwithsources3"
+						#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz $dirwithsources3/."
+						#cp -r $dirwithsources3/. $targetdirwithsources3
+						tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz $dirwithsources3/.
+					fi 
+
+					if [ ! -f "/tmp/cache$dirwithsources3.tgz" ]; then
+						# If cache does not exists. Should not happen
+                        echo "Warning: Both remote and local cache does not exists. Should not happen."
+                        echo "cp -r  $dirwithsources3/. $targetdirwithsources3"
+                        cp -r  $dirwithsources3/. $targetdirwithsources3
+					else 
+						# If cache exists.
+                        echo "Local cache found. We uncompress it."
+                        echo "tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
+                        tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
+                    fi
 				fi
 			fi
 		fi
