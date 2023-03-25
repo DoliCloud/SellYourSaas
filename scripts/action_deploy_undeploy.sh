@@ -737,8 +737,31 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					echo "tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
 					tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
 				else
-					echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
-					cp -pr  $dirwithsources2/. $targetdirwithsources2
+					datesource=`date -r $dirwithsources2 +"%Y%m%d"`
+					if [ -f "/tmp/cache$dirwithsources2.tgz" ]
+						# compare date of file with date of source dir
+						datecache=`date -r /tmp/cache$dirwithsources2.tgz +"%Y%m%d"`
+					else 
+						datecache=0
+					fi
+					echo "datesource=$datesource datecache=$datecache"
+
+					if [ ! -f "/tmp/cache$dirwithsources2.tgz" -o $datesource -gt $datecache ]; then
+						echo "Cache does not exists or is too old, we recreate it"
+						mkdir -p "/tmp/cache$dirwithsources2"
+						echo "cp -r $dirwithsources2/ /tmp/cache$dirwithsources2"
+						#cp -r $dirwithsources2/. $targetdirwithsources2
+						#tar -cvf $dirwithsources2/ /tmp/cache$dirwithsources2.tgz
+					fi 
+
+					if [ ! -f "/tmp/cache$dirwithsources2.tgz" ]; then
+						# If cache does not exists. Should not happen
+						echo "cp -r  $dirwithsources2/ $targetdirwithsources2"
+						cp -r  $dirwithsources2/. $targetdirwithsources2
+					else 
+						# If cache exists.
+						echo "TODO detar the cache file"
+					fi
 				fi
 			fi
 		fi
