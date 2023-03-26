@@ -226,8 +226,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 		if [ "x$nbofdir" != "x0" ]; then
 			# Test if we force backup on a given dir
 			if [ "x$3" != "x" ]; then
-				if [ "x$3" != "xosu$i" ]; then
-					echo "Ignored."
+				if [ "x$3" != "xosu$i" -a "x$3" != "x--delete" ]; then
+					echo "Ignored (param 3 is $3)."
 					continue
 				fi
 			fi
@@ -323,7 +323,7 @@ if [ "x$atleastoneerror" != "x0" ]; then
 	exit 1
 fi
 
-if [ "x$3" != "x" ]; then
+if [ "x$3" != "x" -a "x$3" != "x--delete" ]; then
 	echo "Script was called for only one of few given instances. No email or supervision event sent on success in such situation."
 else
 	echo "Send email to $EMAILTO to inform about backup success"
