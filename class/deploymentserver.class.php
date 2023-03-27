@@ -164,19 +164,9 @@ class Deploymentserver extends CommonObject
 	// If this object has a subtable with lines
 
 	// /**
-	//  * @var string    Name of subtable line
-	//  */
-	// public $table_element_line = 'sellyoursaas_deploymentserverline';
-
-	// /**
 	//  * @var string    Field with ID of parent key if this object has a parent
 	//  */
 	// public $fk_element = 'fk_deploymentserver';
-
-	// /**
-	//  * @var string    Name of subtable class that manage subtable lines
-	//  */
-	// public $class_element_line = 'Deploymentserverline';
 
 	// /**
 	//  * @var array	List of child tables. To test if we can delete object.
@@ -189,11 +179,6 @@ class Deploymentserver extends CommonObject
 	//  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
 	//  */
 	// protected $childtablesoncascade = array('sellyoursaas_deploymentserverdet');
-
-	// /**
-	//  * @var DeploymentserverLine[]     Array of subtable lines
-	//  */
-	// public $lines = array();
 
 
 
@@ -970,17 +955,7 @@ class Deploymentserver extends CommonObject
 	{
 		$this->lines = array();
 
-		$objectline = new DeploymentserverLine($this->db);
-		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_deploymentserver = '.((int) $this->id)));
-
-		if (is_numeric($result)) {
-			$this->error = $objectline->error;
-			$this->errors = $objectline->errors;
-			return $result;
-		} else {
-			$this->lines = $result;
-			return $this->lines;
-		}
+		return $this->lines;
 	}
 
 	/**
@@ -1134,31 +1109,40 @@ class Deploymentserver extends CommonObject
 		}
 		return $reflist;
 	}
-}
-
-
-require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
-
-/**
- * Class DeploymentserverLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class DeploymentserverLine extends CommonObjectLine
-{
-	// To complete with content of an object DeploymentserverLine
-	// We should have a field rowid, fk_deploymentserver and position
 
 	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-	 */
-	public $isextrafieldmanaged = 0;
-
-	/**
-	 * Constructor
+	 * Return info about last backups on the server
 	 *
-	 * @param DoliDb $db Database handler
+	 * @return	array		Array with info
 	 */
-	public function __construct(DoliDB $db)
+	public function getLastBackupDate()
 	{
-		$this->db = $db;
+		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
+
+		$sql = "SELECT ce.latestbackup_status, MAX(ce.latestbackup_date) as maxtry, MAX(ce.latestbackup_date_ok) as maxok";
+		$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
+		$sql .= " WHERE ce.fk_object = c.rowid";
+		//$sql .= " AND ce.latestbackup_status = 'OK'";
+		$sql .= " AND ce.deployment_host = '".$this->db->escape($this->ipaddress)."'";
+		$sql .= " GROUP BY ce.latestbackup_status";
+
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			while ($obj = $this->db->fetch_object($resql)) {
+				if ($obj->latestbackup_status == 'OK') {
+					$maxtryok = $this->db->jdate($obj->maxtry);
+					$maxokok = $this->db->jdate($obj->maxok);
+				} elseif ($obj->latestbackup_status == 'KO') {
+					$maxtryko = $this->db->jdate($obj->maxtry);
+					$maxokko = $this->db->jdate($obj->maxok);
+				} elseif ($obj->latestbackup_status) {
+					dol_print_error($this->db, 'Bad value for latestbackup_status');
+				}
+			}
+		} else {
+			dol_print_error($this->db);
+		}
+
+		return array('maxtryok' => $maxtryok, 'maxokok' => $maxokok, 'maxtryko' => $maxtryko, 'maxokko' => $maxokko);
 	}
 }

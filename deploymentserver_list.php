@@ -817,7 +817,12 @@ while ($i < $imaxinloop) {
 		}
 		// Column nb of instances backups
 		if (!empty($arrayfields['nb_backups']['checked'])) {
-			print '<td class="right">';
+			$titletoshow = '';
+			$tmpdata = $object->getLastBackupDate();
+			$titletoshow .= 'Latest backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest backup ko: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest backup ok: '.dol_print_date($tmpdata['maxokok'], 'dayhoursec', 'tzuserrel');
+			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
 			if (!empty($backuptotalinstances[$obj->ipaddress])) {
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
 					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->options_deployment_host).'">';
