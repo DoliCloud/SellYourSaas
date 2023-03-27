@@ -20,9 +20,11 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 if [ "x$1" == "x" ]; then
-	echo "Usage: ${0} (test|confirm) [m|w] [osuX] [--delete]"
-	echo "Where m (default) is to keep 1 month of backup, and w is to keep 1 week of backup"
-	echo "You can also set a group of 4 first letter on username to backup the backup of a limited number of users."
+	echo "Usage: ${0} (test|confirm) [month|week|none] [osuX] [--delete]"
+	echo "With  month (default) is to keep 1 month of backup using --backup option of rsync"
+	echo "      week is to keep 1 week of backup using --backup option of rsync"
+	echo "      none is to not archive old versions using the --backup option of rsync. For example when you already do it using snapshots on backup server (recommended)."
+	echo "You can also set a group of 4 first letters on username to backup the backup of a limited number of users."
 	exit 101
 fi
 
@@ -47,9 +49,13 @@ export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 export testorconfirm=$1
+
 export HISTODIR=`date +%d`
-if [ "x$2" == "xw" ]; then
+if [ "x$2" == "xw" -o "x$2" == "xweek" ]; then
 	HISTODIR=`date +%u`
+fi
+if [ "x$2" == "xn" -o "x$2" == "xnone" ]; then
+	HISTODIR=""
 fi
 
 if [ "x$homedir" == "x" ]; then
@@ -178,7 +184,11 @@ do
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of $DIRSOURCE1 to remote $USER@$SERVDESTICURSOR:$DIRDESTI1..."
 	
 	export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-	export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
+	if [ "x$HISTODIR" == "x" ]; then
+		export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
+	else
+		export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI1/backupold_$HISTODIR $DIRSOURCE1/* $USER@$SERVDESTICURSOR:$DIRDESTI1";
+	fi
 	echo `date +'%Y-%m-%d %H:%M:%S'`" $command";
 	
 	
@@ -216,8 +226,8 @@ if [[ "x$instanceserver" != "x0" ]]; then
 		if [ "x$nbofdir" != "x0" ]; then
 			# Test if we force backup on a given dir
 			if [ "x$3" != "x" ]; then
-				if [ "x$3" != "xosu$i" ]; then
-					echo "Ignored."
+				if [ "x$3" != "xosu$i" -a "x$3" != "x--delete" ]; then
+					echo "Ignored (param 3 is $3)."
 					continue
 				fi
 			fi
@@ -225,7 +235,11 @@ if [[ "x$instanceserver" != "x0" ]]; then
 			for SERVDESTICURSOR in `echo $SERVDESTI | sed -e 's/,/ /g'`
 			do
 				export RSYNC_RSH="ssh -p $SERVPORTDESTI"
-		        export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+				if [ "x$HISTODIR" == "x" ]; then
+		    	    export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+		    	else 
+		    	    export command="rsync $TESTN -x --exclude-from=$scriptdir/backup_backups.exclude $OPTIONS --backup --backup-dir=$DIRDESTI2/backupold_$HISTODIR $DIRSOURCE2/osu$i* $USER@$SERVDESTICURSOR:$DIRDESTI2";
+		    	fi
 	        	echo `date +'%Y-%m-%d %H:%M:%S'`" $command";
 
 		        $command 2>&1
@@ -309,7 +323,7 @@ if [ "x$atleastoneerror" != "x0" ]; then
 	exit 1
 fi
 
-if [ "x$3" != "x" ]; then
+if [ "x$3" != "x" -a "x$3" != "x--delete" ]; then
 	echo "Script was called for only one of few given instances. No email or supervision event sent on success in such situation."
 else
 	echo "Send email to $EMAILTO to inform about backup success"

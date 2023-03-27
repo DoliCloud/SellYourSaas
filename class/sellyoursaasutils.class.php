@@ -1754,7 +1754,7 @@ class SellYourSaasUtils
 
 					// Test if there is at least 1 open invoice
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
-					if (is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
+					if (isset($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						usort($object->linkedObjects['facture'], "cmp");	// function cmp compare objects on ->date and is defined into sellyoursaas.lib.php.
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
@@ -3339,18 +3339,22 @@ class SellYourSaasUtils
 
 				$SSLON='On';	// Is SSL enabled on the custom url virtual host ?
 
-				$CERTIFFORCUSTOMDOMAIN =$customurl;
-				if ($CERTIFFORCUSTOMDOMAIN) {
-					// Kept for backward compatibility
-					if (preg_match('/on\.dolicloud\.com$/', $CERTIFFORCUSTOMDOMAIN)) {
-						$CERTIFFORCUSTOMDOMAIN='on.dolicloud.com';
+				$CERTIFFORCUSTOMDOMAIN = "";
+				if ($customurl) {
+					include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+					$pooldomainname = getDomainFromURL($customurl, 2);
+
+					// Check if SSL certificate for $customurl exists into master crt directory.
+					if (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$customurl.'.crt')) {
+						$CERTIFFORCUSTOMDOMAIN = $customurl;
+					} elseif (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$pooldomainname.'.crt')) {
+						$CERTIFFORCUSTOMDOMAIN = $pooldomainname;
 					} else {
-						// Check if SSL certificate for $customurl exists. If it does not exist, return an error to ask to upload certificate first.
-						if (! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt')) {
-							// TODO Return error to ask to upload a certificate first.
-							$CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
-							$SSLON='Off';
-						}
+						// If it does not exist, return an error to ask to upload certificate first.
+						/* $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
+						 // TODO Show an error or warning to ask to upload a certificate first or let go and create with letsencrypt ?.
+						 */
+						$SSLON='Off';	// To avoid error of SSL certificate not found
 					}
 				}
 
@@ -3612,20 +3616,22 @@ class SellYourSaasUtils
 					$customvirtualhostline= $contract->array_options['options_custom_virtualhostline'];
 					$SSLON='On';	// Is SSL enabled on the custom url virtual host ?
 
-					$CERTIFFORCUSTOMDOMAIN=$customurl;
-					if ($CERTIFFORCUSTOMDOMAIN) {
-						// Kept for backward compatibility
-						if (preg_match('/on\.dolicloud\.com$/', $CERTIFFORCUSTOMDOMAIN)) {
-							$CERTIFFORCUSTOMDOMAIN='on.dolicloud.com';
-						} else {
-							// Check if SSL certificate for $customurl exists. If it does not exist, return an error to ask to upload certificate first.
-							if (! file_exists($conf->sellyoursaas->dir_output.'/crt/'.$CERTIFFORCUSTOMDOMAIN.'.crt')) {
-								include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-								$CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
-								$SSLON='Off';
+					$CERTIFFORCUSTOMDOMAIN = "";
+					if ($customurl) {
+						include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+						$pooldomainname = getDomainFromURL($customurl, 2);
 
-								// TODO Show an error or warning to ask to upload a certificate first.
-							}
+						// Check if SSL certificate for $customurl exists into master crt directory.
+						if (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$customurl.'.crt')) {
+							$CERTIFFORCUSTOMDOMAIN = $customurl;
+						} elseif (file_exists($conf->sellyoursaas->dir_output.'/crt/'.$pooldomainname.'.crt')) {
+							$CERTIFFORCUSTOMDOMAIN = $pooldomainname;
+						} else {
+							// If it does not exist, return an error to ask to upload certificate first.
+							/* $CERTIFFORCUSTOMDOMAIN=getDomainFromURL($customurl, 2);
+							 // TODO Show an error or warning to ask to upload a certificate first or let go and create with letsencrypt ?.
+							 */
+							$SSLON='Off';	// To avoid error of SSL certificate not found
 						}
 					}
 
@@ -3831,8 +3837,8 @@ class SellYourSaasUtils
 
 								if (function_exists('ssh2_disconnect')) {
 									if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
-										dol_syslog("If it hangs or core dump due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
-										ssh2_disconnect($connection);     // Hang on some config
+										dol_syslog("If it hangs or core dump later due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
+										ssh2_disconnect($connection);     // Hang on some config (ex: php7.0/ubuntu18.04.6 connecting to ubuntu 20.04 or 22.04.1
 									}
 									$connection = null;
 									unset($connection);

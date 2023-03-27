@@ -205,10 +205,10 @@ if (empty($reshook)) {
 			if ($fordolibarr) {
 				$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, email, signature, api_key)";
 				$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
-				$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
+				$sql .= " null,";
 				$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
 				$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
-				$sql .= " '".$newdb->escape($password)."')";
+				$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."')";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
 					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
@@ -238,7 +238,6 @@ if (empty($reshook)) {
 						$resql=$newdb->query($sql);
 					}
 				}
-
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 			} else {

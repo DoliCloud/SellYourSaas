@@ -1442,6 +1442,12 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 					$servercountries = explode(',', $deploymentserver->servercountries);
 					$ipuser = getUserRemoteIP();
 					$countryuser = dolGetCountryCodeFromIp($ipuser);
+					if (GETPOST('country')) {	// Can force a country instead of default autodetected value
+						$countryuser = GETPOST('country');
+					}
+					if (empty($countryuser)) $countryuser='US';
+					$countryuser = strtolower($countryuser);
+
 					if (in_array($countryuser, $servercountries)) {
 						if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
 						$domainstosuggestcountryfilter[] = $newval; // Servers with user country

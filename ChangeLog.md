@@ -1,6 +1,11 @@
 # CHANGELOG SELLYOURSAAS FOR <a href="https://www.dolibarr.org">DOLIBARR ERP CRM</a>
 
 
+## 2.1
+
+* NEW Use a local cache for deployment if no remote cache is found.
+* NEW Show info on latest backup on tooltip on column "Nb of backup"  
+
 ## 2.0
 
 * FIX Renewal of letsencrypt wildcard certificate when we use more than 1 domain on the same server

@@ -29,16 +29,12 @@ systemctl disable cron 2>&1 >>/tmp/post_inst_script.log
 echo "Disable cron end"
 echo "Disable cron end" >>/tmp/post_inst_script.log
 
-echo "Stop postfix begin"
-echo "Stop postfix begin" >>/tmp/post_inst_script.log
-
-/etc/init.d/postfix stop >>/tmp/post_inst_script.log
-echo result = $? >>/tmp/post_inst_script.log
-
-echo "Stop postfix end"
-echo "Stop postfix end" >>/tmp/post_inst_script.log
 
 if [ -f /etc/init.d/datadog-agent ]; then
+	rm -f /etc/datadog-agent/datadog.yaml.disabled
+	if [ -f /etc/datadog-agent/datadog.yaml ]; then
+		mv /etc/datadog-agent/datadog.yaml  /etc/datadog-agent/datadog.yaml.disabled
+	fi 
 	echo "Stop datadog begin"
 	echo "Stop datadog begin" >>/tmp/post_inst_script.log
 	
@@ -48,5 +44,16 @@ if [ -f /etc/init.d/datadog-agent ]; then
 	echo "Stop datadog end"
 	echo "Stop datadog end" >>/tmp/post_inst_script.log
 fi
+
+
+echo "Stop postfix begin"
+echo "Stop postfix begin" >>/tmp/post_inst_script.log
+
+/etc/init.d/postfix stop >>/tmp/post_inst_script.log
+echo result = $? >>/tmp/post_inst_script.log
+
+echo "Stop postfix end"
+echo "Stop postfix end" >>/tmp/post_inst_script.log
+
 
 exit 0

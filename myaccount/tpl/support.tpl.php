@@ -472,8 +472,8 @@ if ($sellyoursaassupporturl) {
 			print '<div id="showforautomigration" class="showforautomigration" style="display:none;">';
 			print '<br><br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
-			print '<button id="hideautomigrationgoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("GoToAutomigration").'</button>&ensp;';
-			print '<button id="hideautomigrationdiv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("AutomigrationErrorOrNoAutomigration").'</button>';
+			print '<button id="hideautomigrationgoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap flexitem50">'.$langs->trans("GoToAutomigration").'</button>&ensp;';
+			print '<button id="hideautomigrationdiv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap flexitem50">'.$langs->trans("AutomigrationErrorOrNoAutomigration").'</button>';
 			print '</div>';
 			print '<br>';
 			print '</div>';
@@ -483,8 +483,8 @@ if ($sellyoursaassupporturl) {
 			print '<div id="showforautoupgrade" class="showforautoupgrade" style="display:none;">';
 			print '<br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
-			print '<button id="hideautoupgradegoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("GoToAutoUpgrade").'</button>&ensp;';
-			print '<button id="hideautoupgradediv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap">'.$langs->trans("AutoupgradeErrorOrNoAutoupgrade").'</button>';
+			print '<button id="hideautoupgradegoto" type="submit" form="changemodeForm" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap flexitem50">'.$langs->trans("GoToAutoUpgrade").'</button>&ensp;';
+			print '<button id="hideautoupgradediv" type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright whitespacenowrap flexitem50">'.$langs->trans("AutoupgradeErrorOrNoAutoupgrade").'</button>';
 			print '</div>';
 			print '<br>';
 			print '</div>';

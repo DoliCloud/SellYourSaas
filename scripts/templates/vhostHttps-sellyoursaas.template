@@ -38,10 +38,10 @@
         LogLevel info
 
         #ErrorLog __osUserPath__/__webAppLogName___error.log
-        #TransferLog /var/log/apache2/__webAppLogName___access_log
+        #TransferLog ${APACHE_LOG_DIR}/__webAppLogName___access_log
         CustomLog ${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined
-        CustomLog /var/log/apache2/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
-        
+        CustomLog ${APACHE_LOG_DIR}/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
+
         # Compress returned resources of type php pages, text file export, css and javascript
         AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript
 
@@ -89,17 +89,20 @@
                 nokeepalive ssl-unclean-shutdown \
                 downgrade-1.0 force-response-1.0
 
-        #<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
-		#	SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt
-		#	SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.key
-		#	SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt__webAppDomain__-intermediate.crt
-		#	SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
-        #</IfFile>
-        #<IfFile !"/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
-			SSLCertificateFile /etc/apache2/__webSSLCertificateCRT__
-			SSLCertificateKeyFile /etc/apache2/__webSSLCertificateKEY__
-			SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
-			SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
-        #</IfFile>
+		SSLCertificateFile /etc/apache2/__webSSLCertificateCRT__
+		SSLCertificateKeyFile /etc/apache2/__webSSLCertificateKEY__
+		SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
+		SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
+
+		# To enabled this section, you must edit /etc/apache2/envvars to set 
+		# export APACHE_ARGUMENTS='-DUSEIFFILE'
+		<IfDefine USEIFFILE>
+        <IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
+			SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt
+			SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.key
+			SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
+			SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
+        </IfFile>
+        </IfDefine>
 
 </VirtualHost>

@@ -83,7 +83,7 @@ class Deploymentserver extends CommonObject
 	 *  	'date', 'datetime', 'timestamp', 'duration',
 	 *  	'boolean', 'checkbox', 'radio', 'array',
 	 *  	'mail', 'phone', 'url', 'password', 'ip'
-	 *		Note: Filter can be a string like "(t.ref:like:'SO-%') or (t.date_creation:<:'20160101') or (t.nature:is:NULL)"
+	 *		Note: Filter must be a Dolibarr Universal Filter syntax string. Example: "(t.ref:like:'SO-%') or (t.date_creation:<:'20160101') or (t.status:!=:0) or (t.nature:is:NULL)"
 	 *  'label' the translation key.
 	 *  'picto' is code of a picto to show before value in forms
 	 *  'enabled' is a condition when the field must be managed (Example: 1 or '$conf->global->MY_SETUP_PARAM' or 'isModEnabled("multicurrency")' ...)
@@ -98,7 +98,7 @@ class Deploymentserver extends CommonObject
 	 *  'searchall' is 1 if we want to search in this field when making a search from the quick search button.
 	 *  'isameasure' must be set to 1 or 2 if field can be used for measure. Field type must be summable like integer or double(24,8). Use 1 in most cases, or 2 if you don't want to see the column total into list (for example for percentage)
 	 *  'css' and 'cssview' and 'csslist' is the CSS style to use on field. 'css' is used in creation and update. 'cssview' is used in view mode. 'csslist' is used for columns in lists. For example: 'css'=>'minwidth300 maxwidth500 widthcentpercentminusx', 'cssview'=>'wordbreak', 'csslist'=>'tdoverflowmax200'
-	 *  'help' is a 'TranslationString' to use to show a tooltip on field. You can also use 'TranslationString:keyfortooltiponlick' for a tooltip on click.
+	 *  'help' and 'helplist' is a 'TranslationString' to use to show a tooltip on field. You can also use 'TranslationString:keyfortooltiponlick' for a tooltip on click.
 	 *  'showoncombobox' if value of the field must be visible into the label of the combobox that list record
 	 *  'disabled' is 1 if we want to have the field locked by a 'disabled' attribute. In most cases, this is never set into the definition of $fields into class, but is set dynamically by some part of code.
 	 *  'arrayofkeyval' to set a list of values if type is a list of predefined values. For example: array("0"=>"Draft","1"=>"Active","-1"=>"Cancel"). Note that type can be 'integer' or 'varchar'
@@ -112,7 +112,7 @@ class Deploymentserver extends CommonObject
 
 	// BEGIN MODULEBUILDER PROPERTIES
 	/**
-	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
+	 * @var array  Array with all fields into database and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>-1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
@@ -129,10 +129,24 @@ class Deploymentserver extends CommonObject
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'),),
+		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserLastModif', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
+
+	/**
+	 * @var int ID
+	 */
 	public $rowid;
-	public $entity;
+
+	/**
+	 * @var string Ref
+	 */
 	public $ref;
+
+	/**
+	 * @var int Entity
+	 */
+	public $entity;
+
 	public $note_private;
 	public $date_creation;
 	public $date_modification;
@@ -143,25 +157,16 @@ class Deploymentserver extends CommonObject
 	public $servercountries;
 	public $servercustomerannouncestatus;
 	public $servercustomerannounce;
+	public $fk_user_modif;
 	// END MODULEBUILDER PROPERTIES
 
 
 	// If this object has a subtable with lines
 
 	// /**
-	//  * @var string    Name of subtable line
-	//  */
-	// public $table_element_line = 'sellyoursaas_deploymentserverline';
-
-	// /**
 	//  * @var string    Field with ID of parent key if this object has a parent
 	//  */
 	// public $fk_element = 'fk_deploymentserver';
-
-	// /**
-	//  * @var string    Name of subtable class that manage subtable lines
-	//  */
-	// public $class_element_line = 'Deploymentserverline';
 
 	// /**
 	//  * @var array	List of child tables. To test if we can delete object.
@@ -174,11 +179,6 @@ class Deploymentserver extends CommonObject
 	//  *               call method deleteByParentField(parentId, ParentFkFieldName) to fetch and delete child object
 	//  */
 	// protected $childtablesoncascade = array('sellyoursaas_deploymentserverdet');
-
-	// /**
-	//  * @var DeploymentserverLine[]     Array of subtable lines
-	//  */
-	// public $lines = array();
 
 
 
@@ -201,7 +201,7 @@ class Deploymentserver extends CommonObject
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->sellyoursaas->deploymentserver->read) {
+		/*if ($user->hasRights->('sellyoursaas', 'deploymentserver', 'read')) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
@@ -392,7 +392,7 @@ class Deploymentserver extends CommonObject
 
 		$sql = "SELECT ";
 		$sql .= $this->getFieldList('t');
-		$sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
+		$sql .= " FROM ".$this->db->prefix().$this->table_element." as t";
 		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
 			$sql .= " WHERE t.entity IN (".getEntity($this->element).")";
 		} else {
@@ -689,7 +689,20 @@ class Deploymentserver extends CommonObject
 		}
 
 		$result = '';
+		$params = [
+			'id' => $this->id,
+			'objecttype' => $this->element,
+			'option' => $option,
+		];
+		$classfortooltip = 'classfortooltip';
+		$dataparams = '';
+		if (getDolGlobalInt('MAIN_ENABLE_AJAX_TOOLTIP')) {
+			$classfortooltip = 'classforajaxtooltip';
+			$dataparams = " data-params='".json_encode($params)."'";
+			// $label = $langs->trans('Loading');
+		}
 
+		//$label = implode($this->getTooltipContentArray($params));
 		$label = img_picto('', $this->picto).' <u>'.$langs->trans("Deploymentserver").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
@@ -717,7 +730,7 @@ class Deploymentserver extends CommonObject
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
 			$linkclose .= ' title="'.dol_escape_htmltag($label, 1).'"';
-			$linkclose .= ' class="classfortooltip'.($morecss ? ' '.$morecss : '').'"';
+			$linkclose .= $dataparams.' class="'.$classfortooltip.($morecss ? ' '.$morecss : '').'"';
 		} else {
 			$linkclose = ($morecss ? ' class="'.$morecss.'"' : '');
 		}
@@ -738,7 +751,7 @@ class Deploymentserver extends CommonObject
 
 		if (empty($this->showphoto_on_popup)) {
 			if ($withpicto) {
-				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
+				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : $dataparams.' class="'.(($withpicto != 2) ? 'paddingright ' : '').$classfortooltip.'"'), 0, 0, $notooltip ? 0 : 1);
 			}
 		} else {
 			if ($withpicto) {
@@ -773,7 +786,7 @@ class Deploymentserver extends CommonObject
 		//if ($withpicto != 2) $result.=(($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
 
 		global $action, $hookmanager;
-		$hookmanager->initHooks(array('deploymentserverdao'));
+		$hookmanager->initHooks(array($this->element.'dao'));
 		$parameters = array('id'=>$this->id, 'getnomurl' => &$result);
 		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 		if ($reshook > 0) {
@@ -794,7 +807,9 @@ class Deploymentserver extends CommonObject
 	 */
 	public function getKanbanView($option = '', $arraydata = null)
 	{
-		 global $langs;
+		global $conf, $langs;
+
+		$selected = (empty($arraydata['selected']) ? 0 : $arraydata['selected']);
 
 		$return = '<div class="box-flex-item box-flex-grow-zero">';
 		$return .= '<div class="info-box info-box-sm">';
@@ -802,9 +817,10 @@ class Deploymentserver extends CommonObject
 		$return .= img_picto('', $this->picto);
 		$return .= '</span>';
 		$return .= '<div class="info-box-content">';
-		$return .= '<span class="info-box-ref">'.(method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref).'</span>';
+		$return .= '<span class="info-box-ref valignmiddle">'.(method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref).'</span>';
+		$return .= '<input id="cb'.$this->id.'" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="'.$this->id.'"'.($selected ? ' checked="checked"' : '').'>';
 		if (property_exists($this, 'label')) {
-			$return .= '<br><span class="info-box-label opacitymedium">'.$this->label.'</span>';
+			$return .= ' <div class="inline-block opacitymedium valignmiddle tdoverflowmax100">'.$this->label.'</div>';
 		}
 
 		$return .= '<br><span class="opacitymedium">'.$langs->trans("NbOfInstances").':</span> '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
@@ -819,7 +835,7 @@ class Deploymentserver extends CommonObject
 			}
 		}
 		if (method_exists($this, 'getLibStatut')) {
-			$return .= '<br><div class="info-box-status margintoponly">'.$this->getLibStatut(5).'</div>';
+			$return .= '<br><div class="info-box-status margintoponly">'.$this->getLibStatut(3).'</div>';
 		}
 		$return .= '</div>';
 		$return .= '</div>';
@@ -939,17 +955,7 @@ class Deploymentserver extends CommonObject
 	{
 		$this->lines = array();
 
-		$objectline = new DeploymentserverLine($this->db);
-		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_deploymentserver = '.((int) $this->id)));
-
-		if (is_numeric($result)) {
-			$this->error = $objectline->error;
-			$this->errors = $objectline->errors;
-			return $result;
-		} else {
-			$this->lines = $result;
-			return $this->lines;
-		}
+		return $this->lines;
 	}
 
 	/**
@@ -1103,31 +1109,40 @@ class Deploymentserver extends CommonObject
 		}
 		return $reflist;
 	}
-}
-
-
-require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
-
-/**
- * Class DeploymentserverLine. You can also remove this and generate a CRUD class for lines objects.
- */
-class DeploymentserverLine extends CommonObjectLine
-{
-	// To complete with content of an object DeploymentserverLine
-	// We should have a field rowid, fk_deploymentserver and position
 
 	/**
-	 * @var int  Does object support extrafields ? 0=No, 1=Yes
-	 */
-	public $isextrafieldmanaged = 0;
-
-	/**
-	 * Constructor
+	 * Return info about last backups on the server
 	 *
-	 * @param DoliDb $db Database handler
+	 * @return	array		Array with info
 	 */
-	public function __construct(DoliDB $db)
+	public function getLastBackupDate()
 	{
-		$this->db = $db;
+		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
+
+		$sql = "SELECT ce.latestbackup_status, MAX(ce.latestbackup_date) as maxtry, MAX(ce.latestbackup_date_ok) as maxok";
+		$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
+		$sql .= " WHERE ce.fk_object = c.rowid";
+		$sql .= " AND ce.deployment_status IN ('done', 'processing')";
+		$sql .= " AND ce.deployment_host = '".$this->db->escape($this->ipaddress)."'";
+		$sql .= " GROUP BY ce.latestbackup_status";
+
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			while ($obj = $this->db->fetch_object($resql)) {
+				if ($obj->latestbackup_status == 'OK') {
+					$maxtryok = $this->db->jdate($obj->maxtry);
+					$maxokok = $this->db->jdate($obj->maxok);
+				} elseif ($obj->latestbackup_status == 'KO') {
+					$maxtryko = $this->db->jdate($obj->maxtry);
+					$maxokko = $this->db->jdate($obj->maxok);
+				} elseif ($obj->latestbackup_status) {
+					dol_print_error($this->db, 'Bad value for latestbackup_status');
+				}
+			}
+		} else {
+			dol_print_error($this->db);
+		}
+
+		return array('maxtryok' => $maxtryok, 'maxokok' => $maxokok, 'maxtryko' => $maxtryko, 'maxokko' => $maxokko);
 	}
 }
