@@ -1005,6 +1005,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
+	
 	if [[ -s $apacheconf ]]
 	then
 		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
@@ -1047,8 +1048,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
-	#echo Enable conf with a2ensite $fqn.conf
-	#a2ensite $fqn.conf
+	# Enable conf with ln
 	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online 
 	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
 	

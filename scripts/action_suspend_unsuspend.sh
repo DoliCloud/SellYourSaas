@@ -516,7 +516,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 	fi	
 	
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
-	echo "Create a suspended apache conf $apacheconf from $vhostfiletouse"
+	echo `date +'%Y-%m-%d %H:%M:%S'`"Create a suspended apache conf $apacheconf from $vhostfiletouse"
 
 	if [[ -s $apacheconf ]]
 	then
@@ -560,12 +560,11 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
-	#echo Enable conf with a2ensite $fqn.conf
-	#a2ensite $fqn.conf
+	# Enable conf with ln
 	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
 	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
 	
-	
+	# We create the virtual host for the custom url
 	if [[ "x$customurl" != "x" ]]; then
 	
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
@@ -621,7 +620,19 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 	fi
 
 	
-	# remove virtual host for public web sites by deleting links into sellyoursaas-enabled
+	echo /usr/sbin/apache2ctl configtest
+	/usr/sbin/apache2ctl configtest
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn...conf to hope to restore configtest ok.
+		rm -f /etc/apache2/sellyoursaas-online/$fqn.conf
+		rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+		#rm -f /etc/apache2/sellyoursaas-online/$fqn.website*.conf	# Not modified previously and removed just after
+		echo "Failed to suspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Warning] Pb when suspending $instancename.$domainname" $EMAILTO 
+		sleep 1
+		exit 5
+	fi 
+
+	# Remove virtual host for public web sites by deleting links into sellyoursaas-enabled
 	echo "Remove virtual host for possible virtual host for web sites"
 	for fic in `ls /etc/apache2/sellyoursaas-online/$fqn.website-*.conf`
 	do
@@ -629,17 +640,6 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
 		rm -f /etc/apache2/sellyoursaas-online/$fqn.website-*.conf
 	done
 	
-	
-	echo /usr/sbin/apache2ctl configtest
-	/usr/sbin/apache2ctl configtest
-	if [[ "x$?" != "x0" ]]; then
-		echo Error when running apache2ctl configtest. We remove the new created virtual host /etc/apache2/sellyoursaas-online/$fqn.conf to hope to restore configtest ok.
-		rm -f /etc/apache2/sellyoursaas-online/$fqn.conf
-		rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
-		echo "Failed to suspend instance $instancename.$domainname with: Error when running apache2ctl configtest" | mail -aFrom:$EMAILFROM -s "[Warning] Pb when suspending $instancename.$domainname" $EMAILTO 
-		sleep 1
-		exit 5
-	fi 
 	
 	if [[ "x$apachereload" != "xnoapachereload" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Apache tasks finished. service apache2 reload."
