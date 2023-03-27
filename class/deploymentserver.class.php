@@ -1122,7 +1122,7 @@ class Deploymentserver extends CommonObject
 		$sql = "SELECT ce.latestbackup_status, MAX(ce.latestbackup_date) as maxtry, MAX(ce.latestbackup_date_ok) as maxok";
 		$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
 		$sql .= " WHERE ce.fk_object = c.rowid";
-		//$sql .= " AND ce.latestbackup_status = 'OK'";
+		$sql .= " AND ce.deployment_status IN ('done', 'processing')";
 		$sql .= " AND ce.deployment_host = '".$this->db->escape($this->ipaddress)."'";
 		$sql .= " GROUP BY ce.latestbackup_status";
 
