@@ -1112,7 +1112,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			fi
 		else 
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
-			export domainnameorcustomurl = `echo $customurl | cut -d "." -f 1`
+			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 			# We must create it using letsencrypt if not yet created
 			#if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn.crt ]]; then
 					# Generate the letsencrypt certificate
