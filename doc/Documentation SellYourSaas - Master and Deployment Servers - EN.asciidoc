@@ -2707,18 +2707,18 @@ But remove it after you solve the problem, to have the tables writable again.
 
 On *deployment servers*:
 
-Copy */bin/bash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
+Copy */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
 [source,bash]
 ---------------
-cp /bin/bash /bin/secureBash
+cp /bin/dash /bin/secureBash
 ---------------
 
-On Ubuntu 20.04+, copy also */usr/bin/bash* into */usr/bin/secureBash*
+On Ubuntu 20.04+, copy also */usr/bin/dash* into */usr/bin/secureBash*
 
 [source,bash]
 ---------------
-cp /usr/bin/bash /usr/bin/secureBash
+cp /usr/bin/dash /usr/bin/secureBash
 ---------------
 
 
@@ -4085,10 +4085,12 @@ Edit it to exclude some filesystems:
 
 instances:
 
-  mount_point_exclude:
-    - /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+  - use_mount: false
+
+    mount_point_exclude:
+        - /home/admin/wwwroot/dolibarr_documents/sellyoursaas
     
-  include_all_devices: false
+    include_all_devices: false
     
 ---------------
 
