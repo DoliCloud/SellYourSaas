@@ -1123,7 +1123,6 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 					# If links does not exists, we disable SSL
 					#SSLON="Off"
 			#fi
-
 			
 			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
