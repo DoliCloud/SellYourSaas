@@ -742,7 +742,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 	export vhostfiletouse=$vhostfile;
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
-	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new suspended apache conf $apacheconf from $vhostfiletouse"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfiletouse"
 
 	if [[ -s $apacheconf ]]
 	then
