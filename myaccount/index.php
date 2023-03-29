@@ -572,6 +572,8 @@ if ($action == 'updateurl') {
 
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 
+		$db->begin();
+
 		$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
 		if ($result != 0) {
 			$error++;
@@ -889,13 +891,26 @@ if ($action == 'updateurl') {
 							setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 						}
 					}
-					header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);
+
+					if (! $error) {
+						$result = $mythirdpartyaccount->set_as_client();
+						if ($result <= 0) {
+							$error++;
+							setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
+						}
+					}
 				}
 			}
 		}
 	}
-
 	$action = '';
+	if (!$error) {
+		$db->commit();
+	} else {
+		$db->rollback();
+	}
+	header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);
+	exit();
 } elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 	// Send support ticket
 	$error = 0;
