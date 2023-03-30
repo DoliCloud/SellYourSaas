@@ -1261,7 +1261,7 @@ if ($action == 'updateurl') {
 
 		// Test if iban is ok
 		$testiban = checkIbanForAccount($companybankaccount);
-		if (empty($companybankaccount->iban_prefix) || !$testiban) {
+		if (empty($companybankaccount->iban) || !$testiban) {
 			setEventMessages($langs->trans("IbanNotValid"), null, 'errors');
 			$action = '';
 			$error++;

@@ -670,7 +670,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd width50 paddingright marginrightonly valignmiddle">';
+			print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
 
 			$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
 
@@ -726,9 +726,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<hr>';
 		}
 
+		print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
+		print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
 
 		print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';
 		print '<br>';
+
+		print '</div></div></div>';
+
 		print '</div>';
 		print '</div>';
 
