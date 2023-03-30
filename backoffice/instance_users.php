@@ -759,25 +759,25 @@ function print_user_table($newdb, $object)
 							}
 						} elseif ($key == 'pass') {
 							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-							print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
+							print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($valtoshow).'">'.dol_escape_htmltag($valtoshow).'</td>';
 						} elseif ($key == 'login') {
-							print '<td class="nowraponall">';
+							print '<td class="nowraponall tdoverflowmax150" title="'.dol_escape_htmltag($obj->$key).'">';
 							print $obj->$key;
 							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 							print '</td>';
 						} elseif ($key == 'email') {
-							print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
+							print '<td class="tdoverflowma150" title="'.dol_escape_htmltag($obj->$key).'">'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
 						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
-							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
+							print '<td class="nowraponall">'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
 						} else {
-							print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').' title="'.$db->escape((empty($obj->$key) ? '' : $obj->$key)).'">';
-							print (empty($obj->$key) ? '' : $obj->$key);
+							print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').' title="'.dol_escape_htmltag(empty($obj->$key) ? '' : $obj->$key).'">';
+							print dol_escape_htmltag(empty($obj->$key) ? '' : $obj->$key);
 							print '</td>';
 						}
 					}
 				}
 				print '<td align="center">';
-				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto('ResetPassword', 'object_technic').'</a>';
 				print '</td>';
 				print '</tr>';
 				$i++;
