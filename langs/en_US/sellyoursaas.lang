@@ -804,4 +804,4 @@ NewEmailToConfirm=New email to confirm
 UnitPriceOfLine=Unit price of line
 InvoicePaymentDisputed=Invoice payment disputed
 InvoicePaymentDisputedDesc=As soon as an invoice has been flagged to have a disputed payement, a message asking the customer to contact you is visible into its customer dashboard
-InvoicePaymentDisputedMessage=The owner of the payment mode used to pay the invoice %s, the %s has open a disputed with his bank to decline the payment. For this reason, your instance may have been suspended after the bank has contacted us, or may be suspended soon. Please contact us from the support menu to remove this alert and fix the situation.
+InvoicePaymentDisputedMessage=The owner of the payment mode used to pay the invoice %s, created the %s has open a disputed with his bank to decline the payment. For this reason, your instance may have been suspended after the bank has contacted us, or may be suspended soon. Please contact us from the support menu to remove this alert and fix the situation.

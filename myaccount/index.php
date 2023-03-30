@@ -4030,7 +4030,8 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 	}
 
 	// Test if there is one invoice disputed
-	$sql = 'SELECT f.rowid, f.ref, f.datef, fe.invoicepaymentdisputed FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
+	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, fe.invoicepaymentdisputed';
+	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
 	$sql .= ' WHERE fe.fk_object = f.rowid AND f.fk_soc = '.((int) $mythirdpartyaccount->id);
 	$sql .= ' AND invoicepaymentdisputed = 1';
 	$sql .= ' ORDER BY f.datef';
@@ -4046,7 +4047,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 			while ($obj = $db->fetch_object($resql)) {
 				print '
 					<div class="note note-warning note-disputed">
-					<h4 class="block">'.$langs->trans("InvoicePaymentDisputedMessage", $obj->ref, dol_print_date($db->jdate($obj->datef), 'day', 'gmt')).'</h4>
+					<h4 class="block">'.$langs->trans("InvoicePaymentDisputedMessage", $obj->ref, dol_print_date($db->jdate($obj->datec), 'day', 'gmt')).'</h4>
 					</div>
 				';
 			}
