@@ -609,8 +609,8 @@ if (!$error && ! $user->socid) {
 	print '<div class="tabsAction">';
 
 	if ($user->rights->sellyoursaas->write) {
-		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createsupportuser&token='.newToken().'">'.$langs->trans('CreateSupportUser').'</a>';
-		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletesupportuser&token='.newToken().'">'.$langs->trans('DeleteSupportUser').'</a>';
+		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createsupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('CreateSupportUser').'</a>';
+		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletesupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('DeleteSupportUser').'</a>';
 	}
 
 	print "</div><br>";
