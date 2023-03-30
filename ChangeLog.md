@@ -5,6 +5,8 @@
 
 * NEW Use a local cache for deployment if no remote cache is found.
 * NEW Show info on latest backup on tooltip on column "Nb of backup"  
+* NEW Add property invoice payment disputed on invoice
+
 
 ## 2.0
 
