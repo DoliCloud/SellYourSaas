@@ -343,8 +343,10 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 
 		print '</table>';
 	} else {
-		print $langs->trans("NoPaymentMethodOnFile");
-		if ($nbofinstancessuspended || $ispaid || $atleastonecontractwithtrialended) print ' '.img_warning();
+		print '<span class="opacitymedium">'.$langs->trans("NoPaymentMethodOnFile").'</span>';
+		if ($nbofinstancessuspended || $ispaid || $atleastonecontractwithtrialended) {
+			print ' '.img_warning();
+		}
 	}
 
 	print '
