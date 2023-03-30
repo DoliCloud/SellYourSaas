@@ -2108,7 +2108,7 @@ class SellYourSaasUtils
 	/**
 	 * Called by batch only: doSuspendExpiredTestInstances or doSuspendExpiredRealInstances
 	 * It sets the status of services to "offline" and send an email to the customer.
-	 * Note: An instance can also be suspended from backoffice by setting service to "offline". In such a case, no email is sent.
+	 * Note: An instance can also be suspended from backoffice by setting service to "Offline". In such a case, no email is sent.
 	 *
 	 * @param	string	$mode				'test' or 'paid'
 	 * @param	int   	$noapachereload		0=Reload apache after remote action, 1=Force no apache reload
@@ -2583,6 +2583,8 @@ class SellYourSaasUtils
 									$this->errors[] = $cmail->error;
 									if (is_array($cmail->errors) && count($cmail->errors) > 0) $this->errors += $cmail->errors;
 								}
+
+								sleep(1);
 							}
 						}
 
