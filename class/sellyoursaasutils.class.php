@@ -1676,10 +1676,11 @@ class SellYourSaasUtils
 		$mode = 'paid';
 		$delayindaysshort = 2;	// So we update the resources 2 days before the invoice is generated
 		$enddatetoscan = dol_time_plus_duree($now, abs($delayindaysshort), 'd');		// $enddatetoscan = yesterday
+		$enddateoflastupdate = dol_time_plus_duree($now, -1, 'd');						// If a refresh was done recently we do not do it again
 
 		$error = 0;
 		$this->output = '';
-		$this->error='';
+		$this->error = '';
 
 		$contractprocessed = array();
 		$contractignored = array();
@@ -1698,8 +1699,10 @@ class SellYourSaasUtils
 		$sql.= " AND cd.statut = 4";
 		$sql.= " AND c.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
-
 		if ($thirdparty_id > 0) $sql.=" AND c.fk_soc = ".((int) $thirdparty_id);
+		$sql.= " AND cd.latestresupdate_date < '".$this->db->idate($enddateoflastupdate)."'";
+		$sql.= " ORDER BY rowid";
+
 		//print $sql;
 
 		$resql = $this->db->query($sql);
@@ -1740,7 +1743,7 @@ class SellYourSaasUtils
 						continue;											// Discard if this is a test instance when we are in paid mode
 					}
 
-					// Update expiration date of instance
+					// Get expiration date of instance (the min of end date among all lines)
 					dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
 					$tmparray = sellyoursaasGetExpirationDate($object, 0);				// This loop on $object->lines
 					dol_syslog('Call sellyoursaasGetExpirationDate end', LOG_DEBUG, -1);
@@ -1755,12 +1758,14 @@ class SellYourSaasUtils
 					// Test if there is at least 1 open invoice
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
 					if (isset($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
-						usort($object->linkedObjects['facture'], "cmp");	// function cmp compare objects on ->date and is defined into sellyoursaas.lib.php.
+						usort($object->linkedObjects['facture'], "cmp");	// function cmp compares objects on ->date and is defined into sellyoursaas.lib.php.
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
 						$someinvoicenotpaid=0;
 						foreach ($object->linkedObjects['facture'] as $idinvoice => $invoice) {
-							if ($invoice->statut == Facture::STATUS_DRAFT) continue;	// Draft invoice are not unpaid invoices
+							if ($invoice->statut == Facture::STATUS_DRAFT) {
+								continue;	// Draft invoice are not unpaid invoices
+							}
 
 							if (empty($invoice->paye)) {
 								$someinvoicenotpaid++;
@@ -1824,7 +1829,8 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output .= count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only)';
+		$this->output = count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '')."\n".$this->output;
+		$this->output .= "\n".'Search has been done on contracts of SellYourSaas customers only with sql = '.$sql;
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
