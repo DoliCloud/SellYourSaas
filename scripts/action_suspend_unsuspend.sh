@@ -327,7 +327,7 @@ if [[ "$mode" == "rename" ]]; then
 			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
 				# If file or link does not exist
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateKEY to $pathforcertiflocal/$webCustomSSLCertificateKEY"
-				cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
 				# It is better to link to a bad certificate than linking to non existing file, so
 				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
 					echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateKEY"
@@ -338,7 +338,7 @@ if [[ "$mode" == "rename" ]]; then
 			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
 				# If file or link does not exist
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateIntermediate to $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
-				cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
 				# It is better to link to a bad certificate than linking to non existing file, so
 				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
 					echo "Previous cp not valid, so we recreate it from /etc/apache2/$webSSLCertificateIntermediate"
@@ -594,7 +594,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
                 if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
                         # If file or link does not exist
                         echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateKEY to $pathforcertiflocal/$webCustomSSLCertificateKEY"
-                        cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
+                        cp -pn $pathforcertifmaster/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
                         # It is better to link to a bad certificate than linking to non existing file, so
                         if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
                                 echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateKEY"
@@ -605,7 +605,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
                 if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
                         # If file or link does not exist
                         echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateIntermediate to $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
-                        cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
+                        cp -pn $pathforcertifmaster/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
                         # It is better to link to a bad certificate than linking to non existing file, so
                         if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
                                 echo "Previous cp not valid, so we recreate it from /etc/apache2/$webSSLCertificateIntermediate"
@@ -816,7 +816,7 @@ if [[ "$mode" == "unsuspend" ]]; then
                 if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
                         # If file or link does not exist
                         echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateKEY to $pathforcertiflocal/$webCustomSSLCertificateKEY"
-                        cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
+                        cp -pn $pathforcertifmaster/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
                         # It is better to link to a bad certificate than linking to non existing file, so
                         if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
                                 echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateKEY"
@@ -827,7 +827,7 @@ if [[ "$mode" == "unsuspend" ]]; then
                 if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
                         # If file or link does not exist
                         echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateIntermediate to $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
-                        cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
+                        cp -pn $pathforcertifmaster/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
                         # It is better to link to a bad certificate than linking to non existing file, so
                         if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
                                 echo "Previous cp not valid, so we recreate it from /etc/apache2/$webSSLCertificateIntermediate"

@@ -1081,7 +1081,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		
 			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateCRT ]]; then
 				# If file or link does not exist
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateCRT to $pathforcertiflocal/$webCustomSSLCertificateCRT"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" cp -pn $pathforcertifmaster/$webCustomSSLCertificateCRT to $pathforcertiflocal/$webCustomSSLCertificateCRT"
 				cp -pn $pathforcertifmaster/$webCustomSSLCertificateCRT $pathforcertiflocal/$webCustomSSLCertificateCRT
 				# It is better to link to a bad certificate than linking to non existing file, so
 				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateCRT ]]; then
@@ -1092,8 +1092,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			fi
 			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
 				# If file or link does not exist
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateKEY to $pathforcertiflocal/$webCustomSSLCertificateKEY"
-				cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
+				echo `date +'%Y-%m-%d %H:%M:%S'`" cp -pn $pathforcertifmaster/$webCustomSSLCertificateKEY to $pathforcertiflocal/$webCustomSSLCertificateKEY"
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
 				# It is better to link to a bad certificate than linking to non existing file, so
 				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
 					echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateKEY"
@@ -1103,8 +1103,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			fi
 			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
 				# If file or link does not exist
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Copy file $pathforcertifmaster/$webCustomSSLCertificateIntermediate to $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
-				cp -pn $pathforcertifmaster/crt/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
+				echo `date +'%Y-%m-%d %H:%M:%S'`" cp -pn $pathforcertifmaster/$webCustomSSLCertificateIntermediate to $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
 				# It is better to link to a bad certificate than linking to non existing file, so
 				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
 					echo "Previous cp not valid, so we recreate it from /etc/apache2/$webSSLCertificateIntermediate"
