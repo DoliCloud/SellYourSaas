@@ -1066,11 +1066,11 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
 		if [[ -s $apacheconf ]]
 		then
-			echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
 			rm -f $apacheconf
 		fi
 
-		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
 			mkdir -p $pathforcertiflocal
 
@@ -1111,6 +1111,20 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 					echo "ln -fs /etc/apache2/$webSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
 					ln -fs /etc/apache2/$webSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
 				fi
+			fi
+			
+			# Create also the link in /etc/apache2 for the case we use old virtual host using this file
+			if [[ -e $pathforcertiflocal/$webCustomSSLCertificateCRT -a ! -e /etc/apache2/$webSSLCertificateCRT ]]; then
+				echo ln -fs $pathforcertiflocal/$webCustomSSLCertificateCRT /etc/apache2/$webSSLCertificateCRT
+				ln -fs $pathforcertiflocal/$webCustomSSLCertificateCRT /etc/apache2/$webSSLCertificateCRT
+			fi
+			if [[ -e $pathforcertiflocal/$webCustomSSLCertificateKEY -a ! -e /etc/apache2/$webSSLCertificateKEY ]]; then
+				echo ln -fs $pathforcertiflocal/$webCustomSSLCertificateKEY /etc/apache2/$webSSLCertificateKEY
+				ln -fs $pathforcertiflocal/$webCustomSSLCertificateKEY /etc/apache2/$webSSLCertificateKEY
+			fi
+			if [[ -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate -a ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
+				echo ln -fs $pathforcertiflocal/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
+				ln -fs $pathforcertiflocal/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
 			fi
 		else 
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
