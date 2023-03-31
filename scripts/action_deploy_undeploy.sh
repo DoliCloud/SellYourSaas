@@ -1113,6 +1113,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				fi
 			fi
 			
+			chown -R admin.www-data $pathforcertiflocal/
+			
 			# Create also the link in /etc/apache2 for the case we use old virtual host using this file
 			if [[ -e $pathforcertiflocal/$webCustomSSLCertificateCRT -a ! -e /etc/apache2/$webSSLCertificateCRT ]]; then
 				echo ln -fs $pathforcertiflocal/$webCustomSSLCertificateCRT /etc/apache2/$webSSLCertificateCRT
