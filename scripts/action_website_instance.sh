@@ -133,7 +133,7 @@ export directaccess=${38}
 export sshaccesstype=${39}
 
 # The value from the virtualhost of website (with of without www., we remove it)
-export CUSTOMDOMAIN=${46/www./ }
+export CUSTOMDOMAIN=${46/www./}
 # The website name in document dir
 export WEBSITENAME=${47}
 
@@ -200,6 +200,7 @@ echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
 echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
 echo "CUSTOMDOMAIN = $CUSTOMDOMAIN"
+echo "WEBSITENAME = $WEBSITENAME"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
