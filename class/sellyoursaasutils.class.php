@@ -1700,7 +1700,7 @@ class SellYourSaasUtils
 		$sql.= " AND c.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 		if ($thirdparty_id > 0) $sql.=" AND c.fk_soc = ".((int) $thirdparty_id);
-		$sql.= " AND cd.latestresupdate_date < '".$this->db->idate($enddateoflastupdate)."'";
+		$sql.= " AND ce.latestresupdate_date < '".$this->db->idate($enddateoflastupdate)."'";
 		$sql.= " ORDER BY rowid";
 
 		//print $sql;
