@@ -270,13 +270,24 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
 	ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 	
+	echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
+	mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+
 	if [[ ${46} == www.* ]]; then
 		echo certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
-		#certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
+		certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
 	else
 		echo certbot certonly --webroot -w $instancedir/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
-		#certbot certonly --webroot -w $instancedir/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
+		certbot certonly --webroot -w $instancedir/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
 	fi
+	echo "Link certificate for virtualhost with
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
+	"
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
 fi
 
 

@@ -693,11 +693,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</select>';
 				print ajax_combobox("websiteidoption");
 				print '<div id="domainnamewebsite" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'">';
-				print '<br><span>'.$langs->trans("PurshaseDomainName", $iphostwebsite).'&nbsp;</span><button type="button" id="domainpurchasedbutton" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">'.$langs->trans("Confirm").'</button>';
-				print '<div id="domainpurchased" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'>';
+				print '<br><span>'.$langs->trans("PurshaseDomainName").'&nbsp;</span>';
 				print '<br><span class="bold">'.$langs->trans("Domain").'&nbsp;</span>';
 				print '<input name="domainnamewebsite" id="domainnamewebsiteinput" value="'.GETPOST("domainnamewebsite", "alpha").'">&nbsp;';
-				print '<input class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition '.(GETPOST("domainnamewebsite", "alpha") == "" ? 'hidden" disabled' : '"').' type="submit" id="choosewebsiteoption" name="choosewebsiteoption" value="'.$langs->trans("Choose").'">';
+				print '<div id="choosewebsiteoption" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'>';
+				print '<br><span>'.$langs->trans("AddInstructionToDns", $contract->ref_customer, $contract->ref_customer).'</span>';
+				print '<br><input class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" type="submit" name="startwebsitedeploy" value="'.$langs->trans("StartWebsiteDeployment").'">';
 				print '</div>';
 				print '</div>';
 				print '</form>';
@@ -709,7 +710,6 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 						$("#domainnamewebsite").addClass("hidden");
 					}
 				})
-				$("#domainpurchasedbutton").on("click", () => $("#domainpurchased").removeClass("hidden"));
 				$("#domainnamewebsiteinput").on("change", function(){
 					if($("#choosewebsiteoption").val() != "" || $("#choosewebsiteoption:hidden").length ){
 						$("#choosewebsiteoption").removeClass("hidden");
