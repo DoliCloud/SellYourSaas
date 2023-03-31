@@ -1301,7 +1301,7 @@ if ($reusecontractid) {
 
 
 // -----------------------------------------------------------------------------------------------------------------------
-// Create unix user and directories, DNS, virtual host and databaseby calling the remote action to deploy
+// Create unix user and directories, DNS, virtual host and database by calling the remote action to deploy
 // -----------------------------------------------------------------------------------------------------------------------
 
 if (! $error && $productref != 'none') {
@@ -1634,3 +1634,6 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 
 <?php
 llxFooter();
+
+// For cli mode
+return $error;
