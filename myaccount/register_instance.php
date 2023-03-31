@@ -129,7 +129,7 @@ $email = dol_trunc(trim(GETPOST('username', 'alpha')), 255, 'right', 'UTF-8', 1)
 $domainemail = preg_replace('/^.*@/', '', $email);
 $password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
 $password2 = dol_trunc(trim(GETPOST('password2', 'alpha')), 128, 'right', 'UTF-8', 1);
-$country_code = trim(GETPOST('address_country', 'alpha'));
+$country_code = trim(GETPOST('country', 'alpha'));
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
 $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
@@ -344,7 +344,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (! preg_match('/orgName/i', $newurl)) $newurl.='&orgName='.urlencode($orgname);
 	if (! preg_match('/phone/i', $newurl)) $newurl.='&phone='.urlencode($phone);
 	if (! preg_match('/username/i', $newurl)) $newurl.='&username='.urlencode($email);
-	if (! preg_match('/address_country/i', $newurl)) $newurl.='&address_country='.urlencode($country_code);
+	if (! preg_match('/country/i', $newurl)) $newurl.='&country='.urlencode($country_code);
 	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) $newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
 	if (! preg_match('/tldid/i', $tldid)) $newurl.='&tldid='.urlencode($tldid);
 	if (! preg_match('/plan/i', $newurl)) $newurl.='&plan='.urlencode($productref);
@@ -1301,7 +1301,7 @@ if ($reusecontractid) {
 
 
 // -----------------------------------------------------------------------------------------------------------------------
-// Create unix user and directories, DNS, virtual host and databaseby calling the remote action to deploy
+// Create unix user and directories, DNS, virtual host and database by calling the remote action to deploy
 // -----------------------------------------------------------------------------------------------------------------------
 
 if (! $error && $productref != 'none') {
@@ -1634,3 +1634,6 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 
 <?php
 llxFooter();
+
+// cli mode need an error return code
+exit($error);

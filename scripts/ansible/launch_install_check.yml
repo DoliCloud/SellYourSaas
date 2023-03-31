@@ -29,7 +29,6 @@
   become_user: root
   tasks:
 
-
   ##### Misc packages
   - name: Launch apt for misc packages
     apt:
@@ -42,6 +41,7 @@
       - memcached 
       - ncdu
       - duc
+      - iotop
       - acl
       - snapd
     register: command_output
@@ -749,14 +749,14 @@
         state: restarted
 
 
-  ##### check/complete the sshd_config file
-- name: Add a section into the sshd_config, after passing validation with sshd -T
+  ##### Setup files
+- name: Check setup files
   hosts: '{{target}}'
   become: yes
   become_method: sudo
   become_user: root
   tasks:
-    - name: sshd_config
+    - name: Add a section into the sshd_config, after passing validation with sshd -T
       ansible.builtin.blockinfile:
         path: /etc/ssh/sshd_config
         marker: "# {mark} Block for SellYourSaas"
@@ -772,7 +772,16 @@
           #  ChrootDirectory %h
           Match User osu*
             PasswordAuthentication=yes
-    
+
+    - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
+      ansible.builtin.template:
+        src: ../../etc/datadog-agent/conf.d/disk.d/conf.yaml
+        dest: /etc/datadog-agent/conf.d/disk.d/conf.yaml
+        owner: dd-agent
+        group: dd-agent
+        mode: '0644'
+
+
   ##### Set permissions, create some dirs and files by calling perms.ksh
 - name: Call perms.ksh to set permissions, create some dirs and files
   hosts: '{{target}}'
@@ -780,7 +789,7 @@
   become_method: sudo
   become_user: root
   tasks:
-  - name: Launch perms.sh
+  - name: Launch perms.sh to set permissions, create some dirs and files
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh confirm"
     register: command_output
 

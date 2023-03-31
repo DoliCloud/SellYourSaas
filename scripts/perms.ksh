@@ -51,9 +51,13 @@ chown admin.admin /mnt/diskbackup;
 chown admin.admin /home/admin/backup; chown admin.admin /home/admin/backup/conf; chown admin.admin /home/admin/backup/mysql; 
 chown admin.admin /home/admin/wwwroot
 
-# Permissions on private key files
-[ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa
-[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas
+# Permissions on SSH config and private key files
+echo "Set owner and permission on admin ssh files"
+[ -s /home/admin/.ssh/config ] && chmod go-rwx /home/admin/.ssh/config && chown admin.admin /home/admin/.ssh/config
+[ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa && chown admin.admin /home/admin/.ssh/id_rsa
+[ -s /home/admin/.ssh/id_rsa.pub ] && chmod go-wx /home/admin/.ssh/id_rsa.pub && chown admin.admin /home/admin/.ssh/id_rsa.pub
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas && chown admin.admin /home/admin/.ssh/id_rsa_sellyoursaas 
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas.pub ] && chmod go-wx /home/admin/.ssh/id_rsa_sellyoursaas.pub && chown admin.admin /home/admin/.ssh/id_rsa_sellyoursaas.pub 
 
 
 echo "Set owner and permission on /home/admin/wwwroot/dolibarr_documents/ (except sellyoursaas)"

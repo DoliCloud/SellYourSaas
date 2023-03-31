@@ -205,10 +205,10 @@ if (empty($reshook)) {
 			if ($fordolibarr) {
 				$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, email, signature, api_key)";
 				$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
-				$sql .= " ".(empty($conf->global->SELLYOURSAAS_DEPRECATED_CLEAR_PASSWORD) ? 'null' : "'".$newdb->escape($password)."'").",";
+				$sql .= " null,";
 				$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
 				$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
-				$sql .= " '".$newdb->escape($password)."')";
+				$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."')";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
 					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
@@ -238,7 +238,6 @@ if (empty($reshook)) {
 						$resql=$newdb->query($sql);
 					}
 				}
-
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
 			} else {
@@ -610,8 +609,8 @@ if (!$error && ! $user->socid) {
 	print '<div class="tabsAction">';
 
 	if ($user->rights->sellyoursaas->write) {
-		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createsupportuser&token='.newToken().'">'.$langs->trans('CreateSupportUser').'</a>';
-		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletesupportuser&token='.newToken().'">'.$langs->trans('DeleteSupportUser').'</a>';
+		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createsupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('CreateSupportUser').'</a>';
+		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletesupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('DeleteSupportUser').'</a>';
 	}
 
 	print "</div><br>";
@@ -760,25 +759,25 @@ function print_user_table($newdb, $object)
 							}
 						} elseif ($key == 'pass') {
 							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
-							print '<td class="tdoverflowmax100" title="'.$valtoshow.'">'.$valtoshow.'</td>';
+							print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($valtoshow).'">'.dol_escape_htmltag($valtoshow).'</td>';
 						} elseif ($key == 'login') {
-							print '<td class="nowraponall">';
+							print '<td class="nowraponall tdoverflowmax150" title="'.dol_escape_htmltag($obj->$key).'">';
 							print $obj->$key;
 							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 							print '</td>';
 						} elseif ($key == 'email') {
-							print '<td>'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
+							print '<td class="tdoverflowma150" title="'.dol_escape_htmltag($obj->$key).'">'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
 						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
-							print '<td>'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
+							print '<td class="nowraponall">'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
 						} else {
-							print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').' title="'.$db->escape((empty($obj->$key) ? '' : $obj->$key)).'">';
-							print (empty($obj->$key) ? '' : $obj->$key);
+							print '<td'.($cssforfield ? ' class="'.$cssforfield.'"' : '').' title="'.dol_escape_htmltag(empty($obj->$key) ? '' : $obj->$key).'">';
+							print dol_escape_htmltag(empty($obj->$key) ? '' : $obj->$key);
 							print '</td>';
 						}
 					}
 				}
 				print '<td align="center">';
-				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.$obj->rowid.'&id='.$id.'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+				print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto('ResetPassword', 'object_technic').'</a>';
 				print '</td>';
 				print '</tr>';
 				$i++;

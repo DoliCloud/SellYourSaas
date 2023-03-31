@@ -71,47 +71,55 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s.=$langs->trans("Language").': ';
 		$formother=new FormAdmin($this->db);
 
-		$s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+		$s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, null, $langs->trans("Language"), 0, 0, '', 0, 0, 1);
 
 		$s.=$langs->trans("NotLanguage").': ';
 		$formother=new FormAdmin($this->db);
-		$s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+		$s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, null, $langs->trans("NotLanguage"), 0, 0, '', 0, 0, 1);
 
+		$s .= '<br>';
+
+		$s.=$langs->trans("DoNotUseDefaultStripeAccount").': ';
+		$s.='<input type="checkbox" class="margintoponly marginbottomonly" value="1" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
+
+		// Filter on contracts
 		$s.='<br> ';
 
 		$s.=$langs->trans("DeploymentStatus").': ';
-		$s.='<select name="filter" class="flat">';
+		$s.='<select name="filter" id="sellyoursaas_filter" class="flat">';
 		$s.='<option value="none">&nbsp;</option>';
 		foreach ($arraystatus as $key => $status) {
 			$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
 		}
 		$s.='</select>';
+		$s .= ajax_combobox("sellyoursaas_filter");
 
 		$s.=' ';
 
 		$listofipwithinstances=array();
-		$sql = "SELECT DISTINCT deployment_host";
-		$sql .= " FROM ".MAIN_DB_PREFIX."contrat_extrafields";
-		$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
+		$sql = "SELECT rowid, ref, ipaddress, status, servercountries";
+		$sql .= " FROM ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver";
 		$resql=$this->db->query($sql);
 		if ($resql) {
 			while ($obj = $this->db->fetch_object($resql)) {
-				$listofipwithinstances[]=$obj->deployment_host;
+				$listofipwithinstances[$obj->rowid] = array('ref'=>$obj->ref, 'ipaddress'=>$obj->ipaddress, 'status'=>$obj->status, 'servercountries'=>$obj->servercountries);
 			}
 			$this->db->free($resql);
 		} else dol_print_error($this->db);
 
 		$s.=$langs->trans("DeploymentHost").': ';
-		$s.='<select name="filterip" class="flat">';
+		$s.='<select name="filterip" id="sellyoursaas_filterip" class="flat">';
 		$s.='<option value="none">&nbsp;</option>';
-		foreach ($listofipwithinstances as $val) {
-			$s.='<option value="'.$val.'"'.(GETPOST('filterip', 'alpha') == $val ? ' selected':'').'>'.$val.'</option>';
+		foreach ($listofipwithinstances as $key => $val) {
+			$label = $val['ref'].' - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')');
+			$labelhtml = $val['ref'].'<span class="opacitymedium"> - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : ' ('.$val['servercountries'].')').'</span>';
+			$s.='<option value="'.$val['ipaddress'].'"'.(GETPOST('filterip', 'alpha') == $val['ipaddress'] ? ' selected':'').' data-html="'.dol_escape_htmltag($labelhtml).'">'.dol_escape_htmltag($label).'</option>';
 		}
 		$s.='</select>';
-
+		$s .= ajax_combobox("sellyoursaas_filterip");
 		$s.='<br> ';
 
-		$listofpackages=array();
+		/*$listofpackages=array();
 		$sql = "SELECT DISTINCT ref";
 		$sql .= " FROM ".MAIN_DB_PREFIX."packages";
 		//$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
@@ -122,15 +130,19 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			}
 			$this->db->free($resql);
 		} else dol_print_error($this->db);
-		//$s .= $langs->trans("Package").': ';
+		$s .= $langs->trans("Package").': ';
+		*/
 
-		$s .= $langs->trans("Product").': ';
+		// Filter on line of contracts
+		$s .= img_picto('', 'product');
 		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 
+		/*
 		$s .= '<br>';
-
-		$s.=$langs->trans("DoNotUseDefaultStripeAccount").': ';
-		$s.='<input type="checkbox" value="1" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
+		$s .= '<input value="'.GETPOST('contractpricetotal', 'int').'" name="contractpricetotal" class="width100 right marginrightonly" placeholder="'.$langs->trans("UnitPriceOfLine").'">';
+		$s .= '<input value="'.GETPOST('quantityproduct', 'int').'" name="quantityproduct" class="width100 right marginrightonly" placeholder="'.$langs->trans("Quantity").'">';
+		$s .= '<input value="'.GETPOST('discountproduct', 'int').'" name="discountproduct" class="width100 right marginrightonly" placeholder="'.$langs->trans("Discount").'">';
+		*/
 
 		return $s;
 	}
@@ -180,7 +192,10 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			}
 		}
 
-		$productid = GETPOST('productid', 'int');
+		$productid = GETPOSTINT('productid');
+		$contractpricetotal = price2num(GETPOST('contractpricetotal'));
+		$quantityproduct = price2num(GETPOST('quantityproduct'));
+		$discountproduct = price2num(GETPOST('discountproduct'));
 
 		$sql = " SELECT s.rowid as id, email, nom as lastname, '' as firstname, s.default_lang, c.code as country_code, c.label as country_label,";
 		$sql .= " se.stripeaccount, se.domain_registration_page";
@@ -192,19 +207,16 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
-		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
-			(! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
-			($productid > 0)) {
-				$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
-				$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
+		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') || (! empty($_POST['filterip']) && $_POST['filterip'] != 'none') || ($productid > 0)) {
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
 		}
-		$sql .= ", ".MAIN_DB_PREFIX."categorie_societe as cs";
+		$sql .= " INNER JOIN ".MAIN_DB_PREFIX."categorie_societe as cs ON cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
+		if ($contractpricetotal > 0 || $productid > 0 || $quantityproduct > 0 || $discountproduct != '') {
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facture_rec as fr on fr.fk_soc = s.rowid";
+			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facturedet_rec as fdr on fdr.fk_facture = fr.rowid";
+		}
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
-		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
-		/*if (! empty($_POST['options_dolicloud']) && $_POST['options_dolicloud'] != 'none')
-		{
-			$sql.= " AND se.dolicloud = '".$this->db->escape($_POST['options_dolicloud'])."'";
-		}*/
 		if (GETPOST('lang_id') && GETPOST('lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id', 'array')), 3);
 		if (GETPOST('not_lang_id') && GETPOST('not_lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id', 'array')), -3);
 		if (GETPOST('country_id') && GETPOST('country_id') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
@@ -221,6 +233,22 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		if ($productid > 0) {
 			$sql .= ' AND co.rowid IN (SELECT fk_contrat FROM '.MAIN_DB_PREFIX.'contratdet as cd WHERE fk_product IN ('.$this->db->sanitize($this->db->escape($productid)).'))';
 		}
+		if ($quantityproduct > 0) {
+			$sql .= " AND fdr.qty = ".((float) $quantityproduct);
+		}
+		if ($productid > 0) {
+			$sql .= " AND fdr.fk_product = ".((int) $productid);
+		}
+		if ($discountproduct != '') {
+			if (empty($discountproduct)) {
+				$sql .= " AND (fdr.remise_percent IS NULL or fdr.remise_percent = 0)";
+			} else {
+				$sql .= " AND fdr.remise_percent = ".((float) $discountproduct);
+			}
+		}
+		if ($contractpricetotal > 0) {
+			$sql .= " AND fdr.subprice = ".((float) $contractpricetotal);
+		}
 
 		if (GETPOST('donotusedefaultstripeaccount')) {
 			$sql.= " AND se.stripeaccount IS NOT NULL AND se.stripeaccount <> ''";
@@ -228,6 +256,8 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		$sql.= " ORDER BY email";
 		//print $sql;
+
+		$this->sql = $sql;
 
 		// Stocke destinataires dans cibles
 		$result=$this->db->query($sql);

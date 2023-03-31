@@ -72,11 +72,11 @@ if (! $res) die("Include of master fails");
 
 $date = new DateTime();
 print "***** ".$script_file." (".$version.") - ".$date->format('Ymd-H:i:s')." *****\n";
-if (! isset($argv[3])) {	// Check parameters
+if (! isset($argv[4])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed desktop.\n";
 	print "\n";
-	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) login hostfile target [userip=userip] [userpublickey=\"userpublickey\"]\n";
+	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userip=userip] [userroot=0|1] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
 	print "\n";
 	exit(-1);
 }
@@ -96,12 +96,19 @@ $now = time();
 $action = isset($argv[1]) ? $argv[1] : '';
 $login = isset($argv[2]) ? $argv[2] : '';
 $hostfile = isset($argv[3]) ? $argv[3] : '';
+$target = empty($argv[4]) ? '' : $argv[4];
+
+$loginforansible = isset($argv[5]) ? $argv[5] : '';
+if (strpos($loginforansible, '=') !== false) {
+	$loginforansible = "";
+}
 
 // optional params
 $userip = '';
 $userpublickey = '';
-$target = empty($argv[4]) ? '' : $argv[4];
-for ($i = 4; $i <= 6; $i++) {
+$userpassword = '';
+$userroot = '';
+for ($i = 5; $i <= 10; $i++) {
 	$moreparam = empty($argv[$i]) ? '' : $argv[$i];
 	//print $moreparam."\n";
 	if ($moreparam) {
@@ -113,14 +120,29 @@ for ($i = 4; $i <= 6; $i++) {
 			if ($arrayparam[0] == 'userpublickey') {
 				$userpublickey = $arrayparam[1];
 			}
+			if ($arrayparam[0] == 'userpassword') {
+				$userpassword = $arrayparam[1];
+			}
+			if ($arrayparam[0] == 'userroot') {
+				$userroot = $arrayparam[1];
+			}
 		}
 	}
+}
+
+if ($action == 'create' && ($userroot === '' || empty($userpublickey))) {
+	echo "Error: To create a personal user login, the parameter userroot and userpublickey are mandatory.\n";
+	exit(-1);
+}
+if ($userroot && empty($userpassword)) {
+	echo "Error: To create a personal user login allowed to get root access (userroot=1), the parameter userpassword is mandatory.\n";
+	exit(-1);
 }
 
 $scriptyaml = '';
 if ($action == 'create') {
 	$scriptyaml = 'create_user.yml';
-} elseif ($action == 'allowroot' || $action == 'disallowroot' || $action == 'reactivate') {
+} elseif ($action == 'reactivate') {
 	$scriptyaml = 'reactivate_user.yml';
 } elseif ($action == 'deactivate') {
 	$scriptyaml = 'deactivate_user.yml';
@@ -129,7 +151,9 @@ if ($action == 'create') {
 } elseif ($action == 'remove') {
 	$scriptyaml = 'remove_user.yml';
 } else {
-	echo "Error: Bad parameter action. Must be (create|allowroot|disallowroot|deactivate|reactivate|remove).\n";
+	echo "Error: Bad parameter action. Must be (create|deactivate|reactivate|remove).\n";
+	echo "\n";
+	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userip=userip] [userroot=0|1] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
 	exit(-1);
 }
 
@@ -141,18 +165,26 @@ $currentdir = getcwd();
 
 chdir($path.'/ansible');
 
-$command = "ansible-playbook -v -K ".$scriptyaml." -i hosts-".$hostfile." -e 'target=".$target." login=".$login;
+$command = "ansible-playbook -v -K ".$scriptyaml." -i hosts-".$hostfile;
+if ($loginforansible) {
+	$command .= " --user=".$loginforansible;
+}
+$command .= " -e 'target=".$target." login=".$login;
 if ($userip) {
 	$command .= " userip=\"".$userip."\"";
+}
+if ($userroot) {
+	$command .= " userroot=\"".$userroot."\"";
 }
 if ($userpublickey) {
 	$command .= " userpublickey=\"".$userpublickey."\"";
 }
-if ($action == 'allowroot') {
-	$command .= " allowroot=1";
-}
-if ($action == 'disallowroot') {
-	$command .= " disallowroot=1";
+if ($userpassword) {
+	$salt = generateSalt(16); // génère un sel aléatoire de 16 caractères
+	//$hash = '$6$' . $salt . '$' . hash('sha512', $salt . $userpassword, false); // utilise la fonction hash() pour hasher le mot de passe avec le sel et encode le résultat dans le format du fichier /etc/shadow
+	$hash = crypt($userpassword, "$6$".$salt); // utilise la fonction crypt() pour hasher le mot de passe avec le sel
+
+	$command .= " userpassword=\"".$hash."\"";
 }
 $command .= "'";
 
@@ -169,3 +201,21 @@ foreach ($resarray as $line) {
 chdir($currentdir);
 
 exit(0);
+
+
+
+/**
+ * Generate a salt
+ *
+ * @param	int		$length		Length of salt
+ * @return	string				Salt
+ */
+function generateSalt($length)
+{
+	$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+	$salt = '';
+	for ($i = 0; $i < $length; $i++) {
+		$salt .= $chars[rand(0, strlen($chars) - 1)];
+	}
+	return $salt;
+}

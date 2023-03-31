@@ -337,6 +337,10 @@ div.tab-content {
 	overflow-y: scroll;
 }
 
+.flexitem50 {
+	max-width: 48%;
+	flex-grow: 1;
+}
 
 @media only screen and (max-width: 400px)	/* reduction 3 */
 {
@@ -683,7 +687,7 @@ inline-block;float: right;}.general-item-list > .item > .item-head >
 14px;
 margin-right: .05em;line-height: 14px;-webkit-font-smoothing: 
 antialiased;}li [class^="fa-"],li [class^="glyphicon-"],li [class^=
-"icon-"],li [class*=" fa-"],li [class*=" glyphicon-"],li [class*=" 
+"icon-"],li [class*=" fa-"],li [class*=" glyphicon-"], li [class*=" 
 icon-"] {display: inline-block;width: 1.25em;text-align: center;}li [
 class^="glyphicon-"],li [class*=" glyphicon-"] {top: 2px;}li [class^=
 "icon-"],li [class*=" icon-"] {top: 1px;position: relative;}li [

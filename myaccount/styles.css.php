@@ -216,6 +216,10 @@ address {display: block;margin-bottom: 20px;font-style: normal;line-height: 20px
 	vertical-align: bottom;
 }
 
+.width300 {
+	width: 300px;
+}
+
 @media (min-width: 980px) {
 	.nav-collapse.collapse {height: auto !important;overflow: visible !important;}
 }

@@ -467,8 +467,8 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	$content_grabbed = $resultarray['output'];
 
 	echo "Result: ".$return_val."\n";
-	echo "Output: ".$content_grabbed."\n";
 	if (!empty($resultarray['error'])) {
+		echo "Output: ".$content_grabbed."\n";
 		echo "Error: ".$resultarray['error']."\n";
 	}
 }

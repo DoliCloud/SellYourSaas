@@ -54,13 +54,15 @@ $titleofpage=$langs->trans('Login').' @ '.$titletruedolibarrversion;	// $titletr
 $disablenofollow=1;
 if (! preg_match('/'.constant('DOL_APPLICATION_TITLE').'/', $titleofpage)) $disablenofollow=0;
 
+$head = '';
+
 $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
 if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
 if ($favicon) {
 	$href = 'img/'.$favicon;
 	if (preg_match('/^http/i', $favicon)) $href = $favicon;
-	$head.='<link rel="icon" href="'.$href.'">'."\n";
+	$head .= '<link rel="icon" href="'.$href.'">'."\n";
 }
 
 print top_htmlhead_sellyoursaas($head, $titleofpage, 0, 0, $arrayofjs, array(), 0, $disablenofollow);

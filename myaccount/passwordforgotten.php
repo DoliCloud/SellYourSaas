@@ -214,7 +214,7 @@ if (empty($reshook)) {
 						if (! empty($conf->global->$newnamekey)) $sellyoursaasaccounturl = $conf->global->$newnamekey;
 					}
 
-					$url=$sellyoursaasaccounturl.'/passwordforgotten.php?id='.$thirdparty->id.'&hashreset='.$hashreset;
+					$url = $sellyoursaasaccounturl.'/passwordforgotten.php?id='.$thirdparty->id.'&hashreset='.$hashreset;
 
 					$trackid='thi'.$thirdparty->id;
 
@@ -233,7 +233,7 @@ if (empty($reshook)) {
 					$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
 					$mesg = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
 
-					$newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_MAIN_EMAIL, $mesg, array(), array(), array(), '', '', 0, -1, '', '', $trackid, '', 'standard');
+					$newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_NOREPLY_EMAIL, $mesg, array(), array(), array(), '', '', 0, -1, '', '', $trackid, '', 'standard');
 
 					if ($newemail->sendfile() > 0) {
 						$message = $messagegenericresult;
@@ -295,28 +295,28 @@ $sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
 
 $domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 $constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-if (! empty($conf->global->$constforaltname)) {
+if (getDolGlobalString($constforaltname)) {
 	$sellyoursaasdomain = $domainname;
 	$sellyoursaasname = $conf->global->$constforaltname;
 	$constlogo.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 	$constlogosmall.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 }
 
-if (empty($urllogo) && ! empty($conf->global->$constlogosmall)) {
-	if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall)) {
-		$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constlogosmall);
+if (empty($urllogo) && getDolGlobalString($constlogosmall)) {
+	if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constlogosmall))) {
+		$urllogo = DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.getDolGlobalString($constlogosmall));
 	}
 } elseif (empty($urllogo) && ! empty($conf->global->$constlogo)) {
-	if (is_readable($conf->mycompany->dir_output.'/logos/'.$conf->global->$constlogo)) {
-		$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/'.$conf->global->$constlogo);
+	if (is_readable($conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constlogo))) {
+		$urllogo = DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/'.getDolGlobalString($constlogo));
 		$width=128;
 	}
 } elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
-	$urllogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
+	$urllogo = DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
 } elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png')) {
-	$urllogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
+	$urllogo = DOL_URL_ROOT.'/theme/dolibarr_logo.png';
 } else {
-	$urllogo=DOL_URL_ROOT.'/theme/login_logo.png';
+	$urllogo = DOL_URL_ROOT.'/theme/login_logo.png';
 }
 
 // Security graphical code

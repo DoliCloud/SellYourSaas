@@ -134,7 +134,11 @@ if [ "x$customurl" == "x-" ]; then
 fi
 export contractlineid=${28}
 export EMAILFROM=${29}
+# CERTIFFORCUSTOMDOMAIN. Example: withY.mysaasdomain.com, myowndomain.com 
 export CERTIFFORCUSTOMDOMAIN=${30}
+if [ "x$CERTIFFORCUSTOMDOMAIN" == "x-" ]; then
+	CERTIFFORCUSTOMDOMAIN=""
+fi
 export archivedir=${31}
 export SSLON=${32}
 export apachereload=${33}
@@ -703,63 +707,149 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	echo "Create dir for instance = $targetdir/$osusername/$dbname"
 	mkdir -p $targetdir/$osusername/$dbname
 	
-	echo "Check dirwithsources1=$dirwithsources1 targetdirwithsources1=$targetdirwithsources1"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources1=$dirwithsources1 targetdirwithsources1=$targetdirwithsources1"
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
 			if [[ -f $dirwithsources1.tar.zst ]]; then
-				echo "tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 				tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
 				if [ -f $dirwithsources1.tgz ]; then
-					echo "tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
+					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
 					tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
 				else
-					echo "cp -pr  $dirwithsources1/ $targetdirwithsources1"
-					cp -pr  $dirwithsources1/. $targetdirwithsources1
-				fi
+					datesource=`date -r $dirwithsources1 +"%Y%m%d"`
+					if [ -f "/tmp/cache$dirwithsources1.tgz" ]; then
+						# compare date of file with date of source dir
+						datecache=`date -r /tmp/cache$dirwithsources1.tgz +"%Y%m%d"`
+					else 
+						datecache=0
+					fi
+					echo "datesource=$datesource datecache=$datecache"
+
+					if [ ! -f "/tmp/cache$dirwithsources1.tgz" -o $datesource -gt $datecache ]; then
+						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
+						mkdir -p "/tmp/cache$dirwithsources1"
+						#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
+						cd $dirwithsources1/.
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz ."
+						#cp -r $dirwithsources1/. $targetdirwithsources1
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz .
+					fi 
+
+					if [ ! -f "/tmp/cache$dirwithsources1.tgz" ]; then
+						# If cache does not exists. Should not happen
+                        echo "Warning: Both remote and local cache does not exists. Should not happen."
+                        echo "cp -r  $dirwithsources1/. $targetdirwithsources1"
+                        cp -r  $dirwithsources1/. $targetdirwithsources1
+					else 
+						# If cache exists.
+                        echo "Local cache found. We uncompress it."
+                        echo "tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
+                        tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
+                    fi
+          		fi
 			fi
 		fi
 	fi
-	echo "Check dirwithsources2=$dirwithsources2 targetdirwithsources2=$targetdirwithsources2"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources2=$dirwithsources2 targetdirwithsources2=$targetdirwithsources2"
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
 			if [[ -f $dirwithsources2.tar.zst ]]; then
-				echo "tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 				tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
 				if [ -f $dirwithsources2.tgz ]; then
-					echo "tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
+					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
 					tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
 				else
-					echo "cp -pr  $dirwithsources2/ $targetdirwithsources2"
-					cp -pr  $dirwithsources2/. $targetdirwithsources2
+					datesource=`date -r $dirwithsources2 +"%Y%m%d"`
+					if [ -f "/tmp/cache$dirwithsources2.tgz" ]; then
+						# compare date of file with date of source dir
+						datecache=`date -r /tmp/cache$dirwithsources2.tgz +"%Y%m%d"`
+					else 
+						datecache=0
+					fi
+					echo "datesource=$datesource datecache=$datecache"
+
+					if [ ! -f "/tmp/cache$dirwithsources2.tgz" -o $datesource -gt $datecache ]; then
+						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
+						mkdir -p "/tmp/cache$dirwithsources2"
+						#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
+						cd $dirwithsources2/.
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz ."
+						#cp -r $dirwithsources2/. $targetdirwithsources2
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz .
+					fi 
+
+					if [ ! -f "/tmp/cache$dirwithsources2.tgz" ]; then
+						# If cache does not exists. Should not happen
+                        echo "Warning: Both remote and local cache does not exists. Should not happen."
+                        echo "cp -r  $dirwithsources2/. $targetdirwithsources2"
+                        cp -r  $dirwithsources2/. $targetdirwithsources2
+					else 
+						# If cache exists.
+                        echo "Local cache found. We uncompress it."
+                        echo "tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
+                        tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
+                    fi
 				fi
 			fi
 		fi
 	fi
-	echo "Check dirwithsources3=$dirwithsources3 targetdirwithsources3=$targetdirwithsources3"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources3=$dirwithsources3 targetdirwithsources3=$targetdirwithsources3"
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
 			if [[ -f $dirwithsources3.tar.zst ]]; then
-				echo "tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 				tar -I zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
 				if [ -f $dirwithsources3.tgz ]; then
-					echo "tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
+					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
 					tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
 				else
-					echo "cp -pr  $dirwithsources3/ $targetdirwithsources3"
-					cp -pr  $dirwithsources3/. $targetdirwithsources3
+					datesource=`date -r $dirwithsources3 +"%Y%m%d"`
+					if [ -f "/tmp/cache$dirwithsources3.tgz" ]; then
+						# compare date of file with date of source dir
+						datecache=`date -r /tmp/cache$dirwithsources3.tgz +"%Y%m%d"`
+					else 
+						datecache=0
+					fi
+					echo "datesource=$datesource datecache=$datecache"
+
+					if [ ! -f "/tmp/cache$dirwithsources3.tgz" -o $datesource -gt $datecache ]; then
+						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
+						mkdir -p "/tmp/cache$dirwithsources3"
+						#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
+						cd $dirwithsources3/.
+						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz ."
+						#cp -r $dirwithsources3/. $targetdirwithsources3
+						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz .
+					fi 
+
+					if [ ! -f "/tmp/cache$dirwithsources3.tgz" ]; then
+						# If cache does not exists. Should not happen
+                        echo "Warning: Both remote and local cache does not exists. Should not happen."
+                        echo "cp -r  $dirwithsources3/. $targetdirwithsources3"
+                        cp -r  $dirwithsources3/. $targetdirwithsources3
+					else 
+						# If cache exists.
+                        echo "Local cache found. We uncompress it."
+                        echo "tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
+                        tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
+                    fi
 				fi
 			fi
 		fi
 	fi
 
-	echo "Force permissions and owner on $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Force permissions and owner on $targetdir/$osusername/$dbname"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername.$osusername $targetdir/$osusername/$dbname"
 	chown -R $osusername.$osusername $targetdir/$osusername/$dbname
+	echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
 	chmod -R go-rwxs $targetdir/$osusername/$dbname
 fi
 
@@ -915,6 +1005,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
+	
 	if [[ -s $apacheconf ]]
 	then
 		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
@@ -957,8 +1048,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
-	#echo Enable conf with a2ensite $fqn.conf
-	#a2ensite $fqn.conf
+	# Enable conf with ln
 	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online 
 	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
 	
@@ -967,48 +1057,103 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 	if [[ "x$customurl" != "x" ]]; then
 	
-		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
+
+		export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
+		export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+
+		# Delete old custom conf file
+		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
 		if [[ -s $apacheconf ]]
 		then
-			echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
 			rm -f $apacheconf
 		fi
 
-		echo "Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists and create link to generic certificate files if not"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
-			export pathforcertif=`dirname $pathforcertif`
+			mkdir -p $pathforcertiflocal
+
+			# If a name for a custom CERTIF stored on master was forced, we use this one as SSL certiticate
 			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
 			export webCustomSSLCertificateKEY=$CERTIFFORCUSTOMDOMAIN.key
 			export webCustomSSLCertificateIntermediate=$CERTIFFORCUSTOMDOMAIN-intermediate.crt
 		
-			if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
-				echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to $pathforcertif/crt/$webCustomSSLCertificateCRT"
-				ln -fs $pathforcertif/crt/$webCustomSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
-				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateCRT to /etc/apache2/$webSSLCertificateCRT"
-					ln -fs /etc/apache2/$webSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
+			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateCRT ]]; then
+				# If file or link does not exist
+				echo `date +'%Y-%m-%d %H:%M:%S'`" cp -pn $pathforcertifmaster/$webCustomSSLCertificateCRT to $pathforcertiflocal/$webCustomSSLCertificateCRT"
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateCRT $pathforcertiflocal/$webCustomSSLCertificateCRT
+				# It is better to link to a bad certificate than linking to non existing file, so
+				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateCRT ]]; then
+					echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateCRT"
+					echo "ln -fs /etc/apache2/$webSSLCertificateCRT $pathforcertiflocal/$webCustomSSLCertificateCRT"
+					ln -fs /etc/apache2/$webSSLCertificateCRT $pathforcertiflocal/$webCustomSSLCertificateCRT
 				fi
 			fi
-			if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
-				echo "Create link /etc/apache2/$webCustomSSLCertificateKEY to $pathforcertif/crt/$webCustomSSLCertificateKEY"
-				ln -fs $pathforcertif/crt/$webCustomSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
-				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$webCustomSSLCertificateKEY ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateKEY to /etc/apache2/$webSSLCertificateKEY"
-					ln -fs /etc/apache2/$webSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
+			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
+				# If file or link does not exist
+				echo `date +'%Y-%m-%d %H:%M:%S'`" cp -pn $pathforcertifmaster/$webCustomSSLCertificateKEY to $pathforcertiflocal/$webCustomSSLCertificateKEY"
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
+				# It is better to link to a bad certificate than linking to non existing file, so
+				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateKEY ]]; then
+					echo "Previous cp not valid, so we create it from /etc/apache2/$webSSLCertificateKEY"
+					echo "ln -fs /etc/apache2/$webSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY"
+					ln -fs /etc/apache2/$webSSLCertificateKEY $pathforcertiflocal/$webCustomSSLCertificateKEY
 				fi
 			fi
-			if [[ ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
-				echo "Create link /etc/apache2/$webCustomSSLCertificateIntermediate to $pathforcertif/crt/$webCustomSSLCertificateIntermediate"
-				ln -fs $pathforcertif/crt/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
-				# It is better to link to a bad certificate than linking to non existing file
-				if [[ ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
-					echo "Create link /etc/apache2/$webCustomSSLCertificateIntermediate to /etc/apache2/$webSSLCertificateIntermediate"
-					ln -fs /etc/apache2/$webSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
+			if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
+				# If file or link does not exist
+				echo `date +'%Y-%m-%d %H:%M:%S'`" cp -pn $pathforcertifmaster/$webCustomSSLCertificateIntermediate to $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
+				cp -pn $pathforcertifmaster/$webCustomSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
+				# It is better to link to a bad certificate than linking to non existing file, so
+				if [[ ! -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate ]]; then
+					echo "Previous cp not valid, so we recreate it from /etc/apache2/$webSSLCertificateIntermediate"
+					echo "ln -fs /etc/apache2/$webSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate"
+					ln -fs /etc/apache2/$webSSLCertificateIntermediate $pathforcertiflocal/$webCustomSSLCertificateIntermediate
 				fi
 			fi
+			
+			echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R admin.www-data $pathforcertiflocal/"
+			chown -R admin.www-data $pathforcertiflocal/
+
+			# Create also the link in /etc/apache2 for the case we use old virtual host using this file
+			if [ -e $pathforcertiflocal/$webCustomSSLCertificateCRT -a ! -e /etc/apache2/$webCustomSSLCertificateCRT ]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" ln -fs $pathforcertiflocal/$webCustomSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT"
+				ln -fs $pathforcertiflocal/$webCustomSSLCertificateCRT /etc/apache2/$webCustomSSLCertificateCRT
+			fi
+			if [ -e $pathforcertiflocal/$webCustomSSLCertificateKEY -a ! -e /etc/apache2/$webCustomSSLCertificateKEY ]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" ln -fs $pathforcertiflocal/$webCustomSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY"
+				ln -fs $pathforcertiflocal/$webCustomSSLCertificateKEY /etc/apache2/$webCustomSSLCertificateKEY
+			fi
+			if [ -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate -a ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" ln -fs $pathforcertiflocal/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate"
+				ln -fs $pathforcertiflocal/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
+			fi
+		else 
+			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
+			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
+			# We must create it using letsencrypt if not yet created
+			#if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn.crt ]]; then
+					# Generate the letsencrypt certificate
+					
+					# certbot certonly --webroot -w $instancedir -d $customurl 
+					# create links					
+
+					# If links does not exists, we disable SSL
+					#SSLON="Off"
+			#fi
+			
+			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
+			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
+			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
+			export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
+		fi
+
+		# If the certificate file is not found, we disable SSL
+		if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+			SSLON="Off"
+		else
+			SSLON="On"
 		fi
 
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \

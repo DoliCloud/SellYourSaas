@@ -659,7 +659,11 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
+					if (!isset($listofnewinstances[$obj->customer_id])) {
+						$listofnewinstances[$obj->customer_id] = 0;
+					}
 					$listofnewinstances[$obj->customer_id]++;
+
 					$nbmonth = 1;
 					if ($obj->unit_frequency == 'y') {
 						$nbmonth = 12;
@@ -710,6 +714,9 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
+					if (!isset($listoflostinstances[$obj->customer_id])) {
+						$listoflostinstances[$obj->customer_id] = 0;
+					}
 					$listoflostinstances[$obj->customer_id]++;
 					$nbmonth = 1;
 					if ($obj->unit_frequency == 'y') {

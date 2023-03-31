@@ -32,7 +32,7 @@ This document present how to install a remote server for Backups in a SellYourSa
 
 === Choice of machine and OS and create it
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*)
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04* or *22.04*)
 
 * Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
 
@@ -784,6 +784,7 @@ Delete very old files every sunday by adding the cron task:
 ---------------
 0 18 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +50 -ls -delete > /var/log/find_delete_old_files.log 2>&1
 0 18 * * 1 find /mnt/diskbackup/*/backupold_* -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
+55 23 * * * btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >/var/log/sellyoursaas_btrfs.log; btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >>/var/log/sellyoursaas_btrfs.log; rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +\%j`/.snapshots >>/var/log/sellyoursaas_btrfs.log; btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` ro true >>/var/log/sellyoursaas_btrfs.log;
 ---------------
 
 
@@ -925,9 +926,35 @@ mount /dev/sdXY /mnt
 Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
 
 
-=== Use of btrfs to create a subvolume vor each backup dir of each server
+<<<<<<<
+
+== Annexes
+
+
+=== Migrate a ext4 partition into btrfs
+
+Run command to see partition types:
+
+[source,bash]
+---------------
+df -Th
+lsblk -f
+---------------
+
+If the data disk is ext4, you can convert it into BTRFS with:
+
+[source,bash]
+---------------
+btrfs-convert -p /dev/vdX
+lsblk -f
+---------------
+
+Then edit he */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it was changed)
 
 Then you create a subvolume for each directory you want to be able to make snapshots.
+
+
+=== BTRFS admin
 
 To list existing subvolumes:
 
@@ -943,27 +970,45 @@ To create a subvolume for a server
 btrfs subvolume create /mnt/diskbackup/xxx   # with xxx = home_serverX or backup_serverX
 chown admin.admin /mnt/diskbackup/xxx
 chmod -R o-rw /mnt/diskbackup/xxx
+cp -ax --reflink=always src/. dest
 ---------------
+
+To convert an existing directory into a subvolume or convert a subvolume into a common directory
+
+[source,bash]
+---------------
+export dirtoconvert=xxx		# with xxx = home_serverX or backup_serverX
+
+# To convert directory into subvolume
+mv /mnt/diskbackup/$dirtoconvert /mnt/diskbackup/$dirtoconvert-old; btrfs subvolume create /mnt/diskbackup/$dirtoconvert; cp -ax --reflink=always /mnt/diskbackup/$dirtoconvert-old/. /mnt/diskbackup/$dirtoconvert; rm -fr /mnt/diskbackup/$dirtoconvert-old;
+
+# To convert subvolume into directory
+mv /mnt/diskbackup/$dirtoconvert /mnt/diskbackup/$dirtoconvert-old; cp -ax --reflink=always /mnt/diskbackup/$dirtoconvert-old/. /mnt/diskbackup/$dirtoconvert; btrfs subvolume delete /mnt/diskbackup/$dirtoconvert-old;
+
+---------------
+
+
+-- Example of CLI to convert directoris not btrfs into btrfs subvolume
+-- btrfs subvolume show /mnt/diskbackup/not 2>&1 | grep -c "Not a Btrfs subvolume" && mv /mnt/diskbackup/not /mnt/diskbackup/not-old && btrfs subvolume create /mnt/diskbackup/not && cp -ax --reflink=always /mnt/diskbackup/not-old/. /mnt/diskbackup/not && rm -fr /mnt/diskbackup/not-old  
+
+
 
 To create a readonly snapshot
 
 [source,bash]
 ---------------
-btrfs subvolume snapshot -r /mnt/diskbackup/xxx /mnt/diskbackup/.snapshots/xxx
+btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +%j`; 
+rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +%j`/.snapshots;
+btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +%j` ro true;
 ---------------
 
 To delete a readonly snapshot
 
 [source,bash]
 ---------------
-btrfs subvolume delete /mnt/diskbackup/.snapshots/xxx
+btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +%j`;
 ---------------
 
-
-
-<<<<<<<
-
-== Annexes
 
 === TroubleShooting
 

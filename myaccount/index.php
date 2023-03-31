@@ -1261,7 +1261,7 @@ if ($action == 'updateurl') {
 
 		// Test if iban is ok
 		$testiban = checkIbanForAccount($companybankaccount);
-		if (empty($companybankaccount->iban_prefix) || !$testiban) {
+		if (empty($companybankaccount->iban) || !$testiban) {
 			setEventMessages($langs->trans("IbanNotValid"), null, 'errors');
 			$action = '';
 			$error++;
@@ -1275,6 +1275,7 @@ if ($action == 'updateurl') {
 
 		$db->begin();
 
+		// First update or insert payment mode 'ban'
 		if (! $error) {
 			$companybankid = $companybankaccount->create($user);
 
@@ -1301,7 +1302,7 @@ if ($action == 'updateurl') {
 					$resultbanksetdefault = $companybankaccount->setAsDefault(0, '');
 					if ($resultbanksetdefault > 0) {
 						setEventMessages($langs->trans("BankSaved"), null, 'mesgs');
-						setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
+						//setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
 					} else {
 						setEventMessages($companybankaccount->error, $companybankaccount->errors, 'errors');
 						$error++;
@@ -1317,6 +1318,7 @@ if ($action == 'updateurl') {
 			}
 		}
 
+		// Then create record on Stripe side
 		if (!$error && isModEnabled('stripe')) {
 			$companybankaccount->fetch(GETPOST('bankid'));
 			$service = 'StripeTest';
@@ -1347,9 +1349,29 @@ if ($action == 'updateurl') {
 						$error++;
 						setEventMessages($stripe->error, $stripe->errors, 'errors');
 					} else {
-						setEventMessages("SEPA on Stripe", "SEPA IBAN is now linked to customer account !");
+						dol_syslog("SEPA IBAN is now linked to the customer Stripe account");
 					}
 				}
+			}
+		}
+
+		if (!$error) {
+			$id_payment_mode_ban = dol_getIdFromCode($db, 'PRE', 'c_paiement', 'code', 'id', 1);
+
+			// Update recurring invoice to the payment mode direct debit.
+			if ($id_payment_mode_ban > 0) {
+				$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
+				$sql .= " SET fk_mode_reglement = ".((int) $id_payment_mode_ban);
+				$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
+
+				$result = $db->query($sql);
+				if ($result < 0) {
+					$error++;
+					setEventMessages($db->lasterror(), null, 'errors');
+				}
+			} else {
+				$error++;
+				setEventMessages("Failed to get payment mode ID for Direct Debit (code PRE). We can't continue.", null, 'errors');
 			}
 		}
 
@@ -1445,7 +1467,28 @@ if ($action == 'updateurl') {
 					if ($result < 0) {
 						$error++;
 						setEventMessages($companypaymentmode->error, $companypaymentmode->errors, 'errors');
-						$action='createcard';     // Force chargement page création
+						$action='createcard';     // Force load of create page
+					}
+
+					// Set the default payment mode for recurring invoice to Credit card.
+					if (!$error) {
+						$id_payment_mode_cb = dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
+
+						// Update recurring invoice to the payment mode direct debit.
+						if ($id_payment_mode_cb > 0) {
+							$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
+							$sql .= " SET fk_mode_reglement = ".((int) $id_payment_mode_cb);
+							$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
+
+							$result = $db->query($sql);
+							if ($result < 0) {
+								$error++;
+								setEventMessages($db->lasterror(), null, 'errors');
+							}
+						} else {
+							$error++;
+							setEventMessages("Failed to get payment mode ID for Credit Card (code CB). We can't continue.", null, 'errors');
+						}
 					}
 
 					if (! $error) {
@@ -3432,40 +3475,49 @@ if ($welcomecid > 0) {
 	';
 }
 
-$showannoucefordomain = array();
+$showannouncefordomain = array();
 // Detect global announce
 if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
-	$showannoucefordomain['_global_'] = 'SELLYOURSAAS_ANNOUNCE';
+	$showannouncefordomain['_global_'] = 'SELLYOURSAAS_ANNOUNCE';
 }
 // Detect local announce (per server)
+$deploymentserver = new Deploymentserver($db);
 foreach ($listofcontractidopen as $tmpcontract) {
 	$tmpdomainname = getDomainFromURL($tmpcontract->ref_customer, 2);
-	$deploymentserver = new Deploymentserver($db);
+
 	$deploymentserver->fetch(null, $tmpdomainname);
 	if (!empty($deploymentserver->servercustomerannouncestatus) && !empty($deploymentserver->servercustomerannounce)) {
-		//$datemessage = $db->jdate();
-		print '<div class="note note-warning">';
-		print '<b>'.dol_print_date($deploymentserver->date_modification, 'dayhour').'</b>';
-		if ($tmpdomainname != '_global_') {
-			print ' - '.$langs->trans("InfoForDomain").' <b>*.'.$tmpdomainname.'</b>';
+		if (empty($conf->cache['message_for_domaine'])) {
+			$conf->cache['message_for_domaine'] = array();
 		}
-		print ' : ';
-		print '<h4 class="block">';
-		$reg=array();
-		if (preg_match('/^\((.*)\)$/', $deploymentserver->servercustomerannounce, $reg)) {
-			print $langs->trans($reg[1]);
-		} else {
-			print $deploymentserver->servercustomerannounce;
+
+		if (empty($conf->cache['message_for_domaine'][$tmpdomainname])) {
+			print '<!-- show announce for this deployment server-->'."\n";
+			print '<div class="note note-warning">';
+			print '<b>'.dol_print_date($deploymentserver->date_modification, 'dayhour').'</b>';
+			if ($tmpdomainname != '_global_') {
+				print ' - '.$langs->trans("InfoForDomain").' <b>*.'.$tmpdomainname.'</b>';
+			}
+			print ' : ';
+			print '<h4 class="block">';
+			$reg=array();
+			if (preg_match('/^\((.*)\)$/', $deploymentserver->servercustomerannounce, $reg)) {
+				print $langs->trans($reg[1]);
+			} else {
+				print $deploymentserver->servercustomerannounce;
+			}
+			print '</h4>';
+			print '</div>';
 		}
-		print '</h4>';
-		print '</div>';
+		// Add a flag into cache to avoid to show message twice for same domain
+		$conf->cache['message_for_domaine'][$tmpdomainname] = 1;
 	} elseif (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON_'.$tmpdomainname)) {
-		$showannoucefordomain[$tmpdomainname] = 'SELLYOURSAAS_ANNOUNCE_'.$tmpdomainname;
+		$showannouncefordomain[$tmpdomainname] = 'SELLYOURSAAS_ANNOUNCE_'.$tmpdomainname;
 	}
 }
-// Show annouces detected
-if (!empty($showannoucefordomain)) {
-	foreach ($showannoucefordomain as $tmpdomainame => $tmpkey) {
+// If a message to show into setup has been found (for global message or for a given server)
+if (!empty($showannouncefordomain)) {
+	foreach ($showannouncefordomain as $tmpdomainame => $tmpkey) {
 		$sql = "SELECT name, value, tms from ".MAIN_DB_PREFIX."const where name = '".$db->escape($tmpkey)."'";
 		$resql=$db->query($sql);
 		if ($resql) {
@@ -3834,7 +3886,7 @@ if ($mythirdpartyaccount->isareseller && count($listofcontractidreseller)) {
 
 $atleastonecontractwithtrialended = 0;
 $atleastonepaymentinerroronopeninvoice = 0;
-
+$atleastoneinvoicedisputed = 0;
 
 // Show warnings
 
@@ -4066,7 +4118,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 	$sql = 'SELECT f.rowid, ee.code, ee.label, ee.extraparams FROM '.MAIN_DB_PREFIX.'facture as f';
 	$sql.= ' INNER JOIN '.MAIN_DB_PREFIX."actioncomm as ee ON ee.fk_element = f.rowid AND ee.elementtype = 'invoice'";
 	$sql.= " AND (ee.code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";		// See also into sellyoursaasIsPaymentKo
-	$sql.= ' WHERE f.fk_soc = '.$mythirdpartyaccount->id.' AND f.paye = 0';
+	$sql.= ' WHERE f.fk_soc = '.((int) $mythirdpartyaccount->id).' AND f.paye = 0';
 	$sql.= ' ORDER BY ee.datep DESC';
 
 	$resql = $db->query($sql);
@@ -4101,7 +4153,36 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 					';
 			}
 		}
-	} else dol_print_error($db);
+	} else {
+		dol_print_error($db);
+	}
+
+	// Test if there is one invoice disputed
+	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, fe.invoicepaymentdisputed';
+	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
+	$sql .= ' WHERE fe.fk_object = f.rowid AND f.fk_soc = '.((int) $mythirdpartyaccount->id);
+	$sql .= ' AND invoicepaymentdisputed = 1';
+	$sql .= ' ORDER BY f.datef';
+	$sql .= ' LIMIT 1';
+
+	$resql = $db->query($sql);
+	if ($resql) {
+		$num_rows = $db->num_rows($resql);
+		$i=0;
+		if ($num_rows) {
+			$atleastoneinvoicedisputed++;
+
+			while ($obj = $db->fetch_object($resql)) {
+				print '
+					<div class="note note-warning note-disputed">
+					<h4 class="block">'.$langs->trans("InvoicePaymentDisputedMessage", $obj->ref, dol_print_date($db->jdate($obj->datec), 'day', 'gmt')).'</h4>
+					</div>
+				';
+			}
+		}
+	} else {
+		dol_print_error($db);
+	}
 }
 
 

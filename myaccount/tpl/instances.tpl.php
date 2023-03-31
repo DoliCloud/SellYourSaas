@@ -747,7 +747,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd width50 paddingright marginrightonly valignmiddle">';
+			print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
 
 			$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
 
@@ -803,9 +803,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<hr>';
 		}
 
+		print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
+		print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
 
 		print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';
 		print '<br>';
+
+		print '</div></div></div>';
+
 		print '</div>';
 		print '</div>';
 
@@ -1519,6 +1524,12 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 					$servercountries = explode(',', $deploymentserver->servercountries);
 					$ipuser = getUserRemoteIP();
 					$countryuser = dolGetCountryCodeFromIp($ipuser);
+					if (GETPOST('country')) {	// Can force a country instead of default autodetected value
+						$countryuser = GETPOST('country');
+					}
+					if (empty($countryuser)) $countryuser='US';
+					$countryuser = strtolower($countryuser);
+
 					if (in_array($countryuser, $servercountries)) {
 						if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
 						$domainstosuggestcountryfilter[] = $newval; // Servers with user country

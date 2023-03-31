@@ -544,14 +544,17 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				?>
 
 			<div class="control-group  ">
-				<label class="control-label" for="address_country"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
+				<label class="control-label" for="country"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 				<?php
-				$countryselected=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
-				print '<!-- Autodetected IP/Country: '.dol_escape_htmltag(getUserRemoteIP()).'/'.$countryselected.' -->'."\n";
-				if (empty($countryselected)) $countryselected='US';
-				if (GETPOST('address_country', 'alpha')) $countryselected=GETPOST('address_country', 'alpha');
-				print $form->select_country($countryselected, 'address_country', 'optionsValue="name"'.$disabled, 0, ($conf->dol_optimize_smallscreen ? 'minwidth200' : 'minwidth300'), 'code2', 1, 1);
+				$countryuser=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
+				print '<!-- Autodetected IP/Country: '.dol_escape_htmltag(getUserRemoteIP()).'/'.$countryuser.' -->'."\n";
+				if (GETPOST('country')) {	// Can force a country instead of default autodetected value
+					$countryuser = GETPOST('country');
+				}
+				if (empty($countryuser)) $countryuser='US';
+				$countryuser = strtoupper($countryuser);
+				print $form->select_country($countryuser, 'country', 'optionsValue="name"'.$disabled, 0, ($conf->dol_optimize_smallscreen ? 'minwidth200' : 'minwidth300'), 'code2', 1, 1);
 				?>
 				</div>
 			</div>
@@ -635,6 +638,12 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 									$servercountries = explode(',', $deploymentserver->servercountries);
 									$ipuser = getUserRemoteIP();
 									$countryuser = dolGetCountryCodeFromIp($ipuser);
+									if (GETPOST('country')) {	// Can force a country instead of default autodetected value
+										$countryuser = GETPOST('country');
+									}
+									if (empty($countryuser)) $countryuser='US';
+									$countryuser = strtolower($countryuser);
+
 									if (in_array($countryuser, $servercountries)) {
 										if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
 										$domainstosuggestcountryfilter[] = $newval; // Servers with user country

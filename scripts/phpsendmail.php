@@ -201,7 +201,7 @@ $resexec = shell_exec($commandcheck);
 $resexec = (int) (empty($resexec) ? 0 : trim($resexec));
 
 $MAXALLOWED = $MAXPERDAYPAID;
-if ($usernamestring) {
+if ($usernamestring && $usernamestring != 'admin') {
 	if (in_array($usernamestring, array_keys($instanceofuser))) {
 		$MAXALLOWED = $instanceofuser[$usernamestring]['mailquota'];
 	} else {
@@ -217,7 +217,7 @@ if ($resexec > $MAXALLOWED) {
 }
 
 
-//* Write the log
+// Write the log
 //file_put_contents($logfile, var_export($_SERVER, true)."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $toline, FILE_APPEND);
 if ($ccline)  file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ccline, FILE_APPEND);

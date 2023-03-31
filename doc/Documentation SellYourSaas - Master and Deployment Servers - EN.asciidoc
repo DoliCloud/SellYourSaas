@@ -316,7 +316,7 @@ adduser myunixlogin
 
 ==== Default shell
 
-Modify the default shell to use bash (instead of dh sh or dash)
+Modify the default shell to use bash (instead of dh, sh or dash)
 
 [source, bash]
 ---------------
@@ -915,7 +915,7 @@ Require ip ip.user.1
 Require ip ip.user.2
 ---------------
 
-Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufx.sh* to have the change taken into account on the firewall.
+Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufw.sh* to have the change taken into account on the firewall.
 
 
 === Installing the nfs share
@@ -963,7 +963,7 @@ and comment out this line: RPCMOUNTDOPTS=--manage-gids, add this instead:
 
 [source, bash]
 ---------------
-RPCMOUNTDOPTS="--port 33333"
+RPCMOUNTDOPTS="--port 33333 --no-nfs-version 3"
 ---------------
 
 [source, bash]
@@ -973,7 +973,10 @@ service nfs-kernel-server restart
 rpcinfo -p
 ---------------
 
-You should see mountd on port 33333. If not, restart server.
+You should see mountd on port 33333, portmapper on port 111 and nfs on port 2049. If not, restart server.
+Warning: LISTEN is done on port 2049, so you can see it with "netstat -ultpn | grep 2049" or "ss -ultpn | grep 2049" but not with "lsof -P -i -n" (this is a special kernel embedded service). And you won't see link
+doing a grep on the server even with netstat or ss.
+On the deployment server, you can see when the NFS share is linked on network with "netstat -n | grep ipservermaster" 
 
 [source, bash]
 ---------------
@@ -1053,7 +1056,7 @@ There are two scenarios depending on your version of Ubuntu. Follow the instruct
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install -y ntp git gzip zip zstd memcached ncdu duc acl ufw sudo
+sudo apt install -y ntp git gzip zip zstd memcached ncdu duc iotop acl ufw sudo
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring
@@ -1072,7 +1075,7 @@ sudo apt install -y mailutils postfix
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu duc acl ufw sudo
+sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu duc iotop acl ufw sudo
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysql php-curl php-memcached php-imagick php-geoip php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
@@ -1091,7 +1094,7 @@ sudo apt install -y mailutils postfix
 [source,bash]
 ---------------
 sudo apt update
-sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu duc acl ufw sudo
+sudo apt install -y systemd-timesyncd git gzip zip zstd memcached ncdu duc iotop acl ufw sudo
 sudo apt install -y mariadb-server mariadb-client
 sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysql php-curl php-memcached php-imagick php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
@@ -2140,7 +2143,7 @@ mysql           hard     nofile           32768
 #65535:           hard     cpu              5000
 ---------------
 
-Note: To get/see the current limits of OS and connected user:
+Note: To get/see the current limits of OS for the connected user:
 
 [source,bash]
 ---------------
@@ -2704,18 +2707,18 @@ But remove it after you solve the problem, to have the tables writable again.
 
 On *deployment servers*:
 
-Copy */bin/bash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
+Copy */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
 [source,bash]
 ---------------
-cp /bin/bash /bin/secureBash
+cp /bin/dash /bin/secureBash
 ---------------
 
-On Ubuntu 20.04+, copy also */usr/bin/bash* into */usr/bin/secureBash*
+On Ubuntu 20.04+, copy also */usr/bin/dash* into */usr/bin/secureBash*
 
 [source,bash]
 ---------------
-cp /bin/bash /bin/secureBash
+cp /usr/bin/dash /usr/bin/secureBash
 ---------------
 
 
@@ -3669,7 +3672,7 @@ You must have inside the cron of user *root*
 # cron master and deployment root
 #47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
-40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm >/home/admin/logs/backup_backups.log 2>&1
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm none --delete >/home/admin/logs/backup_backups.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
@@ -3681,7 +3684,7 @@ You must have inside the cron of user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
@@ -3974,7 +3977,8 @@ init_config:
     # service: <SERVICE>
 
 instances:
-  - url: localhost  # url used to connect to the memcached instance
+
+    url: localhost  # url used to connect to the memcached instance
 ---------------
 
 
@@ -4067,6 +4071,32 @@ instances:
 Note: Replace withX by correct prefix of the deployment server.
 
 
+* On *deployment servers* only, copy the datadog config file to supervize *SSL certificates*.
+
+[source,bash]
+---------------
+cp /etc/datadog-agent/conf.d/disk.d/conf.yaml.default /etc/datadog-agent/conf.d/disk.d/conf.yaml
+---------------
+
+Edit it to exclude some filesystems:
+
+[source,bash]
+---------------
+
+instances:
+
+  - use_mount: false
+
+    mount_point_exclude:
+        - /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+    
+    include_all_devices: false
+    
+---------------
+
+Note: Replace withX by correct prefix of the deployment server.
+
+
 * Restart datadog
 
 [source,bash]
@@ -4095,7 +4125,7 @@ script is regularly completed but still check only few part of your installation
 
 - If the deployed application is Dolibarr try to upload a file from menu Home - Setup - Security - Upload file.
 
-- If the deployed application is Dolibarr try to make a backup from the internal backup tool.
+- If the deployed application is Dolibarr try to make a backup (mysqldump) from its internal backup tool (menu Home - Admin tools - Backup).
 
 - If the deployed application is Dolibarr, you can check a call of page https://myinstances/public/test/test_exec.php
 
@@ -4198,14 +4228,14 @@ so the old URL will still works (temporarily until the old instance is closed)
 umount /mnt/disk/
 ---------------
 
-Note: To see open files on a disk if umount fails:
+Note: To see open files on a disk if umount fails because drive is busy:
 
 [source,bash]
 ---------------
 lsof | grep "/mnt/disk"
 ---------------
 
-* Detach the disk from the server. Ensure its name does not contain white space or special characters. Change the disk size from the Public Cloud manager and re-attach it to the server.
+* Ensure the name of disk does not contain white space or special characters. Change the disk size from the Public Cloud manager and re-attach it to the server.
 
 * Increase the partition size by running:
 
@@ -4216,7 +4246,7 @@ parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print all
 resizepart 
 Y		  (the num of the part)
-999GB    (Don't input the default value but the max value in column "End" of the disk that was shown by "print all")
+999GB    (Don't input the default value but the max value of disk size found on line "Disk...:" that was shown by "print all")
 q
 ---------------
 
@@ -4226,6 +4256,8 @@ q
 ---------------
 mount /mnt/disk/
 resize2fs /dev/vdX9
+or
+btrfs filesystem resize max /mnt/disk
 ---------------
 
 
@@ -5368,7 +5400,7 @@ Error when sending email in */var/log/mail.log*
 
 	fatal: file /etc/postfix/main.cf: parameter mail_owner: unknown user name value: postfix
 	
-=> If the user *postfix* really exists into /etc/passwd, the trouble may be apparmor that does not allow reading the file */etc/passwd*
+=> If the user *postfix* really exists into */etc/passwd*, the trouble may be apparmor that does not allow reading the file */etc/passwd*
 
 Check in file /etc/apparmor.d/usr.sbin.apache2 that /etc/passwd is not denied.
 
@@ -5403,6 +5435,13 @@ Edit the file /etc/fail2ban/jail/conf to replace *imap3* (it does not exists) in
 You can get more information by running 
 
 sudo fail2ban-client -vvv -x start
+
+
+If error is:
+ERROR: cannot import name 'MutableMapping' from 'collections' (/usr/lib/python3.10/collections/__init__.py)
+
+You must upgrade fail2ban version with the verison into "universe" repository:
+Check the universe repository is enabled into */etc/apt/sources.list*, then run *apt update; apt upgrade;*
 
 
 ==== Problem when starting mariadb / mariadb stop after a timetout
@@ -5493,7 +5532,7 @@ restart
 Even if php -i show the new version of library, a reboot may be required to have the new lib taken into account.
 
 
-==== Some remote action generates a PHP coredump
+==== Some remote action generates a PHP coredump or return a page "No answer received"
 
 This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
 You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1

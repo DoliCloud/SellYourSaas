@@ -682,7 +682,7 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 	$error = 0;		// error for this instance
 
 	if ($datefilter && $instancearray['deployment_date_start'] < (dol_now() - $datefilter)) {
-		print 'Discard '.$instancearray['instance']." - too old (< now - ".$datefilter.")\n";
+		print 'Discard '.$instancearray['instance']." - deployment date too old (< now - ".$datefilter.")\n";
 		continue;
 	} else {
 		print 'Process '.$instancearray['instance']."\n";
