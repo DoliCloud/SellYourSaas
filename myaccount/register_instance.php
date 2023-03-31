@@ -1635,5 +1635,5 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 <?php
 llxFooter();
 
-// For cli mode
-return $error;
+// cli mode need an error return code
+exit(-1);

@@ -1116,15 +1116,15 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			chown -R admin.www-data $pathforcertiflocal/
 			
 			# Create also the link in /etc/apache2 for the case we use old virtual host using this file
-			if [[ -e $pathforcertiflocal/$webCustomSSLCertificateCRT -a ! -e /etc/apache2/$webSSLCertificateCRT ]]; then
+			if [ -e $pathforcertiflocal/$webCustomSSLCertificateCRT -a ! -e /etc/apache2/$webSSLCertificateCRT ]; then
 				echo ln -fs $pathforcertiflocal/$webCustomSSLCertificateCRT /etc/apache2/$webSSLCertificateCRT
 				ln -fs $pathforcertiflocal/$webCustomSSLCertificateCRT /etc/apache2/$webSSLCertificateCRT
 			fi
-			if [[ -e $pathforcertiflocal/$webCustomSSLCertificateKEY -a ! -e /etc/apache2/$webSSLCertificateKEY ]]; then
+			if [ -e $pathforcertiflocal/$webCustomSSLCertificateKEY -a ! -e /etc/apache2/$webSSLCertificateKEY ]; then
 				echo ln -fs $pathforcertiflocal/$webCustomSSLCertificateKEY /etc/apache2/$webSSLCertificateKEY
 				ln -fs $pathforcertiflocal/$webCustomSSLCertificateKEY /etc/apache2/$webSSLCertificateKEY
 			fi
-			if [[ -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate -a ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]]; then
+			if [ -e $pathforcertiflocal/$webCustomSSLCertificateIntermediate -a ! -e /etc/apache2/$webCustomSSLCertificateIntermediate ]; then
 				echo ln -fs $pathforcertiflocal/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
 				ln -fs $pathforcertiflocal/$webCustomSSLCertificateIntermediate /etc/apache2/$webCustomSSLCertificateIntermediate
 			fi
