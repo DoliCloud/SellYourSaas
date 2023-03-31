@@ -270,7 +270,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
 	ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 	
-	if [[ ${46} != www.* ]]; then
+	if [[ ${46} == www.* ]]; then
 		echo certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
 		#certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
 	else
