@@ -1684,6 +1684,7 @@ class SellYourSaasUtils
 
 		$contractprocessed = array();
 		$contractignored = array();
+		$contractcanceled = array();
 		$contracterror = array();
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
@@ -1716,7 +1717,7 @@ class SellYourSaasUtils
 				$obj = $this->db->fetch_object($resql);
 				if ($obj) {
 					// Check if this contract was already processed (because loop is on lines of contract)
-					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) continue;
+					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contractcanceled[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) continue;
 
 					// Test if this is a paid or not instance
 					$object = new Contrat($this->db);
@@ -1772,8 +1773,7 @@ class SellYourSaasUtils
 							}
 						}
 						if ($someinvoicenotpaid) {
-							$this->output .= 'Contract '.$object->ref.' is qualified for refresh but there is '.$someinvoicenotpaid.' invoice(s) unpayed so we cancel refresh'."\n";
-							$contractignored[$object->id]=$object->ref;
+							$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
 							continue;
 						}
 					}
@@ -1830,6 +1830,17 @@ class SellYourSaasUtils
 		}
 
 		$this->output = count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '')."\n".$this->output;
+		//$this->output .= "\n".count($contractignored).' contract(s) not qualified.';
+		$this->output .= "\n".count($contractcanceled).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were qualified for refresh but there is at least 1 invoice(s) unpayed so we cancel refresh : ';
+		$i = 0;
+		foreach ($contractcanceled as $tmpval) {
+			if ($i) {
+				$this->output .= ',';
+			}
+			$this->output .= $tmpval['ref'].'('.$tmpval['someinvoicenotpaid'].')';
+			$i++;
+		}
+		$this->output .= "\n";
 		$this->output .= "\n".'Search has been done on contracts of SellYourSaas customers only with sql = '.$sql;
 
 		$conf->global->SYSLOG_FILE = $savlog;
