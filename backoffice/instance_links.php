@@ -387,7 +387,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 					$obj = $newdb->fetch_object($resqlformula);
 					$stringofversion .= ($i > 0 ? ' / ' : '');
 					if ($obj) {
-						$stringofversion .= $obj->name.'='.$obj->value;
+						$stringofversion .= $obj->name.'='.$obj->version;
 					} else {
 						$stringofversion .= $langs->trans("Unknown");
 					}
