@@ -3202,7 +3202,7 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendma
 
 For *PHP versions greater than or equal to 8.1*:
 
-Create a hard link to the 2 tools used for preprocessing PHP
+Create a hard link to the 2 tools used for preprocessing PHP (be sure <<Installation of Dolibarr framework>> part is already done, else it will result in an error)
 
 [source,bash]
 ---------------
