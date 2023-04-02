@@ -1835,9 +1835,9 @@ class SellYourSaasUtils
 		$i = 0;
 		foreach ($contractcanceled as $tmpval) {
 			if ($i) {
-				$this->output .= ',';
+				$this->output .= ', ';
 			}
-			$this->output .= $tmpval['ref'].'('.$tmpval['someinvoicenotpaid'].')';
+			$this->output .= $tmpval['ref'].' ('.$tmpval['someinvoicenotpaid'].')';
 			$i++;
 		}
 		$this->output .= "\n";
