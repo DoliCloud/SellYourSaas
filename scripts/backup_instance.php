@@ -190,13 +190,10 @@ if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
 	exit(-1);
 }
-if (empty($ipserverdeployment)) {
-	echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
-	exit(-1);
-}
 if (empty($instanceserver)) {
 	echo "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
-	exit(-1);
+	print "Press ENTER to continue or CTL+C to cancel...";
+	$input = trim(fgets(STDIN));
 }
 
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
