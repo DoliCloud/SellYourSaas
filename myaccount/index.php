@@ -959,7 +959,13 @@ if ($action == 'updateurl') {
 		}
 
 		// Set $content
-		$content .= "<br><br>\n";
+		$content .= "<br><br>\n\n";
+
+		if (!empty($mythirdpartyaccount->default_lang)) {
+			$content .= '<div lang="'.$mythirdpartyaccount->default_lang.'" class="cartouche">'."\n";
+		} else {
+			$content .= '<div class="cartouche">'."\n";
+		}
 		$content .= 'Date: '.dol_print_date($now, 'dayhour')."<br>\n";
 		if ($groupticket) {
 			$content .= 'Group: '.dol_escape_htmltag($groupticket)."<br>\n";
@@ -1001,6 +1007,7 @@ if ($action == 'updateurl') {
 				$content .= "<br>\n";;
 			}
 		}
+		$content .= '</div>';
 
 		$arr_file = array();
 		$arr_mime = array();
