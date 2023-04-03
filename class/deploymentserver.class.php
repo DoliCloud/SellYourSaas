@@ -698,17 +698,17 @@ class Deploymentserver extends CommonObject
 		$dataparams = '';
 		if (getDolGlobalInt('MAIN_ENABLE_AJAX_TOOLTIP')) {
 			$classfortooltip = 'classforajaxtooltip';
-			$dataparams = " data-params='".json_encode($params)."'";
-			// $label = $langs->trans('Loading');
+			$dataparams = ' data-params="'.dol_escape_htmltag(json_encode($params)).'"';
+			$label = '';
+		} else {
+			//$label = implode($this->getTooltipContentArray($params));
+			$label = img_picto('', $this->picto).' <u>'.$langs->trans("Deploymentserver").'</u>';
+			if (isset($this->status)) {
+				$label .= ' '.$this->getLibStatut(5);
+			}
+			$label .= '<br>';
+			$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
 		}
-
-		//$label = implode($this->getTooltipContentArray($params));
-		$label = img_picto('', $this->picto).' <u>'.$langs->trans("Deploymentserver").'</u>';
-		if (isset($this->status)) {
-			$label .= ' '.$this->getLibStatut(5);
-		}
-		$label .= '<br>';
-		$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
 
 		$url = dol_buildpath('/sellyoursaas/deploymentserver_card.php', 1).'?id='.$this->id;
 
@@ -729,7 +729,7 @@ class Deploymentserver extends CommonObject
 				$label = $langs->trans("ShowDeploymentserver");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
-			$linkclose .= ' title="'.dol_escape_htmltag($label, 1).'"';
+			$linkclose .= ($label ? ' title="'.dol_escape_htmltag($label, 1).'"' :  ' title="tocomplete"');
 			$linkclose .= $dataparams.' class="'.$classfortooltip.($morecss ? ' '.$morecss : '').'"';
 		} else {
 			$linkclose = ($morecss ? ' class="'.$morecss.'"' : '');

@@ -1164,7 +1164,7 @@ if ($action == 'updateurl') {
 		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
 		$error++;
 	}
-	if ($oldemail != $email) {		// A request to change email was done.
+	if (strtolower($oldemail) != strtolower($email)) {		// A request to change email was done.
 		// Test if email already exists
 		$tmpthirdparty = new Societe($db);
 		$tmpthirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $email);
