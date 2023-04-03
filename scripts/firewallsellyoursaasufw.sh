@@ -244,6 +244,7 @@ else
 	ufw delete allow in 8080/tcp
 fi
 
+# At end, after all allow
 ufw default deny incoming
 ufw default deny outgoing
 
