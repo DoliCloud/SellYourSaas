@@ -63,7 +63,7 @@ if ($fp) {
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'dolibarrdir') {
-			$dolibarrdir = dol_sanitizePathName($tmpline[1]);
+			$dolibarrdir = preg_replace('/[^a-zA-Z0-9_\-\/]/', '', $tmpline[1]);
 		}
 	}
 }
@@ -129,9 +129,6 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'databasepass') {
 			$databasepass = $tmpline[1];
-		}
-		if ($tmpline[0] == 'dolibarrdir') {
-			$dolibarrdir = dol_sanitizePathName($tmpline[1]);
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = dol_string_nospecial($tmpline[1]);
