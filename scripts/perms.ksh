@@ -220,3 +220,12 @@ fi
 #	echo "We are on a deployment server, so we try to delete empty dirs into backup directory under $backupdir/osu*"
 #	find $backupdir/osu*/ -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
 #fi
+
+# TODO Try to change permission on this files to remove this ?
+touch /var/log/phpmail.log
+chown syslog.adm /var/log/phpmail.log
+chmod a+rw /var/log/phpmail.log
+touch /var/log/phpsendmail.log
+chown syslog.adm /var/log/phpsendmail.log
+chmod a+rw /var/log/phpsendmail.log
+
