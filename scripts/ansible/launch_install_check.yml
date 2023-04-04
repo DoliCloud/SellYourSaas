@@ -756,7 +756,7 @@
   become_method: sudo
   become_user: root
   tasks:
-    - name: Add a section into the sshd_config, after passing validation with sshd -T
+    - name: Add a section into the sshd_config
       ansible.builtin.blockinfile:
         path: /etc/ssh/sshd_config
         marker: "# {mark} Block for SellYourSaas"
@@ -781,6 +781,21 @@
         group: dd-agent
         mode: '0644'
 
+    - name: Set datadog config files /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+      ansible.builtin.template:
+        src: ../../etc/datadog-agent/conf.d/mcache.d/conf.yaml
+        dest: /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+        owner: dd-agent
+        group: dd-agent
+        mode: '0644'
+
+    - name: Set datadog config files /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+      ansible.builtin.template:
+        src: ../../etc/datadog-agent/conf.d/postfix.d/conf.yaml
+        dest: /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+        owner: dd-agent
+        group: dd-agent
+        mode: '0644'
 
   ##### Set permissions, create some dirs and files by calling perms.ksh
 - name: Call perms.ksh to set permissions, create some dirs and files
