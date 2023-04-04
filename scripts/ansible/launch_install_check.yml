@@ -8,7 +8,6 @@
 #
 
 
-
 #- name: Check/Fix OS unix accounts
 #  hosts: '{{target}}'
 #  become: yes
@@ -20,6 +19,7 @@
 #      name: "admin"
 #      groups: www-data
 #      append: yes     
+# TODO Remove the group www-data for user admin ?
 
 
 - name: Apt install packages
