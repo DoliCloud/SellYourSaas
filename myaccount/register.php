@@ -725,7 +725,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<!-- Checkbox for non profit orga -->
 			<section id="checkboxnonprofitorgaid">
 			<div class="group required">
-				<input type="checkbox" id="checkboxnonprofitorga" name="checkboxnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="1" required=""<?php echo (GETPOST('checkboxnonprofitorga') ? ' checked="checked"' : ''); ?>>
+				<input type="checkbox" id="checkboxnonprofitorga" name="checkboxnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="nonprofit" required=""<?php echo (GETPOST('checkboxnonprofitorga') ? ' checked="checked"' : ''); ?>>
 				<label for="checkboxnonprofitorga" class="valignmiddle small inline"><?php
 					echo $langs->trans("ConfirmNonProfitOrga", $sellyoursaasname);
 					echo '. ';
