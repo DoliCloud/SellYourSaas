@@ -2,7 +2,7 @@
 # Copy all backups on other locations (on a remote backup server)
 #
 # Put the following entry into your root cron
-#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm [m|w] [osuX]
+#40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm [month|week|none] [osuX]
 
 #set -e
 
