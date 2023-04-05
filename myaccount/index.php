@@ -572,6 +572,8 @@ if ($action == 'updateurl') {
 
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 
+		$db->begin();
+
 		$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
 		if ($result != 0) {
 			$error++;
@@ -588,7 +590,7 @@ if ($action == 'updateurl') {
 				if ($contract->array_options['options_deployment_status'] != 'done') {
 					dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
 					setEventMessages("Deployment status is not 'done'", 'errors');
-					header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);// This is a not valid contract (undeployed or not yet completely deployed), so we discard this contract to avoid to create template not expected
+					$error++;
 				}
 
 				// Make a test to pass loop if there is already a template invoice
@@ -596,14 +598,14 @@ if ($action == 'updateurl') {
 				if ($result < 0) {
 					dol_syslog("--- Error during fetchObjectLinked, we discard this contract", LOG_ERR, 0);
 					setEventMessages("Error during fetchObjectLinked", 'errors');
-					header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);// There is an error, so we discard this contract to avoid to create template twice
+					$error++;// There is an error, so we discard this contract to avoid to create template twice
 				}
-				if (! empty($contract->linkedObjectsIds['facturerec'])) {
+				if (!$error && ! empty($contract->linkedObjectsIds['facturerec'])) {
 					$templateinvoice = reset($contract->linkedObjectsIds['facturerec']);
 					if ($templateinvoice > 0) {			// There is already a template invoice, so we discard this contract to avoid to create template twice
 						dol_syslog("--- There is already a recurring invoice on the contract contract_id = ".$contract->id, LOG_DEBUG, 0);
 						setEventMessages("There is already a recurring invoice on the contract contract_id = ".$contract->id, 'errors');
-						header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);
+						$error++;
 					}
 				}
 
@@ -889,13 +891,28 @@ if ($action == 'updateurl') {
 							setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 						}
 					}
-					header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);
+
+					if (! $error) {
+						$result = $mythirdpartyaccount->set_as_client();
+						if ($result <= 0) {
+							$error++;
+							setEventMessages($mythirdpartyaccount->error, $mythirdpartyaccount->errors, 'errors');
+						}
+					}
 				}
+			} else {
+				$error++;
 			}
 		}
 	}
-
 	$action = '';
+	if (!$error) {
+		$db->commit();
+	} else {
+		$db->rollback();
+	}
+	header("Location: ".$_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id);
+	exit();
 } elseif ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile')) {
 	// Send support ticket
 	$error = 0;
