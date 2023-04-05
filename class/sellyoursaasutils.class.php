@@ -1841,7 +1841,7 @@ class SellYourSaasUtils
 			$i++;
 		}
 		$this->output .= "\n";
-		$this->output .= "\n".'Search has been done on contracts of SellYourSaas customers only with sql = '.$sql;
+		$this->output .= "\n".'Search has been done on deployed contracts of SellYourSaas customers only with sql = '.$sql;
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
@@ -1855,7 +1855,7 @@ class SellYourSaasUtils
 	 * Action executed by scheduler
 	 * CAN BE A CRON TASK
 	 * Loop on each contract.
-	 * If it is a paid contract, and there is no unpaid invoice for contract, and lines are not suspended and end date < today + 2 days (so expired or soon expired),
+	 * If it is a paid/confirmed contract, and there is no unpaid invoice for contract, and lines are not suspended and end date < today + 2 days (so expired or soon expired),
 	 * we make a refresh (update qty of contract + qty of linked template invoice) + we set the running contract service end date to end at next period.
 	 *
 	 * @param	int		$thirdparty_id			Thirdparty id
@@ -1882,6 +1882,7 @@ class SellYourSaasUtils
 
 		$contractprocessed = array();
 		$contractignored = array();
+		$contractcanceled = array();
 		$contracterror = array();
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
@@ -1909,7 +1910,7 @@ class SellYourSaasUtils
 			while ($i < $num) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj) {
-					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) {
+					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contractcanceled[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) {
 						continue;
 					}
 
@@ -1963,8 +1964,7 @@ class SellYourSaasUtils
 							}
 						}
 						if ($someinvoicenotpaid) {
-							$this->output .= 'Contract '.$object->ref.' is qualified for renewal but there is '.$someinvoicenotpaid.' invoice(s) unpayed so we cancel renewal'."\n";
-							$contractignored[$object->id]=$object->ref;
+							$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
 							continue;
 						}
 					}
@@ -2057,7 +2057,20 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output .= count($contractprocessed).' contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '').' (search done on contracts of SellYourSaas customers only, including redirect contracts)';
+		$this->output .= count($contractprocessed).' contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '')."\n".$this->output;
+		//$this->output .= "\n".count($contractignored).' contract(s) not qualified.';
+		$this->output .= "\n".count($contractcanceled).' contract(s) were qualified for renewal but there is at least 1 invoice(s) unpayed so we cancel renewal : ';
+		$i = 0;
+		foreach ($contractcanceled as $tmpval) {
+			if ($i) {
+				$this->output .= ', ';
+			}
+			$this->output .= $tmpval['ref'].' ('.$tmpval['someinvoicenotpaid'].')';
+			$i++;
+		}
+		$this->output .= "\n";
+		$this->output .= "\n".'Search has been done on deployed contracts of SellYourSaas customers only, including redirect contracts, with sql = '.$sql;
+
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
