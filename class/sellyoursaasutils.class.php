@@ -2057,7 +2057,7 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output .= count($contractprocessed).' contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '')."\n".$this->output;
+		$this->output .= count($contractprocessed).' contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were renewed'.(count($contractprocessed)>0 ? " :\n".join(', ', $contractprocessed) : '')."\n".$this->output;
 		//$this->output .= "\n".count($contractignored).' contract(s) not qualified.';
 		$this->output .= "\n".count($contractcanceled).' contract(s) were qualified for renewal but there is at least 1 invoice(s) unpayed so we cancel renewal : ';
 		$i = 0;
@@ -2952,7 +2952,7 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output = count($contractprocessed).' contract(s), in mode '.$mode.', suspended, with a planned end date before '.dol_print_date($datetotest, 'dayrfc').', undeployed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '');
+		$this->output = count($contractprocessed).' contract(s), in mode '.$mode.', suspended, with a planned end date before '.dol_print_date($datetotest, 'dayrfc').', undeployed'.(count($contractprocessed)>0 ? " :\n".join(', ', $contractprocessed) : '');
 
 		return ($error ? 1: 0);
 	}
