@@ -135,7 +135,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
 		if (GETPOST('country_id_reseller') && GETPOST('country_id_reseller') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id_reseller', 'intcomma'), 1)."')";
 		if (empty($this->evenunsubscribe)) {
-			$sql .= " AND NOT EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."mailing_unsubscribe as mu WHERE mu.email = c.email and mu.entity = ".((int) $conf->entity).")";
+			$sql .= " AND NOT EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."mailing_unsubscribe as mu WHERE mu.email = s.email and mu.entity = ".((int) $conf->entity).")";
 		}
 
 		$sql.= " ORDER BY email";
@@ -225,7 +225,7 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		$sql = "SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."categorie_fournisseur as cs WHERE s.email IS NOT NULL AND s.email <> ''";
 		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG);
 		if (empty($this->evenunsubscribe)) {
-			$sql .= " AND NOT EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."mailing_unsubscribe as mu WHERE mu.email = c.email and mu.entity = ".((int) $conf->entity).")";
+			$sql .= " AND NOT EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."mailing_unsubscribe as mu WHERE mu.email = s.email and mu.entity = ".((int) $conf->entity).")";
 		}
 
 		$a = parent::getNbOfRecipients($sql);
