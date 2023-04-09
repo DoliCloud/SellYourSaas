@@ -157,6 +157,9 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		if ($contractpricetotal > 0) {
 			$sql .= " AND fdr.subprice = ".((float) $contractpricetotal);
 		}
+		if (empty($this->evenunsubscribe)) {
+			$sql .= " AND NOT EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."mailing_unsubscribe as mu WHERE mu.email = c.email and mu.entity = ".((int) $conf->entity).")";
+		}
 
 		$sql.= " ORDER BY email";
 		//print $sql;
@@ -242,7 +245,12 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 	{
 		global $conf;
 
-		$a = parent::getNbOfRecipients("SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email <> ''");
+		$sql = "SELECT COUNT(DISTINCT(email)) as nb FROM ".MAIN_DB_PREFIX."societe as s WHERE email IS NOT NULL AND email <> ''";
+		if (empty($this->evenunsubscribe)) {
+			$sql .= " AND NOT EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."mailing_unsubscribe as mu WHERE mu.email = c.email and mu.entity = ".((int) $conf->entity).")";
+		}
+
+		$a = parent::getNbOfRecipients($sql);
 		if ($a < 0) return -1;
 		return $a;
 	}
