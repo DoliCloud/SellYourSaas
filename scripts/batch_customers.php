@@ -208,6 +208,7 @@ if (! isset($argv[1])) {	// Check parameters
 	print "- backupdatabase      creates backup (mysqldump)\n";
 	print "- backup              creates backup (rsync + database) ***** Used by cron on deployment servers *****\n";
 	print "- backupdelete        creates backup (rsync with delete + database)\n";
+	print "- backupdeleteexclude creates backup (rsync with delete excluded + database)\n";
 	print "\n";
 	print "with a backup... action, you can also add the option --force to execute backup even if done recently.\n";
 
@@ -390,7 +391,7 @@ print "We found ".count($instancestrial)." deployed trial + ".count($instances).
 
 
 //print "----- Start loop for backup_instance\n";
-if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdeleteexclude' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
 	if (empty($conf->global->DOLICLOUD_BACKUP_PATH)) {
 		print "Error: Setup of module SellYourSaas not complete. Path to backup not defined.\n";
 		exit(-1);
@@ -426,6 +427,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 				$mode = 'unknown';
 				$mode = ($action == 'backup'?'confirm':$mode);
 				$mode = ($action == 'backupdelete'?'confirm':$mode);
+				$mode = ($action == 'backupdeleteexclude'?'confirm':$mode);
 				$mode = ($action == 'backuprsync'?'confirmrsync':$mode);
 				$mode = ($action == 'backupdatabase'?'confirmdatabase':$mode);
 				$mode = ($action == 'backuptest'?'test':$mode);
@@ -436,6 +438,9 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 				if ($action == 'backupdelete') {
 					$command .= ' --delete';
 				}
+				if ($action == 'backupdeleteexclude') {
+					$command .= ' --delete --delete-excluded';
+				}
 				if ($FORCE) {
 					$command .= ' --forcersync --forcedump';
 				}
@@ -444,7 +449,7 @@ if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' 
 
 				echo $command."\n";
 
-				if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase') {
+				if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdeleteexclude' || $action == 'backuprsync' || $action == 'backupdatabase') {
 					$utils = new Utils($db);
 					$outputfile = $conf->admin->dir_temp.'/out.tmp';
 					$resultarray = $utils->executeCLI($command, $outputfile);
@@ -676,7 +681,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 // Output result
 $out = '';
-if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdeleteexclude' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
 	$out.= "\n";
 	$out.= "***** Summary for host ".$ipserverdeployment."\n";
 } else {
@@ -769,7 +774,7 @@ if ($action == 'updatestatsonly') {
 if (! $nboferrors) {
 	print '--- end OK - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 
-	if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+	if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdeleteexclude' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
 		if (empty($instancefilter)) {
 			$from = $emailfrom;
 			$to = $emailsupervision;
@@ -804,7 +809,7 @@ if (! $nboferrors) {
 } else {
 	print '--- end ERROR nb='.$nboferrors.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
 
-	if ($action == 'backup' || $action == 'backupdelete' ||$action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
+	if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdeleteexclude' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
 		if (empty($instancefilter)) {
 			$from = $emailfrom;
 			$to = $emailsupervision;
