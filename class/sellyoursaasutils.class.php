@@ -132,6 +132,9 @@ class SellYourSaasUtils
 								// Note: If suspended, when unsuspened, the remaining draft invoice will be generated
 								// Note: if undeployed, this should not happen, because templates invoice should be disabled when an instance is undeployed
 								if ($nbservice && $contract->array_options['options_deployment_status'] != 'undeployed') {
+									//$user->rights->facture->creer = 1;		// Force permission to user to validate invoices
+									//$user->rights->facture->invoice_advance->validate = 1;
+
 									if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
 										$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
 									}
@@ -909,7 +912,7 @@ class SellYourSaasUtils
 						$result = $invoice->fetch($obj->rowid);
 						if ($result > 0) {
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
-								$user->rights->facture->creer = 1;		// Force permission to user to validate invoices
+								$user->rights->facture->creer = 1;		// Force permission to user to validate invoices because code may be executed by anonymous user
 								$user->rights->facture->invoice_advance->validate = 1;
 
 								if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
