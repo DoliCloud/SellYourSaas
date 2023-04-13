@@ -773,6 +773,12 @@
           Match User osu*
             PasswordAuthentication=yes
 
+    - name: Update PrivateTmp property into /etc/systemd/system/multi-user.target.wants/apache2.service
+      lineinfile:
+        path: /etc/systemd/system/multi-user.target.wants/apache2.service
+        regexp: '^PrivateTmp='
+        line: 'PrivateTmp=false'
+        
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/disk.d/conf.yaml
