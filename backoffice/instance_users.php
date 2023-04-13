@@ -144,9 +144,9 @@ if (empty($reshook)) {
 
 		if (is_object($newdb)) {
 			// Get login and password for support
-			$loginforsupport = $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+			$loginforsupport = getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT');
 
-			$password = $conf->global->SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD;
+			$password = getDolGlobalString('SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD');
 			if (empty($password)) {
 				require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
 				$password = getRandomPassword(false);
