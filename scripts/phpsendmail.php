@@ -336,6 +336,8 @@ function getInstancesOfUser($pathtospamdir)
 			echo "Erreur: fgets() a échoué\n";
 		}
 		fclose($fp);
+	} else {
+		//file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/mailquota can't be read.\n", FILE_APPEND);
 	}
 	return $instanceofuser;
 }

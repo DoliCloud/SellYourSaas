@@ -112,6 +112,8 @@
   /run/mysqld/mysqld.sock rw,
   /sbin/ r,
   /sys/devices/system/cpu/ r,
+  /tmp/spam/ rw,
+  /tmp/spam/** rw,
   /usr/bin/awk rix,
   /usr/bin/basename rix,
   /usr/bin/clamdscan rix,
