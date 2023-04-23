@@ -78,9 +78,9 @@ ufw allow out 143/tcp
 ufw allow out 993/tcp
 # DCC (anti spam public services)
 #ufw allow out 6277/tcp
-#ufw allow out 6277/udpvi /etc/
-# Rdate
-ufw allow out 37/tcp
+#ufw allow out 6277/udpvi
+# Rdate / NTP
+#ufw allow out 37/tcp deprecated
 ufw allow out 123/udp
 # Whois
 ufw allow out 43/tcp
@@ -89,8 +89,9 @@ ufw allow out 53/tcp
 ufw allow out 53/udp
 # NFS (only 2049/tcp is required for NFS)
 ufw allow out 2049/tcp
-#ufw allow out 2049/udp
-
+# DHCP
+# TODO Allow DHCP client access ?
+# ufw allow out from $ipserverdeployment port 68 to any port 67 proto udp
 
 # From external source to local - In
 #-----------------------------------
