@@ -22,12 +22,13 @@ echo Lancement repair.ksh - $1 - $$ - $UID >/var/log/repair01_start$$.log
 
 export databaseuser=`grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
+
 # Report Mysql usage status
 uptime > /var/log/repair02_uptime$$.log
 cat /proc/meminfo > /var/log/repair02_meminfo$$.log
 /usr/bin/mysqladmin -h localhost --verbose processlist > /var/log/repair02_mysqlprocesslist$$.log 2>&1
 ps fauxww > /var/log/repair02_ps$$.log
-
+iotop -P -b -n 1 > /var/log/repair02_iotop$$.log
 
 /usr/sbin/apachectl fullstatus > /var/log/repair03_status$$.log 2>&1
 
