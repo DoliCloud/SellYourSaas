@@ -60,18 +60,24 @@ cd $targetdir;
 	#exit 31
 #fi
 
-#if [ "x$1" == "x" ]; then
-	#echo "Missing parameter - test|confirm" 1>&2
-	#echo "Usage: ${0} [test|confirm] (oldtempinarchive)"
-	#echo "With mode test, the /temp/... files are not deleted at end of script" 
-	#exit 6
-#fi
-
 echo "***** Report disk used per instance (scan home dir duc.db file containing analysis of content into backup dir)"
+
+if [ "x$1" == "x" ]; then
+	echo "Missing parameter - test|confirm" 1>&2
+	echo "Usage: ${0} [list|delete]"
+	exit 1
+fi
 
 > /tmp/disk_used.tmp
 
-for fic in `ls -A`; do duc info -b -a -d $fic/.duc.db >>/tmp/disk_used.tmp 2>&1; done
+for fic in `ls -A`; do
+	if [ "x$1" == "xlist" ]; then
+		duc info -b -a -d "$fic/.duc.db" >>/tmp/disk_used.tmp 2>&1;
+	fi 
+	if [ "x$1" == "xdelete" ]; then
+		rm "$fic/.duc.db"
+	fi 
+done
 
 cat /tmp/disk_used.tmp | sed -e 's/Error opening:/YYYY-MM-DD HH:MM:SS 0 0 0/g' | grep -v "Date" | awk ' { if ($6) { print $5" "$6; } } ' | sort -n -r -k 1
 
