@@ -8,6 +8,8 @@
 #
 
 
+# TODO Remove the group www-data for user admin ?
+#
 #- name: Check/Fix OS unix accounts
 #  hosts: '{{target}}'
 #  become: yes
@@ -19,7 +21,15 @@
 #      name: "admin"
 #      groups: www-data
 #      append: yes     
-# TODO Remove the group www-data for user admin ?
+#  - name: Remove user ubuntu from the sudo group
+#    command: "gpasswd -d ubuntu sudo"
+#    register: command_result
+#    changed_when: "not 'is not a member of' in command_result.stderr"
+#    failed_when: "'does not exist in /etc/group' in command_result.stderr"
+#  - name: Remove file /home/ubuntu/.ssh/authorized_keys
+#    ansible.builtin.file:
+#      path: /home/ubuntu/.ssh/authorized_keys
+#      state: absent
 
 
 - name: Apt install packages
