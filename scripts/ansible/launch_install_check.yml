@@ -8,7 +8,8 @@
 #
 
 
-# TODO Remove the group www-data for user admin ?
+# TODO Remove the group www-data for the user admin ?
+# TODO Remove sshkey to user ubuntu
 #
 #- name: Check/Fix OS unix accounts
 #  hosts: '{{target}}'
