@@ -58,14 +58,13 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		$s.=$langs->trans("Status").': ';
 		$s.=$form->selectarray('status_reseller', $arraystatus, GETPOST('status_reseller', 'alpha'), 1);
 
-		$s.=$langs->trans("Country").': ';
-		$s.=$form->select_country(GETPOST('country_id_reseller', 'alpha'), 'country_id_reseller', '', 0, 'minwidth300', '', 1);
+		$s.=img_picto($langs->trans("Country"), 'country', 'class="pictofixedwidth"');
+		$s.=$form->select_country(GETPOST('country_id_reseller', 'alpha'), 'country_id_reseller', '', 0, 'minwidth300', '', $langs->trans("Country"));
 
 		$s.='<br> ';
 
-		$s.=$langs->trans("Language").': ';
-
-		$s.=$formother->select_language(GETPOST('lang_id_reseller', 'array'), 'lang_id_reseller', 0, 'null', 1, 0, 0, '', 0, 0, 1);
+		$s.=img_picto($langs->trans("Language"), 'language', 'class="pictofixedwidth"');
+		$s.=$formother->select_language(GETPOST('lang_id_reseller', 'array'), 'lang_id_reseller', 0, 'null', $langs->trans("Language"), 0, 0, '', 0, 0, 1);
 
 		$s.=$langs->trans("NotLanguage").': ';
 		$formother=new FormAdmin($this->db);
@@ -133,7 +132,9 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		}
 		if (GETPOST('lang_id_reseller') && GETPOST('lang_id_reseller') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id_reseller', 'array')), 3);
 		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
-		if (GETPOST('country_id_reseller') && GETPOST('country_id_reseller') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id_reseller', 'intcomma'), 1)."')";
+		if (GETPOST('country_id_reseller') && GETPOST('country_id_reseller') != 'none' && GETPOST('country_id_reseller') != '-1') {
+			$sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id_reseller', 'intcomma'), 1)."')";
+		}
 		if (empty($this->evenunsubscribe)) {
 			$sql .= " AND NOT EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."mailing_unsubscribe as mu WHERE mu.email = s.email and mu.entity = ".((int) $conf->entity).")";
 		}

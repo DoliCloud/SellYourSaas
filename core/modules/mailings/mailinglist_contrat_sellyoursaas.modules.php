@@ -58,8 +58,7 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 
 		$s = '';
 
-		$s .= $langs->trans("Language").': ';
-
+		$s.=img_picto($langs->trans("Language"), 'language', 'class="pictofixedwidth"');
 		$s .= $formother->select_language(GETPOST('contract_sellyoursaas_lang_id', 'array'), 'contract_sellyoursaas_lang_id', 0, null, $langs->trans("Language"), 0, 0, '', 0, 0, 1);
 
 		/*

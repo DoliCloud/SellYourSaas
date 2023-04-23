@@ -62,13 +62,13 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		$s.=' ';
 
-		$s.=$langs->trans("Country").': ';
+		$s.=img_picto($langs->trans("Country"), 'country', 'class="pictofixedwidth"');
 		$formother=new FormAdmin($this->db);
-		$s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id');
+		$s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id', '', 0, 'minwidth300', '', $langs->trans("Country"));
 
 		$s.='<br> ';
 
-		$s.=$langs->trans("Language").': ';
+		$s.=img_picto($langs->trans("Language"), 'language', 'class="pictofixedwidth"');
 		$formother=new FormAdmin($this->db);
 
 		$s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, null, $langs->trans("Language"), 0, 0, '', 0, 0, 1);
@@ -79,8 +79,8 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		$s .= '<br>';
 
-		$s.=$langs->trans("DoNotUseDefaultStripeAccount").': ';
-		$s.='<input type="checkbox" class="margintoponly marginbottomonly" value="1" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
+		$s.= '<label for="donotusedefaultstripeaccount">'.$langs->trans("DoNotUseDefaultStripeAccount").':</span> ';
+		$s.='<input type="checkbox" class="margintoponly marginbottomonly" value="1" id="donotusedefaultstripeaccount" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
 
 		// Filter on contracts
 		$s.='<br> ';
@@ -219,7 +219,9 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
 		if (GETPOST('lang_id') && GETPOST('lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id', 'array')), 3);
 		if (GETPOST('not_lang_id') && GETPOST('not_lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id', 'array')), -3);
-		if (GETPOST('country_id') && GETPOST('country_id') != 'none') $sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
+		if (GETPOST('country_id') && GETPOST('country_id') != 'none' && GETPOST('country_id') != '-1') {
+			$sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
+		}
 		if (GETPOST('filter') && GETPOST('filter') != 'none') {
 			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('filter'))."'";
 		}
