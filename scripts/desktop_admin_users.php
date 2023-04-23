@@ -76,8 +76,13 @@ if (! isset($argv[4])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed desktop.\n";
 	print "\n";
-	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userip=userip] [userroot=0|1] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
+	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userroot=0|1] [userip=userip] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
 	print "\n";
+	print "Example:\n";
+	print "To create a first admin user (root allowed): ".$script_file.' create logintocreate hostfile master,deployment,web ubuntu userroot=1 userpassword=... userpublickey="ABC..."'."\n";
+	print "To add an admin user (root not allowed): ".$script_file.' create logintocreate hostfile master,deployment,web userroot=0 userip=ipofuser userpassword=... userpublickey="ABC..."'."\n";
+	print "To update root access of a user: ".$script_file.' create logintoupdate hostfile withX.sellyoursaasdomain.com userroot=X'."\n";
+	print "To remove a user: ".$script_file.' remove logintodelete hostfile master,deployment,web'."\n";
 	exit(-1);
 }
 print '--- start'."\n";
