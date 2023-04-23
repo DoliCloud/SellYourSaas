@@ -848,7 +848,7 @@ class SellYourSaasUtils
 
 	/**
 	 * doTakePaymentStripeForThirdparty
-	 * Take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+	 * Take payment/send email for a given thirdparty ID. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
 	 *
 	 * @param	int		             $service					'StripeTest' or 'StripeLive'
 	 * @param	int		             $servicestatus				Service 0 or 1
@@ -1101,7 +1101,8 @@ class SellYourSaasUtils
 						if (!$error && empty($nocancelifpaymenterror)) {	// If we are not in a mode that ask to avoid cancelation, we cancel payment.
 							// Test if last AC_PAYMENT_STRIPE_KO event is an old error lower than $nbhoursbetweentries hours.
 							$recentfailedpayment = false;
-							$sqlonevents = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'actioncomm WHERE fk_soc = '.$thirdparty->id." AND code ='AC_PAYMENT_STRIPE_KO' AND datep > '".$this->db->idate($now - ($nbhoursbetweentries * 3600))."'";
+							$sqlonevents = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'actioncomm';
+							$sqlonevents .= ' WHERE fk_soc = '.$thirdparty->id." AND code ='AC_PAYMENT_STRIPE_KO' AND datep > '".$this->db->idate($now - ($nbhoursbetweentries * 3600))."'";
 							$resqlonevents = $this->db->query($sqlonevents);
 							if ($resqlonevents) {
 								$obj = $this->db->fetch_object($resqlonevents);
