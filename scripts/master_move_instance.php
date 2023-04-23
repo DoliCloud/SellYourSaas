@@ -45,7 +45,6 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 
 // Read /etc/sellyoursaas.conf file
 $masterserver='';
-$ipserverdeployment='';
 $instanceserver='';
 $databasehost='localhost';
 $databaseport='3306';
@@ -62,9 +61,6 @@ if ($fp) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'masterserver') {
 			$masterserver = $tmpline[1];
-		}
-		if ($tmpline[0] == 'ipserverdeployment') {
-			$ipserverdeployment = $tmpline[1];
 		}
 		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = $tmpline[1];
@@ -197,17 +193,6 @@ if (getDomainFromURL($oldinstance, 2) == getDomainFromURL($newinstance, 2)) {
 	print "\n";
 	exit(-1);
 }
-
-/*if (empty($ipserverdeployment))
-{
-	echo "Script can't find the value of 'ipserverdeployment' in sellyoursaas.conf file).\n";
-	exit(-1);
-}
-if (empty($instanceserver))
-{
-	echo "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
-	exit(-1);
-}*/
 
 //$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 $dbmaster = $db;

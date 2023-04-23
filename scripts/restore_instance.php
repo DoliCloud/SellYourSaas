@@ -109,9 +109,6 @@ if ($fp) {
 		if ($tmpline[0] == 'domain') {
 			$domain = dol_string_nospecial($tmpline[1]);
 		}
-		if ($tmpline[0] == 'ipserverdeployment') {
-			$ipserverdeployment = dol_string_nospecial($tmpline[1]);
-		}
 		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = (int) $tmpline[1];
 		}

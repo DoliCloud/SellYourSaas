@@ -45,7 +45,6 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 
 // Read /etc/sellyoursaas.conf file
 $masterserver='';
-$ipserverdeployment='';
 $instanceserver='';
 $databasehost='localhost';
 $databaseport='3306';
@@ -62,9 +61,6 @@ if ($fp) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'masterserver') {
 			$masterserver = $tmpline[1];
-		}
-		if ($tmpline[0] == 'ipserverdeployment') {
-			$ipserverdeployment = $tmpline[1];
 		}
 		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = $tmpline[1];

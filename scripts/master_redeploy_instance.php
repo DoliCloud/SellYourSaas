@@ -66,9 +66,6 @@ if ($fp) {
 		if ($tmpline[0] == 'masterserver') {
 			$masterserver = $tmpline[1];
 		}
-		if ($tmpline[0] == 'ipserverdeployment') {
-			$ipserverdeployment = $tmpline[1];
-		}
 		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = $tmpline[1];
 		}

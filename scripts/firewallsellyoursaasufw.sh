@@ -91,7 +91,7 @@ ufw allow out 53/udp
 ufw allow out 2049/tcp
 # DHCP
 # TODO Allow DHCP client access ?
-# ufw allow out from $ipserverdeployment port 68 to any port 67 proto udp
+# ufw allow out from $ipserver port 68 to any port 67 proto udp
 
 # From external source to local - In
 #-----------------------------------
@@ -136,7 +136,7 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2"  || "x$webserver" =
 	done
 	
 	# Allow SSH to myself (for example this is required with Scaleway)
-	if [[ "x$ipserverdeployment" != "x" ]]; then
+	if [[ "x$ipserverdeployment" != "x" && "x$instanceserver" != "x" && "x$instanceserver" != "x0" ]]; then
 		echo Allow SSH to the restricted ip of deployment server $ipserverdeployment
 		ufw allow from $ipserverdeployment to any port $port_ssh proto tcp
 	fi
@@ -185,7 +185,7 @@ if [[ "x$masterserver" == "x2" || "x$instanceserver" == "x2" || "x$webserver" ==
 	done
 	
 	# Allow MySQL to myself (for example this is required with Scaleway)
-	if [[ "x$ipserverdeployment" != "x" ]]; then
+	if [[ "x$ipserverdeployment" != "x" && "x$instanceserver" != "x" && "x$instanceserver" != "x0" ]]; then
 		echo Allow MySQL to the restricted ip $ipserverdeployment
 		ufw allow from $ipserverdeployment to any port 3306 proto tcp
 	fi

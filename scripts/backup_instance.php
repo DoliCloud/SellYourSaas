@@ -99,9 +99,6 @@ if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
-		if ($tmpline[0] == 'ipserverdeployment') {
-			$ipserverdeployment = $tmpline[1];
-		}
 		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = $tmpline[1];
 		}
