@@ -204,9 +204,9 @@ do
     
     sleep 2
 done
- 
-	
-# Loop on each target server to make backup of SOURCE2 (if no error during backup of SOURCE1)
+
+
+# Loop on each target server to make backup of SOURCE2
 if [[ "x$instanceserver" != "x0" ]]; then
 	echo
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories $DIRSOURCE2/osu to remote $SERVDESTI..."
@@ -262,7 +262,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 		        		if [[ $nbdu -lt 50 ]]; then
 			        		export osudirbase=`basename $osudir`
 			        		if [[ -d $homedir/$osudirbase/ ]]; then
-			        			echo `date +'%Y-%m-%d %H:%M:%S'`" Search if a duc file exists with find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l"
+			        			echo `date +'%Y-%m-%d %H:%M:%S'`" Search if a recent duc file exists with find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l"
 				        		export found=`find $homedir/$osudirbase/.duc.db -mtime -60 2>/dev/null | wc -l`
 				        		if [ "x$found" = "x0" ]; then
 				        			# No recent .duc.db found, so we calculate it
