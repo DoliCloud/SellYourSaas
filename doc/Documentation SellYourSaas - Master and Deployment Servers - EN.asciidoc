@@ -294,7 +294,7 @@ Create the user account *admin*. It will be used to install and administer the s
 
 [source, bash]
 ---------------
-groupadd admin; useradd -m -g admin admin;
+groupadd admin; useradd -m -s bash -g admin admin;
 mkdir /home/admin/logs; chown root.admin /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
 mkdir /home/admin/backup; chown admin.admin /home/admin/backup;
