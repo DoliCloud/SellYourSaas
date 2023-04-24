@@ -442,7 +442,10 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			  <input type="hidden" name="reusesocid" value="<?php echo dol_escape_htmltag($reusesocid); ?>" />
 			  <input type="hidden" name="reusecontractid" value="<?php echo dol_escape_htmltag($reusecontractid); ?>" />
 			  <input type="hidden" name="fromsocid" value="<?php echo dol_escape_htmltag($fromsocid); ?>" />
-			  <input type="hidden" name="origin" value="<?php echo dol_escape_htmltag($origin); ?>" /><!--  the utm_source_cookie=<?php echo dol_escape_htmltag($_COOKIE["utm_source_cookie"]); ?> will be used in priority -->
+
+			  <input type="hidden" name="origin" value="<?php echo dol_escape_htmltag($origin); ?>" /><!-- wil be saved into options_source -->
+			  <!-- the utm_source_cookie=<?php echo dol_escape_htmltag($_COOKIE["utm_source_cookie"]); ?> will be saved into options_source_utm -->
+
 			  <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
 			  <!-- _SESSION['dol_loginsellyoursaas'] = <?php echo empty($_SESSION['dol_loginsellyoursaas']) ? '' : $_SESSION['dol_loginsellyoursaas']; ?> -->
 
