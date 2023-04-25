@@ -135,6 +135,7 @@
       - php7.4-ssh2 
       - php7.4-mbstring 
       - php7.4-dev
+      - php7.4-soap
     register: command_output
     when: 
       - php74 is defined
@@ -176,6 +177,7 @@
       - php8.0-ssh2 
       - php8.0-mbstring 
       - php8.0-dev
+      - php8.0-soap
     register: command_output
     when: 
       - php80 is defined
