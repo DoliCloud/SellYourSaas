@@ -234,7 +234,9 @@ echo "CERTIFFORCUSTOMDOMAIN = $CERTIFFORCUSTOMDOMAIN"
 echo "archivedir = $archivedir"
 echo "SSLON = $SSLON"
 echo "apachereload = $apachereload"
+# ALLOWOVERRIDE come from package
 echo "ALLOWOVERRIDE = $ALLOWOVERRIDE"
+# VIRTUALHOSTHEAD come from contract
 echo "VIRTUALHOSTHEAD = $VIRTUALHOSTHEAD"
 echo "ispaidinstance = $ispaidinstance"
 echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
