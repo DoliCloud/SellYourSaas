@@ -1461,11 +1461,11 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
 	if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$now.sql.zst"
-		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > "$archivedir/$osusername/dump.$dbname.$now.sql.zst"
+		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$nowlog.sql.zst"
+		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > "$archivedir/$osusername/dump.$dbname.$nowlog.sql.zst"
 	else
-		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$now.sql.gz"
-		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > "$archivedir/$osusername/dump.$dbname.$now.sql.gz"
+		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$nowlog.sql.gz"
+		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > "$archivedir/$osusername/dump.$dbname.$nowlog.sql.gz"
 	fi
 
 	if [[ "x$?" == "x0" ]]; then
