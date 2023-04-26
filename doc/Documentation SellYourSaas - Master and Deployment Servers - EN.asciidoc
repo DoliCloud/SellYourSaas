@@ -514,7 +514,7 @@ sudo chmod -R go-rwx /etc/skel/.ssh
 sudo vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
-Thus any new linux account created (those of customer instances) will be accessible by the administrator(s).
+Thus, any new linux account created (those of customer instances) will be accessible by the administrator(s).
 
 Also create a per-user mysql configuration file in */etc/skel/.my.cnf* to enable SellYourSaas end users to use the
 mysql client from their ssh shell connection.
@@ -5517,11 +5517,9 @@ Try to restart mysql. Once logged, do a CREATE DATABASE thedatabase; DROP DATABA
 - Check the temp directory is writable by the web server user.
 	
 
-==== Error when doing PHP ssh2_connect or just ssh to a server
+==== Error when doing PHP ssh2_connect or just a CLI ssh to a server
 
 If you find into */var/log/auth.log* an error like:
-
-... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group1-sha1 [preauth]
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: ... [preauth]
 
@@ -5534,9 +5532,9 @@ The client (maybe an old PHP version) is using a deprecated algorithm for negoti
 [source,bash]
 ---------------
 # Legacy changes - To allow an old client to connect to
-PubkeyAcceptedKeyTypes=+ssh-rsa
+#PubkeyAcceptedKeyTypes=+ssh-rsa
 HostKeyAlgorithms +ssh-rsa
-HostKey /etc/ssh/ssh_host_rsa_key
+#HostKey /etc/ssh/ssh_host_rsa_key
 KexAlgorithms +diffie-hellman-group1-sha1
 Ciphers +aes128-cbc
 ---------------
