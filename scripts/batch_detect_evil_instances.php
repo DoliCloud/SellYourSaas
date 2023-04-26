@@ -758,9 +758,9 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 				}
 			}
 
-			$nbmissing = (is_array($file_list['missing']) ? count($file_list['missing']) : 0);
-			$nbupdated = (is_array($file_list['updated']) ? count($file_list['updated']) : 0);
-			$nbadded = (is_array($file_list['added']) ? count($file_list['added']) : 0);
+			$nbmissing = ((!empty($file_list['missing']) && is_array($file_list['missing'])) ? count($file_list['missing']) : 0);
+			$nbupdated = ((!empty($file_list['updated']) && is_array($file_list['updated'])) ? count($file_list['updated']) : 0);
+			$nbadded = ((!empty($file_list['added']) && is_array($file_list['added'])) ? count($file_list['added']) : 0);
 
 			$s = 'Missing: '.$nbmissing;
 			$s .= ' - Updated: '.$nbupdated;
