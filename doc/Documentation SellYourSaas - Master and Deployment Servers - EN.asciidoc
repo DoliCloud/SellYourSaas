@@ -3571,7 +3571,7 @@ ln -fs /etc/letsencrypt/live/withX.mysaasdomainname.com/chain.pem with.sellyours
 
 NOTE: This is the wildcard certificate that will be used for the customer instances. Custom certificates for instances will be saved into */home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt*
 
-* If the file */etc/apache2/sites-available/default-ssl.conf* exists, rename it into */etc/apache2/sites-available/000-default-ssl.conf*
+* If the file */etc/apache2/sites-available/default-ssl.conf* exists, rename it into */etc/apache2/sites-available/000-default-ssl.conf* :
 
 [source,bash]
 ---------------
