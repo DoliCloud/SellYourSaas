@@ -5337,9 +5337,8 @@ btrfs-convert -p /dev/vdX
 lsblk -f
 ---------------
 
-Then edit he */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it was changed)
+Then edit the */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it was changed)
 
-Then you create a subvolume for each directory you want to be able to make snapshots.
 
 === Block/Unblock an IP using internal firewall
 
@@ -5348,7 +5347,6 @@ To block an external IP 'the.ip.to.block' to access port 'porttoblock':
 [source,bash]
 ---------------
 ufw insert 1 deny from the.ip.to.block to any port porttoblock 
-
 ---------------
 
 To delete a rule:
