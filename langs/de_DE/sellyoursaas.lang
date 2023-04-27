@@ -140,7 +140,7 @@ AddressLine=Adresszeile
 Organization=Organisation
 NameOfCompany=Name der Firma/Organisation
 ChooseANameForYourApplication=Internetadresse für die Applikation wählen
-WhenRegisteringYouAccept=Mit der Buchung stimmen Sie unseren<br> <a href="%s" target="_blank">Nutzungsbedingungen</a> zu.
+WhenRegisteringYouAccept=Mit der Buchung stimmen Sie unseren <a href="%s" target="_blank">Nutzungsbedingungen</a> zu.
 SignMeUp=Jetzt buchen
 ErrorPasswordMismatch=Fehler, die 2 Passwörter dürfen sich nicht unterscheiden
 ErrorOnlyCharAZAllowedFor=Für %s sind nur die Zeichen a-z, 0-9 oder - erlaubt

@@ -140,7 +140,7 @@ AddressLine=Wiersz adresu
 Organization=Organizacja
 NameOfCompany=Nazwa firmy / organizacji
 ChooseANameForYourApplication=Wybierz adres aplikacji
-WhenRegisteringYouAccept=Rejestrując się, wyrażasz zgodę na nasze <br> <a href="%s" target="_blank"> Warunki korzystania z usługi </a> .
+WhenRegisteringYouAccept=Rejestrując się, wyrażasz zgodę na nasze <a href="%s" target="_blank"> Warunki korzystania z usługi </a> .
 SignMeUp=Zapisz mnie!
 ErrorPasswordMismatch=Błąd, 2 hasła nie mogą się różnić
 ErrorOnlyCharAZAllowedFor=Tylko znaki a-z, 0-9 lub - są dozwolone dla %s

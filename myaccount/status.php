@@ -74,9 +74,12 @@ $lang = GETPOST('lang', 'aZ09');
  * View
  */
 
+top_httphead('application/json');
+
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
 
 $return = array();
 

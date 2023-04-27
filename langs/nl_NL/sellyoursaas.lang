@@ -140,7 +140,7 @@ AddressLine=Adresregel
 Organization=Organisatie
 NameOfCompany=Bedrijfs / organisatie naam
 ChooseANameForYourApplication=Kies toepassingsadres
-WhenRegisteringYouAccept=Door te registreren gaat u akkoord met onze <br> <a href="%s" target="_blank"> Servicevoorwaarden </a> .
+WhenRegisteringYouAccept=Door te registreren gaat u akkoord met onze <a href="%s" target="_blank"> Servicevoorwaarden </a> .
 SignMeUp=Schrijf me in!
 ErrorPasswordMismatch=Fout, de 2 wachtwoorden mogen niet verschillen
 ErrorOnlyCharAZAllowedFor=Alleen de tekens a-z, 0-9 of - zijn toegestaan voor de %s

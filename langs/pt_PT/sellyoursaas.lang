@@ -140,7 +140,7 @@ AddressLine=Linha de endereço
 Organization=Organização
 NameOfCompany=Nome da empresa / organização
 ChooseANameForYourApplication=Escolha o endereço do aplicativo
-WhenRegisteringYouAccept=Ao se registrar, você concorda com os nossos <br> <a href="%s" target="_blank"> Termos de serviço </a>.
+WhenRegisteringYouAccept=Ao se registrar, você concorda com os nossos <a href="%s" target="_blank"> Termos de serviço </a>.
 SignMeUp=Inscreva-me!
 ErrorPasswordMismatch=Erro, as 2 senhas não devem ser diferentes
 ErrorOnlyCharAZAllowedFor=Somente o caractere a-z, 0-9 ou - é permitido para %s

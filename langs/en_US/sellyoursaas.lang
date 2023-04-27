@@ -140,7 +140,7 @@ AddressLine=Address line
 Organization=Organization
 NameOfCompany=Company/organization name
 ChooseANameForYourApplication=Choose Application Address
-WhenRegisteringYouAccept=By registering you agree to our<br><a href="%s" target="_blank">Terms of Service</a>.
+WhenRegisteringYouAccept=By registering you agree to our <a href="%s" target="_blank">Terms of Service</a>.
 SignMeUp=Sign Me Up!
 ErrorPasswordMismatch=Error, the 2 passwords must not differ
 ErrorOnlyCharAZAllowedFor=Only character a-z, 0-9 or - are allowed for the %s

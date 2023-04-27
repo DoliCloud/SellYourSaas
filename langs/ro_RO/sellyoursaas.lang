@@ -140,7 +140,7 @@ AddressLine=Linia adresă
 Organization=Organizaţie-companie
 NameOfCompany=Numele companiei/organizaţiei
 ChooseANameForYourApplication=Alegeți adresa aplicației
-WhenRegisteringYouAccept= Prin înregistrare sunteți de acord cu <br><a href="%s" target="_blank">Termenii și condițiile noastre</a>.
+WhenRegisteringYouAccept= Prin înregistrare sunteți de acord cu <a href="%s" target="_blank">Termenii și condițiile noastre</a>.
 SignMeUp=Înscrie-mă!
 ErrorPasswordMismatch=Eroare, cele 2 parole nu trebuie să difere
 ErrorOnlyCharAZAllowedFor=Numai caracterele a-z, 0-9 sau - sunt permise pentru %s

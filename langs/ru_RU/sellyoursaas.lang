@@ -140,7 +140,7 @@ AddressLine=Адресная строка
 Organization=организация
 NameOfCompany=Название компании / организации
 ChooseANameForYourApplication=Выберите адрес приложения
-WhenRegisteringYouAccept=Регистрируясь, вы соглашаетесь с нашими <br> <a href="%s" target="_blank"> Условиями обслуживания </a>.
+WhenRegisteringYouAccept=Регистрируясь, вы соглашаетесь с нашими <a href="%s" target="_blank"> Условиями обслуживания </a>.
 SignMeUp=Запишите меня!
 ErrorPasswordMismatch=Ошибка, 2 пароля не должны отличаться
 ErrorOnlyCharAZAllowedFor=Только символы a-z, 0-9 или - разрешены для %s
