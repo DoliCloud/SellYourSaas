@@ -245,7 +245,7 @@ foreach ($output as $outputline) {
 	print $outputline."\n";
 }
 
-// Remove install.lock file if mode )) confirmunlock
+// Remove install.lock and create upgrade.unlock file if mode confirmunlock
 if ($mode == 'confirmunlock') {
 	// SFTP connect
 	if (! function_exists("ssh2_connect")) { dol_print_error('', 'ssh2_connect function does not exists'); exit(1); }
@@ -259,13 +259,25 @@ if ($mode == 'confirmunlock') {
 		} else {
 			$sftp = ssh2_sftp($connection);
 
-			// Check if install.lock exists
+			// Remove install.lock
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 			$fileinstalllock=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 
 			print 'Remove file '.$fileinstalllock."\n";
 
 			ssh2_sftp_unlink($sftp, $fileinstalllock);
+
+			// Create upgrade.unlock
+			$fileupgradeunlock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.$dir.'/documents/upgrade.unlock';
+
+			print 'Create file '.$fileupgradeunlock."\n";
+
+			$stream = fopen($fileupgradeunlock, 'w+');
+			if ($stream) {
+				//var_dump($stream);exit;
+				fwrite($stream, "// File to allow upgrade.\n");
+				fclose($stream);
+			}
 		}
 	} else {
 		print 'Failed to connect to ssh2 to '.$server;
