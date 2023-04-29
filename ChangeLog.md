@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW Add the date of the first access.
 * NEW Use a local cache for deployment if no remote cache is found.
 * NEW Show info on latest backup on tooltip on column "Nb of backup"  
 * NEW Add property invoice payment disputed on invoice
