@@ -52,7 +52,7 @@ if (!empty($_GET["utm_source"]) || !empty($_GET["origin"]) || !empty($_GET["part
 	$cookievalue = empty($_GET["utm_source"]) ? (empty($_GET["origin"]) ? 'partner'.$_GET["partner"] : $_GET["origin"]) : $_GET["utm_source"];
 	if (empty($_COOKIE[$cookiename]) && $tmpdomain) {
 		$domain = $tmpdomain;
-		$cookievalue .= '-'.date("Ymd-His");
+		$cookievalue .= '-'.date("Ymd-His").'-myaccount';
 		setcookie($cookiename, empty($cookievalue) ? '' : $cookievalue, empty($cookievalue) ? 0 : (time() + (86400 * 90)), '/', $domain, false, true); // keep cookie 90 days and add tag httponly
 	}
 }

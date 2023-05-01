@@ -977,7 +977,7 @@ if ($reusecontractid) {
 	}
 
 	$reg = array();
-	if (!empty($_COOKIE['utm_source_cookie']) && preg_match('/^partner(\d+)$/', $_COOKIE['utm_source_cookie'], $reg)) {
+	if (!empty($_COOKIE['utm_source_cookie']) && preg_match('/^partner(\d+)/', $_COOKIE['utm_source_cookie'], $reg)) {
 		// The source is from a partner
 		if (getDolGlobalInt('SELLYOURSAAS_LINK_TO_PARTNER_IF_FIRST_SOURCE')) {
 			$tmpthirdparty->parent = ((int) $reg[1]);		// Add link to parent/reseller id with the id of first source in all web site
