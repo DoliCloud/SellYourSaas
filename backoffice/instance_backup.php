@@ -179,6 +179,8 @@ if ($ispaid) {
 
 $tmparray = explode('.', $object->ref_customer);
 
+$moveinstancestringtoshow .= "# check that the master server can connect with ssh and user admin on the source instance server ".getDomainFromURL($object->ref_customer, 2).". If not, do on ".getDomainFromURL($object->ref_customer, 2).":";
+$moveinstancestringtoshow .= "# copy /etc/skel/.ssh/authorized_keys_support /home/admin/.ssh/authorized_keys_support; chown admin.admin /home/admin/.ssh/authorized_keys_support\n";
 $moveinstancestringtoshow .= "su - admin\n";
 $moveinstancestringtoshow .= $conf->global->DOLICLOUD_SCRIPTS_PATH.'/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm|confirmredirect|confirmmaintenance)'."\n";
 // Remove read in certif file.
