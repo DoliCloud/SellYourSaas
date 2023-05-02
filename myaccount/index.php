@@ -3159,8 +3159,8 @@ if ($action == 'updateurl') {
 			}
 		}
 		if (!$error){
-			$object->array_options["options_websitename"] = $website->ref;
-			$object->array_options["options_domainnamewebsite"] = $domainnamewebsite;
+			$object->context["options_websitename"] = $website->ref;
+			$object->context["options_domainnamewebsite"] = $domainnamewebsite;
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction("deploywebsite", $object);
 			if ($result <= 0) {
 				$error++;

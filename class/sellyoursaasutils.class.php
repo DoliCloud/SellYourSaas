@@ -3455,8 +3455,8 @@ class SellYourSaasUtils
 				$laststableupgradeversion = (empty($object->array_options["laststableupgradeversion"]) ? '' : $object->array_options["laststableupgradeversion"]);
 				$lastversiondolibarrinstance = (empty($object->array_options["lastversiondolibarrinstance"]) ? '' : $object->array_options["lastversiondolibarrinstance"]);
 				
-				$websitenamedeploy = (empty($object->array_options["options_websitename"]) ? '' : $object->array_options["options_websitename"]);
-				$domainnamewebsite = (empty($object->array_options["options_domainnamewebsite"]) ? '' : $object->array_options["options_domainnamewebsite"]);
+				$websitenamedeploy = (empty($object->context["options_websitename"]) ? '' : $object->context["options_websitename"]);
+				$domainnamewebsite = (empty($object->context["options_domainnamewebsite"]) ? '' : $object->context["options_domainnamewebsite"]);
 				
 				// get direct access value
 				$directaccess=0;
