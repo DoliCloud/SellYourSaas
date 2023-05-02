@@ -879,7 +879,7 @@ if ($mode == 'confirmredirect' && $mode == 'confirmmaintenance') {
 }
 
 if (!$dnschangedone) {
-	print "NOW TO GET A COMPLETELY WORKING REDIRECT, YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
+	print "NOTE: TO GET A REDIRECT WORKING AT THE DNS LEVEL, YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
 	print $oldshortname." A ".$newobject->array_options['options_deployment_host']."\n";
 	print "THEN RELOAD DNS WITH rndc reload ".$oldwilddomain."\n";
 }
