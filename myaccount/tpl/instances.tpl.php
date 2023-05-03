@@ -609,7 +609,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		}
 
 		// Add here the Option panel (hidden by default)
-		print '<div id="optionpanel_'.$id.'" class="optionpanel hidden">';
+
+		print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' :'hidden').'">';
 		print '<br>';
 		print '<div class="areaforresources sectionresources">';
 		print '<br>';
@@ -635,15 +636,91 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '</div></div>';
 
 		// Hard coded option: A website
-		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES')) {
+		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
+			$type_db = $conf->db->type;
+			$hostname_db  = $contract->array_options['options_hostname_db'];
+			$username_db  = $contract->array_options['options_username_db'];
+			$password_db  = $contract->array_options['options_password_db'];
+			$database_db  = $contract->array_options['options_database_db'];
+			$port_db      = (!empty($contract->array_options['options_port_db']) ? $contract->array_options['options_port_db'] : 3306);
+			$prefix_db    = (!empty($contract->array_options['options_prefix_db']) ? $contract->array_options['options_prefix_db'] : 'llx_');
+			$hostname_os  = $contract->array_options['options_hostname_os'];
+			$username_os  = $contract->array_options['options_username_os'];
+			$password_os  = $contract->array_options['options_password_os'];
+			$username_web = $contract->thirdparty->email;
+			$password_web = $contract->thirdparty->array_options['options_password'];
+			$iphostwebsite = $contract->array_options['options_deployment_host'];
+			
+			$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+			$newdb->prefix_db = $prefix_db;
+
+			$confinstance = new Conf();
+			$confinstance->setValues($newdb);
+
+			$websitemodenabled = 0;
+			foreach ($confinstance->global as $key => $val) {
+				if (preg_match('/^MAIN_MODULE_WEBSITE+$/', $key) && ! empty($val)) {
+					$websitemodenabled ++;
+				}
+			}
+			
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 			print '<div class="tagtd">';
-			print $langs->trans("OptionYourWebsite");
-			print '<span class="small">';
-			print $langs->trans("OptionYourWebsiteDesc").'<br>';
-			print $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
-			print '</span>';
-			// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
+			if (empty($websitemodenabled)) {
+				print $langs->trans("OptionYourWebsiteNoEnabled").'<br>';
+			}else {
+				include_once DOL_DOCUMENT_ROOT."/website/class/website.class.php";
+				$websitestatic = new Website($newdb);
+				$websitestatic->fetchAll('','',0,0,array('t.status'=>$websitestatic::STATUS_VALIDATED));
+				print $langs->trans("OptionYourWebsite");
+				print '<span class="small">';
+				print $langs->trans("OptionYourWebsiteDesc").'<br>';
+				print $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
+				print '</span><br>';
+				print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+				print '<input type="hidden" name="token" value="'.newToken().'">';
+				print '<input type="hidden" name="action" value="deploywebsite">';
+				print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
+				print '<input type="hidden" name="mode" value="'.$mode.'">';
+				print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
+				
+				print '<span class=" bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
+				print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
+				print '<option value="">&nbsp;</option>';
+				foreach ($websitestatic->records as $website) {
+					print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "").'>'.$website->ref.'</option>';
+				}
+				print '</select>';
+				print ajax_combobox("websiteidoption");
+				print '<div id="domainnamewebsite" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'">';
+				print '<br><span>'.$langs->trans("PurshaseDomainName").'&nbsp;</span>';
+				print '<br><span class="bold">'.$langs->trans("Domain").'&nbsp;</span>';
+				print '<input name="domainnamewebsite" id="domainnamewebsiteinput" value="'.GETPOST("domainnamewebsite", "alpha").'">&nbsp;';
+				print '<div id="choosewebsiteoption" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'>';
+				print '<br><span>'.$langs->trans("AddInstructionToDns", $contract->ref_customer, $contract->ref_customer).'</span>';
+				print '<br><input class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" type="submit" name="startwebsitedeploy" value="'.$langs->trans("StartWebsiteDeployment").'">';
+				print '</div>';
+				print '</div>';
+				print '</form>';
+				print '<script>
+				$("#websiteidoption").on("change", function(){
+					if($("#websiteidoption").val() != "" || $("#domainnamewebsite:hidden").length){
+						$("#domainnamewebsite").removeClass("hidden");
+					} else {
+						$("#domainnamewebsite").addClass("hidden");
+					}
+				})
+				$("#domainnamewebsiteinput").on("change", function(){
+					if($("#choosewebsiteoption").val() != "" || $("#choosewebsiteoption:hidden").length ){
+						$("#choosewebsiteoption").removeClass("hidden");
+						$("#choosewebsiteoption").prop("disabled", false);
+					} else {
+						$("#choosewebsiteoption").addClass("hidden");
+						$("#choosewebsiteoption").prop("disabled", true);
+					}
+				})
+				</script>';
+			}
 			print '</div>';
 			print '<div class="tagtd">';
 			print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
