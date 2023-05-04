@@ -105,6 +105,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND", GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT", GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT", GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT", GETPOST("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
 	}
 
 	if (! $error) {
@@ -218,6 +219,14 @@ print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT" value="'.getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT').'">';
 print '</td>';
 print '<td><span class="opacitymedium small">120</span></td>';
+print '</tr>';
+
+// For Website deployment automation
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT").'</td>';
+print '<td>';
+print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT");
+print '</td>';
+print '<td><span class="opacitymedium small"></span></td>';
 print '</tr>';
 
 print '</table>';

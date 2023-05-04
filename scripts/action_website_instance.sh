@@ -133,7 +133,9 @@ export directaccess=${38}
 export sshaccesstype=${39}
 
 # The value from the virtualhost of website (with of without www., we remove it)
-export CUSTOMDOMAIN=${46/www./ }
+export CUSTOMDOMAIN=${46/www./}
+# The website name in document dir
+export WEBSITENAME=${47}
 
 
 
@@ -198,6 +200,7 @@ echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
 echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
 echo "CUSTOMDOMAIN = $CUSTOMDOMAIN"
+echo "WEBSITENAME = $WEBSITENAME"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
@@ -213,7 +216,7 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "deploywebsite" ]]; then
 
-	export apacheconf="/etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf"
+	export apacheconf="/etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf"
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfilewebsite"
 	if [[ -s $apacheconf ]]
 	then
@@ -223,6 +226,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 
 	echo "cat $vhostfilewebsite | sed -e 's/__webSiteDomain__/www.$CUSTOMDOMAIN/g' | \
 			  sed -e 's/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g' | \
+			  sed -e 's/__webSiteName__/$WEBSITENAME/g' | \
 			  sed -e 's/__webAppLogName__/$CUSTOMDOMAIN/g' | \
               sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
               sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
@@ -239,8 +243,9 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
-	cat $vhostfilewebsite | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
-			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+	cat $vhostfilewebsite | sed -e "s/__webSiteDomain__/$CUSTOMDOMAIN/g" | \
+			  sed -e "s/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g" | \
+			  sed -e "s/__webSiteNamePath__/$WEBSITENAME/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
               sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
               sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
@@ -262,9 +267,27 @@ if [[ "$mode" == "deploywebsite" ]]; then
 
 	#echo Enable conf with a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
 	#a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
-	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
-	ln -fs /etc/apache2/sellyoursaas-available/$instance.$domain.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
+	ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 	
+	echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
+	mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+
+	if [[ ${46} == www.* ]]; then
+		echo certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
+		certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
+	else
+		echo certbot certonly --webroot -w $instancedir/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
+		certbot certonly --webroot -w $instancedir/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
+	fi
+	echo "Link certificate for virtualhost with
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
+	"
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
 fi
 
 
