@@ -1408,10 +1408,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 	
+	# For mariadb by default
 	Q1="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'localhost'; "
 	Q2="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'%'; "
-	
-	# For mariadb by default
 	Q2a=""
 	Q2b=""
 	Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
