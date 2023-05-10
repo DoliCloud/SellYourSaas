@@ -28,6 +28,10 @@ if (empty($conf) || ! is_object($conf)) {
 // $thirdpartyhadalreadyapaymentmode
 // $langscompany
 
+dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
+if (!is_object($sellyoursaasutils)) {
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+}
 
 // Create a recurring invoice (+real invoice + contract renewal) if there is no recurring invoice yet
 if (! $error) {
