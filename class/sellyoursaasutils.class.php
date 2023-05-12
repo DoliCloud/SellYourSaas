@@ -1615,6 +1615,160 @@ class SellYourSaasUtils
 		return $error;
 	}
 
+	/**
+	 * Action executed by scheduler
+	 * Loop on invoice for customer with default payment mode Stripe sepa and send sepa direct debit ot stripe / sendmail.
+	 * CAN BE A CRON TASK
+	 *
+	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
+	 * @param	int		$noemailtocustomeriferror		1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
+	 * @param	string  $mode                           Payment type can be "sepa"
+	 * @return	int			                    		0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 */
+	public function doTakePaymentStripeSEPA($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0, $mode = 'sepa')
+	{
+		global $conf, $langs, $mysoc, $user;
+
+		$langs->load("agenda");
+
+		$savlog = $conf->global->SYSLOG_FILE;
+		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doTakePaymentStripeSEPA.log';
+
+		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+		include_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
+
+		$error = 0;
+		$this->output = '';
+		$this->error='';
+
+		$invoiceprocessed = array();
+		$invoiceprocessedok = array();
+		$invoiceprocessedko = array();
+
+		if (empty($conf->stripe->enabled)) {
+			$this->error='Error, stripe module not enabled';
+
+			$conf->global->SYSLOG_FILE = $savlog;
+
+			return 1;
+		}
+
+		$service = 'StripeTest';
+		$servicestatus = 0;
+		if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+			$service = 'StripeLive';
+			$servicestatus = 1;
+		}
+
+		dol_syslog(__METHOD__." maxnbofinvoicetotry=".$maxnbofinvoicetotry." noemailtocustomeriferror=".$noemailtocustomeriferror, LOG_DEBUG);
+
+		$idpaiementstripe = dol_getIdFromCode($this->db, 'STRIPE', 'c_paiement', 'code', 'id', 1);
+		$idpaiementdebit = dol_getIdFromCode($this->db, 'PRE', 'c_paiement', 'code', 'id', 1);
+
+		$sql = 'SELECT f.rowid, se.fk_object as socid, sr.rowid as companypaymentmodeid';
+		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
+		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
+		$sql .= " AND (f.fk_mode_reglement IS NULL OR f.fk_mode_reglement IN (0, ".((int) $idpaiementdebit).",".((int) $idpaiementstripe)."))";
+		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
+		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
+		$sql .= " AND sr.status = ".((int) $servicestatus);
+		$sql .= " AND sr.type = 'ban'";	// This exclude payment mode of other types
+		$sql .= " AND sr.card_type = 'sepa_debit'";	// Only sepa_debit payment mode
+		$sql .= " AND sr.stripe_card_ref IS NOT NULL";	// Only stripe payment mode
+		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
+		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
+		//print $sql;exit;
+
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			$num = $this->db->num_rows($resql);
+
+			$i=0;
+			while ($i < $num) {
+				$obj = $this->db->fetch_object($resql);
+				if ($obj) {
+					if (! empty($invoiceprocessed[$obj->rowid])) {	// Invoice already processed
+						continue;
+					}
+
+					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->transaction_opened = ".$this->transaction_opened);
+
+					$this->db->begin();
+
+					$invoice = new Facture($this->db);
+					$result1 = $invoice->fetch($obj->rowid);
+
+					$companypaymentmode = new CompanyPaymentMode($this->db);
+					$result2 = $companypaymentmode->fetch($obj->companypaymentmodeid);
+
+					if ($result1 <= 0 || $result2 <= 0) {
+						$error++;
+						dol_syslog('Failed to get invoice id = '.$obj->rowid.' or companypaymentmode id ='.$obj->companypaymentmodeid, LOG_ERR);
+						$this->errors[] = 'Failed to get invoice id = '.$obj->rowid.' or companypaymentmode id ='.$obj->companypaymentmodeid;
+					} else {
+						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
+						$result = $invoice->demande_prelevement($user);
+						if ($result < 0) {
+							$error++;
+							dol_syslog('Failed to create withdrawal request for a direct debit order for invoice id = '.$obj->rowid, LOG_ERR);
+							$this->errors[] = 'Failed to create withdrawal request for a direct debit order for invoice id = '.$obj->rowid;
+						}
+					}
+
+					if (!$error) {
+						$sql = "SELECT rowid";
+						$sql .= " FROM ".MAIN_DB_PREFIX."prelevement_demande";
+						$sql .= " WHERE fk_facture = ".((int) $obj->rowid);
+						$sql .= " AND type = 'ban'"; // To exclude record done for some online payments
+						$sql .= " AND traite = 0";
+						$rsql = $this->db->query($sql);
+						if ($rsql) {
+							$n = $this->db->num_rows($rsql);
+							if ($n != 1) {
+								$error++;
+								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order', LOG_ERR);
+								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order';
+							} else {
+								$objd = $this->db->fetch_object($rsql);
+								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
+								if ($result < 0) {
+									$error++;
+									dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. '.$invoice->error, LOG_ERR);
+									$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. '.$invoice->error;
+								}
+							}
+						}
+					}
+
+					if (!$error) {	// No error
+						$invoiceprocessedok[$obj->rowid]=$invoice->ref;
+						$this->db->commit();
+					} else {
+						$invoiceprocessedko[$obj->rowid]=$invoice->ref;
+						$this->db->rollback();
+					}
+
+					$invoiceprocessed[$obj->rowid]=$invoice->ref;
+				}
+
+				$i++;
+
+				if ($maxnbofinvoicetotry && $i >= $maxnbofinvoicetotry) {
+					break;
+				}
+			}
+		} else {
+			$error++;
+			$this->error = $this->db->lasterror();
+		}
+
+		$this->output = count($invoiceprocessedok).' invoice(s) paid among '.count($invoiceprocessed).' qualified invoice(s) with a valid Stripe default payment mode processed'.(count($invoiceprocessedok)>0 ? ' : '.join(',', $invoiceprocessedok) : '').' (ran in mode '.$servicestatus.') (search done on SellYourSaas customers only)';
+		$this->output .= ' - '.count($invoiceprocessedko).' discarded (missing Stripe customer/card id, payment error or other reason)'.(count($invoiceprocessedko)>0 ? ' : '.join(',', $invoiceprocessedko) : '');
+
+		$conf->global->SYSLOG_FILE = $savlog;
+
+		return $error;
+	}
 
 	/**
 	 * Action executed by scheduler
