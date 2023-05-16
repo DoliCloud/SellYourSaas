@@ -23,7 +23,7 @@ if [ "$(id -u)" == "0" ]; then
    exit 1
 fi
 
-echo "Update git dirs found into $1 and generate the tgz image."
+echo "Update git dirs found into $1 and generate the archive file (.zst or .tgz)"
 
 for dir in $(find "$1" -mindepth 1 -maxdepth 1 -type d)
 do
