@@ -5,6 +5,7 @@
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1 apache=1'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php80=1 apache=1'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php81=1 apache=1'
 #
 
 
@@ -201,7 +202,51 @@
   - debug:
       var: command_output.stdout_lines
 
+     
+      
+  ##### For PHP 8.1
+  - name: Launch apt for php 8.1 packages
+    apt:
+      pkg:
+      - php8.1 
+      - php8.1-cli 
+      - libapache2-mod-php8.1 
+      #- php8.0-fpm 
+      - php8.1-gd 
+      - php8.1-imap 
+      - php8.1-ldap 
+      - php8.1-mysql 
+      - php8.1-curl 
+      - php8.1-memcached 
+      - php8.1-imagick 
+      - php8.1-intl 
+      - php8.1-xml 
+      - php8.1-zip 
+      - php8.1-bz2 
+      - php8.1-ssh2 
+      - php8.1-mbstring 
+      - php8.1-dev
+      - php8.1-soap
+    register: command_output
+    when: 
+      - php81 is defined
 
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: Launch apt for GLPI packages
+    apt:
+      pkg:
+      - php8.1-readline
+      - php8.1-xmlrpc
+    register: command_output
+    when: 
+      - php81 is defined
+
+  - debug:
+      var: command_output.stdout_lines
+      
+      
   ##### apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
@@ -735,6 +780,194 @@
     notify: restart-apache
     when: 
       - php80 is defined
+
+
+  ##### apache2/php.ini
+  - name: Check or update upload_max_filesize php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: PHP
+      option: upload_max_filesize
+      value: 25M
+      backup: yes
+    when: 
+      - php81 is defined
+
+  - name: Check or update post_max_size php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: PHP
+      option: post_max_size
+      value: 30M
+    when: 
+      - php81 is defined
+
+  - name: Check or update max_input_vars php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: PHP
+      option: max_input_vars
+      value: '4000'
+    when: 
+      - php81 is defined
+
+  - name: Check or update memory_limit php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: PHP
+      option: memory_limit
+      value: 256M
+    when: 
+      - php81 is defined
+
+  - name: Check or update disable_functions php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: PHP
+      option: disable_functions
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
+    when: 
+      - php81 is defined
+
+  - name: Check or update session.gc_maxlifetime php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: Session
+      option: session.gc_maxlifetime
+      value: '3600'
+    when: 
+      - php81 is defined
+
+  - name: Check or update session.use_strict_mode php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: Session
+      option: session.use_strict_mode
+      value: '1'
+    when: 
+      - php81 is defined
+
+  - name: Check or update session.use_only_cookies php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: Session
+      option: session.use_only_cookies
+      value: '1'
+    when: 
+      - php80 is defined
+
+  - name: Check or update session.cookie_httponly php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: Session
+      option: session.cookie_httponly
+      value: '1'
+    when: 
+      - php81 is defined
+
+  - name: Check or update session.cookie_samesite php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: Session
+      option: session.cookie_samesite
+      value: Lax
+    when: 
+      - php81 is defined
+
+  - name: Check or update auto_prepend_file php.ini
+    ini_file:
+      path: /etc/php/8.0/apache2/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+    when: 
+      - php80 is defined
+
+  - name: Check or update sendmail_path php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: 'mail function'
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+    when: 
+      - php81 is defined
+
+  - name: Check or update mail.log php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: 'mail function'
+      option: mail.log
+      value: /var/log/phpmail.log
+    when: 
+      - php81 is defined
+
+  - name: Check or update opcache.memory_consumption php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: opcache
+      option: opcache.memory_consumption
+      value: '1024'
+    when: 
+      - php81 is defined
+
+  - name: Check or update opcache.max_accelerated_files php.ini
+    ini_file:
+      path: /etc/php/8.1/apache2/php.ini
+      section: opcache
+      option: opcache.max_accelerated_files
+      value: '100000'
+    when: 
+      - php81 is defined
+
+  ##### cli/php.ini
+  - name: Check or update auto_prepend_file cli/php.ini
+    ini_file:
+      path: /etc/php/8.1/cli/php.ini
+      section: PHP
+      option: auto_prepend_file
+      value: /usr/local/bin/phpsendmailprepend.php
+      backup: yes
+    when: 
+      - php81 is defined
+
+  - name: Check or update sendmail_path cli/php.ini
+    ini_file:
+      path: /etc/php/8.1/cli/php.ini
+      section: PHP
+      option: sendmail_path
+      value: /usr/local/bin/phpsendmail.php
+    when: 
+      - php81 is defined
+
+  - name: Check or update mail.log cli/php.ini
+    ini_file:
+      path: /etc/php/8.1/cli/php.ini
+      section: PHP
+      option: mail.log
+      value: /var/log/phpmail.log
+    when: 
+      - php81 is defined
+      
+  - name: Disable old PHP on Apache
+    command: a2dismod php7.0 php7.2 php7.3 php7.4 php8.0
+    ignore_errors: true
+    when: 
+      - php81 is defined
+      
+  - name: Activates PHP on Apache
+    command: a2enmod php8.1
+    when: 
+      - php81 is defined
+
+  - name: Set PHP version for CLI
+    community.general.alternatives:
+      name: php
+      path: /usr/bin/php8.1
+    register: phpversionmodified
+    notify: restart-apache
+    when: 
+      - php81 is defined
+
 
   - debug:
       var: phpversionmodified.changed
