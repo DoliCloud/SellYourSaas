@@ -479,6 +479,16 @@ input.input-field {
         text-align: center;	max-width:110px; max-height: 60px;
     }
 
+	.page-header-top {
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+
+	header h1 {
+	    font-size: 20px;
+	    line-height: 20px;
+	}
+
 	.areaforresources {
 		padding-left: 0px;
 		padding-right: 0px;
