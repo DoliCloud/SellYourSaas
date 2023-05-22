@@ -1457,7 +1457,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		print '<div class="horizontal-fld centpercent marginbottomonly">';
 		print '<!-- selection of plan -->'."\n";
 		print '<strong>'.$langs->trans("YourSubscriptionPlan").'</strong> ';
-		print $form->selectarray('service', $arrayofplans, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
+		print $form->selectarray('service', $arrayofplansfull, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
 		print '<br>';
 		print '</div>';
 		//print ajax_combobox('service');
