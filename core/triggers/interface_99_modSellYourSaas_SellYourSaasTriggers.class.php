@@ -164,7 +164,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						$contract = new Contrat($this->db);
 						$contract->fetch($object->fk_contrat);
 						if ($contract->array_options['options_deployment_status'] == 'undeployed') {
-							setEventMessages("CantActivateContractWhenUndeployed", null, 'errors');
+							setEventMessages("CantActivateContractWhenUndeployed", null, 'warnings');
 						} else {
 							$remoteaction = 'unsuspend';
 						}
@@ -176,7 +176,13 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 			case 'LINECONTRACT_CLOSE':
 				$object->fetch_product();
 				if ($object->product->array_options['options_app_or_option'] == 'app') {
-					$remoteaction = 'suspend';
+					$contract = new Contrat($this->db);
+					$contract->fetch($object->fk_contrat);
+					if ($contract->array_options['options_deployment_status'] == 'undeployed') {
+						setEventMessages("CantDisableContractWhenUndeployed", null, 'warnings');
+					} else {
+						$remoteaction = 'suspend';
+					}
 				}
 				break;
 			case 'CONTRACT_DELETE':
