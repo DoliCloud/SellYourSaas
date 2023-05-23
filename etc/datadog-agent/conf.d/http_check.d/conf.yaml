@@ -1,0 +1,12 @@
+init_config:
+  ## @param ca_certs - string - optional
+  ## Change default path of trusted certificates
+  #
+  ## ca_certs: /etc/ssl/certs/ca-certificates.crt
+
+instances:
+
+  - name: SellYourSaas customers instances (withX)
+    url: https://supervision.withX.mysaasdomain.org
+    disable_ssl_validation: false
+    min_collection_interval: 86400

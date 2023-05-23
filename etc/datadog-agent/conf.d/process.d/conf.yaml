@@ -1,0 +1,92 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param pid_cache_duration - integer - optional - default: 120
+    ## Changes the check refresh rate of the matching pid list every X seconds except if it
+    ## detects a change before. You might want to set it low if you want to
+    ## alert on process service checks.
+    #
+    # pid_cache_duration: 120
+
+    ## @param access_denied_cache_duration - integer - optional - default: 120
+    ## The check maintains a list of PIDs for which it got access denied. It won't try to look at them again for the
+    ## duration in seconds specified by access_denied_cache_duration.
+    #
+    # access_denied_cache_duration: 120
+
+    ## @param shared_process_list_cache_duration - integer - optional - default: 120
+    ## The check maintains a list of running processes shared among all instances, that is used to generate the
+    ## matching pid list on each instance. It won't try to look at them again for the duration in seconds
+    ## specified by shared_process_list_cache_duration.
+    #
+    # shared_process_list_cache_duration: 120
+
+    ## @param procfs_path - string - optional
+    ## Used to override the default procfs path, e.g. for docker containers with the outside fs mounted at /host/proc
+    ## DEPRECATED: please specify `procfs_path` globally in `datadog.conf` instead
+    #
+    # procfs_path: /proc
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independent of the others.
+#
+instances:
+  - name: process_apache2
+    search_string: ['apache2']
+    exact_match: False
+    thresholds:
+      critical: [4, 5000]
+
+  - name: fail2ban
+    search_string: ['fail2ban-server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: cron
+    search_string: ['/usr/sbin/cron']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]      
+
+  #
+  # The following entries are for deployment server only
+  #      
+
+  - name: agent_sellyoursaas
+    search_string: ['remote_server']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: apache_watchdog_daemon1
+    search_string: ['apache_watchdog_daemon1']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+      
+  - name: apache_watchdog_daemon2
+    search_string: ['apache_watchdog_daemon2']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+ 
+  - name: apache_watchdog_daemon3
+    search_string: ['apache_watchdog_daemon3']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+
+  - name: smtp_watchdog_daemon1
+    search_string: ['smtp_watchdog_daemon1']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]
+

@@ -4013,7 +4013,6 @@ instances:
 ---------------
 
 
-
 * Copy the datadog config file to supervize *process*.
 
 [source,bash]
