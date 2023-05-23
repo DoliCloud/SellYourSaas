@@ -4069,7 +4069,13 @@ instances:
     search_string: ['apache_watchdog_daemon3']
     exact_match: False
     thresholds:
-      critical: [1, 5000]      
+      critical: [1, 5000]
+
+  - name: smtp_watchdog_daemon1
+    search_string: ['smtp_watchdog_daemon1']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]       
 ---------------
 
 
