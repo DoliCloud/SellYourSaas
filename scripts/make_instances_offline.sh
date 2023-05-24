@@ -55,7 +55,11 @@ fi
 
 if [ "x$2" != "xonline" ]; then
 	echo "Loop on each enabled virtual host of customer instances, create a new one and switch it"
-	echo "Path for template is $scriptdir"
+	if [[ "x$templatesdir" != "x" ]]; then
+		echo "Path for template is $templatesdir"
+	else
+		echo "Path for template is $scriptdir"
+	fi
 	mkdir /etc/apache2/sellyoursaas-offline 2>/dev/null
 
 	for file in `ls /etc/apache2/sellyoursaas-online/*`
