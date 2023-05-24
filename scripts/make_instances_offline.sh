@@ -7,6 +7,20 @@
 
 echo "***** $0 *****"
 
+if [ "x$2" == "x" ]; then
+   echo "Usage:   $0  urlwhenoffline  test|offline|online"
+   echo "Example: $0  offline.php  test"
+   echo "Example: $0  maintenance.php  test"
+   echo "Example: $0  https://myaccount.mydomain.com/offline.php  test       (old syntax)"
+   echo "Example: $0  https://myaccount.mydomain.com/maintenance.php  test   (old syntax)"
+   exit 1
+fi
+
+if [ "x$2" != "xtest" -a "x$2" != "xoffline" -a "x$2" != "xonline" ]; then
+   echo "Parameter 2 must be test|offline|online"
+   exit 2
+fi
+
 # possibility to change the ssl certificates name
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateCRT" == "x" ]]; then
@@ -21,20 +35,6 @@ if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
 export domainmyaccount=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-
-if [ "x$2" == "x" ]; then
-   echo "Usage:   $0  urlwhenoffline  test|offline|online"
-   echo "Example: $0  offline.php  test"
-   echo "Example: $0  maintenance.php  test"
-   echo "Example: $0  https://myaccount.mydomain.com/offline.php  test       (old syntax)"
-   echo "Example: $0  https://myaccount.mydomain.com/maintenance.php  test   (old syntax)"
-   exit 1
-fi
-
-if [ "x$2" != "xtest" -a "x$2" != "xoffline" -a "x$2" != "xonline" ]; then
-   echo "Parameter 2 must be test|offline|online"
-   exit 2
-fi
 
 export urlwhenoffline=$1
 if [[ $urlwhenoffline != http* ]]; then
