@@ -260,7 +260,9 @@ $title = $langs->trans("Registration").($tmpproduct->label?' ('.$tmpproduct->lab
 
 $prefix=dol_getprefix('');
 $cookieregistrationa='DOLREGISTERA_'.$prefix;
-if (empty($_COOKIE[$cookieregistrationa])) setcookie($cookieregistrationa, 1, 0, "/", null, false, true);	// Cookie to count nb of registration from this computer
+if (empty($_COOKIE[$cookieregistrationa])) {
+	setcookie($cookieregistrationa, 1, 0, "/", null, false, true);	// Cookie to count nb of registration from this computer
+}
 
 llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
