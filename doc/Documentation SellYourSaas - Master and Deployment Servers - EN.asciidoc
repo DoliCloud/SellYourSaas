@@ -831,6 +831,8 @@ archivedirpaid=/mnt/diskbackup/archives-paid
 
 # Set option to exclude some tables for some instances in backup
 #backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
+# Set option to use --compression-algorithms=zstd on mysqldump command (required with mysql 8.0.18+)
+#backupcompressionalgorithms=zstd
 # Can set the frequency of rsync
 #backuprsyncdayfrequency=1
 # Can set the frequency of sql dump
@@ -1947,7 +1949,9 @@ exclude_suffix := tmp old bak
 # define the nice value : from 0 to 19 (priority of the job)
 @@define NICE 18
 # = 1 to allow cron job, = 0 to suppress cron job
-@@define BATCH 1
+@@define 
+
+ 1
 # if set to 0, keep all archives, else define the number of days to keep
 # with the syntaxe nS , n for a number, S for the scale
 # (d for day, w for week, m for month, y for year)
@@ -3685,14 +3689,15 @@ You must have inside the cron of user *admin*:
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
+*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> anonymousbatch >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
 5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 ---------------
 
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. You will also set it into module *Scheduled jobs* on the Dolibarr master later.
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *batch* is the user dedicated for batch processing. You will set them
+later on the Dolibarr master.
 
 ==== On deployment servers
 
@@ -3830,7 +3835,8 @@ Connect to Dolibarr's master server's user interface (https://admin.mysaasdomain
 
 * Activate the module *SellYourSaas* and *Vendor*
 
-* Create a *Generic Dolibarr user account* called "Service account for Saas anonymous" that will be used to access Dolibarr data and functions when a customer is using the public customer interface. Give this user the permissions below and only the permission below:
+* Create a *Generic Dolibarr user account* with login *anonymous* called "SellYourSaas anonymous account" that will be used to access Dolibarr data and functions when a customer is using the public customer interface.
+Give this user the permissions below and only the permission below:
 
 ** Agenda Module 
 *** Read actions
@@ -3839,7 +3845,7 @@ Connect to Dolibarr's master server's user interface (https://admin.mysaasdomain
 *** Create actions for others
 ** Bank Module
 *** View financial accounts
-*** Create/modify amount/delete bank posting
+*** Create/modify amount/delete bank transactions
 ** Categories Module 
 *** View categories
 ** Contracts/Subscriptions
@@ -3847,32 +3853,55 @@ Connect to Dolibarr's master server's user interface (https://admin.mysaasdomain
 *** Create/modify contracts/subscriptions
 *** Activate a subscription
 *** Deactivate a subscription
-** DMS Module 
-*** Read/get documents
-*** Submit/delete a document
-** Invoices and credits Module
+** Invoices and credits notes Module
 *** View invoices
 ** Vendors Module
 *** View vendors
-** Taxes Module 
-*** View Taxes
-** Product Module 
-*** View products
 ** SellYourSaas Module 
 *** Read SellYourSaaS data
 ** Services Module 
 *** View services
 ** Third Parties Module
 *** View third parties related to user
-*** View contacts
 ** View Users and Groups Module 
 *** Create/modify one's own user data
+
+* Create a *Generic Dolibarr user account* with login *anonymousbatch* called "SellYourSaas batch account" that will be used for batch actions.
+Give this user the permissions below and only the permission below:
+
+** Agenda Module 
+*** Read actions
+*** Create/modify actions
+*** Read other's actions 
+*** Create actions for others
+** Bank Module
+*** View financial accounts
+*** Create/modify amount/delete bank transactions
+** Categories Module 
+*** View categories
+** Contracts/Subscriptions
+*** Read contracts/subscriptions
+*** Create/modify contracts/subscriptions
+*** Activate a subscription
+*** Deactivate a subscription
+** Invoices and credits notes Module
+*** View invoices
+*** Create/modify invoices
+*** Make payments on invoices
+** Vendors Module
+*** View vendors
+** SellYourSaas Module 
+*** Read SellYourSaaS data
+** Services Module 
+*** View services
+** Third Parties Module
+*** View third parties related to user
 
 * Create a *Product tag* called "SaaS products"
 
 * Create a *Third-party tag* called "SaaS customers" and "Saas resellers"
 
-* Setup the module *SellYoursSaas*, at least the mandatory fields:
+* Setup the module *SellYoursSaas*, at least the following mandatory fields:
 
 ** Name of Saas service
 ** Name of main domain
@@ -3902,8 +3931,9 @@ Note: The *Options* and *Metrics* type services must be linked to an *Applicatio
 
 Note: The URL to deploy *Applications* type packages can be viewed in the *SellYourSaas - Deployment URL* menu
 
-
-* Go to the configuration of the *Scheduled jobs* module and retrieve the instruction to add in the cron of the user *admin*. Check if not add this instruction so that the Sell-Your-Saas batches can run.
+* Go to the configuration of the *Scheduled jobs* module and retrieve the instruction to add in the cron of the user *admin* and check 
+it has been added into the cron so the Sell-Your-Saas batches can run.
+The value for <securitykeydefinedinscheduledjobsetup> must match into the setup of the module and into the cron command line.
 
 
 <<<<
@@ -3983,7 +4013,6 @@ instances:
 ---------------
 
 
-
 * Copy the datadog config file to supervize *process*.
 
 [source,bash]
@@ -4040,7 +4069,13 @@ instances:
     search_string: ['apache_watchdog_daemon3']
     exact_match: False
     thresholds:
-      critical: [1, 5000]      
+      critical: [1, 5000]
+
+  - name: smtp_watchdog_daemon1
+    search_string: ['smtp_watchdog_daemon1']
+    exact_match: False
+    thresholds:
+      critical: [1, 5000]       
 ---------------
 
 
@@ -4894,7 +4929,7 @@ lsof -p PID_of_ps_grep_mysqld
 to see files and DBs treated in relog. They are open either by date of the inodes or by alphabetical order in the dbn folder... (do it several times to determine which)
 
 
-=== Check that batch of user instances are executed.
+=== Check that batches of user instances are executed.
 
 All cron files are stored into */var/spool/cron/crontabs*. When an instnace is suspended, the cron file is moved into */var/spool/cron/crontabs.disabled*
 

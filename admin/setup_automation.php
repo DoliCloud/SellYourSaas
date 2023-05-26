@@ -222,12 +222,14 @@ print '<td><span class="opacitymedium small">120</span></td>';
 print '</tr>';
 
 // For Website deployment automation
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT").'</td>';
-print '<td>';
-print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT");
-print '</td>';
-print '<td><span class="opacitymedium small"></span></td>';
-print '</tr>';
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT").'</td>';
+	print '<td>';
+	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT");
+	print '</td>';
+	print '<td><span class="opacitymedium small"></span></td>';
+	print '</tr>';
+}
 
 print '</table>';
 print '</div>';

@@ -1260,7 +1260,7 @@ class ActionsSellyoursaas
 		$this->results['head'] = $head;
 
 		$arrayoftypes = array(
-			'packages' => array('label' => 'Packages', 'ObjectClassName' => 'Packages', 'enabled' => $conf->sellyoursaas->enabled, 'ClassPath' => "/sellyoursaas/class/packages.class.php", 'langs'=>'sellyousaas@sellyoursaas')
+			'packages' => array('label' => 'Packages', 'picto'=>'label', 'ObjectClassName' => 'Packages', 'enabled' => $conf->sellyoursaas->enabled, 'ClassPath' => "/sellyoursaas/class/packages.class.php", 'langs'=>'sellyousaas@sellyoursaas')
 		);
 		$this->results['arrayoftype'] = $arrayoftypes;
 

@@ -95,8 +95,10 @@ if ($resqlproducts) {
 
 			$pricetoshow = price2num($priceinstance['fix'], 'MT');
 			if (empty($pricetoshow)) $pricetoshow = 0;
-			$arrayofplans[$obj->rowid]=$label.' ('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
+			$arrayofplans[$obj->rowid] = $label;
 
+			// Set $priceforlabel
+			$priceforlabel = '('.price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 			$tmpduration = '';
 			if ($tmpprod->duration) {
 				if ($tmpprod->duration == '1m') {
@@ -112,15 +114,22 @@ if ($resqlproducts) {
 				}
 			}
 
-			if ($tmpprod->duration) $arrayofplans[$obj->rowid].=$tmpduration;
-			if ($priceinstance['user']) {
-				$arrayofplans[$obj->rowid].=' + '.price(price2num($priceinstance['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
-				if ($tmpprod->duration) $arrayofplans[$obj->rowid].=$tmpduration;
+			if ($tmpprod->duration) {
+				$priceforlabel .= $tmpduration;
 			}
-			$arrayofplans[$obj->rowid].=')';
+			if ($priceinstance['user']) {
+				$priceforlabel .= ' + '.price(price2num($priceinstance['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
+				if ($tmpprod->duration) {
+					$priceforlabel .= $tmpduration;
+				}
+			}
+			$priceforlabel .= ')';
+
+			$arrayofplans[$obj->rowid] .= ' '.$priceforlabel;
 
 			$arrayofplansfull[$obj->rowid]['id'] = $obj->rowid;
 			$arrayofplansfull[$obj->rowid]['label'] = $arrayofplans[$obj->rowid];
+			$arrayofplansfull[$obj->rowid]['data-html'] = $label.' <span class="opacitymedium">'.$priceforlabel.'</span>';
 			$arrayofplansfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
 		}
 		$i++;
@@ -1446,8 +1455,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		print '<div class="group">';
 
 		print '<div class="horizontal-fld centpercent marginbottomonly">';
+		print '<!-- selection of plan -->'."\n";
 		print '<strong>'.$langs->trans("YourSubscriptionPlan").'</strong> ';
-		print $form->selectarray('service', $arrayofplans, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
+		print $form->selectarray('service', $arrayofplansfull, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
 		print '<br>';
 		print '</div>';
 		//print ajax_combobox('service');
