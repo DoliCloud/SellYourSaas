@@ -815,4 +815,5 @@ InvoicePaymentDisputed=Invoice payment disputed
 InvoicePaymentDisputedDesc=As soon as an invoice has been flagged to have a disputed payment, a message asking the customer to contact you is visible into its customer dashboard
 InvoicePaymentDisputedMessage=The owner of the payment mode used to pay the invoice %s, created the %s has open a disputed with his bank to decline the payment. For this reason, your instance may have been suspended after the bank has contacted us, or may be suspended soon. Please contact us from the support menu to remove this alert and fix the situation.
 RuleForPassword=Password must contain at least %s characters, including UPPER/lowercase and numbers
+SepaSentToBank=SEPA direct debit sent to the bank
 SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT=Product to deploy when deploying a website of the Dolibarr CMS 

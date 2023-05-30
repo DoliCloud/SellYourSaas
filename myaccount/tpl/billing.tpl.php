@@ -185,6 +185,19 @@ if (count($listofcontractid) > 0) {
 					$s = $invoice->getLibStatut(2, $alreadypayed + $amount_credit_notes_included);
 					$s = preg_replace('/'.$langs->transnoentitiesnoconv("BillStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
 					$s = preg_replace('/'.$langs->transnoentitiesnoconv("BillShortStatusPaidBackOrConverted").'/', $langs->trans("Refunded"), $s);
+					// Test if there is a direct debit order linked to invoice
+					$sql = "SELECT dp.rowid, pb.rowid  FROM ".MAIN_DB_PREFIX."prelevement_demande as dp";
+					$sql .= " JOIN ".MAIN_DB_PREFIX."prelevement_bons as pb ON pb.rowid = dp.fk_prelevement_bons";
+					$sql .= " WHERE dp.fk_facture = ".((int) $invoice->id)." AND dp.date_traite IS NOT NULL";
+					$sql .= " AND pb.statut = 1 AND pb.date_credit IS NULL";
+					$resql = $db->query($sql);
+					if ($resql) {
+						$num_rows = $db->num_rows($resql);
+						if ($num_rows >= 1) {
+							$s = preg_replace('/'.$langs->transnoentitiesnoconv("BillStatusNotPaid").'/', $langs->trans("StatusTrans"), $s);
+							$s = preg_replace('/'.$langs->trans("BillShortStatusNotPaid").'/', $langs->trans("SepaSentToBank"), $s);
+						}
+					}
 					print $s;
 					// TODO Add details of payments
 					//$htmltext = 'Soon here: Details of payment...';
