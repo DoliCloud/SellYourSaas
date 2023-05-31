@@ -413,7 +413,7 @@ if (! $error) {
 				}
 			}
 		}
-		if (! $error) {
+		if (! $error && !$thirdpartyhadalreadyapaymentmode) {
 			$comment = 'Services for '.$contract->ref.' after the creation of a first payment method';
 			$sellyoursaasutils = new SellYourSaasUtils($db);
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction('actionafterpaid', $contract, 'admin', '', '', 0, $comment);
