@@ -1336,6 +1336,20 @@ if (! $error && $productref != 'none') {
 	}
 }
 
+// Trigger actionafterpaid if deployment is Ok and thirdparty had already a payment mode
+if (! $error) {
+	$thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($tmpthirdparty->id);// Check if customer has already a payment mode or not
+	if ($thirdpartyhadalreadyapaymentmode > 0) {
+		$comment = 'Services for '.$contract->ref.' after the creation of new instance with a payment mode already given';
+		$sellyoursaasutils = new SellYourSaasUtils($db);
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction('actionafterpaid', $contract, 'admin', '', '', 0, $comment);
+		if ($result <= 0) {
+			$error++;
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+		}
+	}
+}
+
 // End of deployment is now OK / Complete
 if (! $error && $productref != 'none') {
 	$contract->array_options['options_deployment_status'] = 'done';

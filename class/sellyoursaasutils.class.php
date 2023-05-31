@@ -3589,7 +3589,7 @@ class SellYourSaasUtils
 					}
 				}
 
-				if (! $error && in_array($remoteaction, array('deploy','deployall','deployoption', 'afterpaid'))) {
+				if (! $error && in_array($remoteaction, array('deploy','deployall','deployoption', 'actionafterpaid'))) {
 					// Execute personalized SQL requests (sqlafter), (sqlafterpaid)
 					if (! $error) {
 						dol_syslog("Try to connect to customer instance database to execute personalized requests");
@@ -3617,7 +3617,7 @@ class SellYourSaasUtils
 
 							$sqltoexecute = make_substitutions($tmppackage->sqlafter, $substitarrayforsql);
 
-							if ($remoteaction == 'afterpaid') {
+							if ($remoteaction == 'actionafterpaid') {
 								$sqltoexecute = make_substitutions($tmppackage->sqlafterpaid, $substitarrayforsql);
 							}
 
