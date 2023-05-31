@@ -3278,7 +3278,7 @@ class SellYourSaasUtils
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite')) &&
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'actionafterpaid')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 					$doremoteaction = 1;
 			}
@@ -3469,10 +3469,12 @@ class SellYourSaasUtils
 				$tmppackage->srcconffile1 = $dirfortmpfiles.'/conf.php.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccronfile  = $dirfortmpfiles.'/cron.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccliafter  = $dirfortmpfiles.'/cliafter.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
+				$tmppackage->srccliafterpaid  = $dirfortmpfiles.'/cliafterpaid.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 
 				$conffile = make_substitutions($tmppackage->conffile1, $substitarray);
 				$cronfile = make_substitutions($tmppackage->crontoadd, $substitarray);
 				$cliafter = make_substitutions($tmppackage->cliafter, $substitarray);
+				$cliafterpaid = make_substitutions($tmppackage->cliafterpaid, $substitarray);
 
 				$tmppackage->targetconffile1 = make_substitutions($tmppackage->targetconffile1, $substitarray);
 				$tmppackage->datafile1 = make_substitutions($tmppackage->datafile1, $substitarray);
@@ -3524,6 +3526,15 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("No cli file to create or no content");
 					}
+
+					if ($tmppackage->cliafterpaid && $cliafterpaid) {
+						dol_syslog("Create cli file ".$tmppackage->srccliafter);
+						dol_delete_file($tmppackage->srccliafterpaid, 0, 1, 0, null, false, 0);
+						$result = file_put_contents($tmppackage->srccliafterpaid, str_replace("\r", '', $cliafterpaid));
+						@chmod($tmppackage->srccliafterpaid, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
+					} else {
+						dol_syslog("No cli after paid file to create or no content");
+					}
 				}
 				// Parameters for remote action
 				$commandurl = $generatedunixlogin.'&'.$generatedunixpassword.'&'.$sldAndSubdomain.'&'.$domainname;
@@ -3559,6 +3570,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $lastversiondolibarrinstance); //Param 45 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $domainnamewebsite); //Param 46 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $websitenamedeploy); //Param 47 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srccliafterpaid); //Param 48 in .sh src for cli after paid
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 
@@ -3577,8 +3589,8 @@ class SellYourSaasUtils
 					}
 				}
 
-				if (! $error && in_array($remoteaction, array('deploy','deployall','deployoption'))) {
-					// Execute personalized SQL requests (sqlafter)
+				if (! $error && in_array($remoteaction, array('deploy','deployall','deployoption', 'afterpaid'))) {
+					// Execute personalized SQL requests (sqlafter), (sqlafterpaid)
 					if (! $error) {
 						dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
@@ -3604,6 +3616,10 @@ class SellYourSaasUtils
 							dol_syslog("newsubstitarray=".join(',', $substitarrayforsql));
 
 							$sqltoexecute = make_substitutions($tmppackage->sqlafter, $substitarrayforsql);
+
+							if ($remoteaction == 'afterpaid') {
+								$sqltoexecute = make_substitutions($tmppackage->sqlafterpaid, $substitarrayforsql);
+							}
 
 							$arrayofsql=explode(';', $sqltoexecute);
 							foreach ($arrayofsql as $sqltoexecuteline) {
