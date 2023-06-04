@@ -80,7 +80,9 @@ foreach ($tmpservicessub as $key => $tmpservicesub) {
 $arrayofsuffixfound = array();
 foreach ($tmpservices as $key => $tmpservice) {
 	$suffix = '';
-	if ($key != '0') $suffix='_'.strtoupper(str_replace('.', '_', $tmpservice));
+	if ($key != '0') {
+		$suffix = '_'.strtoupper(str_replace('.', '_', $tmpservice));
+	}
 
 	if (in_array($suffix, $arrayofsuffixfound)) continue;
 	$arrayofsuffixfound[$tmpservice] = $suffix;

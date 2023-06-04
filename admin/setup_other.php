@@ -300,7 +300,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	$constname = 'SELLYOURSAAS_LOGO_MINI'.$suffix;
 	print '<!-- constname = '.$constname.' -->';
 	if (! empty($conf->global->$constname)) {
-		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.$suffix.'">'.img_delete($langs->trans("Delete")).'</a>';
+		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname)) {
 			print ' &nbsp; ';
 			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constname).'">';
@@ -319,7 +319,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '</td><td class="nocellnopadd" valign="middle">';
 	$constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
 	if (! empty($conf->global->$constname)) {
-		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.$suffix.'">'.img_delete($langs->trans("Delete")).'</a>';
+		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname)) {
 			print ' &nbsp; ';
 			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constname).'">';

@@ -103,9 +103,9 @@ $defaultproduct = '';
 if (empty($productid) && empty($productref)) {
 	$productref = $plan;
 	if (empty($productref)) {
-		$suffix='_'.strtoupper(str_replace('.', '_', $domainname));
-		$constname="SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
-		$defaultproduct=(empty($conf->global->$constname) ? $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT : $conf->global->$constname);
+		$suffix = '_'.strtoupper(str_replace('.', '_', $domainname));
+		$constname = "SELLYOURSAAS_DEFAULT_PRODUCT".$suffix;
+		$defaultproduct = (empty($conf->global->$constname) ? $conf->global->SELLYOURSAAS_DEFAULT_PRODUCT : $conf->global->$constname);
 
 		// Take first plan found
 		$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pa.restrict_domains';
