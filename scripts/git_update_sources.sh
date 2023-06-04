@@ -74,7 +74,7 @@ do
 		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -delete
 		
 	    if [ -s build/generate_filelist_xml.php ]; then
-	        echo "Found generate_filelist_xml.php"
+	        echo "Found generate_filelist_xml.php from ".`pwd`
 	        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
 	    fi
 	
