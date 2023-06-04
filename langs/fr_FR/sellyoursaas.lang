@@ -55,6 +55,7 @@ BenefitDoliCloud=Bénéfice (instances payantes - frais - commissions partenaire
 ActivePaymentError=Paiment en erreur mais instance active
 DisabledPaymentError=Paiment en erreur et instance désactivée
 PayedMode=Mode payant
+ConfirmedMode=Mode confirmé
 TrialMode=Mode gratuit
 Trial=Période essai gratuite
 TrialUntil=Période de test gratuit jusqu'au %s

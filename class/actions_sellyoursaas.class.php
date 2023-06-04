@@ -794,7 +794,13 @@ class ActionsSellyoursaas
 					}
 					// Show payment status
 					if ($ispaid) {
-						$ret .= '<span class="badge badge-status4 badge-status valignmiddle inline-block">'.$langs->trans("PayedMode").'</span>';
+						$ret .= '<span class="badge badge-status4 badge-status valignmiddle inline-block">';
+						if (getDolGlobalString("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+							$ret .= $langs->trans("PayedOrConfirmedMode");
+						} else {
+							$ret .= $langs->trans("PayedMode");
+						}
+						$ret .= '</span>';
 						// nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
 						if (! $object->nbofservicesclosed) {
 							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND');

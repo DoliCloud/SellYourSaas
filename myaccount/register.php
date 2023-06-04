@@ -736,6 +736,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				<label for="checkboxnonprofitorga" class="valignmiddle small inline"><?php
 					echo $langs->trans("ConfirmNonProfitOrga", $sellyoursaasname);
 					echo '. ';
+					// Show the link for commecial service if there is a commercial alternative service
 				if (getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL')) {
 					echo $langs->trans("ConfirmNonProfitOrgaBis", getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'), getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'));
 				}
