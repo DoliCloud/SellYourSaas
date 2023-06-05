@@ -223,14 +223,16 @@ if ($resqloptions) {
 			}
 
 			$arrayofoptionsfull[$obj->rowid]['id'] = $obj->rowid;
-			$arrayofoptionsfull[$obj->rowid]['label'] = $arrayofoptions[$obj->rowid];
+			$arrayofoptionsfull[$obj->rowid]['label'] = $label;
 			$arrayofoptionsfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
 			$arrayofoptionsfull[$obj->rowid]['product'] = $tmpprod;
 			$arrayofoptionsfull[$obj->rowid]['labelprice'] =($pricetoshow ? $labelprice : '');
 		}
 		$i++;
 	}
-} else dol_print_error($db);
+} else {
+	dol_print_error($db);
+}
 
 
 

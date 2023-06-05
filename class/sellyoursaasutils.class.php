@@ -1600,7 +1600,7 @@ class SellYourSaasUtils
 					$error++;
 					$errorforinvoice++;
 					dol_syslog('Error '.$e->getMessage(), LOG_ERR);
-					$this->errors[]='Error '.$e->getMessage();
+					$this->errors[] = 'Error '.$e->getMessage();
 				}
 			} else {	// If remain to pay is null
 				$error++;
@@ -1961,8 +1961,8 @@ class SellYourSaasUtils
 
 								$error++;
 								$errorforlocaltransaction++;
-								$this->error=$this->error;
-								$this->errors=$this->errors;
+								$this->error = $this->error;
+								$this->errors = $this->errors;
 							} else {
 								$contractprocessed[$object->id]=$object->ref;
 							}
@@ -2154,12 +2154,12 @@ class SellYourSaasUtils
 							}
 
 							if ($result <= 0) {
-								$contracterror[$object->id]=$object->ref;
+								$contracterror[$object->id] = $object->ref;
 
 								$error++;
 								$errorforlocaltransaction++;
-								$this->error=$this->error;
-								$this->errors=$this->errors;
+								$this->error = $this->error;
+								$this->errors = $this->errors;
 							} else {
 								$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
 								$sqlupdate.= ' WHERE fk_contrat = '.((int) $object->id);
@@ -2965,8 +2965,8 @@ class SellYourSaasUtils
 						$conf->global->noapachereload = null;    // unset a global variable that can be read later
 						if ($result <= 0) {
 							$error++;
-							$this->error=$this->error;
-							$this->errors=$this->errors;
+							$this->error = $this->error;
+							$this->errors = $this->errors;
 						}
 						//$object->array_options['options_deployment_status'] = 'suspended';
 
@@ -2984,7 +2984,7 @@ class SellYourSaasUtils
 							$conf->global->noapachereload = null;    // unset a global variable that can be read later by trigger
 							if ($result <= 0) {
 								$error++;
-								$this->error=$object->error;
+								$this->error = $object->error;
 								$this->errors = array_merge((array) $this->errors, (array) $object->errors);
 							}
 						}
@@ -3258,7 +3258,7 @@ class SellYourSaasUtils
 									$stream = fopen($filecert, 'w');
 									if ($stream === false) {
 										$error++;
-										$this->errors[] =$langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile");
+										$this->errors[] = $langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile");
 									} else {
 										$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 										// Add public keys
@@ -3282,7 +3282,7 @@ class SellYourSaasUtils
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
-								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
+								$this->errors[] = 'Failed to connect to ssh2_sftp to '.$server;
 								$error++;
 							} else {
 								// Check if install.lock exists
@@ -3304,7 +3304,7 @@ class SellYourSaasUtils
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
-								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
+								$this->errors[] = 'Failed to connect to ssh2_sftp to '.$server;
 								$error++;
 							} else {
 								// Check if install.lock exists
@@ -3320,7 +3320,7 @@ class SellYourSaasUtils
 									$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
 								} else {
 									$error++;
-									$this->errors[]=$langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
+									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
 								}
 
 								$object->array_options['options_filelock']=(empty($fstat['atime'])?'':$fstat['atime']);
@@ -3333,7 +3333,7 @@ class SellYourSaasUtils
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
-								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
+								$this->errors[] = 'Failed to connect to ssh2_sftp to '.$server;
 								$error++;
 							} else {
 								// Check if install.lock exists
@@ -3355,7 +3355,7 @@ class SellYourSaasUtils
 							$sftp = ssh2_sftp($connection);
 							if (! $sftp) {
 								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
-								$this->errors[]='Failed to connect to ssh2_sftp to '.$server;
+								$this->errors[] = 'Failed to connect to ssh2_sftp to '.$server;
 								$error++;
 							} else {
 								// Check if install.lock exists
@@ -3371,7 +3371,7 @@ class SellYourSaasUtils
 									$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
 								} else {
 									$error++;
-									$this->errors[]=$langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
+									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
 								}
 
 								$object->array_options['options_fileinstallmoduleslock']=(empty($fstat['atime'])?'':$fstat['atime']);
@@ -3396,12 +3396,12 @@ class SellYourSaasUtils
 					}
 				} else {
 					dol_syslog('Failed to connect with ssh2_connect to server '.$server.', server_port '.$server_port, LOG_ERR);
-					$this->errors[]='Failed to connect with ssh2_connect to '.$server.', server_port '.$server_port;
+					$this->errors[] = 'Failed to connect with ssh2_connect to '.$server.', server_port '.$server_port;
 					$error++;
 					$errorforsshconnect++;
 				}
 			} else {
-				$this->errors[]='ssh2_connect not supported by this PHP';
+				$this->errors[] = 'ssh2_connect not supported by this PHP';
 				$error++;
 			}
 		}
@@ -3760,7 +3760,7 @@ class SellYourSaasUtils
 						if (! $dbinstance || ! $dbinstance->connected) {
 							$error++;
 							$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
-							$this->errors = $dbinstance->errors;
+							$this->errors[] = $this->error;
 						} else {
 							$substitarrayforsql = array();
 							foreach ($substitarray as $key => $val) {
@@ -3939,7 +3939,7 @@ class SellYourSaasUtils
 
 							if (! $dbinstance || ! $dbinstance->connected) {
 								$this->error = $dbinstance->error.' ('.$serverdb.'@'.$generateddbhostname.'/'.$generateddbname.')';
-								$this->errors = $dbinstance->errors;
+								$this->errors[] = $this->error;
 							}
 						} else {
 							dol_syslog("Do no try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation, because we already failed previously to connect with ssh", LOG_WARNING);
@@ -4006,7 +4006,7 @@ class SellYourSaasUtils
 							} else {
 								$error++;
 								$this->error = $dbinstance->lasterror();
-								$this->errors[] = $dbinstance->lasterror();
+								$this->errors[] = $this->error;
 							}
 
 							$dbinstance->close();
@@ -4370,16 +4370,16 @@ class SellYourSaasUtils
 			//print 'Found domain at position '.$found;
 			if (! $found) {
 				dol_syslog("Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES, LOG_WARNING);
-				$this->error="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
-				$this->errors[]="Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
+				$this->error = "Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
+				$this->errors[] = "Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
 				$error++;
 			} else {
 				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
 				$REMOTEIPTODEPLOYTO=$tmparray[($found-1)];
 				if (! $REMOTEIPTODEPLOYTO) {
 					dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP, LOG_WARNING);
-					$this->error="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
-					$this->errors[]="Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
+					$this->error = "Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
+					$this->errors[] = "Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
 					$error++;
 				}
 			}
@@ -4395,8 +4395,8 @@ class SellYourSaasUtils
 				$error++;
 			} elseif ($res == 0 ) {
 				dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
-				$this->error="Failed to find server domain '".$domainname."' into database";
-				$this->errors[]="Failed to find server domain '".$domainname."' into database";
+				$this->error = "Failed to find server domain '".$domainname."' into database";
+				$this->errors[] = "Failed to find server domain '".$domainname."' into database";
 				$error++;
 			}
 
