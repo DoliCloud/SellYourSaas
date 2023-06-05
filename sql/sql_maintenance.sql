@@ -33,3 +33,47 @@ select concat("update mysql.user set password = '", u.password, "' where host = 
 
 -- Other
 See also the documentation *Documentation SellYourSaas - Master and Deployment Servers*
+
+
+
+-- List on recuring invoice line and contract invoice line with amount of 9 euros and qty of 1 or 2 for some languages for product 162
+drop table tmp_tmp;
+create table tmp_tmp AS SELECT
+	DISTINCT fr.rowid as frid, s.rowid as sid,
+	fdr.rowid as fdrid, fdr.qty as fdrqty, fdr.subprice as fdrsubprice,
+	c.rowid as cid, cd.rowid as cdid, cd.qty as cdqty, cd.subprice as cdsubprice,
+	s.email,
+	s.nom as lastname,
+	'' as firstname
+FROM
+	llx_societe as s
+INNER JOIN llx_facture_rec as fr on
+	fr.fk_soc = s.rowid
+	and fr.suspended = 0
+INNER JOIN llx_facturedet_rec as fdr on
+	fdr.fk_facture = fr.rowid
+INNER JOIN llx_contrat as c on
+	c.fk_soc = s.rowid
+INNER JOIN llx_contrat_extrafields as ce on
+	ce.fk_object = c.rowid AND ce.deployment_status = 'done'
+INNER JOIN llx_contratdet as cd on
+	cd.fk_contrat = c.rowid
+INNER JOIN llx_element_element as ee on
+    ee.sourcetype = 'contrat' and ee.targettype = 'facturerec' and ee.fk_source = c.rowid and ee.fk_target = fr.rowid
+WHERE
+	email IS NOT NULL
+	AND email <> ''
+	AND (default_lang IN ('fr_FR', 'fr_BE', 'fr_CM', 'fr_CA', 'fr_CI', 'fr_GA', 'fr_NC', 'fr_CH'))
+	AND fdr.qty IN (1, 2)
+	AND fdr.fk_product = 162
+	AND (fdr.remise_percent IS NULL
+		or fdr.remise_percent = 0)
+	AND fdr.subprice = 9
+	AND cd.qty IN (1, 2)
+	AND cd.fk_product = 162
+	AND (cd.remise_percent IS NULL
+		or cd.remise_percent = 0)
+	AND cd.subprice = 9
+ORDER BY
+	frid
+	
