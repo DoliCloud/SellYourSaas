@@ -586,8 +586,22 @@ if ($action == 'updateurl') {
 		if (! $error) {
 			$result = $contract->fetch(GETPOST('contractid', 'int'));
 			if ($result > 0) {
+				$savlistofcontractid = $listofcontractid;
+
+				// Set a list of contract id but with the contract validated only to call the action_create_recinvoice_after_payment_creation
+				$listofcontractid = array();
+				$listofcontractid[] = $contract;
+
+				// TODO LMR Replace this part of code with the generic one
+				// include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
+
 				dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
 
+				if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+					dol_syslog("--- This contract is a redirection, we discard this contract", LOG_DEBUG, 0);
+					setEventMessages("This contract is a redirection", 'errors');
+					$error++;
+				}
 				if ($contract->array_options['options_deployment_status'] != 'done') {
 					dol_syslog("--- Deployment status is not 'done', we discard this contract", LOG_DEBUG, 0);
 					setEventMessages("Deployment status is not 'done'", 'errors');
@@ -901,6 +915,9 @@ if ($action == 'updateurl') {
 						}
 					}
 				}
+
+				// End of code to create the recurring invoice, we restore $listofcontractid with list of all contract of the thirdparty
+				$listofcontractid = $savlistofcontractid;
 			} else {
 				$error++;
 			}

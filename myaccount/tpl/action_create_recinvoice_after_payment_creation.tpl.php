@@ -33,7 +33,7 @@ if (!is_object($sellyoursaasutils)) {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 }
 
-// Create a recurring invoice (+real invoice + contract renewal) if there is no recurring invoice yet
+// Create a recurring invoice (+real invoice + contract renewal) for all contracts of the customer, if there is no recurring invoice yet
 if (! $error) {
 	foreach ($listofcontractid as $contract) {
 		dol_syslog("--- Create recurring invoice on contract contract_id = ".$contract->id." if it does not have yet.", LOG_DEBUG, 0);
