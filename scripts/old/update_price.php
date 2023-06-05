@@ -250,12 +250,12 @@ if ($resql) {
 				}
 
 				// We process the contract
-				print "Update contract = ".$obj->cid."\n";
+				/*print "Update contract = ".$obj->cid."\n";
 				$tmpcontract = new Contrat($db);
 				$result = $tmpcontract->fetch($obj->cid);
 				if ($result) {
 					$tmpcontract->update_price();
-				}
+				}*/
 			}
 			$i++;
 		}
