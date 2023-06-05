@@ -49,13 +49,13 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 
 		// Test with hash
 		if (GETPOST('login_hash', 'alpha', 1)) {
-			$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$usertotest.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one day
+			$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH').$usertotest.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one day
 			//var_dump(GETPOST('login_hash', 'alpha', 1));
 			//var_dump($dol_login_hash);exit;
 
 			if (GETPOST('login_hash', 'alpha', 1) == $dol_login_hash) {
 				$tmpuser = new User($db);
-				$tmpuser->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+				$tmpuser->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 				if ($tmpuser->login) {
 					// Login is ok
 					$_SESSION["dol_loginsellyoursaas"] = $thirdparty->id;

@@ -219,7 +219,7 @@ foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 	if ($companypaymentmodetemp->type == 'card') {
 		$foundcard++;
 		print '<hr>';
-		print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
+		print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->card_type, 'marginrightonlyimp');
 		print '<span class="opacitymedium">'.$langs->trans("CurrentCreditOrDebitCard").'</span></div>';
 		print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
 		print '....'.$companypaymentmodetemp->last_four;
@@ -235,7 +235,7 @@ foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 }
 if ($foundcard) {
 	print '<hr>';
-	print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->type_card, 'marginrightonlyimp');
+	print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->card_type, 'marginrightonlyimp');
 	print '<span class="opacitymedium">'.$langs->trans("NewCreditOrDebitCard").'</span></div>';
 }
 
