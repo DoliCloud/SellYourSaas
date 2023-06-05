@@ -76,4 +76,8 @@ WHERE
 	AND cd.subprice = 9
 ORDER BY
 	frid
-	
+
+
+UPDATE llx_facturedet_rec SET subprice = 12, total_ht = 12 * qty where subprice = 12 AND qty IN (1,2) AND rowid IN (SELECT fdrid from tmp_tmp);
+
+UPDATE llx_contratdet SET subprice = 12, total_ht = 12 * qty where subprice = 12 AND qty IN (1,2) AND rowid IN (SELECT cdid from tmp_tmp);
