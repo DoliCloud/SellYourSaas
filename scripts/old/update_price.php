@@ -246,7 +246,7 @@ if ($resql) {
 				$tmpinvoicerec = new FactureRec($db);
 				$result = $tmpinvoicerec->fetch($obj->frid);
 				if ($result) {
-					$tmpinvoicerec->update_total();
+					$tmpinvoicerec->update_price();
 				}
 
 				// We process the contract
@@ -254,7 +254,7 @@ if ($resql) {
 				$tmpcontract = new Contrat($db);
 				$result = $tmpcontract->fetch($obj->cid);
 				if ($result) {
-					$tmpcontract->update_total();
+					$tmpcontract->update_price();
 				}
 			}
 			$i++;
