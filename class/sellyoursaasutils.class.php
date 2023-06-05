@@ -912,7 +912,10 @@ class SellYourSaasUtils
 						$result = $invoice->fetch($obj->rowid);
 						if ($result > 0) {
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
-								$user->rights->facture->creer = 1;		// Force permission to user to validate invoices because code may be executed by anonymous user
+								$user->rights->facture->creer = 1;	// Force permission to user to validate invoices because code may be executed by anonymous user
+								if (empty($user->rights->facture->invoice_advance)) {
+									$user->rights->facture->invoice_advance = new stdClass();
+								}
 								$user->rights->facture->invoice_advance->validate = 1;
 
 								if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {

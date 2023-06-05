@@ -351,11 +351,13 @@ if (! $error) {
 				dol_syslog("--- A template invoice was generated with id ".$invoicerecid.", now we run createRecurringInvoices to build real invoice", LOG_DEBUG, 0);
 				$facturerec = new FactureRec($db);
 
-				$savperm1 = $user->rights->facture->creer;
-				$savperm2 = $user->rights->facture->invoice_advance->validate;
+				$savperm1 = $user->hasRight('facture', 'creer');
+				$savperm2 = $user->hasRight('facture', 'invoice_advance', 'validate');
 
-				$user->rights->facture->creer = 1;
-				if (empty($user->rights->facture->invoice_advance)) $user->rights->facture->invoice_advance=new stdClass();
+				$user->rights->facture->creer = 1;	// Force permission to user to validate invoices because code may be executed by anonymous user
+				if (empty($user->rights->facture->invoice_advance)) {
+					$user->rights->facture->invoice_advance = new stdClass();
+				}
 				$user->rights->facture->invoice_advance->validate = 1;
 
 				$result = $facturerec->createRecurringInvoices($invoicerecid, 1);		// Generate real invoice from pending recurring invoices

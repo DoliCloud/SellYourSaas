@@ -277,7 +277,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '</tr>';
 				print '<tr>';
 				print '<td>';
-				print '....'.$companypaymentmodetemp->last_four;
+				print '....'.dol_escape_htmltag($companypaymentmodetemp->last_four);
 				print '</td>';
 				print '<td></td>';
 				print '<td>';
@@ -300,7 +300,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 					print '<tr><td>';
 					print 'Stripe customer: '.$customer->id;
 					print '</td><td colspan="2">';
-					print 'Stripe card: '.$companypaymentmodetemp->stripe_card_ref;
+					print 'Stripe card: '.dol_escape_htmltag($companypaymentmodetemp->stripe_card_ref);
 					print '</td></tr>';
 				}
 			} elseif ($companypaymentmodetemp->type == 'paypal') {
@@ -313,7 +313,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '</tr>';
 				print '<tr>';
 				print '<td>';
-				print $companypaymentmodetemp->email;
+				print dol_escape_htmltag($companypaymentmodetemp->email);
 				print '<br>Preaproval key: '.$companypaymentmodetemp->preapproval_key;
 				print '</td>';
 				print '<td>';
@@ -341,10 +341,10 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 			} else {
 				print '<tr>';
 				print '<td>';
-				print $companypaymentmodetemp->type;
+				print dol_escape_htmltag($companypaymentmodetemp->type);
 				print '</td>';
 				print '<td>';
-				print $companypaymentmodetemp->label;
+				print dol_escape_htmltag($companypaymentmodetemp->label);
 				print '</td>';
 				print '<td>';
 				print '</td>';
@@ -357,8 +357,8 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 		print '</table>';
 	} else {
 		print '<span class="opacitymedium">'.$langs->trans("NoPaymentMethodOnFile").'</span>';
-		if ($nbofinstancessuspended || $ispaid || $atleastonecontractwithtrialended) {
-			print ' '.img_warning();
+		if (!empty($nbofinstancessuspended) || !empty($ispaid) || !empty($atleastonecontractwithtrialended)) {
+			print ' '.img_warning($langs->trans("NoPaymentMethodOnFile"));
 		}
 	}
 
