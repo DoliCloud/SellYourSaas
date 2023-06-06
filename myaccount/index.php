@@ -2159,11 +2159,11 @@ if ($welcomecid > 0) {
 	var_dump($mythirdpartyaccount);*/
 	$contract=new Contrat($db);
 	$contract->fetch($welcomecid);
-	$listofcontractid[$welcomecid]=$contract;
+	$listofcontractid[$welcomecid] = $contract;
 	// Add a protection to avoid to see dashboard of others by changing welcomecid.
 	if (($mythirdpartyaccount->isareseller == 0 && $contract->fk_soc != $_SESSION['dol_loginsellyoursaas'])           // Not reseller, and contract is for another thirdparty
 	|| ($mythirdpartyaccount->isareseller == 1 && array_key_exists($contract->fk_soc, $listofcustomeridreseller))) { // Is a reseller and contract is for a company that is a customer of reseller
-		dol_print_error_email('DEPLOY-WELCOMEID'.$welcomecid, 'Bad value for welcomeid', null, 'alert alert-error');
+		dol_print_error_email('DEPLOY-WELCOMEID'.$welcomecid, 'Bad value for welcomeid. Try to remove the parameter welcomeid from your URL.', null, 'alert alert-error');
 		exit;
 	}
 }
