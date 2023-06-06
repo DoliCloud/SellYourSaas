@@ -420,8 +420,10 @@ if (! $error) {
 			$sellyoursaasutils = new SellYourSaasUtils($db);
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction('actionafterpaid', $contract, 'admin', '', '', 0, $comment);
 			if ($result <= 0) {
-				$error++;
-				setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+				dol_syslog("Call to remoteaction actionafterpaid has failed with result=".$result.". Check remote_server.log file.", LOG_WARNING);
+				// No error test on this. Not a problem if it fails.
+				//$error++;
+				//setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 			}
 		}
 	}
