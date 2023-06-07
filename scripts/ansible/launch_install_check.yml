@@ -50,9 +50,10 @@
     apt:
       pkg:
       - ntp 
-      - git 
+      - git
+      - ghostscript 
       - gzip 
-      - zip 
+      - zip
       - zstd 
       - memcached 
       - ncdu
