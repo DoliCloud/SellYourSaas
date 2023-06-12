@@ -884,33 +884,6 @@ apt dist-upgrade
 ---------------
 
 
-=== Follow files modified
-
-Pour détecter la liste des fichiers modifiés depuis la dernière mise à jour afick:
-
-[source,bash]
----------------
-afick.pl -k
----------------
-
-Voir le résumé des historiques de chaque changements:
-
-[source,bash]
----------------
-vi /var/lib/afick/history
----------------
-
-Voir le détail des changements d'un jour:
-
-[source,bash]
----------------
-vi /var/lib/afick/archive/afick.YYYMMDD*
----------------
-
-Voir la documentation *afick.pl* pour plus d'options.
-
-
-
 === Passage en mode rescue d'un serveur
 
 Aller sur l'interface du service Cloud pour passer en mode rescue. Le serveur sera rebooté et un lien pour se logué sera fourni.
@@ -924,11 +897,6 @@ mount /dev/sdXY /mnt
 ---------------
 
 Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
-
-
-<<<<<<<
-
-== Annexes
 
 
 === Migrate a ext4 partition into btrfs
@@ -1002,7 +970,7 @@ rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +%j`/.snapshots;
 btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +%j` ro true;
 ---------------
 
-To delete a readonly snapshot
+To delete a readonly snapshot of a day. Note: space is not freed immediatly.
 
 [source,bash]
 ---------------
@@ -1010,7 +978,7 @@ btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +%j`;
 ---------------
 
 
-=== TroubleShooting
+== TroubleShooting
 
 See the chapter available into the *Documentation SellYourSaas - Master and Deployment servers*
 
