@@ -93,6 +93,8 @@ if ($action == 'set') {
 	$error=0;
 
 	if (! $error) {
+		dolibarr_set_const($db, 'SELLYOURSAAS_EXTCSS', GETPOST("SELLYOURSAAS_EXTCSS", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_SEPA')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA', GETPOST("SELLYOURSAAS_ENABLE_SEPA", 'int'), 'chaine', 0, '', $conf->entity);
 		}
@@ -271,6 +273,14 @@ print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
 print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
+
+// SELLYOURSAAS_EXTCSS
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EXTCSS").'</td>';
+print '<td>';
+print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_EXTCSS" value="'.getDolGlobalString('SELLYOURSAAS_EXTCSS', '').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">dist/css/myaccount.css, https://adomain.com/acssfile.css</span></td>';
+print '</tr>';
 
 // SELLYOURSAAS_ENABLE_OPTINMESSAGES
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_OPTINMESSAGES").'</td>';

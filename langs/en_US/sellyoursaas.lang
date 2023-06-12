@@ -819,3 +819,4 @@ InvoicePaymentDisputedMessage=The owner of the payment mode used to pay the invo
 RuleForPassword=Password must contain at least %s characters, including UPPER/lowercase and numbers
 SepaSentToBank=SEPA direct debit sent to the bank
 SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT=Product to deploy when deploying a website of the Dolibarr CMS 
+SELLYOURSAAS_EXTCSS=URL to force another CSS file for the register page
