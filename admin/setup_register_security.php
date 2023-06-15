@@ -96,6 +96,9 @@ if ($action == 'set') {
 		if (GETPOSTISSET("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP", GETPOST("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP", 'alpha'), 'chaine', 0, '', $conf->entity);
 		}
+		if (GETPOSTISSET("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_ONLY_NON_PROFIT_ORGA", GETPOST("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
 
 		if (GETPOSTISSET("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", 'alpha'), 'chaine', 0, '', $conf->entity);
@@ -192,7 +195,7 @@ print '</tr>';
 // Option to say that only non profit organisation can register. The checkbox become mandatory
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';
-$array = array('0' => 'No', '1' => 'NonProfitOrga', '2' => 'NonProfitOrgaAndCaritative', '2' => 'NonProfitOrgaAndSmall');
+$array = array('0' => 'No', '1' => 'NonProfitOrga', '2' => 'NonProfitOrgaAndCaritative', '3' => 'NonProfitOrgaAndSmall');
 print $form->selectarray('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', $array, getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA'), 0);
 print '</td>';
 print '<td><span class="opacitymedium small">Set to yes if you want registration of non-profit organizations only</span></td>';
