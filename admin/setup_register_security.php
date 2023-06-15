@@ -192,17 +192,10 @@ print '</tr>';
 // Option to say that only non profit organisation can register. The checkbox become mandatory
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', array(), null, 0, 0, 1);
-} else {
-	if (empty($conf->global->SELLYOURSAAS_ONLY_NON_PROFIT_ORGA)) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_ONLY_NON_PROFIT_ORGA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
+$array = array('0' => 'No', '1' => 'NonProfitOrga', '2' => 'NonProfitOrgaAndCaritative', '2' => 'NonProfitOrgaAndSmall');
+print $form->selectarray('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', $array, getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA'), 0);
 print '</td>';
-print '<td><span class="opacitymedium small">Set to yes if you only want non-profit organisations as customers</span></td>';
+print '<td><span class="opacitymedium small">Set to yes if you want registration of non-profit organizations only</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</td>';

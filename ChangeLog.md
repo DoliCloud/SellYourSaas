@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW More options on SELLYOURSAAS_ONLY_NON_PROFIT_ORGA
 * NEW Features "Shell after swtiching to paid" and "Sql after switch to paid" are now available.
 * NEW Add the date of the first access.
 * NEW Use a local cache for deployment if no remote cache is found.
