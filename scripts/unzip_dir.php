@@ -54,15 +54,15 @@ function dirIterator($dirName)
 
 $listofdirs = dirIterator('.');
 
-//var_dump($listofdirs);
 
 foreach ($listofdirs as $file) {
-	print "Process path $file => dir ".dirname($file)."\n";
-	if (!preg_match('/\\\\/', $file)) {
+	$filebis = str_replace('\\', '/', $file);
+	print "Process path $file => dir ".dirname($filebis)."\n";
+	if (!preg_match('/\\\\/', $file) && !preg_match('/\//', $file)) {
 		continue;
 	}
 
-	$tmparray = preg_split('/[\/\\\\]/', dirname($file));
+	$tmparray = preg_split('/[\/\\\\]/', dirname($filebis));
 	if (isset($tmparray[1])) {
 		$s = "";
 		foreach ($tmparray as $aaa) {
@@ -75,8 +75,8 @@ foreach ($listofdirs as $file) {
 		}
 		print "Dir $s has been created.";
 		if (is_file($file)) {
-			print " Now rename $file into ".$s.'/'.basename($file)."\n";
-			rename($file, $s.'/'.basename($file));
+			print " Now rename $file into ".$s.'/'.basename($filebis)."\n";
+			rename($file, $s.'/'.basename($filebis));
 		} else {
 			print "\n";
 		}
