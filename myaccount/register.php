@@ -734,9 +734,14 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<div class="group required">
 				<input type="checkbox" id="checkboxnonprofitorga" name="checkboxnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="nonprofit" required=""<?php echo (GETPOST('checkboxnonprofitorga') ? ' checked="checked"' : ''); ?>>
 				<label for="checkboxnonprofitorga" class="valignmiddle small inline"><?php
-					echo $langs->trans("ConfirmNonProfitOrga", $sellyoursaasname);
-					echo '. ';
-					// Show the link for commecial service if there is a commercial alternative service
+				if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') == 2) {
+					echo $langs->trans("ConfirmNonProfitOrgaCaritative", $sellyoursaasname).'. ';
+				} elseif (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') == 3) {
+					echo $langs->trans("ConfirmNonProfitOrgaSmall", $sellyoursaasname).'. ';
+				} else {
+					echo $langs->trans("ConfirmNonProfitOrga", $sellyoursaasname).'. ';
+				}
+				// Show the link for commecial service if there is a commercial alternative service
 				if (getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL')) {
 					echo $langs->trans("ConfirmNonProfitOrgaBis", getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'), getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_LINK_COMMERCIAL'));
 				}
