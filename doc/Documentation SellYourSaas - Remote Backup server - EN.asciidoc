@@ -785,6 +785,7 @@ Delete very old files every sunday by adding the cron task:
 0 18 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +50 -ls -delete > /var/log/find_delete_old_files.log 2>&1
 0 18 * * 1 find /mnt/diskbackup/*/backupold_* -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
 55 23 * * * btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >/var/log/sellyoursaas_btrfs.log; btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >>/var/log/sellyoursaas_btrfs.log; rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +\%j`/.snapshots >>/var/log/sellyoursaas_btrfs.log; btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` ro true >>/var/log/sellyoursaas_btrfs.log;
+0 0 * * 1 find /mnt/diskbackup/.snapshots -maxdepth 1 -type d -mtime +40 -exec btrfs subvolume delete {} \; >>/var/log/sellyoursaas_btrfs.log;
 ---------------
 
 
@@ -975,6 +976,13 @@ To delete a readonly snapshot of a day. Note: space is not freed immediatly.
 [source,bash]
 ---------------
 btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +%j`;
+---------------
+
+To delete all old snapshot
+
+[source,bash]
+---------------
+find /mnt/diskbackup/.snapshots -maxdepth 1 -type d -mtime +60 -exec btrfs subvolume delete {} \; >>/var/log/sellyoursaas_btrfs.log;
 ---------------
 
 
