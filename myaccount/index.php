@@ -2886,7 +2886,11 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 						print '
 							<!-- XDaysBeforeEndOfTrial -->
 							<div class="note note-warning">
-							<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), '{s1}')).' !</h4>';
+							<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), '{s1}')).' !';
+						if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+							print '<br>'.$langs->trans("XDaysBeforeEndOfTrialNoteForFreeMode");
+						}
+							print '</h4>';
 						if ($mode != 'registerpaymentmode') {
 							print '<p class="pforbutton">';
 							if ($contract->total_ht > 0) {
@@ -3000,6 +3004,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 									</div>
 								';
 							} else {
+								// If amount is 0 in contract, explain that instance will be destroyed at end of trial
 								print '
 									<!-- XDaysBeforeEndOfTrialForAlwaysFreeInstance -->
 									<div class="note note-info">
