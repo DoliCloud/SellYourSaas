@@ -20,6 +20,8 @@
 /**
  *      \file       sellyoursaas/scripts/update_total.php
  *		\ingroup    sellyoursaas
+ *
+ *      This script call the update_total on all recurring invoice into tmp_tmp table.
  */
 
 if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
