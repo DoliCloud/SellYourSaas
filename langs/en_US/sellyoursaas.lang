@@ -751,7 +751,7 @@ DateUse=Date usage
 WhitelistipDesc=Add IP addresses that must be allowed to register new account or instance whatever are the other filtering rules.
 BlacklistipDesc=Add IP in this list to block any creation of new account or instances from this IP. The list of IP is also used as the global source to generate the local file of blacklisted IP used by the PHP wrapper to send emails.
 BlacklistXDesc=The list of emails listed here are used as the global source to generate the local file of blacklisted emails used in the <b>%s</b> header for emails sent by the PHP wrapper.
-BlacklistdirDesc=List of directories or files that are not allowed into an instance. The script batch_detect_evil_instances.php will use it to report warnings.
+BlacklistdirDesc=List of directories or files (signature of phishing kits=scamas) that are not allowed into an instance. The script batch_detect_evil_instances.php will use it to report warnings.
 BlacklistcontentDesc=List of keywords that are used as the global source to generate the local file of blacklisted keywords checked by the PHP wrapper to send emails. Check is done both in header and body email.
 Searchkeys=Search keys
 NoBlackListIf=No blacklist for path

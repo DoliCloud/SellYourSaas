@@ -751,7 +751,7 @@ DateUse=Date d'utilisation
 WhitelistipDesc=Ajoutez des adresses IP qui doivent être autorisées à enregistrer un nouveau compte ou une nouvelle instance quelles que soient les autres règles de filtrage.
 BlacklistipDesc=Ajoutez une IP dans cette liste pour bloquer toute création de nouveau compte ou d'instances à partir de cette IP. La liste des IP est également utilisée comme source globale pour générer le fichier local des IP sur liste noire utilisé par le wrapper PHP pour envoyer des e-mails.
 BlacklistXDesc=La liste des e-mails répertoriés ici est utilisée comme source globale pour générer le fichier local des e-mails sur liste noire utilisé dans l'en-tête <b> %s </b> pour les e-mails envoyés par le wrapper PHP.
-BlacklistdirDesc=Liste des répertoires ou fichiers non autorisés dans une instance. Le script batch_detect_evil_instances.php l'utilisera pour signaler les avertissements.
+=Liste des répertoires ou fichiers non autorisés (signature de phishing kits=scamas) dans une instance. Le script batch_detect_evil_instances.php l'utilisera pour signaler les avertissements.
 BlacklistcontentDesc=Liste des mots-clés utilisés comme source globale pour générer le fichier local des mots-clés de la liste noire vérifiés par le wrapper PHP pour envoyer des e-mails. La vérification est effectuée à la fois dans l'en-tête et dans le corps de l'e-mail.
 Searchkeys=Touches de recherche
 NoBlackListIf=Pas de liste noire pour le chemin
