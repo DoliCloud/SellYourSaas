@@ -489,14 +489,16 @@ apt remove unattended-upgrades
 [source, bash]
 ---------------
 ufw allow 22
+
 ufw allow out ntp
 ufw allow out 53
 ufw allow out 443
+
 ufw status
 ufw enable
 ---------------
 
-Port 22 is for SSH, NTP is 123/upd, 53 if for DNS, 443 is to allow for monitoring agent reports
+Port 22 is for SSH, NTP is 123/upd, 53 if for DNS, 443 is to allow monitoring agents to push reporting data
 
 
 === Installation of fail2ban ===
