@@ -36,4 +36,3 @@ MigrationSuccessNote=Aviso: Para acessar sua instância, você precisa usar o lo
 UpgradeErrorContent=Ocorreu um erro ao tentar atualizar automaticamente:\n&#60;adicione sua mensagem aqui&#62;
 ErrorListSupport=lista de erros
 SELLYOURSAAS_AUTOUPGRADE_CODE=Grupo de tickets para sugerir atualização automática
-BlacklistdirDesc=Lista de diretórios ou arquivos que não são permitidos em uma instância. O script batch_detect_evil_instances.php irá usá-lo para relatar avisos.
