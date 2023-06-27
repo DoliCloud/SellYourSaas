@@ -1,17 +1,30 @@
-= Document installation et exploitation SellYourSaas
+= Sell-Your-Saas installation and operation document - Web portal
 This document describes the technical and functional implementation of a server to host a web portal for SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
 :source-highlighter: rouge
 :companyname: Teclib
 :corpname: Teclib
 :orgname: Teclib
-:title: Document installation and operaiont for a Web portal
-// Date du document :
-:docdate: 30/01/2019
-// Ville associée au document
+:creator: Laurent Destailleur
+:title: Document installation and operation for a Web portal
+:subject: This document describes the technical and functional implementation of SellYourSaas web portal
+:keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
 :city: Bordeaux
 :toc: manual
+:toclevels: 3
+:toc-title: Table of contents
 :toc-placement: preamble
-:keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
+:revnumber: v1.0
+:revdate: 2019-01-30
+:revremark: First version
+:revnumber: v1.1
+:revdate: 2023-06-01
+:revremark: Many improvements
+
+<<<<
+
+== Introduction ==
+
+This document explains how to install the optionnal web portal server of Sell-Your-Saas.
 
 
 == Installation of the machine and OS
@@ -50,6 +63,16 @@ adduser myunixlogin
 ---------------
 
 
+==== Default shell
+
+Modify the default shell to use bash (instead of dh sh or dash)
+
+[source, bash]
+---------------
+ln -fs /bin/bash /usr/bin/sh
+---------------
+
+
 ==== SSH setup
 
 Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
@@ -59,7 +82,10 @@ Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 chmod go-rw /etc/ssh/sshd_config
 ---------------
 
+
 Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
+
+For Ubuntu 18.04: you can concat the content into file *sshd_config*, but be sure to not have duplicate values.
 
 [source, conf]
 ---------------
@@ -68,6 +94,10 @@ Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permiss
 # Permissions on files must be correct to allow login
 StrictModes yes
 
+Port 22
+
+# MaxAuthTries 6
+MaxAuthTries 10
 # MaxSessions 10
 MaxSessions 25
 
@@ -77,20 +107,57 @@ PermitRootLogin no
 PermitEmptyPasswords no
 # Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
 ChallengeResponseAuthentication no
- 
+
 # Define list of allowed method to authenticate
-PasswordAuthentication yes
+PasswordAuthentication no   # This will be allowed for osu users only into main sshd_config file with a Match User rule
 PubkeyAuthentication yes
 
 DenyUsers guest
 
 AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
 
+# Legacy changes - To allow an old client (like old PHP) to connect to
+HostKeyAlgorithms +ssh-rsa
+KexAlgorithms +diffie-hellman-group1-sha1
+Ciphers +aes128-cbc
+
+ClientAliveInterval 30
+#ClientAliveCountMax 3
+
 AllowUsers admin osu*
 AllowUsers myunixlogin
+
 ---------------
 
 Please note: replace *myunixlogin* with the correct value before taking changes into account with:
+
+
+
+Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
+
+[source, conf]
+---------------
+# BEGIN Block for SellYourSaas
+# Warning Match rule works only insshd_config not into include files
+# You can test a Match User rule with ssd -T -C user=aaa | grep param
+#Match User osu*
+#  ChrootDirectory "/home/jail/home/"
+#  ForceCommand /usr/bin/secureBash
+#Match User osu*
+#  ChrootDirectory %h
+Match User osu*
+  PasswordAuthentication=yes
+# END Block for SellYourSaas
+---------------
+
+To test a ssh config, you can run
+
+[source, conf]
+---------------
+sshd -T -C user=mylogin -C host=clienthost -C addr=clientaddr
+---------------
+
+Then reload ssh 
 
 [source, conf]
 ---------------
@@ -109,15 +176,26 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 
 [source, conf]
 ---------------
-myunixlogin ALL=(ALL) NOPASSWD:ALL
+myunixlogin ALL=(ALL) ALL
+# You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
+#myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
+#myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
 
-And set the *root*.*root* and the permissions *r-r-----*
+This allows you to switch to *admin* without typing your password too:
+
+[source, bash]
+---------------
+sudo su - admin
+---------------
+
+
+And set the *root*.*root* and the permissions *r--r-----*
 
 [source, conf]
 ---------------
 chmod a-w /etc/sudoers.d/myunixlogin
-chmod a-r /etc/sudoers.d/myunixlogin
+chmod o-r /etc/sudoers.d/myunixlogin
 ---------------
 
 
@@ -138,7 +216,7 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Define or redefine the password for *root*, *admin* with a secure password.
+Define or redefine the password for *root*, *admin* with a secured password saved into your password manager.
 
 [source,bash]
 ---------------
@@ -146,23 +224,31 @@ passwd root
 passwd admin
 ---------------
 
-Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
+Run *ssh-keygen* for all these acounts : *root*, *admin* and *myunixlogin*
 
 
-==== Default shell
+=== Deletion of information files at login
 
-Modify the default shell to use bash (instead of dh sh or dash)
+In order not to give information to users doing SSH, on the deployment servers:
 
 [source, bash]
 ---------------
-ln -fs /bin/bash /usr/bin/sh
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
+Ignore error on missing files.
 
 
-=== Modification du nom du serveur
+=== Add alias
 
-Mettre le nom du serveur dans le fichier */etc/hostname*
+Add at the end of */etc/bash.bashrc*:
+
+[source, bash]
+---------------
+alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,context,cmd'
+---------------
+
 
 
 === Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
@@ -233,23 +319,233 @@ netplan apply
 Rem: *eth0* can be something else, for example *ens3*.
 
 
-=== Addition of a swap (optional)
+=== Add virtual IP (optional)
 
-Check if swap exists:
+- Add the virtual IP via the OVH manager.
+
+- Add and remove the virtual network interface on the server dynamically (for test).
+
+Addition:
 
 [source, bash]
 ---------------
-swapon --summary
+ifconfig eth0: 0 a.b.c.d
 ---------------
 
-Add a swap on */swap/swap.img* if the disk is not SSD, otherwise on the non SSD disk */mnt/sdX/swap/swap.img*. If all the disks are SSD, do not swap.
+Deletion:
 
-https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory-swap-file-on-a-vps#4
+[source, bash]
+---------------
+ifconfig eth0: 0 down
+---------------
+
+- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
+
+Example for 2 virtual IPs:
+
+[source, conf]
+---------------
+auto eth0: 0
+iface eth0: 0 inet static
+            address a.b.c.d
+            netmask 255.255.255.255
+            broadcast a.b.c.d
+
+# To declare a persistent virtual IP
+auto eth0: 1
+iface eth0: 1 inet static
+            address e.f.g.h
+            netmask 255.255.255.255
+            broadcast e.f.g.h
+---------------
+
+Rem: *eth0* can be something else, for example *ens3*.
+
+To take this into account, try this, otherwise, reboot.
+
+[source, bash]
+---------------
+/etc/init.d/networking restart
+---------------
+
+- Associate the virtual IP with the server from the OVH manager.
 
 
-== Installation des composants systèmes et applicatifs
 
-=== Installation des packages
+=== Creation of working directories
+
+On the *Master* server and the *Deployment* servers, create the directories to store backups and archives.
+
+Create directories required to store data, backups and archives:
+
+* Create directory */mnt/diskbackup/backup*:
+
+If you have created a dedicated disk for the backup:
+
+[source, bash]
+---------------
+mkdir /mnt/diskbackup/backup
+---------------
+
+If you haven't:
+
+[source, bash]
+---------------
+mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
+ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
+---------------
+
+
+=== Getting files of Dolibarr and SellYourSaas application
+
+On all servers (*Master and Deployment*):
+
+* Under the *root* login, install git tool:
+
+[source,bash]
+---------------
+apt install git
+---------------
+
+* Under the *admin* account, retrieve the sources of *Dolibarr* (v16 or +) to be placed in */home/admin/wwwroot/dolibarr*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
+chown -R admin.admin /home/admin/wwwroot/dolibarr
+---------------
+
+* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
+
+[source,bash]
+---------------
+cd /home/admin/wwwroot
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas 
+---------------
+
+
+=== Creation of sellyoursaas.conf with credentials
+
+* Create a file */etc/sellyoursaas.conf* on the *Web* server
+
+[source,bash]
+---------------
+vi /etc/sellyoursaas.conf
+chown root.admin /etc/sellyoursaas.conf
+chmod g-wx /etc/sellyoursaas.conf
+chmod o-rwx /etc/sellyoursaas.conf
+---------------
+
+With the following content:
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas.conf
+
+# domain du service
+domain=mysaasdomainname.com
+
+# Set to 1 if this server is the master server, 
+# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
+masterserver=0
+# Set to 1 if this server host instances for the pool (deployment server), 
+# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
+instanceserver=0
+# Set to 1 if this server hosts a dns for the pool (deployment server)
+dnsserver=0
+# Set to 1 if this server hosts a web portal
+webserver=1
+
+# email from
+emailfrom=noreply@mysaasdomainname.com
+# email supervision
+emailsupervision=supervision@mysaasdomainname.com
+
+# Set location of the web database
+databasehost=ipOfMasterServer or localhost if on master server
+# Set port of the web database (default is 3306)
+databaseport=3306
+# Set database name of the web server
+database=databaseNameOnMasterServer
+# Set list of more database if there is
+#databasemore=database2,database3...
+# Set a credential for an access to the master database (each server can have a different account to access the master database)
+databaseuser=sellyoursaas
+databasepass=xxxxx
+
+# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+usecompressformatforarchive=zstd
+
+# Set this to directory where dolibarr repository is installed
+dolibarrdir=/home/admin/wwwroot/dolibarr
+# Set directory where instances are stored (default is /home/jail/home)
+#targetdir=/home/jail/home
+
+# Set directory where backup are stored
+backupdir=/mnt/diskbackup/backup
+
+# Set option to exclude some tables for some instances in backup
+#backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
+# Set option to use --compression-algorithms=zstd on mysqldump command (required with mysql 8.0.18+)
+#backupcompressionalgorithms=zstd
+# Can set the frequency of rsync
+#backuprsyncdayfrequency=1
+# Can set the frequency of sql dump
+#backupdumpdayfrequency=1
+
+remotebackupserver=ip.of.remote.backup.ssh.server
+remotebackupuser=admin
+remotebackupdir=/mnt/diskbackup
+
+# Option to use different path for dataroot
+#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
+#newdoldataroot=/new/path/of/documents
+# Options to change the directory of vhostfile templates
+#templatesdir=/path/of/vhostfile/templates
+
+# Options to change the SSL certificates names in Apache virtualhost
+#websslcertificatecrt=with.sellyoursaas.com.crt
+#websslcertificatekey=with.sellyoursaas.com.key
+#websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
+
+# Options for Jailkit
+#chrootdir=/home/jail/chroot
+#privatejailtemplatename=privatejail
+#commonjailtemplatename=commonjail
+---------------
+
+Put *masterserver*, *dnsserver* and *instanceserver* to 0
+
+
+* Create also an empty directory:
+
+[source,conf]
+---------------
+mkdir -p /etc/sellyoursaas.d
+---------------
+
+
+* Optional: If you want to restrict access to some IP (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
+create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only) 
+
+[source,conf]
+---------------
+# File /etc/sellyoursaas.d/xxx-allowed-ip-zzz.conf
+
+# User 1
+Require ip ip.user.1
+# User 2
+Require ip ip.user.2
+---------------
+
+Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufw.sh* to have the change taken into account on the firewall.
+
+<<<<
+
+== Installation of system and application components
+
+=== Installation of packages
 
 * Installation des packages Ubuntu *18.04-*
 
@@ -1644,22 +1940,68 @@ iface eth0:1 inet static
 
 
 
+=== Backup / Restore
 
-== Sauvegarde / Restauration
+==== Backup system
 
-La sauvegarde peut se faire par un snapshot d'image de la VM.
-Il est aussi possible de ne faire un snapshot que des disques complémentaires.
+A backup of the server+bases can be done with a VM snapshot.
+It is also possible to snapshot only extra disks.
 
-Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentire),
-à condition que la cible (serveur ou disque) soit supérieur en terme de capacité de stockage.
+See chapter in Master and Deployment Servers doc.
 
-Une fois une restauration faite, si elle a été faite sur un autre serveur, il faut:
+==== Restoration system
+
+From OVH's "Snapshots" interface, you can restore a VM image on a server or a disk image on a disk, provided the target has at least the same amount of storage.
+
+See chapter in Master and Deployment Servers doc.
+
+Note une fois une restauration faite, si elle a été faite sur un autre serveur, il faut:
 
 * Log into ssh: Change apache virtual host to set new host name
 * If VM is a backup VM, disabled also root cron tasks
 
+Et si le serveur avait des services complémentaires:
+
 * For Prestashop sites, if VM has a new url, go into database to set correct url into table ps_configuration (var PS_SHOP_DOMAIN, PS_SHOP_DOMAIN_SSL, CANONICAL_URL) and ps_shop_url
 * For Mediawiki sites, if VM has a new url, go into database to set correct url into file LocalSettings.php
+
+
+
+==== Backup files and database
+
+===== Local backup
+
+- The configuration of the server and the system database is done locally via the cron task of *root* :
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* 
+
+See <<installing_cron_tasks>>. This will write backup files into */home/admin/backup/conf* and */home/admin/backup/mysql*
+
+The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
+
+
+
+===== Remote backup
+
+- An external backup must be done to another server by a cron task of *root* :
+
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm none --delete >/home/admin/logs/backup_backups.log 2>&1*
+
+See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). 
+
+The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
+
+
+- For a remote backup as AWS:
+
+[source,bash]
+---------------
+pip install awscli --upgrade --user
+
+    TODO...
+---------------
+
+
 
 
 <<<<<<<

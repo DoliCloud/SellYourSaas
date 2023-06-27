@@ -1,4 +1,4 @@
-= Sell-Your-Saas installation and operation document
+= Sell-Your-Saas installation and operation document - Master and deployment servers
 This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...) - Laurent Destailleur - www.sellyoursaas.org
 :source-highlighter: rouge
 :companyname: Teclib
@@ -7,7 +7,7 @@ This document describes the technical and functional implementation of Sell-Your
 :creator: Laurent Destailleur
 :title: Document installation and operation of SellYourSaas
 :subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...).
-:keywords: sellyoursaas, saas,olibarr, wamp, glpi
+:keywords: sellyoursaas, saas, dolibarr, wamp, glpi
 :imagesdir: ./img
 :city: Bordeaux
 :toc: manual
@@ -665,7 +665,7 @@ Check if swap exists:
 swapon --summary
 ---------------
 
-Add a swap on */swap/swap.img* if the disk is not SSD, otherwise on the non SSD disk */mnt/sdX/swap/swap.img*. If all the disks are SSD, do not swap.
+Add a swap on */swap/swap.img* if the disk is not SSD, otherwise on the non SSD disk */mnt/sdX/swap/swap.img*. If all the disks are SSD, do not add swap.
 
 https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory-swap-file-on-a-vps#4
 
@@ -837,9 +837,6 @@ archivedirpaid=/mnt/diskbackup/archives-paid
 #backuprsyncdayfrequency=1
 # Can set the frequency of sql dump
 #backupdumpdayfrequency=1
-
-# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
-usecompressformatforarchive=gzip
 
 # Set remote server launcher ip (default is 0.0.0.0)
 remoteserverlistenip=0.0.0.0

@@ -745,9 +745,6 @@ archivedirpaid=/mnt/diskbackup/archives-paid
 # Can set the frequency of sql dump
 #backupdumpdayfrequency=1
 
-# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
-usecompressformatforarchive=gzip
-
 # Set remote server launcher ip (default is 0.0.0.0)
 remoteserverlistenip=0.0.0.0
 # Set remote server launcher port (default is 8080)

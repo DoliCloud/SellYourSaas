@@ -32,6 +32,7 @@ export targetdir="/home/admin/backup/mysql"
 export targetdir2="/home/admin/backup/conf"				
 
 export DATABASE=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export DATABASEMORE=`grep '^databasemore=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export webserver=`grep '^webserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
@@ -112,9 +113,15 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
             foundmasterdatabase=1;
     fi
     if [ "x$foundmasterdatabase" == "x1" ]; then	
-		export dbname=$DATABASE 
+		export listofdb=$DATABASE
+		if [ "x$DATABASEMORE" != "x" ]; then
+			listofdb="$listofdb,$DATABASEMORE"
+		fi
 		export now=`date +'%Y-%m-%d %H:%M:%S'`
 
+		IFS=','	
+
+        for dbname in $listofdb; do
 		rm "$targetdir/${dbname}.sql.zst"
 		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.zst"
 		echo "$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst"
@@ -123,6 +130,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		chmod o-rwx $targetdir/${dbname}.sql.zst
 		rm -f $targetdir/${dbname}.sql.gz
 		rm -f $targetdir/${dbname}.sql.bz2
+		done
 	else
 		echo "No sellyoursaas master database found to backup (parameter in /etc/sellyoursaas.conf: database=$DATABASE, masterserver=$masterserver, webserver=$webserver)."
 	fi
@@ -161,9 +169,15 @@ else
     echo 
     
     if [ "x$foundmasterdatabase" == "x1" ]; then	
-		export dbname=$DATABASE 
+		export listofdb=$DATABASE 
+		if [ "x$DATABASEMORE" != "x" ]; then
+			listofdb="$listofdb,$DATABASEMORE"
+		fi
 		export now=`date +'%Y-%m-%d %H:%M:%S'`
 
+		IFS=','	
+
+        for dbname in $listofdb; do
 		rm "$targetdir/${dbname}.sql.gz"
 		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
 		echo "$now $MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz"
@@ -172,6 +186,7 @@ else
 		chmod o-rwx $targetdir/${dbname}.sql.gz
 		rm -f $targetdir/${dbname}.sql.bz2
 		rm -f $targetdir/${dbname}.sql.zst
+		done
 	else
 		export now=`date +'%Y-%m-%d %H:%M:%S'`
 
