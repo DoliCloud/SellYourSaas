@@ -53,7 +53,9 @@ require_once DOL_DOCUMENT_ROOT.'/website/class/website.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/usergroups.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
-if (! empty($conf->ldap->enabled)) require_once DOL_DOCUMENT_ROOT.'/core/class/ldap.class.php';
+if (isModEnabled('ldap')) {
+	require_once DOL_DOCUMENT_ROOT.'/core/class/ldap.class.php';
+}
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
@@ -69,7 +71,7 @@ if ($langs->defaultlang == 'en_US') {
 
 
 // Security check
-if (! empty($conf->global->SELLYOURSAAS_SECURITY_DISABLEFORGETPASSLINK)) {
+if (getDolGlobalString('SELLYOURSAAS_SECURITY_DISABLEFORGETPASSLINK')) {
 	header("Location: ".DOL_URL_ROOT.'/');
 	exit;
 }
@@ -81,10 +83,10 @@ if (!$mode) {
 	$mode='http';
 }
 
-$username 		= GETPOST('username', 'alphanohtml');
+$username 		= trim(GETPOST('username', 'alphanohtml'));
 $hashreset		= GETPOST('hashreset', 'alpha');
-$newpassword1   = GETPOST('newpassword1', 'none');
-$newpassword2   = GETPOST('newpassword2', 'none');
+$newpassword1   = trim(GETPOST('newpassword1', 'none'));
+$newpassword2   = trim(GETPOST('newpassword2', 'none'));
 
 $conf->entity 	= (GETPOST('entity', 'int') ? GETPOST('entity', 'int') : 1);
 
@@ -207,11 +209,13 @@ if (empty($reshook)) {
 					// Success
 					include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 
-					$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+					$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 					if (! empty($thirdparty->array_options['options_domain_registration_page'])
-						&& $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_ACCOUNT_URL) {
+						&& $thirdparty->array_options['options_domain_registration_page'] != $sellyoursaasaccounturl) {
 						$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$thirdparty->array_options['options_domain_registration_page'];
-						if (! empty($conf->global->$newnamekey)) $sellyoursaasaccounturl = $conf->global->$newnamekey;
+						if (getDolGlobalString($newnamekey)) {
+							$sellyoursaasaccounturl = getDolGlobalString($newnamekey);
+						}
 					}
 
 					$url = $sellyoursaasaccounturl.'/passwordforgotten.php?id='.$thirdparty->id.'&hashreset='.$hashreset;
@@ -233,7 +237,7 @@ if (empty($reshook)) {
 					$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
 					$mesg = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
 
-					$newemail = new CMailFile($subject, $username, $conf->global->SELLYOURSAAS_NOREPLY_EMAIL, $mesg, array(), array(), array(), '', '', 0, -1, '', '', $trackid, '', 'standard');
+					$newemail = new CMailFile($subject, $username, getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL'), $mesg, array(), array(), array(), '', '', 0, -1, '', '', $trackid, '', 'standard');
 
 					if ($newemail->sendfile() > 0) {
 						$message = $messagegenericresult;
@@ -256,8 +260,8 @@ $dol_url_root = '';
 
 // Title
 $title='Dolibarr '.DOL_VERSION;
-if (!empty($conf->global->MAIN_APPLICATION_TITLE)) {
-	$title = $conf->global->MAIN_APPLICATION_TITLE;
+if (getDolGlobalString('MAIN_APPLICATION_TITLE')) {
+	$title = getDolGlobalString('MAIN_APPLICATION_TITLE');
 }
 $title=$langs->trans("YourCustomerDashboard");
 
@@ -275,7 +279,7 @@ $disabled='disabled';
 if (preg_match('/dolibarr/i', $mode)) {
 	$disabled = '';
 }
-if (!empty($conf->global->MAIN_SECURITY_ENABLE_SENDPASSWORD)) {
+if (getDolGlobalString('MAIN_SECURITY_ENABLE_SENDPASSWORD')) {
 	$disabled = '';	 // To force button enabled
 }
 
@@ -290,14 +294,14 @@ $urllogo = '';
 $constlogo = 'SELLYOURSAAS_LOGO';
 $constlogosmall = 'SELLYOURSAAS_LOGO_SMALL';
 
-$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
+$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
+$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');
 
-$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
+$domainname = getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 $constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
 if (getDolGlobalString($constforaltname)) {
 	$sellyoursaasdomain = $domainname;
-	$sellyoursaasname = $conf->global->$constforaltname;
+	$sellyoursaasname = getDolGlobalString($constforaltname);
 	$constlogo.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 	$constlogosmall.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 }
@@ -306,7 +310,7 @@ if (empty($urllogo) && getDolGlobalString($constlogosmall)) {
 	if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constlogosmall))) {
 		$urllogo = DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.getDolGlobalString($constlogosmall));
 	}
-} elseif (empty($urllogo) && ! empty($conf->global->$constlogo)) {
+} elseif (empty($urllogo) && getDolGlobalString($constlogo)) {
 	if (is_readable($conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constlogo))) {
 		$urllogo = DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/'.getDolGlobalString($constlogo));
 		$width=128;
