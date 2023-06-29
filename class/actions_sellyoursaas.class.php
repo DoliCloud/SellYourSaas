@@ -698,7 +698,11 @@ class ActionsSellyoursaas
 			// Change customer confirmation
 			$showtype = 1;
 			$showcode = 0;
-			$formquestion = array(array('type' => 'other','name' => 'socid','label' => $langs->trans("SelectThirdParty"),'value' => $form->select_company($object->thirdparty->id, 'socid', '(s.client=1 OR s.client=2 OR s.client=3)', '', $showtype, 0, null, 0, 'minwidth100', '', '', 1, array(), false, array(), $showcode)));
+			if ((float) DOL_VERSION < 18) {
+				$formquestion = array(array('type' => 'other','name' => 'socid','label' => $langs->trans("SelectThirdParty"),'value' => $form->select_company($object->thirdparty->id, 'socid', '(s.client=1 OR s.client=2 OR s.client=3)', '', $showtype, 0, null, 0, 'minwidth100', '', '', 1, array(), false, array(), $showcode)));
+			} else {
+				$formquestion = array(array('type' => 'other','name' => 'socid','label' => $langs->trans("SelectThirdParty"),'value' => $form->select_company($object->thirdparty->id, 'socid', '((s.client:=:1) OR (s.client:=:2) OR (s.client:=:3))', '', $showtype, 0, null, 0, 'minwidth100', '', '', 1, array(), false, array(), $showcode)));
+			}
 			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ChangeCustomer'), '', 'confirm_changecustomer', $formquestion, 'yes', 1);
 			$this->resprints = $formconfirm;
 		}
