@@ -723,7 +723,7 @@ SELLYOURSAAS_AUTOMIGRATION_CODE=Ticket group to suggest the migration wizard
 SELLYOURSAAS_SUPPORT_SHOW_MESSAGE=Show a message in the support page
 ConfirmNonProfitOrga=I confirm that I am a non-profit organization
 ConfirmNonProfitOrgaCaritative=I confirm that I am both a non-profit organization AND a caritative organization
-ConfirmNonProfitOrgaSmall=I confirm that I am a non-profit organization with less than 50 members
+ConfirmNonProfitOrgaSmall=I confirm that I am a non-profit organization with less than 50 members and without employees
 ConfirmNonProfitOrgaBis=Note: If you are not in this case, the same service is available for you on <a href="https://%s" target="_blank" rel="noopener">https://%s</a>
 SELLYOURSAAS_ONLY_NON_PROFIT_ORGA=Add a checkbox "I am a non-profit organisation" on registration form. Checking the checkbox is mandatory.
 AddACommentDestruction=More details will allow us to improve...

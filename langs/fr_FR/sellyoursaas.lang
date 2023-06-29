@@ -723,7 +723,7 @@ SELLYOURSAAS_AUTOMIGRATION_CODE=Groupe de tickets pour suggérer l'assistant de 
 SELLYOURSAAS_SUPPORT_SHOW_MESSAGE=Afficher un message dans la page d'assistance
 ConfirmNonProfitOrga=Je confirme que je suis une organisation à but non lucratif
 ConfirmNonProfitOrgaCaritative=Je confirme être à la fois une association à but non lucratif ET une association caritative
-ConfirmNonProfitOrgaSmall=Je confirme que je suis une organisation à but non lucratif de moins de 50 membres
+ConfirmNonProfitOrgaSmall=Je confirme que je suis une organisation à but non lucratif de moins de 50 membres et sans salariés
 ConfirmNonProfitOrgaBis=Remarque : Si vous n'êtes pas dans ce cas, le même service est disponible pour vous sur <a href="https://%s" target="_blank" rel="noopener"> https://%s </a>
 SELLYOURSAAS_ONLY_NON_PROFIT_ORGA=Ajoutez une case à cocher "Je suis une organisation à but non lucratif" sur le formulaire d'inscription. Cocher la case est obligatoire.
 AddACommentDestruction=Plus de détails nous permettront de nous améliorer...
