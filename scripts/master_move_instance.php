@@ -593,11 +593,11 @@ $return_var = $resultarray['result'];
 $content_grabbed = $resultarray['output'];
 
 if ($return_var) {
-	print "-> Error during rsync\n";
+	print "-> Error during rsync from source instance to ".$tmptargetdir."\n";
 	print $content_grabbed;
 	exit(-1);
 } else {
-	print "-> Files were sync\n";
+	print "-> Files were sync from source instance to ".$tmptargetdir."\n";
 }
 
 // Output result
@@ -649,11 +649,11 @@ $content_grabbed = $resultarray['output'];
 
 //exec($fullcommand, $output, $return_var);
 if ($return_var) {
-	print "-> Error during rsync\n";
+	print "-> Error during rsync from local dir ".$sourcedir." to target instance\n";
 	print $content_grabbed;
 	exit(-1);
 } else {
-	print "-> Files were sync\n";
+	print "-> Files were sync from local dir ".$sourcedir." to target instance\n";
 }
 print "\n";
 
