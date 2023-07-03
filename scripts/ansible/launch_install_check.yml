@@ -300,7 +300,7 @@
       path: /etc/php/7.0/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '3600'
+      value: '7200'
     when: 
       - php70 is defined
 
@@ -474,7 +474,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '3600'
+      value: '7200'
     when: 
       - php74 is defined
 
@@ -648,7 +648,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '3600'
+      value: '7200'
     when: 
       - php80 is defined
 
@@ -835,7 +835,7 @@
       path: /etc/php/8.1/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '3600'
+      value: '7200'
     when: 
       - php81 is defined
 
