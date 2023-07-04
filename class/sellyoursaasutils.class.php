@@ -1724,7 +1724,7 @@ class SellYourSaasUtils
 						$sql = "SELECT rowid";
 						$sql .= " FROM ".MAIN_DB_PREFIX."prelevement_demande";
 						$sql .= " WHERE fk_facture = ".((int) $obj->rowid);
-						$sql .= " AND type = 'ban'"; // To exclude record done for some online payments
+						$sql .= " AND type = 'ban'"; // To exclude record saved by other online payments like credit card payments
 						$sql .= " AND traite = 0";
 						$rsql = $this->db->query($sql);
 						if ($rsql) {
@@ -1732,7 +1732,7 @@ class SellYourSaasUtils
 							if ($n != 1) {
 								$error++;
 								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order', LOG_ERR);
-								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order';
+								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order found. We should have only 1.';
 							} else {
 								$objd = $this->db->fetch_object($rsql);
 								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
