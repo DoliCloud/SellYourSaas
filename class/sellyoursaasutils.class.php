@@ -728,12 +728,11 @@ class SellYourSaasUtils
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
 	 * @param	int		$noemailtocustomeriferror		1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
-	 * @param	string  $mode                           Payment type can be "card" or "ban"
 	 * @return	int			                    		0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doTakePaymentStripe($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0, $mode = 'card')
+	public function doTakePaymentStripe($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0)
 	{
-		global $conf, $langs, $mysoc;
+		global $conf, $langs;
 
 		$langs->load("agenda");
 
@@ -777,9 +776,12 @@ class SellYourSaasUtils
 		$sql .= " AND (f.fk_mode_reglement IS NULL OR f.fk_mode_reglement IN (0, ".((int) $idpaiementcard).", ".((int) $idpaiementstripe)."))";
 		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
-		$sql .= " AND sr.status = ".((int) $servicestatus);
-		$sql .= " AND sr.type = '".$this->db->escape($mode)."'";	// This exclude payment mode of other types
-		$sql .= " AND sr.stripe_card_ref IS NOT NULL";	// Only stripe payment mode
+		$sql .= " AND sr.status = ".((int) $servicestatus);	// Test or production
+		$sql .= " AND sr.type = 'card'";					// mode="card", this exclude payment mode of other types
+		// sr.card_type can be 'visa', 'mastercard', 'amex', '' ...
+		$sql .= " AND sr.stripe_card_ref IS NOT NULL";		// Only stripe payment mode
+		// TODO Filter also on AND ext_payment_site = 'StripeLive'
+
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
 		//print $sql;exit;
@@ -1625,12 +1627,11 @@ class SellYourSaasUtils
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
 	 * @param	int		$noemailtocustomeriferror		1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
-	 * @param	string  $mode                           Payment type can be "sepa"
 	 * @return	int			                    		0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doTakePaymentStripeSEPA($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0, $mode = 'sepa')
+	public function doTakePaymentStripeSEPA($maxnbofinvoicetotry = 0, $noemailtocustomeriferror = 0)
 	{
-		global $conf, $langs, $mysoc, $user;
+		global $conf, $langs, $user;
 
 		$langs->load("agenda");
 
@@ -1673,10 +1674,12 @@ class SellYourSaasUtils
 		$sql .= " AND f.fk_mode_reglement = ".((int) $idpaiementdebit);
 		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
-		$sql .= " AND sr.status = ".((int) $servicestatus);
-		$sql .= " AND sr.type = 'ban'";	// This exclude payment mode of other types
-		$sql .= " AND sr.card_type = 'sepa_debit'";	// Only sepa_debit payment mode
-		$sql .= " AND sr.stripe_card_ref IS NOT NULL";	// Only stripe payment mode
+		$sql .= " AND sr.status = ".((int) $servicestatus);	// Test or production
+		$sql .= " AND sr.type = 'ban'";						// This exclude payment mode of other types
+		$sql .= " AND sr.card_type = 'sepa_debit'";			// Only sepa_debit payment mode
+		$sql .= " AND sr.stripe_card_ref IS NOT NULL";		// Only stripe payment mode
+		// TODO Filter also on AND ext_payment_site = 'StripeLive'
+
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
 		//print $sql;exit;
