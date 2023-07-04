@@ -112,8 +112,12 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	// Fill array of company payment modes
 	$sql = 'SELECT rowid, default_rib FROM '.MAIN_DB_PREFIX."societe_rib";
 	$sql.= " WHERE type in ('ban', 'card', 'paypal')";
-	$sql.= " AND fk_soc = ".$thirdpartyidtotest;
-	$sql.= " AND (type = 'ban' OR (type = 'card' AND status = ".$servicestatusstripe.") OR (type = 'paypal' AND status = ".$servicestatuspaypal."))";
+	$sql.= " AND fk_soc = ".((int) $thirdpartyidtotest);
+	$sql.= " AND (";
+	$sql.= "(type = 'ban') OR";												// sepa
+	$sql.= "(type = 'card' AND status = ".$servicestatusstripe.") OR";		// stripe
+	$sql.= "(type = 'paypal' AND status = ".$servicestatuspaypal.")";		// paypal
+	$sql.= ")";
 	$sql.= " ORDER BY default_rib DESC, tms DESC";
 
 	$resqltmp = $db->query($sql);

@@ -1316,6 +1316,8 @@ if ($action == 'updateurl') {
 			$error++;
 		}
 
+		$thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($mythirdpartyaccount->id);    // Check if customer has already a payment mode or not
+
 		$db->begin();
 
 		// First update or insert payment mode 'ban'
@@ -1417,8 +1419,43 @@ if ($action == 'updateurl') {
 				$error++;
 				setEventMessages("Failed to get payment mode ID for Direct Debit (code PRE). We can't continue.", null, 'errors');
 			}
-		}
 
+			dol_syslog("--- A sepa bank was recorded. Now we reset the custom stripeaccount (to force use of the default setup)", LOG_DEBUG, 0);
+
+			$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
+			$db->query($sql);
+
+			if ($mythirdpartyaccount->client == 2) {
+				dol_syslog("--- Set status of thirdparty to prospect+client instead of only prospect", LOG_DEBUG, 0);
+				$mythirdpartyaccount->set_as_client();
+			}
+
+			if (! $error) {
+				$labelofevent = 'Payment mode SEPA added by '.getUserRemoteIP();
+				$codeofevent = 'AC_ADD_PAYMENT';
+				if ($thirdpartyhadalreadyapaymentmode > 0) {
+					$labelofevent = 'Payment mode modified by '.getUserRemoteIP().' with a SEPA';
+					$codeofevent = 'AC_MOD_PAYMENT';
+				}
+
+				include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+				// Create an event
+				$actioncomm = new ActionComm($db);
+				$actioncomm->type_code   = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+				$actioncomm->code        = $codeofevent;
+				$actioncomm->label       = $labelofevent;
+				$actioncomm->datep       = $now;
+				$actioncomm->datef       = $now;
+				$actioncomm->percentage  = -1;   // Not applicable
+				$actioncomm->socid       = $mythirdpartyaccount->id;
+				$actioncomm->authorid    = $user->id;   // User saving action
+				$actioncomm->userownerid = $user->id;	// Owner of action
+				$actioncomm->note_private= $labelofevent.' - Company payment mode id created or modified = '.$companypaymentmode->id;
+				//$actioncomm->fk_element  = $mythirdpartyaccount->id;
+				//$actioncomm->elementtype = 'thirdparty';
+				$ret=$actioncomm->create($user);       // User creating action
+			}
+		}
 
 		// Create a recurring invoice (+real invoice + contract renewal if payment try success and not 'ban') if there is no recurring invoice yet
 		// $listofcontractid must be defined
@@ -1430,6 +1467,7 @@ if ($action == 'updateurl') {
 
 		$paymentmode = 'ban';
 		include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
+		// This include the $db->commit() or $db->rollback() and the redirect if everything is ok
 
 		$action='';
 		$mode='registerpaymentmode';
@@ -1599,7 +1637,7 @@ if ($action == 'updateurl') {
 
 				if (! $error) {
 					$companypaymentmode->setAsDefault($companypaymentmode->id, 1);
-					dol_syslog("--- A credit card was recorded. Now we reset the stripeaccount (to force use of default Stripe setup)", LOG_DEBUG, 0);
+					dol_syslog("--- A credit card was recorded. Now we reset the custom stripeaccount (to force use of the default setup)", LOG_DEBUG, 0);
 
 					$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
 					$db->query($sql);
@@ -1610,10 +1648,10 @@ if ($action == 'updateurl') {
 					}
 
 					if (! $error) {
-						$labelofevent = 'Payment mode added by '.getUserRemoteIP();
+						$labelofevent = 'Payment mode CARD added by '.getUserRemoteIP();
 						$codeofevent = 'AC_ADD_PAYMENT';
 						if ($thirdpartyhadalreadyapaymentmode > 0) {
-							$labelofevent = 'Payment mode modified by '.getUserRemoteIP();
+							$labelofevent = 'Payment mode modified by '.getUserRemoteIP().' with a CARD';
 							$codeofevent = 'AC_MOD_PAYMENT';
 						}
 
@@ -1690,9 +1728,10 @@ if ($action == 'updateurl') {
 			// $backurl
 			// $thirdpartyhadalreadyapaymentmode
 			// $langscompany
+
 			$paymentmode = 'card';
 			include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
-			// This include the $commit or $rollback and the redirect if everything is ok
+			// This include the $db->commit() or $db->rollback() and the redirect if everything is ok
 
 			$action='';
 			$mode='registerpaymentmode';
@@ -1902,7 +1941,7 @@ if ($action == 'updateurl') {
 		}
 	}
 
-	//$error++;
+	// Commit or Rollback
 	if (! $error) {
 		$db->commit();
 
