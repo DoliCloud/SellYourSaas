@@ -630,13 +630,14 @@ Example for 2 virtual IPs:
 
 [source, conf]
 ---------------
+# To declare persistent virtual IPs
+
 auto eth0: 0
 iface eth0: 0 inet static
             address a.b.c.d
             netmask 255.255.255.255
             broadcast a.b.c.d
 
-# To declare a persistent virtual IP
 auto eth0: 1
 iface eth0: 1 inet static
             address e.f.g.h
@@ -789,7 +790,7 @@ archivetestinstances=1
 ipserverdeployment=ip.of.deployment.server
 
 # If deployment server: IPs allowed to request a deployment
-allowed_hosts=127.0.0.1,ipofmasterserver
+allowed_hosts=ipofmasterserver
 
 # email from
 emailfrom=noreply@mysaasdomainname.com
