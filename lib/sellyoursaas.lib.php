@@ -114,9 +114,9 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	$sql.= " WHERE type in ('ban', 'card', 'paypal')";
 	$sql.= " AND fk_soc = ".((int) $thirdpartyidtotest);
 	$sql.= " AND (";
-	$sql.= "(type = 'ban') OR";												// sepa
-	$sql.= "(type = 'card' AND status = ".$servicestatusstripe.") OR";		// stripe
-	$sql.= "(type = 'paypal' AND status = ".$servicestatuspaypal.")";		// paypal
+	$sql.= "(type = 'ban') OR";												// sepa		TODO Add filter on ext_payment_site
+	$sql.= "(type = 'card' AND status = ".$servicestatusstripe.") OR";		// stripe	TODO Add filter on ext_payment_site
+	$sql.= "(type = 'paypal' AND status = ".$servicestatuspaypal.")";		// paypal	TODO Add filter on ext_payment_site
 	$sql.= ")";
 	$sql.= " ORDER BY default_rib DESC, tms DESC";
 
