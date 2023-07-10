@@ -457,7 +457,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 
 			// Check in API Block Disposable E-mail database
 			if ($disposable === false) {
-				$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+				$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', $conf->global->MAIN_INFO_SOCIETE_MAIL);
 				$apikey = $conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY;
 
 				// Check if API account and credit are ok
@@ -535,7 +535,9 @@ dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontracti
 
 if (empty($remoteip)) {
 	dol_syslog("InstanceCreationBlockedForSecurityPurpose: empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
-	$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+
+	$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', $conf->global->MAIN_INFO_SOCIETE_MAIL);
+
 	if (substr($sapi_type, 0, 3) != 'cli') {
 		setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
 		header("Location: ".$newurl);
@@ -586,7 +588,9 @@ if (!$whitelisted && !empty($tmparrayblacklist)) {
 	foreach ($tmparrayblacklist as $val) {
 		if ($val->content == $remoteip) {
 			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip ".$remoteip." is in blacklistip", LOG_WARNING);
-			$emailtowarn = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+
+			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', $conf->global->MAIN_INFO_SOCIETE_MAIL);
+
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action'), null, 'errors');
 				header("Location: ".$newurl);
@@ -1190,8 +1194,9 @@ if ($reusecontractid) {
 		if ($abusetest) {
 			$db->rollback();
 
-			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', $conf->global->MAIN_INFO_SOCIETE_MAIL);
 			dol_syslog("InstanceCreationBlockedForSecurityPurpose ip ".$remoteip." is refused with value abusetest=".$abusetest, LOG_DEBUG);
+
+			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', $conf->global->MAIN_INFO_SOCIETE_MAIL);
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, $abusetest), null, 'errors');
