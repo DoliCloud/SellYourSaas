@@ -715,6 +715,15 @@ print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
 
+// Upgrade.unlock file
+print '<tr>';
+print '<td>'.$langs->trans("UnlockfileInstalled").'</td><td>'.($object->array_options['options_fileunlock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileunlock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
+print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addupgradeunlock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+print ($object->array_options['options_fileunlock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delupgradeunlock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
+print '</td>';
+print '<td></td><td></td>';
+print '</tr>';
+
 // Installmodules.lock file
 print '<tr>';
 print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';

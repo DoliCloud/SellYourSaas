@@ -128,8 +128,58 @@ if ($action == 'addauthorizedkey') {
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
 			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 
-			$object->filelock=(empty($fstat['atime'])?'':$fstat['atime']);
+			//$object->filelock=(empty($fstat['atime'])?'':$fstat['atime']);
 			$object->array_options['options_filelock']=(empty($fstat['atime'])?'':$fstat['atime']);
+
+			if (! empty($fstat['atime'])) {
+				$result = $object->update($user);
+			}
+		}
+	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+} elseif ($action == 'addupgradeunlock') {
+	// SSH connect
+	if (! function_exists("ssh2_connect")) {
+		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+	}
+
+	$type_db = $conf->db->type;
+
+	$instance = $object->ref_customer;
+	$hostname_db = $object->array_options['options_hostname_db'];
+	$username_db = $object->array_options['options_username_db'];
+	$password_db = $object->array_options['options_password_db'];
+	$database_db = $object->array_options['options_database_db'];
+	$port_db     = $object->array_options['options_port_db'];
+	$username_os = $object->array_options['options_username_os'];
+	$password_os = $object->array_options['options_password_os'];
+	$hostname_os = $object->array_options['options_hostname_os'];
+
+	$server=$hostname_os;
+
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
+	if ($connection) {
+		//print $instance." ".$username_os." ".$password_os."<br>\n";
+		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
+			dol_syslog("Could not authenticate with username ".$username_os." . and password ".preg_replace('/./', '*', $password_os), LOG_ERR);
+		} else {
+			$sftp = ssh2_sftp($connection);
+
+			// Check if install.lock exists
+			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
+			//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/install.lock';
+			$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock';
+			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock');
+			if (empty($fstat['atime'])) {
+				$stream = fopen($fileinstalllock, 'w');
+				//var_dump($stream);exit;
+				fwrite($stream, "// File to allow upgrade.\n");
+				fclose($stream);
+				$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock');
+				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
+			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+
+			$object->array_options['options_fileunlock']=(empty($fstat['atime'])?'':$fstat['atime']);
 
 			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
@@ -179,7 +229,7 @@ if ($action == 'addauthorizedkey') {
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
 			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 
-			$object->fileinstallmoduleslock=(empty($fstat['atime'])?'':$fstat['atime']);
+			//$object->fileinstallmoduleslock=(empty($fstat['atime'])?'':$fstat['atime']);
 			$object->array_options['options_fileinstallmoduleslock']=(empty($fstat['atime'])?'':$fstat['atime']);
 
 			if (! empty($fstat['atime'])) {
@@ -266,8 +316,52 @@ if ($action == 'addauthorizedkey') {
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
 			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/install.lock'), 'warnings');
 
-			$object->filelock='';
+			//$object->filelock='';
 			$object->array_options['options_filelock']='';
+
+			if ($result) {
+				$result = $object->update($user);
+			}
+		}
+	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+} elseif ($action == 'delupgradeunlock') {
+	// SSH connect
+	if (! function_exists("ssh2_connect")) {
+		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+	}
+
+	$type_db = $conf->db->type;
+
+	$instance = $object->ref_customer;
+	$hostname_db = $object->array_options['options_hostname_db'];
+	$username_db = $object->array_options['options_username_db'];
+	$password_db = $object->array_options['options_password_db'];
+	$database_db = $object->array_options['options_database_db'];
+	$port_db     = $object->array_options['options_port_db'];
+	$username_os = $object->array_options['options_username_os'];
+	$password_os = $object->array_options['options_password_os'];
+	$hostname_os = $object->array_options['options_hostname_os'];
+
+	$server=$hostname_os;
+	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$connection = ssh2_connect($server, $server_port);
+	if ($connection) {
+		//print $object->instance." ".$username_os." ".$password_os."<br>\n";
+		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
+			dol_syslog("Could not authenticate with username ".$username_os." . and password ".preg_replace('/./', '*', $password_os), LOG_ERR);
+		} else {
+			$sftp = ssh2_sftp($connection);
+
+			// Check if install.lock exists
+			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
+			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock';
+			$result=ssh2_sftp_unlink($sftp, $filetodelete);
+
+			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
+			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/upgrade.unlock'), 'warnings');
+
+			//$object->filelock='';
+			$object->array_options['options_fileunlock']='';
 
 			if ($result) {
 				$result = $object->update($user);
@@ -310,7 +404,7 @@ if ($action == 'addauthorizedkey') {
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
 			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/installmodules.lock'), 'warnings');
 
-			$object->fileinstallmoduleslock='';
+			//$object->fileinstallmoduleslock='';
 			$object->array_options['options_fileinstallmoduleslock']='';
 
 			if ($result) {
