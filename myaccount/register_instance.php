@@ -1345,7 +1345,7 @@ if (! $error && $productref != 'none') {
 if (! $error) {
 	$thirdpartyhadalreadyapaymentmode = sellyoursaasThirdpartyHasPaymentMode($tmpthirdparty->id);// Check if customer has already a payment mode or not
 	if ($thirdpartyhadalreadyapaymentmode > 0) {
-		$comment = 'Services for '.$contract->ref.' after the creation of new instance with a payment mode already given';
+		$comment = 'Execute remote script after the creation of the new instance '.$contract->ref.' with a payment mode already given';
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction('actionafterpaid', $contract, 'admin', '', '', 0, $comment);
 		if ($result <= 0) {
