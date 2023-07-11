@@ -723,7 +723,11 @@ function print_user_table($newdb, $object)
 			$sql .= " LEFT JOIN glpi_profiles_users as gpu ON gpu.users_id = gu.id";
 			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id AND gp.interface = 'central'";
 			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.is_deleted = 1)";
-			$sql .= " ORDER BY gu.is_active DESC";
+			if (empty($sortfield)) {
+				$sql .= " ORDER BY gu.is_active DESC";
+			} else {
+				$sql .= $newdb->order($sortfield, $sortorder);
+			}
 		}
 
 		$resql=$newdb->query($sql);
