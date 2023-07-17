@@ -211,8 +211,7 @@ class SellYourSaasUtils
 								if (!$error) {
 									$codepaiementdebit = 'PRE';
 									if ($invoice->mode_reglement_code == $codepaiementdebit) {
-										$delayindaysshort = 1;
-										$enddatetoscan = dol_time_plus_duree($now, -1 * abs($delayindaysshort), 'd');		// $enddatetoscan = yesterday
+										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');		// $enddatetoscan = yesterday
 
 										dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
 										$tmparray = sellyoursaasGetExpirationDate($contract, 0);
@@ -233,58 +232,37 @@ class SellYourSaasUtils
 											if ($protecti < 1000) {	// If not, there is a pb
 												// We will update the end of date of contrat, so first we refresh contract data
 												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
-					
-					
-												$errorforlocaltransaction = 0;
-					
-												$label = 'Renewal of contrat '.$contract->ref;
-												$comment = 'Renew date of contract '.$contract->ref.' by doRenewalContracts';
-					
-												// First launch update of resources if it is not a redirect contract:
-												$result = 1;
-												if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
-													// This update qty of contract lines + qty into linked template invoice.
-													$result = $this->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
-												}
-					
-												if ($result <= 0) {
-													$contracterror[$contract->id] = $contract->ref;
-					
-													$error++;
-													$this->error = $this->error;
-													$this->errors = $this->errors;
+
+												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
+												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
+												$resqlupdate = $this->db->query($sqlupdate);
+												if ($resqlupdate) {
+													$contractprocessed[$contract->id]=$contract->ref;
+				
+													$actioncode = 'RENEW_CONTRACT';
+													$now = dol_now();
+				
+													// Create an event
+													$actioncomm = new ActionComm($this->db);
+													$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+													$actioncomm->code         = 'AC_'.$actioncode;
+													$actioncomm->label        = $label;
+													$actioncomm->datep        = $now;
+													$actioncomm->datef        = $now;
+													$actioncomm->percentage   = -1;   // Not applicable
+													$actioncomm->socid        = $contract->thirdparty->id;
+													$actioncomm->authorid     = $user->id;   // User saving action
+													$actioncomm->userownerid  = $user->id;	// Owner of action
+													$actioncomm->fk_element   = $contract->id;
+													$actioncomm->elementtype  = 'contract';
+													$actioncomm->note_private = $comment;
+				
+													$ret = $actioncomm->create($user);       // User creating action
 												} else {
-													$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
-													$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
-													$resqlupdate = $this->db->query($sqlupdate);
-													if ($resqlupdate) {
-														$contractprocessed[$contract->id]=$contract->ref;
-					
-														$actioncode = 'RENEW_CONTRACT';
-														$now = dol_now();
-					
-														// Create an event
-														$actioncomm = new ActionComm($this->db);
-														$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-														$actioncomm->code         = 'AC_'.$actioncode;
-														$actioncomm->label        = $label;
-														$actioncomm->datep        = $now;
-														$actioncomm->datef        = $now;
-														$actioncomm->percentage   = -1;   // Not applicable
-														$actioncomm->socid        = $contract->thirdparty->id;
-														$actioncomm->authorid     = $user->id;   // User saving action
-														$actioncomm->userownerid  = $user->id;	// Owner of action
-														$actioncomm->fk_element   = $contract->id;
-														$actioncomm->elementtype  = 'contract';
-														$actioncomm->note_private = $comment;
-					
-														$ret = $actioncomm->create($user);       // User creating action
-													} else {
-														$contracterror[$contract->id]=$contract->ref;
-					
-														$error++;
-														$this->error = $this->db->lasterror();
-													}
+													$contracterror[$contract->id]=$contract->ref;
+				
+													$error++;
+													$this->error = $this->db->lasterror();
 												}
 											}
 										}
