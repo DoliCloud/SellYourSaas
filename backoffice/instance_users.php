@@ -645,15 +645,15 @@ function print_user_table($newdb, $object)
 		'firstname'=>array('label'=>"Firstname", 'checked'=>1, 'position'=>50, 'csslist'=>'tdoverflowmax150'),
 		'admin'=>array('label'=>"Admin", 'checked'=>1, 'position'=>22),
 		'email'=>array('label'=>"Email", 'checked'=>1, 'position'=>25),
-		'pass'=>array('label'=>"Pass", 'checked'=>1, 'position'=>27),
+		'pass'=>array('label'=>"Pass", 'checked'=>-1, 'position'=>27),
 		'datec'=>array('label'=>"DateCreation", 'checked'=>1, 'position'=>31),
-		'datem'=>array('label'=>"DateModification", 'checked'=>1, 'position'=>32),
+		'datem'=>array('label'=>"DateModification", 'checked'=>-1, 'position'=>32),
 		'datelastlogin'=>array('label'=>"DateLastLogin", 'checked'=>1, 'position'=>35),
 		'iplastlogin'=>array('label'=>"IPLastLogin", 'checked'=>0, 'position'=>36),
 		'datepreviouslogin'=>array('label'=>"DatePreviousLogin", 'checked'=>0, 'position'=>37),
 		'ippreviouslogin'=>array('label'=>"IPPreviousLogin", 'checked'=>0, 'position'=>38),
 		'entity'=>array('label'=>"Entity", 'checked'=>1, 'position'=>100),
-		'fk_soc'=>array('label'=>"ParentsId", 'checked'=>1, 'position'=>105),
+		'fk_soc'=>array('label'=>"ParentsId", 'checked'=>-1, 'position'=>105),
 		'statut'=>array('label'=>"Status", 'checked'=>1, 'position'=>110),
 	);
 	if (!$sortfield) {
