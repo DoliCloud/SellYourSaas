@@ -28,7 +28,7 @@ This document describes the technical and functional implementation of Sell-Your
 Sell-Your-Saas is an Open Source project, born out of the need to provide, in real time, Web application instances (like Dolibarr ERP CRM, GLPI, MediaWiki, ...) to end users, for immediate use, with the following requirements:
 
 * Able to manage a very high number of instances and users.
-* Very low costs (must be at least 10x lower than Cloud solutions by containers).
+* Very low costs (must be at least 10x lower than Cloud solutions by containers like Docker or Kubernetes).
 * Real-time deployment.
 * Offer full and private access to the proposed application, including administration, with full access without restricting functionality or configuration.
 * Offer optionaly a 100% open SaaS, with SSH, SFTP and direct database access to users.
@@ -3789,6 +3789,8 @@ certbot
 
 * Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php* in the cron of user *admin*.
 
+* Activate the "Stripe" module and set it. On Stripe side, you must enable the WebHooks for a least the message *payment_intent.succeeded*
+
 
 On *Deployment servers*:
 
@@ -3826,7 +3828,7 @@ On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr
 
 == Installation or update of plugin SellYourSaas
 
-For a first installation, you must make the initial setup of plugin. 
+For a first installation, you must make all the initial setup of plugin. 
 If you just added a new deployment server, you must just edit the setup of the module to declare the new server.
 
 
