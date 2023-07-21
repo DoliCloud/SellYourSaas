@@ -106,8 +106,10 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_SUPERVISION_EMAIL", GETPOST("SELLYOURSAAS_SUPERVISION_EMAIL"), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NOREPLY_EMAIL", GETPOST("SELLYOURSAAS_NOREPLY_EMAIL"), 'chaine', 0, '', $conf->entity);
 
-		$dir=GETPOST("DOLICLOUD_SCRIPTS_PATH");
-		if (! dol_is_dir($dir)) setEventMessage($langs->trans("ErrorDirNotFound", $dir), 'warnings');
+		$dir = GETPOST("DOLICLOUD_SCRIPTS_PATH");
+		if ($dir && ! dol_is_dir($dir)) {
+			setEventMessage($langs->trans("ErrorDirNotFound", $dir), 'warnings');
+		}
 		dolibarr_set_const($db, "DOLICLOUD_SCRIPTS_PATH", GETPOST("DOLICLOUD_SCRIPTS_PATH"), 'chaine', 0, '', $conf->entity);
 
 		foreach ($arrayofsuffixfound as $suffix) {
