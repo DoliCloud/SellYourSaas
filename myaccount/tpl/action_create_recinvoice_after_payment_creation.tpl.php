@@ -91,7 +91,11 @@ if (! $error) {
 			$invoice_draft->date				= $dateinvoice;
 
 			$invoice_draft->note_private		= 'Template invoice created after adding a payment mode for card/stripe';
-			$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
+			if ($paymentmode == 'ban') {
+				$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'PRE', 'c_paiement', 'code', 'id', 1);
+			} else {
+				$invoice_draft->mode_reglement_id	= dol_getIdFromCode($db, 'CB', 'c_paiement', 'code', 'id', 1);
+			}
 			$invoice_draft->cond_reglement_id	= dol_getIdFromCode($db, 'RECEP', 'c_payment_term', 'code', 'rowid', 1);
 			$invoice_draft->fk_account          = getDolGlobalInt('STRIPE_BANK_ACCOUNT_FOR_PAYMENTS');	// stripe
 

@@ -1335,7 +1335,7 @@ if ($action == 'updateurl') {
 			if ($resultbankcreate > 0) {
 				$sql = "UPDATE ".MAIN_DB_PREFIX ."societe_rib";
 				$sql.= " SET status = '".$db->escape($servicestatusstripe)."'";
-				$sql.= " WHERE rowid = " . $companybankid;
+				$sql.= " WHERE rowid = " . ((int) $companybankid);
 				$sql.= " AND type = 'ban'";
 				$resql = $db->query($sql);
 				if (! $resql) {
@@ -1404,7 +1404,7 @@ if ($action == 'updateurl') {
 			$id_payment_mode_ban = dol_getIdFromCode($db, 'PRE', 'c_paiement', 'code', 'id', 1);
 
 			// Update all pending recurring invoices of the thirdparty to the payment mode direct debit.
-			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended)
+			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended). For such case, recuring invoice is created at end of this action.
 			if ($id_payment_mode_ban > 0) {
 				$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
 				$sql .= " SET fk_mode_reglement = ".((int) $id_payment_mode_ban);
@@ -1584,7 +1584,7 @@ if ($action == 'updateurl') {
 
 				if (! $error) {
 					$stripe = new Stripe($db);
-					$stripeacc = $stripe->getStripeAccount($service);								// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
+					$stripeacc = $stripe->getStripeAccount($service);	// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
 
 					// Get the Stripe customer (should have been created already when creating the setupintent)
 					// Note that we should have already the customer in $setupintent->customer
