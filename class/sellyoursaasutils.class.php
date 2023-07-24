@@ -208,6 +208,66 @@ class SellYourSaasUtils
 									// Do nothing
 									dol_syslog("Number of open services (".$nbservice.") is zero or contract is undeployed, so we do nothing.");
 								}
+								if (!$error) {
+									$codepaiementdebit = 'PRE';
+									if ($invoice->mode_reglement_code == $codepaiementdebit) {
+										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');		// $enddatetoscan = yesterday
+
+										dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
+										$tmparray = sellyoursaasGetExpirationDate($contract, 0);
+										dol_syslog('Call sellyoursaasGetExpirationDate end', LOG_DEBUG, -1);
+										$expirationdate = $tmparray['expirationdate'];
+										$duration_value = $tmparray['duration_value'];
+										$duration_unit = $tmparray['duration_unit'];
+										//$contract->doRenewalContracts();
+										if ($expirationdate && $expirationdate < $enddatetoscan) {
+											dol_syslog("Define the newdate of end of services from expirationdate=".$expirationdate);
+											$newdate = $expirationdate;
+											$protecti=0;	//$protecti is to avoid infinite loop
+											while ($newdate < $enddatetoscan && $protecti < 1000) {
+												$newdate = dol_time_plus_duree($newdate, $duration_value, $duration_unit);
+												$protecti++;
+											}
+					
+											if ($protecti < 1000) {	// If not, there is a pb
+												// We will update the end of date of contrat, so first we refresh contract data
+												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
+
+												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
+												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
+												$resqlupdate = $this->db->query($sqlupdate);
+												if ($resqlupdate) {
+													$contractprocessed[$contract->id]=$contract->ref;
+				
+													$actioncode = 'RENEW_CONTRACT';
+													$now = dol_now();
+				
+													// Create an event
+													$actioncomm = new ActionComm($this->db);
+													$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+													$actioncomm->code         = 'AC_'.$actioncode;
+													$actioncomm->label        = $label;
+													$actioncomm->datep        = $now;
+													$actioncomm->datef        = $now;
+													$actioncomm->percentage   = -1;   // Not applicable
+													$actioncomm->socid        = $contract->thirdparty->id;
+													$actioncomm->authorid     = $user->id;   // User saving action
+													$actioncomm->userownerid  = $user->id;	// Owner of action
+													$actioncomm->fk_element   = $contract->id;
+													$actioncomm->elementtype  = 'contract';
+													$actioncomm->note_private = $comment;
+				
+													$ret = $actioncomm->create($user);       // User creating action
+												} else {
+													$contracterror[$contract->id]=$contract->ref;
+				
+													$error++;
+													$this->error = $this->db->lasterror();
+												}
+											}
+										}
+									}
+								}
 							}
 						} else {
 							dol_syslog("No linked contract found on this invoice");
