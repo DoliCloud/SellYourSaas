@@ -1322,9 +1322,10 @@ You can create another virtual host for the HTTPS on port 443
 
 [source, bash]
 ---------------
-#########################                                                                                               
-# MyAccount                                                                                        
-#########################                                                                                               
+#########################
+# MyAccount
+#########################
+
 <VirtualHost *:80>
    #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
    #php_admin_value mail.force_extra_parameters "-f postmaster@mysaasdomainname.com"
@@ -5133,24 +5134,28 @@ Services represent pricing policies.
 
 You need to create an *Application* type service that will be linked to the *Package* to allow deployment.
 
-The *Application* type service can then have other types of services like *Options* or *Statistics* in the *Virtual Product* tab.
+The *Application* type service can then have other types of services like *Options* or *Metrics* in the *Virtual Product* tab.
 
 
-Example of Application type service to deploy the Dolibarr ERP CRM PHP application:
+Example of Application type service to deploy a PHP application, like Dolibarr ERP CRM:
 
 image::Example_service_application.png[Exemple service application]
 
-Example for a service adding pricing statistics by User:
+Example for a service adding a pricing metric by User:
 
 image::Example_service_metric_USER.png[Exemple service metric]
 
-Example for a service adding an option for more Go:
+Example for a service adding an option for more Gb:
 
 image::Example_service_option_GO.png[Exemple service option GO]
 
-
 Note: *Options* and *Metrics* type services must be attached to an *Application* type service from the Virtual Products tab. 
 
+In the field *Formulae to count qty*, you can use:
+* BASH:... and bash instructions that return on stdout the qty
+* SQL:... and a SQL with the form: "SELECT ... as nb FROM ..." or "SELECT ... as nb, ... as comment FROM ..."
+The comment will be saved into an extrafield in the template invoice and will be shown on the generated invoice. 
+* PHPMETHOD:nameOfMethod:param1:param2
 
 
 === Get the URL for subscription
