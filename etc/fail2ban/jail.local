@@ -96,11 +96,6 @@ enabled = true
 enabled = true
 
 
-[webmin-auth]
-
-enabled = true
-
-
 [xinetd-fail]
 
 enabled = true
