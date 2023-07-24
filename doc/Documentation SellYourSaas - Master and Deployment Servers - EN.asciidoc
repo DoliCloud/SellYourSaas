@@ -5154,7 +5154,7 @@ Note: *Options* and *Metrics* type services must be attached to an *Application*
 In the field *Formulae to count qty*, you can use:
 * BASH:... and bash instructions that return on stdout the qty
 * SQL:... and a SQL with the form: "SELECT ... as nb FROM ..." or "SELECT ... as nb, ... as comment FROM ..."
-The comment will be saved into an extrafield in the template invoice and will be shown on the generated invoice. 
+The comment will be saved into an extrafield of the contract (only 1 comment for all services lines is possible). It is also copied into an extrafield of the template invoice and will be shown on the generated invoice. 
 * PHPMETHOD:nameOfMethod:param1:param2
 
 

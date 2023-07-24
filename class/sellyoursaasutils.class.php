@@ -228,7 +228,7 @@ class SellYourSaasUtils
 												$newdate = dol_time_plus_duree($newdate, $duration_value, $duration_unit);
 												$protecti++;
 											}
-					
+
 											if ($protecti < 1000) {	// If not, there is a pb
 												// We will update the end of date of contrat, so first we refresh contract data
 												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
@@ -238,10 +238,10 @@ class SellYourSaasUtils
 												$resqlupdate = $this->db->query($sqlupdate);
 												if ($resqlupdate) {
 													$contractprocessed[$contract->id]=$contract->ref;
-				
+
 													$actioncode = 'RENEW_CONTRACT';
 													$now = dol_now();
-				
+
 													// Create an event
 													$actioncomm = new ActionComm($this->db);
 													$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
@@ -256,11 +256,11 @@ class SellYourSaasUtils
 													$actioncomm->fk_element   = $contract->id;
 													$actioncomm->elementtype  = 'contract';
 													$actioncomm->note_private = $comment;
-				
+
 													$ret = $actioncomm->create($user);       // User creating action
 												} else {
 													$contracterror[$contract->id]=$contract->ref;
-				
+
 													$error++;
 													$this->error = $this->db->lasterror();
 												}
@@ -4153,6 +4153,7 @@ class SellYourSaasUtils
 
 					if (! $error && ! is_null($newqty)) {
 						if (($newqty != $currentqty) || ($newcommentonqty != $currentcommentonqty)) {
+							// $currentcommentonqty is current comment on contract extra field
 							// tmpobject is a contract line
 							$tmpobject->qty = $newqty;
 
@@ -4215,7 +4216,8 @@ class SellYourSaasUtils
 
 													$result = $lasttemplateinvoice->update_price();
 
-													if ($lasttemplateinvoice->array_options['options_commentonqty'] != $newcommentonqty) {
+													// Overwrite the extrafield commentonqty of the template invoice. Note that only last comment among all services is saved/kept
+													if ($newcommentonqty && $lasttemplateinvoice->array_options['options_commentonqty'] != $newcommentonqty) {
 														$lasttemplateinvoice->array_options['options_commentonqty'] = $newcommentonqty;
 
 														$result = $lasttemplateinvoice->update($user);
@@ -4251,9 +4253,14 @@ class SellYourSaasUtils
 						dol_syslog("Error Failed to get new value for metric", LOG_WARNING);
 					}
 
+					// end of processing contract line
+
+					// TODO Move this out of the loop on each contract line
 					if (! $error) {
 						$contract->array_options['options_latestresupdate_date'] = dol_now();
-						$contract->array_options['options_commentonqty'] = $newcommentonqty;
+						if ($newcommentonqty) {
+							$contract->array_options['options_commentonqty'] = $newcommentonqty;
+						}
 
 						$result = $contract->update($user);
 						if ($result <= 0) {
@@ -4261,9 +4268,23 @@ class SellYourSaasUtils
 							$this->error = 'Failed to update field options_latestresupdate_date on contract '.$contract->ref;
 						}
 					}
-				}
-			}
+				} // end if formula for contract line defined
+			} // end if remoteaction is refresh
+		} // end loop of each contract line
+
+		// TODO update $arrayofcomment on the contract and rec invoices.
+		// Contract and Invoice to update must have been saved previously into the
+		// array $arrayofrefreshedcontract and $arrayofrefreshedrecinvoice in the loop of contract line.
+		// So here, we can update this linked rec invoices
+		/*
+		foreach($arrayofrefreshedcontract as $refreshedcontract) {
+		 	 $refreshedcontract->array_options['options_commentonqty'] = join(', ', $arrayofcomment);
 		}
+		// Then we must update this linked rec invoices
+		foreach($arrayofrefreshedrecinvoice as $refreshedrecinvoice) {
+			$linkedinvoice->array_options['options_commentonqty'] = join(', ', $arrayofcomment);
+		}
+		*/
 
 		// Complete message if error
 		$recordanevent = 0;
