@@ -11,6 +11,18 @@
 // if (! empty($_SERVER) && (preg_match('/phpsendmail/', @$_SERVER['SCRIPT_FILENAME']) || preg_match('/phpsendmail/', @$_SERVER['SCRIPT_NAME'])) )
 $tmpactionprepend = @$_POST['action'];
 
+/* TODO Enable this by default
+$listofwrappers = stream_get_wrappers();
+$arrayofstreamtodisable = array('compress.zlib', 'ftps', 'glob', 'data', 'expect', 'ftp', 'ogg', 'phar', 'rar', 'zip', 'zlib');
+foreach ($arrayofstreamtodisable as $streamtodisable) {
+	if (!empty($listofwrappers) && in_array($streamtodisable, $listofwrappers)) {
+		stream_wrapper_unregister($streamtodisable);
+	}
+}
+*/
+//$tmp = stream_get_wrappers();
+//var_dump($tmp);
+
 if (preg_match('/^send_/', $tmpactionprepend) || in_array($tmpactionprepend, array('send', 'sendallconfirmed', 'relance'))) {
 	$tmpfile='/tmp/phpsendmailprepend-'.posix_getuid().'-'.getmypid().'.tmp';
 	@unlink($tmpfile);
