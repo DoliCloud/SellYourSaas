@@ -243,6 +243,7 @@ Redeploy=Re-Deploy
 Undeploy=Undeploy
 UndeployInstance=Undeploy and destroy instance
 DangerZone=Danger Zone
+CancelInstance=Cancel instance
 SellYourSaasRemoteServerIpForDeployement=Remote server ip for instances
 ChangeDomain=Change domain
 ChangePlan=Upgrade plan
