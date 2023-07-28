@@ -41,8 +41,13 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 	$result = $thirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $usertotest);
 
 	if ($result <= 0) {
-		$login='';
-		$langs->load("errors");
+		dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO entity '".$entitytotest."' not allowed for user '".$usertotest."'", LOG_NOTICE);
+		sleep(1);	// Anti brut force protection. Must be same delay when password is not valid
+
+		// Load translation files required by the page
+		$langs->loadLangs(array('main', 'errors'));
+
+		$login = '';
 		$_SESSION["dol_loginmesg"]=$langs->transnoentitiesnoconv("ErrorBadLoginPassword");
 	} else {
 		//dol_syslog("thirdparty found with id=".$thirdparty->id);
@@ -61,6 +66,8 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 					$_SESSION["dol_loginsellyoursaas"] = $thirdparty->id;
 					return $tmpuser->login;
 				} else {
+					dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO Setup not complete", LOG_NOTICE);
+
 					$_SESSION["dol_loginmesg"]='ErrorSetupOfModuleSellYourSaasNotComplete';		// Set invisible message
 					return '';
 				}
@@ -91,12 +98,16 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 			hash('sha256', $passwordtotest) == $thirdparty->array_options['options_oldpassword']	// For compatibility with old versions
 			) {
 			if (empty($conf->global->SELLYOURSAAS_ANONYMOUSUSER)) {
+				dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO Setup not complete", LOG_NOTICE);
+
+				// Load translation files required by the page
+				$langs->loadLangs(array('main', 'errors'));
+
 				$login='';
-				$langs->load("errors");
 				$_SESSION["dol_loginmesg"]=$langs->transnoentitiesnoconv("SellYourSaasSetupNotComplete");
 			} else {
 				$tmpuser = new User($db);
-				$tmpuser->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+				$tmpuser->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 				if ($tmpuser->login) {
 					// Login is ok
 					$_SESSION["dol_loginsellyoursaas"] = $thirdparty->id;
@@ -104,8 +115,13 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 				}
 			}
 		} else {
+			dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO entity '".$entitytotest."' not allowed for user '".$usertotest."'", LOG_NOTICE);
+			sleep(1);	// Anti brut force protection. Must be same delay when password is not valid
+
+			// Load translation files required by the page
+			$langs->loadLangs(array('main', 'errors'));
+
 			$login='';
-			$langs->load("errors");
 			$_SESSION["dol_loginmesg"]=$langs->transnoentitiesnoconv("ErrorBadLoginPassword");
 		}
 	}
