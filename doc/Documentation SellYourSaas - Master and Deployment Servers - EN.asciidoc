@@ -5404,10 +5404,10 @@ ufw delete X
 
 === TroubleShooting
 
-==== Ping hangs in input, not in output
+==== Ping hangs in input, not in output. IP v4 or V6 fails in input or output
 
 If you are using a server hosted on OpenStack, a security group may exists that block network in some direction/protocols.
-Check that your security group match the following setup
+Check that your *security group* match the following setup
 
 image::Example_setup_security_group_horizon.png[Example of setup of security group on horizon]
 
