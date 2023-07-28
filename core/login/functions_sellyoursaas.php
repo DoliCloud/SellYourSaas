@@ -41,7 +41,7 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 	$result = $thirdparty->fetch(0, '', '', '', '', '', '', '', '', '', $usertotest);
 
 	if ($result <= 0) {
-		dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO entity '".$entitytotest."' not allowed for user '".$usertotest."'", LOG_NOTICE);
+		dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO not allowed for user '".$usertotest."'", LOG_NOTICE);
 		sleep(1);	// Anti brut force protection. Must be same delay when password is not valid
 
 		// Load translation files required by the page
@@ -115,7 +115,7 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 				}
 			}
 		} else {
-			dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO entity '".$entitytotest."' not allowed for user '".$usertotest."'", LOG_NOTICE);
+			dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO not allowed for user '".$usertotest."'", LOG_NOTICE);
 			sleep(1);	// Anti brut force protection. Must be same delay when password is not valid
 
 			// Load translation files required by the page
