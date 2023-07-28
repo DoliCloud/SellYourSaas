@@ -3,8 +3,9 @@
 
 ## 2.1
 
+* FIX Notice on login attempt on myaccount fixed to allow fail2ban.
 * FIX $emailtowarn on job scheduled was not using the sellyoursaas setuped email.
-* NEW Can filter and sort in the list of usersof a given instance.
+* NEW Can filter and sort in the list of "users of" a given instance.
 * NEW Enhance script disk_used_per_instance to allow to process 1 instance only and to run updates manually
 * NEW More options on SELLYOURSAAS_ONLY_NON_PROFIT_ORGA
 * NEW Features "Shell after swtiching to paid" and "Sql after switch to paid" are now available.
