@@ -54,7 +54,7 @@ $action		= (GETPOST('action', 'alpha') ? GETPOST('action', 'alpha') : 'view');
 $confirm	= GETPOST('confirm', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 $contextpage = 'instance_user';
-$optioncss  = GETPOST('optioncss','alpha');
+$optioncss  = GETPOST('optioncss', 'alpha');
 
 $sortfield = GETPOST('sortfield', 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
@@ -760,7 +760,7 @@ function print_user_table($newdb, $object)
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
 			if (in_array($key, array('rowid', 'login', 'lastname', 'firstname', 'admin', 'email'))) {
-			//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
 				print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
 				print '</td>';
@@ -885,7 +885,6 @@ function print_user_table($newdb, $object)
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
-			$sql .= $newdb->order($sortfield, $sortorder);
 
 			if (empty($sortfield)) {
 				$sql .= " ORDER BY gu.is_active DESC";
