@@ -1,0 +1,234 @@
+  #Note: You must disable the rule DEFAULT_URI and HANDLING_UNTRUSTED_INPUT into the main usr.sbin.apache2
+  # and check the include if exists <local/usr.sbin.apache2> exists.
+
+  signal send set=usr1 peer=unconfined,
+
+
+  ^DEFAULT_URI flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/openssl>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/mysql>
+
+    network inet,
+    network inet6,
+    network unix dgram,
+
+    # Warning, this may create troubles with sending email from postfix
+    deny /etc/group r,
+    deny /etc/passwd r,
+
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/apache2/.htpasswd r,
+    /etc/clamav/clamd.conf r,
+    /etc/mysql/conf.d/ r,
+    /etc/mysql/conf.d/** rix,
+    /etc/mysql/conf.d/mysql.cnf r,
+    /etc/mysql/conf.d/mysqldump.cnf r,
+    /etc/mysql/mariadb.cnf r,
+    /etc/mysql/mariadb.conf.d/ r,  
+    /etc/mysql/mariadb.conf.d/50-client.cnf r,
+    /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf r,
+    /etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf r,
+    /etc/mysql/mariadb.conf.d/50-server.cnf r,
+    /etc/php{,5,7,8}/** r,  
+    /etc/postfix/dynamicmaps.cf.d/ r,
+    /etc/sellyoursaas-public.conf r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/logs/** w,
+    /home/admin/tools/maxmind/** rix,
+    /home/admin/wwwroot/** rix,
+    /home/admin/wwwroot/dolibarr_documents/** rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /run/mysqld/mysqld.sock r,
+    /tmp/spam/ rw,
+    /tmp/spam/** rw,
+    /usr/bin/clamdscan rix,
+    /usr/bin/find rix,
+    /usr/bin/free rix,
+    /usr/bin/grep rix,
+    /usr/bin/id rix,
+    /usr/bin/mariadb-dump mrix,
+    /usr/bin/mysqldump mrix,
+    /usr/bin/wc rix,
+    /usr/bin/zip rix,
+    /usr/bin/zstd rix,
+    /usr/sbin/post* rix,
+    /usr/sbin/sendmail rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/lib/letsencrypt/http_challenges/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/apache2/other_vhosts_pid.log w,
+    /var/log/apache2/websites_vhosts_access.log w,
+    /var/log/apache2/websites_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/dash rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
+    /mnt/diskhome/home/osu*/dbn*/documents/website/*/.well-known/** r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /run/systemd/notify w,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+
+    # Note: there is already the abstractions/user-tmp that allows /tmp but for owner only
+    #allow /tmp/test.txt r,
+  }
+
+  ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/openssl>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/mysql>
+
+    capability dac_read_search,
+
+    network inet,
+    network inet6,
+
+    signal receive set=term peer=apache2,
+
+    /home/admin/logs/** w,  
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/error.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/apache_sellyoursaas_suspended_error.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/apache2/other_vhosts_pid.log w,
+    /var/log/apache2/websites_vhosts_access.log w,
+    /var/log/apache2/websites_vhosts_error.log w,
+    /{usr/,}bin/dash rix,
+    /{usr/,}bin/sh rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,    
+  }
+    
+  ^sellyoursaas-instances flags=(attach_disconnected) {
+    #include <abstractions/apache2-common>
+    #include <abstractions/base>
+    #include <abstractions/openssl>
+    #include <abstractions/php>
+    #include <abstractions/postfix-common>
+    #include <abstractions/user-tmp>
+    #include <abstractions/mysql>
+
+    network inet,
+    network inet6,
+    network unix dgram,
+
+    signal receive set=term peer=apache2,
+
+    # Warning, this may create troubles with sending email from postfix on ubuntu 18.04, 20.04
+    #deny /etc/group r,
+    #deny /etc/passwd r,
+
+    /dev/tty rw,
+    /etc/ImageMagick*/** rw,
+    /etc/clamav/clamd.conf r,
+    /etc/mysql/conf.d/ r,
+    /etc/mysql/conf.d/** rix,
+    /etc/mysql/conf.d/mysql.cnf r,
+    /etc/mysql/conf.d/mysqldump.cnf r,
+    /etc/mysql/mariadb.cnf r,
+    /etc/mysql/mariadb.conf.d/ r,    
+    /etc/mysql/mariadb.conf.d/50-client.cnf r,
+    /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf r,
+    /etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf r,
+    /etc/mysql/mariadb.conf.d/50-server.cnf r,
+    /etc/php{,5,7,8}/** r, 
+    /etc/postfix/dynamicmaps.cf.d/ r,
+    /etc/sellyoursaas-public.conf r,
+    /etc/ssl/openssl.cnf rw,
+    /home/admin/logs/** w,
+    /home/admin/tools/maxmind/** rix,
+    /home/admin/wwwroot/** rix,
+    /home/admin/wwwroot/dolibarr_documents/** rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/ rw,
+    /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/** rw,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
+    /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php r,
+    /proc/*/attr/current rw,
+    /proc/loadavg r,
+    /run/clamav/** rw,
+    /run/mysqld/mysqld.sock r,
+    /tmp/spam/ rw,
+    /tmp/spam/** rw,
+    /usr/bin/clamdscan rix,
+    /usr/bin/find rix,
+    /usr/bin/free rix,
+    /usr/bin/grep rix,
+    /usr/bin/id rix,
+    /usr/bin/mariadb-dump mrix,
+    /usr/bin/mysqldump mrix,
+    /usr/bin/wc rix,
+    /usr/bin/zip rix,
+    /usr/bin/zstd rix,
+    /usr/sbin/post* rix,
+    /usr/sbin/sendmail rix,
+    /usr/share/ImageMagick*/** rw,
+    /usr/share/zoneinfo-icu/ r,
+    /usr/share/zoneinfo-icu/** r,
+    /usr/share/zoneinfo/ r,
+    /usr/share/zoneinfo/** r,
+    /var/lib/letsencrypt/http_challenges/** r,
+    /var/log/apache2/access.log w,
+    /var/log/apache2/access_ssl.log w,
+    /var/log/apache2/apache_sellyoursaas_suspended_error.log w,
+    /var/log/apache2/error.log w,
+    /var/log/apache2/error_ssl.log w,
+    /var/log/apache2/other_vhosts_access.log w,
+    /var/log/apache2/other_vhosts_error.log w,
+    /var/log/apache2/other_vhosts_pid.log w,
+    /var/log/apache2/websites_vhosts_access.log w,
+    /var/log/apache2/websites_vhosts_error.log w,
+    /var/log/phpmail.log w,
+    /var/log/phpsendmail.log rw,
+    /var/spool/postfix/public/pickup rw,
+    /var/www/html/index.html r,
+    /{usr/,}bin/bash rix,
+    /{usr/,}bin/cat rix,
+    /{usr/,}bin/dash rix,
+    /{usr/,}bin/gzip rix,
+    /{usr/,}bin/tar rix,
+    /{usr/,}bin/uncompress rix,
+    /mnt/diskhome/home/osu*/dbn*/documents/website/*/.well-known/** r,
+    owner /mnt/diskhome/home/osu*/** rw,
+    owner /run/systemd/notify w,
+    owner /var/spool/postfix/maildrop/ rw,
+    owner /var/spool/postfix/maildrop/** rw,
+
+    # Note: there is already the abstractions/user-tmp that allows /tmp but for owner only
+    #allow /tmp/test.txt r,
+  }
+
+    
