@@ -871,7 +871,7 @@ function print_user_table($newdb, $object)
 			}
 			$key = 'lastname';
 			if ($search[$key]) {
-				$sql .= natural_search($key, $search[$key], 0);
+				$sql .= natural_search('realname', $search[$key], 0);
 			}
 			$key = 'firstname';
 			if ($search[$key]) {
@@ -879,18 +879,14 @@ function print_user_table($newdb, $object)
 			}
 			$key = 'admin';
 			if ($search[$key]) {
-				$sql .= natural_search($key, $search[$key], 0);
+				$sql .= natural_search('gp.interface', $search[$key], 0);
 			}
 			$key = 'email';
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
 
-			if (empty($sortfield)) {
-				$sql .= " ORDER BY gu.is_active DESC";
-			} else {
-				$sql .= $newdb->order($sortfield, $sortorder);
-			}
+			$sql .= $newdb->order($sortfield, $sortorder);
 		} else {
 			// Generic case
 		}
