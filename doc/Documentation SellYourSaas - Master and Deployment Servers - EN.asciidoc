@@ -1811,9 +1811,8 @@ echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - 
 Note: To test a rule file on an existing log file:
 fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
-Note: To unban an ip:
-fail2ban-client unban IP
-
+Note: To unban an IP
+fail2ban-client unban IP.to.unban
 
 === Test spamassassin ===
 
@@ -4427,7 +4426,7 @@ systemctl restart nfs-kernel-server
 
 - Allow access between the new *Deployment server* and the *Master server* in the firewall.
 
-*If using iptables*
+*If using iptables* (old method)
 
 On the *Master server*:
 
@@ -5385,7 +5384,7 @@ Then edit the */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it 
 
 === Block/Unblock an IP using internal firewall
 
-To block an external IP 'the.ip.to.block' to access port 'porttoblock':
+To block or ban an external IP 'the.ip.to.block' to access port 'porttoblock':
 
 [source,bash]
 ---------------
