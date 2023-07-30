@@ -41,6 +41,7 @@ AmountNewInstances=Amount of new instances
 AmountLostInstances=Amount of lost instances
 Authorized_keyInstalled=File authorized_keys_support installed
 LockfileInstalled=File install.lock installed
+UnlockfileInstalled=File upgrade.unlock installed
 InstallModulesLockfileInstalled=File installmodules.lock installed
 DoliCloudArea=DoliCloud area
 DateLastBackup=Date backup (latest try)
