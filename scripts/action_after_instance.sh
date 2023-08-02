@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # To use this script with remote ssh (not required when using the remote agent):
-# Create a symbolic link to this file .../action_website_instance.sh into /usr/bin
+# Create a symbolic link to this file .../action_after_instance.sh into /usr/bin
 # Grant adequate permissions (550 mean root and group www-data can read and execute, nobody can write)
-# sudo chown root:www-data /usr/bin/action_website_instance.sh
-# sudo chmod 550 /usr/bin/action_website_instance.sh
+# sudo chown root:www-data /usr/bin/action_after_instance_instance.sh
+# sudo chmod 550 /usr/bin/action_after_instance.sh
 # And allow apache to sudo on this script by doing visudo to add line:
 #www-data        ALL=(ALL) NOPASSWD: /usr/bin/action_website_instance.sh
 
