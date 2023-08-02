@@ -905,7 +905,7 @@ function print_user_table($newdb, $object)
 				// Action column
 				if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 					print '<td align="center">';
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto($langs->trans('ResetPassword'), 'object_technic').'</a>';
 					print '</td>';
 				}
 				print '<td>';
@@ -947,7 +947,7 @@ function print_user_table($newdb, $object)
 				// Action column
 				if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 					print '<td align="center">';
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto($langs->trans('ResetPassword'), 'object_technic').'</a>';
 					print '</td>';
 				}
 				print '</tr>';
