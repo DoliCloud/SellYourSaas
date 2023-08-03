@@ -783,7 +783,7 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Loop on invoice for customer with default payment mode Stripe and take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+	 * Loop on each sale invoice with default payment mode Stripe and take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
@@ -911,6 +911,7 @@ class SellYourSaasUtils
 	/**
 	 * doTakePaymentStripeForThirdparty
 	 * Take payment/send email for a given thirdparty ID. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+	 * Note: Some code has been implemented to manage Stripe SEPA mode=ban, but method used by batch for payment of direct debit is doTakePaymentStripeSEPA() not calling doTakePaymentStripeForThirdparty().
 	 *
 	 * @param	int		             $service					'StripeTest' or 'StripeLive'
 	 * @param	int		             $servicestatus				Service 0 or 1
@@ -941,6 +942,18 @@ class SellYourSaasUtils
 		// Check parameters
 		if (empty($thirdparty_id)) {
 			$this->errors[]='Empty parameter thirdparty_id when calling doTakePaymentStripeForThirdparty';
+			return 1;
+		}
+
+		if ($mode == 'ban') {
+			// This mode is not supported here. If you need it, you can do this process:
+
+			// Create the request to make a SEPA direct debit in database (add a record into prelevement_demande)
+			// $did = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture');
+			// Create the direct debit order
+			//$result = $invoice->makeStripeSepaRequest($user, $did);
+
+			$this->errors[] = 'Mode ban is not supported by doTakePaymentStripeForThirdparty(). You can do it with invoice->demande_prelevement() then invoice->makeStripeSepaRequest()';
 			return 1;
 		}
 
@@ -1184,7 +1197,8 @@ class SellYourSaasUtils
 							}
 						}
 
-						if (!$error) {	// Payment was not canceled
+						if (!$error) {
+							// Payment try can be done (no reason to have it canceled)
 							if ($mode == "ban") {
 								$stripecard = $stripe->sepaStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
 							} elseif ($mode == "card") {
@@ -1231,7 +1245,7 @@ class SellYourSaasUtils
 										$stripefailuremessage=$e->getMessage();
 									}
 								} else { // Using new SCA method
-									dol_syslog("* Create payment on card ".$stripecard->id.", amounttopay=".$amounttopay.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
+									dol_syslog("* Create payment on payment mode ".$stripecard->id.", amounttopay=".$amounttopay.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
 									// Create payment intent and charge payment (because of confirmnow = true)
 									$confirmnow = true;
@@ -1348,13 +1362,13 @@ class SellYourSaasUtils
 
 									$ispostactionok = 1;
 
-									// Creation of payment line
+									// Creation of payment line in database if payment mode is not Direct Debit.
 									include_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 									$paiement = new Paiement($this->db);
 									$paiement->datepaye     = $now;
 									$paiement->date         = $now;
 									if ($currencyCodeType == $conf->currency) {
-										$paiement->amounts      = array($invoice->id => $amounttopay);   // Array with all payments dispatching with invoice id
+										$paiement->amounts = array($invoice->id => $amounttopay);   // Array with all payments dispatching with invoice id
 									} else {
 										$paiement->multicurrency_amounts = array($invoice->id => $amounttopay);   // Array with all payments dispatching
 
@@ -1437,16 +1451,19 @@ class SellYourSaasUtils
 
 								$object = $invoice;
 
-								// Send emails
+								// Set the label of email to use by default when success
 								$labeltouse = 'InvoicePaymentSuccess';
 								$sendemailtocustomer = 1;
 
+								// Overwrite if an error was found
 								if (empty($charge) || $charge->status == 'failed') {
 									$labeltouse = 'InvoicePaymentFailure';
-									if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+									if ($noemailtocustomeriferror) {
+										$sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+									}
 								}
 
-								// Track an event
+								// Add an action event into database
 								if (empty($charge) || $charge->status == 'failed') {
 									$actioncode='PAYMENT_STRIPE_KO';
 									$extraparams=$stripefailurecode;
@@ -1518,7 +1535,8 @@ class SellYourSaasUtils
 						$extraparams='';
 					}
 
-					// Send email + create action after
+
+					// Send email to customer + record action after
 					if ($sendemailtocustomer && $labeltouse) {
 						dol_syslog("* Send email with result of payment - ".$labeltouse);
 
@@ -1682,7 +1700,7 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Loop on invoice for customer with default payment mode Stripe sepa and send sepa direct debit ot stripe / sendmail.
+	 * Loop on sale invoice with default payment mode Stripe sepa and send sepa direct debit ot stripe / sendmail.
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
@@ -1785,14 +1803,14 @@ class SellYourSaasUtils
 						$sql .= " FROM ".MAIN_DB_PREFIX."prelevement_demande";
 						$sql .= " WHERE fk_facture = ".((int) $obj->rowid);
 						$sql .= " AND type = 'ban'"; // To exclude record saved by other online payments like credit card payments
-						$sql .= " AND traite = 0";
+						$sql .= " AND traite = 0";	// To not process payment request that were already converted into a direct debit or credit transfer order (Note: fk_prelevement_bons is also empty when traite = 0)
 						$rsql = $this->db->query($sql);
 						if ($rsql) {
 							$n = $this->db->num_rows($rsql);
 							if ($n != 1) {
 								$error++;
-								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order', LOG_ERR);
-								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order found. We should have only 1.';
+								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many direct debit order. We should have only 1.', LOG_ERR);
+								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many direct debit order found. We should have only 1.';
 							} else {
 								$objd = $this->db->fetch_object($rsql);
 								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
@@ -3627,7 +3645,6 @@ class SellYourSaasUtils
 				dol_syslog("password0salted=".$password0salted." passwordmd5salted=".$passwordmd5salted." passwordsha256salted=".$passwordsha256salted, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = '';
-				//dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
 				$password0 = dol_hash($password);	// deprecated. Depend on master setup.
 				$passwordmd5 = dol_hash($password, 'md5');
 				$passwordsha256 = dol_hash($password, 'sha256');
@@ -3931,7 +3948,7 @@ class SellYourSaasUtils
 					dol_syslog("passwordmd5salted=".$passwordmd5salted);
 
 					$conf->global->MAIN_SECURITY_SALT = '';
-					dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
+					dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables");
 					$password0 = dol_hash($password);
 					$passwordmd5 = dol_hash($password, 'md5');
 					$passwordsha256 = dol_hash($password, 'sha256');
@@ -4278,7 +4295,7 @@ class SellYourSaasUtils
 		// So here, we can update this linked rec invoices
 		/*
 		foreach($arrayofrefreshedcontract as $refreshedcontract) {
-		 	 $refreshedcontract->array_options['options_commentonqty'] = join(', ', $arrayofcomment);
+			  $refreshedcontract->array_options['options_commentonqty'] = join(', ', $arrayofcomment);
 		}
 		// Then we must update this linked rec invoices
 		foreach($arrayofrefreshedrecinvoice as $refreshedrecinvoice) {

@@ -633,7 +633,7 @@ class ActionsSellyoursaas
 			}
 		}
 
-		// Action when we click on "Pay all pending invoices"
+		// Action when we click on "Pay all pending invoices" on a credit card line
 		if (in_array($parameters['currentcontext'], array('thirdpartybancard')) && $action == 'sellyoursaastakepayment' && GETPOST('companymodeid', 'int') > 0) {
 			// Define environment of payment modes
 			$servicestatusstripe = 0;

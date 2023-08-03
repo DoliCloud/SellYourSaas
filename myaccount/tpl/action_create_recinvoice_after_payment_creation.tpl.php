@@ -268,6 +268,8 @@ if (! $error) {
 
 		// Now we convert invoice into a template
 		if (! $error) {
+			dol_syslog("Now we convert invoice into recuring invoice");
+
 			//var_dump($invoice_draft->lines);
 			//var_dump(dol_print_date($date_start,'dayhour'));
 			//exit;
@@ -374,13 +376,13 @@ if (! $error) {
 				$user->rights->facture->invoice_advance->validate = $savperm2;
 			}
 
-			// Now try to take the payment
-			if (! $error) {
+			// Now try to take the payment if payment is OK and payment mode is not a differed payment mode
+			if (! $error && $paymentmode != 'ban') {
 				if (empty($paymentmode)) {
 					$paymentmode = 'card';
 				}
 
-				dol_syslog("--- Now we try to take payment with mode ".$paymentmode." for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+				dol_syslog("--- Now we try to take payment with mode '".$paymentmode."' for thirdpartyid = ".$mythirdpartyaccount->id, LOG_DEBUG, 0);	// Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
 
 
 				$sellyoursaasutils = new SellYourSaasUtils($db);

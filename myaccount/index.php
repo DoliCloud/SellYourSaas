@@ -1286,6 +1286,8 @@ if ($action == 'updateurl') {
 		include_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
 
+		dol_syslog("Record the SEPA payment mode from myaccount");
+
 		$companybankaccount = new CompanyBankAccount($db);
 		$companybankaccount->label = GETPOST('bankname', 'alphanohtml');
 		$companybankaccount->bank = GETPOST('bankname', 'alphanohtml');
@@ -1476,6 +1478,8 @@ if ($action == 'updateurl') {
 		$iban = '';
 		$bic = '';
 	} else {
+		dol_syslog("Record the credit card");
+
 		// Case of Credit or Debit card
 		$setupintentid = GETPOST('setupintentid', 'alpha');
 
