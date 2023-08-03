@@ -1809,8 +1809,8 @@ class SellYourSaasUtils
 							$n = $this->db->num_rows($rsql);
 							if ($n != 1) {
 								$error++;
-								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many direct debit order. We should have only 1.', LOG_ERR);
-								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many direct debit order found. We should have only 1.';
+								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.', LOG_ERR);
+								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.';
 							} else {
 								$objd = $this->db->fetch_object($rsql);
 								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
