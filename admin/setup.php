@@ -427,6 +427,22 @@ if ($allowresellerprogram) {
 		print '<td><span class="opacitymedium small">30 %</span></td>';
 		print '</tr>';
 	}
+
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND").'</td>';
+	print '<td>';
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND', array(), null, 0, 0, 1);
+	} else {
+		if (empty($conf->global->SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND)) {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		} else {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		}
+	}
+	print '</td>';
+	print '<td></td>';
+	print '</tr>';
+	
 }
 
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');

@@ -1109,7 +1109,12 @@ if ($action == 'updateurl') {
 	$trackid = 'thi'.$mythirdpartyaccount->id;
 
 	$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, array(), array(), array(), '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
-	$result = $cmailfile->sendfile();
+	if (!getDolGlobalInt("SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND")) {
+		$result = $cmailfile->sendfile();
+	}
+
+	$mythirdpartyaccount->array_options['options_date_apply_for_reseller'] = dol_now();
+	$result = $mythirdpartyaccount->update(0);
 
 	if ($result) setEventMessages($langs->trans("TicketSent"), null, 'warnings');
 	else setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
