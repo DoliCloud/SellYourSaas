@@ -110,14 +110,14 @@ class SellYourSaasUtils
 					$invoice->fetch_thirdparty();
 
 					if ($invoice->thirdparty->array_options['manualcollection']) {
-						dol_syslog("This thirdparty has manual collection on, so we don't validate invoice");
+						dol_syslog("This thirdparty has manual collection on, so we don't validate the invoice");
 					} else {
 						$tmparray = $invoice->thirdparty->getOutstandingBills('customer');
 						if ($tmparray['opened'] > 0) {
 							dol_syslog("This thirdparty has already open invoices, so we don't validate any other invoices");     // So only 1 invoice is validated per thirdparty and pass
 						}
 
-						// Search contract linked to invoice
+						// Search contracts linked to the invoice we try to validate
 						$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
