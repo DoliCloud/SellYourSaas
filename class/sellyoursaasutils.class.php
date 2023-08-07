@@ -3092,7 +3092,7 @@ class SellYourSaasUtils
 								// Now we force disable of recurring invoices
 								$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
-								if (is_array($object->linkedObjects['facturerec'])) {
+								if (!empty($object->linkedObjects['facturerec']) && is_array($object->linkedObjects['facturerec'])) {
 									foreach ($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
 										// Disabled this template invoice
 										$res = $templateinvoice->setValueFrom('suspended', 1);
@@ -3103,7 +3103,7 @@ class SellYourSaasUtils
 								}
 
 								// Delete draft invoices linked to this thirdparty, after a successfull undeploy
-								if (is_array($object->linkedObjects['facture'])) {
+								if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture'])) {
 									foreach ($object->linkedObjects['facture'] as $idinvoice => $invoicetodelete) {
 										if ($invoicetodelete->statut == Facture::STATUS_DRAFT) {
 											if (preg_match('/\(.*\)/', $invoicetodelete->ref)) {
@@ -3580,9 +3580,14 @@ class SellYourSaasUtils
 					break;
 				}
 
-				$tmpold = explode('.', $object->oldcopy->ref_customer, 2);
-				$sldAndSubdomainold = $tmpold[0];
-				$domainnameold = (empty($tmpold[1]) ? '' :$tmpold[1]);
+				// Define old domain data for the 'rename' remoteaction
+				$sldAndSubdomainold = '';
+				$domainnameold = '';
+				if (!empty($object->oldcopy->ref_customer)) {
+					$tmpold = explode('.', $object->oldcopy->ref_customer, 2);
+					$sldAndSubdomainold = $tmpold[0];
+					$domainnameold = (empty($tmpold[1]) ? '' :$tmpold[1]);
+				}
 
 				$orgname = $contract->thirdparty->name;
 				$countryid = 0;
@@ -3726,7 +3731,8 @@ class SellYourSaasUtils
 				$tmppackage->targetsrcfile2 = make_substitutions($tmppackage->targetsrcfile2, $substitarray);
 				$tmppackage->targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
 
-				$automigrationtmpdir = $dirfortmpfiles."/automigration_".$object->socid.".tmp";
+
+				$automigrationtmpdir = $dirfortmpfiles."/automigration".($object->socid > 0 ? "_".$object->socid : "").".tmp";
 				$automigrationdocumentarchivename = (empty($object->array_options["automigrationdocumentarchivename"]) ? '' : $object->array_options["automigrationdocumentarchivename"]);
 				$dirforexampleforsources = (empty($object->array_options["dirforexampleforsources"]) ? '' : $object->array_options["dirforexampleforsources"]);
 				$laststableupgradeversion = (empty($object->array_options["laststableupgradeversion"]) ? '' : $object->array_options["laststableupgradeversion"]);
