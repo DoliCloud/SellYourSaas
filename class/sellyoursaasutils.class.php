@@ -190,7 +190,7 @@ class SellYourSaasUtils
 									$result = $invoice->validate($user);
 
 									if ($result > 0) {
-										$draftinvoiceprocessed[$invoice->id]=$invoice->ref;
+										$draftinvoiceprocessed[$invoice->id] = $invoice->ref;
 
 										// Now we build the PDF invoice
 										$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
@@ -198,7 +198,7 @@ class SellYourSaasUtils
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
 
 										$model_pdf = ($invoice->model_pdf ? $invoice->model_pdf : $invoice->modelpdf);
-										$ret = $invoice->fetch($id); // Reload to get new records
+										$ret = $invoice->fetch($invoice->id); // Reload to get new records
 
 										dol_syslog("GETPOST('lang_id','aZ09')=".GETPOST('lang_id', 'aZ09')." invoice->thirdparty->default_lang=".(is_object($invoice->thirdparty)?$invoice->thirdparty->default_lang:'invoice->thirdparty not defined')." newlang=".$newlang." outputlangs->defaultlang=".$outputlangs->defaultlang);
 
