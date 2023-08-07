@@ -113,7 +113,7 @@ class SellYourSaasUtils
 
 					$invoice->fetch_thirdparty();
 
-					if ($invoice->thirdparty->array_options['manualcollection']) {
+					if (!empty($invoice->thirdparty->array_options['manualcollection'])) {
 						dol_syslog("This thirdparty has manual collection on, so we don't validate the invoice");
 					} else {
 						$tmparray = $invoice->thirdparty->getOutstandingBills('customer');
