@@ -2197,7 +2197,7 @@ class SellYourSaasUtils
 					// Test if there is pending invoice
 					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
-					if (is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
+					if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						usort($object->linkedObjects['facture'], "cmp");
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');

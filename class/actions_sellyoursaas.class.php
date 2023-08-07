@@ -1170,7 +1170,9 @@ class ActionsSellyoursaas
 		}
 		$pdf->SetFont(pdf_getPDFFont($outputlangs));
 
-		if ($conf->global->MAIN_DISABLE_PDF_COMPRESSION) $pdf->SetCompression(false);
+		if (getDolGlobalString('MAIN_DISABLE_PDF_COMPRESSION')) {
+			$pdf->SetCompression(false);
+		}
 		//$pdf->SetCompression(false);
 
 		$pagecounttmp = $pdf->setSourceFile($file);
