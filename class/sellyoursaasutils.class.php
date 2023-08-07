@@ -64,9 +64,10 @@ class SellYourSaasUtils
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$restrictonthirdpartyid		0=All qualified draft invoices, >0 = Restrict on qualified draft invoice of thirdparty.
+	 * @param	int		$maxtoprocess				0=All, >0 = Nb max of invoices to process
 	 * @return	int									0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doValidateDraftInvoices($restrictonthirdpartyid = 0)
+	public function doValidateDraftInvoices($restrictonthirdpartyid = 0, $maxtoprocess = 0)
 	{
 		global $conf, $langs, $user;
 
@@ -97,11 +98,14 @@ class SellYourSaasUtils
 		$sql.= " AND f.total_ttc > 0";
 		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".((int) $restrictonthirdpartyid);
 		$sql.= " ORDER BY f.datef, f.rowid";
+		if ($maxtoprocess > 0) {
+			$sql.= $this->db->plimit($maxtoprocess);
+		}
 
 		$resql = $this->db->query($sql);
 		if ($resql) {
 			$num_rows = $this->db->num_rows($resql);
-			$i= 0;
+			$i = 0;
 			while ($i < $num_rows) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj && $invoice->fetch($obj->rowid) > 0) {

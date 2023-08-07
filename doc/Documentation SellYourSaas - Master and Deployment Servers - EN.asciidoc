@@ -2564,7 +2564,7 @@ GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dol
 FLUSH PRIVILEGES;
 ---------------
 
---TODO Reduce permissions of this user sellyoursaas
+--TODO Reduce permissions of this database user sellyoursaas
 This is used by:
 * the batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
 * the batch *batch_detect_evil_instances.php* to SELECT contracts
@@ -3697,7 +3697,7 @@ You must have inside the cron of user *admin*:
 ---------------
 
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *batch* is the user dedicated for batch processing. You will set them
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *anonymousbatch* is the user dedicated for batch processing. You will set them
 later on the Dolibarr master.
 
 ==== On deployment servers
@@ -3899,6 +3899,7 @@ Give this user the permissions below and only the permission below:
 *** View services
 ** Third Parties Module
 *** View third parties related to user
+*** Extend access to all thirdparties
 
 * Create a *Product tag* called "SaaS products"
 
