@@ -308,7 +308,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">5</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL").'</td>';
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL"), $langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLELDesc")).'</td>';
 print '<td>';
 print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPARALLEL" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 4).'">';
 print '</td>';
