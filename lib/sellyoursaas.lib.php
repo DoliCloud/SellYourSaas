@@ -460,6 +460,11 @@ function sellyoursaas_admin_prepare_head()
 	$head[$h][2] = "setup_reseller";
 	$h++;
 
+	$head[$h][0] = "setup_endpoints.php";
+	$head[$h][1] = $langs->trans("Endpoints");
+	$head[$h][2] = "setup_endpoints";
+	$h++;
+
 	$head[$h][0] = "setup_other.php";
 	$head[$h][1] = $langs->trans("Other");
 	$head[$h][2] = "setup_other";
