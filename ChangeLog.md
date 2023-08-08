@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW reorganisation of the setup tabs. Add a dedicated tab for reseller options.
 * FIX $emailtowarn on job scheduled was not using the sellyoursaas setuped email.
 * NEW Can filter and sort in the list of usersof a given instance.
 * NEW Enhance script disk_used_per_instance to allow to process 1 instance only and to run updates manually
