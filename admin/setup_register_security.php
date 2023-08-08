@@ -196,7 +196,7 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';
 $array = array('0' => 'No', '1' => 'NonProfitOrganization', '2' => 'NonProfitOrganizationAndCaritative', '3' => 'NonProfitOrganizationAndSmall');
-print $form->selectarray('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', $array, getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA'), 0);
+print $form->selectarray('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', $array, getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA'), 0, 0, 0, '', 1, 0, 0, '', 'maxwidth200');
 print '</td>';
 print '<td><span class="opacitymedium small">Set to yes if you want registration of non-profit organizations only</span></td>';
 print '</tr>';

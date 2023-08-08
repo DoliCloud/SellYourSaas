@@ -390,7 +390,8 @@ if ($allowresellerprogram) {
 
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MINAMOUNT_TO_CLAIM").'</td>';
 	print '<td>';
-	print '<input class="width50" type="text" name="SELLYOURSAAS_MINAMOUNT_TO_CLAIM" value="'.getDolGlobalString('SELLYOURSAAS_MINAMOUNT_TO_CLAIM').'">';
+	print '<input class="width50 right" type="text" name="SELLYOURSAAS_MINAMOUNT_TO_CLAIM" value="'.getDolGlobalString('SELLYOURSAAS_MINAMOUNT_TO_CLAIM').'">';
+	print ' '.$conf->currency;
 	print '</td>';
 	print '<td><span class="opacitymedium small">100</span></td>';
 	print '</tr>';
