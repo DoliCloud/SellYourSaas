@@ -647,7 +647,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '</span>';
 			print '</div>';
 			print '<div class="tagtd center">';
-			// TODO Use same frequency than into the template invoice
+			// TODO Use same frequency than into the template invoice ?
 			$nbmonth = 1;
 			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 			print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
@@ -659,7 +659,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		}
 
 		// Hard coded option: A website
-		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
+		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0
+			&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', 'intcomma'))))) {
 			$type_db = $conf->db->type;
 			$hostname_db  = $contract->array_options['options_hostname_db'];
 			$username_db  = $contract->array_options['options_username_db'];

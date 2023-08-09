@@ -404,7 +404,7 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA')) {
 	print '<td>';
 	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium small">12345,12346,...</span></td>';
+	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
 	print '</tr>';
 }
 
@@ -421,7 +421,7 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to allow customer to set a ustom URL.</td>';
+print '<td><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
 print '</tr>';
 
 // Allow Custom URL for ?
@@ -430,7 +430,7 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 	print '<td>';
 	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', '').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium small">12345,12346,...</span></td>';
+	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
 	print '</tr>';
 }
 
@@ -447,8 +447,18 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to allow customer to set a ustom URL.</td>';
+print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
 print '</tr>';
+
+// Allow deployment of Dolibarr website for ?
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID").'</td>';
+	print '<td>';
+	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', '').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+	print '</tr>';
+}
 
 // Product ID for website deployment
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
