@@ -636,13 +636,20 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '</td></tr></table>';
 			print '</div>';
 
+			print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<input type="hidden" name="action" value="deploycustomurl">';
+			print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
+			print '<input type="hidden" name="mode" value="'.$mode.'">';
+			print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
+
 			print '<div class="tagtd valignmiddle">';
 			print $langs->trans("OptionYourCustomDomainName").'<br>';
 			print '<span class="small">';
 			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
 			print $langs->trans("OptionYourCustomDomainNamePrerequisites").'<br>';
 			print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
-			print '<input disabled="disabled" type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
+			print '<input type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
 			print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
 			print '</span>';
 			print '</div>';
@@ -650,9 +657,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			// TODO Use same frequency than into the template invoice ?
 			$nbmonth = 1;
 			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
-			print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-			print '<input type="submit" class="btn btn-primary wordbreak" name="activateoption" disabled="disabled" value="'.$langs->trans("Enable").'">';
+			//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
+			print '<input type="submit" class="btn btn-primary wordbreak" name="activateoption" value="'.$langs->trans("Enable").'">';
 			print '</div>';
+
+			print '</form>';
+
 			print '</div></div>';
 
 			print '<hr>';
@@ -708,7 +718,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<input type="hidden" name="mode" value="'.$mode.'">';
 				print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
 
-				print '<span class=" bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
+				print '<span class="bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
 				print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
 				print '<option value="">&nbsp;</option>';
 				foreach ($websitestatic->records as $website) {

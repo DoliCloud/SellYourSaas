@@ -386,6 +386,7 @@ if (preg_match('/logout/', $mode)) {
 	header("Location: /index.php".($param?'?'.$param:''));
 	exit;
 }
+
 if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'updateforcepriceinstance') {
 	$errors = 0;
 	$result = 1;
@@ -543,7 +544,7 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'r
 	}
 }
 
-if ($action == 'updateurl') {
+if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
@@ -2058,7 +2059,7 @@ if ($action == 'updateurl') {
 				';
 
 				// TODO
-				// Make a redirect on cancellation survey
+				// Make a redirect on cancelation survey
 
 				llxFooter();
 
@@ -2142,14 +2143,14 @@ if ($action == 'updateurl') {
 		if (!$foundlinecontract) {
 			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end);
 			if ($idlinecontract <= 0) {
-				// TODO: Send mail auto to inform admins error line creation
+				// TODO: Send mail auto to inform admins of error line creation
 				$error ++;
 			}
 			if (!$error) {
 				$object->fetch($contractid);
 				$result = $object->active_line($user, $idlinecontract, $date_start, '', 'Activation after website deployment');
 				if (!$result) {
-					// TODO: Send mail auto to inform admins errror activation line
+					// TODO: Send mail auto to inform admins of error activation line
 					$error ++;
 				}
 			}
@@ -2159,7 +2160,7 @@ if ($action == 'updateurl') {
 			$object->fetchObjectLinked();
 			$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
 			if (count($arrayfacturerec) != 1) {
-				// TODO: Send mail auto to inform admins multiples faturerec contract
+				// TODO: Send mail auto to inform admins of multiples faturerec contract
 				$error ++;
 			} else {
 				$facturerec = $arrayfacturerec[0];
@@ -2172,7 +2173,7 @@ if ($action == 'updateurl') {
 				if (!$foundlinefacturerec) {
 					$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
 					if (!$result) {
-						// TODO: Send mail auto to inform admins errror line creation facturRec
+						// TODO: Send mail auto to inform admins of error line creation facturRec
 						$error ++;
 					}
 				}
@@ -2189,14 +2190,16 @@ if ($action == 'updateurl') {
 		if ($error) {
 			$db->rollback();
 			setEventMessages($langs->trans("ErrorDeployWebsite"), null, 'errors');
-			header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		} else {
 			$db->commit();
 			setEventMessages($langs->trans("DeploymentWebsiteDone"), null, 'mesgs');
-			header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		}
+
+		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
+} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+	// TODO
 }
 
 
