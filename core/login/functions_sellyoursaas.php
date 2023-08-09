@@ -62,13 +62,21 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 				$tmpuser = new User($db);
 				$tmpuser->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 				if ($tmpuser->login) {
-					// Login is ok
-					$_SESSION["dol_loginsellyoursaas"] = $thirdparty->id;
-					return $tmpuser->login;
+					if ($tmpuser->status == $tmpuser::STATUS_DISABLED) {
+						// Load translation files required by the page
+						$langs->loadLangs(array('main', 'errors', 'sellyoursaas'));
+
+						$_SESSION["dol_loginmesg"] = 'SellYourSaasSetupNotComplete: The anonymous user has been set to a disabled user.';
+						return '';
+					} else {
+						// Login is ok
+						$_SESSION["dol_loginsellyoursaas"] = $thirdparty->id;
+						return $tmpuser->login;
+					}
 				} else {
 					dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO Setup not complete", LOG_NOTICE);
 
-					$_SESSION["dol_loginmesg"]='ErrorSetupOfModuleSellYourSaasNotComplete';		// Set invisible message
+					$_SESSION["dol_loginmesg"] = 'SellYourSaasSetupNotComplete: The anonymous user to use for customer dashboard has not been set';		// Set invisible message
 					return '';
 				}
 			}
@@ -104,8 +112,9 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 				$langs->loadLangs(array('main', 'errors'));
 
 				$login='';
-				$_SESSION["dol_loginmesg"]=$langs->transnoentitiesnoconv("SellYourSaasSetupNotComplete");
+				$_SESSION["dol_loginmesg"] = 'SellYourSaasSetupNotComplete Anonymous user not defined';
 			} else {
+				// If authentication is OK, we force to use the user defined into SellYourSaas setup by SELLYOURSAAS_ANONYMOUSUSER
 				$tmpuser = new User($db);
 				$tmpuser->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 				if ($tmpuser->login) {

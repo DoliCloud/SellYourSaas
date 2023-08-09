@@ -202,7 +202,6 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 	$urlfaq = $conf->global->SELLYOURSAAS_MAIN_FAQ_URL;
 }
 
-
 $urlstatus = getDolGlobalString('SELLYOURSAAS_STATUS_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
@@ -1116,8 +1115,11 @@ if ($action == 'updateurl') {
 	$mythirdpartyaccount->array_options['options_date_apply_for_reseller'] = dol_now();
 	$result = $mythirdpartyaccount->update(0);
 
-	if ($result) setEventMessages($langs->trans("TicketSent"), null, 'warnings');
-	else setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
+	if ($result) {
+		setEventMessages($langs->trans("TicketSent"), null, 'warnings');
+	} else {
+		setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
+	}
 	$action = '';
 } elseif ($action == 'updatemythirdpartyaccount') {
 	$error = 0;
