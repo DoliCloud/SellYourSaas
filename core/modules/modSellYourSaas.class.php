@@ -28,7 +28,7 @@ class modSellYourSaas extends DolibarrModules
 	 */
 	public function __construct($db)
 	{
-		global $langs,$conf;
+		global $conf;
 
 		$this->db = $db;
 
@@ -549,6 +549,21 @@ class modSellYourSaas extends DolibarrModules
 		);
 		$r++;
 
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_resellerlist',
+			'type'=>'left',
+			'titre'=>'PendingResellers',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'mysaas_pendingreseller',
+			'url'=>'/societe/list.php?search_categ_sup=-2&search_options_date_apply_for_reseller_startday=1&search_options_date_apply_for_reseller_startmonth=1&search_options_date_apply_for_reseller_startyear=2000',
+			'langs'=>'sellyoursaas@sellyoursaas',
+			'position'=>602,
+			'enabled'=>'isModEnabled("sellyoursaas") && getDolGlobalInt(\'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM\')',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
 
 		// Security tools
 
@@ -774,10 +789,10 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('optinmessages',          "OptinForCommercialMessages",  'boolean', 160,    '', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('emailccinvoice',                    "EmailCCInvoices",  'varchar', 180, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('manualcollection',                 "ManualCollection",  'boolean', 194,    '', 'thirdparty', 0, 0, '',     '', 1, '',  1, 'If checked, the batch SellYourSaasValidateDraftInvoices will never validate invoices of this customer', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('commission',                      "PartnerCommission",      'int', 195,   '3', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('date_apply_for_reseller',         "DateApplyReseller",     'date', 195,    '', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('commission',                      "PartnerCommission",      'int', 196,   '3', 'thirdparty', 0, 0, '', $param, 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('stripeaccount',                       "StripeAccount",  'varchar', 197, '255', 'thirdparty', 0, 0, '',     '', 1, '', -1, 'StripeAccountForCustomerHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('maxnbofinstances',                 "MaxNbOfInstances",      'int', 198,   '3', 'thirdparty', 0, 0, '4',    '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('date_apply_for_reseller',        "DateApplyReseller",      'date', 200,    '', 'thirdparty', 0, 0, '',     '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$arrayoptions=array(
 			'profit'=>'ProfitOrganization',
 			'nonprofit'=>'NonProfitOrganization'

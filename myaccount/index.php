@@ -1076,6 +1076,12 @@ if ($action == 'updateurl') {
 		$action = 'presend';
 	}
 } elseif ($action == 'sendbecomereseller') {
+	$dateapplyreseller = $mythirdpartyaccount->array_options['options_date_apply_for_reseller'];
+	if ($dateapplyreseller) {
+		accessforbidden("A request was already sent or too many request.", 1, 1, 1);
+		exit;
+	}
+
 	// Send reseller request
 	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 	$sellyoursaasnoreplyemail = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
