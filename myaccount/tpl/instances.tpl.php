@@ -629,10 +629,18 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		// Hard coded option: Custom domain name
 		if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', 'intcomma'))))) {
 			print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
-			print '<div class="tagtd">';
+
+			print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
+			print '<table class="centpercent center paddingleft paddingright"><tr><td width="100%" class="photo">';
+			print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/theme/common/octicons/build/svg/milestone.svg" title="'.dol_escape_htmltag($alt).'">';
+			print '</td></tr></table>';
+			print '</div>';
+
+			print '<div class="tagtd valignmiddle">';
 			print $langs->trans("OptionYourCustomDomainName").'<br>';
 			print '<span class="small">';
 			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
+			print $langs->trans("OptionYourCustomDomainNamePrerequisites").'<br>';
 			print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
 			print '<input disabled="disabled" type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
 			print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
@@ -643,9 +651,11 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$nbmonth = 1;
 			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 			print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-			print '<input type="submit" name="activateoption" disabled="disabled" value="'.$langs->trans("Enable").'">';
+			print '<input type="submit" class="btn btn-primary wordbreak" name="activateoption" disabled="disabled" value="'.$langs->trans("Enable").'">';
 			print '</div>';
 			print '</div></div>';
+
+			print '<hr>';
 		}
 
 		// Hard coded option: A website
@@ -678,7 +688,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd">';
+			print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
 			if (empty($websitemodenabled)) {
 				print $langs->trans("OptionYourWebsiteNoEnabled").'<br>';
 			} else {
@@ -818,7 +828,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 		print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
-
+		print '<br>';
 		print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';
 		print '<br>';
 
