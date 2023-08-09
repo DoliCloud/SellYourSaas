@@ -642,6 +642,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
 			print '<input type="hidden" name="mode" value="'.$mode.'">';
 			print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
+			print '<input type="hidden" name="page_y" value="">';
 
 			print '<div class="tagtd valignmiddle">';
 			print $langs->trans("OptionYourCustomDomainName").'<br>';
@@ -658,7 +659,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$nbmonth = 1;
 			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 			//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-			print '<input type="submit" class="btn btn-primary wordbreak" name="activateoption" value="'.$langs->trans("Enable").'">';
+			print '<input type="submit" class="btn btn-primary wordbreak reposition" name="activateoption" value="'.$langs->trans("Enable").'">';
 			print '</div>';
 
 			print '</form>';
@@ -717,6 +718,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
 				print '<input type="hidden" name="mode" value="'.$mode.'">';
 				print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
+				print '<input type="hidden" name="page_y" value="">';
 
 				print '<span class="bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
 				print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
