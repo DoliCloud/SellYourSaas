@@ -830,3 +830,5 @@ SepaSentToBank=SEPA direct debit sent to the bank
 SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT=Product to deploy when deploying a website of the Dolibarr CMS 
 SELLYOURSAAS_EXTCSS=URL to force another CSS file for the register page
 AnExampleIsAvailableWith=An example is available with
+DateApplyReseller=Date apply for reseller
+SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND=Disable the send of an email when applying for reseller
