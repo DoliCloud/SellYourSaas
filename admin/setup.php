@@ -93,8 +93,6 @@ if ($action == 'set') {
 	$error=0;
 
 	if (! $error) {
-		dolibarr_set_const($db, 'SELLYOURSAAS_MAIN_FAQ_URL', GETPOST("SELLYOURSAAS_MAIN_FAQ_URL", 'custom', 0, FILTER_VALIDATE_URL), 'chaine', 0, '', $conf->entity);
-
 		dolibarr_set_const($db, "SELLYOURSAAS_NAME", GETPOST("SELLYOURSAAS_NAME"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_MAIN_DOMAIN_NAME", GETPOST("SELLYOURSAAS_MAIN_DOMAIN_NAME"), 'chaine', 0, '', $conf->entity);
@@ -139,14 +137,12 @@ if ($action == 'set') {
 		foreach ($arrayofsuffixfound as $suffix) {
 			dolibarr_set_const($db, "SELLYOURSAAS_PRICES_URL".$suffix, GETPOST("SELLYOURSAAS_PRICES_URL".$suffix), 'chaine', 0, '', $conf->entity);
 		}
-		//dolibarr_set_const($db, "SELLYOURSAAS_PRICES_URL", GETPOST("SELLYOURSAAS_PRICES_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_STATUS_URL", GETPOST("SELLYOURSAAS_STATUS_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_URL", GETPOST("SELLYOURSAAS_RESELLER_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_MYACCOUNT_FOOTER", GETPOST("SELLYOURSAAS_MYACCOUNT_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_CONVERSION_FOOTER", GETPOST("SELLYOURSAAS_CONVERSION_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 
-		dolibarr_set_const($db, "SELLYOURSAAS_CSS", GETPOST("SELLYOURSAAS_CSS", 'none'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_ANONYMOUSUSER", GETPOST("SELLYOURSAAS_ANONYMOUSUSER", 'alpha'), 'chaine', 0, '', $conf->entity);
 	}
 
 	if (! $error) {
@@ -206,9 +202,12 @@ llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 $linkback='<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
-print '<span class="opacitymedium">'.$langs->trans("Prerequisites")."</span><br>\n";
-print '<br>';
+$error=0;
 
+$head = sellyoursaas_admin_prepare_head();
+print dol_get_fiche_head($head, "setup", "SellYouSaasSetup", -1, "sellyoursaas@sellyoursaas");
+
+print '<span class="opacitymedium">'.$langs->trans("Prerequisites")." :</span><br>\n";
 print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
@@ -220,17 +219,12 @@ if (in_array('exec', $arrayoffunctionsdisabled)) {
 }
 print "<br>\n";
 
-$error=0;
-
-$head = sellyoursaas_admin_prepare_head();
-print dol_get_fiche_head($head, "setup", "SellYouSaasSetup", -1, "sellyoursaas@sellyoursaas");
-
 print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP_SELF"].'" name="form_index">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder" width="100%">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
 print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
@@ -347,104 +341,6 @@ print '</td>';
 print '<td><span class="opacitymedium small">SaaS Customers</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', array(), null, 0, 0, 1);
-} else {
-	if (empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM)) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
-//print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
-print '</td>';
-print '<td><span class="opacitymedium small">Set to yes if you want your customers being able to apply to become resellers</span></td>';
-print '</tr>';
-
-$allowresellerprogram = getDolGlobalInt('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM');
-if ($allowresellerprogram) {
-	print '<tr class="oddeven"><td>'.$langs->trans("DefaultCommission");
-	print '</td>';
-	print '<td>';
-	print '<input class="width50 right" type="text" name="SELLYOURSAAS_DEFAULT_COMMISSION" value="'.getDolGlobalString('SELLYOURSAAS_DEFAULT_COMMISSION').'"> %';
-	print '</td>';
-	print '<td><span class="opacitymedium small">25%</span></td>';
-	print '</tr>';
-
-	print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSResellers").'</td>';
-	print '<td>';
-	$defaultcustomercategid = getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG');
-	print $formother->select_categories(Categorie::TYPE_SUPPLIER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_RESELLER_CATEG', 0, 1, 'miwidth300');
-	print '</td>';
-	print '<td><span class="opacitymedium small">SaaS Resellers</span></td>';
-	print '</tr>';
-
-	print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasResellerUrl").'</td>';
-	print '<td>';
-	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_URL" value="'.getDolGlobalString('SELLYOURSAAS_RESELLER_URL').'">';
-	print '</td>';
-	print '<td><span class="opacitymedium small">https://www.mysaasdomainname.com/en-become-a-dolicloud-reseller.php</span></td>';
-	print '</tr>';
-
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MINAMOUNT_TO_CLAIM").'</td>';
-	print '<td>';
-	print '<input class="width50" type="text" name="SELLYOURSAAS_MINAMOUNT_TO_CLAIM" value="'.getDolGlobalString('SELLYOURSAAS_MINAMOUNT_TO_CLAIM').'">';
-	print '</td>';
-	print '<td><span class="opacitymedium small">100</span></td>';
-	print '</tr>';
-
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_EMAIL").'</td>';
-	print '<td>';
-	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_RESELLER_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL').'">';
-	print '</td>';
-	print '<td><span class="opacitymedium small">partner@mysaasdomainname.com</span></td>';
-	print '</tr>';
-
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE").'</td>';
-	print '<td>';
-	if ($conf->use_javascript_ajax) {
-		print ajax_constantonoff('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE', array(), null, 0, 0, 1);
-	} else {
-		if (empty($conf->global->SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE)) {
-			print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-		} else {
-			print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-		}
-	}
-	//print $form->selectyesno('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE', $allowresellerprogram, 1);
-	print '</td>';
-	print '<td></td>';
-	print '</tr>';
-
-	// If option to allow reseller custome prices is on, we can set a maximum for discount
-	if (getDolGlobalInt('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE')) {
-		print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION").'</td>';
-		print '<td>';
-		print '<input class="maxwidth50 right" type="text" name="SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION" value="'.getDolGlobalInt('SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION', 0).'"> %';
-		print '</td>';
-		print '<td><span class="opacitymedium small">30 %</span></td>';
-		print '</tr>';
-	}
-
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND").'</td>';
-	print '<td>';
-	if ($conf->use_javascript_ajax) {
-		print ajax_constantonoff('SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND', array(), null, 0, 0, 1);
-	} else {
-		if (empty($conf->global->SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND)) {
-			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-		} else {
-			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-		}
-	}
-	print '</td>';
-	print '<td></td>';
-	print '</tr>';
-	
-}
-
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');
 print '</td>';
 print '<td>';
@@ -473,28 +369,6 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '</tr>';
 }
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_STATUS_URL" value="'.getDolGlobalString('SELLYOURSAAS_STATUS_URL').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">https://status.mysaasdomainname.com</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
-print '</td>';
-print '<td colspan="2">';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL').'">';
-print '</td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("CSSForCustomerAndRegisterPages").'</td>';
-print '<td>';
-print '<textarea name="SELLYOURSAAS_CSS" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_CSS').'</textarea>';
-print '</td>';
-print '<td></td>';
-print '</tr>';
-
 print '<tr class="oddeven"><td>'.$langs->trans("FooterContent").'</td>';
 print '<td>';
 print '<textarea name="SELLYOURSAAS_MYACCOUNT_FOOTER" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER').'</textarea>';
@@ -507,6 +381,13 @@ print '<td>';
 print '<textarea name="SELLYOURSAAS_CONVERSION_FOOTER" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER').'</textarea>';
 print '</td>';
 print '<td><span class="opacitymedium small">&lt;script&gt;Your conversion trackers&lt;/script&gt;</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("AnonymousUser").'</td>';
+print '<td>';
+print $form->select_dolusers(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'), 'SELLYOURSAAS_ANONYMOUSUSER', 1);
+print '</td>';
+print '<td><span class="opacitymedium small">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
 print '</tr>';
 
 print '</table>';

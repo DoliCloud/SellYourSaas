@@ -101,7 +101,6 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT", GETPOST("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBHOURSBETWEENTRIES", GETPOST("SELLYOURSAAS_NBHOURSBETWEENTRIES", 'none'), 'chaine', 0, 'Nb hours minium between each invoice payment try', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES", GETPOST("SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES", 'none'), 'chaine', 0, 'Nb days before stopping invoice payment try', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_ANONYMOUSUSER", GETPOST("SELLYOURSAAS_ANONYMOUSUSER", 'alpha'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND", GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND", GETPOST("SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND", 'int'), 'chaine', 0, '', $conf->entity);
@@ -130,22 +129,8 @@ llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 $linkback='<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
-print '<span class="opacitymedium">'.$langs->trans("Prerequisites")."</span><br>\n";
-print '<br>';
-
-print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-$arrayoffunctionsdisabled = explode(',', ini_get('disable_functions'));
-if (in_array('exec', $arrayoffunctionsdisabled)) {
-	print "Parameter <b>disable_functions</b>: Bad. Must not contain 'exec'<br>";
-} else {
-	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
-}
-print "<br>\n";
-
-
 $error=0;
+
 $head = sellyoursaas_admin_prepare_head();
 print dol_get_fiche_head($head, "setup_automation", "SellYouSaasSetup", -1, "sellyoursaas@sellyoursaas");
 
@@ -154,18 +139,11 @@ print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder" width="100%">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
 print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
-
-print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("AnonymousUser").'</td>';
-print '<td>';
-print $form->select_dolusers(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'), 'SELLYOURSAAS_ANONYMOUSUSER', 1);
-print '</td>';
-print '<td><span class="opacitymedium small">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
-print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT").'</td>';
 print '<td>';

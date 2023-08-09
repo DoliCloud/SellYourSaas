@@ -3,6 +3,8 @@
 
 ## 2.1
 
+* NEW Add allowed patterns for shell scripts (CLI after install, CLI after switch to pay)
+* NEW reorganisation of the setup tabs. Add a dedicated tab for reseller and endpoints options.
 * FIX $emailtowarn on job scheduled was not using the sellyoursaas setuped email.
 * NEW Can filter and sort in the list of usersof a given instance.
 * NEW Enhance script disk_used_per_instance to allow to process 1 instance only and to run updates manually
