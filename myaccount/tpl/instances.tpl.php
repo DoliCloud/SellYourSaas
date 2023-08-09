@@ -627,7 +627,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<br>';
 
 		// Hard coded option: Custom domain name
-		if (GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL", 'int') && (!GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdparty->id, explode(',', GETPOST('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', 'intcomma'))))) {
+		if (GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL", 'int') && (!GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdpartyaccount->id, explode(',', GETPOST('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', 'intcomma'))))) {
 			print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
 			print '<div class="tagtd">';
 			print $langs->trans("OptionYourCustomDomainName").'<br>';
