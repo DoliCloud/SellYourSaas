@@ -627,27 +627,29 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<br>';
 
 		// Hard coded option: Custom domain name
-		print '<div class="tagtable centpercent divcustomdomain hidden"><div class="tagtr">';
-		print '<div class="tagtd">';
-		print $langs->trans("OptionYourCustomDomainName").'<br>';
-		print '<span class="small">';
-		print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
-		print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
-		print '<input disabled="disabled" type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
-		print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
-		print '</span>';
-		print '</div>';
-		print '<div class="tagtd center">';
-		// TODO Use same frequency than into the template invoice
-		$nbmonth = 1;
-		print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
-		print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-		print '<input type="submit" name="activateoption" disabled="disabled" value="'.$langs->trans("Enable").'">';
-		print '</div>';
-		print '</div></div>';
+		if (GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL", 'int') && (!GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdparty->id, explode(',', GETPOST('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', 'intcomma'))))) {
+			print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
+			print '<div class="tagtd">';
+			print $langs->trans("OptionYourCustomDomainName").'<br>';
+			print '<span class="small">';
+			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
+			print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
+			print '<input disabled="disabled" type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
+			print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
+			print '</span>';
+			print '</div>';
+			print '<div class="tagtd center">';
+			// TODO Use same frequency than into the template invoice
+			$nbmonth = 1;
+			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+			print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
+			print '<input type="submit" name="activateoption" disabled="disabled" value="'.$langs->trans("Enable").'">';
+			print '</div>';
+			print '</div></div>';
+		}
 
 		// Hard coded option: A website
-		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
+		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
 			$type_db = $conf->db->type;
 			$hostname_db  = $contract->array_options['options_hostname_db'];
 			$username_db  = $contract->array_options['options_username_db'];
