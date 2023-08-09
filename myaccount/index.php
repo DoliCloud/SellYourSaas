@@ -1109,7 +1109,7 @@ if ($action == 'updateurl') {
 	$trackid = 'thi'.$mythirdpartyaccount->id;
 
 	$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, array(), array(), array(), '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
-	if (!getDolGlobalInt("SELLYOURSAAS_APPLY_RESELLER_EMAIL_NOT_SEND")) {
+	if (!getDolGlobalInt("SELLYOURSAAS_APPLY_RESELLER_EMAIL_DISABLED")) {
 		$result = $cmailfile->sendfile();
 	}
 
