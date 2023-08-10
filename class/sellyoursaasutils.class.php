@@ -1762,8 +1762,7 @@ class SellYourSaasUtils
 		$sql .= " AND sr.type = 'ban'";						// This exclude payment mode of other types
 		$sql .= " AND sr.card_type = 'sepa_debit'";			// Only sepa_debit payment mode
 		$sql .= " AND sr.stripe_card_ref IS NOT NULL";		// Only stripe payment mode
-		// TODO Filter also on AND ext_payment_site = 'StripeLive'
-
+		$sql .= " AND sr.ext_payment_site = '".$this->db->escape($service)."'";
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
 		//print $sql;exit;
@@ -1830,14 +1829,14 @@ class SellYourSaasUtils
 					}
 
 					if (!$error) {	// No error
-						$invoiceprocessedok[$obj->rowid]=$invoice->ref;
+						$invoiceprocessedok[$obj->rowid] = $invoice->ref;
 						$this->db->commit();
 					} else {
-						$invoiceprocessedko[$obj->rowid]=$invoice->ref;
+						$invoiceprocessedko[$obj->rowid] = $invoice->ref;
 						$this->db->rollback();
 					}
 
-					$invoiceprocessed[$obj->rowid]=$invoice->ref;
+					$invoiceprocessed[$obj->rowid] = $invoice->ref;
 				}
 
 				$i++;
@@ -1851,7 +1850,7 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output = count($invoiceprocessedok).' invoice(s) paid among '.count($invoiceprocessed).' qualified invoice(s) with a valid Stripe default payment mode processed'.(count($invoiceprocessedok)>0 ? ' : '.join(',', $invoiceprocessedok) : '').' (ran in mode '.$servicestatus.') (search done on SellYourSaas customers only)';
+		$this->output = count($invoiceprocessedok).' invoice(s) processed to request direct debit on Stripe among '.count($invoiceprocessed).' qualified invoice(s) with a valid Stripe default payment mode processed'.(count($invoiceprocessedok)>0 ? ' : '.join(',', $invoiceprocessedok) : '').' (ran in mode '.$servicestatus.') (search done on SellYourSaas customers only)';
 		$this->output .= ' - '.count($invoiceprocessedko).' discarded (missing Stripe customer/card id, payment error or other reason)'.(count($invoiceprocessedko)>0 ? ' : '.join(',', $invoiceprocessedko) : '');
 
 		$conf->global->SYSLOG_FILE = $savlog;

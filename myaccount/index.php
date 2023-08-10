@@ -1404,7 +1404,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				}
 
 				if (!$error) {
-					// Creation of Stripe SEPA + update of societe_account
+					// Creation of Stripe SEPA + update of societe_rib
 					$card = $stripe->sepaStripe($cu, $companypaymentmode, $stripeacc, $servicestatus, 1);
 					if (!$card) {
 						$error++;
