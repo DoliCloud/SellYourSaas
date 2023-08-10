@@ -1705,7 +1705,8 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Loop on sale invoice with default payment mode Stripe sepa and send sepa direct debit ot stripe / sendmail.
+	 * Loop on sale invoices with a default payment mode "Direct debit" and with a known bank mandate for the customer.
+	 * For each invoice found, it creates a SEPA direct debit on Stripe then send an sendmail.
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
