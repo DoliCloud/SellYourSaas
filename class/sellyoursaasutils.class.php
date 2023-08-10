@@ -216,6 +216,7 @@ class SellYourSaasUtils
 								if (!$error) {
 									$codepaiementdebit = 'PRE';
 									if ($invoice->mode_reglement_code == $codepaiementdebit) {
+										// If invoice is an invoice to pay with a direct debit
 										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');		// $enddatetoscan = yesterday
 
 										dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
@@ -236,10 +237,10 @@ class SellYourSaasUtils
 
 											if ($protecti < 1000) {	// If not, there is a pb
 												// We will update the end of date of contrat, so first we refresh contract data
-												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
+												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc'));
 
-												$label = 'Invoice '.$invoice->ref.' validated by doValidateDraftInvoices()';
-												$comment = '';
+												$label = 'Increase end date of services for contract '.$contract->ref;
+												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices()';
 
 												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
 												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
