@@ -238,6 +238,9 @@ class SellYourSaasUtils
 												// We will update the end of date of contrat, so first we refresh contract data
 												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
 
+												$label = 'Invoice '.$invoice->ref.' validated by doValidateDraftInvoices()';
+												$comment = '';
+
 												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
 												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
 												$resqlupdate = $this->db->query($sqlupdate);
@@ -1804,6 +1807,7 @@ class SellYourSaasUtils
 					}
 
 					if (!$error) {
+						// Search pending payment requests for invoice
 						$sql = "SELECT rowid";
 						$sql .= " FROM ".MAIN_DB_PREFIX."prelevement_demande";
 						$sql .= " WHERE fk_facture = ".((int) $obj->rowid);
@@ -1814,15 +1818,15 @@ class SellYourSaasUtils
 							$n = $this->db->num_rows($rsql);
 							if ($n != 1) {
 								$error++;
-								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.', LOG_ERR);
-								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.';
+								dol_syslog('Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.', LOG_ERR);
+								$this->errors[] = 'Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.';
 							} else {
 								$objd = $this->db->fetch_object($rsql);
 								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
 								if ($result < 0) {
 									$error++;
-									dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. '.$invoice->error, LOG_ERR);
-									$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. '.$invoice->error;
+									dol_syslog('Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. '.$invoice->error, LOG_ERR);
+									$this->errors[] = 'Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. '.$invoice->error;
 								}
 							}
 						}
