@@ -347,23 +347,23 @@ function checkScriptFile($scriptfile, $fh)
 			break;
 		}
 		// Check allowed pattern
-		if (preg_match('/^touch __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^touch __INSTANCEDIR__\/[\/a-z0-9_\.]+;?$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^rm -fr __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^rm -fr __INSTANCEDIR__\/[\/a-z0-9_\.]+;?$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/[\/a-z0-9_\.]+;?$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown( -R)? __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^chown( -R)? __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/[\/a-z0-9_\.]+;?$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__$/i', $newline)) {
+		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__;?$/i', $newline)) {
 			continue;
 		}
-
 		// TODO enhance list of allowed patterns
+		// ...
 
 		$linenotvalid = $i;
 		break;
