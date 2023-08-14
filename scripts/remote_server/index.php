@@ -13,6 +13,7 @@ if (empty($fh)) {
 }
 
 $allowed_hosts_array = array();
+$allowed_token = '';
 $dnsserver = '';
 $instanceserver = '';
 $backupdir = '';
@@ -26,6 +27,9 @@ if ($fp) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'allowed_hosts') {
 			$allowed_hosts_array = explode(",", $tmpline[1]);
+		}
+		if ($tmpline[0] == 'allowed_token') {
+			$allowed_token = explode(",", $tmpline[1]);
 		}
 		if ($tmpline[0] == 'dnsserver') {
 			$dnsserver = $tmpline[1];
@@ -41,7 +45,9 @@ if ($fp) {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit;
 }
-if (! in_array('127.0.0.1', $allowed_hosts_array)) $allowed_hosts_array[]='127.0.0.1';	// Add localhost if not present
+//if (! in_array('127.0.0.1', $allowed_hosts_array)) {
+//	$allowed_hosts_array[] = '127.0.0.1';	// Add localhost if not present
+//}
 
 
 if (empty($allowed_hosts_array) || ! in_array($_SERVER['REMOTE_ADDR'], $allowed_hosts_array)) {
@@ -69,6 +75,14 @@ if (! empty($tmparray[1])) {
 	}
 }
 
+// Set variables
+$tmpparam = preg_split('/\s/', $paramspace);
+$osusername = $tmpparam[0];
+$dbname = $tmpparam[4];
+$dbusername = $tmpparam[6];
+$cliafter = $tmpparam[18];
+$cliafterpaid = $tmpparam[46];
+
 
 /*
  * Actions
@@ -88,12 +102,11 @@ if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployal
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
-	$tmpparam = preg_split('/\s/', $paramspace);
-	$cliafter = $tmpparam[18];
-	$cliafterpaid = $tmpparam[46];
-
-	checkScriptFile($cliafter, $fh);
-	checkScriptFile($cliafterpaid, $fh);
+	$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	if (!in_array($tmparray[0], array('undeployall'))) {
+		checkScriptFile($cliafter, $fh, $params);
+		checkScriptFile($cliafterpaid, $fh, $params);
+	}
 
 	exec('./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
@@ -117,12 +130,9 @@ if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'uns
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
-	$tmpparam = preg_split('/\s/', $paramspace);
-	$cliafter = $tmpparam[18];
-	$cliafterpaid = $tmpparam[46];
-
-	checkScriptFile($cliafter, $fh);
-	checkScriptFile($cliafterpaid, $fh);
+	//$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	//checkScriptFile($cliafter, $fh, $params);
+	//checkScriptFile($cliafterpaid, $fh, $params);
 
 	exec('./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
@@ -147,12 +157,9 @@ if (in_array($tmparray[0], array('backup'))) {
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
-	$tmpparam = preg_split('/\s/', $paramspace);
-	$cliafter = $tmpparam[18];
-	$cliafterpaid = $tmpparam[46];
-
-	//checkScriptFile($cliafter, $fh);
-	//checkScriptFile($cliafterpaid, $fh);
+	//$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	//checkScriptFile($cliafter, $fh, $params);
+	//checkScriptFile($cliafterpaid, $fh, $params);
 
 	exec('sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir.' confirm --quick --forcersync --forcedump 2>&1', $output, $return_var);
 
@@ -187,12 +194,9 @@ if (in_array($tmparray[0], array('migrate'))) {
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
-	$tmpparam = preg_split('/\s/', $paramspace);
-	$cliafter = $tmpparam[18];
-	$cliafterpaid = $tmpparam[46];
-
-	checkScriptFile($cliafter, $fh);
-	checkScriptFile($cliafterpaid, $fh);
+	//$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	//checkScriptFile($cliafter, $fh, $params);
+	//checkScriptFile($cliafterpaid, $fh, $params);
 
 	exec('./action_migrate_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
@@ -217,12 +221,9 @@ if (in_array($tmparray[0], array('upgrade'))) {
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
-	$tmpparam = preg_split('/\s/', $paramspace);
-	$cliafter = $tmpparam[18];
-	$cliafterpaid = $tmpparam[46];
-
-	checkScriptFile($cliafter, $fh);
-	checkScriptFile($cliafterpaid, $fh);
+	//$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	//checkScriptFile($cliafter, $fh, $params);
+	//checkScriptFile($cliafterpaid, $fh, $params);
 
 	exec('./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
@@ -247,12 +248,9 @@ if (in_array($tmparray[0], array('deploywebsite'))) {
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
-	$tmpparam = preg_split('/\s/', $paramspace);
-	$cliafter = $tmpparam[18];
-	$cliafterpaid = $tmpparam[46];
-
-	checkScriptFile($cliafter, $fh);
-	checkScriptFile($cliafterpaid, $fh);
+	//$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	//checkScriptFile($cliafter, $fh, $params);
+	//checkScriptFile($cliafterpaid, $fh, $params);
 
 	exec('./action_website_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
@@ -277,12 +275,9 @@ if (in_array($tmparray[0], array('actionafterpaid'))) {
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
-	$tmpparam = preg_split('/\s/', $paramspace);
-	$cliafter = $tmpparam[18];
-	$cliafterpaid = $tmpparam[46];
-
-	checkScriptFile($cliafter, $fh);
-	checkScriptFile($cliafterpaid, $fh);
+	$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	checkScriptFile($cliafter, $fh, $params);
+	checkScriptFile($cliafterpaid, $fh, $params);
 
 	exec('./action_after_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
 
@@ -317,9 +312,10 @@ exit();
  *
  * @param 	string	$scriptfile		Name of file
  * @param	string	$fh				File handler
+ * @param	array	$params			Parameters
  * @return 	int						0 if ok, line nb if there is a problem on a line
  */
-function checkScriptFile($scriptfile, $fh)
+function checkScriptFile($scriptfile, $fh, $params)
 {
 	fwrite($fh, date('Y-m-d H:i:s')." script file to scan is ".$scriptfile."\n");
 
@@ -347,19 +343,35 @@ function checkScriptFile($scriptfile, $fh)
 			break;
 		}
 		// Check allowed pattern
-		if (preg_match('/^touch __INSTANCEDIR__\/[\/a-z0-9_\.]+;?$/i', $newline)) {
+		if (preg_match('/^touch __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^rm -fr __INSTANCEDIR__\/[\/a-z0-9_\.]+;?$/i', $newline)) {
+		if (preg_match('/^rm -fr? __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/[\/a-z0-9_\.]+;?$/i', $newline)) {
+		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown( -R)? __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/[\/a-z0-9_\.]+;?$/i', $newline)) {
+		if (preg_match('/^chown( -R)? __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__;?$/i', $newline)) {
+		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__$/i', $newline)) {
+			continue;
+		}
+		// Check more patterns
+		if (preg_match('/^touch \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^rm -fr? \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^chown( -R)? '.$params['osusername'].'.'.$params['osusername'].' \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^\/home\/jail\/home\/'.$params['osusername'].'\/'.$params['dbname'].'\/htdocs\/cloud\/init.sh \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
 		// TODO enhance list of allowed patterns
@@ -376,6 +388,8 @@ function checkScriptFile($scriptfile, $fh)
 		http_response_code(599);
 		print 'The CLI file '.$scriptfile.' contains instructions line '.$linenotvalid.' that does not match an allowed pattern.'."\n";
 		exit();
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s')." script file is valid.\n");
 	}
 
 	return 0;
