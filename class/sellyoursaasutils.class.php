@@ -1804,12 +1804,12 @@ class SellYourSaasUtils
 						$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);
 						if ($result == 0) {
 							$error++;
-							dol_syslog('A direct-debit request already exists for this invoice, so we cancel payment try', LOG_ERR);
-							$this->errors[] = 'A direct-debit request already exists for this invoice, so we cancel payment try';
+							dol_syslog('A direct-debit request already exists for invoice id='.$obj->rowid.', so we cancel payment try', LOG_ERR);
+							$this->errors[] = 'A direct-debit request already exists for the invoice '.$invoice->ref.', so we cancel payment try';
 						} elseif ($result < 0) {
 							$error++;
-							dol_syslog('Failed to create withdrawal request for a direct debit order for invoice id = '.$obj->rowid, LOG_ERR);
-							$this->errors[] = 'Failed to create withdrawal request for a direct debit order for invoice id = '.$obj->rowid;
+							dol_syslog('Failed to create withdrawal request for a direct debit order for the invoice id='.$obj->rowid, LOG_ERR);
+							$this->errors[] = 'Failed to create withdrawal request for a direct debit order for the invoice '.$obj->ref;
 						}
 					}
 
