@@ -1731,14 +1731,14 @@ class SellYourSaasUtils
 
 		$error = 0;
 		$this->output = '';
-		$this->error='';
+		$this->error = '';
 
 		$invoiceprocessed = array();
 		$invoiceprocessedok = array();
 		$invoiceprocessedko = array();
 
 		if (empty($conf->stripe->enabled)) {
-			$this->error='Error, stripe module not enabled';
+			$this->error = 'Error, stripe module not enabled';
 
 			$conf->global->SYSLOG_FILE = $savlog;
 
