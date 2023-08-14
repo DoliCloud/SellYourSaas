@@ -3827,6 +3827,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srccliafterpaid); //Param 48 in .sh src for cli after paid
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
+				// Add a signature of message at end of message
 				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION'));
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
