@@ -71,7 +71,7 @@ $paramspace='';
 $paramarray=array();
 if (! empty($tmparray[1])) {
 	// Remove last param that is the signature to get the message signed
-	$contentsigned = preg_replace('/&[a-z0-9]+$/i', urldecode($tmparray[1]));
+	$contentsigned = preg_replace('/&[a-z0-9]+$/i', '', urldecode($tmparray[1]));
 	// Generate array of parameters
 	$paramarray = explode('&', urldecode($tmparray[1]));
 	foreach ($paramarray as $val) {
