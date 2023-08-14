@@ -91,10 +91,10 @@ $cliafterpaid = $tmpparam[46];
 $output='';
 $return_var=0;
 
-if ($DEBUG) fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>> Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.$_SERVER['REQUEST_URI']."\n");
-else fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>> Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
+if ($DEBUG) fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.$_SERVER['REQUEST_URI']."\n");
+else fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
 
-fwrite($fh, "\n".date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
+fwrite($fh, date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
 
 if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployall', 'undeployall'))) {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");
@@ -359,19 +359,19 @@ function checkScriptFile($scriptfile, $fh, $params)
 			continue;
 		}
 		// Check more patterns
-		if (preg_match('/^touch \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^touch \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^rm -fr? \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^rm -fr? \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown( -R)? '.$params['osusername'].'.'.$params['osusername'].' \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^chown( -R)? osu[a-z0-9]+\.osu[a-z0-9]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^\/home\/jail\/home\/'.$params['osusername'].'\/'.$params['dbname'].'\/htdocs\/cloud\/init.sh \/home\/jail\/home\/'.$params['osusername'].'\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^\/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/cloud\/init.sh \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
 		// TODO enhance list of allowed patterns
