@@ -13,7 +13,7 @@ if (empty($fh)) {
 }
 
 $allowed_hosts_array = array();
-$allowed_token = '';
+$signature_key = '';
 $dnsserver = '';
 $instanceserver = '';
 $backupdir = '';
@@ -28,8 +28,8 @@ if ($fp) {
 		if ($tmpline[0] == 'allowed_hosts') {
 			$allowed_hosts_array = explode(",", $tmpline[1]);
 		}
-		if ($tmpline[0] == 'allowed_token') {
-			$allowed_token = explode(",", $tmpline[1]);
+		if ($tmpline[0] == 'signature_key') {
+			$signature_key = explode(",", $tmpline[1]);
 		}
 		if ($tmpline[0] == 'dnsserver') {
 			$dnsserver = $tmpline[1];
@@ -64,14 +64,18 @@ $allowed_hosts=join(',', $allowed_hosts_array);
 
 // Build param string
 $param = preg_replace('/^\//', '', $_SERVER['REQUEST_URI']);
-$tmparray=explode('?', $param, 2);
+$tmparray = explode('?', $param, 2);
 
+$contentsigned = '';
 $paramspace='';
 $paramarray=array();
 if (! empty($tmparray[1])) {
+	// Remove last param that is the signature to get the message signed
+	$contentsigned = preg_replace('/&[a-z0-9]+$/i', urldecode($tmparray[1]));
+	// Generate array of parameters
 	$paramarray = explode('&', urldecode($tmparray[1]));
 	foreach ($paramarray as $val) {
-		$paramspace.=($val!='' ? $val : '-').' ';
+		$paramspace.=($val != '' ? $val : '-').' ';
 	}
 }
 
@@ -82,6 +86,11 @@ $dbname = $tmpparam[4];
 $dbusername = $tmpparam[6];
 $cliafter = $tmpparam[18];
 $cliafterpaid = $tmpparam[46];
+
+// Recalculate the signature with message received
+$recalculatedsignature = md5($contentsigned.$signature_key);
+// Extract the signature received
+$signature = empty($tmpparam[47]) ? '' : $tmpparam[47];
 
 
 /*
@@ -95,6 +104,7 @@ if ($DEBUG) fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for
 else fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
 
 fwrite($fh, date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
+fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignature=".$recalculatedsignature."\n");
 
 if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployall', 'undeployall'))) {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");

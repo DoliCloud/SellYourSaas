@@ -790,7 +790,7 @@ archivetestinstances=1
 ipserverdeployment=ip.of.deployment.server
 
 # If deployment server: IPs allowed to request a deployment
-allowed_hosts=ipofmasterserver
+allowed_hosts=ip.of.master.server
 
 # email from
 emailfrom=noreply@mysaasdomainname.com
