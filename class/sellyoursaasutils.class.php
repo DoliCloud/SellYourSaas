@@ -1787,6 +1787,8 @@ class SellYourSaasUtils
 
 					$this->db->begin();
 
+					$errorforinvoice = 0;
+
 					$invoice = new Facture($this->db);
 					$result1 = $invoice->fetch($obj->rowid);
 
@@ -1794,7 +1796,7 @@ class SellYourSaasUtils
 					$result2 = $companypaymentmode->fetch($obj->companypaymentmodeid);
 
 					if ($result1 <= 0 || $result2 <= 0) {
-						$error++;
+						$errorforinvoice++;
 						dol_syslog('Failed to get invoice id = '.$obj->rowid.' or companypaymentmode id ='.$obj->companypaymentmodeid, LOG_ERR);
 						$this->errors[] = 'Failed to get invoice id = '.$obj->rowid.' or companypaymentmode id ='.$obj->companypaymentmodeid;
 					} else {
@@ -1803,17 +1805,17 @@ class SellYourSaasUtils
 						// Create a direct debit payment request (if none already exists)
 						$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);
 						if ($result == 0) {
-							$error++;
+							$errorforinvoice++;
 							dol_syslog('A direct-debit request already exists for invoice id='.$obj->rowid.', so we cancel payment try', LOG_ERR);
 							$this->errors[] = 'A direct-debit request already exists for the invoice '.$invoice->ref.', so we cancel payment try';
 						} elseif ($result < 0) {
-							$error++;
+							$errorforinvoice++;
 							dol_syslog('Failed to create withdrawal request for a direct debit order for the invoice id='.$obj->rowid, LOG_ERR);
 							$this->errors[] = 'Failed to create withdrawal request for a direct debit order for the invoice '.$obj->ref;
 						}
 					}
 
-					if (!$error) {
+					if (!$errorforinvoice) {
 						// Search pending payment requests for invoice
 						$sql = "SELECT rowid";
 						$sql .= " FROM ".MAIN_DB_PREFIX."prelevement_demande";
@@ -1824,14 +1826,14 @@ class SellYourSaasUtils
 						if ($rsql) {
 							$n = $this->db->num_rows($rsql);
 							if ($n != 1) {
-								$error++;
+								$errorforinvoice++;
 								dol_syslog('Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.', LOG_ERR);
 								$this->errors[] = 'Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.';
 							} else {
 								$objd = $this->db->fetch_object($rsql);
 								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
 								if ($result < 0) {
-									$error++;
+									$errorforinvoice++;
 									dol_syslog('Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. '.$invoice->error, LOG_ERR);
 									$this->errors[] = 'Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. '.$invoice->error;
 								}
@@ -1839,10 +1841,11 @@ class SellYourSaasUtils
 						}
 					}
 
-					if (!$error) {	// No error
+					if (!$errorforinvoice) {	// No error
 						$invoiceprocessedok[$obj->rowid] = $invoice->ref;
 						$this->db->commit();
 					} else {
+						$error++;
 						$invoiceprocessedko[$obj->rowid] = $invoice->ref;
 						$this->db->rollback();
 					}
