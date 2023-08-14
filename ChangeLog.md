@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW Add a test on a signature of paramaters provided to remoteaction
 * NEW Request to become a reseller are now store into database. Add a menu entry to list all pending requests to become a reseller.
 * NEW Add allowed patterns for shell scripts (CLI after install, CLI after switch to pay)
 * NEW reorganisation of the setup tabs. Add a dedicated tab for reseller and endpoints options.
