@@ -54,31 +54,37 @@ if (empty($url)) {
 	$url = 'UrlDocresellerNotSetup (See param SELLYOURSAAS_RESELLER_URL)';
 }
 
-
-print '
-		<div class="alert alert-success note note-success">
-		<h4 class="block">'.$langs->trans("BecomeResellerDesc", $sellyoursaasname, $url, $sellyoursaasname).'</h4>
-		</div>
-	';
-
-
-print '
-	<div class="page-content-wrapper">
-			<div class="page-content">
-
-
-	     <!-- BEGIN PAGE HEADER-->
-	<!-- BEGIN PAGE HEAD -->
-	<div class="page-head">
-
-
+$dateapplyreseller = $mythirdpartyaccount->array_options['options_date_apply_for_reseller'];
+if ($dateapplyreseller) {
+	print '
+	<div class="alert alert-success note note-success">
+	<h4 class="block">'.$langs->trans("ARequestToBeAResellerHasAlreadyBeenSent", dol_print_date($dateapplyreseller, 'day')).'</h4>
 	</div>
-	<!-- END PAGE HEAD -->
-	<!-- END PAGE HEADER-->';
+	';
+} else {
+	print '
+			<div class="alert alert-success note note-success">
+			<h4 class="block">'.$langs->trans("BecomeResellerDesc", $sellyoursaasname, $url, $sellyoursaasname).'</h4>
+			</div>
+		';
+
+	print '
+		<div class="page-content-wrapper">
+				<div class="page-content">
+
+
+		     <!-- BEGIN PAGE HEADER-->
+		<!-- BEGIN PAGE HEAD -->
+		<div class="page-head">
+
+
+		</div>
+		<!-- END PAGE HEAD -->
+		<!-- END PAGE HEADER-->';
 
 
 	print '
-			    <div class="row" id="choosechannel">
+			    <div class="row" id="formreseller">
 			      <div class="col-md-12">
 
 					<div class="portlet light">
@@ -93,11 +99,11 @@ print '
 
 		// Set email to use when applying for reseller program
 		$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
-if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-	$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
-}
+		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+		if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+	}
 
 		$subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):(preg_match('/fr/i', $langs->defaultlang)?$langs->trans("BecomeReseller"):$langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
 
@@ -109,18 +115,18 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 
 		$texttouse = GETPOST('content', 'none');
 		// Text is in french or english (no other language for resellers)
-if (! $texttouse) {
-	$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
-	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+	if (! $texttouse) {
+		$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
+		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
-		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (getDolGlobalString($newnamekey)) {
-			$sellyoursaasname = getDolGlobalString($newnamekey);
+			$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+			if (getDolGlobalString($newnamekey)) {
+				$sellyoursaasname = getDolGlobalString($newnamekey);
+			}
 		}
-	}
 
-	$texttouse = (preg_match('/fr/i', $langs->defaultlang)?$langs->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault):$langsen->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault));
-}
+		$texttouse = (preg_match('/fr/i', $langs->defaultlang)?$langs->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault):$langsen->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault));
+	}
 		$texttouse=preg_replace('/\\\\n/', "\n", $texttouse);
 		print '<textarea rows="6" required style="border: 1px solid #888" name="content" class="centpercent">';
 		print $texttouse;
@@ -153,6 +159,7 @@ if (! $texttouse) {
 	    </div>
 		</div>
 	';
+}
 
 ?>
 <!-- END PHP TEMPLATE becomereseller.tpl.php -->

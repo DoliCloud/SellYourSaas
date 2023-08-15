@@ -633,7 +633,7 @@ class ActionsSellyoursaas
 			}
 		}
 
-		// Action when we click on "Pay all pending invoices"
+		// Action when we click on "Pay all pending invoices" on a credit card line
 		if (in_array($parameters['currentcontext'], array('thirdpartybancard')) && $action == 'sellyoursaastakepayment' && GETPOST('companymodeid', 'int') > 0) {
 			// Define environment of payment modes
 			$servicestatusstripe = 0;
@@ -1170,7 +1170,9 @@ class ActionsSellyoursaas
 		}
 		$pdf->SetFont(pdf_getPDFFont($outputlangs));
 
-		if ($conf->global->MAIN_DISABLE_PDF_COMPRESSION) $pdf->SetCompression(false);
+		if (getDolGlobalString('MAIN_DISABLE_PDF_COMPRESSION')) {
+			$pdf->SetCompression(false);
+		}
 		//$pdf->SetCompression(false);
 
 		$pagecounttmp = $pdf->setSourceFile($file);

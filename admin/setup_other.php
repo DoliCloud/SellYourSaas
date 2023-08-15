@@ -18,7 +18,7 @@
 
 /**
  *     \file       htdocs/sellyoursaas/admin/setup_other.php
- *     \brief      Page administration module SellYourSaas
+ *     \brief      Page administration module SellYourSaas (tab Other)
  */
 
 
@@ -93,12 +93,29 @@ if ($action == 'set') {
 	$error=0;
 
 	if (! $error) {
+		dolibarr_set_const($db, "SELLYOURSAAS_STATUS_URL", GETPOST("SELLYOURSAAS_STATUS_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'SELLYOURSAAS_MAIN_FAQ_URL', GETPOST("SELLYOURSAAS_MAIN_FAQ_URL", 'custom', 0, FILTER_VALIDATE_URL), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_CSS", GETPOST("SELLYOURSAAS_CSS", 'none'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_EXTCSS', GETPOST("SELLYOURSAAS_EXTCSS", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_SEPA')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA', GETPOST("SELLYOURSAAS_ENABLE_SEPA", 'int'), 'chaine', 0, '', $conf->entity);
 		}
-		dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
+		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID')) {
+			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_CUSTOMURL', GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL", 'int'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID')) {
+			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_WEBSITES')) {
+			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_WEBSITES', GETPOST("SELLYOURSAAS_ENABLE_WEBSITES", 'int'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET('SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT", GETPOST("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
+		}
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', GETPOST("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE", 'int'), 'chaine', 0, '', $conf->entity);
 
@@ -119,8 +136,6 @@ if ($action == 'set') {
 		if (GETPOSTISSET('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", GETPOST("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 		}
-
-		dolibarr_set_const($db, "SELLYOURSAAS_SECURITY_KEY", GETPOST("SELLYOURSAAS_SECURITY_KEY", 'none'), 'chaine', 0, '', $conf->entity);
 
 		// Save images
 		$dirforimage=$conf->mycompany->dir_output.'/logos/';
@@ -244,20 +259,6 @@ llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 $linkback='<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
-print '<span class="opacitymedium">'.$langs->trans("Prerequisites")."</span><br>\n";
-print '<br>';
-
-print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-$arrayoffunctionsdisabled = explode(',', ini_get('disable_functions'));
-if (in_array('exec', $arrayoffunctionsdisabled)) {
-	print "Parameter <b>disable_functions</b>: Bad. Must not contain 'exec'<br>";
-} else {
-	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
-}
-print "<br>\n";
-
 $error=0;
 
 $head = sellyoursaas_admin_prepare_head();
@@ -268,11 +269,26 @@ print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder" width="100%">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
 print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
+
+print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_STATUS_URL" value="'.getDolGlobalString('SELLYOURSAAS_STATUS_URL').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">https://status.mysaasdomainname.com</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
+print '</td>';
+print '<td colspan="2">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL').'">';
+print '</td>';
+print '</tr>';
 
 // SELLYOURSAAS_EXTCSS
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EXTCSS").'</td>';
@@ -280,6 +296,14 @@ print '<td>';
 print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_EXTCSS" value="'.getDolGlobalString('SELLYOURSAAS_EXTCSS', '').'">';
 print '</td>';
 print '<td><span class="opacitymedium small">dist/css/myaccount.css, https://adomain.com/acssfile.css</span></td>';
+print '</tr>';
+
+// SELLYOURSAAS_CSS
+print '<tr class="oddeven"><td>'.$langs->trans("CSSForCustomerAndRegisterPages").'</td>';
+print '<td>';
+print '<textarea name="SELLYOURSAAS_CSS" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_CSS').'</textarea>';
+print '</td>';
+print '<td></td>';
 print '</tr>';
 
 // SELLYOURSAAS_ENABLE_OPTINMESSAGES
@@ -295,7 +319,7 @@ if ($conf->use_javascript_ajax) {
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to add a checkbox on register page to accept "Commercial offers".</td>';
+print '<td><span class="opacitymedium small">Set to yes to add a checkbox on register and customer dashboard page to accept "Commercial offers".</td>';
 print '</tr>';
 
 
@@ -358,19 +382,11 @@ print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
 print '</tr>';
 
-// Allow SEPA Payment for ?
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID").'</td>';
-print '<td>';
-print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">12345,12346,...</span></td>';
-print '</tr>';
-
-// Allow Sepa
+// Allow SEPA
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA").'</td>';
 print '<td>';
 if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ENABLE_SEPA', array(), null, 0, 0, 0);
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_SEPA', array(), null, 0, 0, 1);
 } else {
 	if (empty($conf->global->SELLYOURSAAS_ENABLE_SEPA)) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
@@ -381,6 +397,78 @@ if ($conf->use_javascript_ajax) {
 print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to add Sepa as a Payment method.</td>';
 print '</tr>';
+
+// Allow SEPA Payment for ?
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID").'</td>';
+	print '<td>';
+	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+	print '</tr>';
+}
+
+// Allow Custom URL
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_CUSTOMURL', array(), null, 0, 0, 1);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ENABLE_CUSTOMURL)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
+print '</tr>';
+
+// Allow Custom URL for ?
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID").'</td>';
+	print '<td>';
+	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', '').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+	print '</tr>';
+}
+
+// Allow deployment of Dolibarr website
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES', array(), null, 0, 0, 1);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
+print '</tr>';
+
+// Allow deployment of Dolibarr website for ?
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID").'</td>';
+	print '<td>';
+	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', '').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+	print '</tr>';
+}
+
+// Product ID for website deployment
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT").'</td>';
+	print '<td>';
+	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT");
+	print '</td>';
+	print '<td><span class="opacitymedium small"></span></td>';
+	print '</tr>';
+}
 
 // Activate free payment mode
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE").'</td>';
@@ -458,15 +546,15 @@ print '<td><span class="opacitymedium small">45fdf4sds54fdf</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
-print '<td>';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400');
+print '<td class="nowraponall">';
+print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
 print '</td>';
 print '<td></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
-print '<td>';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400');
+print '<td class="nowraponall">';
+print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
 print '</td>';
 print '<td></td>';
 print '</tr>';
@@ -509,13 +597,6 @@ print '</td>';
 print '<td><span class="opacitymedium small"></span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").' <span class="opacitymedium">(To protect the URL for Spam reporting webhooks)</spam></td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_SECURITY_KEY').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">123456abcdef</span></td>';
-print '</tr>';
-
 print '</table>';
 print '</div>';
 
@@ -523,48 +604,6 @@ print '</table>';
 print '</div>';
 
 print "</form>\n";
-
-
-print "<br>";
-
-
-// Define $urlwithroot
-$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));
-$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
-//$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current. For Paypal payment, we can use internal URL like localhost.
-
-/*
-var_dump(DOL_URL_ROOT);
-var_dump(dol_buildpath('/sellyoursaas/public/spamreport.php', 1));
-var_dump(DOL_MAIN_URL_ROOT);
-*/
-
-$message = '';
-$url = dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY', 'KEYNOTDEFINED')).'[&mode=test]';
-$message .= img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "SpamReport", '{s1}');
-$message = str_replace('{s1}', '', $message);
-print $message.'<br>';
-print '<div class="urllink">';
-print '<input type="text" id="spamurl" class="quatrevingtpercent" value="'.$url.'">';
-print '<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY', 'KEYNOTDEFINED')).'&mode=test" target="_blank" rel="noopener">';
-print img_picto('', 'download', 'class="paddingleft hideonsmartphone"');
-print '</a>';
-print '</div>';
-print ajax_autoselect("spamurl");
-
-print '<br><br>';
-
-/*
-$message='';
-$url='<a href="'.dol_buildpath('/sellyoursaas/myaccount/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
-$message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "Test", '{s1}');
-$message = str_replace('{s1}', $url, $message);
-print $message;
-
-print "<br>";
-*/
-
-//dol_fiche_end();
 
 
 llxfooter();

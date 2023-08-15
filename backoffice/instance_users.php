@@ -54,7 +54,7 @@ $action		= (GETPOST('action', 'alpha') ? GETPOST('action', 'alpha') : 'view');
 $confirm	= GETPOST('confirm', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 $contextpage = 'instance_user';
-$optioncss  = GETPOST('optioncss','alpha');
+$optioncss  = GETPOST('optioncss', 'alpha');
 
 $sortfield = GETPOST('sortfield', 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
@@ -760,7 +760,7 @@ function print_user_table($newdb, $object)
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
 			if (in_array($key, array('rowid', 'login', 'lastname', 'firstname', 'admin', 'email'))) {
-			//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
 				print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
 				print '</td>';
@@ -871,7 +871,7 @@ function print_user_table($newdb, $object)
 			}
 			$key = 'lastname';
 			if ($search[$key]) {
-				$sql .= natural_search($key, $search[$key], 0);
+				$sql .= natural_search('realname', $search[$key], 0);
 			}
 			$key = 'firstname';
 			if ($search[$key]) {
@@ -879,19 +879,14 @@ function print_user_table($newdb, $object)
 			}
 			$key = 'admin';
 			if ($search[$key]) {
-				$sql .= natural_search($key, $search[$key], 0);
+				$sql .= natural_search('gp.interface', $search[$key], 0);
 			}
 			$key = 'email';
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
-			$sql .= $newdb->order($sortfield, $sortorder);
 
-			if (empty($sortfield)) {
-				$sql .= " ORDER BY gu.is_active DESC";
-			} else {
-				$sql .= $newdb->order($sortfield, $sortorder);
-			}
+			$sql .= $newdb->order($sortfield, $sortorder);
 		} else {
 			// Generic case
 		}
@@ -910,7 +905,7 @@ function print_user_table($newdb, $object)
 				// Action column
 				if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 					print '<td align="center">';
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto($langs->trans('ResetPassword'), 'object_technic').'</a>';
 					print '</td>';
 				}
 				print '<td>';
@@ -952,7 +947,7 @@ function print_user_table($newdb, $object)
 				// Action column
 				if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 					print '<td align="center">';
-					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto('ResetPassword', 'object_technic').'</a>';
+					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto($langs->trans('ResetPassword'), 'object_technic').'</a>';
 					print '</td>';
 				}
 				print '</tr>';

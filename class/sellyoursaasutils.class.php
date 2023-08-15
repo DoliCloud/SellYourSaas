@@ -64,9 +64,10 @@ class SellYourSaasUtils
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$restrictonthirdpartyid		0=All qualified draft invoices, >0 = Restrict on qualified draft invoice of thirdparty.
+	 * @param	int		$maxtoprocess				0=All, >0 = Nb max of invoices to process
 	 * @return	int									0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doValidateDraftInvoices($restrictonthirdpartyid = 0)
+	public function doValidateDraftInvoices($restrictonthirdpartyid = 0, $maxtoprocess = 0)
 	{
 		global $conf, $langs, $user;
 
@@ -97,11 +98,14 @@ class SellYourSaasUtils
 		$sql.= " AND f.total_ttc > 0";
 		if ($restrictonthirdpartyid > 0) $sql.=" AND f.fk_soc = ".((int) $restrictonthirdpartyid);
 		$sql.= " ORDER BY f.datef, f.rowid";
+		if ($maxtoprocess > 0) {
+			$sql.= $this->db->plimit($maxtoprocess);
+		}
 
 		$resql = $this->db->query($sql);
 		if ($resql) {
 			$num_rows = $this->db->num_rows($resql);
-			$i= 0;
+			$i = 0;
 			while ($i < $num_rows) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj && $invoice->fetch($obj->rowid) > 0) {
@@ -109,15 +113,15 @@ class SellYourSaasUtils
 
 					$invoice->fetch_thirdparty();
 
-					if ($invoice->thirdparty->array_options['manualcollection']) {
-						dol_syslog("This thirdparty has manual collection on, so we don't validate invoice");
+					if (!empty($invoice->thirdparty->array_options['manualcollection'])) {
+						dol_syslog("This thirdparty has manual collection on, so we don't validate the invoice");
 					} else {
 						$tmparray = $invoice->thirdparty->getOutstandingBills('customer');
 						if ($tmparray['opened'] > 0) {
 							dol_syslog("This thirdparty has already open invoices, so we don't validate any other invoices");     // So only 1 invoice is validated per thirdparty and pass
 						}
 
-						// Search contract linked to invoice
+						// Search contracts linked to the invoice we try to validate
 						$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
@@ -151,6 +155,7 @@ class SellYourSaasUtils
 									$outputlangs->loadLangs(array('main', 'bills', 'products', 'users', 'sellyoursaas@sellyoursaas'));
 
 									// Set notes with the $contract->array_options['options_commentonqty']
+									dol_syslog("Check if we must update the public note with the comment on qty", LOG_DEBUG);
 									if (!empty($contract->array_options['options_commentonqty'])) {
 										$publicnoteofcontract = str_replace('User Accounts', $outputlangs->trans("ListOfUsers"), $contract->array_options['options_commentonqty']);
 										$newpublicnote = dol_concatdesc($invoice->note_public, $publicnoteofcontract);
@@ -158,7 +163,7 @@ class SellYourSaasUtils
 									}
 
 									// Check amount
-									if (!empty($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE)) {
+									if (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
 										$amountofinvoice = $invoice->total_ht;
 										$monthfactor = 1;
 										if ($invoice->fk_fac_rec_source > 0) {
@@ -174,9 +179,9 @@ class SellYourSaasUtils
 										}
 										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
 										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
-										if ($amountofinvoice >= ($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE * $monthfactor)) {
+										if ($amountofinvoice >= (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') * $monthfactor)) {
 											$error++;
-											$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".$conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE." * ".$monthfactor;
+											$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
 											$this->errors[] = $this->error;
 											break;
 										}
@@ -185,7 +190,7 @@ class SellYourSaasUtils
 									$result = $invoice->validate($user);
 
 									if ($result > 0) {
-										$draftinvoiceprocessed[$invoice->id]=$invoice->ref;
+										$draftinvoiceprocessed[$invoice->id] = $invoice->ref;
 
 										// Now we build the PDF invoice
 										$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
@@ -193,7 +198,7 @@ class SellYourSaasUtils
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
 
 										$model_pdf = ($invoice->model_pdf ? $invoice->model_pdf : $invoice->modelpdf);
-										$ret = $invoice->fetch($id); // Reload to get new records
+										$ret = $invoice->fetch($invoice->id); // Reload to get new records
 
 										dol_syslog("GETPOST('lang_id','aZ09')=".GETPOST('lang_id', 'aZ09')." invoice->thirdparty->default_lang=".(is_object($invoice->thirdparty)?$invoice->thirdparty->default_lang:'invoice->thirdparty not defined')." newlang=".$newlang." outputlangs->defaultlang=".$outputlangs->defaultlang);
 
@@ -211,6 +216,7 @@ class SellYourSaasUtils
 								if (!$error) {
 									$codepaiementdebit = 'PRE';
 									if ($invoice->mode_reglement_code == $codepaiementdebit) {
+										// If invoice is an invoice to pay with a direct debit
 										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');		// $enddatetoscan = yesterday
 
 										dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
@@ -231,7 +237,10 @@ class SellYourSaasUtils
 
 											if ($protecti < 1000) {	// If not, there is a pb
 												// We will update the end of date of contrat, so first we refresh contract data
-												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
+												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc'));
+
+												$label = 'Increase end date of services for contract '.$contract->ref;
+												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices()';
 
 												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
 												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
@@ -783,7 +792,7 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Loop on invoice for customer with default payment mode Stripe and take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+	 * Loop on each sale invoice with default payment mode Stripe and take payment/send email. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
@@ -911,6 +920,7 @@ class SellYourSaasUtils
 	/**
 	 * doTakePaymentStripeForThirdparty
 	 * Take payment/send email for a given thirdparty ID. Unsuspend if it was suspended (done by trigger BILL_CANCEL or BILL_PAYED).
+	 * Note: Some code has been implemented to manage Stripe SEPA mode=ban, but method used by batch for payment of direct debit is doTakePaymentStripeSEPA() not calling doTakePaymentStripeForThirdparty().
 	 *
 	 * @param	int		             $service					'StripeTest' or 'StripeLive'
 	 * @param	int		             $servicestatus				Service 0 or 1
@@ -941,6 +951,18 @@ class SellYourSaasUtils
 		// Check parameters
 		if (empty($thirdparty_id)) {
 			$this->errors[]='Empty parameter thirdparty_id when calling doTakePaymentStripeForThirdparty';
+			return 1;
+		}
+
+		if ($mode == 'ban') {
+			// This mode is not supported here. If you need it, you can do this process:
+
+			// Create the request to make a SEPA direct debit in database (add a record into prelevement_demande)
+			// $did = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture');
+			// Create the direct debit order
+			//$result = $invoice->makeStripeSepaRequest($user, $did);
+
+			$this->errors[] = 'Mode ban is not supported by doTakePaymentStripeForThirdparty(). You can do it with invoice->demande_prelevement() then invoice->makeStripeSepaRequest()';
 			return 1;
 		}
 
@@ -1184,7 +1206,8 @@ class SellYourSaasUtils
 							}
 						}
 
-						if (!$error) {	// Payment was not canceled
+						if (!$error) {
+							// Payment try can be done (no reason to have it canceled)
 							if ($mode == "ban") {
 								$stripecard = $stripe->sepaStripe($customer, $companypaymentmode, $stripeacc, $servicestatus, 0);
 							} elseif ($mode == "card") {
@@ -1231,7 +1254,7 @@ class SellYourSaasUtils
 										$stripefailuremessage=$e->getMessage();
 									}
 								} else { // Using new SCA method
-									dol_syslog("* Create payment on card ".$stripecard->id.", amounttopay=".$amounttopay.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
+									dol_syslog("* Create payment on payment mode ".$stripecard->id.", amounttopay=".$amounttopay.", amountstripe=".$amountstripe.", FULLTAG=".$FULLTAG, LOG_DEBUG);
 
 									// Create payment intent and charge payment (because of confirmnow = true)
 									$confirmnow = true;
@@ -1348,13 +1371,13 @@ class SellYourSaasUtils
 
 									$ispostactionok = 1;
 
-									// Creation of payment line
+									// Creation of payment line in database if payment mode is not Direct Debit.
 									include_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 									$paiement = new Paiement($this->db);
 									$paiement->datepaye     = $now;
 									$paiement->date         = $now;
 									if ($currencyCodeType == $conf->currency) {
-										$paiement->amounts      = array($invoice->id => $amounttopay);   // Array with all payments dispatching with invoice id
+										$paiement->amounts = array($invoice->id => $amounttopay);   // Array with all payments dispatching with invoice id
 									} else {
 										$paiement->multicurrency_amounts = array($invoice->id => $amounttopay);   // Array with all payments dispatching
 
@@ -1437,16 +1460,19 @@ class SellYourSaasUtils
 
 								$object = $invoice;
 
-								// Send emails
+								// Set the label of email to use by default when success
 								$labeltouse = 'InvoicePaymentSuccess';
 								$sendemailtocustomer = 1;
 
+								// Overwrite if an error was found
 								if (empty($charge) || $charge->status == 'failed') {
 									$labeltouse = 'InvoicePaymentFailure';
-									if ($noemailtocustomeriferror) $sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+									if ($noemailtocustomeriferror) {
+										$sendemailtocustomer = 0;		// $noemailtocustomeriferror is set when error already reported on myaccount screen
+									}
 								}
 
-								// Track an event
+								// Add an action event into database
 								if (empty($charge) || $charge->status == 'failed') {
 									$actioncode='PAYMENT_STRIPE_KO';
 									$extraparams=$stripefailurecode;
@@ -1518,7 +1544,8 @@ class SellYourSaasUtils
 						$extraparams='';
 					}
 
-					// Send email + create action after
+
+					// Send email to customer + record action after
 					if ($sendemailtocustomer && $labeltouse) {
 						dol_syslog("* Send email with result of payment - ".$labeltouse);
 
@@ -1682,7 +1709,8 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler
-	 * Loop on invoice for customer with default payment mode Stripe sepa and send sepa direct debit ot stripe / sendmail.
+	 * Loop on sale invoices with a default payment mode "Direct debit" and with a known bank mandate for the customer.
+	 * For each invoice found, it creates a SEPA direct debit on Stripe then send an sendmail.
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$maxnbofinvoicetotry    		Max number of payment to do (0 = No max)
@@ -1703,14 +1731,14 @@ class SellYourSaasUtils
 
 		$error = 0;
 		$this->output = '';
-		$this->error='';
+		$this->error = '';
 
 		$invoiceprocessed = array();
 		$invoiceprocessedok = array();
 		$invoiceprocessedko = array();
 
 		if (empty($conf->stripe->enabled)) {
-			$this->error='Error, stripe module not enabled';
+			$this->error = 'Error, stripe module not enabled';
 
 			$conf->global->SYSLOG_FILE = $savlog;
 
@@ -1738,8 +1766,7 @@ class SellYourSaasUtils
 		$sql .= " AND sr.type = 'ban'";						// This exclude payment mode of other types
 		$sql .= " AND sr.card_type = 'sepa_debit'";			// Only sepa_debit payment mode
 		$sql .= " AND sr.stripe_card_ref IS NOT NULL";		// Only stripe payment mode
-		// TODO Filter also on AND ext_payment_site = 'StripeLive'
-
+		$sql .= " AND sr.ext_payment_site = '".$this->db->escape($service)."'";
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";	// Lines may be duplicated. Never mind, we will exclude duplicated invoice later.
 		//print $sql;exit;
@@ -1760,6 +1787,8 @@ class SellYourSaasUtils
 
 					$this->db->begin();
 
+					$errorforinvoice = 0;
+
 					$invoice = new Facture($this->db);
 					$result1 = $invoice->fetch($obj->rowid);
 
@@ -1767,58 +1796,70 @@ class SellYourSaasUtils
 					$result2 = $companypaymentmode->fetch($obj->companypaymentmodeid);
 
 					if ($result1 <= 0 || $result2 <= 0) {
+						$errorforinvoice++;
 						$error++;
 						dol_syslog('Failed to get invoice id = '.$obj->rowid.' or companypaymentmode id ='.$obj->companypaymentmodeid, LOG_ERR);
 						$this->errors[] = 'Failed to get invoice id = '.$obj->rowid.' or companypaymentmode id ='.$obj->companypaymentmodeid;
 					} else {
 						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
-						$result = $invoice->demande_prelevement($user);
-						if ($result < 0) {
+
+						// Create a direct debit payment request (if none already exists)
+						$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);
+						if ($result == 0) {
+							$errorforinvoice++;
+							//$error++;		// This case should not generate a global error
+							dol_syslog('A direct-debit request already exists for invoice id='.$obj->rowid.', so we cancel payment try', LOG_ERR);
+							$this->errors[] = 'A direct-debit request already exists for the invoice '.$invoice->ref.', so we cancel payment try';
+						} elseif ($result < 0) {
+							$errorforinvoice++;
 							$error++;
-							dol_syslog('Failed to create withdrawal request for a direct debit order for invoice id = '.$obj->rowid, LOG_ERR);
-							$this->errors[] = 'Failed to create withdrawal request for a direct debit order for invoice id = '.$obj->rowid;
+							dol_syslog('Failed to create withdrawal request for a direct debit order for the invoice id='.$obj->rowid, LOG_ERR);
+							$this->errors[] = 'Failed to create withdrawal request for a direct debit order for the invoice '.$obj->ref;
 						}
 					}
 
-					if (!$error) {
+					if (!$errorforinvoice) {
+						// Search pending payment requests for invoice
 						$sql = "SELECT rowid";
 						$sql .= " FROM ".MAIN_DB_PREFIX."prelevement_demande";
 						$sql .= " WHERE fk_facture = ".((int) $obj->rowid);
 						$sql .= " AND type = 'ban'"; // To exclude record saved by other online payments like credit card payments
-						$sql .= " AND traite = 0";
+						$sql .= " AND traite = 0";	// To not process payment request that were already converted into a direct debit or credit transfer order (Note: fk_prelevement_bons is also empty when traite = 0)
 						$rsql = $this->db->query($sql);
 						if ($rsql) {
 							$n = $this->db->num_rows($rsql);
 							if ($n != 1) {
+								$errorforinvoice++;
 								$error++;
-								dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order', LOG_ERR);
-								$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. Too many direct debit order found. We should have only 1.';
+								dol_syslog('Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.', LOG_ERR);
+								$this->errors[] = 'Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.';
 							} else {
 								$objd = $this->db->fetch_object($rsql);
 								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
 								if ($result < 0) {
+									$errorforinvoice++;
 									$error++;
-									dol_syslog('Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. '.$invoice->error, LOG_ERR);
-									$this->errors[] = 'Failed to create Stripe sepa request for invoice id = '.$obj->rowid.'. '.$invoice->error;
+									dol_syslog('Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. '.$invoice->error, LOG_ERR);
+									$this->errors[] = 'Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. '.$invoice->error;
 								}
 							}
 						}
 					}
 
-					if (!$error) {	// No error
-						$invoiceprocessedok[$obj->rowid]=$invoice->ref;
+					if (!$errorforinvoice) {	// No error
+						$invoiceprocessedok[$obj->rowid] = $invoice->ref;
 						$this->db->commit();
 					} else {
-						$invoiceprocessedko[$obj->rowid]=$invoice->ref;
+						$invoiceprocessedko[$obj->rowid] = $invoice->ref;
 						$this->db->rollback();
 					}
 
-					$invoiceprocessed[$obj->rowid]=$invoice->ref;
+					$invoiceprocessed[$obj->rowid] = $invoice->ref;
 				}
 
 				$i++;
 
-				if ($maxnbofinvoicetotry && $i >= $maxnbofinvoicetotry) {
+				if ($maxnbofinvoicetotry && count($invoiceprocessedok) >= $maxnbofinvoicetotry) {
 					break;
 				}
 			}
@@ -1827,7 +1868,7 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output = count($invoiceprocessedok).' invoice(s) paid among '.count($invoiceprocessed).' qualified invoice(s) with a valid Stripe default payment mode processed'.(count($invoiceprocessedok)>0 ? ' : '.join(',', $invoiceprocessedok) : '').' (ran in mode '.$servicestatus.') (search done on SellYourSaas customers only)';
+		$this->output = count($invoiceprocessedok).' invoice(s) processed to request direct debit on Stripe among '.count($invoiceprocessed).' qualified invoice(s) with a valid Stripe default payment mode processed'.(count($invoiceprocessedok)>0 ? ' : '.join(',', $invoiceprocessedok) : '').' (ran in mode '.$servicestatus.') (search done on SellYourSaas customers only)';
 		$this->output .= ' - '.count($invoiceprocessedko).' discarded (missing Stripe customer/card id, payment error or other reason)'.(count($invoiceprocessedko)>0 ? ' : '.join(',', $invoiceprocessedko) : '');
 
 		$conf->global->SYSLOG_FILE = $savlog;
@@ -2174,7 +2215,7 @@ class SellYourSaasUtils
 					// Test if there is pending invoice
 					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
-					if (is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
+					if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						usort($object->linkedObjects['facture'], "cmp");
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
@@ -3069,7 +3110,7 @@ class SellYourSaasUtils
 								// Now we force disable of recurring invoices
 								$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
-								if (is_array($object->linkedObjects['facturerec'])) {
+								if (!empty($object->linkedObjects['facturerec']) && is_array($object->linkedObjects['facturerec'])) {
 									foreach ($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
 										// Disabled this template invoice
 										$res = $templateinvoice->setValueFrom('suspended', 1);
@@ -3080,7 +3121,7 @@ class SellYourSaasUtils
 								}
 
 								// Delete draft invoices linked to this thirdparty, after a successfull undeploy
-								if (is_array($object->linkedObjects['facture'])) {
+								if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture'])) {
 									foreach ($object->linkedObjects['facture'] as $idinvoice => $invoicetodelete) {
 										if ($invoicetodelete->statut == Facture::STATUS_DRAFT) {
 											if (preg_match('/\(.*\)/', $invoicetodelete->ref)) {
@@ -3557,9 +3598,14 @@ class SellYourSaasUtils
 					break;
 				}
 
-				$tmpold = explode('.', $object->oldcopy->ref_customer, 2);
-				$sldAndSubdomainold = $tmpold[0];
-				$domainnameold = (empty($tmpold[1]) ? '' :$tmpold[1]);
+				// Define old domain data for the 'rename' remoteaction
+				$sldAndSubdomainold = '';
+				$domainnameold = '';
+				if (!empty($object->oldcopy->ref_customer)) {
+					$tmpold = explode('.', $object->oldcopy->ref_customer, 2);
+					$sldAndSubdomainold = $tmpold[0];
+					$domainnameold = (empty($tmpold[1]) ? '' :$tmpold[1]);
+				}
 
 				$orgname = $contract->thirdparty->name;
 				$countryid = 0;
@@ -3627,7 +3673,6 @@ class SellYourSaasUtils
 				dol_syslog("password0salted=".$password0salted." passwordmd5salted=".$passwordmd5salted." passwordsha256salted=".$passwordsha256salted, LOG_DEBUG);
 
 				$conf->global->MAIN_SECURITY_SALT = '';
-				//dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
 				$password0 = dol_hash($password);	// deprecated. Depend on master setup.
 				$passwordmd5 = dol_hash($password, 'md5');
 				$passwordsha256 = dol_hash($password, 'sha256');
@@ -3704,7 +3749,8 @@ class SellYourSaasUtils
 				$tmppackage->targetsrcfile2 = make_substitutions($tmppackage->targetsrcfile2, $substitarray);
 				$tmppackage->targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
 
-				$automigrationtmpdir = $dirfortmpfiles."/automigration_".$object->socid.".tmp";
+
+				$automigrationtmpdir = $dirfortmpfiles."/automigration".($object->socid > 0 ? "_".$object->socid : "").".tmp";
 				$automigrationdocumentarchivename = (empty($object->array_options["automigrationdocumentarchivename"]) ? '' : $object->array_options["automigrationdocumentarchivename"]);
 				$dirforexampleforsources = (empty($object->array_options["dirforexampleforsources"]) ? '' : $object->array_options["dirforexampleforsources"]);
 				$laststableupgradeversion = (empty($object->array_options["laststableupgradeversion"]) ? '' : $object->array_options["laststableupgradeversion"]);
@@ -3713,11 +3759,13 @@ class SellYourSaasUtils
 				$websitenamedeploy = (empty($object->context["options_websitename"]) ? '' : $object->context["options_websitename"]);
 				$domainnamewebsite = (empty($object->context["options_domainnamewebsite"]) ? '' : $object->context["options_domainnamewebsite"]);
 
-				// get direct access value
+				// Get direct access value for main product of instance
 				$directaccess=0;
 				if ($producttmp->array_options['options_app_or_option'] == 'app') {
 					$directaccess=$producttmp->array_options['options_directaccess'];
 				}
+
+				// Prepare the script or txt files
 				if ($remoteaction != "migrate" && $remoteaction != "upgrade") {
 					dol_syslog("Create conf file ".$tmppackage->srcconffile1);
 					if ($tmppackage->srcconffile1 && $conffile) {
@@ -3763,7 +3811,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->datafile1);
 				$commandurl.= '&'.$tmppackage->srcfile1.'&'.$tmppackage->targetsrcfile1.'&'.$tmppackage->srcfile2.'&'.$tmppackage->targetsrcfile2.'&'.$tmppackage->srcfile3.'&'.$tmppackage->targetsrcfile3;
 				$commandurl.= '&'.$tmppackage->srccronfile.'&'.$tmppackage->srccliafter.'&'.$targetdir;
-				$commandurl.= '&'.$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;		// Param 22 in .sh
+				$commandurl.= '&'.getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL');		// Param 22 in .sh
 				$commandurl.= '&'.$serverdeployment;
 				$commandurl.= '&'.$urlforsellyoursaasaccount;			            	// Param 24 in .sh
 				$commandurl.= '&'.$sldAndSubdomainold;
@@ -3778,7 +3826,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->allowoverride);	// Param 34 in .sh: Will replace __AllowOverride__ in virtual host
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);		// Param 35 in .sh: Will replace __VirtualHostHead__ in virtual host
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
-				$commandurl.= '&'.$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT;
+				$commandurl.= '&'.getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT');
 				$commandurl.= '&'.$directaccess;        // Param 38 in .sh
 				$commandurl.= '&'.$sshaccesstype;       // Param 39 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostdir);       	// Param 40 in .sh: Will replace __IncludeFromContract__ in virtual host
@@ -3792,6 +3840,8 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srccliafterpaid); //Param 48 in .sh src for cli after paid
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
+				// Add a signature of message at end of message
+				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION'));
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
 
@@ -3931,7 +3981,7 @@ class SellYourSaasUtils
 					dol_syslog("passwordmd5salted=".$passwordmd5salted);
 
 					$conf->global->MAIN_SECURITY_SALT = '';
-					dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_SALT);
+					dol_syslog("Using empty salt for __APPPASSWORDxxx__ variables");
 					$password0 = dol_hash($password);
 					$passwordmd5 = dol_hash($password, 'md5');
 					$passwordsha256 = dol_hash($password, 'sha256');
@@ -4278,7 +4328,7 @@ class SellYourSaasUtils
 		// So here, we can update this linked rec invoices
 		/*
 		foreach($arrayofrefreshedcontract as $refreshedcontract) {
-		 	 $refreshedcontract->array_options['options_commentonqty'] = join(', ', $arrayofcomment);
+			  $refreshedcontract->array_options['options_commentonqty'] = join(', ', $arrayofcomment);
 		}
 		// Then we must update this linked rec invoices
 		foreach($arrayofrefreshedrecinvoice as $refreshedrecinvoice) {

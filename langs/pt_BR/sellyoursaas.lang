@@ -15,7 +15,6 @@ CustomVirtualHostDir=Linha RequireAll de host virtual personalizado
 EnterAVirtualHostDirLine=Insira uma linha para incluir na seção RequireAll da seção Directory do arquivo virtualhost do servidor da web. Por exemplo: <br> Exigir ip 1.2.3.4/16 <br> Você deve suspender e cancelar a suspensão da instância para que isso seja efetivo.
 ErrorEMailAddressBannedForSecurityReasons=Este tipo de endereço de e-mail foi banido por motivos de segurança. Use outro endereço de e-mail ou entre em contato conosco se não puder fazer o contrário.
 RegistrationURLDesc=Para obter uma URL para registrar uma instância, você deve ter criado um serviço na categoria boa e com o tipo "Aplicativo".
-SecurityOfRegistrations=Segurança do registro
 IHaveAVATID=Eu tenho um ID de imposto/IVA
 NoResourceToCountUsersFound=Esta instância não contém produtos que precisam contar usuários de recursos
 ThirdPartyModified=Modificado por terceiros

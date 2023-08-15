@@ -67,7 +67,7 @@ $tmpservices=array();
 $staticdeploymentserver = new Deploymentserver($db);
 if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
 	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-}else {
+} else {
 	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
 }
 foreach ($tmpservicessub as $key => $tmpservicesub) {
@@ -157,21 +157,6 @@ llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 $linkback='<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
-print '<span class="opacitymedium">'.$langs->trans("Prerequisites")."</span><br>\n";
-print '<br>';
-
-print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-$arrayoffunctionsdisabled = explode(',', ini_get('disable_functions'));
-if (in_array('exec', $arrayoffunctionsdisabled)) {
-	print "Parameter <b>disable_functions</b>: Bad. Must not contain 'exec'<br>";
-} else {
-	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
-}
-print "<br>\n";
-
-
 $error=0;
 
 $head = sellyoursaas_admin_prepare_head();
@@ -182,7 +167,7 @@ print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder" width="100%">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td class="titlefield">'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
 print '<td class="titlefield"><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';

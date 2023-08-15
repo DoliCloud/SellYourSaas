@@ -790,7 +790,7 @@ archivetestinstances=1
 ipserverdeployment=ip.of.deployment.server
 
 # If deployment server: IPs allowed to request a deployment
-allowed_hosts=ipofmasterserver
+allowed_hosts=ip.of.master.server
 
 # email from
 emailfrom=noreply@mysaasdomainname.com
@@ -1811,9 +1811,8 @@ echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - 
 Note: To test a rule file on an existing log file:
 fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
-Note: To unban an ip:
-fail2ban-client unban IP
-
+Note: To unban an IP
+fail2ban-client unban IP.to.unban
 
 === Test spamassassin ===
 
@@ -2565,7 +2564,7 @@ GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dol
 FLUSH PRIVILEGES;
 ---------------
 
---TODO Reduce permissions of this user sellyoursaas
+--TODO Reduce permissions of this database user sellyoursaas
 This is used by:
 * the batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
 * the batch *batch_detect_evil_instances.php* to SELECT contracts
@@ -3698,7 +3697,7 @@ You must have inside the cron of user *admin*:
 ---------------
 
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *batch* is the user dedicated for batch processing. You will set them
+Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *anonymousbatch* is the user dedicated for batch processing. You will set them
 later on the Dolibarr master.
 
 ==== On deployment servers
@@ -3900,6 +3899,7 @@ Give this user the permissions below and only the permission below:
 *** View services
 ** Third Parties Module
 *** View third parties related to user
+*** Extend access to all thirdparties
 
 * Create a *Product tag* called "SaaS products"
 
@@ -4427,7 +4427,7 @@ systemctl restart nfs-kernel-server
 
 - Allow access between the new *Deployment server* and the *Master server* in the firewall.
 
-*If using iptables*
+*If using iptables* (old method)
 
 On the *Master server*:
 
@@ -5385,7 +5385,7 @@ Then edit the */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it 
 
 === Block/Unblock an IP using internal firewall
 
-To block an external IP 'the.ip.to.block' to access port 'porttoblock':
+To block or ban an external IP 'the.ip.to.block' to access port 'porttoblock':
 
 [source,bash]
 ---------------
@@ -5474,6 +5474,28 @@ Error when sending email in */var/log/mail.log*
 => If the user *postfix* really exists into */etc/passwd*, the trouble may be apparmor that does not allow reading the file */etc/passwd*
 
 Check in file */etc/apparmor.d/usr.sbin.apache2* that /etc/passwd is not denied.
+
+
+==== Error sometimes when sendig emails with Gmail
+
+If you have error like this one
+------------
+Error [120]: Ran into problems sending Mail. 
+Response: 421 4.7.0 Try again later, closing connection. (EHLO) j206sm146142wmj.43 - gsmtp 
+Error [126]: 'smtp-relay.gmail.com' does not support authenticated connections. Error after sending EHLO smtp-relay.gmail.com
+
+Response:421 4.7.0 Try again later, closing connection. (EHLO) n17-20020a5099d1000000b0047e8c678d49sm385619edb.22 - gsmtp
+Error [126]: "smtp-relay.gmail.com" does not support authenticated connections. Error after sending EHLO smtp-relay.gmail.com
+------------
+
+Full list of errors can be found with 
+[source,bash]
+-------------
+grep 'CMailFile::sendfile: mail end error' dolibarr.log
+-------------
+
+
+To fix this, try to add the constant: MAIL_SMTP_USE_FROM_FOR_HELO = yourdomainname.com
 
 
 ==== Problem of php sessions files in /var/lib/php/sessions not purged

@@ -165,6 +165,7 @@ instances:
     #
     mount_point_exclude:
         - /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+        - /var/snap/lxd/common/ns
     #   - /proc/sys/fs/binfmt_misc
     #   - /dev/sde
     #   - '[FJ]:'

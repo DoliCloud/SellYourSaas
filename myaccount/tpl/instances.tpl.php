@@ -619,7 +619,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '</a>';
 		}
 
-		// Add here the Option panel (hidden by default)
+		// Add here the Option panel
 
 		print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' :'hidden').'">';
 		print '<br>';
@@ -627,27 +627,51 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<br>';
 
 		// Hard coded option: Custom domain name
-		print '<div class="tagtable centpercent divcustomdomain hidden"><div class="tagtr">';
-		print '<div class="tagtd">';
-		print $langs->trans("OptionYourCustomDomainName").'<br>';
-		print '<span class="small">';
-		print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
-		print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
-		print '<input disabled="disabled" type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
-		print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
-		print '</span>';
-		print '</div>';
-		print '<div class="tagtd center">';
-		// TODO Use same frequency than into the template invoice
-		$nbmonth = 1;
-		print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
-		print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-		print '<input type="submit" name="activateoption" disabled="disabled" value="'.$langs->trans("Enable").'">';
-		print '</div>';
-		print '</div></div>';
+		if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', 'intcomma'))))) {
+			print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
+
+			print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
+			print '<table class="centpercent center paddingleft paddingright"><tr><td width="100%" class="photo">';
+			print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/theme/common/octicons/build/svg/milestone.svg" title="'.dol_escape_htmltag($alt).'">';
+			print '</td></tr></table>';
+			print '</div>';
+
+			print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<input type="hidden" name="action" value="deploycustomurl">';
+			print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
+			print '<input type="hidden" name="mode" value="'.$mode.'">';
+			print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
+			print '<input type="hidden" name="page_y" value="">';
+
+			print '<div class="tagtd valignmiddle">';
+			print $langs->trans("OptionYourCustomDomainName").'<br>';
+			print '<span class="small">';
+			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
+			print $langs->trans("OptionYourCustomDomainNamePrerequisites").'<br>';
+			print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
+			print '<input type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
+			print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
+			print '</span>';
+			print '</div>';
+			print '<div class="tagtd center">';
+			// TODO Use same frequency than into the template invoice ?
+			$nbmonth = 1;
+			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+			//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
+			print '<input type="submit" class="btn btn-primary wordbreak reposition" name="activateoption" value="'.$langs->trans("Enable").'">';
+			print '</div>';
+
+			print '</form>';
+
+			print '</div></div>';
+
+			print '<hr>';
+		}
 
 		// Hard coded option: A website
-		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
+		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0
+			&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', 'intcomma'))))) {
 			$type_db = $conf->db->type;
 			$hostname_db  = $contract->array_options['options_hostname_db'];
 			$username_db  = $contract->array_options['options_username_db'];
@@ -676,7 +700,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
-			print '<div class="tagtd">';
+			print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
 			if (empty($websitemodenabled)) {
 				print $langs->trans("OptionYourWebsiteNoEnabled").'<br>';
 			} else {
@@ -694,8 +718,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
 				print '<input type="hidden" name="mode" value="'.$mode.'">';
 				print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
+				print '<input type="hidden" name="page_y" value="">';
 
-				print '<span class=" bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
+				print '<span class="bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
 				print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
 				print '<option value="">&nbsp;</option>';
 				foreach ($websitestatic->records as $website) {
@@ -816,7 +841,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 		print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
-
+		print '<br>';
 		print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';
 		print '<br>';
 

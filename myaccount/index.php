@@ -202,7 +202,6 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 	$urlfaq = $conf->global->SELLYOURSAAS_MAIN_FAQ_URL;
 }
 
-
 $urlstatus = getDolGlobalString('SELLYOURSAAS_STATUS_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
@@ -387,6 +386,7 @@ if (preg_match('/logout/', $mode)) {
 	header("Location: /index.php".($param?'?'.$param:''));
 	exit;
 }
+
 if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'updateforcepriceinstance') {
 	$errors = 0;
 	$result = 1;
@@ -544,7 +544,7 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'r
 	}
 }
 
-if ($action == 'updateurl') {
+if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
@@ -1077,6 +1077,12 @@ if ($action == 'updateurl') {
 		$action = 'presend';
 	}
 } elseif ($action == 'sendbecomereseller') {
+	$dateapplyreseller = $mythirdpartyaccount->array_options['options_date_apply_for_reseller'];
+	if ($dateapplyreseller) {
+		accessforbidden("A request was already sent or too many request.", 1, 1, 1);
+		exit;
+	}
+
 	// Send reseller request
 	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 	$sellyoursaasnoreplyemail = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
@@ -1109,10 +1115,18 @@ if ($action == 'updateurl') {
 	$trackid = 'thi'.$mythirdpartyaccount->id;
 
 	$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, array(), array(), array(), '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
-	$result = $cmailfile->sendfile();
+	if (!getDolGlobalInt("SELLYOURSAAS_APPLY_RESELLER_EMAIL_DISABLED")) {
+		$result = $cmailfile->sendfile();
+	}
 
-	if ($result) setEventMessages($langs->trans("TicketSent"), null, 'warnings');
-	else setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
+	$mythirdpartyaccount->array_options['options_date_apply_for_reseller'] = dol_now();
+	$result = $mythirdpartyaccount->update(0);
+
+	if ($result) {
+		setEventMessages($langs->trans("TicketSent"), null, 'warnings');
+	} else {
+		setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
+	}
 	$action = '';
 } elseif ($action == 'updatemythirdpartyaccount') {
 	$error = 0;
@@ -1286,6 +1300,8 @@ if ($action == 'updateurl') {
 		include_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
 
+		dol_syslog("Record the SEPA payment mode from myaccount");
+
 		$companybankaccount = new CompanyBankAccount($db);
 		$companybankaccount->label = GETPOST('bankname', 'alphanohtml');
 		$companybankaccount->bank = GETPOST('bankname', 'alphanohtml');
@@ -1388,7 +1404,7 @@ if ($action == 'updateurl') {
 				}
 
 				if (!$error) {
-					// Creation of Stripe SEPA + update of societe_account
+					// Creation of Stripe SEPA + update of societe_rib
 					$card = $stripe->sepaStripe($cu, $companypaymentmode, $stripeacc, $servicestatus, 1);
 					if (!$card) {
 						$error++;
@@ -1476,6 +1492,8 @@ if ($action == 'updateurl') {
 		$iban = '';
 		$bic = '';
 	} else {
+		dol_syslog("Record the credit card");
+
 		// Case of Credit or Debit card
 		$setupintentid = GETPOST('setupintentid', 'alpha');
 
@@ -2041,7 +2059,7 @@ if ($action == 'updateurl') {
 				';
 
 				// TODO
-				// Make a redirect on cancellation survey
+				// Make a redirect on cancelation survey
 
 				llxFooter();
 
@@ -2052,7 +2070,7 @@ if ($action == 'updateurl') {
 			}
 		}
 	}
-} elseif ($action == 'deploywebsite' && getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_FEATURES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
+} elseif ($action == 'deploywebsite' && getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0) {
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$contractid = GETPOST('contractid', 'int');
@@ -2125,14 +2143,14 @@ if ($action == 'updateurl') {
 		if (!$foundlinecontract) {
 			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end);
 			if ($idlinecontract <= 0) {
-				// TODO: Send mail auto to inform admins error line creation
+				// TODO: Send mail auto to inform admins of error line creation
 				$error ++;
 			}
 			if (!$error) {
 				$object->fetch($contractid);
 				$result = $object->active_line($user, $idlinecontract, $date_start, '', 'Activation after website deployment');
 				if (!$result) {
-					// TODO: Send mail auto to inform admins errror activation line
+					// TODO: Send mail auto to inform admins of error activation line
 					$error ++;
 				}
 			}
@@ -2142,7 +2160,7 @@ if ($action == 'updateurl') {
 			$object->fetchObjectLinked();
 			$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
 			if (count($arrayfacturerec) != 1) {
-				// TODO: Send mail auto to inform admins multiples faturerec contract
+				// TODO: Send mail auto to inform admins of multiples faturerec contract
 				$error ++;
 			} else {
 				$facturerec = $arrayfacturerec[0];
@@ -2155,7 +2173,7 @@ if ($action == 'updateurl') {
 				if (!$foundlinefacturerec) {
 					$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
 					if (!$result) {
-						// TODO: Send mail auto to inform admins errror line creation facturRec
+						// TODO: Send mail auto to inform admins of error line creation facturRec
 						$error ++;
 					}
 				}
@@ -2172,14 +2190,16 @@ if ($action == 'updateurl') {
 		if ($error) {
 			$db->rollback();
 			setEventMessages($langs->trans("ErrorDeployWebsite"), null, 'errors');
-			header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		} else {
 			$db->commit();
 			setEventMessages($langs->trans("DeploymentWebsiteDone"), null, 'mesgs');
-			header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		}
+
+		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
+} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+	// TODO
 }
 
 
