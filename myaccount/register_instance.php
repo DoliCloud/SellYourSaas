@@ -1100,7 +1100,7 @@ if ($reusecontractid) {
 		$contract->commercial_signature_id = $user->id;
 		$contract->commercial_suivi_id = $user->id;
 		$contract->date_contrat = $now;
-		$contract->note_private = 'Contract created from the online instance registration form or the customer dashboard. forcesubdomain was '.(GETPOST('forcesubdomain')?GETPOST('forcesubdomain'):' empty').'.';
+		$contract->note_private = 'Contract created from the online instance registration form or the customer dashboard. forcesubdomain was '.(GETPOST('forcesubdomain') ? GETPOST('forcesubdomain') : 'empty').'.';
 
 		$tmp=explode('.', $contract->ref_customer, 2);
 		$sldAndSubdomain=$tmp[0];
