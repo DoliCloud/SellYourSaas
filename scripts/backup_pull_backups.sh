@@ -1,8 +1,8 @@
 #!/bin/bash
-# Catch/Pull some backups on local computer
+# Catch backups from a remote backup server into a local computer, like a NAS.
 #
-# Put the following entry into your root cron
-# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.sh (test|confirm) [remotebackupserversrc localdirtarget] 
+# Put the following entry into the cron of a user that can rsync to the remote server with its public key.
+# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.sh (test|confirm) [remotebackupserversrc localdirtarget] >/.../backup_backup_backups.log
 
 #set -e
 
@@ -130,11 +130,20 @@ cd "$scriptdir"
 
 
 if [ "x$3" != "x" -a "x$4" != "x" ]; then
-	>/var/log/$script.generic.log 
-
 	# Generic usage
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in generic mode" 
 
+	>/var/log/$script.generic.log 
+	if [ ! -w /var/log/$script.generic.log ]; then
+		echo User has no permission to write into log file /var/log/$script.generic.log
+		export ret1=1
+	fi
+	> /var/log/$script.generic.err
+	if [ ! -w /var/log/$script.generic.err ]; then
+		echo User has no permission to write into err file /var/log/$script.generic.err
+		export ret1=1
+	fi
+	
 	# Source
 	export SERVSOURCE=$remotebackupserver
 	export SERVPORTSOURCE=$remotebackupserverport
@@ -171,11 +180,20 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 		echo
 	fi
 else
-	>/var/log/$script.log 
-
 	# Usage for sellyoursaas
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in SellYourSaas mode (using parameters from /etc/sellyoursaas.conf)" 
 
+	>/var/log/$script.log 
+	if [ ! -w /var/log/$script.log ]; then
+		echo User has no permission to write into log file /var/log/$script.log
+		export ret1=1
+	fi
+	> /var/log/$script.err
+	if [ ! -w /var/log/$script.err ]; then
+		echo User has no permission to write into err file /var/log/$script.err
+		export ret1=1
+	fi
+	
 	# Source
 	export SERVSOURCE=$remotebackupserver
 	export SERVPORTSOURCE=$remotebackupserverport
@@ -238,7 +256,7 @@ else
 				        	export ret1=$(($ret1 + 1));
 			    	    	export errstring="$errstring<br>Dir $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2 "`date '+%Y-%m-%d %H:%M:%S'`" $command"
 			    	    else
-			                echo "No files found"
+			                echo "WARNING Command returned an error. May be because no files were found. See /var/log/$script.log|.err"
 			                echo
 			    	    fi
 					else
