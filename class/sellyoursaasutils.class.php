@@ -3331,9 +3331,14 @@ class SellYourSaasUtils
 								//var_dump(dateinstallmoduleslockfile);
 								//var_dump($fileauthorizedkeys2);
 
+								// TODO Run the update only if one of the 3 properties has been modified
+
 								$object->array_options['options_filelock'] = $datelockfile;
 								$object->array_options['options_fileinstallmoduleslock'] = $dateinstallmoduleslockfile;
 								$object->array_options['options_fileauthorizekey'] = $dateauthorizedkeysfile;
+
+								$object->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to modify the date of files lock, install and authorized keys during a refresh';
+
 								$object->update($user);
 							}
 						} elseif ($remoteaction == 'recreateauthorizedkeys') {
@@ -3515,8 +3520,8 @@ class SellYourSaasUtils
 
 		$ispaidinstance = 0;
 
-		// Loop on each line of contract ($tmpobject is a ContractLine): It set or not $doremoteaction if an action must be done for the line,
-		// then do it by calling remote agent, or making action for qty calculation (ssh2 connect, sql execution, ...)
+		// Loop on each line of contract ($tmpobject is a ContractLine): It sets (or not) $doremoteaction to say if an action must be done for
+		//  the line, then does it by calling the remote agent, or by making the action for qty calculation (ssh2 connect, sql execution, ...)
 		foreach ($listoflines as $tmpobject) {
 			if (empty($tmpobject)) {
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
@@ -4312,10 +4317,12 @@ class SellYourSaasUtils
 							$contract->array_options['options_commentonqty'] = $newcommentonqty;
 						}
 
+						$object->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
+
 						$result = $contract->update($user);
 						if ($result <= 0) {
 							$error++;
-							$this->error = 'Failed to update field options_latestresupdate_date on contract '.$contract->ref;
+							$this->error = 'Failed to update field options_latestresupdate_date or options_commentonqty on contract '.$contract->ref;
 						}
 					}
 				} // end if formula for contract line defined
