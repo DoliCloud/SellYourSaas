@@ -3367,9 +3367,10 @@ Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*
 [source,conf]
 ---------------
 ...
+# Set SplitMode to none instead of uid, to have only 1 journal log file
+SplitMode=none
+# Defined max size of log file
 SystemMaxUse=1G
-# Define max size of each file (there is 1 file per user). Default is 1/8 of SystemMaxUse.
-SystemMaxFileSize=5M
 ...
 ---------------
 
@@ -4712,23 +4713,25 @@ Example when missing /etc/apparmor/severity.db, run sudo apt install --reinstall
 apt install python3-openstackclient python3-novaclient python3-glanceclient -y
 ---------------
 
-- Create an API account for OpenStack Horizon and get the file RC OpenStack File v3. Launch it.
+- Create an API account for OpenStack Horizon, connect on Horizon, choose a Region, get the file "OpenStack RC File" and save it under *openrc.sh*. Launch this shell file.
 
 [source,bash]
 ---------------
 source openrc.sh
 ---------------
 
-- OpenStack commands are now available.
+- OpenStack and Nova commands are now available:
 
-To get an instance's image:
+To create an image (so a backup) of an instance and download it:
 
 [source,bash]
 ---------------
 nova list
-nova image-create aaa115b3-83df-4375-b2ee-19339041dcfa image-myfile-server1
+   ou   openstack server list --long
+nova image-create ID_OF_SERVER image-myfile-server1
+
 glance image-list   
-   ou   openstack image list
+   ou   openstack image list --long
 glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a   
    ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
@@ -4742,7 +4745,7 @@ export OS_REGION_NAME=SBG1
 glance image-create --name nom_image_snaphot_new_server --disk-format qcow2 --container-format bare --file mon_fichier_snap_serveur1.qcow2
 ---------------
 
-To get a volume image, you need to create from the detached volume (can't use a snapshot)
+To build a volume image, you need to create it from the detached volume (can't use a snapshot)
 
 [source,bash]
 ---------------
@@ -4763,6 +4766,11 @@ To push an image on a project:
 ---------------
 
 ---------------
+
+
+- To restore
+openstack server create --flavor FLAVOR_ID --image BACKUP_IMAGE_ID --nic net-id=NETWORK_ID INSTANCE_NAME
+
 
 - To recreate a server from an image
 

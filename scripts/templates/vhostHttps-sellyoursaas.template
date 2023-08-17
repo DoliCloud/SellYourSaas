@@ -94,8 +94,9 @@
 		SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
 		SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
 
-		# To enabled this section, you must edit /etc/apache2/envvars to set 
+		# To enable this section, you must edit /etc/apache2/envvars to set 
 		# export APACHE_ARGUMENTS='-DUSEIFFILE'
+		# You can do it only if Apache is 2.4.35+
 		<IfDefine USEIFFILE>
         <IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
 			SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt
