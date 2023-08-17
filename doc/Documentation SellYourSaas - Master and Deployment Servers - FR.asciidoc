@@ -3337,9 +3337,10 @@ Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*
 [source,conf]
 ---------------
 ...
+# Set SplitMode to none instead of uid, to have only 1 journal log file
+SplitMode=none
+# Defined max size of log file
 SystemMaxUse=1G
-# Define max size of each file (there is 1 file per user). Default is 1/8 of SystemMaxUse.
-SystemMaxFileSize=5M
 ...
 ---------------
 
