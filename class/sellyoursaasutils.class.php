@@ -3228,27 +3228,28 @@ class SellYourSaasUtils
 	 * Make a remote action on a contract (deploy/undeploy/suspend/suspendmaintenance/unsuspend/rename/backup...).
 	 * This function is called on Master but remote action is done on remote agent.
 	 *
-	 * @param	string					$remoteaction	Remote action:
-	 * 													'backup',
-	 * 													'deployall/undeployall'=create/delete all,
-	 * 													'deploy/undeploy'=create/delete all except user,
-	 * 													'deployoption'=create/delete files+cli,
-	 * 													'rename'=change apache virtual host file,
-	 * 													'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
-	 * 													'refresh'=update status of install.lock+installmodules.lock+authorized key + loop on each line and read remote data and update qty of metrics
-	 * 													'refreshfilesonly'=update status of install.lock+installmodules.lock+authorized key
-	 * 													'refreshmetrics'=loop on each line of contract and read remote data and update qty of metrics
-	 * 													'recreateauthorizedkeys', 'deletelock', 'recreatelock'
-	 * 													'migrate',
-	 * @param 	Contrat|ContratLigne	$object			Object contract or contract line
-	 * @param	string					$appusername	App login. Used for replacement of __APPUSERNAME__
-	 * @param	string					$email			Initial email. Used for replacement of __APPEMAIL__
-	 * @param	string					$password		Initial password. Used for replacement of __APPPASSWORD__
-	 * @param	string					$forceaddevent	'1'=Force to add event. '-1'=Never add. If '0', add of event is done only for remoteaction = 'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy','undeployall'
-	 *													$forceaddevent is set by caller but is also overwrote to on when we detect qty has changed.
-	 * @param	string					$comment		Comment
-	 * @param   int                     $timeout        Time out in seconds
-	 * @return	int										<0 if KO (-1 = generic error, -2 = failed to connect), >0 if OK
+	 * @param	string										$remoteaction	Remote action:
+	 * 																		'backup',
+	 * 																		'deployall/undeployall'=create/delete all,
+	 * 																		'deploy/undeploy'=create/delete all except user,
+	 * 																		'deployoption'=create/delete files+cli,
+	 * 																		'rename'=change apache virtual host file,
+	 * 																		'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
+	 * 																		'refresh'=update status of install.lock+installmodules.lock+authorized key + loop on each line and read remote data and update qty of metrics
+	 * 																		'refreshfilesonly'=update status of install.lock+installmodules.lock+authorized key
+	 * 																		'refreshmetrics'=loop on each line of contract and read remote data and update qty of metrics
+	 * 																		'recreateauthorizedkeys', 'deletelock', 'recreatelock'
+	 * 																		'migrate',
+	 * @param 	Contrat|SellyoursaasContract|ContratLigne	$object			Object Contract or Contract line
+	 * @param	string										$appusername	App login. Used for replacement of __APPUSERNAME__
+	 * @param	string										$email			Initial email. Used for replacement of __APPEMAIL__
+	 * @param	string										$password		Initial password. Used for replacement of __APPPASSWORD__
+	 * @param	string										$forceaddevent	'1'=Force to add the event "Remote action executed". '-1'=Never add. If '0', add of event is done only for
+	 * 																		remoteaction = 'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy','undeployall'
+	 * 																		or if qty is modified with 'refresh' or 'refreshmetrics'
+	 * @param	string										$comment		Comment
+	 * @param   int                     					$timeout        Time out in seconds
+	 * @return	int															<0 if KO (-1 = generic error, -2 = failed to connect), >0 if OK
 	 */
 	public function sellyoursaasRemoteAction($remoteaction, $object, $appusername = 'admin', $email = '', $password = '', $forceaddevent = '0', $comment = '', $timeout = 90)
 	{
@@ -3260,16 +3261,27 @@ class SellYourSaasUtils
 		$errorforsshconnect = 0;
 		$errorfordb = 0;
 		$retarray = array();
+		$contracthasbeenrefreshed = 0;
 
 		$now = dol_now();
 
-		if (get_class($object) == 'Contrat') {
+		if (in_array(get_class($object), array('Contrat', 'SellYourSaasContract'))) {
 			$listoflines = $object->lines;
 		} else {
 			$listoflines = array($object);
 		}
 
 		dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." initial email=".$email.(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref: '')." timeout=".$timeout.")", LOG_DEBUG, 1);
+
+		// Load parent contract of the processed contract line $tmpobject
+		if (in_array(get_class($object), array('Contrat', 'SellYourSaasContract'))) {
+			$contract = $object;
+		} else {
+			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+			$contract = new Contrat($this->db);
+			$contract->fetch($object->fk_contrat);
+		}
+		$contract->fetch_thirdparty();
 
 		include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
@@ -3557,13 +3569,6 @@ class SellYourSaasUtils
 			// remoteaction = 'deploy','deployall','deployoption',...
 			if ($doremoteaction) {
 				dol_syslog("Enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
-
-				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-
-				// Load parent contract of the processed contract line $tmpobject
-				$contract = new Contrat($this->db);
-				$contract->fetch($tmpobject->fk_contrat);
-				$contract->fetch_thirdparty();
 
 				// We are in a case of $remoteaction that need to add an event when forceaddevent = 0, to force to add an event at end of remote action.
 				if ($forceaddevent != '-1') {
@@ -3917,11 +3922,7 @@ class SellYourSaasUtils
 			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				dol_syslog("Start refresh of nb of resources for a customer");
 
-				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 				dol_include_once('/sellyoursaas/class/packages.class.php');
-
-				$contract = new Contrat($this->db);
-				$contract->fetch($tmpobject->fk_contrat);
 
 				// Update resource count
 				if (! empty($producttmp->array_options['options_resource_formula'])) {
@@ -4271,7 +4272,7 @@ class SellYourSaasUtils
 
 													$result = $lasttemplateinvoice->update_price();
 
-													// Overwrite the extrafield commentonqty of the template invoice. Note that only last comment among all services is saved/kept
+													// Overwrite the extrafield commentonqty of the template invoice. Note that only last comment among all services is saved/kept. This is a bug.
 													if ($newcommentonqty && $lasttemplateinvoice->array_options['options_commentonqty'] != $newcommentonqty) {
 														$lasttemplateinvoice->array_options['options_commentonqty'] = $newcommentonqty;
 
@@ -4312,24 +4313,28 @@ class SellYourSaasUtils
 
 					// end of processing contract line
 
-					// TODO Move this out of the loop on each contract line
-					if (! $error) {
-						$contract->array_options['options_latestresupdate_date'] = dol_now();
-						if ($newcommentonqty) {
-							$contract->array_options['options_commentonqty'] = $newcommentonqty;
-						}
-
-						$contract->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
-
-						$result = $contract->update($user);
-						if ($result <= 0) {
-							$error++;
-							$this->error = 'Failed to update field options_latestresupdate_date or options_commentonqty on contract '.$contract->ref;
-						}
-					}
-				} // end if formula for contract line defined
+					// Set flag to update latesresupdate_date of the contract
+					$contracthasbeenrefreshed = 1;
+				} // end if a formula for the contract line is defined (so if a refresh must be done for line)
 			} // end if remoteaction is refresh
 		} // end loop of each contract line
+
+		// If flag was set to say contract metrics has been refreshed
+		if (!empty($contracthasbeenrefreshed) && ! $error) {
+			$contract->array_options['options_latestresupdate_date'] = dol_now();
+			if ($newcommentonqty) {
+				$contract->array_options['options_commentonqty'] = $newcommentonqty;
+			}
+
+			$contract->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
+
+			$result = $contract->update($user);
+			if ($result <= 0) {
+				$error++;
+				$this->error = 'Failed to update field options_latestresupdate_date or options_commentonqty on contract '.$contract->ref;
+			}
+		}
+
 
 		// TODO update $arrayofcomment on the contract and rec invoices.
 		// Contract and Invoice to update must have been saved previously into the

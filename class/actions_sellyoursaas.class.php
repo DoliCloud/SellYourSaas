@@ -597,7 +597,9 @@ class ActionsSellyoursaas
 			if (in_array($action, array('refresh', 'refreshmetrics', 'refreshfilesonly', 'recreateauthorizedkeys', 'deletelock', 'recreatelock', 'unsuspend', 'suspendmaintenance'))) {
 				dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($db);
-				$result = $sellyoursaasutils->sellyoursaasRemoteAction($action, $object);
+
+				$comment = 'Executed by doActions with action = '.$action;
+				$result = $sellyoursaasutils->sellyoursaasRemoteAction($action, $object, 'admin', '', '', '0', $comment);
 				if ($result <= 0) {
 					$error++;
 					$this->error=$sellyoursaasutils->error;
