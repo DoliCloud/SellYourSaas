@@ -4275,6 +4275,8 @@ class SellYourSaasUtils
 													if ($newcommentonqty && $lasttemplateinvoice->array_options['options_commentonqty'] != $newcommentonqty) {
 														$lasttemplateinvoice->array_options['options_commentonqty'] = $newcommentonqty;
 
+														$tmpobject->context["actionmsg"] = $forceaddevent;
+
 														$result = $lasttemplateinvoice->update($user);
 														if ($result < 0) {
 															$error++;
@@ -4317,7 +4319,7 @@ class SellYourSaasUtils
 							$contract->array_options['options_commentonqty'] = $newcommentonqty;
 						}
 
-						$object->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
+						$contract->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
 
 						$result = $contract->update($user);
 						if ($result <= 0) {

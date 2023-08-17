@@ -318,7 +318,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		// Update resources of instance
 		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 			$comment = 'Refresh contract '.$contract->ref.' after entering dashboard';
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);
 			if ($result <= 0) {
 				$error++;
 
