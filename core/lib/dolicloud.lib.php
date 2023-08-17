@@ -294,7 +294,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	$purgestring=DOL_DATA_ROOT.'/../dev/initdata/purge-data.php test (all|option) (all|YYYY-MM-DD) mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port?$object->database_port:3306);
 
-	// Mysql Backup
+	// Mysql Backup database
 	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql backup database:<br>';
@@ -355,6 +355,27 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<input type="text" id="purgestring" name="purgestring" value="'.$purgestringtoshow.'" class="marginleftonly quatrevingtpercent"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("purgestring", 0);
 	$links.='<br>';
+
+	// Generate certificate on customer domain name
+	if (!empty($object->array_options['options_custom_url'])) {
+		$generatecertif='certbot certonly --webroot -w '.$homestring.'/'.$object->database_db.'/htdocs -d '.$object->array_options['options_custom_url']."\n";
+		$generatecertif.='ln -fs /etc/letsencrypt/live/'.$object->array_options['options_custom_url'].'/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/'.$object->hostname_db.'-'.$object->array_options['options_custom_url'].'.key'."\n";
+		$generatecertif.='ln -fs /etc/letsencrypt/live/'.$object->array_options['options_custom_url'].'/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/'.$object->hostname_db.'-'.$object->array_options['options_custom_url'].'.crt'."\n";
+		$generatecertif.='ln -fs /etc/letsencrypt/live/'.$object->array_options['options_custom_url'].'/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/'.$object->hostname_db.'-'.$object->array_options['options_custom_url'].'-intermediate.crt'."\n";
+	} else {
+		$generatecertif='No custom domain for this instance';
+	}
+	$links.='<span class="fa fa-certificate"></span> ';
+	$links.='Generate SSL certificate for custom domain';
+	$links.='<span class="opacitymedium"> (to run on the deployment server)</span>';
+	$links.='<textarea name="generatecertifstring" id="generatecertifstring" class="centpercent" rows="'.ROWS_4.'">';
+	//$links.='<input type="text" id="generatecertifstring" name="generatecertifstring" value="'.$generatecertif.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.=$generatecertif;
+	$links.='</textarea>';
+	//if ($conf->use_javascript_ajax) $links.=ajax_autoselect("generatecertif", 0);
+	$links.='<br>';
+
+
 
 	// Upgrade link from V1
 	/*
