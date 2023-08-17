@@ -44,6 +44,7 @@ fi
 if [ "x$EMAILTO" == "x" ]; then
 	export EMAILTO=supervision@$DOMAIN
 fi
+export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 
 
@@ -67,9 +68,9 @@ export testorconfirm=$1
 echo "testorconfirm = $testorconfirm"
 echo "EMAILFROM=$EMAILFROM"
 echo "EMAILTO=$EMAILTO"
+echo "usecompressformatforarchive=$usecompressformatforarchive"
 
 export errstring=""
-export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 MYSQLDUMP=`which mysqldump`
 
