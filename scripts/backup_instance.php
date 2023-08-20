@@ -650,6 +650,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		$object->array_options['options_latestbackup_date_ok'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'OK';
 		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
+
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)
@@ -682,6 +683,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'KO';
 		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
+
 		$object->update($user, 1);
 
 		// Send to DataDog (metric + event)

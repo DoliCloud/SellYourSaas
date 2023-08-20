@@ -186,6 +186,7 @@ $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields['commands'] = array('type'=>'varchar', 'label'=>'Commands', 'checked'=>1, 'enabled'=>1, 'position'=>300, 'csslist'=>'center');
 $arrayfields['nb_instances'] = array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'checked'=>1, 'enabled'=>1, 'position'=>305, 'csslist'=>'right');
 $arrayfields['nb_backups'] = array('type'=>'integer', 'label'=>'NbOfBackups', 'checked'=>1, 'enabled'=>1, 'position'=>306, 'csslist'=>'right');
+$arrayfields['nb_backupsremote'] = array('type'=>'integer', 'label'=>'NbOfBackupsRemote', 'checked'=>1, 'enabled'=>1, 'position'=>306, 'csslist'=>'right');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
 // There is several ways to check permission.
@@ -608,6 +609,9 @@ if (!empty($arrayfields['nb_instances']['checked'])) {
 if (!empty($arrayfields['nb_backups']['checked'])) {
 	print '<td class="liste_titre"></td>';
 }
+if (!empty($arrayfields['nb_backupsremote']['checked'])) {
+	print '<td class="liste_titre"></td>';
+}
 // Action column
 if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 	print '<td class="liste_titre center maxwidthsearch">';
@@ -652,17 +656,21 @@ $parameters = array('arrayfields'=>$arrayfields, 'param'=>$param, 'sortfield'=>$
 $reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
 if (!empty($arrayfields['commands']['checked'])) {
-	print '<th class="liste_titre">'.$langs->trans("Commands").'</th>';
+	print '<th class="liste_titre">'.$langs->trans($arrayfields['commands']['label']).'</th>';
 	$totalarray['nbfield']++;
 	print '<th class="liste_titre"></th>';
 	$totalarray['nbfield']++;
 }
 if (!empty($arrayfields['nb_instances']['checked'])) {
-	print '<th class="liste_titre right">'.$langs->trans("NbOfOpenInstances").'</th>';
+	print '<th class="liste_titre right">'.$langs->trans($arrayfields['nb_instances']['label']).'</th>';
 	$totalarray['nbfield']++;
 }
 if (!empty($arrayfields['nb_backups']['checked'])) {
-	print '<th class="liste_titre right">'.$langs->trans("NbOfBackups").'</th>';
+	print '<th class="liste_titre right">'.$langs->trans($arrayfields['nb_backups']['label']).'</th>';
+	$totalarray['nbfield']++;
+}
+if (!empty($arrayfields['nb_backupsremote']['checked'])) {
+	print '<th class="liste_titre right">'.$langs->trans($arrayfields['nb_backupsremote']['label']).'</th>';
 	$totalarray['nbfield']++;
 }
 // Action column
@@ -687,9 +695,12 @@ if (isset($extrafields->attributes[$object->table_element]['computed']) && is_ar
 $openinstances = array();
 $backupokinstances = array();
 $backuptotalinstances = array();
+$backuptotalinstancesremote = array();
 $sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
-$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko,";
+$sqlperhost .= " SUM(0) as nbbackupremoteok,";
+$sqlperhost .= " SUM(0) as nbbackupremoteko";
 $sqlperhost .= " FROM ".$db->prefix()."contrat_extrafields as ce";
 $sqlperhost .= " WHERE deployment_status in ('processing', 'done')";
 $sqlperhost .= " GROUP BY ce.deployment_host";
@@ -699,6 +710,7 @@ if ($resqlperhost) {
 		$openinstances[$obj->deployment_host] = (int) $obj->nb;
 		$backupokinstances[$obj->deployment_host] = (int) $obj->nbbackupok;
 		$backuptotalinstances[$obj->deployment_host] = (int) $obj->nbbackupok + (int) $obj->nbbackupko;
+		$backuptotalinstancesremote[$obj->deployment_host] = (int) $obj->nbbackupremoteok + (int) $obj->nbbackupremoteko;
 	}
 } else {
 	dol_print_error($db);
@@ -734,6 +746,7 @@ while ($i < $imaxinloop) {
 		}
 		$object->nb_instances = empty($openinstances[$obj->ipaddress]) ? 0 : $openinstances[$obj->ipaddress];
 		$object->nb_backuptotal = empty($backuptotalinstances[$obj->ipaddress]) ? 0 : $backuptotalinstances[$obj->ipaddress];
+		$object->nb_backuptotalremote = empty($backuptotalinstancesremote[$obj->ipaddress]) ? 0 : $backuptotalinstancesremote[$obj->ipaddress];
 		$object->nb_backupok = empty($backupokinstances[$obj->ipaddress]) ? 0 : $backupokinstances[$obj->ipaddress];
 		print $object->getKanbanView('', array('selected' => in_array($object->id, $arrayofselected)));
 		if ($i == ($imaxinloop - 1)) {
@@ -828,6 +841,9 @@ while ($i < $imaxinloop) {
 			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
 			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, -1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
 			print '</td>';
+			if (!$i) {
+				$totalarray['nbfield']++;
+			}
 		}
 		// Column nb of instances
 		if (!empty($arrayfields['nb_instances']['checked'])) {
@@ -836,6 +852,9 @@ while ($i < $imaxinloop) {
 			print (empty($openinstances[$obj->ipaddress]) ? '' : $openinstances[$obj->ipaddress]);
 			print '</a>';
 			print '</td>';
+			if (!$i) {
+				$totalarray['nbfield']++;
+			}
 		}
 		// Column nb of instances backups
 		if (!empty($arrayfields['nb_backups']['checked'])) {
@@ -860,6 +879,18 @@ while ($i < $imaxinloop) {
 				}
 			}
 			print '</td>';
+			if (!$i) {
+				$totalarray['nbfield']++;
+			}
+		}
+		// Column nb of instances backups
+		if (!empty($arrayfields['nb_backupsremote']['checked'])) {
+			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
+			// TODO
+			print '</td>';
+			if (!$i) {
+				$totalarray['nbfield']++;
+			}
 		}
 		// Action column
 		if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {

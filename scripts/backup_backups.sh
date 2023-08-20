@@ -4,6 +4,8 @@
 # Put the following entry into your root cron
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backups.sh confirm [month|week|none] [osuX]
 
+#TODO Rewrite this in PHP so we can update database of master to flag remote backup success or error. 
+
 #set -e
 
 source /etc/lsb-release

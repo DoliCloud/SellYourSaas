@@ -66,7 +66,7 @@ class Deploymentserver extends CommonObject
 	public $nb_instances;
 	public $nb_backupok;
 	public $nb_backuptotal;
-
+	public $nb_backuptotalremote;
 
 	const STATUS_DISABLED = 0;
 	const STATUS_ENABLED = 1;
