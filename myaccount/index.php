@@ -1310,7 +1310,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$companybankaccount->bic = GETPOST('bic', 'alphanohtml');
 		$companybankaccount->socid = $mythirdpartyaccount->id;
 		$companybankaccount->datec = dol_now();
-		$companybankaccount->frstrecur = 'RECUR';
+		$companybankaccount->frstrecur = 'RCUR';
 
 		if (empty($companybankaccount->label)) {
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("BankName")), null, 'errors');
@@ -1338,7 +1338,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		// First update or insert payment mode 'ban'
 		if (! $error) {
-			$companybankid = $companybankaccount->create($user);
+			$companybankid = $companybankaccount->create($user);	// Create with main data
 
 			if (empty($companybankaccount->rum)) {
 				require_once DOL_DOCUMENT_ROOT.'/compta/prelevement/class/bonprelevement.class.php';
@@ -1347,7 +1347,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				$companybankaccount->rum = $prelevement->buildRumNumber($mythirdpartyaccount->code_client, $companybankaccount->datec, $companybankid);
 			}
 
+			// Update with all other data, including $companybankaccount->rum
 			$resultbankcreate = $companybankaccount->update($user);
+
 			if ($resultbankcreate > 0) {
 				$sql = "UPDATE ".MAIN_DB_PREFIX ."societe_rib";
 				$sql.= " SET status = '".$db->escape($servicestatusstripe)."'";
@@ -1397,6 +1399,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				$error++;
 				setEventMessages('ThisPaymentModeIsNotSepa', null, 'errors');
 			} else {
+				$stripe = new Stripe($db);
+				$stripeacc = $stripe->getStripeAccount($service);	// Get Stripe OAuth connect account if it exists (no remote access to Stripe here)
+
 				$cu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatus, 1);
 				if (!$cu) {
 					$error++;
