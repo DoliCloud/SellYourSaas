@@ -1567,6 +1567,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 			$companypaymentmode->stripe_card_ref = $payment_method->id;
 			$companypaymentmode->stripe_account  = $setupintent->customer.'@'.$stripearrayofkeys['publishable_key'];
+			$companypaymentmode->ext_payment_site= ($servicestatusstripe ? 'StripeLive' : 'StripeTest');
 			$companypaymentmode->status          = $servicestatusstripe;
 
 			$companypaymentmode->card_type       = $payment_method->card->brand;
