@@ -1745,6 +1745,7 @@ class SellYourSaasUtils
 			return 1;
 		}
 
+		// Define $service to use for Stripe
 		$service = 'StripeTest';
 		$servicestatus = 0;
 		if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
@@ -1792,6 +1793,9 @@ class SellYourSaasUtils
 					$invoice = new Facture($this->db);
 					$result1 = $invoice->fetch($obj->rowid);
 
+					$invoice->fetch_thirdparty();
+					$thirdparty = $invoice->thirdparty;
+
 					$companypaymentmode = new CompanyPaymentMode($this->db);
 					$result2 = $companypaymentmode->fetch($obj->companypaymentmodeid);
 
@@ -1835,7 +1839,8 @@ class SellYourSaasUtils
 								$this->errors[] = 'Failed to create Stripe SEPA request for invoice id = '.$obj->rowid.'. Not enough or too many request to pay with direct debit order. We should have only 1.';
 							} else {
 								$objd = $this->db->fetch_object($rsql);
-								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid);
+
+								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid, 'direct-debit', 'facture', $service, empty($thirdparty->array_options['options_stripeaccount']) ? '' : $thirdparty->array_options['options_stripeaccount']);
 								if ($result < 0) {
 									$errorforinvoice++;
 									$error++;
