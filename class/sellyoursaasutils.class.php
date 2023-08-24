@@ -463,6 +463,8 @@ class SellYourSaasUtils
 							}
 						}
 
+						// TODO Add an event in agenda for contract/thirdparty
+
 						$contractprocessed[$object->id]=$object->ref;
 					} else {
 					}
