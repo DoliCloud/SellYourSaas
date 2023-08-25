@@ -1100,31 +1100,68 @@ class SellYourSaasUtils
 
 					$foundalternativestripeaccount = '';
 
-					// Force stripe to another value (by default this value is empty)
-					if (! empty($thirdparty->array_options['options_stripeaccount'])) {
-						dol_syslog("The thirdparty id=".$thirdparty->id." has a dedicated Stripe Account, so we switch to it.");
+					// Force Stripe to another value (by default this custom value for thirdparty is empty)
+					if (!empty($thirdparty->array_options['options_stripeaccount'])) {
+						dol_syslog("The thirdparty id=".$thirdparty->id." has a dedicated Stripe Account (".$thirdparty->array_options['options_stripeaccount']."), so we switch to it.");
 
-						$tmparray = explode('@', $thirdparty->array_options['options_stripeaccount']);
-						if (! empty($tmparray[1])) {
-							$tmparray2 = explode(':', $tmparray[1]);
-							if (! empty($tmparray2[3])) {
+						$tmparrayenv = explode('-', $thirdparty->array_options['options_stripeaccount']);
+						if (count($tmparrayenv) == 2) {
+							// New format 'cus_account_test@pk_test_...:sk_test_...-cus_account_live@pk_live_...:sk_live_...'
+							$tmparraytest = explode('@', $tmparrayenv[0]);
+							if (!empty($tmparraytest[1])) {
+								$tmparraytest2 = explode(':', $tmparraytest[1]);
+							}
+							$tmparraylive = explode('@', $tmparrayenv[1]);
+							if (!empty($tmparraylive[1])) {
+								$tmparraylive2 = explode(':', $tmparraylive[1]);
+							}
+							if (!empty($tmparraytest2[1]) && !empty($tmparraylive2[1])) {
 								$stripearrayofkeysbyenv = array(
 									0=>array(
-										"publishable_key" => $tmparray2[0],
-										"secret_key"      => $tmparray2[1]
+										"publishable_key" => $tmparraytest2[0],
+										"secret_key"      => $tmparraytest2[1]
 									),
 									1=>array(
-										"publishable_key" => $tmparray2[2],
-										"secret_key"      => $tmparray2[3]
+										"publishable_key" => $tmparraylive2[0],
+										"secret_key"      => $tmparraylive2[1]
 									)
 								);
 
 								$stripearrayofkeys = $stripearrayofkeysbyenv[$servicestatus];
 								\Stripe\Stripe::setApiKey($stripearrayofkeys['secret_key']);
 
-								$foundalternativestripeaccount = $tmparray[0];    // Store the customer id
+								if ($servicestatus != 1) {
+									$foundalternativestripeaccount = $tmparraytest[0];    // Store the customer id
+								} else {
+									$foundalternativestripeaccount = $tmparraylive[0];    // Store the customer id
+								}
 
 								dol_syslog("We use now customer=".$foundalternativestripeaccount." publishable_key=".$stripearrayofkeys['publishable_key'], LOG_DEBUG);
+							}
+						} else {
+							// Old format 'cus_account@pk_test_...:sk_test_...:pk_live_...:sk_live_...'
+							$tmparray = explode('@', $thirdparty->array_options['options_stripeaccount']);
+							if (! empty($tmparray[1])) {
+								$tmparray2 = explode(':', $tmparray[1]);
+								if (! empty($tmparray2[3])) {
+									$stripearrayofkeysbyenv = array(
+										0=>array(
+											"publishable_key" => $tmparray2[0],
+											"secret_key"      => $tmparray2[1]
+										),
+										1=>array(
+											"publishable_key" => $tmparray2[2],
+											"secret_key"      => $tmparray2[3]
+										)
+									);
+
+									$stripearrayofkeys = $stripearrayofkeysbyenv[$servicestatus];
+									\Stripe\Stripe::setApiKey($stripearrayofkeys['secret_key']);
+
+									$foundalternativestripeaccount = $tmparray[0];    // Store the customer id
+
+									dol_syslog("We use now customer=".$foundalternativestripeaccount." publishable_key=".$stripearrayofkeys['publishable_key'], LOG_DEBUG);
+								}
 							}
 						}
 
