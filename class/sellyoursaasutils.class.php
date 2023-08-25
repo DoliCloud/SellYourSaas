@@ -1879,7 +1879,15 @@ class SellYourSaasUtils
 							} else {
 								$objd = $this->db->fetch_object($rsql);
 
-								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid, 'direct-debit', 'facture', $service, empty($thirdparty->array_options['options_stripeaccount']) ? '' : $thirdparty->array_options['options_stripeaccount']);
+								$forcestripe = '';
+								if (!empty($thirdparty->array_options['options_stripeaccount'])) {
+									$tmparrayenv = explode('-', $thirdparty->array_options['options_stripeaccount']);
+									if (count($tmparrayenv) == 2) {
+										$forcestripe = $tmparrayenv[$servicestatus];
+									}
+								}
+
+								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid, 'direct-debit', 'facture', $service, $forcestripe);
 								if ($result < 0) {
 									$errorforinvoice++;
 									$error++;
