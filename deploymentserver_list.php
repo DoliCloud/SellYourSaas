@@ -700,7 +700,7 @@ $sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackupremote_status = 'OK'", "1", "0").") as nbbackupremoteok,";
-$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackupremote_status = 'KO'", "1", "0").") as nbbackupremoteko,";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackupremote_status = 'KO'", "1", "0").") as nbbackupremoteko";
 $sqlperhost .= " FROM ".$db->prefix()."contrat_extrafields as ce";
 $sqlperhost .= " WHERE deployment_status in ('processing', 'done')";
 $sqlperhost .= " GROUP BY ce.deployment_host";
