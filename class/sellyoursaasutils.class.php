@@ -88,6 +88,8 @@ class SellYourSaasUtils
 		$this->error='';
 
 		$draftinvoiceprocessed = array();
+		$contractprocessed = array();
+		$contracterror = array();
 
 		$this->db->begin();
 
@@ -214,8 +216,9 @@ class SellYourSaasUtils
 									dol_syslog("Number of open services (".$nbservice.") is zero or contract is undeployed, so we do nothing.");
 								}
 								if (!$error) {
-									$codepaiementdebit = 'PRE';
-									if ($invoice->mode_reglement_code == $codepaiementdebit) {
+									$codepaiementdirectdebit = 'PRE';
+									$codepaiementtransfer = 'VIR';
+									if ($invoice->mode_reglement_code == $codepaiementdirectdebit || $invoice->mode_reglement_code == $codepaiementtransfer) {
 										// If invoice is an invoice to pay with a direct debit
 										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');		// $enddatetoscan = yesterday
 
@@ -246,7 +249,7 @@ class SellYourSaasUtils
 												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
 												$resqlupdate = $this->db->query($sqlupdate);
 												if ($resqlupdate) {
-													$contractprocessed[$contract->id]=$contract->ref;
+													$contractprocessed[$contract->id] = $contract->ref;
 
 													$actioncode = 'RENEW_CONTRACT';
 													$now = dol_now();
@@ -268,7 +271,7 @@ class SellYourSaasUtils
 
 													$ret = $actioncomm->create($user);       // User creating action
 												} else {
-													$contracterror[$contract->id]=$contract->ref;
+													$contracterror[$contract->id] = $contract->ref;
 
 													$error++;
 													$this->error = $this->db->lasterror();
