@@ -4378,12 +4378,12 @@ class SellYourSaasUtils
 				$contract->array_options['options_commentonqty'] = $newcommentonqty;
 			}
 
-			$contract->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
+			$contract->context['actionmsg'] = 'sellyoursaasRemoteAction '.$remoteaction.': Update contract by '.(getUserRemoteIP() ? getUserRemoteIP() : 'localhost').' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
 
 			$result = $contract->update($user);
 			if ($result <= 0) {
 				$error++;
-				$this->error = 'Failed to update field options_latestresupdate_date or options_commentonqty on contract '.$contract->ref;
+				$this->error = 'sellyoursaasRemoteAction '.$remoteaction.': Failed to update field options_latestresupdate_date or options_commentonqty on contract '.$contract->ref;
 			}
 		}
 
