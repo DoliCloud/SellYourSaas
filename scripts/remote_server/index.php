@@ -380,7 +380,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^#?cd __INSTANCEDIR__\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+;$/i', $newline)) {
+		if (preg_match('/^#?cd __INSTANCEDIR__\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
 			continue;
 		}
 		// Check more patterns
@@ -399,7 +399,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^chown root.root \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+;$/i', $newline)) {
+		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
 			continue;
 		}
 		// TODO enhance list of allowed patterns
