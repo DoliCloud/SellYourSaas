@@ -241,3 +241,8 @@ gsettings set org.gnome.Vino require-encryption false
 /usr/lib/vino/vino-server
 ---------------
 
+
+== Cloner son poste sur un autre
+
+TODO ...
+
