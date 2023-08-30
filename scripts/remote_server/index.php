@@ -362,10 +362,10 @@ function checkScriptFile($scriptfile, $fh, $params)
 			break;
 		}
 		// Check allowed pattern
-		if (preg_match('/^touch __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^#?touch __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^rm -fr? __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^#?rm -fr? __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
@@ -384,10 +384,10 @@ function checkScriptFile($scriptfile, $fh, $params)
 			continue;
 		}
 		// Check more patterns
-		if (preg_match('/^touch \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^#?touch \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^rm -fr? \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^#?rm -fr? \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
@@ -399,7 +399,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^chown root.root \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^\/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/cloud\/init.sh \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install; php upgrade2.php 0\.0\.0 0\.0\.0 MAIN_MODULE_Adherents$/i', $newline)) {
 			continue;
 		}
 		// TODO enhance list of allowed patterns
