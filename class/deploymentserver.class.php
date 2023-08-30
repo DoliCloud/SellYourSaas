@@ -1119,7 +1119,9 @@ class Deploymentserver extends CommonObject
 	{
 		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
 
-		$sql = "SELECT ce.latestbackup_status, MAX(ce.latestbackup_date) as maxtry, MAX(ce.latestbackup_date_ok) as maxok";
+		$sql = "SELECT ce.latestbackup_status,";
+		$sql .= " MIN(ce.latestbackup_date) as mintry, MIN(ce.latestbackup_date_ok) as minok,";
+		$sql .= " MAX(ce.latestbackup_date) as maxtry, MAX(ce.latestbackup_date_ok) as maxok";
 		$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
 		$sql .= " WHERE ce.fk_object = c.rowid";
 		$sql .= " AND ce.deployment_status IN ('done', 'processing')";
@@ -1132,9 +1134,13 @@ class Deploymentserver extends CommonObject
 				if ($obj->latestbackup_status == 'OK') {
 					$maxtryok = $this->db->jdate($obj->maxtry);
 					$maxokok = $this->db->jdate($obj->maxok);
+					$mintryok = $this->db->jdate($obj->mintry);
+					$minokok = $this->db->jdate($obj->minok);
 				} elseif ($obj->latestbackup_status == 'KO') {
 					$maxtryko = $this->db->jdate($obj->maxtry);
 					$maxokko = $this->db->jdate($obj->maxok);
+					$mintryko = $this->db->jdate($obj->mintry);
+					$minokko = $this->db->jdate($obj->minok);
 				} elseif ($obj->latestbackup_status) {
 					dol_print_error($this->db, 'Bad value for latestbackup_status');
 				}
@@ -1143,6 +1149,7 @@ class Deploymentserver extends CommonObject
 			dol_print_error($this->db);
 		}
 
-		return array('maxtryok' => $maxtryok, 'maxokok' => $maxokok, 'maxtryko' => $maxtryko, 'maxokko' => $maxokko);
+		return array('maxtryok' => $maxtryok, 'maxokok' => $maxokok, 'maxtryko' => $maxtryko, 'maxokko' => $maxokko,
+			'mintryok'=>$mintryok, 'minokok'=>$minokok, 'mintryko'=>$mintryko, 'minokko'=>$minokko);
 	}
 }

@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW Show oldest date of backup ok/ko in popup on list of instances
 * NEW Removed a lot of useless or duplicated SQL request in remoteAction.
 * NEW Add a test on a signature of parameters provided to remoteaction
 * NEW Request to become a reseller are now store into database. Add a menu entry to list all pending requests to become a reseller.

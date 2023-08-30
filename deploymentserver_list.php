@@ -860,9 +860,12 @@ while ($i < $imaxinloop) {
 		if (!empty($arrayfields['nb_backups']['checked'])) {
 			$titletoshow = '';
 			$tmpdata = $object->getLastBackupDate();
-			$titletoshow .= 'Latest backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
-			$titletoshow .= '<br>Latest backup ko: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
-			$titletoshow .= '<br>Latest backup ok: '.dol_print_date($tmpdata['maxokok'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Oldest backup try: '.dol_print_date(min($tmpdata['mintryok'], $tmpdata['mintryko']), 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Oldest backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest backup KO: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Oldest backup OK: '.dol_print_date($tmpdata['minokok'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest backup OK: '.dol_print_date($tmpdata['maxokok'], 'dayhoursec', 'tzuserrel');
 			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
 			if (!empty($backuptotalinstances[$obj->ipaddress])) {
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
