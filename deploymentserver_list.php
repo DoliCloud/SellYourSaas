@@ -860,7 +860,7 @@ while ($i < $imaxinloop) {
 		if (!empty($arrayfields['nb_backups']['checked'])) {
 			$titletoshow = '';
 			$tmpdata = $object->getLastBackupDate();
-			$titletoshow .= '<br>Oldest backup try: '.dol_print_date(min($tmpdata['mintryok'], $tmpdata['mintryko']), 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Oldest backup try: '.dol_print_date(findMinimum($tmpdata['mintryok'], $tmpdata['mintryko']), 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Oldest backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest backup KO: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
@@ -966,3 +966,24 @@ if (in_array('builddoc', $arrayofmassactions) && ($nbtotalofrecords === '' || $n
 // End of page
 llxFooter();
 $db->close();
+
+
+/**
+ * findMinimum
+ *
+ * @param int	$var1		Var 1
+ * @param int	$var2		Var 2
+ * @return int|null
+ */
+function findMinimum($var1, $var2)
+{
+	if ($var1 === null && $var2 === null) {
+		return null; // Les deux variables sont nulles
+	} elseif ($var1 === null) {
+		return $var2; // Variable 1 est nulle, retourne la variable 2
+	} elseif ($var2 === null) {
+		return $var1; // Variable 2 est nulle, retourne la variable 1
+	} else {
+		return min($var1, $var2); // Aucune variable n'est nulle, retourne le minimum entre les deux
+	}
+}
