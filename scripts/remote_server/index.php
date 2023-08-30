@@ -380,6 +380,9 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#cd __INSTANCEDIR__\/htdocs\/install; php upgrade2.php 0.0.0 0.0.0 MAIN_MODULE_Adherents;$/i', $newline)) {
+			continue;
+		}
 		// Check more patterns
 		if (preg_match('/^touch \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
