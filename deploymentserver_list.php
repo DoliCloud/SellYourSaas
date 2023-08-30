@@ -789,16 +789,15 @@ while ($i < $imaxinloop) {
 			if (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('rowid', 'status')) && empty($val['arrayofkeyval'])) {
 				$cssforfield .= ($cssforfield ? ' ' : '').'right';
 			}
-			if (in_array($key, array('servercustomerannouncestatus'))) {
-				$cssforfield = 'center';
-			}
 			if (!empty($arrayfields['t.'.$key]['checked'])) {
 				print '<td'.($cssforfield ? ' class="'.$cssforfield.(preg_match('/tdoverflow/', $cssforfield) ? ' classfortooltip' : '').'"' : '');
 				if (preg_match('/tdoverflow/', $cssforfield) && !is_numeric($object->$key)) {
-					print ' title="'.dol_escape_htmltag($object->$key).'"';
+					print ' title="'.dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($object->$key), 1, 1, 1)).'"';
 				}
 				print '>';
-				if ($key == 'servercustomerannouncestatus') {
+				if ($key == 'servercustomerannounce') {
+					print dolGetFirstLineOfText($object->$key);
+				} elseif ($key == 'servercustomerannouncestatus') {
 					print ajax_object_onoff($object, 'servercustomerannouncestatus', 'servercustomerannouncestatus', 'On:switch_on_warning', 'Off', array(), '', $key);
 				} elseif ($key == 'status') {
 					print $object->getLibStatut(5);
