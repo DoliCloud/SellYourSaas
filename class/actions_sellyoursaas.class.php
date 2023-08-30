@@ -1055,8 +1055,15 @@ class ActionsSellyoursaas
 
 						$ret = '<div class="bold">';
 						$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);	// This call fetchObjectLinked
-						if ($ispaid) $ret .= '<span class="badge badge-status4" style="font-size: 1em;">'.$langs->trans("PayedMode").'</span>';
-						else $ret .= '<span class="badge" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
+						if ($ispaid) {
+							if (getDolGlobalString("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+								$ret .= '<span class="badge badge-status4" style="font-size: 1em;">'.$langs->trans("PayedOrConfirmedMode").'</span>';
+							} else {
+								$ret .= '<span class="badge badge-status4" style="font-size: 1em;">'.$langs->trans("PayedMode").'</span>';
+							}
+						} else {
+							$ret .= '<span class="badge" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
+						}
 						$ret .= '</div>';
 
 						print $ret;
