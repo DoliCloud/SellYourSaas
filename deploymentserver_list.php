@@ -833,12 +833,12 @@ while ($i < $imaxinloop) {
 		print $hookmanager->resPrint;
 		// Column for commands
 		if (!empty($arrayfields['commands']['checked'])) {
-			print '<td class="small tdoverflowmax150">';
-			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/remote_server_launcher.sh start|status|stop';
+			print '<td class="small tdoverflowmax125">';
+			$commandstartstop = 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/remote_server_launcher.sh start|status|stop';
 			print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, -1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
 			print '</td>';
-			print '<td class="small tdoverflowmax150">';
-			$commandstartstop = 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
+			print '<td class="small tdoverflowmax125">';
+			$commandstartstop = 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offline.sh '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/offline.php test|offline|online';
 			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, -1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
 			print '</td>';
 			if (!$i) {
