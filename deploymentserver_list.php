@@ -800,7 +800,12 @@ while ($i < $imaxinloop) {
 				} elseif ($key == 'servercustomerannouncestatus') {
 					print ajax_object_onoff($object, 'servercustomerannouncestatus', 'servercustomerannouncestatus', 'On:switch_on_warning', 'Off', array(), '', $key);
 				} elseif ($key == 'status') {
-					print $object->getLibStatut(5);
+					if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
+						$s = $object->getLibStatut(5);
+						print '<span class="opacitymedium">'.str_replace('title="'.$langs->transnoentitiesnoconv('Opened').'"', 'title="'.$langs->transnoentitiesnoconv('Opened').' - '.$langs->trans("ClosedGlobally").'"', $s).'</span>';
+					} else {
+						print $object->getLibStatut(5);
+					}
 				} elseif ($key == 'rowid') {
 					print $object->showOutputField($val, $key, $object->id, '');
 				} else {

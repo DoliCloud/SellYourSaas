@@ -840,3 +840,4 @@ PendingResellers=Pending requests for resellers
 SELLYOURSAAS_APPLY_RESELLER_EMAIL_DISABLED=Disable the send of an email when applying for reseller
 ARequestToBeAResellerHasAlreadyBeenSent=A request to be a reseller has already been sent (the %s)
 ThirdpartyHasNoDefaultBanAccount=This thirdparty has not default Bank payment mode, please add it first.
+ClosedGlobally=but closed globally
