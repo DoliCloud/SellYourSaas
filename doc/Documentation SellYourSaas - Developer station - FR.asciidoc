@@ -243,6 +243,25 @@ gsettings set org.gnome.Vino require-encryption false
 
 
 == Cloner son poste sur un autre
+Prerequisites:
+- You must have a remote ssh access to store the backup and you must be able to access it with 
+  ssh username@servername
+- The computer must have a LAN internet connexion
 
-TODO ...
+Prepare the USB boot key:
+- Download the amd64 (x86-64) version of Clonezilla Live zip file from (https://clonezilla.org/)
+- unzip the file
+- copy all files into the root of the USB key.
+
+Make the image of the partition to save
+- Start the computer with the USB key as boot
+- Choose to start CloneZilla and choose the SSH for the media storing the image.
+- Choose saveparts (or savedisks)
+
+Restore
+
+- First go on source image. Rename the image file sdXY.xxx-ptcl-img.gz to change XY whith value to use to restore to.
+- Edit file *dev-fs.list*
+
+- Launch CloneZilla then restoreparts
 
