@@ -253,15 +253,46 @@ Prepare the USB boot key:
 - unzip the file
 - copy all files into the root of the USB key.
 
-Make the image of the partition to save
-- Start the computer with the USB key as boot
-- Choose to start CloneZilla and choose the SSH for the media storing the image.
-- Choose saveparts (or savedisks)
+Make the image of the partition to save:
+- Start the computer with the CloneZilla USB key as boot
+- Choose to start CloneZilla then choose the SSH for the media storing the image.
+- Choose *saveparts* (or savedisks)
 
-Restore
+Restore:
 
-- First go on source image. Rename the image file sdXY.xxx-ptcl-img.gz to change XY whith value to use to restore to.
-- Edit file *dev-fs.list*
+- Start the computer with the CloneZilla USB key as boot
+- Choose to start CloneZilla then choose the SSH for the media storing the image.
+- Choose *restoreparts* (or restoredisks)
+- If the target partition is larger, don't forget to check during restoration option that the option auto-resize is set.
 
-- Launch CloneZilla then restoreparts
+After the restoration, rename the UUID if it is already used by another partition on same disk. If not, fix this with 
+[source,bash]
+---------------
+tune2fs 
+---------------
+
+Check that the boot partition has the flag on (flag boot for BIOS/Legacy or flag ESP for UEFI). You can edit this with
+[source,bash]
+---------------
+gparted
+---------------
+
+Then run 
+[source,bash]
+---------------
+update-grub
+---------------
+
+You can also: Check/modify the /etc/fstab to automount the new partition. 
+You can also: edit /etc/default/grub to set GRUB_TERMINAL=console
+
+If after a reboot, you reach a grub invit, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a live Ubunu. Then:
+[source,bash]
+---------------
+sudo add-apt-repository ppa:yannubuntu/boot-repair
+sudo apt update
+sudo apt install -y boot-repair
+sudo boot-repair
+---------------
+
 
