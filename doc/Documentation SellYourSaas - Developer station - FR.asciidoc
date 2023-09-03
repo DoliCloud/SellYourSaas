@@ -265,28 +265,31 @@ Restore:
 - Choose *restoreparts* (or restoredisks)
 - If the target partition is larger, don't forget to check during restoration option that the option auto-resize is set.
 
-After the restoration, rename the UUID if it is already used by another partition on same disk. If not, fix this with 
+After the restoration, you can make some check and fix keeping troubles:
+Reboot from a Live ubuntu) and then you can:
+
+Rename the UUID if it is already used by another partition on same disk. If not, fix this with 
 [source,bash]
 ---------------
 tune2fs 
 ---------------
 
-Check that the boot partition has the flag on (flag boot for BIOS/Legacy or flag ESP for UEFI). You can edit this with
+Check that the boot partition has the flag on (flag boot for BIOS/Legacy or flag ESP for UEFI).
 [source,bash]
 ---------------
 gparted
 ---------------
 
-Then run 
+Reinstall grub (if something is rong)
 [source,bash]
 ---------------
 update-grub
 ---------------
 
 You can also: Check/modify the /etc/fstab to automount the new partition. 
-You can also: edit /etc/default/grub to set GRUB_TERMINAL=console
 
-If after a reboot, you reach a grub invit, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a live Ubunu. Then:
+
+If after a final reboot, you reach a grub prompt, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a Live Ubunu. Then:
 [source,bash]
 ---------------
 sudo add-apt-repository ppa:yannubuntu/boot-repair
@@ -294,5 +297,4 @@ sudo apt update
 sudo apt install -y boot-repair
 sudo boot-repair
 ---------------
-
 
