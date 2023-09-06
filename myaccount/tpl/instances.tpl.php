@@ -909,7 +909,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		// Billing
 		if ($statuslabel != 'undeployed') {
-			$freemodeinstance = $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE");
+			$freemodeinstance = ((empty($mythirdpartyaccount->array_options['options_checkboxnonprofitorga']) || $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit') && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"));
 
 			print '<!-- Billing information of contract -->'."\n";
 			print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.($freemodeinstance ? ($foundtemplate == 0 ? $langs->trans("Confirmation") : $langs->trans("Billing")) : $langs->trans("Billing")).' : </span>';
