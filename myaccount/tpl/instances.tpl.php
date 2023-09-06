@@ -927,7 +927,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				if ($foundtemplate != 0 && $priceinvoicedht != $contract->total_ht) {
 					if ($pricetoshow != '') print $langs->trans("FlatOrDiscountedPrice").' = ';
 				}
-				print '<span class="bold">'.($freemodeinstance ? $langs->trans("Free") : $pricetoshow).'</span>';
+				print '<span class="bold">'.($freemodeinstance ? $langs->trans("FreePrice") : $pricetoshow).'</span>';
 
 				// Discount and next invoice line
 				if ($foundtemplate == 0) {	// foundtemplate means there is at least one template invoice (so contract is a paying or validated contract)
