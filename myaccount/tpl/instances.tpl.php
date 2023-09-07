@@ -627,14 +627,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<br>';
 
 		// Hard coded option: Custom domain name
-		if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', 'intcomma'))))) {
+		if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))) {
 			print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
-
-			print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
-			print '<table class="centpercent center paddingleft paddingright"><tr><td width="100%" class="photo">';
-			print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/theme/common/octicons/build/svg/milestone.svg" title="'.dol_escape_htmltag($alt).'">';
-			print '</td></tr></table>';
-			print '</div>';
 
 			print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 			print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -644,16 +638,23 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
 			print '<input type="hidden" name="page_y" value="">';
 
-			print '<div class="tagtd valignmiddle">';
-			print $langs->trans("OptionYourCustomDomainName").'<br>';
+			print '<div class="tagtd valignmiddle paddingleft paddingright">';
+			print '<div class="titleoption">'; // title line
+			print '<div class="inline-block">';
+			print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/theme/common/octicons/build/svg/milestone.svg" title="'.dol_escape_htmltag($alt).'">';
+			print '</div>';
+			print '<div class="inline-block paddingleft marginleftonly paddingright marginrightonly bold">'.$langs->trans("OptionYourCustomDomainName").'</div>';
+			print '</div>';	// end title line
+
 			print '<span class="small">';
-			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'<br>';
-			print $langs->trans("OptionYourCustomDomainNamePrerequisites").'<br>';
+			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'</span><br>';
+			print '<span class="opacitymedium small">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'</span><br>';
+
+			print '<div class="installcertif margintop">';
 			print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
 			print '<input type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
 			print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
-			print '</span>';
-			print '</div>';
+			print '</div></div>';
 			print '<div class="tagtd center">';
 			// TODO Use same frequency than into the template invoice ?
 			$nbmonth = 1;
@@ -671,7 +672,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		// Hard coded option: A website
 		if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0
-			&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID", 'intcomma') || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', 'intcomma'))))) {
+			&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID'))))) {
 			$type_db = $conf->db->type;
 			$hostname_db  = $contract->array_options['options_hostname_db'];
 			$username_db  = $contract->array_options['options_username_db'];
@@ -701,13 +702,20 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 			print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
+
+			print '<div class="titleoption">'; // title line
+			print '<div class="inline-block">';
+			print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/theme/common/octicons/build/svg/globe.svg" title="'.dol_escape_htmltag($alt).'">';
+			print '</div>';
+			print '<div class="inline-block paddingleft marginleftonly paddingright marginrightonly bold">'.$langs->trans("OptionYourWebsite").'</div>';
+			print '</div>';	// end title line
+
 			if (empty($websitemodenabled)) {
 				print $langs->trans("OptionYourWebsiteNoEnabled").'<br>';
 			} else {
 				include_once DOL_DOCUMENT_ROOT."/website/class/website.class.php";
 				$websitestatic = new Website($newdb);
 				$websitestatic->fetchAll('', '', 0, 0, array('t.status'=>$websitestatic::STATUS_VALIDATED));
-				print $langs->trans("OptionYourWebsite");
 				print '<span class="small">';
 				print $langs->trans("OptionYourWebsiteDesc").'<br>';
 				print $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
