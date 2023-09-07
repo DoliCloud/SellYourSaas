@@ -1120,6 +1120,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 
 	$mythirdpartyaccount->array_options['options_date_apply_for_reseller'] = dol_now();
+	$mythirdpartyaccount->note_private = dol_concatdesc($mythirdpartyaccount->note_private, GETPOST('content', 'restricthtml'));
 	$result = $mythirdpartyaccount->update(0);
 
 	if ($result) {
@@ -1127,7 +1128,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	} else {
 		setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
 	}
-	$action = '';
+	header("Location: ".$_SERVER['PHP_SELF']);
+	exit;
 } elseif ($action == 'updatemythirdpartyaccount') {
 	$error = 0;
 
