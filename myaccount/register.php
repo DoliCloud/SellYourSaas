@@ -843,6 +843,9 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 		while ( domain.length > 1 && !isNaN( domain.charAt(0))  ){
 		  domain=domain.substr(1)
 		}
+		if (domain.length > 29) {
+			domain = domain.substring(0, 28);
+		}
 		return domain
 	}
 
