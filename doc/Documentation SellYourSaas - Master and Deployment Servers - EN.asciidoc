@@ -2446,7 +2446,7 @@ Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
 
-Comment the line into */etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf* (if not the error log file will not be isolated into the /var/log/mysql/mysql.log file):
+Comment the line into */etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf* (if not, the error log file will not be isolated into the /var/log/mysql/mysql.log file):
 
 [source,bash]
 --------------
