@@ -15,7 +15,7 @@ This document describes the technical and functional implementation of Sell-Your
 :toc-title: Table of contents
 :toc-placement: preamble
 :revnumber: v1.0
-:revdate: 2019-01-30
+:revdate: 2019-01-30caching_sha2_password
 :revremark: First version
 :revnumber: v1.1
 :revdate: 2020-02-12
@@ -5756,6 +5756,25 @@ You can edit the section [mysqld] of the file *mysql.cnf* to increase this limit
 # avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
 net_buffer_length=100000 
 max_allowed_packet=100000000
+---------------
+
+==== Error mysql connect pb with caching_sha2_password
+
+Error can be: Client does not support authentication protocol requested by server; consider upgrading MySQL client
+
+The client may be the mariadb mysql client and the user on server may be encrypted with *caching_sha2_password* instead of *mysql_native_password*.
+If this is the case, you must modify the encryption of user password with the *mysql_native_password*. For this you can run
+
+[source,bash]
+---------------
+ALTER USER dbu... IDENTIFIED WITH mysql_native_password BY 'userpassword';
+---------------
+
+You can also run the script to generate a SQL file to update all passwords of the deployment server in one script.
+
+[source,bash]
+---------------
+sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php withX.mysaasdomain.com userresetpass
 ---------------
 
 
