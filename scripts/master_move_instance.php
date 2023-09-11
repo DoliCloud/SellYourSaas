@@ -20,6 +20,12 @@
  * Script must be ran with admin from master server.
  */
 
+/**
+ *      \file       sellyoursaas/scripts/master_move_instance.php
+ *		\ingroup    sellyoursaas
+ *      \brief      Script to run from master server to move an instance into another one.
+ */
+
 if (!defined('NOSESSION')) define('NOSESSION', '1');
 
 $sapi_type = php_sapi_name();

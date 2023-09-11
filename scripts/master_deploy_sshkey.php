@@ -20,7 +20,7 @@
 /**
  *      \file       sellyoursaas/scripts/master_deploy_sshkey.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to run from master server to redeploy the public keys found into setup to the authorized_keys_support file of all customers
+ *      \brief      Script to run from master server to redeploy the public keys (found into setup) to the authorized_keys_support file of all customers
  *                  on deployment servers. Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).
  *                  This script erases the old version of authorized_keys_support files.
  */
@@ -79,11 +79,13 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print 'Redeploy the public keys found into the setup (SELLYOURSAAS_PUBLIC_KEY) to the authorized_keys_support file of all customers on 1 or all deployment servers.'."\n";
+	print 'Redeploy the public keys found into the SellYourSaas setup (SELLYOURSAAS_PUBLIC_KEY) to the authorized_keys_support file of all customers on 1 or all deployment servers.'."\n";
 	print 'Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).'."\n";
 	print "This script must be ran from the master server.\n";
 	print "\n";
-	print "Usage: ".$script_file." (test|confirm) [instancefilter]\n";
+	print "Usage:   ".$script_file." (test|confirm) [instancefilterstartwith]\n";
+	print "Example: ".$script_file." test withX\n";
+	print "Example: ".$script_file." test withX.mysaasdomain.com\n";
 	print "\n";
 	print "- test     test deployment of the public keys into authorized_keys_support (nothing is done)\n";
 	print "- confirm  deploy the public key into authorized_keys_support (it erases old verions)\n";
@@ -121,7 +123,7 @@ include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($db);
 
 
-// Get list of instance that we must deploy to.
+// Get list of instance that we must deploy ssh key to.
 $sql = "SELECT c.rowid as id, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";

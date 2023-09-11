@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2012-2019 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2023 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * or see http://www.gnu.org/
- *
- * FEATURE
- *
- * Redeploy some instances from command line.
- * This script is run from the master server.
+ */
+
+/**
+ *      \file       sellyoursaas/scripts/master_redeploy_instances.php
+ *		\ingroup    sellyoursaas
+ *      \brief      Script to run from master server to redeploy all the instances of a deployment server known by the master onto an empty deployment server
  */
 
 if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
@@ -191,7 +192,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 }
 
 if (! in_array($mode, array('test', 'confirm'))) {
-	print "Error: Bad value for last parameter (action must be testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm).\n";
+	print "Error: Bad value for last parameter (action must be test|confirm).\n";
 	exit(-2);
 }
 

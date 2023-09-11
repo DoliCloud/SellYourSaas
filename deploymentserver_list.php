@@ -1,6 +1,5 @@
 <?php
-/* Copyright (C) 2007-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2022 SuperAdmin <test@dolibarr.com>
+/* Copyright (C) 2007-2023 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -601,7 +600,6 @@ $reshook = $hookmanager->executeHooks('printFieldListOption', $parameters, $obje
 print $hookmanager->resPrint;
 if (!empty($arrayfields['commands']['checked'])) {
 	print '<td class="liste_titre"></td>';
-	print '<td class="liste_titre"></td>';
 }
 if (!empty($arrayfields['nb_instances']['checked'])) {
 	print '<td class="liste_titre"></td>';
@@ -657,8 +655,6 @@ $reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters, $objec
 print $hookmanager->resPrint;
 if (!empty($arrayfields['commands']['checked'])) {
 	print '<th class="liste_titre">'.$langs->trans($arrayfields['commands']['label']).'</th>';
-	$totalarray['nbfield']++;
-	print '<th class="liste_titre"></th>';
 	$totalarray['nbfield']++;
 }
 if (!empty($arrayfields['nb_instances']['checked'])) {
@@ -838,12 +834,32 @@ while ($i < $imaxinloop) {
 		// Column for commands
 		if (!empty($arrayfields['commands']['checked'])) {
 			print '<td class="small tdoverflowmax125">';
-			$commandstartstop = 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/remote_server_launcher.sh start|status|stop';
-			print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, -1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
-			print '</td>';
-			print '<td class="small tdoverflowmax125">';
-			$commandstartstop = 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offline.sh '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/offline.php test|offline|online';
-			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, -1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
+			$html = '<br>';
+			$html .= $langs->trans("CommandToManageRemoteDeploymentAgent").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/remote_server_launcher.sh start|status|stop';
+			$html .= '">';
+			$html .= '</div>';
+			$html .= '<br><br>';
+			$html .= $langs->trans("CommandToPutInstancesOnOffline").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offline.sh '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/offline.php test|offline|online';
+			$html .= '">';
+			$html .= '</div>';
+			$html .= '<br><br>';
+			$html .= $langs->trans("CommandToSqlToReGenerateDb").' <span class="opacitymedium">(to run from master server)</span>:<br>';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_build_sql_for_instances.php '.$object->ref.' dbcreate|usercreate|userresetpass';
+			$html .= '">';
+			$html .= '</div>';
+			$html .= '<br><br>';
+			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from master server)</span>:<br>';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_redeploy_instances.php '.$object->ref.' test|confirm';
+			$html .= '">';
+			$html .= '</div>';
+
+			print $form->textwithpicto(img_picto('', 'help').' '.$langs->trans("Commands"), $html, -1, 'none', '', 0, 3, 'startstop'.$key.'clickable').'<br>';
 			print '</td>';
 			if (!$i) {
 				$totalarray['nbfield']++;

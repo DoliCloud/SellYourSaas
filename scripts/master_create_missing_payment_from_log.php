@@ -124,9 +124,11 @@ if (! $res) {
 }
 
 
-print 'Script to create missing payment after successful Stripe payment but no recording into database.';
+print 'Script to create missing payment after successful Stripe payment but not recording into database.';
+
+print 'TODO...';
 
 /*
 Scan "Successfuly charge card pm_.... for invoice ...."
-and create payment for those invoices.
+and create payment for those invoices if invoice does not has the payement.
 */
