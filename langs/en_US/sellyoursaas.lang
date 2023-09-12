@@ -788,7 +788,7 @@ MaxEmailPerDay=Max number of emails per day
 MaxEmailPerDayDesc=If empty, the default value defined into /etc/sellyoursaas.conf of the deployment server will be used.
 ProfitOrganization=For-Profit organization
 NonProfitOrganization=Non-profit organization
-NonProfitOrganizationAndCaritative=Non-profit organization and caritative
+NonProfitOrganizationAndCaritative=Non-profit and charitable organization
 NonProfitOrganizationAndSmall=Non-profit and small organization (<50 members without employees) 
 ConfirmInstanceValidation=Permanently validate your instance
 ConfirmInstanceValidationToRestoreInstance=Permanently validate your instance to reactivate it
@@ -821,7 +821,7 @@ ErrorDeployWebsite=Error while website deployment
 DeploymentWebsiteDone=Website deployed successfully
 IWantToTest=I want to test
 OptionCondition=Condition to see option
-HelpOnOptionCondition=Enter the condtion to have the option visilbe into customer dashboard. Example: 1=always visible. 0=Never visible
+HelpOnOptionCondition=Enter the condition to have the option visible into customer dashboard. Example: 1=always visible. 0=Never visible
 NewEmailToConfirm=New email to confirm
 UnitPriceOfLine=Unit price of line
 InvoicePaymentDisputed=Invoice payment disputed
@@ -830,7 +830,7 @@ InvoicePaymentDisputedMessage=The owner of the payment mode used to pay the invo
 RuleForPassword=Password must contain at least %s characters, including UPPER/lowercase and numbers
 SepaSentToBank=SEPA direct debit sent to the bank
 SELLYOURSAAS_ENABLE_CUSTOMURL=Enable the "Custom URL" option
-SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID=List of thirdparty ID with the "Custom URL" option available
+SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID=List of third-party ID with the "Custom URL" option available
 SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES=Enable the "Dolibarr Websites" deployment option
 SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID=List of thirdparty ID with the "Dolibarr Websites" deployment option
 SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT=Product to deploy when deploying a website of the Dolibarr CMS 
