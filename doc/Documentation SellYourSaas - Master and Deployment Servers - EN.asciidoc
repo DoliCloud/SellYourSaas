@@ -15,7 +15,7 @@ This document describes the technical and functional implementation of Sell-Your
 :toc-title: Table of contents
 :toc-placement: preamble
 :revnumber: v1.0
-:revdate: 2019-01-30caching_sha2_password
+:revdate: 2019-01-30
 :revremark: First version
 :revnumber: v1.1
 :revdate: 2020-02-12
@@ -2601,7 +2601,7 @@ ALTER USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...';
 or
 SET PASSWORD FOR 'yourremotelogin'@'ip.poste.admin.distant' = PASSWORD('...');
 or
-update mysql.user SET authentication_string = PASSWORD('...') where user  = 'yourremotelogin' and host =  'ip.poste.admin.distant';
+update mysql.user SET authentication_string = PASSWORD('...') where user = 'yourremotelogin' and host = 'ip.poste.admin.distant';
 FLUSH PRIVILEGES;
 ---------------
 
