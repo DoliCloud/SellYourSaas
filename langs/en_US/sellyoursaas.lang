@@ -843,5 +843,5 @@ ARequestToBeAResellerHasAlreadyBeenSent=A request to be a reseller has already b
 ThirdpartyHasNoDefaultBanAccount=This thirdparty has not default Bank payment mode, please add it first.
 ClosedGlobally=but closed globally
 FreePrice=Free
-CommandToSqlToReGenerateDb=Command to generate SQL for massive db init on deployment server
+CommandToSqlToReGenerateDb=Command to generate SQL for massive db or user (re)init on deployment server
 CommandToRedeployInstanceOnADeploymentServer=Command to redeploy instances on a reseted deployment server
