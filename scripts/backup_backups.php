@@ -215,6 +215,7 @@ if (! $res) {
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
+include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
 
@@ -348,42 +349,99 @@ if (!empty($instanceserver)) {
 					continue;
 				}
 			}
-		}
 
-		foreach ($SERVERDESTIARRAY as $servername) {
-			$RSYNC_RSH = "ssh -p ".$servername;
-			if (empty($HISTODIR)) {
-				$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
-			} else {
-				$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
-			}
-			print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
-			exec($command, $output, $return_var);
+			foreach ($SERVERDESTIARRAY as $servername) {
+				$RSYNC_RSH = "ssh -p ".$servername;
+				if (empty($HISTODIR)) {
+					$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
+				} else {
+					$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
+				}
+				print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
+				exec($command, $output, $return_var);
 
-			if ($return_var != 0) {
-				$ret2[$servername] = $ret2[$servername] + 1;
-				print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
-				print "Command was: ".$command."\n";
-				$totalinstancesfailed += $nbofdir;
-				$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
-			} else {
-				$totalinstancessaved+= $nbofdir;
-				print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named".$DIRSOURCE2."/osu".$i."*\n";
-				foreach ($arraydirlist as $key => $osudir) {
-					$osudirbase = basename($osudir);
-					if ($nbdu < 50) {
-						if (dol_is_dir($homedir."/".$osudirbase."/")) {
-							$DELAYUPDATEDUC=-15;
-							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."Search if a recent duc file exists with find ".$homedir."/".$osudirbase."/.duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
-							//COMMAND find l:270
+				if ($return_var != 0) {
+					$ret2[$servername] = $ret2[$servername] + 1;
+					print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
+					print "Command was: ".$command."\n";
+					$totalinstancesfailed += $nbofdir;
+					$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
+				} else {
+					$totalinstancessaved+= $nbofdir;
+					print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named".$DIRSOURCE2."/osu".$i."*\n";
+					foreach ($arraydirlist as $key => $osudir) {
+						$osudirbase = basename($osudir);
+						if ($nbdu < 50) {
+							if (dol_is_dir($homedir."/".$osudirbase."/")) {
+								$DELAYUPDATEDUC = 15;
+								// We convert the delay in days to seconde
+								$DELAYUPDATEDUCSEC = $DELAYUPDATEDUC*24*3600;
+								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."Search if a recent duc file exists with find ".$homedir."/".$osudirbase."/.duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
+								//COMMAND find l:270
+								$arrayducdb =  dol_dir_list($homedir."/".$osudirbase."/.duc.db", "files", 0, "", null, "name", SORT_ASC, 0, 0, "", $DELAYUPDATEDUCSEC);
+								if (count($arrayducdb) <= 0) {
+									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."No recent .duc.db into".$homedir."/".$osudirbase."/.duc.db and nb already updated = ".$nbdu.", so we update it.";
+									$command = "duc index ".$homedir."/".$osudirbase." -x -m 3 -d ".$homedir."/".$osudirbase."/.duc.db";
+									print "\n".$command;
+									exec($command, $output, $return_var);
+									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$osudirbase."/.duc.db";
+									exec($command, $output, $return_var);
+									$nbdu ++;
+								} else {
+									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."File ".$homedir."/".$osudirbase."/.duc.db was recently updated";
+								}
+							} else {
+								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/";
+							}
 						} else {
-							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/";
+							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$osudirbase."/";
 						}
-					} else {
-						print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$osudirbase."/";
 					}
 				}
 			}
+		} else {
+			print "\nNo directory found starting with name ".$backupdir."/osu".$i;
+			$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/osu".$i."\n";
 		}
 	}
 }
+
+
+print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." End with errstring=".$errstring;
+
+// Loop on each targeted server for return code
+$atleastoneerror = 0;
+
+foreach ($SERVERDESTIARRAY as $servername) {
+	print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." End for ".$servername." ret1[".$servername."]=".$ret1[$servername]." ret2[".$servername."]=".$ret2[$servername];
+	if ($ret1[$servername] != 0) {
+		$atleastoneerror = 1;
+	} elseif ($ret2[$servername] != 0) {
+		$atleastoneerror = 1;
+	}
+}
+
+//Delete temporary emptydir
+dol_delete_dir($homedir."/emptydir");
+
+// Send email if there is one error
+if ($atleastoneerror != 0) {
+	$subject = "[Warning] Backup of backup to remote server(s) failed for ".gethostname();
+	$msg = "Failed to make copy backup to remote backup server(s) ".$SERVDESTI.".\nNumber of instances successfully saved: ".$totalinstancessaved."\nNumber of instances unsuccessfully saved: ".$totalinstancesfailed."\nErrors or warnings are:\n".$errstring;
+	$cmail = new CMailFile($subject, $EMAILTO, $EMAILFROM, $msg);
+	$cmail->sendfile();
+	exit(1);
+}
+
+if (isset($argv[3]) && $argv[3] != "--delete") {
+	print "\nScript was called for only one of few given instances. No email or supervision event sent on success in such situation.";
+} else {
+	print "\nSend email to ".$EMAILTO." to inform about backup success";
+	$subject = "[Backup of Backup - ".gethostname()."] Backup of backup to remote server succeed";
+	$msg = "The backup of backup for ".gethostname()." to remote backup server ".$SERVDESTI." succeed.\nNumber of instances successfully saved: ".$totalinstancessaved."\n".$errstring;
+	$cmail = new CMailFile($subject, $EMAILTO, $EMAILFROM, $msg);
+	$cmail->sendfile();
+}
+print "\n";
+
+exit(0);
