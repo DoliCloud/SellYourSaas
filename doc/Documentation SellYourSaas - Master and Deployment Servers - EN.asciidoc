@@ -2519,7 +2519,7 @@ update mysql.user set plugin='unix_socket' where user='root' and host='localhost
 You must stop/start database server to validate this change !
 
 
-Note: To show specific parameters that are not the default values, you can launch:
+Note: To show specific parameters that are not the default values in conf file, you can launch:
 
 [source,bash]
 ---------------
@@ -5776,6 +5776,16 @@ You can also run the script to generate a SQL file to update all passwords of th
 ---------------
 sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php withX.mysaasdomain.com userresetpass
 ---------------
+
+
+==== A lot of warnings  Error mysql connect pb with caching_sha2_password
+
+There is a lot of warning into /var/log/mysql/error.log like this one 
+Aborted connection 594 to db: 'unconnected' user: 'datadog' host: 'localhost' (CLOSE_CONNECTION)
+
+The warning appear into log file when we disconnect, even if we disconnect correctly.
+
+To avoid this, check that the *log_warning = 2* (default value of mysql and mariadb) instead of a higher value.
 
 
 ==== Error on apt on shim-signed of grub-efi-amd64-signed package
