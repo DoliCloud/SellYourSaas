@@ -346,7 +346,7 @@ AnnounceOnCustomerDashboard=Enable announce on portal and/or customers dashboard
 AnnounceMajorOutage=We are currently experiencing major technical outages impacting access to some instances.<br>We are engaged in restoration efforts and service will be restored as safely and quickly as possible.
 AnnounceMinorOutage=We are currently experiencing minor technical troubles impacting access to some instances. Your may experience slow access or disconnecting troubles on our services.<br>We are engaged in restoration efforts and service will be restored as safely and quickly as possible.
 AnnounceMaintenanceInProgress=A technical maintenance is on progress.<br>Your instance will be back in a few minutes ...
-CommandToManageRemoteDeploymentAgent=Command to start/stop remote deployment agent
+CommandToManageRemoteDeploymentAgent=Command to start/stop the remote deployment agent
 CommandToPutInstancesOnOffline=Command to put all instances online/offline
 InstanceWasDeployed=Instance has been deployed
 YourPaymentModeWillExpireFixItSoon=Your payment mode is about to expire. Please <a href="%s">update your payment mode</a> to avoid any interruption of service.
@@ -843,5 +843,7 @@ ARequestToBeAResellerHasAlreadyBeenSent=A request to be a reseller has already b
 ThirdpartyHasNoDefaultBanAccount=This thirdparty has not default Bank payment mode, please add it first.
 ClosedGlobally=but closed globally
 FreePrice=Free
+CommandForDeploymentServer=The commands here are generic tools for maintenance actions on all instances of a deployment server. For maintenance tools on a given instance, see documentation
+CommandToSwithInstanceInReadOnlyMode=Command to switch all instances in read only mode
 CommandToSqlToReGenerateDb=Command to generate SQL for massive db or user (re)init on deployment server
 CommandToRedeployInstanceOnADeploymentServer=Command to redeploy instances on a reseted deployment server
