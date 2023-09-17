@@ -191,9 +191,9 @@ if (empty($server) || empty($mode)) {
 	exit(-1);
 }
 
-if (! in_array($mode, array('dbcreate', 'usercreate', 'userresetpass'))) {
+if (! in_array($mode, array('dbcreate', 'usercreate', 'userresetpass', 'all'))) {
 	print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
-	print "Error: Bad value for last parameter (action must be dbcreate|usercreate|userresetpass).\n";
+	print "Error: Bad value for last parameter (action must be dbcreate|usercreate|userresetpass|all).\n";
 	exit(-2);
 }
 
@@ -285,16 +285,16 @@ while ($i < $num_rows) {
 
 	$now = dol_now();
 
-	if ($mode == 'dbcreate') {
+	if ($mode == 'dbcreate' || $mode == 'all') {
 		print "CREATE DATABASE IF NOT EXISTS ".$dbmaster->escape($object->database_db).";\n";
 	}
-	if ($mode == 'usercreate') {
+	if ($mode == 'usercreate' || $mode == 'all') {
 		print "CREATE USER '".$dbmaster->escape($object->username_db)."'@'localhost' IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($object->password_db)."';\n";
 		print "CREATE USER '".$dbmaster->escape($object->username_db)."'@'%' IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($object->password_db)."';\n";
 		print "GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON ".$object->database_db.".* TO '".$dbmaster->escape($object->username_db)."'@'localhost';\n";
 		print "GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON ".$object->database_db.".* TO '".$dbmaster->escape($object->username_db)."'@'%';\n";
 	}
-	if ($mode == 'userresetpass') {
+	if ($mode == 'userresetpass' || $mode == 'all') {
 		print "ALTER USER ".$dbmaster->escape($object->username_db)." IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($object->password_db)."';\n";
 	}
 
