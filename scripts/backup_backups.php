@@ -228,8 +228,8 @@ if ($HISTODIRTEXT == "week") {
 
 $DIRSOURCE2 = $backupdir;
 
-$DIRDESTI1 = $remotebackupdir.'home_'.gethostname();
-$DIRDESTI2 = $remotebackupdir.'backup_'.gethostname();
+$DIRDESTI1 = $remotebackupdir.'/home_'.gethostname();
+$DIRDESTI2 = $remotebackupdir.'/backup_'.gethostname();
 
 if (empty($EMAILFROM)) {
 	$EMAILFROM = 'noreply@'.$DOMAIN;
