@@ -379,6 +379,7 @@ SEPAPaymentModeAvailableNotYetAvailable=SEPA Direct Debit payment should be avai
 LatestBackupDate=Backup date (last try)
 LatestBackupDateOK=Backup date (last success)
 LatestBackupStatus=Latest backup status
+LatestBackupRemoteStatus=Latest remote backup status 
 FailedToConnectMayBeOldInstance=Failed to connect to user database instance
 BackupDir=Backup directory
 PaymentModeRecorded=Payment mode saved
