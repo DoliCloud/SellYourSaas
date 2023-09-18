@@ -3146,7 +3146,14 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 					print '
 							<!-- XDaysAfterEndOfPeriodPaymentModeSet -->
 							<div class="note note-warning">
-							<h4 class="block">'.$langs->trans("XDaysAfterEndOfPeriodPaymentModeSet", $contract->ref_customer, abs($delayindays)).'</h4>
+							<h4 class="block">';
+					print $langs->trans("XDaysAfterEndOfPeriodPaymentModeSet", $contract->ref_customer, abs($delayindays));
+					if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+						print $langs->trans("XDaysAfterEndOfPeriodPaymentModeSet2Free");
+					} else {
+						print $langs->trans("XDaysAfterEndOfPeriodPaymentModeSet2");
+					}
+					print '</h4>
 							</div>
 						';
 				}
