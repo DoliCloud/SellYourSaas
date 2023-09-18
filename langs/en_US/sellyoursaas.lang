@@ -849,3 +849,4 @@ CommandForDeploymentServer=The commands here are generic tools for maintenance a
 CommandToSwithInstanceInReadOnlyMode=Command to switch all instances in read only mode
 CommandToSqlToReGenerateDb=Command to generate SQL for massive db or user (re)init on deployment server
 CommandToRedeployInstanceOnADeploymentServer=Command to redeploy instances on a reseted deployment server
+InstanceVersion=Instance version
