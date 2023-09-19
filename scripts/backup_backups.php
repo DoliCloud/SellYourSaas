@@ -372,12 +372,12 @@ if (!empty($instanceserver)) {
 						$osudirbase = basename($osudir[0]);
 						if ($nbdu < 50) {
 							if (dol_is_dir($homedir."/".$osudirbase."/")) {
-								$DELAYUPDATEDUC = 15;
+								$DELAYUPDATEDUC = -15;
 								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$osudirbase.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
 								$command = "find ".$homedir."/".$osudirbase.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
 								$output = array();
 								exec($command, $output, $return_var);
-								if ($output[0] == 0) {
+								if ($output[0] == "0") {
 									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$osudirbase.".duc.db and nb already updated = ".$nbdu.", so we update it.";
 									$command = "duc index ".$homedir."/".$osudirbase." -x -m 3 -d ".$homedir."/".$osudirbase.".duc.db";
 									print "\n".$command;
@@ -387,19 +387,19 @@ if (!empty($instanceserver)) {
 									exec($command, $output, $return_var);
 									$nbdu ++;
 								} else {
-									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."File ".$homedir."/".$osudirbase.".duc.db was recently updated";
+									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." File ".$homedir."/".$osudirbase.".duc.db was recently updated \n";
 								}
 							} else {
-								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/";
+								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/ \n";
 							}
 						} else {
-							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$osudirbase."/";
+							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$osudirbase."/ \n";
 						}
 					}
 				}
 			}
 		} else {
-			print "\nNo directory found starting with name ".$backupdir."/osu".$i;
+			print "No directory found starting with name ".$backupdir."/osu".$i."\n";
 			$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/osu".$i."\n";
 		}
 	}
