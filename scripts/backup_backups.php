@@ -114,7 +114,7 @@ $DIRSOURCE2 = "";
 #Target
 $SERVDESTI = '';
 $SERVPORTDESTI = '22';
-$USER = '';
+$USER = 'admin';
 $DIRDESTI1 = '';
 $DIRDESTI2 = '';
 
@@ -312,11 +312,12 @@ foreach ($SERVERDESTIARRAY as $servername) {
 	$RSYNC_RSH = "ssh -p ".$servername;
 
 	if (empty($HISTODIR)) {
-		$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
+		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS.$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	} else {
-		$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI1."/backupold_".$HISTODIR." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
+		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI1."/backupold_".$HISTODIR." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	}
 	print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
+	$output = array();
 	exec($command, $output, $return_var);
 	if ($return_var != 0) {
 		$ret1[$servername] = $ret1[$servername] + 1;
@@ -335,7 +336,7 @@ if (!empty($instanceserver)) {
 	$alphaarray = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
 
 	foreach ($alphaarray as $key => $i) {
-		print dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/osu".$i." \n";
+		print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/osu".$i." \n";
 		$regex = '';
 		$arraydirlist = dol_dir_list($DIRSOURCE2, "directories", 0, 'osu'.$i.'.*');
 		$nbofdir = count($arraydirlist);
@@ -350,11 +351,12 @@ if (!empty($instanceserver)) {
 			foreach ($SERVERDESTIARRAY as $servername) {
 				$RSYNC_RSH = "ssh -p ".$servername;
 				if (empty($HISTODIR)) {
-					$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
+					$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
 				} else {
-					$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
+					$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
 				}
 				print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
+				$output = array();
 				exec($command, $output, $return_var);
 
 				if ($return_var != 0) {
@@ -371,14 +373,15 @@ if (!empty($instanceserver)) {
 						if ($nbdu < 50) {
 							if (dol_is_dir($homedir."/".$osudirbase."/")) {
 								$DELAYUPDATEDUC = 15;
-								// We convert the delay in days to seconde
-								$DELAYUPDATEDUCSEC = $DELAYUPDATEDUC*24*3600;
 								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$osudirbase.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
-								$arrayducdb =  dol_dir_list($homedir."/".$osudirbase.".duc.db", "files", 0, "", null, "name", SORT_ASC, 0, 0, "", $DELAYUPDATEDUCSEC);
-								if (count($arrayducdb) <= 0) {
+								$command = "find ".$homedir."/".$osudirbase.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
+								$output = array();
+								exec($command, $output, $return_var);
+								if ($output[0] == 0) {
 									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$osudirbase.".duc.db and nb already updated = ".$nbdu.", so we update it.";
 									$command = "duc index ".$homedir."/".$osudirbase." -x -m 3 -d ".$homedir."/".$osudirbase.".duc.db";
 									print "\n".$command;
+									$output = array();
 									exec($command, $output, $return_var);
 									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$osudirbase.".duc.db";
 									exec($command, $output, $return_var);
