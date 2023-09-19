@@ -342,7 +342,7 @@ if (!empty($instanceserver)) {
 		$nbofdir = count($arraydirlist);
 		if ($nbofdir > 0) {
 			if (isset($argv[3])) {
-				if ($argv[3] != "--delete" && $argv[3] == "osu".$i) {
+				if ($argv[3] != "--delete" && $argv[3] != "osu".$i) {
 					print "Ignored (param 3 is ".$argv[3].").";
 					continue;
 				}
