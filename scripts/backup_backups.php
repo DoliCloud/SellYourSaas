@@ -339,9 +339,9 @@ if (!empty($instanceserver)) {
 	$alphaarray = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
 
 	foreach ($alphaarray as $key => $i) {
-		print dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory $backupdir/osu$i \n";
-		$regex = '/osu'.$i.'.*/';
-		$arraydirlist = dol_dir_list($DIRSOURCE2, "directories", 0, $regex);
+		print dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/osu".$i." \n";
+		$regex = '';
+		$arraydirlist = dol_dir_list($DIRSOURCE2, "directories", 0, '/\osu'.$i.'.*/');
 		$nbofdir = count($arraydirlist);
 		if ($nbofdir > 0) {
 			if (isset($argv[3])) {
