@@ -341,7 +341,7 @@ if (!empty($instanceserver)) {
 	foreach ($alphaarray as $key => $i) {
 		print dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/osu".$i." \n";
 		$regex = '';
-		$arraydirlist = dol_dir_list($DIRSOURCE2, "directories", 0, '/\osu'.$i.'.*/');
+		$arraydirlist = dol_dir_list($DIRSOURCE2, "directories", 0, 'osu'.$i.'.*');
 		$nbofdir = count($arraydirlist);
 		if ($nbofdir > 0) {
 			if (isset($argv[3])) {
