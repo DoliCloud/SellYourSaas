@@ -33,7 +33,6 @@ if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
 $path=dirname(__FILE__).'/';
-$scriptdir = dirname(realpath($script_file));
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
@@ -313,9 +312,9 @@ foreach ($SERVERDESTIARRAY as $servername) {
 	$RSYNC_RSH = "ssh -p ".$servername;
 
 	if (empty($HISTODIR)) {
-		$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
+		$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	} else {
-		$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI1."/backupold_".$HISTODIR." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
+		$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI1."/backupold_".$HISTODIR." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	}
 	print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
 	exec($command, $output, $return_var);
@@ -351,9 +350,9 @@ if (!empty($instanceserver)) {
 			foreach ($SERVERDESTIARRAY as $servername) {
 				$RSYNC_RSH = "ssh -p ".$servername;
 				if (empty($HISTODIR)) {
-					$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
+					$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
 				} else {
-					$command = "rsync ".$TESTN." -x --exclude-from=".$scriptdir."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
+					$command = "rsync ".$TESTN." -x --exclude-from=".$path."/backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
 				}
 				print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
 				exec($command, $output, $return_var);
