@@ -192,7 +192,7 @@ if (0 == posix_getuid()) {
 	exit(-1);
 }
 if (empty($instanceserver)) {
-	echo "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
+	echo "This server seems to not be a server for the deployment of instances (this should be defined in sellyoursaas.conf file).\n";
 	print "Press ENTER to continue or CTL+C to cancel...";
 	$input = trim(fgets(STDIN));
 }
