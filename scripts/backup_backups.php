@@ -308,7 +308,7 @@ foreach ($SERVERDESTIARRAY as $servername) {
 	$ret1[$servername] = 0;
 	$ret2[$servername] = 0;
 }
-var_dump($SERVERDESTIARRAY);
+
 // Loop on each target server to make backup of SOURCE1
 $command = '';
 foreach ($SERVERDESTIARRAY as $servername) {
@@ -377,19 +377,18 @@ if (!empty($instanceserver)) {
 								$DELAYUPDATEDUC = 15;
 								// We convert the delay in days to seconde
 								$DELAYUPDATEDUCSEC = $DELAYUPDATEDUC*24*3600;
-								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."Search if a recent duc file exists with find ".$homedir."/".$osudirbase."/.duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
-								//COMMAND find l:270
-								$arrayducdb =  dol_dir_list($homedir."/".$osudirbase."/.duc.db", "files", 0, "", null, "name", SORT_ASC, 0, 0, "", $DELAYUPDATEDUCSEC);
+								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$osudirbase.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
+								$arrayducdb =  dol_dir_list($homedir."/".$osudirbase.".duc.db", "files", 0, "", null, "name", SORT_ASC, 0, 0, "", $DELAYUPDATEDUCSEC);
 								if (count($arrayducdb) <= 0) {
-									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."No recent .duc.db into".$homedir."/".$osudirbase."/.duc.db and nb already updated = ".$nbdu.", so we update it.";
-									$command = "duc index ".$homedir."/".$osudirbase." -x -m 3 -d ".$homedir."/".$osudirbase."/.duc.db";
+									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$osudirbase.".duc.db and nb already updated = ".$nbdu.", so we update it.";
+									$command = "duc index ".$homedir."/".$osudirbase." -x -m 3 -d ".$homedir."/".$osudirbase.".duc.db";
 									print "\n".$command;
 									exec($command, $output, $return_var);
-									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$osudirbase."/.duc.db";
+									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$osudirbase.".duc.db";
 									exec($command, $output, $return_var);
 									$nbdu ++;
 								} else {
-									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."File ".$homedir."/".$osudirbase."/.duc.db was recently updated";
+									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."File ".$homedir."/".$osudirbase.".duc.db was recently updated";
 								}
 							} else {
 								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/";
