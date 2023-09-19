@@ -371,7 +371,7 @@ if (!empty($instanceserver)) {
 					$totalinstancessaved+= $nbofdir;
 					print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named".$DIRSOURCE2."/osu".$i."*\n";
 					foreach ($arraydirlist as $key => $osudir) {
-						$osudirbase = basename($osudir);
+						$osudirbase = basename($osudir[0]);
 						if ($nbdu < 50) {
 							if (dol_is_dir($homedir."/".$osudirbase."/")) {
 								$DELAYUPDATEDUC = 15;
