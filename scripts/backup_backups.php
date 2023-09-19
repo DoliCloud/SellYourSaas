@@ -39,8 +39,8 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
 	exit(-1);
 }
-if (0 == posix_getuid()) {
-	echo "Script must NOT be ran with root (but with the 'admin' sellyoursaas account).\n";
+if (0 != posix_getuid()) {
+	echo "Script must be ran with root.\n";
 	print "\n";
 	exit(-1);
 }
@@ -249,9 +249,6 @@ if ($RSYNCDELETE == 1) {
 	$OPTIONS = $OPTIONS." --delete --delete-excluded";
 }
 
-if (empty($USER)) {
-	$USER="admin";
-}
 $TESTN = "";
 if ($testorconfirm != "confirm") {
 	$TESTN = "-n";
@@ -391,7 +388,7 @@ if (!empty($instanceserver)) {
 									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."File ".$homedir."/".$osudirbase.".duc.db was recently updated";
 								}
 							} else {
-								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')."Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/";
+								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/";
 							}
 						} else {
 							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$osudirbase."/";
@@ -436,7 +433,7 @@ if ($atleastoneerror != 0) {
 if (isset($argv[3]) && $argv[3] != "--delete") {
 	print "\nScript was called for only one of few given instances. No email or supervision event sent on success in such situation.";
 } else {
-	print "\nSend email to ".$EMAILTO." to inform about backup success";
+	print "\nSend email to ".$EMAILTO." to inform about backup success\n";
 	$subject = "[Backup of Backup - ".gethostname()."] Backup of backup to remote server succeed";
 	$msg = "The backup of backup for ".gethostname()." to remote backup server ".$SERVDESTI." succeed.\nNumber of instances successfully saved: ".$totalinstancessaved."\n".$errstring;
 	$cmail = new CMailFile($subject, $EMAILTO, $EMAILFROM, $msg);
