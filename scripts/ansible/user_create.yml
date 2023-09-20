@@ -131,6 +131,7 @@
       - userip is defined
       - userip|length > 0
 
+  # Set the file of allowed IP, used only if masterserver,instanceserver or webserver is 2 in sellyoursaas.conf
   - name: If IP was provided, add it to the login-allowed-ip.conf file, file is created if not found
     ansible.builtin.lineinfile:
       path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
