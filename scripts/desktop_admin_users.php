@@ -146,15 +146,13 @@ if ($userroot && empty($userpassword)) {
 
 $scriptyaml = '';
 if ($action == 'create') {
-	$scriptyaml = 'create_user.yml';
+	$scriptyaml = 'user_create.yml';
 } elseif ($action == 'reactivate') {
-	$scriptyaml = 'reactivate_user.yml';
+	$scriptyaml = 'user_reactivate.yml';
 } elseif ($action == 'deactivate') {
-	$scriptyaml = 'deactivate_user.yml';
-} elseif ($action == 'delete') {
-	$scriptyaml = 'delete_user.yml';
+	$scriptyaml = 'user_deactivate.yml';
 } elseif ($action == 'remove') {
-	$scriptyaml = 'remove_user.yml';
+	$scriptyaml = 'user_remove.yml';
 } else {
 	echo "Error: Bad parameter action. Must be (create|deactivate|reactivate|remove).\n";
 	echo "\n";

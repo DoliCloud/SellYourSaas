@@ -31,5 +31,5 @@
 
   - name: Remove IP file from sellyoursaas.d
     ansible.builtin.file:
-      path: "/etc/sellyoursaas.d/{{ login }}.conf"
+      path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
       state: absent
