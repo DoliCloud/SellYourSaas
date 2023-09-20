@@ -10,11 +10,16 @@
 source /etc/lsb-release
 
 if [ "x$3" == "x" ]; then
-   echo "Usage:   $0  hostfile  param  value  [hostgrouporname]"
-   echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
-   echo "Example: $0  myhostfile  dolibarr_main_instance_unique_id  123456789   master,deployment"
-   echo "Example: $0  myhostfile  dolibarr_main_instance_unique_id  123456789   withX.mysellyoursaasdomain.com"
-   exit 1
+	echo "***** desktop_config_dolibarr.sh *****"	
+	echo "This script allows to update or fix the Dolibarr config file /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php"
+	echo
+	echo "Usage:   $0  hostfile  param  value  [hostgrouporname]"
+	echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
+	echo
+	echo "Example: $0  myhostfile  dolibarr_main_instance_unique_id  123456789   master,deployment"
+	echo "Example: $0  myhostfile  dolibarr_main_instance_unique_id  123456789   withX.mysellyoursaasdomain.com"
+	echo
+	exit 1
 fi
 
 param=$2

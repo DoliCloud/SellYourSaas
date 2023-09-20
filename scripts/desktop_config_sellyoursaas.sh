@@ -10,13 +10,18 @@
 source /etc/lsb-release
 
 if [ "x$3" == "x" ]; then
-   echo "Usage:   $0  hostsfile  param  value  [hostgrouporname]  [sellyoursaas|sellyoursaas-public]"
-   echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
-   echo "         [sellyoursaasfile] can be 'sellyoursaas' (default) or 'sellyoursaas-public'"
-   echo "Example: $0  myhostsfile  usecompressformatforarchive  zstd  master,deployment"
-   echo "Example: $0  myhostsfile  remotebackupserverport  22  master,deployment"
-   echo "Example: $0  myhostsfile  maxemailperday  500  withX.mysellyoursaasdomain.com  sellyoursaas-public"
-   exit 1
+	echo "***** desktop_config_sellyoursaas.sh *****"	
+	echo "This script allows to update or fix the SellYourSaas config file /etc/sellyoursaas[-public].conf"
+	echo
+	echo "Usage:   $0  hostsfile  param  value  [hostgrouporname]  [sellyoursaas|sellyoursaas-public]"
+	echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
+	echo "         [sellyoursaasfile] can be 'sellyoursaas' (default) or 'sellyoursaas-public'"
+	echo
+	echo "Example: $0  myhostsfile  usecompressformatforarchive  zstd  master,deployment"
+	echo "Example: $0  myhostsfile  remotebackupserverport  22  master,deployment"
+	echo "Example: $0  myhostsfile  maxemailperday  500  withX.mysellyoursaasdomain.com  sellyoursaas-public"
+	echo
+	exit 1
 fi
 
 param=$2

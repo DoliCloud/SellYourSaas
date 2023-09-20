@@ -123,7 +123,7 @@
       state: restarted
     when: addlineinsshconf.changed
 
-  - name: If IP was provided, we delete the login-allowed-ip.conf file
+  - name: If IP was provided, we remove the file login-allowed-ip.conf file to delete all past entries
     ansible.builtin.file:
       path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
       state: absent
@@ -131,7 +131,7 @@
       - userip is defined
       - userip|length > 0
 
-  - name: If IP was provided, add it to the conf dir
+  - name: If IP was provided, add it to the login-allowed-ip.conf file, file is created if not found
     ansible.builtin.lineinfile:
       path: "/etc/sellyoursaas.d/{{ login }}-allowed-ip.conf"
       line: "Require ip {{ userip }}"

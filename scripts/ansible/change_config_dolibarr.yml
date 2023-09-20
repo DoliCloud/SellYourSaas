@@ -1,5 +1,5 @@
 ---
-# Script to change value of an entry into sellyoursaas.conf
+# Script to change an option=value of an entry into htdocs/conf/conf.php
 #
 # Examples to run the script:
 # ansible-playbook -K change_sellyoursaas_config.yml -i hosts-xxx -e 'target=targethost option=<your_option> value=<new_value>'
