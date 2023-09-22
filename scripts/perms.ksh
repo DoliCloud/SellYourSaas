@@ -229,3 +229,7 @@ touch /var/log/phpsendmail.log
 chown syslog.adm /var/log/phpsendmail.log
 chmod a+rw /var/log/phpsendmail.log
 
+# Fix crontabs owners and permissions
+echo "Fix crontabs owners and permissions"
+echo find /var/spool/cron/crontabs/ -type f -name "osu*" -exec sh -c 'i="$1"; user=$(basename $i); chown "$user:$user" $i; chmod 600 $i' _ {} \;
+find /var/spool/cron/crontabs/ -type f -name "osu*" -exec sh -c 'i="$1"; user=$(basename $i); chown "$user:$user" $i; chmod 600 $i' _ {} \;
