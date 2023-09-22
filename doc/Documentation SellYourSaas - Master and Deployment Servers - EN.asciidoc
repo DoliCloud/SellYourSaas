@@ -5421,7 +5421,75 @@ ufw status numbered
 ufw delete X 
 ---------------
 
+=== Reset root password with boot rescue
 
+First you need to reboot your server in boot rescue mode.
+
+==== To reboot your server in boot rescue
+With OVH Public Cloud :
+
+* Click on the instance where you want  to reset the password. 
+
+* Click on the "Reboot in rescue mode" entry and continue by using the button "Restart" in the popup.
+
+* Once done go in the menu VNC console ( it will open a console directly connected to the server).
+
+* When the server is completely restarted a login and a password will be displayed, use it to connect to the server.
+
+* After connecting, you need to identify the system partition. This can be done with the following command:
+
+[source,bash]
+---------------
+fdisk -l
+---------------
+
+Something like this should appear :
+
+[source,bash]
+---------------
+Disk /dev/hda 40.0 GB, 40020664320 bytes
+255 heads, 63 sectors/track, 4865 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+
+Device Boot Start End Blocks Id System
+/dev/hda1 * 1 1305 10482381 83 Linux
+/dev/hda2 1306 4800 28073587+ 83 Linux
+/dev/hda3 4801 4865 522112+ 82 Linux swap / Solaris
+
+Disk /dev/sda 8254 MB, 8254390272 bytes
+16 heads, 32 sectors/track, 31488 cylinders
+Units = cylinders of 512 * 512 = 262144 bytes
+
+Device Boot Start End Blocks Id System
+/dev/sda1 1 31488 8060912 c W95 FAT32 (LBA)
+---------------
+
+In this exemple, the system partition is /dev/hda1.
+
+  Note : if your server is in RAID configuration the system partition is the raid volume partition.
+
+* Once the system partition is identified, you need to mount it.
+
+[source,bash]
+---------------
+mount /dev/hda1 /mnt/
+---------------
+
+* Now we need to change root directory, you can use this command:
+
+[source,bash]
+---------------
+chroot /mnt
+---------------
+
+* Finnaly to change the password, use this command:
+
+[source,bash]
+---------------
+passwd root
+---------------
+
+When all this is done you can reboot your server by using the button Exit rescue mode in the dashboard.
 
 === TroubleShooting
 
