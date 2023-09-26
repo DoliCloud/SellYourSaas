@@ -3,3 +3,5 @@
 /hosts-novafirstcloud
 /hosts-doliasso
 /hosts-sellyoursaas
+/ansible.cfg
+/ssh.cfg
