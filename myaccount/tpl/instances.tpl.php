@@ -1452,6 +1452,9 @@ if ($action == "confirmundeploy") {
 	print '<!-- Form to add an instance -->'."\n";
 	print '<form id="formaddanotherinstance" class="form-group reposition" style="'.(GETPOST('addanotherinstance', 'int') ? '' : 'display: none;').'" action="register_instance.php" method="POST">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
+	if (GETPOSTISSET('forcesubdomain')) {
+		print '<input type="hidden" name="forcesubdomain" value="'.GETPOST('forcesubdomain', 'alpha').'">';
+	}
 	print '<input type="hidden" name="action" value="deployall" />';
 	print '<input type="hidden" name="fromsocid" value="0" />';
 	print '<input type="hidden" name="reusesocid" value="'.((int) $socid).'" />';
@@ -1542,10 +1545,10 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			$tmpdomains = array();
 			if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 				$tmpnewval = explode(':', $newval);
-				if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed') {
+				$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
+				if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed' && $newval != GETPOST('forcesubdomain', 'alpha')) {
 					continue;
 				}
-				$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
 
 				$domainqualified = false;
 				$tmpdomains = explode('+', $reg[1]);

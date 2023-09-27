@@ -4606,7 +4606,8 @@ class SellYourSaasUtils
 				$error++;
 			}
 
-			if ($deployementserver->status != $deployementserver::STATUS_DISABLED) {
+			// If server is disabled, we don't use it. Except if $onlyifopen is set to 0.
+			if ($deployementserver->status != $deployementserver::STATUS_DISABLED || !$onlyifopen) {
 				$REMOTEIPTODEPLOYTO = $deployementserver->ipaddress;
 			}
 		}
