@@ -175,6 +175,12 @@ if ($fp) {
 		if ($tmpline[0] == 'backupdumpdayfrequency') {
 			$backupdumpdayfrequency = $tmpline[1];
 		}
+		if ($tmpline[0] == 'databaseuser') {
+			$databaseuser = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databasepass') {
+			$databasepass = $tmpline[1];
+		}
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
