@@ -275,7 +275,7 @@ if (empty($instanceserver)) {
 	$input = trim(fgets(STDIN));
 }
 
-/*$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
+$dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error) {
 	dol_print_error($dbmaster, "host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database.", ".$dbmaster->error);
 	exit(-1);
@@ -287,7 +287,7 @@ if (empty($db)) {
 	$db = $dbmaster;
 }
  
-$utils = new Utils($db);*/
+//$utils = new Utils($db);
 
 $ret1 = array();
 $ret2 = array();
