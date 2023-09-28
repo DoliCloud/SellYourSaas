@@ -108,7 +108,7 @@ $backupdir = 'mnt/diskbackup/backup';
 $remotebackupdir = '/mnt/diskbackup';
 
 #Source
-$DIRSOURCE1 = "/home/admin";
+$DIRSOURCE1 = "/home";
 $DIRSOURCE2 = "";
 
 #Target
@@ -315,7 +315,6 @@ foreach ($SERVERDESTIARRAY as $servername) {
 $command = '';
 foreach ($SERVERDESTIARRAY as $servername) {
 	print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S').' Do rsync of '.$DIRSOURCE1.' to remote '.$USER.'@'.$servername.':'.$DIRDESTI1."...\n";
-	$RSYNC_RSH = "ssh -p ".$servername;
 
 	if (empty($HISTODIR)) {
 		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS.$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
@@ -339,78 +338,100 @@ if (!empty($instanceserver)) {
 	print dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Do rsync of customer directories ".$DIRSOURCE2."/osu to remote ".$SERVDESTI."...\n";
 
 	$nbdu = 0;
-	$alphaarray = array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+	include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+	$object=new Contrat($dbmaster);
 
-	foreach ($alphaarray as $key => $i) {
-		print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/osu".$i." \n";
-		$regex = '';
-		$arraydirlist = dol_dir_list($DIRSOURCE2, "directories", 0, 'osu'.$i.'.*');
-		$nbofdir = count($arraydirlist);
-		if ($nbofdir > 0) {
-			if (isset($argv[3])) {
-				if ($argv[3] != "--delete" && $argv[3] != "osu".$i) {
-					print "Ignored (param 3 is ".$argv[3].").\n";
-					continue;
-				}
-			}
+	$sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
+	$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency, ce.username_os as osu";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
+	$sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
+	if ($isset($argv[3]) && $argv[3] != "--delete") {
+		$sql.= " AND c.ref_customer IN (".$dbmaster->escape($argv[3]).")";
+	} else {
+		$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
+	}
+	$sql.= " AND ce.deployment_status IS NOT NULL";
+	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 
-			foreach ($SERVERDESTIARRAY as $servername) {
-				$RSYNC_RSH = "ssh -p ".$servername;
-				if (empty($HISTODIR)) {
-					$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
-				} else {
-					$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/osu".$i."* ".$USER."@".$servername.":".$DIRDESTI2;
-				}
-				print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
-				$output = array();
-				exec($command, $output, $return_var);
+	$dbtousetosearch = $dbmaster;
 
-				if ($return_var != 0) {
-					$ret2[$servername] = $ret2[$servername] + 1;
-					print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
-					print "Command was: ".$command."\n";
-					$totalinstancesfailed += $nbofdir;
-					$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
-				} else {
-					$totalinstancessaved+= $nbofdir;
-					print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named".$DIRSOURCE2."/osu".$i."*\n";
-					foreach ($arraydirlist as $key => $osudir) {
-						$osudirbase = basename($osudir[0]);
+	print $sql."\n";                                    // To have this into the ouput of cron job
+	$resql=$dbtousetosearch->query($sql);
+	if ($resql) {
+		$num = $dbtousetosearch->num_rows($resql);
+		$i = 0;
+		while ($i < $num) {
+			print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/".$obj->osu." \n";
+			$obj = $dbtousetosearch->fetch_object($resql);
+			$object->fetch($obj->rowid);
+			if (dol_is_dir($backupdir."/".$obj->osu)) {
+				foreach ($SERVERDESTIARRAY as $servername) {
+	
+					if (empty($HISTODIR)) {
+						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+					} else {
+						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+					}
+					print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
+					$output = array();
+					exec($command, $output, $return_var);
+
+					$object->array_options["options_latestbackup_date"] = dol_now();
+					if ($return_var != 0) {
+						$ret2[$servername] = $ret2[$servername] + 1;
+						print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
+						print "Command was: ".$command."\n";
+						$totalinstancesfailed += $nbofdir;
+						$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
+						$object->array_options["options_latestbackup_status"] = "KO";
+					} else {
+						//Save date of object
+						$object->array_options["options_latestbackup_date_ok"] = dol_now();
+						$object->array_options["options_latestbackup_status"] = "OK";
+
+						//Duc to modify
+						$totalinstancessaved+= $nbofdir;
+
+						print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named".$DIRSOURCE2."/".$obj->osu."\n";
+
 						if ($nbdu < 50) {
-							if (dol_is_dir($homedir."/".$osudirbase."/")) {
+							if (dol_is_dir($homedir."/".$obj->osu."/")) {
 								$DELAYUPDATEDUC = -15;
-								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$osudirbase.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
-								$command = "find ".$homedir."/".$osudirbase.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
+								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$obj->osu.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
+								$command = "find ".$homedir."/".$obj->osu.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
 								$output = array();
 								exec($command, $output, $return_var);
 								if ($output[0] == "0") {
 									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$osudirbase.".duc.db and nb already updated = ".$nbdu.", so we update it.";
-									$command = "duc index ".$homedir."/".$osudirbase." -x -m 3 -d ".$homedir."/".$osudirbase.".duc.db";
+									$command = "duc index ".$homedir."/".$obj->osu." -x -m 3 -d ".$homedir."/".$obj->osu.".duc.db";
 									print "\n".$command;
 									$output = array();
 									exec($command, $output, $return_var);
-									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$osudirbase.".duc.db";
+									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$obj->osu.".duc.db";
 									exec($command, $output, $return_var);
 									$nbdu ++;
 								} else {
-									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." File ".$homedir."/".$osudirbase.".duc.db was recently updated \n";
+									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." File ".$homedir."/".$obj->osu.".duc.db was recently updated \n";
 								}
 							} else {
-								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Dir ".$homedir."/".$osudirbase."/ does not exists, we cancel duc for ".$homedir."/".$osudirbase."/ \n";
+								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Dir ".$homedir."/".$obj->osu."/ does not exists, we cancel duc for ".$homedir."/".$obj->osu."/ \n";
 							}
 						} else {
-							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$osudirbase."/ \n";
+							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$obj->osu."/ \n";
 						}
+						
+					}
+					$res = $object->update($user, 1);
+					if ($res <= 0) {
+						print "Update of Contract error ".$backupdir."/".$obj->osu."\n";
 					}
 				}
+			} else {
+				print "No directory found starting with name ".$backupdir."/".$obj->osu."\n";
+				$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/osu".$i."\n";
 			}
-		} else {
-			print "No directory found starting with name ".$backupdir."/osu".$i."\n";
-			$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/osu".$i."\n";
 		}
 	}
-}
-
 
 print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." End with errstring=".$errstring;
 
