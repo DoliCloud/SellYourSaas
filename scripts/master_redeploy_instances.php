@@ -102,7 +102,7 @@ if (empty($dolibarrdir)) {
 	exit(-1);
 }
 if (empty($masterserver)) {
-	print "Failed to find 'masterserver' entry into /etc/sellyoursaas.conf file. This script must be run on master server.\n";
+	print "Failed to find 'masterserver' entry into /etc/sellyoursaas.conf file. This script must be run on the master server.\n";
 	print "\n";
 	exit(-1);
 }
@@ -185,8 +185,8 @@ if (empty($db)) $db=$dbmaster;
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user from master server.\n";
-	print "Usage:   $script_file  deploymentserver            instance  [test|confirm]\n";
-	print "Example: $script_file  with1.mysaasdomainname.com  all       test\n";
+	print "Usage:   $script_file  emtydeploymentserver        (instance|all)  [test|confirm]\n";
+	print "Example: $script_file  with1.mysaasdomainname.com  all       	  test\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
@@ -195,6 +195,15 @@ if (! in_array($mode, array('test', 'confirm'))) {
 	print "Error: Bad value for last parameter (action must be test|confirm).\n";
 	exit(-2);
 }
+
+if (empty($instanceserver)) {
+	echo "WARNING: This will may erase one or all instances on the target server, so on ".$server." !!!!.\n";
+	print "Press ENTER to continue or CTL+C to cancel...";
+	$input = trim(fgets(STDIN));
+}
+
+// Add a test that target instance does not exist yet. If yes, stop the script
+// TODO
 
 // Forge complete name of instance
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
@@ -210,7 +219,7 @@ if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.ho
 }
 
 
-
+// Get list of instances in scope
 $sql = "SELECT c.rowid, c.statut";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= "  WHERE c.entity IN (".getEntity('contract').")";
