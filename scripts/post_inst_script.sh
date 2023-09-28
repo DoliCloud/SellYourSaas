@@ -17,6 +17,7 @@ if [ "$(id -u)" != "0" ]; then
 	exit 100
 fi
 
+# Disable cron
 echo "Disable cron begin"
 echo "Disable cron begin" >>/tmp/post_inst_script.log
 
@@ -29,7 +30,7 @@ systemctl disable cron 2>&1 >>/tmp/post_inst_script.log
 echo "Disable cron end"
 echo "Disable cron end" >>/tmp/post_inst_script.log
 
-
+# Disablepostfix
 echo "Stop postfix begin"
 echo "Stop postfix begin" >>/tmp/post_inst_script.log
 
@@ -39,8 +40,18 @@ echo result = $? >>/tmp/post_inst_script.log
 echo "Stop postfix end"
 echo "Stop postfix end" >>/tmp/post_inst_script.log
 
+# Disable ufw
+echo "Stop ufw begin"
+echo "Stop ufw begin" >>/tmp/post_inst_script.log
 
+#/etc/init.d/ufw stop >>/tmp/post_inst_script.log
+ufw disable >>/tmp/post_inst_script.log
+echo result = $? >>/tmp/post_inst_script.log
 
+echo "Stop ufw end"
+echo "Stop ufw end" >>/tmp/post_inst_script.log
+
+# Disable datadog
 if [ -f /etc/init.d/datadog-agent ]; then
 	sleep 1
 
