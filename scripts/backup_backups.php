@@ -345,7 +345,7 @@ if (!empty($instanceserver)) {
 	$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency, ce.username_os as osu";
 	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 	$sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
-	if ($isset($argv[3]) && $argv[3] != "--delete") {
+	if (isset($argv[3]) && $argv[3] != "--delete") {
 		$sql.= " AND c.ref_customer IN (".$dbmaster->escape($argv[3]).")";
 	} else {
 		$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
@@ -368,7 +368,7 @@ if (!empty($instanceserver)) {
 				foreach ($SERVERDESTIARRAY as $servername) {
 	
 					if (empty($HISTODIR)) {
-						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS.$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
 					} else {
 						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
 					}
