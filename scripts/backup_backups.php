@@ -408,12 +408,12 @@ if (!empty($instanceserver)) {
 								$output = array();
 								exec($command, $output, $return_var);
 								if ($output[0] == "0") {
-									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$osudirbase.".duc.db and nb already updated = ".$nbdu.", so we update it.";
-									$command = "duc index ".$homedir."/".$obj->osu." -x -m 3 -d ".$homedir."/".$obj->osu.".duc.db";
+									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$obj->osu."/.duc.db and nb already updated = ".$nbdu.", so we update it.";
+									$command = "duc index ".$homedir."/".$obj->osu."/ -x -m 3 -d ".$homedir."/".$obj->osu."/.duc.db";
 									print "\n".$command;
 									$output = array();
 									exec($command, $output, $return_var);
-									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$obj->osu.".duc.db";
+									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$obj->osu."/.duc.db";
 									exec($command, $output, $return_var);
 									$nbdu ++;
 								} else {
