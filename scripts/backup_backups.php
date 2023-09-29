@@ -181,6 +181,15 @@ if ($fp) {
 		if ($tmpline[0] == 'databasepass') {
 			$databasepass = $tmpline[1];
 		}
+		if ($tmpline[0] == 'databasehost') {
+			$databasehost = $tmpline[1];
+		}
+		if ($tmpline[0] == 'database') {
+			$database = $tmpline[1];
+		}
+		if ($tmpline[0] == 'databaseport') {
+			$databaseport = $tmpline[1];
+		}
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
