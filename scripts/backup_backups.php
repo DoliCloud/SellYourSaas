@@ -298,6 +298,7 @@ if (empty($db)) {
 	$db = $dbmaster;
 }
 
+$user = new User($dbmaster);
 $user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 
 $ret1 = array();
