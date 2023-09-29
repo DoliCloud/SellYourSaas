@@ -229,9 +229,6 @@ include_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
 include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
-$user = new User($db);
-$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
-
 $HISTODIR = dol_print_date(dol_now(), '%d');
 if ($HISTODIRTEXT == "week") {
 	$HISTODIR = dol_print_date(dol_now(), 'W');
@@ -300,8 +297,8 @@ if ($dbmaster) {
 if (empty($db)) {
 	$db = $dbmaster;
 }
- 
-//$utils = new Utils($db);
+
+$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 
 $ret1 = array();
 $ret2 = array();
