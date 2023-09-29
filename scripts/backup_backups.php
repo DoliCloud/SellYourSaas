@@ -437,8 +437,9 @@ if (!empty($instanceserver)) {
 				}
 			} else {
 				print "No directory found starting with name ".$backupdir."/".$obj->osu."\n";
-				$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/osu".$i."\n";
+				$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/".$obj->osu."\n";
 			}
+			$i++;
 		}
 	}
 }
