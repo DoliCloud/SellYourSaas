@@ -151,9 +151,6 @@ if ($fp) {
 		if ($tmpline[0] == 'remotebackupuser') {
 			$USER = $tmpline[1];
 		}
-		if ($tmpline[0] == 'remotebackupuser') {
-			$USER = $tmpline[1];
-		}
 		if ($tmpline[0] == 'emailfrom') {
 			$EMAILFROM = $tmpline[1];
 		}
@@ -232,6 +229,8 @@ include_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
 include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
+$user = new User($db);
+$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 
 $HISTODIR = dol_print_date(dol_now(), '%d');
 if ($HISTODIRTEXT == "week") {
@@ -432,7 +431,7 @@ if (!empty($instanceserver)) {
 					}
 					$res = $object->update($user, 1);
 					if ($res <= 0) {
-						print "Update of Contract error ".$backupdir."/".$obj->osu."\n";
+						print "\nUpdate of Contract error ".$backupdir."/".$obj->osu."\n";
 					}
 				}
 			} else {
