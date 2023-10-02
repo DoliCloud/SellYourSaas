@@ -442,7 +442,7 @@ if (!empty($instanceserver)) {
 		}
 	}
 }
-print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." End with errstring=".$errstring;
+print "\n\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." End with errstring=".$errstring;
 
 // Loop on each targeted server for return code
 $atleastoneerror = 0;
