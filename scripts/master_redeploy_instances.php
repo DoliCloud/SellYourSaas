@@ -247,8 +247,9 @@ while ($i < $num_rows) {
 		$idofinstancefound = $obj->rowid;
 	}
 
-	include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-	$object = new Contrat($dbmaster);
+	dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
+
+	$object = new SellYourSaasContract($dbmaster);
 	$result=0;
 	if ($idofinstancefound) {
 		$result=$object->fetch($idofinstancefound);

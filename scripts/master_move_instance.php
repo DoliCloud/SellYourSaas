@@ -232,9 +232,10 @@ if (! empty($newinstance) && ! preg_match('/\./', $newinstance) && ! preg_match(
 
 $tmppackage = new Packages($dbmaster);
 
+dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
 
 // Get data of old instance
-$oldobject = new Contrat($dbmaster);
+$oldobject = new SellYourSaasContract($dbmaster);
 $result=$oldobject->fetch('', '', $oldinstance);
 $oldobject->fetch_thirdparty();
 

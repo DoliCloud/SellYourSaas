@@ -119,8 +119,9 @@ $instanceserror=array();
 
 $dbtousetosearch = $db;
 
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object=new Contrat($db);
+dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
+
+$object=new SellYourSaasContract($db);
 
 
 // Get list of instance that we must deploy ssh key to.
@@ -148,8 +149,10 @@ if ($resql) {
 				$payment_status='PAID';
 				$found = true;
 
-				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
-				$object = new Contrat($db);
+				dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
+				dol_include_once('sellyoursaas/class/sellyoursaascontract.class.php');
+
+				$object = new SellYourSaasContract($db);
 
 				$instance_status = '';
 				$result = $object->fetch($obj->id);

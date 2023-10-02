@@ -76,6 +76,7 @@ $databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
+$master_unique_id = '';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -96,6 +97,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'databasepass') {
 			$databasepass = $tmpline[1];
+		}
+		if ($tmpline[0] == 'master_unique_id') {
+			$master_unique_id = dol_string_nospecial($tmpline[1]);
 		}
 	}
 } else {
@@ -144,8 +148,14 @@ if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.ho
 	$instance = $instance.".".$tmpstring;   // Automatically concat first domain name
 }
 
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object = new Contrat($db);
+dol_include_once('sellyoursaas/class/sellyoursaascontract.class.php');
+
+$object = new SellYourSaasContract($dbmaster);
+
+if (empty($conf->file->unique_instance_id)) {
+	$conf->file->unique_instance_id = empty($master_unique_id) ? '' : $master_unique_id;
+}
+
 $result=$object->fetch('', '', $instance);
 $result=$object->fetch_thirdparty();
 

@@ -100,6 +100,7 @@ $databasepass='';
 $usecompressformatforarchive='gzip';
 $emailfrom='';
 $emailsupervision='';
+$master_unique_id = '';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -135,6 +136,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'emailsupervision') {
 			$emailsupervision = dol_sanitizeEmail($tmpline[1]);
+		}
+		if ($tmpline[0] == 'master_unique_id') {
+			$master_unique_id = dol_string_nospecial($tmpline[1]);
 		}
 	}
 } else {
@@ -226,6 +230,11 @@ if ($num_rows > 1) {
 dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 
 $object = new SellYourSaasContract($dbmaster);
+
+if (empty($conf->file->unique_instance_id)) {
+	$conf->file->unique_instance_id = empty($master_unique_id) ? '' : $master_unique_id;
+}
+
 $result=0;
 if ($idofinstancefound) {
 	$result=$object->fetch($idofinstancefound);
@@ -261,7 +270,6 @@ if (! is_dir($dirroot)) {
 
 $dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 $login = $object->username_os;
-$password = $object->password_os;
 
 $targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
 $server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);

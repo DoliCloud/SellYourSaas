@@ -142,15 +142,18 @@ if ($action == 'fileverification') {
 
 if ($action == 'automigration') {
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
-	include_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
-	dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
+	require_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
+	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
+	dol_include_once('sellyoursaas/class/sellyoursaascontract.class.php');
+
 	$utils = new Utils($db);
 
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$instanceselect = GETPOST('instanceselect', 'alapha');
 	$instanceselect = explode("_", $instanceselect);
 	$idcontract = $instanceselect[1];
-	$object = new Contrat($db);
+
+	$object = new SellYourSaasContract($db);
 	$object->fetch($idcontract);
 
 	$hostname_db  = $object->array_options['options_hostname_db'];

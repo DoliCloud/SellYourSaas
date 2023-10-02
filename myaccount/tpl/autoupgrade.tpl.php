@@ -25,6 +25,7 @@ require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
 require_once DOL_DOCUMENT_ROOT."/product/class/product.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 dol_include_once('sellyoursaas/class/packages.class.php');
+dol_include_once('sellyoursaas/class/sellyoursaascontract.class.php');
 
 ?>
 <!-- BEGIN PHP TEMPLATE autoupgrade.tpl.php -->
@@ -46,7 +47,7 @@ $stringoflistofmodules = "";
 if ($action == "instanceverification") {
 	$confinstance = 0;
 
-	$object = new Contrat($db);
+	$object = new SellYourSaasContract($db);
 	$instanceselect = GETPOST("instanceselect", "alpha");
 	$instanceselect = explode("_", $instanceselect);
 	$idcontract = $instanceselect[1];
@@ -168,7 +169,7 @@ if ($action == "autoupgrade") {
 	$ticketcategory_child_id = explode("=", $arraybacktopage[$keyticketcategory_child_id])[1];
 	$ticketcategory = explode("=", $arraybacktopage[$keyticketcategory])[1];
 
-	$object = new Contrat($db);
+	$object = new SellYourSaasContract($db);
 	$instanceselect = GETPOST("instanceselect", "alpha");
 	$instanceselect = explode("_", $instanceselect);
 	$idcontract = $instanceselect[1];
@@ -395,7 +396,7 @@ if ($action == "instanceverification") {
 	$newversion = (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR") ? "(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")" : "");
 
 	if ($idcontract > 0) {
-		$object = new Contrat($db);
+		$object = new SellYourSaasContract($db);
 
 		$result=$object->fetch($idcontract);
 
