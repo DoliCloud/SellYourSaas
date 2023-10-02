@@ -382,18 +382,18 @@ if (!empty($instanceserver)) {
 					$output = array();
 					exec($command, $output, $return_var);
 
-					$object->array_options["options_latestbackup_date"] = dol_now();
+					$object->array_options["options_latestbackupremote_date"] = dol_now();
 					if ($return_var != 0) {
 						$ret2[$servername] = $ret2[$servername] + 1;
 						print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
 						print "Command was: ".$command."\n";
 						$totalinstancesfailed += $nbofdir;
 						$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
-						$object->array_options["options_latestbackup_status"] = "KO";
+						$object->array_options["options_latestbackupremote_status"] = "KO";
 					} else {
 						//Save date of object
-						$object->array_options["options_latestbackup_date_ok"] = dol_now();
-						$object->array_options["options_latestbackup_status"] = "OK";
+						$object->array_options["options_latestbackupremote_date_ok"] = dol_now();
+						$object->array_options["options_latestbackupremote_status"] = "OK";
 
 						//Duc to modify
 						$totalinstancessaved+= $nbofdir;
@@ -428,7 +428,7 @@ if (!empty($instanceserver)) {
 						
 					}
 					if ($testorconfirm == "confirm") {
-						$res = $object->update($user, 1);
+						$res = $object->update($user, 1); //Make script stop crash
 						if ($res <= 0) {
 							print "\nUpdate of Contract error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
 						}
