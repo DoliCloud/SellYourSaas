@@ -241,7 +241,7 @@ logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
 action  = %(action_mw)s
 bantime  = 86400     ; 1 day
 findtime = 3600      ; 1 hour
-maxretry = 10
+maxretry = 15
 
 [web-dol-limitpublic]
 
@@ -267,7 +267,7 @@ logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
 action  = %(action_mw)s
 bantime  = 4320000   ; 50 days
 findtime = 86400     ; 1 day
-maxretry = 10
+maxretry = 15
 
 [web-dol-registerinstance]
 
