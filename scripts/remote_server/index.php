@@ -108,10 +108,10 @@ fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignatur
 
 // Compare signature and recalculatedsignature
 if ($signature != $recalculatedsignature) {
-	fwrite($fh, date('Y-m-d H:i:s')." The provided signature does not match the signature recalculated from parameters and the signature key.\n");
+	fwrite($fh, date('Y-m-d H:i:s')." The provided signature does not match the signature recalculated from parameters and the signature key (instance server ".$instanceserver."\n");
 
 	http_response_code(598);
-	print 'The provided signature does not match the signature recalculated from parameters and the signature key.'."\n";
+	print 'The provided signature does not match the signature recalculated from parameters and the signature key (instance server '.$instanceserver.')'."\n";
 	exit();
 }
 
