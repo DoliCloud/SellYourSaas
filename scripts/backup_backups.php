@@ -369,7 +369,7 @@ if (!empty($instanceserver)) {
 		while ($i < $num) {
 			print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/".$obj->osu." \n";
 			$obj = $dbtousetosearch->fetch_object($resql);
-			$object->fetch($obj->rowid);
+			$object->fetch($obj->id);
 			if (dol_is_dir($backupdir."/".$obj->osu)) {
 				foreach ($SERVERDESTIARRAY as $servername) {
 	
