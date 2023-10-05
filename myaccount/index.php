@@ -719,7 +719,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 						// If date start is in past, we set it to now
 						$now = dol_now();
 						if ($date_start < $now) {
-							dol_syslog("--- Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
+							dol_syslog("index.php: Date start is in past, so we take current date as date start and update also end date of contract", LOG_DEBUG, 0);
 							$tmparray = sellyoursaasGetExpirationDate($srcobject, 0);
 							$duration_value = $tmparray['duration_value'];
 							$duration_unit = $tmparray['duration_unit'];
@@ -760,12 +760,12 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 						// Get data from product (frequency, discount type and val)
 						$tmpproduct->fetch($lines[$i]->fk_product);
 
-						dol_syslog("--- Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
+						dol_syslog("index.php: Read frequency for product id=".$tmpproduct->id, LOG_DEBUG, 0);
 						if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
 							// Protection to avoid to validate contract with several 'app' products.
 							$nbofproductapp++;
 							if ($nbofproductapp > 1) {
-								dol_syslog("--- Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
+								dol_syslog("Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
 								$error++;
 								break;
 							}
@@ -781,7 +781,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 									if (is_numeric($tmpval)) {
 										$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
 									} else {
-										dol_syslog("--- Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
+										dol_syslog("Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
 									}
 								}
 								// If we entered a discountcode or get it from contract
