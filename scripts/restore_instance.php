@@ -67,6 +67,10 @@ if ($fp) {
 		}
 	}
 }
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
 
 // Load Dolibarr environment
 $res=0;
@@ -100,6 +104,10 @@ $databasepass='';
 $usecompressformatforarchive='gzip';
 $emailfrom='';
 $emailsupervision='';
+$backupignoretables='';
+$backupcompressionalgorithms='';	// can be '' or 'zstd'
+$backuprsyncdayfrequency=1;	// Default value is an rsync every 1 day.
+$backupdumpdayfrequency=1;	// Default value is a sql dump every 1 day.
 $master_unique_id = '';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
@@ -128,6 +136,24 @@ if ($fp) {
 		if ($tmpline[0] == 'databasepass') {
 			$databasepass = $tmpline[1];
 		}
+		if ($tmpline[0] == 'dolibarrdir') {
+			$dolibarrdir = $tmpline[1];
+		}
+		if ($tmpline[0] == 'usecompressformatforarchive') {
+			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupignoretables') {
+			$backupignoretables = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupcompressionalgorithms') {
+			$backupcompressionalgorithms = preg_replace('/[^a-z]/', '', $tmpline[1]);
+		}
+		if ($tmpline[0] == 'backuprsyncdayfrequency') {
+			$backuprsyncdayfrequency = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupdumpdayfrequency') {
+			$backupdumpdayfrequency = $tmpline[1];
+		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = dol_string_nospecial($tmpline[1]);
 		}
@@ -145,6 +171,7 @@ if ($fp) {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit(-1);
 }
+
 if (empty($emailfrom)) {
 	$emailfrom="noreply@".$domain;
 }
@@ -152,9 +179,16 @@ if (empty($emailsupervision)) {
 	$emailsupervision="supervision@".$domain;
 }
 
-
 if (empty($dolibarrdir)) {
 	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+if (empty($backuprsyncdayfrequency)) {
+	print "Bad value for 'backuprsyncdayfrequency'. Must contains the number of days between each rsync.\n";
+	exit(-1);
+}
+if (empty($backupdumpdayfrequency)) {
+	print "Bad value for 'backupdumpdayfrequency'. Must contains the number of days between each sql dump.\n";
 	exit(-1);
 }
 
