@@ -170,8 +170,8 @@ dol_include_once('sellyoursaas/class/sellyoursaascontract.class.php');
 
 $object = new SellYourSaasContract($dbmaster);
 
-if (empty($conf->file->unique_instance_id)) {
-	$conf->file->unique_instance_id = empty($master_unique_id) ? '' : $master_unique_id;
+if (empty($conf->file->instance_unique_id)) {
+	$conf->file->instance_unique_id = empty($master_unique_id) ? '' : $master_unique_id;
 }
 
 $result=$object->fetch('', '', $instance);

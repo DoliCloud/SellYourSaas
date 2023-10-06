@@ -227,6 +227,10 @@ if ($dbmaster->error) {
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
+if (empty($conf->file->instance_unique_id)) {
+	$conf->file->instance_unique_id = empty($master_unique_id) ? '' : $master_unique_id;
+	//print 'instance_unique_id used to decrypt data will be '.substr($conf->file->instance_unique_id, 0, 4) . str_repeat('*', strlen($conf->file->instance_unique_id) - 4)."\n";
+}
 if (empty($db)) {
 	$db = $dbmaster;
 }
@@ -288,11 +292,6 @@ if ($num_rows > 1) {
 dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
 
 $object = new SellYourSaasContract($dbmaster);
-
-if (empty($conf->file->unique_instance_id)) {
-	$conf->file->unique_instance_id = empty($master_unique_id) ? '' : $master_unique_id;
-	print 'unique_instance_id used to decrypt data will be '.substr($conf->file->unique_instance_id, 0, 4) . str_repeat('*', strlen($conf->file->unique_instance_id) - 4);"\n";
-}
 
 $result=0;
 if ($idofinstancefound) {
