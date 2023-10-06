@@ -291,6 +291,7 @@ $object = new SellYourSaasContract($dbmaster);
 
 if (empty($conf->file->unique_instance_id)) {
 	$conf->file->unique_instance_id = empty($master_unique_id) ? '' : $master_unique_id;
+	print 'unique_instance_id used to decrypt data will be '.substr($conf->file->unique_instance_id, 0, 4) . str_repeat('*', strlen($conf->file->unique_instance_id) - 4);"\n";
 }
 
 $result=0;
