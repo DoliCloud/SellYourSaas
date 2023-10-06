@@ -24,7 +24,7 @@
 // Files with some functions
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contract.class.php';
+include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
 /**
