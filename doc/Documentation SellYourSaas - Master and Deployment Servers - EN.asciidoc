@@ -750,7 +750,7 @@ git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 
-=== Creation of sellyoursaas.conf with credentials
+=== Creation of /.conf with credentials
 
 * Create a file */etc/sellyoursaas.conf* on the server (on the server *Master* and the *Deployment servers*)
 
@@ -2471,7 +2471,7 @@ On *all servers*:
 ---------------
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
 -- For newer versions of mariadb, you must also do:
-UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE User='root';
+UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE user='root';
 
 FLUSH PRIVILEGES;
 ---------------
@@ -2540,7 +2540,7 @@ Note: To delete active plugins, empty the mysql *plugin* table. See "Starting my
 [[creer_un_compte_db_sellyoursaas]]
 ==== Create a user sellyoursaas to control databases of user instances
 
-On the *Master* server and each *Deployment server*, grant access localy to the login *sellyoursaas*:
+On the *Master* server and on each *Deployment server*, grant access localy to the login *sellyoursaas*:
 
 [source,sql]
 ---------------
@@ -2553,22 +2553,26 @@ GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT
 FLUSH PRIVILEGES;
 ---------------
 
+
 Give permission, on the *Master server*, to the account *sellyoursaas* for each deployment server, on the database *dolibarr* (so the mysql client on deployment server can connect to the database):
 
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf of the deployment server)
 
-GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON databasename_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
 
 FLUSH PRIVILEGES;
 ---------------
 
 --TODO Reduce permissions of this database user sellyoursaas
 This is used by:
-* the batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
-* the batch *batch_detect_evil_instances.php* to SELECT contracts
-* the batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm 
+* the root batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
+* the root batch *batch_detect_evil_instances.php* to SELECT contracts
+* the admin batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm 
+* the admin batch *backup_instance.php* to get and update properties of instances to backup 
+* the admin batch *restore_instance.php* to get and update properties of instances to restore 
+* the admin batch *backup_backup.php* to update status of remote backup 
 
 Note: If the user already exists, to set only the password:
 
