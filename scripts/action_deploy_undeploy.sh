@@ -713,138 +713,165 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
 			mkdir -p $targetdirwithsources1
-			if [[ -f $dirwithsources1.tar.zst ]]; then
-				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/"
-				tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
+			
+			# Check local cache
+			datesource=`date -r $dirwithsources1 +"%Y%m%d"`
+			if [ -f "/tmp/cache$dirwithsources1.zst" ]; then
+				datecache=`date -r /tmp/cache$dirwithsources1.zst +"%Y%m%d"`
 			else
-				if [ -f $dirwithsources1.tgz ]; then
-					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
-					tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
-				else
-					datesource=`date -r $dirwithsources1 +"%Y%m%d"`
-					if [ -f "/tmp/cache$dirwithsources1.tgz" ]; then
-						# compare date of file with date of source dir
-						datecache=`date -r /tmp/cache$dirwithsources1.tgz +"%Y%m%d"`
-					else 
-						datecache=0
-					fi
-					echo "datesource=$datesource datecache=$datecache"
+				if [ -f "/tmp/cache$dirwithsources1.tgz" ]; then
+					datecache=`date -r /tmp/cache$dirwithsources1.tgz +"%Y%m%d"`
+				else 
+					datecache=0
+				fi
+			fi
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
 
-					if [ ! -f "/tmp/cache$dirwithsources1.tgz" -o $datesource -gt $datecache ]; then
-						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
-						mkdir -p "/tmp/cache$dirwithsources1"
-						#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
+			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache"
+				mkdir -p "/tmp/cache$dirwithsources1"
+				#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
+
+				if [[ -f $dirwithsources1.tar.zst ]]; then
+					echo "cp $dirwithsources1.tar.zst  /tmp/cache$dirwithsources1.tar.zst"
+					cp $dirwithsources1.tar.zst  /tmp/cache$dirwithsources1.tar.zst
+				else
+					if [ -f $dirwithsources1.tgz ]; then
+						echo "cp $dirwithsources1.tgz  /tmp/cache$dirwithsources1.tgz"
+						cp $dirwithsources1.tgz  /tmp/cache$dirwithsources1.tgz
+					else
 						cd $dirwithsources1/.
 						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz ."
 						#cp -r $dirwithsources1/. $targetdirwithsources1
 						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz .
-					fi 
+					fi			
+				fi
+			fi 
 
-					if [ ! -f "/tmp/cache$dirwithsources1.tgz" ]; then
-						# If cache does not exists. Should not happen
-                        echo "Warning: Both remote and local cache does not exists. Should not happen."
-                        echo "cp -r  $dirwithsources1/. $targetdirwithsources1"
-                        cp -r  $dirwithsources1/. $targetdirwithsources1
-					else 
-						# If cache exists.
-                        echo "Local cache found. We uncompress it."
-                        echo "tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
-                        tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
-                    fi
-          		fi
-			fi
+			if [[ -f /tmp/cache$dirwithsources1.tar.zst ]]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+				tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/
+			else
+				if [ -f /tmp/cache$dirwithsources1.tgz ]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
+					tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
+				else
+					# If both remote and local cache does not exists. Should not happen
+                    echo `date +'%Y-%m-%d %H:%M:%S'`" Warning: Both remote and local cache does not exists. Should not happen (very slow on NFS)."
+	                echo "cp -r $dirwithsources1/. $targetdirwithsources1"
+    	            cp -r $dirwithsources1/. $targetdirwithsources1
+    	        fi
+            fi
 		fi
 	fi
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources2=$dirwithsources2 targetdirwithsources2=$targetdirwithsources2"
 	if [ -d $dirwithsources2 ]; then
 		if [[ "x$targetdirwithsources2" != "x" ]]; then
 			mkdir -p $targetdirwithsources2
-			if [[ -f $dirwithsources2.tar.zst ]]; then
-				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
-				tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
+			
+			# Check local cache
+			datesource=`date -r $dirwithsources2 +"%Y%m%d"`
+			if [ -f "/tmp/cache$dirwithsources2.zst" ]; then
+				datecache=`date -r /tmp/cache$dirwithsources2.zst +"%Y%m%d"`
 			else
-				if [ -f $dirwithsources2.tgz ]; then
-					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
-					tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
-				else
-					datesource=`date -r $dirwithsources2 +"%Y%m%d"`
-					if [ -f "/tmp/cache$dirwithsources2.tgz" ]; then
-						# compare date of file with date of source dir
-						datecache=`date -r /tmp/cache$dirwithsources2.tgz +"%Y%m%d"`
-					else 
-						datecache=0
-					fi
-					echo "datesource=$datesource datecache=$datecache"
+				if [ -f "/tmp/cache$dirwithsources2.tgz" ]; then
+					datecache=`date -r /tmp/cache$dirwithsources2.tgz +"%Y%m%d"`
+				else 
+					datecache=0
+				fi
+			fi
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
 
-					if [ ! -f "/tmp/cache$dirwithsources2.tgz" -o $datesource -gt $datecache ]; then
-						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
-						mkdir -p "/tmp/cache$dirwithsources2"
-						#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
+			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache"
+				mkdir -p "/tmp/cache$dirwithsources2"
+				#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
+
+				if [[ -f $dirwithsources2.tar.zst ]]; then
+					echo "cp $dirwithsources2.tar.zst  /tmp/cache$dirwithsources2.tar.zst"
+					cp $dirwithsources2.tar.zst  /tmp/cache$dirwithsources2.tar.zst
+				else
+					if [ -f $dirwithsources2.tgz ]; then
+						echo "cp $dirwithsources2.tgz  /tmp/cache$dirwithsources2.tgz"
+						cp $dirwithsources2.tgz  /tmp/cache$dirwithsources2.tgz
+					else
 						cd $dirwithsources2/.
 						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz ."
 						#cp -r $dirwithsources2/. $targetdirwithsources2
 						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources2.tgz .
-					fi 
-
-					if [ ! -f "/tmp/cache$dirwithsources2.tgz" ]; then
-						# If cache does not exists. Should not happen
-                        echo "Warning: Both remote and local cache does not exists. Should not happen."
-                        echo "cp -r  $dirwithsources2/. $targetdirwithsources2"
-                        cp -r  $dirwithsources2/. $targetdirwithsources2
-					else 
-						# If cache exists.
-                        echo "Local cache found. We uncompress it."
-                        echo "tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
-                        tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
-                    fi
+					fi			
 				fi
-			fi
+			fi 
+
+			if [[ -f /tmp/cache$dirwithsources2.tar.zst ]]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+				tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/
+			else
+				if [ -f /tmp/cache$dirwithsources2.tgz ]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
+					tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
+				else
+					# If both remote and local cache does not exists. Should not happen
+                    echo `date +'%Y-%m-%d %H:%M:%S'`" Warning: Both remote and local cache does not exists. Should not happen (very slow on NFS)."
+	                echo "cp -r $dirwithsources2/. $targetdirwithsources2"
+    	            cp -r $dirwithsources2/. $targetdirwithsources2
+    	        fi
+            fi
 		fi
 	fi
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources3=$dirwithsources3 targetdirwithsources3=$targetdirwithsources3"
 	if [ -d $dirwithsources3 ]; then
 		if [[ "x$targetdirwithsources3" != "x" ]]; then
 			mkdir -p $targetdirwithsources3
-			if [[ -f $dirwithsources3.tar.zst ]]; then
-				echo "Remote zst cache found. We use it with: tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
-				tar -I zstd -xzf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
+			
+			# Check local cache
+			datesource=`date -r $dirwithsources3 +"%Y%m%d"`
+			if [ -f "/tmp/cache$dirwithsources3.zst" ]; then
+				datecache=`date -r /tmp/cache$dirwithsources3.zst +"%Y%m%d"`
 			else
-				if [ -f $dirwithsources3.tgz ]; then
-					echo "Remote tgz cache found. We use it with: tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
-					tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
-				else
-					datesource=`date -r $dirwithsources3 +"%Y%m%d"`
-					if [ -f "/tmp/cache$dirwithsources3.tgz" ]; then
-						# compare date of file with date of source dir
-						datecache=`date -r /tmp/cache$dirwithsources3.tgz +"%Y%m%d"`
-					else 
-						datecache=0
-					fi
-					echo "datesource=$datesource datecache=$datecache"
+				if [ -f "/tmp/cache$dirwithsources3.tgz" ]; then
+					datecache=`date -r /tmp/cache$dirwithsources3.tgz +"%Y%m%d"`
+				else 
+					datecache=0
+				fi
+			fi
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
 
-					if [ ! -f "/tmp/cache$dirwithsources3.tgz" -o $datesource -gt $datecache ]; then
-						echo "Remote cache does not exists. Local cache does not exists or is too old, we recreate local cache"
-						mkdir -p "/tmp/cache$dirwithsources3"
-						#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
+			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache"
+				mkdir -p "/tmp/cache$dirwithsources3"
+				#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
+
+				if [[ -f $dirwithsources3.tar.zst ]]; then
+					echo "cp $dirwithsources3.tar.zst  /tmp/cache$dirwithsources3.tar.zst"
+					cp $dirwithsources3.tar.zst  /tmp/cache$dirwithsources3.tar.zst
+				else
+					if [ -f $dirwithsources3.tgz ]; then
+						echo "cp $dirwithsources3.tgz  /tmp/cache$dirwithsources3.tgz"
+						cp $dirwithsources3.tgz  /tmp/cache$dirwithsources3.tgz
+					else
 						cd $dirwithsources3/.
 						echo "tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz ."
 						#cp -r $dirwithsources3/. $targetdirwithsources3
 						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources3.tgz .
-					fi 
-
-					if [ ! -f "/tmp/cache$dirwithsources3.tgz" ]; then
-						# If cache does not exists. Should not happen
-                        echo "Warning: Both remote and local cache does not exists. Should not happen."
-                        echo "cp -r  $dirwithsources3/. $targetdirwithsources3"
-                        cp -r  $dirwithsources3/. $targetdirwithsources3
-					else 
-						# If cache exists.
-                        echo "Local cache found. We uncompress it."
-                        echo "tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
-                        tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
-                    fi
+					fi			
 				fi
-			fi
+			fi 
+
+			if [[ -f /tmp/cache$dirwithsources3.tar.zst ]]; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+				tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/
+			else
+				if [ -f /tmp/cache$dirwithsources3.tgz ]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
+					tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
+				else
+					# If both remote and local cache does not exists. Should not happen
+                    echo `date +'%Y-%m-%d %H:%M:%S'`" Warning: Both remote and local cache does not exists. Should not happen (very slow on NFS)."
+	                echo "cp -r $dirwithsources3/. $targetdirwithsources3"
+    	            cp -r $dirwithsources3/. $targetdirwithsources3
+    	        fi
+            fi
 		fi
 	fi
 
