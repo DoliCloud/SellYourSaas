@@ -2086,6 +2086,9 @@ class SellYourSaasUtils
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
 								continue;	// Draft invoice are not unpaid invoices
 							}
+							if ($invoice->statut == Facture::STATUS_ABANDONED) {
+								continue;	// Abandoned invoice are not invoice not paid
+							}
 
 							if (empty($invoice->paye)) {
 								$someinvoicenotpaid++;
@@ -2276,7 +2279,12 @@ class SellYourSaasUtils
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
 						$someinvoicenotpaid=0;
 						foreach ($object->linkedObjects['facture'] as $idinvoice => $invoice) {
-							if ($invoice->statut == Facture::STATUS_DRAFT) continue;	// Draft invoice are not invoice not paid
+							if ($invoice->statut == Facture::STATUS_DRAFT) {
+								continue;	// Draft invoice are not invoice not paid
+							}
+							if ($invoice->statut == Facture::STATUS_ABANDONED) {
+								continue;	// Abandoned invoice are not invoice not paid
+							}
 
 							if (empty($invoice->paye)) {
 								$someinvoicenotpaid++;
