@@ -79,12 +79,16 @@ include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// 
 
 // Global variables
 $FORCE=0;
-if (!empty($argv[2]) && $argv[2] == '--force') {
-	unset($argv[2]);
-	$FORCE=1;
-}
-if (!empty($argv[3]) && $argv[3] == '--force') {
-	$FORCE=1;
+$NOSTATS=0;
+$keystocheck = array(3, 3, 4);
+foreach ($keystocheck as $keytocheck) {
+	if (isset($argv[$keytocheck])) {
+		if ($argv[$keytocheck] == '--force') {
+			$FORCE=1;
+		} elseif ($argv[$keytocheck] == '--nostats') {
+			$NOSTATS=1;
+		}
+	}
 }
 
 // Read /etc/sellyoursaas.conf file
@@ -194,8 +198,8 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter] [--force]\n";
-	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force]\n";
+	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter] [--force] [--nostats]\n";
+	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force] [--nostats]\n";
 	print "\n";
 	print "action can be:\n";
 	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
@@ -441,11 +445,14 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 				if ($action == 'backupdeleteexclude') {
 					$command .= ' --delete --delete-excluded';
 				}
+				//$command .= " --notransaction";
+				$command .= " --quick";
 				if ($FORCE) {
 					$command .= ' --forcersync --forcedump';
 				}
-				//$command .= " --notransaction";
-				$command .= " --quick";
+				if ($NOSTATS) {
+					$command .= ' --nostats';
+				}
 
 				echo $command."\n";
 
