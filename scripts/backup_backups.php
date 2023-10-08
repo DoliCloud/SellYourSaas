@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2012-2019 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2023 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  * FEATURE
  *
  * Make a backup of files (rsync) or database (mysqdump) of a deployed instance.
- * There is no report/tracking done into any database. This must be done by a parent script.
+ * There is also a report/tracking done into master database.
  * This script is run from the deployment servers.
  *
  * Note:
@@ -48,11 +48,6 @@ if (0 != posix_getuid()) {
 $version='1.0';
 $RSYNCDELETE=0;
 $HISTODIRTEXT="";
-$NOTRANS=0;
-$QUICK=0;
-$NOSTATS=0;
-$FORCERSYNC=0;
-$FORCEDUMP=0;
 
 $errstring = "";
 
@@ -63,22 +58,12 @@ foreach ($keystocheck as $keytocheck) {
 	if (isset($argv[$keytocheck])) {
 		if ($argv[$keytocheck] == '--delete') {
 			$RSYNCDELETE=1;
-		} elseif ($argv[$keytocheck] == '--notransaction') {
-			$NOTRANS=1;
-		} elseif ($argv[$keytocheck] == '--quick') {
-			$QUICK=1;
-		} elseif ($argv[$keytocheck] == '--nostats') {
-			$NOSTATS=1;
-		} elseif ($argv[$keytocheck] == '--forcersync') {
-			$FORCERSYNC=1;
-		} elseif ($argv[$keytocheck] == '--forcedump') {
-			$FORCEDUMP=1;
 		} elseif ($argv[$keytocheck] == 'month') {
 			$HISTODIRTEXT='month';
 		} elseif ($argv[$keytocheck] == 'week') {
-            $HISTODIRTEXT='week';
+			$HISTODIRTEXT='week';
 		} elseif ($argv[$keytocheck] == 'none') {
-            $HISTODIRTEXT='';
+			$HISTODIRTEXT='';
 		}
 	}
 }
@@ -107,11 +92,11 @@ $homedir = '/mnt/diskhome/home';
 $backupdir = 'mnt/diskbackup/backup';
 $remotebackupdir = '/mnt/diskbackup';
 
-#Source
+// Source
 $DIRSOURCE1 = "/home";
 $DIRSOURCE2 = "";
 
-#Target
+// Target
 $SERVDESTI = '';
 $SERVPORTDESTI = '22';
 $USER = 'admin';
@@ -232,7 +217,7 @@ dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 $HISTODIR = dol_print_date(dol_now(), '%d');
 if ($HISTODIRTEXT == "week") {
 	$HISTODIR = dol_print_date(dol_now(), 'W');
-} else if ($HISTODIRTEXT == "none") {
+} elseif ($HISTODIRTEXT == "none") {
 	$HISTODIR = "";
 }
 
@@ -277,7 +262,7 @@ if (empty($DOMAIN)) {
 }
 
 /*
- * Main 
+ * Main
  */
 
 if (empty($instanceserver)) {
@@ -307,7 +292,7 @@ $totalinstancessaved=0;
 $totalinstancesfailed=0;
 // The following line is to have an empty dir to clear the last incremental directories
 if (!dol_is_dir($homedir."/emptydir")) {
-	mkdir($homedir."/emptydir");
+	dol_mkdir($homedir."/emptydir");
 }
 
 $SERVERDESTIARRAY = explode(',', $SERVDESTI);
@@ -333,15 +318,15 @@ foreach ($SERVERDESTIARRAY as $servername) {
 	if ($return_var != 0) {
 		$ret1[$servername] = $ret1[$servername] + 1;
 		print "ERROR Failed to make rsync for ".$DIRSOURCE1." to ".$servername." ret=".$ret1[$servername]." \n";
-    	print "Command was: ".$command."\n";
-    	$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE1." to ".$servername.". ret=".$ret1[$servername].". Command was: ".$command."\n";
+		print "Command was: ".$command."\n";
+		$errstring .="\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE1." to ".$servername.". ret=".$ret1[$servername].". Command was: ".$command."\n";
 	}
 	sleep(2);
 }
 
 if (!empty($instanceserver)) {
 	print "\n";
-	print dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Do rsync of customer directories ".$DIRSOURCE2."/osu to remote ".$SERVDESTI."...\n";
+	print dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." Do rsync of customer directories into ".$DIRSOURCE2."/osu... to remote ".$SERVDESTI."...\n";
 
 	$nbdu = 0;
 	include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
@@ -367,12 +352,13 @@ if (!empty($instanceserver)) {
 		$num = $dbtousetosearch->num_rows($resql);
 		$i = 0;
 		while ($i < $num) {
-			print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/".$obj->osu." \n";
 			$obj = $dbtousetosearch->fetch_object($resql);
+			print "\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/".$obj->osu." \n";
+
 			$object->fetch($obj->id);
 			if (dol_is_dir($backupdir."/".$obj->osu)) {
+				// Loop on each target server to make backup of backup of instance
 				foreach ($SERVERDESTIARRAY as $servername) {
-	
 					if (empty($HISTODIR)) {
 						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
 					} else {
@@ -380,6 +366,7 @@ if (!empty($instanceserver)) {
 					}
 					print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
 					$output = array();
+					$return_var = 0;
 					exec($command, $output, $return_var);
 
 					$object->array_options["options_latestbackupremote_date"] = dol_now();
@@ -388,7 +375,7 @@ if (!empty($instanceserver)) {
 						print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
 						print "Command was: ".$command."\n";
 						$totalinstancesfailed += $nbofdir;
-						$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
+						$errstring .="\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
 						$object->array_options["options_latestbackupremote_status"] = "KO";
 					} else {
 						//Save date of object
@@ -406,14 +393,16 @@ if (!empty($instanceserver)) {
 								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$obj->osu.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
 								$command = "find ".$homedir."/".$obj->osu.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
 								$output = array();
+								$return_var = 0;
 								exec($command, $output, $return_var);
 								if ($output[0] == "0") {
 									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$obj->osu."/.duc.db and nb already updated = ".$nbdu.", so we update it.";
 									$command = "duc index ".$homedir."/".$obj->osu."/ -x -m 3 -d ".$homedir."/".$obj->osu."/.duc.db";
 									print "\n".$command;
 									$output = array();
+									$return_var = 0;
 									exec($command, $output, $return_var);
-									$command = "chown ".$osudirbase.".".$osudirbase." ".$homedir."/".$obj->osu."/.duc.db";
+									$command = "chown ".$obj->osu.".".$obj->osu." ".$homedir."/".$obj->osu."/.duc.db";
 									exec($command, $output, $return_var);
 									$nbdu ++;
 								} else {
@@ -425,7 +414,6 @@ if (!empty($instanceserver)) {
 						} else {
 							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$obj->osu."/ \n";
 						}
-						
 					}
 					if ($testorconfirm == "confirm") {
 						$res = $object->update($user, 1); //Make script stop crash
@@ -436,19 +424,19 @@ if (!empty($instanceserver)) {
 				}
 			} else {
 				print "No directory found starting with name ".$backupdir."/".$obj->osu."\n";
-				$errstring .="\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/".$obj->osu."\n";
+				$errstring .="\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/".$obj->osu."\n";
 			}
 			$i++;
 		}
 	}
 }
-print "\n\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." End with errstring=".$errstring;
+print "\n\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." End with errstring=".$errstring;
 
 // Loop on each targeted server for return code
 $atleastoneerror = 0;
 
 foreach ($SERVERDESTIARRAY as $servername) {
-	print "\n".dol_print_date(dol_now(),"%Y-%m-%d %H:%M:%S")." End for ".$servername." ret1[".$servername."]=".$ret1[$servername]." ret2[".$servername."]=".$ret2[$servername];
+	print "\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." End for ".$servername." ret1[".$servername."]=".$ret1[$servername]." ret2[".$servername."]=".$ret2[$servername]."\n";
 	if ($ret1[$servername] != 0) {
 		$atleastoneerror = 1;
 	} elseif ($ret2[$servername] != 0) {
