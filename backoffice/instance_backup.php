@@ -445,7 +445,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	if (! $user->socid) {
 		print '<div class="tabsAction">';
 
-		if ($user->rights->sellyoursaas->write) {
+		if ($user->rights->sellyoursaas->write && $object->array_options['options_deployment_status'] !== 'undeployed') {
 			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=backupinstance&token='.newToken().'">'.$langs->trans('BackupNow').'</a>';
 		}
 

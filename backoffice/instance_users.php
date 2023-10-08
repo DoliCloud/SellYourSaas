@@ -508,7 +508,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	 * Fiche en mode visualisation
 	 */
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	}
 
 	if (is_object($newdb) && $newdb->connected) {
 		$fordolibarr = 1;
@@ -623,7 +625,9 @@ $username_os = $object->array_options['options_username_os'];
 $password_os = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
-$dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+	$dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+}
 
 if (!$error && is_object($dbcustomerinstance) && $dbcustomerinstance->connected) {
 	// Get user/pass of last admin user
