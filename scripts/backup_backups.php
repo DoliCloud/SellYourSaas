@@ -357,6 +357,8 @@ if (!empty($instanceserver)) {
 
 			$object->fetch($obj->id);
 			if (dol_is_dir($backupdir."/".$obj->osu)) {
+				$atleastoneerrorononeserver = 0;
+
 				// Loop on each target server to make backup of backup of instance
 				foreach ($SERVERDESTIARRAY as $servername) {
 					if (empty($HISTODIR)) {
@@ -369,21 +371,17 @@ if (!empty($instanceserver)) {
 					$return_var = 0;
 					exec($command, $output, $return_var);
 
-					$object->array_options["options_latestbackupremote_date"] = dol_now();
 					if ($return_var != 0) {
 						$ret2[$servername] = $ret2[$servername] + 1;
 						print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
 						print "Command was: ".$command."\n";
-						$totalinstancesfailed += $nbofdir;
+						$totalinstancesfailed += 1;
 						$errstring .="\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
-						$object->array_options["options_latestbackupremote_status"] = "KO";
-					} else {
-						//Save date of object
-						$object->array_options["options_latestbackupremote_date_ok"] = dol_now();
-						$object->array_options["options_latestbackupremote_status"] = "OK";
 
+						$atleastoneerrorononeserver = 1;
+					} else {
 						//Duc to modify
-						$totalinstancessaved+= $nbofdir;
+						$totalinstancessaved += 1;
 
 						print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named".$DIRSOURCE2."/".$obj->osu."\n";
 
@@ -415,11 +413,20 @@ if (!empty($instanceserver)) {
 							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$obj->osu."/ \n";
 						}
 					}
-					if ($testorconfirm == "confirm") {
-						$res = $object->update($user, 1); //Make script stop crash
-						if ($res <= 0) {
-							print "\nUpdate of Contract error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
-						}
+				}
+
+				if ($testorconfirm == "confirm") {
+					$object->array_options["options_latestbackupremote_date"] = dol_now();
+					if ($atleastoneerrorononeserver) {
+						$object->array_options["options_latestbackupremote_status"] = "KO";
+					} else {
+						$object->array_options["options_latestbackupremote_date_ok"] = dol_now();
+						$object->array_options["options_latestbackupremote_status"] = "OK";
+					}
+
+					$res = $object->update($user, 1); //Make script stop crash
+					if ($res <= 0) {
+						print "\nUpdate of Contract error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
 					}
 				}
 			} else {
