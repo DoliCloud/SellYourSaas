@@ -716,8 +716,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			
 			# Check local cache
 			datesource=`date -r $dirwithsources1 +"%Y%m%d"`
-			if [ -f "/tmp/cache$dirwithsources1.zst" ]; then
-				datecache=`date -r /tmp/cache$dirwithsources1.zst +"%Y%m%d"`
+			if [ -f "/tmp/cache$dirwithsources1.tar.zst" ]; then
+				datecache=`date -r /tmp/cache$dirwithsources1.tar.zst +"%Y%m%d"`
 			else
 				if [ -f "/tmp/cache$dirwithsources1.tgz" ]; then
 					datecache=`date -r /tmp/cache$dirwithsources1.tgz +"%Y%m%d"`
@@ -771,8 +771,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			
 			# Check local cache
 			datesource=`date -r $dirwithsources2 +"%Y%m%d"`
-			if [ -f "/tmp/cache$dirwithsources2.zst" ]; then
-				datecache=`date -r /tmp/cache$dirwithsources2.zst +"%Y%m%d"`
+			if [ -f "/tmp/cache$dirwithsources2.tar.zst" ]; then
+				datecache=`date -r /tmp/cache$dirwithsources2.tar.zst +"%Y%m%d"`
 			else
 				if [ -f "/tmp/cache$dirwithsources2.tgz" ]; then
 					datecache=`date -r /tmp/cache$dirwithsources2.tgz +"%Y%m%d"`
@@ -826,8 +826,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			
 			# Check local cache
 			datesource=`date -r $dirwithsources3 +"%Y%m%d"`
-			if [ -f "/tmp/cache$dirwithsources3.zst" ]; then
-				datecache=`date -r /tmp/cache$dirwithsources3.zst +"%Y%m%d"`
+			if [ -f "/tmp/cache$dirwithsources3.tar.zst" ]; then
+				datecache=`date -r /tmp/cache$dirwithsources3.tar.zst +"%Y%m%d"`
 			else
 				if [ -f "/tmp/cache$dirwithsources3.tgz" ]; then
 					datecache=`date -r /tmp/cache$dirwithsources3.tgz +"%Y%m%d"`
