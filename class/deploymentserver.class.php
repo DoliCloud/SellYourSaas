@@ -75,7 +75,7 @@ class Deploymentserver extends CommonObject
 	 *  'type' field format:
 	 *  	'integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]',
 	 *  	'select' (list of values are in 'options'),
-	 *  	'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]',
+	 *  	'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:CategoryIdType[:CategoryIdList[:SortField]]]]]]',
 	 *  	'chkbxlst:...',
 	 *  	'varchar(x)',
 	 *  	'text', 'text:none', 'html',
@@ -86,7 +86,7 @@ class Deploymentserver extends CommonObject
 	 *		Note: Filter must be a Dolibarr Universal Filter syntax string. Example: "(t.ref:like:'SO-%') or (t.date_creation:<:'20160101') or (t.status:!=:0) or (t.nature:is:NULL)"
 	 *  'label' the translation key.
 	 *  'picto' is code of a picto to show before value in forms
-	 *  'enabled' is a condition when the field must be managed (Example: 1 or '$conf->global->MY_SETUP_PARAM' or 'isModEnabled("multicurrency")' ...)
+	 *  'enabled' is a condition when the field must be managed (Example: 1 or 'getDolGlobalInt("MY_SETUP_PARAM")' or 'isModEnabled("multicurrency")' ...)
 	 *  'position' is the sort order of field.
 	 *  'notnull' is set to 1 if not null in database. Set to -1 if we must set data to null if empty ('' or 0).
 	 *  'visible' says if field is visible in list (Examples: 0=Not visible, 1=Visible on list and create/update/view forms, 2=Visible on list only, 3=Visible on create/update/view form only (not list), 4=Visible on list and update/view form only (not create). 5=Visible on list and view only (not create/not update). Using a negative value means field is not shown by default on list but can be selected for viewing)
@@ -193,7 +193,7 @@ class Deploymentserver extends CommonObject
 
 		$this->db = $db;
 
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid']) && !empty($this->fields['ref'])) {
+		if (!getDolGlobalInt('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid']) && !empty($this->fields['ref'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
 		if (!isModEnabled('multicompany') && isset($this->fields['entity'])) {
@@ -309,8 +309,7 @@ class Deploymentserver extends CommonObject
 		$result = $object->createCommon($user);
 		if ($result < 0) {
 			$error++;
-			$this->error = $object->error;
-			$this->errors = $object->errors;
+			$this->setErrorsFromObject($object);
 		}
 
 		if (!$error) {
@@ -372,7 +371,7 @@ class Deploymentserver extends CommonObject
 
 
 	/**
-	 * Load list of objects in memory from the database.
+	 * Load list of objects in memory from the database. Using a fetchAll is a bad practice, instead try to forge you optimized and limited SQL request.
 	 *
 	 * @param  string      $sortorder    Sort Order
 	 * @param  string      $sortfield    Sort field
@@ -384,8 +383,6 @@ class Deploymentserver extends CommonObject
 	 */
 	public function fetchAll($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
 	{
-		global $conf;
-
 		dol_syslog(__METHOD__, LOG_DEBUG);
 
 		$records = array();
@@ -393,6 +390,9 @@ class Deploymentserver extends CommonObject
 		$sql = "SELECT ";
 		$sql .= $this->getFieldList('t');
 		$sql .= " FROM ".$this->db->prefix().$this->table_element." as t";
+		if (isset($this->isextrafieldmanaged) && $this->isextrafieldmanaged == 1) {
+			$sql .= " LEFT JOIN ".$this->db->prefix().$this->table_element."_extrafields as te ON tf.fk_object = t.rowid";
+		}
 		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
 			$sql .= " WHERE t.entity IN (".getEntity($this->element).")";
 		} else {
@@ -407,11 +407,11 @@ class Deploymentserver extends CommonObject
 				} elseif (in_array($this->fields[$key]['type'], array('date', 'datetime', 'timestamp'))) {
 					$sqlwhere[] = $key." = '".$this->db->idate($value)."'";
 				} elseif ($key == 'customsql') {
-					$sqlwhere[] = $value;
+					$sqlwhere[] = $value;	// For this case, $value never come from a user input but is a hard coded value in code
 				} elseif (strpos($value, '%') === false) {
 					$sqlwhere[] = $key." IN (".$this->db->sanitize($this->db->escape($value)).")";
 				} else {
-					$sqlwhere[] = $key." LIKE '%".$this->db->escape($value)."%'";
+					$sqlwhere[] = $key." LIKE '%".$this->db->escapeforlike($this->db->escape($value))."%'";
 				}
 			}
 		}
@@ -462,6 +462,7 @@ class Deploymentserver extends CommonObject
 	{
 		$now = dol_now();
 		$this->date_modification = $this->db->idate($now);
+
 		return $this->updateCommon($user, $notrigger);
 	}
 
@@ -671,6 +672,31 @@ class Deploymentserver extends CommonObject
 	}
 
 	/**
+	 * getTooltipContentArray
+	 *
+	 * @param 	array 	$params 	Params to construct tooltip data
+	 * @since 	v18
+	 * @return 	array
+	 */
+	public function getTooltipContentArray($params)
+	{
+		global $conf, $langs;
+
+		$datas = [];
+
+		if (getDolGlobalInt('MAIN_OPTIMIZEFORTEXTBROWSER')) {
+			return ['optimize' => $langs->trans("ShowMyObject")];
+		}
+		$datas['picto'] = img_picto('', $this->picto).' <u>'.$langs->trans("Deploymentserver").'</u>';
+		if (isset($this->status)) {
+			$datas['picto'] .= ' '.$this->getLibStatut(5);
+		}
+		$datas['ref'] .= '<br><b>'.$langs->trans('Ref').':</b> '.$this->ref;
+
+		return $datas;
+	}
+
+	/**
 	 *  Return a link to the object card (with optionaly the picto)
 	 *
 	 *  @param  int     $withpicto                  Include picto in link (0=No picto, 1=Include picto into link, 2=Only picto)
@@ -691,7 +717,7 @@ class Deploymentserver extends CommonObject
 		$result = '';
 		$params = [
 			'id' => $this->id,
-			'objecttype' => $this->element,
+			'objecttype' => $this->element.($this->module ? '@'.$this->module : ''),
 			'option' => $option,
 		];
 		$classfortooltip = 'classfortooltip';
@@ -701,18 +727,12 @@ class Deploymentserver extends CommonObject
 			$dataparams = ' data-params="'.dol_escape_htmltag(json_encode($params)).'"';
 			$label = '';
 		} else {
-			//$label = implode($this->getTooltipContentArray($params));
-			$label = img_picto('', $this->picto).' <u>'.$langs->trans("Deploymentserver").'</u>';
-			if (isset($this->status)) {
-				$label .= ' '.$this->getLibStatut(5);
-			}
-			$label .= '<br>';
-			$label .= '<b>'.$langs->trans('Ref').':</b> '.$this->ref;
+			$label = implode($this->getTooltipContentArray($params));
 		}
 
 		$url = dol_buildpath('/sellyoursaas/deploymentserver_card.php', 1).'?id='.$this->id;
 
-		if ($option != 'nolink') {
+		if ($option !== 'nolink') {
 			// Add param to save lastsearch_values or not
 			$add_save_lastsearch_values = ($save_lastsearch_value == 1 ? 1 : 0);
 			if ($save_lastsearch_value == -1 && isset($_SERVER["PHP_SELF"]) && preg_match('/list\.php/', $_SERVER["PHP_SELF"])) {
@@ -751,7 +771,7 @@ class Deploymentserver extends CommonObject
 
 		if (empty($this->showphoto_on_popup)) {
 			if ($withpicto) {
-				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : $dataparams.' class="'.(($withpicto != 2) ? 'paddingright ' : '').$classfortooltip.'"'), 0, 0, $notooltip ? 0 : 1);
+				$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), (($withpicto != 2) ? 'class="paddingright"' : ''), 0, 0, $notooltip ? 0 : 1);
 			}
 		} else {
 			if ($withpicto) {
@@ -765,7 +785,7 @@ class Deploymentserver extends CommonObject
 					$pospoint = strpos($filearray[0]['name'], '.');
 
 					$pathtophoto = $class.'/'.$this->ref.'/thumbs/'.substr($filename, 0, $pospoint).'_mini'.substr($filename, $pospoint);
-					if (empty($conf->global->{strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS'})) {
+					if (!getDolGlobalString(strtoupper($module.'_'.$class).'_FORMATLISTPHOTOSASUSERS')) {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><div class="photoref"><img class="photo'.$module.'" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div></div>';
 					} else {
 						$result .= '<div class="floatleft inline-block valignmiddle divphotoref"><img class="photouserphoto userphoto" alt="No photo" border="0" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$module.'&entity='.$conf->entity.'&file='.urlencode($pathtophoto).'"></div>';
@@ -773,7 +793,7 @@ class Deploymentserver extends CommonObject
 
 					$result .= '</div>';
 				} else {
-					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip ? 0 : 1);
+					$result .= img_object(($notooltip ? '' : $label), ($this->picto ? $this->picto : 'generic'), ($notooltip ? (($withpicto != 2) ? 'class="paddingright"' : '') : 'class="'.(($withpicto != 2) ? 'paddingright ' : '').'"'), 0, 0, $notooltip ? 0 : 1);
 				}
 			}
 		}
@@ -817,8 +837,10 @@ class Deploymentserver extends CommonObject
 		$return .= img_picto('', $this->picto);
 		$return .= '</span>';
 		$return .= '<div class="info-box-content">';
-		$return .= '<span class="info-box-ref valignmiddle">'.(method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref).'</span>';
-		$return .= '<input id="cb'.$this->id.'" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="'.$this->id.'"'.($selected ? ' checked="checked"' : '').'>';
+		$return .= '<span class="info-box-ref inline-block tdoverflowmax150 valignmiddle">'.(method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref).'</span>';
+		if ($selected >= 0) {
+			$return .= '<input id="cb'.$this->id.'" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="'.$this->id.'"'.($selected ? ' checked="checked"' : '').'>';
+		}
 		if (property_exists($this, 'label')) {
 			$return .= ' <div class="inline-block opacitymedium valignmiddle tdoverflowmax100">'.$this->label.'</div>';
 		}
@@ -868,7 +890,7 @@ class Deploymentserver extends CommonObject
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 	/**
-	 *  Return the status
+	 *  Return the label of a given status
 	 *
 	 *  @param	int		$status        Id status
 	 *  @param  int		$mode          0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
@@ -1061,7 +1083,7 @@ class Deploymentserver extends CommonObject
 	 */
 	public function doScheduledJob()
 	{
-		global $conf, $langs;
+		//global $conf, $langs;
 
 		//$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_mydedicatedlofile.log';
 
@@ -1118,6 +1140,7 @@ class Deploymentserver extends CommonObject
 	public function getLastBackupDate()
 	{
 		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
+		$mintryok = $minokok = $mintryko = $minokko = null;
 
 		$sql = "SELECT ce.latestbackup_status,";
 		$sql .= " MIN(ce.latestbackup_date) as mintry, MIN(ce.latestbackup_date_ok) as minok,";

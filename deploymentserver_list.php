@@ -691,7 +691,8 @@ if (isset($extrafields->attributes[$object->table_element]['computed']) && is_ar
 $openinstances = array();
 $backupokinstances = array();
 $backuptotalinstances = array();
-$backuptotalinstancesremote = array();
+$backuptotalinstancesremote = array();		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
+
 $sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko,";
@@ -898,7 +899,7 @@ while ($i < $imaxinloop) {
 			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
 			if (!empty($backuptotalinstances[$obj->ipaddress])) {
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
-					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->options_deployment_host).'">';
+					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->ipaddress).'">';
 					print img_warning($langs->trans("Errors"), '', 'paddingrightonly');
 					print '<span class="error">';
 				}
