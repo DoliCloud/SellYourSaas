@@ -102,7 +102,7 @@ if ($id > 0 || $ref) {
 	$id = $object->id;
 }
 
-$backupstring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/backup_instance.php '.$object->instance.' '.$conf->global->DOLICLOUD_INSTANCES_PATH;
+$backupstring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/backup_instance.php '.$object->instance.' ' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
 
 
 $instance = 'xxxx';
@@ -563,7 +563,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// Ref supplier
 	$morehtmlref.='<br>';
 	$morehtmlref.=$form->editfieldkey("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string', '', 0, 1);
-	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':'.$conf->global->THIRDPARTY_REF_INPUT_SIZE : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
+	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':' . getDolGlobalString('THIRDPARTY_REF_INPUT_SIZE') : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
 	// Thirdparty
 	$morehtmlref .= '<br>'.$object->thirdparty->getNomUrl(1, 'customer');
 	if (empty($conf->global->MAIN_DISABLE_OTHER_LINK) && $object->thirdparty->id > 0) {
@@ -679,7 +679,7 @@ print '</form>'."\n";
 if (!$error && ! $user->socid) {
 	print '<div class="tabsAction">';
 
-	if ($user->rights->sellyoursaas->write) {
+	if ($user->hasRight('sellyoursaas', 'write')) {
 		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createsupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('CreateSupportUser').'</a>';
 		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletesupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('DeleteSupportUser').'</a>';
 	}

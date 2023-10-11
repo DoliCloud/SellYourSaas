@@ -80,43 +80,43 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 
 				// Check if authorized_keys_support exists
 				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/.ssh/authorized_keys_support';
-				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
-				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support');
+				$filecert="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
+				$fstat=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/.ssh/authorized_keys_support');
 				// Create authorized_keys_support file
 				if (empty($fstat['atime']) || $recreateauthorizekey == 2) {
 					if ($recreateauthorizekey) {
-						@ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh');
+						@ssh2_sftp_mkdir($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/.ssh');
 
 						$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 
 						// We overwrite authorized_keys_support
-						if ($printoutput) print 'Write file '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support.'."\n";
+						if ($printoutput) print 'Write file ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os.'/.ssh/authorized_keys_support.'."\n";
 
 						$stream = @fopen($filecert, 'w');
 						//var_dump($stream);exit;
 						if ($stream) {
 							fwrite($stream, $publickeystodeploy);
 							fclose($stream);
-							$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support');
+							$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/.ssh/authorized_keys_support');
 						} else {
 							$errors[]='Failed to open for write '.$filecert."\n";
 						}
 					} else {
-						if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os."/.ssh/authorized_keys_support not found.\n";
+						if ($printoutput) print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support not found.\n";
 					}
 				} else {
-					if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os."/.ssh/authorized_keys_support already exists.\n";
+					if ($printoutput) print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support already exists.\n";
 				}
 				$object->fileauthorizedkey=(empty($fstat['mtime'])?'':$fstat['mtime']);
 
 				// Check if install.lock exists
 				//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 				//$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/install.lock';    // With PHP 5.6.27+
-				$fstatlock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/install.lock');
+				$fstatlock=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/'.$dir.'/documents/install.lock');
 				$object->filelock=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
 				// Check if installmodules.lock exists
-				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
+				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
 				$object->fileinstallmoduleslock=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
 
 				// Define dates
@@ -284,9 +284,9 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 				}
 			}
 
-			$sqltogetlastloginadmin = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE admin = 1 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+			$sqltogetlastloginadmin = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE admin = 1 AND login <> '" . getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 			$sqltogetmodules = "SELECT name, value FROM ".$prefix_db."const WHERE name LIKE 'MAIN_MODULE_%' or name = 'MAIN_VERSION_LAST_UPGRADE' or name = 'MAIN_VERSION_LAST_INSTALL'";
-			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY datelastlogin DESC LIMIT 1";
+			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE statut <> 0 AND login <> '" . getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')."' ORDER BY datelastlogin DESC LIMIT 1";
 
 			// Get user/pass of last admin user
 			if (! $error) {

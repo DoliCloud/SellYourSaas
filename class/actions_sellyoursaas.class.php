@@ -541,7 +541,7 @@ class ActionsSellyoursaas
 				$newid = GETPOST('socid', 'int');
 
 				if ($newid != $object->thirdparty->id) {
-					$object->oldcopy = dol_clone($object);
+					$object->oldcopy = dol_clone($object, 2);
 
 					$object->fk_soc = $newid;
 					$object->socid = $newid;
@@ -562,7 +562,7 @@ class ActionsSellyoursaas
 								$tmpfacturerec = new FactureRec($this->db);
 								$result = $tmpfacturerec->fetch($val);
 								if ($result > 0) {
-									$tmpfacturerec->oldcopy = dol_clone($tmpfacturerec);
+									$tmpfacturerec->oldcopy = dol_clone($tmpfacturerec, 2);
 									$tmpfacturerec->fk_soc = $newid;
 									$tmpfacturerec->socid = $newid;
 

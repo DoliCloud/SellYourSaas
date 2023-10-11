@@ -182,7 +182,7 @@ if (empty($reshook)) {
 					if (! empty($conf->global->$newurlkey)) {
 						$urlmyaccount = $conf->global->$newurlkey;
 					} else {
-						$urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+						$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
 					}
 				}
 			}
@@ -439,7 +439,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// Ref supplier
 	$morehtmlref.='<br>';
 	$morehtmlref.=$form->editfieldkey("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string', '', 0, 1);
-	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':'.$conf->global->THIRDPARTY_REF_INPUT_SIZE : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
+	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':' . getDolGlobalString('THIRDPARTY_REF_INPUT_SIZE') : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
 	// Thirdparty
 	$morehtmlref .= '<br>'.$object->thirdparty->getNomUrl(1, 'customer');
 	if (empty($conf->global->MAIN_DISABLE_OTHER_LINK) && $object->thirdparty->id > 0) {
@@ -687,7 +687,7 @@ print '<table class="noborder centpercent tableforfield">';
 // Nb of users
 print '<tr><td width="20%">'.$langs->trans("NbOfUsers").'</td><td><font size="+2">'.(isset($object->nbofusers) ? round($object->nbofusers) : '').'</font></td>';
 print '<td></td><td>';
-if (! $object->user_id && $user->rights->sellyoursaas->write && $object->array_options['options_deployment_status'] !== 'undeployed') {
+if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refresh&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
 }
 print '</td>';
@@ -702,7 +702,7 @@ if ($object->array_options['options_deployment_status'] !== 'undeployed') {
 print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td>';
-if (! $object->user_id && $user->rights->sellyoursaas->write && $object->array_options['options_deployment_status'] !== 'undeployed') {
+if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refreshfilesonly&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
 }
 print '</td>';
@@ -800,7 +800,7 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td class="nowraponall">'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';
 	print '<td align="right">';
-	if ($user->rights->sellyoursaas->write) {
+	if ($user->hasRight('sellyoursaas', 'write')) {
 		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("MarkAsSpamAndClose").'</span></a>';
 		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
 			print ' &nbsp; ';

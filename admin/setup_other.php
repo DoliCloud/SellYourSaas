@@ -338,9 +338,9 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<!-- constname = '.$constname.' -->';
 	if (! empty($conf->global->$constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
-		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname)) {
+		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
 			print ' &nbsp; ';
-			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constname).'">';
+			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
 		}
 	} else {
 		print '<img height="30" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png">';
@@ -357,9 +357,9 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	$constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
 	if (! empty($conf->global->$constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
-		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constname)) {
+		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
 			print ' &nbsp; ';
-			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constname).'">';
+			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
 		}
 	} else {
 		print '<img height="30" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png">';

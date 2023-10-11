@@ -45,7 +45,7 @@ if ($action == 'addauthorizedkey') {
 			// Dir .ssh must have rwx------ permissions
 			// File authorized_keys_support must have rw------- permissions
 			$dircreated=0;
-			$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/.ssh');
+			$result=ssh2_sftp_mkdir($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/.ssh');
 			if ($result) {
 				$dircreated=1;	// Created
 			} else {
@@ -54,8 +54,8 @@ if ($action == 'addauthorizedkey') {
 
 			// Check if authorized_key exists
 			//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/.ssh/authorized_keys_support';
-			$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
-			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/.ssh/authorized_keys_support');
+			$filecert="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$username_os.'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
+			$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/.ssh/authorized_keys_support');
 
 			// Create authorized_keys_support file
 			if (empty($fstat['atime'])) {		// Failed to connect or file does not exists
@@ -69,8 +69,8 @@ if ($action == 'addauthorizedkey') {
 					fwrite($stream, $publickeystodeploy);
 					fclose($stream);
 					// File authorized_keys_support must have rw------- permissions
-					ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/.ssh/authorized_keys_support', 0600);
-					$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/.ssh/authorized_keys_support');
+					ssh2_sftp_chmod($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/.ssh/authorized_keys_support', 0600);
+					$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/.ssh/authorized_keys_support');
 					setEventMessages($langs->transnoentitiesnoconv("FileCreated"), null, 'mesgs');
 				}
 			} else setEventMessages($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), null, 'warnings');
@@ -117,14 +117,14 @@ if ($action == 'addauthorizedkey') {
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
 			//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/install.lock';
-			$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/install.lock';
-			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/install.lock');
+			$fileinstalllock="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$username_os.'/'.$dir.'/documents/install.lock';
+			$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/install.lock');
 			if (empty($fstat['atime'])) {
 				$stream = fopen($fileinstalllock, 'w');
 				//var_dump($stream);exit;
 				fwrite($stream, "// File to protect from install/upgrade.\n");
 				fclose($stream);
-				$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/install.lock');
+				$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/install.lock');
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
 			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 
@@ -168,14 +168,14 @@ if ($action == 'addauthorizedkey') {
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
 			//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/install.lock';
-			$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock';
-			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock');
+			$fileinstalllock="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock';
+			$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/upgrade.unlock');
 			if (empty($fstat['atime'])) {
 				$stream = fopen($fileinstalllock, 'w');
 				//var_dump($stream);exit;
 				fwrite($stream, "// File to allow upgrade.\n");
 				fclose($stream);
-				$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock');
+				$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/upgrade.unlock');
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
 			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 
@@ -218,14 +218,14 @@ if ($action == 'addauthorizedkey') {
 			// Check if installmodules.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
 			//$fileinstallmoduleslock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock';
-			$fileinstallmoduleslock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock';
-			$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
+			$fileinstallmoduleslock="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$username_os.'/'.$dir.'/documents/installmodules.lock';
+			$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
 			if (empty($fstat['atime'])) {
 				$stream = fopen($fileinstallmoduleslock, 'w');
 				//var_dump($stream);exit;
 				fwrite($stream, "// File to protect from install/upgrade external modules.\n");
 				fclose($stream);
-				$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
+				$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
 			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 
@@ -266,7 +266,7 @@ if ($action == 'addauthorizedkey') {
 			$sftp = ssh2_sftp($connection);
 
 			// Check if authorized_keys_support exists
-			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/.ssh/authorized_keys_support';
+			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/.ssh/authorized_keys_support';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
@@ -310,7 +310,7 @@ if ($action == 'addauthorizedkey') {
 
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
-			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/install.lock';
+			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/install.lock';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
@@ -354,7 +354,7 @@ if ($action == 'addauthorizedkey') {
 
 			// Check if install.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
-			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/upgrade.unlock';
+			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/upgrade.unlock';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
@@ -398,7 +398,7 @@ if ($action == 'addauthorizedkey') {
 
 			// Check if installmodules.lock exists
 			$dir=preg_replace('/_([a-zA-Z0-9]+)$/', '', $database_db);
-			$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock';
+			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
