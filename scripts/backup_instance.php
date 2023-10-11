@@ -238,7 +238,7 @@ if (empty($db)) {
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
 	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick] [--forcersync] [--forcedump] [--nostats]\n";
-	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
+	print "Example: $script_file  myinstance  " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
 	print "         the parameter --delete run the rsync with the --delete option\n";
@@ -328,7 +328,7 @@ if (! is_dir($dirroot)) {
 $dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 $login = $object->username_os;
 
-$sourcedir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
+$sourcedir=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$login.'/'.$dirdb;
 $server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
 
 if (empty($login) || empty($dirdb)) {

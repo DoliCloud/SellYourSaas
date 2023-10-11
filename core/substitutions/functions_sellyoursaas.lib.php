@@ -65,7 +65,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		}
 
 		if (is_object($object) && get_class($object) == 'Contrat') {
-			$hash = dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$object->thirdparty->email.dol_print_date(dol_now(), 'dayrfc'));
+			$hash = dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $object->thirdparty->email.dol_print_date(dol_now(), 'dayrfc'));
 			$substitutionarray['__HASH__'] = $hash;
 
 			include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';

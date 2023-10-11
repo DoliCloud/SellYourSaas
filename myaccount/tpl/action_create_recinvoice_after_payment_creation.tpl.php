@@ -361,7 +361,7 @@ if (! $error) {
 				$savperm2 = $user->hasRight('facture', 'invoice_advance', 'validate');
 
 				$user->rights->facture->creer = 1;	// Force permission to user to validate invoices because code may be executed by anonymous user
-				if (empty($user->rights->facture->invoice_advance)) {
+				if (!$user->hasRight('facture', 'invoice_advance')) {
 					$user->rights->facture->invoice_advance = new stdClass();
 				}
 				$user->rights->facture->invoice_advance->validate = 1;

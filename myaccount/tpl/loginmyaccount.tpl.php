@@ -312,7 +312,7 @@ if (! empty($conf->google->enabled) && ! empty($conf->global->MAIN_GOOGLE_AN_ID)
 		print "\n";
 		print '<script type="text/javascript">'."\n";
 		print '  var _gaq = _gaq || [];'."\n";
-		print '  _gaq.push([\'_setAccount\', \''.$conf->global->MAIN_GOOGLE_AN_ID.'\']);'."\n";
+		print '  _gaq.push([\'_setAccount\', \'' . getDolGlobalString('MAIN_GOOGLE_AN_ID').'\']);'."\n";
 		print '  _gaq.push([\'_trackPageview\']);'."\n";
 		print ''."\n";
 		print '  (function() {'."\n";

@@ -381,7 +381,7 @@ if ($sellyoursaassupporturl) {
 				$("#ticketcategory_back").val(tmp);
 				';
 			$stringtoprint .= '
-					if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
+					if ("' . getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE').'" == $("#ticketcategory").val()){
 						console.log("We hide for automigration");
 						$(".hideforautomigration").hide();
 						$(".showforautoupgrade").hide();
@@ -423,7 +423,7 @@ if ($sellyoursaassupporturl) {
 				$(".showforautomigration").hide();
 				$("#buttonforautomigrationwithhidden").show();';
 			}
-			$stringtoprint .= 'if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
+			$stringtoprint .= 'if ("' . getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE').'" == $("#ticketcategory").val()){
 				console.log("We hide for automigration");
 				$(".hideforautomigration").show();
 				$(".showforautomigration").hide();

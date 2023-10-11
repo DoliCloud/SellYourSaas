@@ -1002,7 +1002,7 @@ class SellYourSaasUtils
 						if ($result > 0) {
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
 								$user->rights->facture->creer = 1;	// Force permission to user to validate invoices because code may be executed by anonymous user
-								if (empty($user->rights->facture->invoice_advance)) {
+								if (!$user->hasRight('facture', 'invoice_advance')) {
 									$user->rights->facture->invoice_advance = new stdClass();
 								}
 								$user->rights->facture->invoice_advance->validate = 1;
@@ -1030,7 +1030,7 @@ class SellYourSaasUtils
 									// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 									if ($amountofinvoice >= ($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE * $monthfactor)) {
 										$error++;
-										$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".$conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE." * ".$monthfactor;
+										$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > " . getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
 										$this->errors[] = $this->error;
 										break;
 									}
@@ -1317,7 +1317,7 @@ class SellYourSaasUtils
 										$charge->failure_message = $stripe->error;
 										$charge->failure_declinecode = $stripe->declinecode;
 										$stripefailurecode = $stripe->code;
-										$stripefailuremessage = 'Action required. Contact the support at '.$conf->global->SELLYOURSAAS_MAIN_EMAIL;
+										$stripefailuremessage = 'Action required. Contact the support at ' . getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 										$stripefailuredeclinecode = $stripe->declinecode;
 									} else {
 										dol_syslog("paymentintent = ".var_export($paymentintent, true), LOG_DEBUG);
@@ -3134,7 +3134,7 @@ class SellYourSaasUtils
 						if ($mode == 'test') $remotetouse = 'undeployall';
 
 						$conf->global->noapachereload = 1;       // Set a global variable that can be read later
-						$comment = "Undeploy instance by doUndeployOldSuspendedInstances('".$mode."') so remotetouse=".$remotetouse.", the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
+						$comment = "Undeploy instance by doUndeployOldSuspendedInstances('".$mode."') so remotetouse=".$remotetouse.", the ".dol_print_date($now, 'dayhourrfc').' (noapachereload=' . getDolGlobalString('noapachereload').')';
 						$result = $this->sellyoursaasRemoteAction($remotetouse, $object, 'admin', '', '', '0', $comment, 300);
 						$conf->global->noapachereload = null;    // unset a global variable that can be read later
 						if ($result <= 0) {
@@ -3153,7 +3153,7 @@ class SellYourSaasUtils
 							dol_syslog("Unactivate all lines - doUndeployOldSuspendedInstances undeploy or undeployall");
 
 							$conf->global->noapachereload = 1;       // Set a global variable that can be read later by trigger
-							$comment = "Close after undeployment by doUndeployOldSuspendedInstances('".$mode."') the ".dol_print_date($now, 'dayhourrfc').' (noapachereload='.$conf->global->noapachereload.')';
+							$comment = "Close after undeployment by doUndeployOldSuspendedInstances('".$mode."') the ".dol_print_date($now, 'dayhourrfc').' (noapachereload=' . getDolGlobalString('noapachereload').')';
 							$result = $object->closeAll($user, 1, $comment);   // Disable trigger to avoid any other action
 							$conf->global->noapachereload = null;    // unset a global variable that can be read later by trigger
 							if ($result <= 0) {
@@ -3390,20 +3390,20 @@ class SellYourSaasUtils
 								// Check if install.lock exists
 								$dir = $object->array_options['options_database_db'];
 								$fileinstalllock="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-								$fileinstalllock2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$fileinstalllock2=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
 								$fstatlock=@ssh2_sftp_stat($sftp, $fileinstalllock2);
 								$datelockfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
 								// Check if installmodules.lock exists
 								$dir = $object->array_options['options_database_db'];
 								$fileinstallmoduleslock="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
-								$fileinstallmoduleslock2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$fileinstallmoduleslock2=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
 								$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $fileinstallmoduleslock2);
 								$dateinstallmoduleslockfile=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
 
 								// Check if authorized_keys_support exists (created during os account creation, into skel dir)
 								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
-								$fileauthorizedkeys2=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
+								$fileauthorizedkeys2=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fstatlock=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
 								$dateauthorizedkeysfile=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 								//var_dump($datelockfile);
@@ -3431,7 +3431,7 @@ class SellYourSaasUtils
 								// Dir .ssh must have rwx------ permissions
 								// File authorized_keys_support must have rw------- permissions
 								$dircreated=0;
-								$result=ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh');
+								$result=ssh2_sftp_mkdir($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/.ssh');
 								if ($result) {
 									// Created
 									$dircreated=1;
@@ -3441,8 +3441,8 @@ class SellYourSaasUtils
 								}
 
 								// Check if authorized_key exists
-								$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
-								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
+								$filecert="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';  // With PHP 5.6.27+
+								$fstat=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
 
 								// Create authorized_keys_support file
 								if (empty($fstat['atime'])) {		// Failed to connect or file does not exists
@@ -3457,8 +3457,8 @@ class SellYourSaasUtils
 
 										fclose($stream);
 										// File authorized_keys_support must have rw------- permissions
-										ssh2_sftp_chmod($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support', 0600);
-										$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
+										ssh2_sftp_chmod($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support', 0600);
+										$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support');
 									}
 								} else {
 									$error++;
@@ -3478,7 +3478,7 @@ class SellYourSaasUtils
 							} else {
 								// Check if install.lock exists
 								$dir = $object->array_options['options_database_db'];
-								$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
 								$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 								if (! $result) {
@@ -3501,14 +3501,14 @@ class SellYourSaasUtils
 								// Check if install.lock exists
 								$dir = $object->array_options['options_database_db'];
 								//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-								$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
+								$fileinstalllock="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
+								$fstat=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
 								if (empty($fstat['atime'])) {
 									$stream = fopen($fileinstalllock, 'w');
 									//var_dump($stream);exit;
 									fwrite($stream, "// File to protect from install/upgrade.\n");
 									fclose($stream);
-									$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
+									$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock');
 								} else {
 									$error++;
 									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
@@ -3529,7 +3529,7 @@ class SellYourSaasUtils
 							} else {
 								// Check if install.lock exists
 								$dir = $object->array_options['options_database_db'];
-								$filetodelete=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
 								$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
 								if (! $result) {
@@ -3552,14 +3552,14 @@ class SellYourSaasUtils
 								// Check if install.lock exists
 								$dir = $object->array_options['options_database_db'];
 								//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/install.lock';
-								$fileinstallmoduleslock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
-								$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
+								$fileinstallmoduleslock="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock';
+								$fstat=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
 								if (empty($fstat['atime'])) {
 									$stream = fopen($fileinstallmoduleslock, 'w');
 									//var_dump($stream);exit;
 									fwrite($stream, "// File to protect from install/upgrade external module.\n");
 									fclose($stream);
-									$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
+									$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/installmodules.lock');
 								} else {
 									$error++;
 									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
@@ -3740,10 +3740,10 @@ class SellYourSaasUtils
 				$savhashalgo = $conf->global->MAIN_SECURITY_HASH_ALGO;
 
 				$conf->global->MAIN_SECURITY_HASH_ALGO = empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD)?'':$conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
-				dol_syslog("Using this MAIN_SECURITY_HASH_ALGO for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_HASH_ALGO);
+				dol_syslog("Using this MAIN_SECURITY_HASH_ALGO for __APPPASSWORDxxx__ variables : " . getDolGlobalString('MAIN_SECURITY_HASH_ALGO'));
 
 				$conf->global->MAIN_SECURITY_SALT = empty($conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION)?'':$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
-				dol_syslog("Using this salt for __APPPASSWORDxxxSALTED__ variables : ".$conf->global->MAIN_SECURITY_SALT);
+				dol_syslog("Using this salt for __APPPASSWORDxxxSALTED__ variables : " . getDolGlobalString('MAIN_SECURITY_SALT'));
 				$password0salted = dol_hash($password);
 				$passwordmd5salted = dol_hash($password, 'md5');
 				$passwordsha256salted = dol_hash($password, 'sha256');
@@ -4044,10 +4044,10 @@ class SellYourSaasUtils
 					$savhashalgo = $conf->global->MAIN_SECURITY_HASH_ALGO;
 
 					$conf->global->MAIN_SECURITY_HASH_ALGO = empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD)?'':$conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
-					dol_syslog("Using this MAIN_SECURITY_HASH_ALGO for __APPPASSWORDxxx__ variables : ".$conf->global->MAIN_SECURITY_HASH_ALGO);
+					dol_syslog("Using this MAIN_SECURITY_HASH_ALGO for __APPPASSWORDxxx__ variables : " . getDolGlobalString('MAIN_SECURITY_HASH_ALGO'));
 
 					$conf->global->MAIN_SECURITY_SALT = empty($conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION)?'':$conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
-					dol_syslog("Using this salt for __APPPASSWORDxxxSALTED__ variables : ".$conf->global->MAIN_SECURITY_SALT);
+					dol_syslog("Using this salt for __APPPASSWORDxxxSALTED__ variables : " . getDolGlobalString('MAIN_SECURITY_SALT'));
 					$password0salted = dol_hash($password);
 					$passwordmd5salted = dol_hash($password, 'md5');
 					$passwordsha256salted = dol_hash($password, 'sha256');
@@ -4503,7 +4503,7 @@ class SellYourSaasUtils
 				$statsd->increment('sellyoursaas.remoteaction', 1, $arraytags);
 
 				// Send an event for errors on remote action of contracts
-				if ($error && get_class($tmpcontract) == 'Contrat' && $conf->global->SELLYOURSAAS_DATADOG_ENABLED == 2) {
+				if ($error && get_class($tmpcontract) == 'Contrat' && getDolGlobalInt('SELLYOURSAAS_DATADOG_ENABLED') == 2) {
 					global $dolibarr_main_url_root;
 					$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT, '/').'$/i', '', trim($dolibarr_main_url_root));
 					$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
@@ -4587,7 +4587,7 @@ class SellYourSaasUtils
 			}
 			//print 'Found domain at position '.$found;
 			if (! $found) {
-				dol_syslog("Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=".$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES, LOG_WARNING);
+				dol_syslog("Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES=" . getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'), LOG_WARNING);
 				$this->error = "Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
 				$this->errors[] = "Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
 				$error++;
@@ -4595,7 +4595,7 @@ class SellYourSaasUtils
 				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
 				$REMOTEIPTODEPLOYTO=$tmparray[($found-1)];
 				if (! $REMOTEIPTODEPLOYTO) {
-					dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP, LOG_WARNING);
+					dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP" . getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'), LOG_WARNING);
 					$this->error = "Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
 					$this->errors[] = "Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
 					$error++;

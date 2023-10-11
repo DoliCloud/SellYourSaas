@@ -319,7 +319,7 @@ if (empty($newobject->instance) || empty($newobject->username_os) || empty($newo
 }
 
 $olddirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $oldobject->array_options['options_database_db']);
-$sourcedir = $conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$oldobject->array_options['options_username_os'].'/'.$olddirdb;
+$sourcedir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$oldobject->array_options['options_username_os'].'/'.$olddirdb;
 
 $oldsftpconnectstring=$oldosuser.'@'.$oldoshost.':'.$sourcedir;
 $adminoldsftpconnectstring='admin@'.$oldoshost;
@@ -546,7 +546,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 }
 
 
-$newsftpconnectstring=$newlogin.'@'.$newserver.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdatabasedb);
+$newsftpconnectstring=$newlogin.'@'.$newserver.':' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdatabasedb);
 
 $createthirdandinstance=1;
 
@@ -612,7 +612,7 @@ print $content_grabbed."\n";
 
 
 $sourcedir=$tmptargetdir;
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdatabasedb;
+$targetdir=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$newlogin.'/'.$newdatabasedb;
 
 print '--- Synchro of files '.$sourcedir.' to '.$newsftpconnectstring."\n";
 print 'SFTP connect string : '.$newsftpconnectstring."\n";

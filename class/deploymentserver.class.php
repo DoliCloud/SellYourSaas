@@ -997,7 +997,7 @@ class Deploymentserver extends CommonObject
 		if (!empty($conf->global->SELLYOURSAAS_DEPLOYMENTSERVER_ADDON)) {
 			$mybool = false;
 
-			$file = $conf->global->SELLYOURSAAS_DEPLOYMENTSERVER_ADDON.".php";
+			$file = getDolGlobalString('SELLYOURSAAS_DEPLOYMENTSERVER_ADDON') . ".php";
 			$classname = $conf->global->SELLYOURSAAS_DEPLOYMENTSERVER_ADDON;
 
 			// Include file with class

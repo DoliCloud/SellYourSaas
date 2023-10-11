@@ -189,10 +189,10 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 			if (! empty($conf->global->$newurlkey)) {
 				$urlmyaccount = $conf->global->$newurlkey;
 			} else {
-				$urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+				$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
 			}
 		}
-		$dol_login_hash=dol_hash($conf->global->SELLYOURSAAS_KEYFORHASH.$thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
+		$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
 		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
 	}
 
@@ -206,14 +206,14 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	// Home
 	//$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
-	$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os;
+	$homestring=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->username_os;
 	$links.='Home dir: ';
 	$links.='<input type="text" name="homestring" id="homestring" value="'.$homestring.'" class="maxwidth250"> ';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('homestring');
 	//$links.='<br>';
 
 	// BackupDir
-	$backupstring=$conf->global->DOLICLOUD_BACKUP_PATH.'/'.$object->username_os;
+	$backupstring=getDolGlobalString('DOLICLOUD_BACKUP_PATH') . '/'.$object->username_os;
 	$links .= ' &nbsp; ';
 	$links .= ' &nbsp; ';
 	$links.='Backup dir: ';
@@ -222,10 +222,10 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	//$links.='<br>';
 
 	// ArchiveDir
-	$archivestring = $conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH.'/'.$object->username_os;
+	$archivestring = getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH') . '/'.$object->username_os;
 	$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	if ($ispaid) {
-		$archivestring = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->username_os;
+		$archivestring = getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH') . '/'.$object->username_os;
 		$archivestringwithdb = $archivestring.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	}
 	$links .= ' &nbsp; ';
@@ -261,7 +261,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	// SFTP
 	//$sftpconnectstring=$object->username_os.':'.$object->password_web.'@'.$object->hostname_os.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
-	$sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.'/'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
+	$sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.'/' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	$links.='<span class="fa fa-terminal"></span> SFTP connect string: ';
 	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.dol_escape_htmltag($sftpconnectstring).'"><br>';
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sftpconnectstring');
@@ -290,12 +290,12 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	$dirforexampleforsources = preg_replace('/__DOL_DATA_ROOT__/', DOL_DATA_ROOT, preg_replace('/\/htdocs\/?$/', '', $tmppackage->srcfile1));
 
-	$upgradestring=$conf->global->DOLICLOUD_SCRIPTS_PATH.'/rsync_instance.php '.$dirforexampleforsources.' '.$object->hostname_os;
+	$upgradestring=getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/rsync_instance.php '.$dirforexampleforsources.' '.$object->hostname_os;
 
 	$purgestring=DOL_DATA_ROOT.'/../dev/initdata/purge-data.php test (all|option) (all|YYYY-MM-DD) mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port?$object->database_port:3306);
 
 	// Mysql Backup database
-	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
+	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > ' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql backup database:<br>';
 	$links.='<input type="text" id="mysqlbackupcommand" name="mysqlbackupcommand" value="'.$mysqlbackupcommand.'" class="marginleftonly quatrevingtpercent"><br>';

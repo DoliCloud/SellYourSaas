@@ -52,7 +52,7 @@ print '<!-- mode = registerpaymentmode -->
 		<div class="portlet-body">';
 
 
-print '<!-- Form payment-form STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION = '.$conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION.' STRIPE_USE_NEW_CHECKOUT = '.$conf->global->STRIPE_USE_NEW_CHECKOUT.' -->'."\n";
+print '<!-- Form payment-form STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION = ' . getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION').' STRIPE_USE_NEW_CHECKOUT = ' . getDolGlobalString('STRIPE_USE_NEW_CHECKOUT').' -->'."\n";
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="payment-form">'."\n";
 
 print '<input type="hidden" name="token" value="'.newToken().'">'."\n";
@@ -439,7 +439,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 				}
 			});
 
-		<?php
+	<?php
 } else { // Old method (not SCA ready)
 	print "
             	// Old code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION off and STRIPE_USE_NEW_CHECKOUT off

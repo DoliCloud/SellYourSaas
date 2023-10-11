@@ -803,7 +803,7 @@ if (! $nboferrors) {
 			}*/
 
 			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Backup instances - '.gethostname().'] Backup of user instances succeed'."\n";
+			print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Backup instances - '.gethostname().'] Backup of user instances succeed'."\n";
 			$cmail = new CMailFile('[Backup instances - '.gethostname().'] Backup of user instances succeed', $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 			$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 			if (!$result) {
@@ -830,7 +830,7 @@ if (! $nboferrors) {
 			$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
 			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
+			print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
 			$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 			$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 			if (!$result) {
