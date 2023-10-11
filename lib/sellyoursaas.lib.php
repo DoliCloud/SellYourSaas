@@ -545,7 +545,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 			// We test if fraudscore is accepted or not
 			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED.' with a fraudscore '.$fraudscoreip.' >= '.$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED);
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').' with a fraudscore '.$fraudscoreip.' >= ' . getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'));
 				$abusetest = 1;
 			}
 		}
@@ -641,7 +641,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 			$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED = 85;
 
 			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
-				dol_syslog("Instance creation blocked for ".$remoteip." - IPQuality VPN probability ".$vpnproba." is higher or equal than ".$conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED.' with a fraudscore '.$fraudscoreip.' >= '.$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED);
+				dol_syslog("Instance creation blocked for ".$remoteip." - IPQuality VPN probability ".$vpnproba." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').' with a fraudscore '.$fraudscoreip.' >= ' . getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'));
 				$abusetest = 1;
 			}
 		}
@@ -682,7 +682,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 			if ($jsonreponse['recent_abuse'] === false && ($jsonreponse['valid'] === true || ($jsonreponse['timed_out'] === true && $jsonreponse['disposable'] === false && $jsonreponse['dns_valid'] === true))) {
 				// Email valid
 			} else {
-				dol_syslog("Instance creation blocked for email ".$email." - Email fraud probability ".$fraudscoreemail." is higher or equal than ".$conf->global->SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED);
+				dol_syslog("Instance creation blocked for email ".$email." - Email fraud probability ".$fraudscoreemail." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED'));
 				// TODO Enable this
 				// $abusetest = 6;
 			}
