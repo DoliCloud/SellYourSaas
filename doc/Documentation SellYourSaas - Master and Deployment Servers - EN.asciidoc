@@ -3507,9 +3507,11 @@ Run cerbot with the following command line (you can test it beforehand by adding
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
+certbot certonly -n [--manual-public-ip-logging-ok] --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
 ---------------
 
+The option [--expand] is to concate the result to the existing certificate when you want to add another domain.
+ 
 For example, you can use *supervision@mysaasdomainname.com* as the email for letsencrypt account.
 
 This create certificates and also enable the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
@@ -5985,6 +5987,42 @@ init_config:
     postfix_user: postfix
     min_collection_interval: 300
 ---------------
+
+
+==== Error HTTP_DATA_ERROR, CertPathValidatorException when using DoliDroid
+
+If you see this king of log into a DoliDroid session:
+
+[12345] Stop requested with status HTTP_DATA_ERROR: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.
+
+=> Android need to have the CA certificate and intermediate into the main certificate.
+
+First check your certificate with the command
+openssl s_client -connect myinstance.withX.myaaasdomain.com:443
+
+Take a look at the section "*Certificate chain*".
+If you like this
+Certificate chain
+ 0 s:/C=US/ST=California/L=Mountain View/O=Google LLC/CN=mail.google.com
+   i:/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte SGC CA
+ 1 s:/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte SGC CA
+   i:/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authority
+   
+It means main certificate was verified by Thawte and Thawte was verified by VeriSign
+
+But if you have only
+Certificate chain
+ 0 s:CN = *.with1.doliasso.org
+   i:C = US, O = Let's Encrypt, CN = R3
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Sep  1 10:49:46 2023 GMT; NotAfter: Nov 30 10:49:45 2023 GMT
+
+It means main certificate was verified by Let's Encrypt but the issuer of Let's encrypt is not included
+
+See https://developer.android.com/privacy-and-security/security-ssl#MissingCa
+
+Fix this by setting correctly your SSLxxx variable in your apache virtual host.
+
 
 
 
