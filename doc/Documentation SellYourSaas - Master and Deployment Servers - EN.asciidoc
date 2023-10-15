@@ -3382,8 +3382,7 @@ Take into account the change with:
 
 [source,bash]
 ---------------
-systemctl stop systemd-journald
-systemctl start systemd-journald
+systemctl stop systemd-journald; systemctl start systemd-journald
 ---------------
 
 To force clear of journal:
