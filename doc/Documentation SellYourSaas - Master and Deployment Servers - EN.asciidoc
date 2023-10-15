@@ -1811,6 +1811,9 @@ echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - 
 Note: To test a rule file on an existing log file:
 fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
+Note: To ban an IP
+fail2ban-client set nameofjail banip IP.to.unban
+
 Note: To unban an IP
 fail2ban-client unban IP.to.unban
 
