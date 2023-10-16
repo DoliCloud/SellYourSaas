@@ -87,7 +87,7 @@ if ($totalInvoiced == 0) {
 	}
 
 	$defaultdiscountcode = GETPOST('discountcode', 'aZ09');
-	$acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE ? 1 : 0);
+	$acceptdiscountcode = getDolGlobalInt('SELLYOURSAAS_ACCEPT_DISCOUNTCODE');
 
 	// We are not yet a customer
 	if ($amounttopayasfirstinvoice) {
@@ -114,7 +114,7 @@ if ($totalInvoiced == 0) {
 				}
 			}
 
-			$urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
+			$urlforplanprices = getDolGlobalString('SELLYOURSAAS_PRICES_URL');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_PRICES_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
@@ -241,6 +241,8 @@ if ($foundcard) {
 
 
 if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {	// Use a SCA ready method
+	dol_syslog("Test if Stripe customer exists for current thirdparty (create it if not) and create the setupintent");
+
 	$fulltag='CUS='.$mythirdpartyaccount->id;
 	$fulltag=dol_string_unaccent($fulltag);
 
