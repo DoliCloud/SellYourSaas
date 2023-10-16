@@ -1439,9 +1439,9 @@ class SellYourSaasUtils
 									$paiement->ext_payment_site = $service;
 
 									if (! $errorforinvoice) {
-										dol_syslog('* Record payment for invoice id '.$invoice->id.'. It includes closing of invoice and regenerating document');
+										dol_syslog('* Record payment for invoice id '.$invoice->id.'. It includes payment insert + trigger PAYMENT_CUSTOMER_CREATE (to warn supervision) then invoice->setPaid() + trigger BILL_PAYED (to unsuspend instance), and regenerating document');
 
-										// This include closing invoices to 'paid' (and trigger including unsuspending) and regenerating document
+										// This include closing invoices to 'paid' (and triggers execution including unsuspending) and regenerating document
 										// So this method can be very long if there is an unsuspend action ending with timeout.
 										// Note: If there is an error during generation of PDF, we received a payment error. A solution may be to set $conf->global->MAIN_DISABLE_PDF_AUTOUPDATE and
 										// force regeneration of PDF outside of method create
