@@ -694,16 +694,6 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 } else {
 	$out.= "***** Summary for all deployment servers\n";
 }
-$out.= "** Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
-$out.= "** Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
-$out.= "** Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
-$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n\n":"\n");
-$out.= "** Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
-$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n":"\n");
-$out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
-$out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
-$out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
-
 if ($action != 'updatestatsonly') {
 	$out.= "** Nb of paying instances processed ko: ".$nboferrors;
 }
@@ -719,6 +709,18 @@ if (count($instancesupdateerror)) {
 		$out .= $instance.' ('.dol_print_date($val['date'], 'standard').') ';
 	}
 }
+
+$out.= "\n\n";
+
+$out.= "** Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
+$out.= "** Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
+$out.= "** Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
+$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n\n":"\n");
+$out.= "** Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
+$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n":"\n");
+$out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
+$out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
+$out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
 
 $out.= "\n\n";
 
