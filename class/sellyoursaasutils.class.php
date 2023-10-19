@@ -3827,7 +3827,7 @@ class SellYourSaasUtils
 				$tmppackage->targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
 
 
-				$automigrationtmpdir = $dirfortmpfiles."/automigration".($object->socid > 0 ? "_".$object->socid : "").".tmp";
+				$automigrationtmpdir = $dirfortmpfiles."/automigration".((!empty($object->socid) && $object->socid > 0) ? "_".$object->socid : "").".tmp";
 				$automigrationdocumentarchivename = (empty($object->array_options["automigrationdocumentarchivename"]) ? '' : $object->array_options["automigrationdocumentarchivename"]);
 				$dirforexampleforsources = (empty($object->array_options["dirforexampleforsources"]) ? '' : $object->array_options["dirforexampleforsources"]);
 				$laststableupgradeversion = (empty($object->array_options["laststableupgradeversion"]) ? '' : $object->array_options["laststableupgradeversion"]);

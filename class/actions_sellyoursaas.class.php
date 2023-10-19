@@ -247,6 +247,7 @@ class ActionsSellyoursaas
 						$resql = $this->db->query($sql);
 						if ($resql) {
 							$num = $this->db->num_rows($resql);
+							$i = 0;
 							while ($i < $num) {
 								$obj = $this->db->fetch_object($resql);
 								$listsubdomainname[] = $obj->ref;

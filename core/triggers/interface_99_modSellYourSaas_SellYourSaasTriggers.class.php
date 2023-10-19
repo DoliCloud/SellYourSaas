@@ -179,7 +179,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				dol_syslog("Trigger LINECONTRACT_CLOSE is ran");
 
 				$object->fetch_product();
-				if ($object->product->array_options['options_app_or_option'] == 'app') {
+				if (!empty($object->product->array_options['options_app_or_option']) && $object->product->array_options['options_app_or_option'] == 'app') {
 					$contract = new Contrat($this->db);
 					$contract->fetch($object->fk_contrat);
 					if ($contract->array_options['options_deployment_status'] == 'undeployed') {
