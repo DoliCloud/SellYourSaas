@@ -430,8 +430,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// Current backup status
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("LatestBackupMessage").'</td>';
-	print '<td>';
-	print $object->array_options['options_latestbackup_message'];
+	print '<td class="classfortooltip" title="'.dol_escape_htmltag(dol_htmlcleanlastbr($object->array_options['options_latestbackup_message'])).'">';
+	print dol_htmlentitiesbr(dolGetFirstLineOfText($object->array_options['options_latestbackup_message']));
 	print '</td>';
 	print '</tr>';
 

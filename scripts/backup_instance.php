@@ -450,7 +450,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		//$param[] = (in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
 		$param[] = $login.'@'.$server.":" . $sourcedir;
 		$param[] = $dirroot.'/'.$login;
-		$fullcommand=$command." ".join(" ", $param);
+		$fullcommand=$command." ".join(" ", $param)." 2>&1";
 		$output=array();
 		$datebeforersync = dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt');
 		print $datebeforersync.' '.$fullcommand."\n";
@@ -462,9 +462,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		$i = 0;
 		foreach ($output as $outputline) {
 			print $outputline."\n";
-			if ($i < 10) {
-				$linesforresult .= $outputline."\n";
-			}
+			$linesforresult .= $outputline."\n";
 			$i++;
 		}
 
@@ -642,9 +640,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		$i = 0;
 		foreach ($output as $outputline) {
 			print $outputline."\n";
-			if ($i < 10) {
-				$linesforresult .= $outputline."\n";
-			}
+			$linesforresult .= $outputline."\n";
 			$i++;
 		}
 
