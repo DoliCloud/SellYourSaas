@@ -21,6 +21,82 @@
  *		\brief      Some functions for module Sell-Your-Saas
  */
 
+
+// Include function for backward comaptibility with v18-
+if (!function_exists('dolPrintLabel')) {
+	/**
+	 * Return a string label ready to be output on HTML content
+	 * To use text inside an attribute, use can simply only dol_escape_htmltag()
+	 *
+	 * @param	string	$s		String to print
+	 * @return	string			String ready for HTML output
+	 */
+	function dolPrintLabel($s)
+	{
+		return dol_escape_htmltag(dol_htmlentitiesbr($s));
+	}
+}
+
+if (!function_exists('dolPrintHTML')) {
+	/**
+	 * Return a string ready to be output on HTML page
+	 * To use text inside an attribute, you can simply use dol_escape_htmltag()
+	 *
+	 * @param	string	$s				String to print
+	 * @param	int		$allowiframe	Allow iframe tags
+	 * @return	string					String ready for HTML output
+	 */
+	function dolPrintHTML($s, $allowiframe = 0)
+	{
+		return dol_escape_htmltag(dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($s), 1, 1, 1, $allowiframe)), 1, 1, 'common', 0, 1);
+	}
+}
+
+if (!function_exists('dolPrintHTMLForAttribute')) {
+	/**
+	 * Return a string ready to be output on an HTML attribute (alt, title, ...)
+	 *
+	 * @param	string	$s		String to print
+	 * @return	string			String ready for HTML output
+	 */
+	function dolPrintHTMLForAttribute($s)
+	{
+		// The dol_htmlentitiesbr will convert simple text into html
+		// The dol_escape_htmltag will escape html chars.
+		return dol_escape_htmltag(dol_htmlentitiesbr($s), 1, -1);
+	}
+}
+
+if (!function_exists('dolPrintHTMLForTextArea')) {
+	/**
+	 * Return a string ready to be output on input textarea
+	 * To use text inside an attribute, use can use only dol_escape_htmltag()
+	 *
+	 * @param	string	$s				String to print
+	 * @param	int		$allowiframe	Allow iframe tags
+	 * @return	string					String ready for HTML output into a textarea
+	 */
+	function dolPrintHTMLForTextArea($s, $allowiframe = 0)
+	{
+		return dol_escape_htmltag(dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($s), 1, 1, 1, $allowiframe)), 1, 1, '', 0, 1);
+	}
+}
+
+if (!function_exists('dolPrintPassword')) {
+	/**
+	 * Return a string ready to be output on an HTML attribute (alt, title, ...)
+	 *
+	 * @param	string	$s		String to print
+	 * @return	string			String ready for HTML output
+	 */
+	function dolPrintPassword($s)
+	{
+		return htmlspecialchars($s, ENT_COMPAT, 'UTF-8');
+	}
+}
+
+
+
 /**
  * getNextInstanceInChain
  *
