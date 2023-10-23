@@ -362,6 +362,8 @@ if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
 	}
 }
 
+$linesforresult = '';
+
 // Backup files
 if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm') {
 	$result = dol_mkdir($dirroot.'/'.$login);	// $result will be 0 if it already exists
@@ -457,8 +459,13 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		print $dateafterrsync.' rsync done (return='.$return_var.')'."\n";
 
 		// Output result
+		$i = 0;
 		foreach ($output as $outputline) {
 			print $outputline."\n";
+			if ($i < 10) {
+				$linesforresult .= $outputline."\n";
+			}
+			$i++;
 		}
 
 		// Add file tag
@@ -588,6 +595,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 		$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
 		print $outputerr;
+		$linesforresult .= $outputerr."\n";
 
 		$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
 		if (empty($return_outputmysql)) {	// If no error detected with the number of lines, we try also to detect by searching ' Error ' into .err content
@@ -631,8 +639,13 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
 
 		// Output result
+		$i = 0;
 		foreach ($output as $outputline) {
 			print $outputline."\n";
+			if ($i < 10) {
+				$linesforresult .= $outputline."\n";
+			}
+			$i++;
 		}
 
 		// Add file tag
@@ -708,7 +721,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		// Update database
 		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'KO';
-		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
+		$object->array_options['options_latestbackup_message'] = dol_trunc($linesforresult, 8000);
 
 		$object->update($user, 1);
 
