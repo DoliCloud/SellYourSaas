@@ -2202,6 +2202,7 @@ Complete the file */etc/postfix/main.cf* with:
 ---------------
 #mydestination = $myhostname, myserver, localhost.localdomain, localhost
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
+#WARNING: This value must match the same value than domain in /etc/mailname
 myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
@@ -5556,7 +5557,13 @@ Error when sending email in */var/log/mail.log*
 Check in file */etc/apparmor.d/usr.sbin.apache2* that /etc/passwd is not denied.
 
 
-==== Error sometimes when sendig emails with Gmail
+==== Error when sending email by the cron of a user. EMail is sent to the external relay instead of locally.
+
+When cron fails, and email must be sent locally. If it is not sent locally, it means the value of domain into */etc/mailname* does not match the one
+into the parameter *myhostname* or *mydestination* in file */etc/postfix/main.cf*
+
+
+==== Error sometimes when sending emails with Gmail
 
 If you have error like this one
 ------------
