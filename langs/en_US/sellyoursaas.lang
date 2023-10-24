@@ -851,3 +851,4 @@ CommandToSwithInstanceInReadOnlyMode=Command to switch all instances in read onl
 CommandToSqlToReGenerateDb=Command to generate SQL for massive db or user (re)init on deployment server
 CommandToRedeployInstanceOnADeploymentServer=Command to redeploy instances on a reseted deployment server
 InstanceVersion=Instance version
+InvoicePDFNotYetAvailable=Invoice PDF not yet available

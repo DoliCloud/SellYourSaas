@@ -132,7 +132,11 @@ if (count($listofcontractid) > 0) {
 					print $hookmanager->resPrint;
 				} else {
 					$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-					print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
+					if ($url) {
+						print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
+					} else {
+						print $invoice->ref.' <span class="small opacitymedium">('.$langs->trans("InvoicePDFNotYetAvailable").')</span>';
+					}
 				}
 
 				print '</div>
