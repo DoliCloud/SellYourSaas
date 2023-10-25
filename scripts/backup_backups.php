@@ -216,9 +216,10 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
 
 $HISTODIR = dol_print_date(dol_now(), '%d');
-if ($HISTODIRTEXT == "week") {
-	$HISTODIR = dol_print_date(dol_now(), 'W');
-} elseif ($HISTODIRTEXT == "none") {
+if ($argv[2] == "w" || $argv[2] == "week") {
+	$HISTODIR = dol_print_date(dol_now(), '%w');
+}
+if ($argv[2] == "n" || $argv[2] == "none") {
 	$HISTODIR = "";
 }
 
@@ -304,7 +305,7 @@ foreach ($SERVERDESTIARRAY as $servername) {
 	print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S').' Do rsync of '.$DIRSOURCE1.' to remote '.$USER.'@'.$servername.':'.$DIRDESTI1."...\n";
 
 	if (empty($HISTODIR)) {
-		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS.$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
+		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	} else {
 		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI1."/backupold_".$HISTODIR." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	}
