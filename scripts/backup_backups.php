@@ -262,15 +262,10 @@ if (empty($DOMAIN)) {
 	exit(-1);
 }
 
+
 /*
  * Main
  */
-
-if (empty($instanceserver)) {
-	print "This server seems to not be a server for deployment of instances (this should be defined in sellyoursaas.conf file).\n";
-	print "Press ENTER to continue or CTL+C to cancel...";
-	$input = trim(fgets(STDIN));
-}
 
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
 if ($dbmaster->error) {
