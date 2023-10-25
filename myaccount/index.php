@@ -1047,7 +1047,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$arr_file = array();
 		$arr_mime = array();
 		$arr_name = array();
-		$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
+		$upload_dir = $conf->sellyoursaas->dir_temp."/support_thirdparty_id_".$mythirdpartyaccount->id.'.tmp';
 		$listofpaths = dol_dir_list($upload_dir, 'files', 0, '', '', 'name', SORT_ASC, 0);
 		if (count($listofpaths)) {
 			foreach ($listofpaths as $key => $val) {
