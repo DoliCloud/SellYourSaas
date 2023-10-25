@@ -282,7 +282,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 		versionfrom=$lastversiondolibarrinstance
 		versionto=$(( $versionfrom + 1 ))
-		while [ $versionfrom -le $laststableupgradeversion ]
+		while [ $versionto -le $laststableupgradeversion ]
 		do
 			if [ -f "$instancedir/documents/install.lock" ]
 			then
