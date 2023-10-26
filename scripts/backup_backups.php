@@ -47,6 +47,11 @@ if (0 != posix_getuid()) {
 
 // Global variables
 $version='1.0';
+$error=0;
+
+
+// Global variables
+$version='1.0';
 $RSYNCDELETE=0;
 $HISTODIRTEXT="";
 
@@ -80,6 +85,7 @@ $databaseport='3306';
 $database='';
 $databaseuser='sellyoursaas';
 $databasepass='';
+$ipserverdeployment='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
 $backupignoretables='';
@@ -136,6 +142,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'remotebackupuser') {
 			$USER = $tmpline[1];
+		}
+		if ($tmpline[0] == 'ipserverdeployment') {
+			$ipserverdeployment = $tmpline[1];
 		}
 		if ($tmpline[0] == 'emailfrom') {
 			$EMAILFROM = $tmpline[1];
@@ -251,6 +260,16 @@ if ($testorconfirm != "confirm") {
 	$TESTN = "-n";
 }
 
+print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+if (empty($argv[1])) {
+	echo "Usage: ${0} (test|confirm) [month|week|none] [osuX] [--delete]\n";
+	echo "With  month (default) is to keep 1 month of backup using --backup option of rsync\n";
+	echo "      week is to keep 1 week of backup using --backup option of rsync\n";
+	echo "      none is to not archive old versions using the --backup option of rsync. For example when you already do it using snapshots on backup server (recommended).\n";
+	echo "You can also set a group of 4 first letters on username to backup the backup of a limited number of users.\n";
+	exit(-1);
+}
+
 if (empty($SERVDESTI)) {
 	print "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf\n";
 	print "Usage: ".$argv[0]." (test|confirm) [osuX]\n";
@@ -283,6 +302,39 @@ if (empty($db)) {
 $user = new User($dbmaster);
 $user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 
+// Nb of deployed instances
+$nbofinstancedeployed=0;
+// Nb of errors
+$nboferrors=0;
+// List of instances
+$instances=array();				// array of paid instances
+$instancestrial=array();		// array of trial instances
+$instancespaidsuspended=array();
+$instancespaidsuspendedandpaymenterror=array();
+$instancespaidnotsuspended=array();
+$instancespaidnotsuspendedpaymenterror=array();
+$instancesbackuperror=array();
+$instancesupdateerror=array();
+$instancesbackupsuccess=array();
+$instancesbackupsuccessdiscarded=array();
+
+$instancefilter=((isset($argv[3]) && $argv[3] != '--delete') ? $argv[3] : '');
+$instancefiltercomplete=$instancefilter;
+
+// Forge complete name of instance
+if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomplete) && ! preg_match('/\.home\.lan$/', $instancefiltercomplete)) {
+	if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+	} else {
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$staticdeploymentserver = new Deploymentserver($db);
+		$tmparray = $staticdeploymentserver->fetchAllDomains();
+	}
+	$tmpstring = preg_replace('/:.*$/', '', $tmparray[0]);
+	$instancefiltercomplete = $instancefiltercomplete.".".$tmpstring;   // Automatically concat first domain name
+}
+
+
 $ret1 = array();
 $ret2 = array();
 $totalinstancessaved=0;
@@ -311,6 +363,7 @@ foreach ($SERVERDESTIARRAY as $servername) {
 	}
 	print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
 	$output = array();
+	$return_var = 0;
 	exec($command, $output, $return_var);
 	if ($return_var != 0) {
 		$ret1[$servername] = $ret1[$servername] + 1;
@@ -340,6 +393,7 @@ if (!empty($instanceserver)) {
 	}
 	$sql.= " AND ce.deployment_status IS NOT NULL";
 	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
+	$sql.= " AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
 
 	$dbtousetosearch = $dbmaster;
 
@@ -350,87 +404,170 @@ if (!empty($instanceserver)) {
 		$i = 0;
 		while ($i < $num) {
 			$obj = $dbtousetosearch->fetch_object($resql);
-			print "\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." ----- Process directory ".$backupdir."/".$obj->osu." \n";
+			if ($obj) {
+				// We process the instance
+				$instance = $obj->instance;
 
-			$object->fetch($obj->id);
-			if (dol_is_dir($backupdir."/".$obj->osu)) {
-				$atleastoneerrorononeserver = 0;
+				dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
-				// Loop on each target server to make backup of backup of instance
-				foreach ($SERVERDESTIARRAY as $servername) {
-					if (empty($HISTODIR)) {
-						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
-					} else {
-						$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+				unset($object->linkedObjects);
+				unset($object->linkedObjectsIds);
+
+				// Load data of instance and set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
+				$instance_status = 'UNKNOWN';
+				$result = $object->fetch($obj->id);
+				if ($result <= 0) {
+					$i++;
+					dol_print_error($dbmaster, $object->error, $object->errors);
+					continue;
+				} else {
+					if ($object->array_options['options_deployment_status'] == 'processing') {
+						$instance_status = 'PROCESSING';
+					} elseif ($object->array_options['options_deployment_status'] == 'undeployed') {
+						$instance_status = 'UNDEPLOYED';
+					} elseif ($object->array_options['options_deployment_status'] == 'done') {
+						// should be here due to test into SQL request
+						$instance_status = 'DEPLOYED';
+						$nbofinstancedeployed++;
 					}
-					print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
-					$output = array();
-					$return_var = 0;
-					exec($command, $output, $return_var);
+				}
 
-					if ($return_var != 0) {
-						$ret2[$servername] = $ret2[$servername] + 1;
-						print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
-						print "Command was: ".$command."\n";
-						$totalinstancesfailed += 1;
-						$errstring .="\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
 
-						$atleastoneerrorononeserver = 1;
+				if ($instance_status == 'DEPLOYED') {
+					$issuspended = sellyoursaasIsSuspended($object);
+					if ($issuspended) {
+						$instance_status = 'SUSPENDED';
+					}
+					// Note: to check that all non deployed instance has line with status that is 5 (close), you can run
+					// select * from llx_contrat as c, llx_contrat_extrafields as ce, llx_contratdet as cd WHERE ce.fk_object = c.rowid
+					// AND cd.fk_contrat = c.rowid AND ce.deployment_status <> 'done' AND cd.statut <> 5;
+					// You should get nothing.
+				}
+
+				// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
+				$payment_status='PAID';
+				$ispaid = sellyoursaasIsPaidInstance($object);	// This load linkedObjectsIds
+				if (! $ispaid) {
+					$payment_status='TRIAL';
+				} else {
+					$ispaymentko = sellyoursaasIsPaymentKo($object);
+					if ($ispaymentko) {
+						$payment_status='FAILURE';
+					}
+				}
+
+				print "Analyze".($instancefiltercomplete ? '' : ' deployed')." instance ".($i+1)." ".$instance.": instance_status=".$instance_status." payment_status=".$payment_status.(empty($object->array_options['options_suspendmaintenance_message']) ? "" : " (maintenance/redirect: ".($object->array_options['options_suspendmaintenance_message']).")")."\n";
+
+				// Count
+				if (! in_array($payment_status, array('TRIAL'))) {
+					// We analyze all non trial deployed instances
+					if (in_array($instance_status, array('SUSPENDED'))) {
+						$instancespaidsuspended[$obj->id] = $obj->ref.' ('.$instance.')';
+						if (in_array($payment_status, array('FAILURE'))) {
+							$instancespaidsuspendedandpaymenterror[$obj->id] = $obj->ref.' ('.$instance.')';
+						}
 					} else {
-						//Duc to modify
-						$totalinstancessaved += 1;
-
-						print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named".$DIRSOURCE2."/".$obj->osu."\n";
-
-						if ($nbdu < 50) {
-							if (dol_is_dir($homedir."/".$obj->osu."/")) {
-								$DELAYUPDATEDUC = -15;
-								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$obj->osu.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
-								$command = "find ".$homedir."/".$obj->osu.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
-								$output = array();
-								$return_var = 0;
-								exec($command, $output, $return_var);
-								if ($output[0] == "0") {
-									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$obj->osu."/.duc.db and nb already updated = ".$nbdu.", so we update it.";
-									$command = "duc index ".$homedir."/".$obj->osu."/ -x -m 3 -d ".$homedir."/".$obj->osu."/.duc.db";
-									print "\n".$command;
-									$output = array();
-									$return_var = 0;
-									exec($command, $output, $return_var);
-									$command = "chown ".$obj->osu.".".$obj->osu." ".$homedir."/".$obj->osu."/.duc.db";
-									exec($command, $output, $return_var);
-									$nbdu ++;
-								} else {
-									print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." File ".$homedir."/".$obj->osu.".duc.db was recently updated \n";
-								}
-							} else {
-								print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Dir ".$homedir."/".$obj->osu."/ does not exists, we cancel duc for ".$homedir."/".$obj->osu."/ \n";
-							}
-						} else {
-							print "\n".dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$obj->osu."/ \n";
+						$instancespaidnotsuspended[$obj->id] = $obj->ref.' ('.$instance.')';
+						if (in_array($payment_status, array('FAILURE'))) {
+							$instancespaidnotsuspendedpaymenterror[$obj->id] = $obj->ref.' ('.$instance.')';
 						}
 					}
+
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok), 'backup_frequency'=>$obj->backup_frequency);
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
+				} elseif ($instancefiltercomplete) {
+					$instances[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok), 'backup_frequency'=>$obj->backup_frequency);
+					print "Qualify instance ".$instance." with instance_status=".$instance_status." payment_status=".$payment_status."\n";
+				} else {
+					$instancestrial[$obj->id] = array('id'=>$obj->id, 'ref'=>$obj->ref, 'instance'=>$instance, 'latestbackup_date_ok'=>$dbtousetosearch->jdate($obj->latestbackup_date_ok), 'backup_frequency'=>$obj->backup_frequency);
+					//print "Found instance ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status_bis." payment_status=".$payment_status."\n";
 				}
 
-				if ($testorconfirm == "confirm") {
-					$object->array_options["options_latestbackupremote_date"] = dol_now();
-					if ($atleastoneerrorononeserver) {
-						$object->array_options["options_latestbackupremote_status"] = "KO";
+				if (!empty($instances[$obj->id])) {
+					print dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." ----- Process ".$instances[$obj->id]['instance']." in directory ".$backupdir."/".$obj->osu." \n";
+
+					$object->fetch($obj->id);
+					if (dol_is_dir($backupdir."/".$obj->osu)) {
+						$atleastoneerrorononeserver = 0;
+
+						// Loop on each target server to make backup of backup of instance
+						foreach ($SERVERDESTIARRAY as $servername) {
+							if (empty($HISTODIR)) {
+								$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+							} else {
+								$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+							}
+							print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
+							$output = array();
+							$return_var = 0;
+							exec($command, $output, $return_var);
+
+							if ($return_var != 0) {
+								$ret2[$servername] = $ret2[$servername] + 1;
+								print "ERROR Failed to make rsync for ".$DIRSOURCE2." to ".$servername." ret=".$ret2[$servername]." \n";
+								print "Command was: ".$command."\n";
+								$totalinstancesfailed += 1;
+								$errstring .="\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." Dir ".$DIRSOURCE2." to ".$servername.". ret=".$ret2[$servername].". Command was: ".$command."\n";
+
+								$atleastoneerrorononeserver = 1;
+							} else {
+								//Duc to modify
+								$totalinstancessaved += 1;
+
+								print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Scan dir named ".$DIRSOURCE2."/".$obj->osu."\n";
+
+								if ($nbdu < 50) {
+									if (dol_is_dir($homedir."/".$obj->osu."/")) {
+										$DELAYUPDATEDUC = -15;
+										print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Search if a recent duc file exists with find ".$homedir."/".$obj->osu.".duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l\n";
+										$command = "find ".$homedir."/".$obj->osu."/.duc.db -mtime ".$DELAYUPDATEDUC." 2>/dev/null | wc -l";
+										$output = array();
+										$return_var = 0;
+										exec($command, $output, $return_var);
+										if ($output[0] == "0") {
+											print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No recent .duc.db into".$homedir."/".$obj->osu."/.duc.db and nb already updated = ".$nbdu.", so we update it.\n";
+											$command = "duc index ".$homedir."/".$obj->osu."/ -x -m 3 -d ".$homedir."/".$obj->osu."/.duc.db";
+											print $command."\n";
+											$output = array();
+											$return_var = 0;
+											exec($command, $output, $return_var);
+											$command = "chown ".$obj->osu.".".$obj->osu." ".$homedir."/".$obj->osu."/.duc.db";
+											exec($command, $output, $return_var);
+											$nbdu ++;
+										} else {
+											print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." File ".$homedir."/".$obj->osu.".duc.db was recently updated \n";
+										}
+									} else {
+										print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Dir ".$homedir."/".$obj->osu."/ does not exists, we cancel duc for ".$homedir."/".$obj->osu."/ \n";
+									}
+								} else {
+									print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Max nb of update to do reached (".$nbdu."), we cancel duc for ".$homedir."/".$obj->osu."/ \n";
+								}
+							}
+						}
+
+						if ($testorconfirm == "confirm") {
+							$object->array_options["options_latestbackupremote_date"] = dol_now();
+							if ($atleastoneerrorononeserver) {
+								$object->array_options["options_latestbackupremote_status"] = "KO";
+							} else {
+								$object->array_options["options_latestbackupremote_date_ok"] = dol_now();
+								$object->array_options["options_latestbackupremote_status"] = "OK";
+							}
+
+							$res = $object->update($user, 1); //Make script stop crash
+							if ($res <= 0) {
+								print "\nUpdate of Contract error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
+							}
+						}
 					} else {
-						$object->array_options["options_latestbackupremote_date_ok"] = dol_now();
-						$object->array_options["options_latestbackupremote_status"] = "OK";
+						print "No directory found starting with name ".$backupdir."/".$obj->osu."\n";
+						$errstring .= dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/".$obj->osu."\n";
 					}
-
-					$res = $object->update($user, 1); //Make script stop crash
-					if ($res <= 0) {
-						print "\nUpdate of Contract error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
-					}
+					print "\n";
 				}
-			} else {
-				print "No directory found starting with name ".$backupdir."/".$obj->osu."\n";
-				$errstring .="\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/".$obj->osu."\n";
+				$i++;
 			}
-			$i++;
 		}
 	}
 }
@@ -440,7 +577,7 @@ if (!empty($instanceserver)) {
 $atleastoneerror = 0;
 
 foreach ($SERVERDESTIARRAY as $servername) {
-	print "\n".dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." End for ".$servername." ret1[".$servername."]=".$ret1[$servername]." ret2[".$servername."]=".$ret2[$servername]."\n";
+	print dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." End for ".$servername." ret1[".$servername."]=".$ret1[$servername]." ret2[".$servername."]=".$ret2[$servername]."\n";
 	if ($ret1[$servername] != 0) {
 		$atleastoneerror = 1;
 	} elseif ($ret2[$servername] != 0) {
@@ -461,9 +598,9 @@ if ($atleastoneerror != 0) {
 }
 
 if (isset($argv[3]) && $argv[3] != "--delete") {
-	print "\nScript was called for only one of few given instances. No email or supervision event sent on success in such situation.";
+	print "Script was called for only one of few given instances. No email or supervision event sent on success in such situation.\n";
 } else {
-	print "\nSend email to ".$EMAILTO." to inform about backup success\n";
+	print "Send email to ".$EMAILTO." to inform about backup success\n";
 	$subject = "[Backup of Backup - ".gethostname()."] Backup of backup to remote server succeed";
 	$msg = "The backup of backup for ".gethostname()." to remote backup server ".$SERVDESTI." succeed.\nNumber of instances successfully saved: ".$totalinstancessaved."\n".$errstring;
 	$cmail = new CMailFile($subject, $EMAILTO, $EMAILFROM, $msg);
