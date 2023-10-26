@@ -712,20 +712,20 @@ if (count($instancesupdateerror)) {
 
 $out.= "\n\n";
 
-$out.= "** Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
-$out.= "** Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
-$out.= "** Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
+$out.= "* Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
+$out.= "* Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
+$out.= "* Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
 $out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n\n":"\n");
-$out.= "** Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
+$out.= "* Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
 $out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n":"\n");
-$out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
-$out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
+$out.= "* Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
+$out.= "* Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
 $out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
 
 $out.= "\n\n";
 
 if ($action != 'updatestatsonly') {
-	$out.= "** Nb of paying instances processed ok+discarded: ".$nbofok."+".$nbofokdiscarded."=".($nbofok + $nbofokdiscarded);
+	$out.= "* Nb of paying instances processed ok+discarded: ".$nbofok."+".$nbofokdiscarded."=".($nbofok + $nbofokdiscarded);
 }
 if (count($instancesbackupsuccess)) {
 	$out.= ", success for backup on ";
