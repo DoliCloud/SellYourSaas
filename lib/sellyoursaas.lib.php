@@ -195,7 +195,8 @@ function sellyoursaasIsPaymentKo($contract)
 	$paymenterror=0;
 
 	// Return number of invoice open with an event payment error on it
-	// Note: we suppose that if a payment as correctly done after the invoice has also been closed so the invoice will not be reported here.
+	// Note: we suppose that if a payment as been correctly saved after the invoice has also been closed, then the
+	// invoice will be excluded by the fk_statut = 1, so we can count record with a payment failure with invoice not closed
 	$sql = "SELECT DISTINCT ee.fk_target as invoiceid";
 	$sql .= " FROM llx_element_element as ee";
 	$sql .= " INNER JOIN ".MAIN_DB_PREFIX."facture as f ON ee.fk_target = f.rowid AND f.fk_statut = 1";
@@ -216,35 +217,6 @@ function sellyoursaasIsPaymentKo($contract)
 	} else {
 		dol_print_error($db);
 	}
-
-	/* old method
-	$loadalsoobjects = 1;	// We nee the object 'facture' to test its status
-	$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', $loadalsoobjects);
-
-	if (is_array($contract->linkedObjects['facture'])) {
-		foreach ($contract->linkedObjects['facture'] as $rowidelementelement => $invoice) {
-			if ($invoice->statut == Facture::STATUS_CLOSED) {
-				continue;
-			}
-
-			// The invoice is not paid, we check if there is at least one payment issue
-			// See also request into index.php
-			$sql = "SELECT id FROM ".MAIN_DB_PREFIX."actioncomm";
-			$sql .= " WHERE elementtype = 'invoice' AND fk_element = ".$invoice->id;
-			$sql .= " AND (code LIKE 'AC_PAYMENT_%_KO' OR label = 'Cancellation of payment by the bank')";
-			$sql .= ' ORDER BY datep DESC';
-
-			$resql=$db->query($sql);
-			if ($resql) {
-				$num = $db->num_rows($resql);
-				$db->free($resql);
-				return $num;
-			} else {
-				dol_print_error($db);
-			}
-		}
-	}
-	*/
 
 	return $paymenterror;
 }
@@ -365,8 +337,6 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
  */
 function sellyoursaasIsSuspended($contract)
 {
-	global $db;
-
 	if ($contract->nbofserviceswait > 0 || $contract->nbofservicesopened > 0 || $contract->nbofservicesexpired > 0) return false;
 	if ($contract->nbofservicesclosed > 0) return true;
 
