@@ -695,7 +695,7 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 	$out.= "***** Summary for all deployment servers\n";
 }
 if ($action != 'updatestatsonly') {
-	$out.= "** Nb of paying instances processed ko: ".$nboferrors;
+	$out.= "\n** Nb of paying instances processed ko: ".$nboferrors;
 }
 if (count($instancesbackuperror)) {
 	$out.= ", ERROR FOR BACKUP ON ";
