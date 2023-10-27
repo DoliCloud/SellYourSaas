@@ -652,7 +652,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 	$sql .= " UNION ";
 
-	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
+	$sql.= "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
 	$sql.= " s.parent, s.nom as name,";
 	$sql.= " f.total_ht, f.unit_frequency";
 	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
