@@ -4387,7 +4387,7 @@ class SellYourSaasUtils
 					// Set flag to update latesresupdate_date of the contract
 					$contracthasbeenrefreshed = 1;
 				} else { // end if a formula for the contract line is defined (so if a refresh must be done for line)
-					dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id.", no formula not defined on service");
+					dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id.", no formula defined on service");
 				}
 			} else { // end if remoteaction is refresh
 				dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".(empty($producttmp->array_options['options_app_or_option']) ? '' : $producttmp->array_options['options_app_or_option']));
