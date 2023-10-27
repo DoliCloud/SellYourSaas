@@ -239,11 +239,19 @@ class SellYourSaasUtils
 											}
 
 											if ($protecti < 1000) {	// If not, there is a pb
-												// We will update the end of date of contrat, so first we refresh contract data
+												// We will update the end of date of contrat
 												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc'));
 
 												$label = 'Increase end date of services for contract '.$contract->ref;
-												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices()';
+												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices(). A refresh has been done before if it is not a redirection contract.';
+
+												// First launch update of resources if it is not a redirect contract:
+												// We to that because the batch SellYourSaasRefreshContracts will not be called due to this special renewal
+												$result = 1;
+												if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+													// This update qty of contract lines + qty into linked template invoice.
+													$result = $this->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+												}
 
 												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
 												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
@@ -3626,7 +3634,7 @@ class SellYourSaasUtils
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 					$doremoteaction = 1;
 			}
-			if (in_array($remoteaction, array('deploy','deployall','deployoption')) &&
+			if (in_array($remoteaction, array('deploy', 'deployall', 'deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
 					$doremoteaction = 1;
 					$remoteaction = 'deployoption';		// force on deployoption for options services
@@ -3980,13 +3988,9 @@ class SellYourSaasUtils
 						}
 					}
 				}
-			} else {
-				dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".(empty($producttmp->array_options['options_app_or_option']) ? '' : $producttmp->array_options['options_app_or_option']));
-			}
-
-			// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
-			// Here we are into a loop where $tmpobject and $tmpproduct are defined.
-			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
+			} elseif ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
+				// remoteaction = refresh or refreshmetrics => update the qty for this line if it is a line that is a metric
+				// Here we are into a loop where $tmpobject, $tmppackage and $producttmp are defined.
 				dol_syslog("Start refresh of nb of resources for a customer");
 
 				dol_include_once('/sellyoursaas/class/packages.class.php');
@@ -4382,8 +4386,12 @@ class SellYourSaasUtils
 
 					// Set flag to update latesresupdate_date of the contract
 					$contracthasbeenrefreshed = 1;
-				} // end if a formula for the contract line is defined (so if a refresh must be done for line)
-			} // end if remoteaction is refresh
+				} else { // end if a formula for the contract line is defined (so if a refresh must be done for line)
+					dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id.", no formula not defined on service");
+				}
+			} else { // end if remoteaction is refresh
+				dol_syslog("Do not enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".(empty($producttmp->array_options['options_app_or_option']) ? '' : $producttmp->array_options['options_app_or_option']));
+			}
 		} // end loop of each contract line
 
 		// If flag was set to say contract metrics has been refreshed
