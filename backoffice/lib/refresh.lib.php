@@ -444,7 +444,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 		$i = 0;
 		if ($num) {
 			include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
-			dol_include_once('/sellyoursaas/class/sellyousaascontrat.class.php');
+			dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
 			dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
 			$now = dol_now();
@@ -464,7 +464,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 					// Load data of instance and set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
 					$instance_status = 'UNKNOWN';
-					$result = $object->fetch($obj->id);
+					$result = $object->fetch($obj->id);	// Make the fetch_lines()
 					if ($result <= 0) {
 						$i++;
 						dol_print_error($db, $object->error, $object->errors);
@@ -500,8 +500,10 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 						// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
 						$payment_status='PAID';
+
 						// This load linkedObjectsIds
-						$ispaid = sellyoursaasIsPaidInstance($object, 0, 0);	// Return true if instance $object is paying instance (invoice or template invoice exists)
+						$ispaid = sellyoursaasIsPaidInstance($object, 0, 0);	// Make the fetchObjectLink(). Return true if instance $object is paying instance (invoice or template invoice exists)
+
 						if (! $ispaid) {		// This is a test only customer, trial expired or not, suspended or not (just no invoice or template invoice at all)
 							$payment_status='TRIAL';
 
@@ -631,17 +633,13 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 	// Get list of new deployed instances
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
-	$sql.= " ce.deployment_status as instance_status,";
 	$sql.= " s.parent, s.nom as name,";
 	$sql.= " f.total_ht, f.unit_frequency";
-	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
-	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object,";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
 	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
 	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
 	$sql.= " ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
-	//$sql.= " AND ce.deployment_status = 'done'";
-	//$sql.= " AND f.suspended = 0";
 	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
 	$sql.= " AND ((ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid)";
 	$sql.= " OR (ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid))";
@@ -651,6 +649,8 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	if ($datefirstday) {
 		$sql.= " AND f.datec >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
 	}
+	// We exclude contracts that are redirection contracts
+	$sql .= " AND NOT EXISTS (select ce.rowid FROM llx_contrat_extrafields as ce WHERE ce.fk_object=c.rowid AND ce.suspendmaintenance_message LIKE 'http%')";
 
 	dol_syslog("sellyoursaas_calculate_stats new begin", LOG_DEBUG, 1);
 
@@ -665,10 +665,10 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
-					if (!isset($listofnewinstances[$obj->customer_id])) {
-						$listofnewinstances[$obj->customer_id] = 0;
+					if (!isset($listofnewinstances[$obj->id])) {
+						$listofnewinstances[$obj->id] = 0;
 					}
-					$listofnewinstances[$obj->customer_id]++;
+					$listofnewinstances[$obj->id]++;
 
 					$nbmonth = 1;
 					if ($obj->unit_frequency == 'y') {
@@ -720,10 +720,10 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
-					if (!isset($listoflostinstances[$obj->customer_id])) {
-						$listoflostinstances[$obj->customer_id] = 0;
+					if (!isset($listoflostinstances[$obj->id])) {
+						$listoflostinstances[$obj->id] = 0;
 					}
-					$listoflostinstances[$obj->customer_id]++;
+					$listoflostinstances[$obj->id]++;
 					$nbmonth = 1;
 					if ($obj->unit_frequency == 'y') {
 						$nbmonth = 12;
