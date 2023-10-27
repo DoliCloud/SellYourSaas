@@ -640,8 +640,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
 	$sql.= " ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
-	$sql.= " AND ((ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid)";
-	$sql.= " OR (ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid))";
+	$sql.= " AND ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid";
 	if ($datelim && ($datelim < $now)) {
 		$sql.= " AND f.datec <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
 	}
@@ -650,6 +649,27 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	}
 	// We exclude contracts that are redirection contracts
 	$sql .= " AND NOT EXISTS (SELECT ce.rowid FROM llx_contrat_extrafields as ce WHERE ce.fk_object=c.rowid AND ce.suspendmaintenance_message LIKE 'http%')";
+
+	$sql .= " UNION ";
+
+	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
+	$sql.= " s.parent, s.nom as name,";
+	$sql.= " f.total_ht, f.unit_frequency";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
+	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
+	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
+	$sql.= " ".MAIN_DB_PREFIX."societe as s";
+	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
+	$sql.= " AND ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid";
+	if ($datelim && ($datelim < $now)) {
+		$sql.= " AND f.datec <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
+	}
+	if ($datefirstday) {
+		$sql.= " AND f.datec >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
+	}
+	// We exclude contracts that are redirection contracts
+	$sql .= " AND NOT EXISTS (SELECT ce.rowid FROM llx_contrat_extrafields as ce WHERE ce.fk_object=c.rowid AND ce.suspendmaintenance_message LIKE 'http%')";
+
 
 	dol_syslog("sellyoursaas_calculate_stats new begin", LOG_DEBUG, 1);
 
@@ -666,7 +686,10 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 				if ($obj) {
 					if (!isset($listofnewinstances[$obj->id])) {
 						$listofnewinstances[$obj->id] = 0;
+					} else {
+						continue;	// We have already processed this contract
 					}
+
 					$listofnewinstances[$obj->id]++;
 
 					$nbmonth = 1;
@@ -694,7 +717,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
 	$sql.= " ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
-	$sql.= " AND (ee.sourcetype = 'contrat' AND ee.fk_source = c.fk_object AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid)";
+	$sql.= " AND ee.sourcetype = 'contrat' AND ee.fk_source = ce.fk_object AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid";
 	if ($datelim && ($datelim < $now)) {
 		$sql.= " AND ce.undeployment_date <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
 	}
@@ -716,7 +739,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
 	$sql.= " ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
-	$sql.= " AND (ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.fk_object)";
+	$sql.= " AND ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = ce.fk_object";
 	if ($datelim && ($datelim < $now)) {
 		$sql.= " AND ce.undeployment_date <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
 	}
@@ -742,7 +765,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 					if (!isset($listoflostinstances[$obj->id])) {
 						$listoflostinstances[$obj->id] = 0;
 					} else {
-						continue;	// We have already process this contract
+						continue;	// We have already processed this contract
 					}
 					$listoflostinstances[$obj->id]++;
 					$nbmonth = 1;
