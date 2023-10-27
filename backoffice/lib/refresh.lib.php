@@ -443,12 +443,12 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 		$i = 0;
 		if ($num) {
-			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 			include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
+			dol_include_once('/sellyoursaas/class/sellyousaascontrat.class.php');
 			dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
 			$now = dol_now();
-			$object = new Contrat($db);
+			$object = new SellYourSaasContract($db);
 			$templateinvoice = new FactureRec($db);
 			//$cacheofthirdparties = array();
 
@@ -480,7 +480,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 							$nbofinstancedeployed++;
 						}
 						if ($instance_status == 'DEPLOYED') {
-							$issuspended = sellyoursaasIsSuspended($object);
+							$issuspended = sellyoursaasIsSuspended($object);	// Use the property ->nb... loaded by the fetch_lines() in the fetch()
 							if ($issuspended) {
 								$instance_status = 'SUSPENDED';
 							}
@@ -492,7 +492,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 
 						// Load array $tmpdata
-						$tmpdata = sellyoursaasGetExpirationDate($object, 0);
+						$tmpdata = sellyoursaasGetExpirationDate($object, 0);	// Loop on $object->lines
 						$nbofuser = $tmpdata['nbusers'];
 						$totalinstances++;
 						$totalusers+=$nbofuser;
@@ -500,6 +500,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 						// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
 						$payment_status='PAID';
+						// This load linkedObjectsIds
 						$ispaid = sellyoursaasIsPaidInstance($object, 0, 0);	// Return true if instance $object is paying instance (invoice or template invoice exists)
 						if (! $ispaid) {		// This is a test only customer, trial expired or not, suspended or not (just no invoice or template invoice at all)
 							$payment_status='TRIAL';
@@ -518,7 +519,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 							$listofcustomerstrial[$obj->customer_id]++;	// This is the total of trial only customers
 							//print "cpt=".$totalinstances." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price." -> 0<br>\n";
 						} else {
-							$ispaymentko = sellyoursaasIsPaymentKo($object);
+							$ispaymentko = sellyoursaasIsPaymentKo($object);	// Read table of actioncomm to find if payment error on an open invoice linked to contract
 							if ($ispaymentko) {
 								$payment_status='FAILURE';
 							}
@@ -544,9 +545,13 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 									$templateinvoice->suspended = 0;
 									$templateinvoice->unit_frequency = 0;
 									$templateinvoice->total_ht = 0;
+									$templateinvoice->total_ttc = 0;
 									$templateinvoice->frequency = 0;
 
-									$result = $templateinvoice->fetch($idtemplateinvoice);
+									$nolines = 1;
+									$noextrafields = 1;
+
+									$result = $templateinvoice->fetch($idtemplateinvoice, '', '', $noextrafields, $nolines);
 									if ($result > 0) {
 										if (! $templateinvoice->suspended) {
 											if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency >= 1) {
@@ -562,7 +567,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 											$atleastonenotsuspended = 1;
 										} else {
-											$listofsuspendedrecurringinvoice[$idtemplateinvoice]=$idtemplateinvoice;
+											$listofsuspendedrecurringinvoice[$idtemplateinvoice] = $idtemplateinvoice;
 										}
 									} else {
 										$error++;

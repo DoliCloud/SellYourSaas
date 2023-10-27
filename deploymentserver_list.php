@@ -789,8 +789,8 @@ while ($i < $imaxinloop) {
 				$cssforfield .= ($cssforfield ? ' ' : '').'right';
 			}
 			if (!empty($arrayfields['t.'.$key]['checked'])) {
-				print '<td'.($cssforfield ? ' class="'.$cssforfield.(preg_match('/tdoverflow/', $cssforfield) ? ' classfortooltip' : '').'"' : '');
-				if (preg_match('/tdoverflow/', $cssforfield) && !is_numeric($object->$key)) {
+				print '<td'.($cssforfield ? ' class="'.$cssforfield.((preg_match('/tdoverflow/', $cssforfield) && $key != 'ref') ? ' classfortooltip' : '').'"' : '');
+				if (preg_match('/tdoverflow/', $cssforfield) && !in_array($val['type'], array('ip', 'url')) && !is_numeric($object->$key)) {
 					print ' title="'.dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($object->$key), 1, 1, 1)).'"';
 				}
 				print '>';
