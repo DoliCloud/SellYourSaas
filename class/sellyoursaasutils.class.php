@@ -246,12 +246,14 @@ class SellYourSaasUtils
 												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices(). A refresh has been done before if it is not a redirection contract.';
 
 												// First launch update of resources if it is not a redirect contract:
-												// We to that because the batch SellYourSaasRefreshContracts will not be called due to this special renewal
+												// We should not have to do that because the batch SellYourSaasRefreshContracts is called 2 days before
+												/*
 												$result = 1;
 												if (empty($contract->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 													// This update qty of contract lines + qty into linked template invoice.
 													$result = $this->sellyoursaasRemoteAction('refreshmetrics', $contract, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
 												}
+												*/
 
 												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
 												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
