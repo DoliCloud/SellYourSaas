@@ -459,12 +459,14 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 					// We process the instance (ref_customer)
 					$instance = $obj->instance;
 
+					dol_syslog("sellyoursaas_calculate_stats analyze ".$instance, LOG_DEBUG);
+
 					unset($object->linkedObjects);
 					unset($object->linkedObjectsIds);
 
 					// Load data of instance and set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
 					$instance_status = 'UNKNOWN';
-					$result = $object->fetch($obj->id);	// Make the fetch_lines()
+					$result = $object->fetch($obj->id);	// Make the fetch_lines() required later in the sellyoursaasGetExpirationDate()
 					if ($result <= 0) {
 						$i++;
 						dol_print_error($db, $object->error, $object->errors);
@@ -628,7 +630,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 		dol_print_error($db);
 	}
 
-	dol_syslog("sellyoursaas_calculate_stats end", LOG_DEBUG, -1);
+	dol_syslog("sellyoursaas_calculate_stats end of getting list of instance", LOG_DEBUG, -1);
 
 
 	// Get list of new deployed instances
