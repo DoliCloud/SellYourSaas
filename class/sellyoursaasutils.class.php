@@ -119,7 +119,9 @@ class SellYourSaasUtils
 					} else {
 						$tmparray = $invoice->thirdparty->getOutstandingBills('customer');
 						if ($tmparray['opened'] > 0) {
-							dol_syslog("Note: This thirdparty has already validated open invoices");	// TODO Try to avoid validation of invoice if open invoice is on same contract ?
+							dol_syslog("Note: This thirdparty has already validated open invoices.");
+							// @TODO Try to avoid validation of invoice if open invoice is on same contract ?
+							// Note also that later, we don't validate invoice if services are suspended.
 						}
 
 						// Search contracts linked to the invoice we try to validate
