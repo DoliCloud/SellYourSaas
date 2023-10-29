@@ -88,6 +88,7 @@ class SellYourSaasUtils
 		$this->error='';
 
 		$draftinvoiceprocessed = array();
+		$draftinvoicecanceled = array();
 		$contractprocessed = array();
 		$contracterror = array();
 
@@ -130,7 +131,7 @@ class SellYourSaasUtils
 							$this->db->begin();
 
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-								if (!empty($draftinvoiceprocessed[$invoice->id])) {
+								if (!empty($draftinvoiceprocessed[$invoice->id]) || !empty($draftinvoicecanceled[$invoice->id])) {
 									continue;	// If already processed because of a previous contract line, do nothing more
 								}
 
@@ -184,11 +185,11 @@ class SellYourSaasUtils
 										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
 										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 										if ($amountofinvoice >= (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') * $monthfactor)) {
+											$draftinvoicecanceled[$invoice->id] = $invoice->ref;
+
 											$errorforinvoice++;
 											$this->error = 'The invoice '.$invoice->ref." can't be validated by doValidateDraftInvoices: Amount ".$amountofinvoice." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
-											if (!in_array($this->error, $this->errors)) {
-												$this->errors[] = $this->error;
-											}
+											$this->errors[] = $this->error;
 											break;
 										}
 									}
@@ -210,6 +211,8 @@ class SellYourSaasUtils
 
 										$result = $invoice->generateDocument($model_pdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
 									} else {
+										$draftinvoicecanceled[$invoice->id] = $invoice->ref;
+
 										$errorforinvoice++;
 										$this->error = $invoice->error;
 										$this->errors = array_merge($this->errors, $invoice->errors);
