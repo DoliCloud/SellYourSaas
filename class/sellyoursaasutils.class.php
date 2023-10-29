@@ -130,7 +130,7 @@ class SellYourSaasUtils
 							$this->db->begin();
 
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-								if (! empty($draftinvoiceprocessed[$invoice->id])) {
+								if (!empty($draftinvoiceprocessed[$invoice->id])) {
 									continue;	// If already processed because of a previous contract line, do nothing more
 								}
 
@@ -185,8 +185,10 @@ class SellYourSaasUtils
 										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 										if ($amountofinvoice >= (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') * $monthfactor)) {
 											$errorforinvoice++;
-											$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
-											$this->errors[] = $this->error;
+											$this->error = 'The invoice '.$invoice->ref." can't be validated by doValidateDraftInvoices: Amount ".$amountofinvoice." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
+											if (!in_array($this->error, $this->errors)) {
+												$this->errors[] = $this->error;
+											}
 											break;
 										}
 									}
@@ -322,9 +324,9 @@ class SellYourSaasUtils
 			$this->errors[] = $this->error;
 		}
 
-		$this->output = count($draftinvoiceprocessed).' invoice(s) validated on '.$num_rows.' draft invoice found'.(count($draftinvoiceprocessed)>0 ? ' : '.join(',', $draftinvoiceprocessed) : '').' (search done on invoices of SellYourSaas customers only)';
+		$this->output = count($draftinvoiceprocessed).' invoice(s) validated on '.$num_rows.' draft invoice(s) found'.(count($draftinvoiceprocessed)>0 ? ' : '.join(',', $draftinvoiceprocessed) : '').' (search done on invoices of SellYourSaas customers only)';
 
-		if (!empty($this->error)) {
+		if (!empty($this->errors)) {
 			$this->output .= "\n\n".join(', ', $this->errors);
 		}
 
@@ -1057,7 +1059,7 @@ class SellYourSaasUtils
 									// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 									if ($amountofinvoice >= ($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE * $monthfactor)) {
 										$error++;
-										$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > " . getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
+										$this->error = 'The invoice '.$invoice->ref." can't be validated by doTakePaymentStripeForThirdparty: Amount ".$amountofinvoice." > " . getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
 										$this->errors[] = $this->error;
 										break;
 									}
