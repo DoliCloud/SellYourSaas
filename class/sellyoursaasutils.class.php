@@ -91,8 +91,6 @@ class SellYourSaasUtils
 		$contractprocessed = array();
 		$contracterror = array();
 
-		$this->db->begin();
-
 		$sql = 'SELECT f.rowid FROM '.MAIN_DB_PREFIX.'facture as f,';
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE f.fk_statut = '.Facture::STATUS_DRAFT;
@@ -120,13 +118,17 @@ class SellYourSaasUtils
 					} else {
 						$tmparray = $invoice->thirdparty->getOutstandingBills('customer');
 						if ($tmparray['opened'] > 0) {
-							dol_syslog("This thirdparty has already open invoices, so we don't validate any other invoices");     // So only 1 invoice is validated per thirdparty and pass
+							dol_syslog("Note: This thirdparty has already validated open invoices");	// TODO Try to avoid validation of invoice if open invoice is on same contract ?
 						}
 
 						// Search contracts linked to the invoice we try to validate
 						$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
+							$errorforinvoice = 0;
+
+							$this->db->begin();
+
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
 								if (! empty($draftinvoiceprocessed[$invoice->id])) {
 									continue;	// If already processed because of a previous contract line, do nothing more
@@ -182,7 +184,7 @@ class SellYourSaasUtils
 										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
 										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 										if ($amountofinvoice >= (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') * $monthfactor)) {
-											$error++;
+											$errorforinvoice++;
 											$this->error = 'The invoice '.$invoice->ref." can't be validated: Amount ".$amountofinvoice." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
 											$this->errors[] = $this->error;
 											break;
@@ -206,16 +208,19 @@ class SellYourSaasUtils
 
 										$result = $invoice->generateDocument($model_pdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
 									} else {
-										$error++;
+										$errorforinvoice++;
 										$this->error = $invoice->error;
-										$this->errors = $invoice->errors;
+										$this->errors = array_merge($this->errors, $invoice->errors);
 										break;
 									}
 								} else {
 									// Do nothing
 									dol_syslog("Number of open services (".$nbservice.") is zero or contract is undeployed, so we do nothing.");
 								}
-								if (!$error) {
+
+								if (!$errorforinvoice) {
+									dol_syslog("Check if invoice payment mode is a SEPA payment: mode_reglement_code=".$invoice->mode_reglement_code);
+
 									$codepaiementdirectdebit = 'PRE';
 									$codepaiementtransfer = 'VIR';
 									if ($invoice->mode_reglement_code == $codepaiementdirectdebit || $invoice->mode_reglement_code == $codepaiementtransfer) {
@@ -285,11 +290,19 @@ class SellYourSaasUtils
 
 													$error++;
 													$this->error = $this->db->lasterror();
+													$this->errors[] = $this->error;
 												}
 											}
 										}
 									}
 								}
+							}
+
+							if (!$errorforinvoice) {
+								$this->db->commit();
+							} else {
+								$this->db->rollback();
+								$error++;
 							}
 						} else {
 							dol_syslog("No linked contract found on this invoice");
@@ -297,7 +310,8 @@ class SellYourSaasUtils
 					}
 				} else {
 					$error++;
-					$this->errors[] = 'Failed to get invoice with id '.$obj->rowid;
+					$this->error = 'Failed to get invoice with id '.$obj->rowid;
+					$this->errors[] = $this->error;
 				}
 
 				$i++;
@@ -305,11 +319,14 @@ class SellYourSaasUtils
 		} else {
 			$error++;
 			$this->error = $this->db->lasterror();
+			$this->errors[] = $this->error;
 		}
 
 		$this->output = count($draftinvoiceprocessed).' invoice(s) validated on '.$num_rows.' draft invoice found'.(count($draftinvoiceprocessed)>0 ? ' : '.join(',', $draftinvoiceprocessed) : '').' (search done on invoices of SellYourSaas customers only)';
 
-		$this->db->commit();
+		if (!empty($this->error)) {
+			$this->output .= "\n\n".join(', ', $this->errors);
+		}
 
 		$conf->global->SYSLOG_FILE = $savlog;
 
