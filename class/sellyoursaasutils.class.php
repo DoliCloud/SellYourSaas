@@ -332,7 +332,8 @@ class SellYourSaasUtils
 		$this->output = count($draftinvoiceprocessed).' invoice(s) validated on '.$num_rows.' draft invoice(s) found'.(count($draftinvoiceprocessed)>0 ? ' : '.join(',', $draftinvoiceprocessed) : '').' (search done on invoices of SellYourSaas customers only)';
 
 		if (!empty($this->errors)) {
-			$this->output .= "\n\n".join(', ', $this->errors);
+			$this->output .= "\n";
+			// The $this->errors will be concatenated to the output bu the function that call this method.
 		}
 
 		$conf->global->SYSLOG_FILE = $savlog;
