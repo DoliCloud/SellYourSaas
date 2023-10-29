@@ -221,6 +221,11 @@ fi
 #	find $backupdir/osu*/ -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
 #fi
 
+# Create empty file it it does not exists
+if [ ! -f  /var/log/apache2/other_vhosts_pid.log ]; then
+	> /var/log/apache2/other_vhosts_pid.log
+fi
+
 # TODO Try to change permission on this files to remove this ?
 touch /var/log/phpmail.log
 chown syslog.adm /var/log/phpmail.log
