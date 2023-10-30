@@ -703,7 +703,11 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 					if ($obj->unit_frequency == 'y') {
 						$nbmonth = 12;
 					}
-					$totalnewinstances += ($obj->total_ht / $nbmonth);
+
+					$pricem = ($obj->total_ht / $nbmonth);
+					if (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') <= 0 || $pricem < getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
+						$totalnewinstances += $pricem;
+					}
 				}
 				$i++;
 			}
@@ -779,7 +783,10 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 					if ($obj->unit_frequency == 'y') {
 						$nbmonth = 12;
 					}
-					$totallostinstances += ($obj->total_ht / $nbmonth);
+					$pricem = ($obj->total_ht / $nbmonth);
+					if (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') <= 0 || $pricem < getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
+						$totallostinstances += $pricem;
+					}
 				}
 				$i++;
 			}
