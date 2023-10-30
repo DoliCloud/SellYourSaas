@@ -222,7 +222,7 @@ if (! $res) {
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
 include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 
 $HISTODIR = dol_print_date(dol_now(), '%d');
 if ($argv[2] == "w" || $argv[2] == "week") {

@@ -120,7 +120,7 @@ if (! $res) {
 }
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';

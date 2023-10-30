@@ -416,7 +416,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 	$now = dol_now();
 
-	// Get list of deployed instances
+	// Get list of living deployed instances (to get stats on deployment status, paying status, ...)
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
 	$sql.= " ce.deployment_status as instance_status,";
 	$sql.= " s.parent, s.nom as name";
@@ -559,14 +559,19 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 									if ($result > 0) {
 										if (! $templateinvoice->suspended) {
 											if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency >= 1) {
-												$price += $templateinvoice->total_ht / $templateinvoice->frequency;
-												$price_ttc += $templateinvoice->total_ttc / $templateinvoice->frequency;
+												$pricem = $templateinvoice->total_ht / $templateinvoice->frequency;
+												$price_ttcm = $templateinvoice->total_ttc / $templateinvoice->frequency;
 											} elseif ($templateinvoice->unit_frequency == 'y' && $templateinvoice->frequency >= 1) {
-												$price += ($templateinvoice->total_ht / (12 * $templateinvoice->frequency));
-												$price_ttc += ($templateinvoice->total_ttc / (12 * $templateinvoice->frequency));
+												$pricem = ($templateinvoice->total_ht / (12 * $templateinvoice->frequency));
+												$price_ttcm = ($templateinvoice->total_ttc / (12 * $templateinvoice->frequency));
 											} else {
-												$price += $templateinvoice->total_ht;
-												$price_ttc += $templateinvoice->total_ttc;
+												$pricem = $templateinvoice->total_ht;
+												$price_ttcm = $templateinvoice->total_ttc;
+											}
+
+											if (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') <= 0 || $pricem < getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
+												$price += $pricem;
+												$price_ttc += $price_ttcm;
 											}
 
 											$atleastonenotsuspended = 1;

@@ -17,7 +17,7 @@
  */
 
 /**
- *	    \file       htdocs/core/lib/dolicloud.lib.php
+ *	    \file       htdocs/core/lib/sellyoursaas.lib.php
  *		\brief      Some functions for module Sell-Your-Saas
  */
 

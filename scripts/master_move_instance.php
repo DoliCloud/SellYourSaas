@@ -131,7 +131,7 @@ if (! $res) {
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once('/sellyoursaas/class/packages.class.php');
 include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
