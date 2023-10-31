@@ -281,7 +281,10 @@ if ($action == 'automigration') {
 				}
 
 				if ($result["result"] == 0) {
-					$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("migrate", $object);
+					$comment = 'Call of sellyoursaasRemoteAction(migrate) on contract ref='.$object->ref;
+					$notused = '';
+					$timeoutmigrate = 240;
+					$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("migrate", $object, 'admin', $notused, $notused, 1, $comment, $timeoutmigrate);
 					if ($exitcode < 0) {
 						$result["result"] = $exitcode;
 						$result["output"] = $langs->trans("ErrorOnDocumentMigration");
