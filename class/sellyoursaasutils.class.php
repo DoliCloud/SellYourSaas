@@ -226,13 +226,13 @@ class SellYourSaasUtils
 								}
 
 								if (!$errorforinvoice) {
-									dol_syslog("Check if invoice payment mode is a SEPA payment: mode_reglement_code=".$invoice->mode_reglement_code);
+									dol_syslog("Check if invoice payment mode is a differed mode (direct debit or credit transfer): mode_reglement_code=".$invoice->mode_reglement_code);
 
 									$codepaiementdirectdebit = 'PRE';
 									$codepaiementtransfer = 'VIR';
 									if ($invoice->mode_reglement_code == $codepaiementdirectdebit || $invoice->mode_reglement_code == $codepaiementtransfer) {
 										// If invoice is an invoice to pay with a direct debit
-										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');		// $enddatetoscan = yesterday
+										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');
 
 										dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
 										$tmparray = sellyoursaasGetExpirationDate($contract, 0);
@@ -2349,7 +2349,7 @@ class SellYourSaasUtils
 							$errorforlocaltransaction = 0;
 
 							$label = 'Renewal of contrat '.$object->ref;
-							$comment = 'Renew date of contract '.$object->ref.' by doRenewalContracts';
+							$comment = 'Renew date of contract '.$object->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doRenewalContracts';
 
 							// First launch update of resources if it is not a redirect contract:
 							$result = 1;
