@@ -119,12 +119,13 @@ class SellYourSaasUtils
 					} else {
 						$tmparray = $invoice->thirdparty->getOutstandingBills('customer');
 						if ($tmparray['opened'] > 0) {
-							dol_syslog("Note: This thirdparty has already validated open invoices.");
-							// @TODO Try to avoid validation of invoice if open invoice is on same contract ?
+							dol_syslog("Note: This thirdparty already owns validated open invoices: ".join(', ', $tmparray['arrayofrefopened']));
+							// We exclude the current draft invoice (should be useless, but with this, we are sure)
+							unset($tmparray['arrayofrefopened'][$obj->rowid]);
 							// Note also that later, we don't validate invoice if services are suspended.
 						}
 
-						// Search contracts linked to the invoice we try to validate
+						// Search contracts linked to the invoice we try to validate (we need the linked contract to check the services are not 'undeployed')
 						$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
@@ -135,6 +136,19 @@ class SellYourSaasUtils
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
 								if (!empty($draftinvoiceprocessed[$invoice->id]) || !empty($draftinvoicecanceled[$invoice->id])) {
 									continue;	// If already processed because of a previous contract line, do nothing more
+								}
+
+								// Try to avoid validation of the current $invoice if on same contract, there is other open invoice !!!
+								$sqltocheckcontratnotlinkedtoanopeninvoice = "SELECT COUNT(rowid) FROM ".MAIN_DB_PREFIX."element_element";
+								$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE sourcetype = 'contrat' AND fk_source = ".((int) $idcontract);
+								$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND target_type = 'facture' AND fk_target IN (".$this->db->sanitize(join(',', array_keys($tmparray['arrayofrefopened']))).")";
+								dol_syslog("We check sql = ".$sqltocheckcontratnotlinkedtoanopeninvoice);
+								// If we found some record, we discard validation of this invoice
+								$nbfound = 0;
+								// TODO
+
+								if ($nbfound > 0) {
+									continue;
 								}
 
 								// We ignore $contract->nbofserviceswait +  and $contract->nbofservicesclosed
