@@ -271,8 +271,6 @@ class SellYourSaasUtils
 												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
 												$resqlupdate = $this->db->query($sqlupdate);
 												if ($resqlupdate) {
-													$contractprocessed[$contract->id] = $contract->ref;
-
 													$actioncode = 'RENEW_CONTRACT';
 													$now = dol_now();
 
@@ -291,11 +289,21 @@ class SellYourSaasUtils
 													$actioncomm->elementtype  = 'contract';
 													$actioncomm->note_private = $comment;
 
-													$ret = $actioncomm->create($user);       // User creating action
+													$ret = $actioncomm->create($user);       // Create event
+
+													if ($ret > 0) {
+														$contractprocessed[$contract->id] = $contract->ref;
+													} else {
+														$contracterror[$contract->id] = $contract->ref;
+
+														$errorforinvoice++;
+														$this->error = $actioncomm->error;
+														$this->errors[] = $this->error;
+													}
 												} else {
 													$contracterror[$contract->id] = $contract->ref;
 
-													$error++;
+													$errorforinvoice++;
 													$this->error = $this->db->lasterror();
 													$this->errors[] = $this->error;
 												}
@@ -333,7 +341,7 @@ class SellYourSaasUtils
 
 		if (!empty($this->errors)) {
 			$this->output .= "\n";
-			// The $this->errors will be concatenated to the output bu the function that call this method.
+			// The $this->errors will be concatenated to the output by the function that call this method.
 		}
 
 		$conf->global->SYSLOG_FILE = $savlog;
