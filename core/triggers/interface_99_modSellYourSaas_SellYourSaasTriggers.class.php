@@ -88,7 +88,9 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 	{
 		global $mysoc;
 
-		if (empty($conf->sellyoursaas->enabled)) return 0;     // Module not active, we do nothing
+		if (!isModEnabled('sellyoursaas')) {
+			return 0;     // Module not active, we do nothing
+		}
 
 		// Put here code you want to execute when a Dolibarr business events occurs.
 		// Data and type of action are stored into $object and $action
@@ -174,8 +176,10 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				}
 				break;
 			case 'LINECONTRACT_CLOSE':
+				dol_syslog("Trigger LINECONTRACT_CLOSE is ran");
+
 				$object->fetch_product();
-				if ($object->product->array_options['options_app_or_option'] == 'app') {
+				if (!empty($object->product->array_options['options_app_or_option']) && $object->product->array_options['options_app_or_option'] == 'app') {
 					$contract = new Contrat($this->db);
 					$contract->fetch($object->fk_contrat);
 					if ($contract->array_options['options_deployment_status'] == 'undeployed') {
@@ -283,6 +287,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				break;
 
 			case 'BILL_VALIDATE':
+				dol_syslog("Trigger BILL_VALIDATE is ran");
+
 				$reseller = new Societe($this->db);
 				$reseller->fetch($object->thirdparty->parent);
 				if ($reseller->id > 0) {
@@ -294,6 +300,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 			case 'BILL_CANCEL':
 				break;
 			case 'BILL_PAYED':
+				dol_syslog("Trigger BILL_PAYED is ran");
+
 				$object->fetchObjectLinked(null, '', null, '', 'OR', 0, 'sourcetype', 0);
 
 				if ($object->type != Facture::TYPE_CREDIT_NOTE  && ! empty($object->linkedObjectsIds['contrat'])) {
@@ -355,7 +363,6 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				break;
 
 			case 'PAYMENT_CUSTOMER_DELETE':
-
 				dol_syslog("We trap trigger PAYMENT_CUSTOMER_DELETE for id = ".$object->id);
 
 				// Send to DataDog (metric + event)

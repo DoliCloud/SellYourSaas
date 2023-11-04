@@ -28,7 +28,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
 require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticket.class.php';
 
-$upload_dir = $conf->sellyoursaas->dir_temp."/support_".$mythirdpartyaccount->id.'.tmp';
+$upload_dir = $conf->sellyoursaas->dir_temp."/support_thirdparty_id_".$mythirdpartyaccount->id.'.tmp';
 
 if (!empty($_POST['addfile'])) {
 	// Set tmp user directory
@@ -381,7 +381,7 @@ if ($sellyoursaassupporturl) {
 				$("#ticketcategory_back").val(tmp);
 				';
 			$stringtoprint .= '
-					if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
+					if ("' . getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE').'" == $("#ticketcategory").val()){
 						console.log("We hide for automigration");
 						$(".hideforautomigration").hide();
 						$(".showforautoupgrade").hide();
@@ -423,7 +423,7 @@ if ($sellyoursaassupporturl) {
 				$(".showforautomigration").hide();
 				$("#buttonforautomigrationwithhidden").show();';
 			}
-			$stringtoprint .= 'if ("'.$conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE.'" == $("#ticketcategory").val()){
+			$stringtoprint .= 'if ("' . getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE').'" == $("#ticketcategory").val()){
 				console.log("We hide for automigration");
 				$(".hideforautomigration").show();
 				$(".showforautomigration").hide();
@@ -612,6 +612,7 @@ if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('support
 				$staticticket->ref = $obj->ref;
 				$staticticket->track_id = $obj->track_id;
 				$staticticket->fk_statut = $obj->fk_statut;
+				$staticticket->status = $obj->fk_statut;
 				$staticticket->progress = $obj->progress;
 				$staticticket->subject = $obj->subject;
 

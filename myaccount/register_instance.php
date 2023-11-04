@@ -734,7 +734,7 @@ if ($reusecontractid) {
 		if ($objselect) $nbofinstancewithsameip = $objselect->nb;
 	}
 	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1. Whitelist ip does not bypass this test)");
-	if ($remoteip != '127.0.0.1' && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIPPERHOUR))) {
+	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIPPERHOUR))) {
 		dol_syslog("TooManyInstancesForSameIpThisHour - ".$remoteip);
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour", $remoteip), null, 'errors');

@@ -44,7 +44,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 
 $langs->loadLangs(array("admin","companies","users","contracts","other","commercial","sellyoursaas@sellyoursaas"));
@@ -182,7 +182,7 @@ if (empty($reshook)) {
 					if (! empty($conf->global->$newurlkey)) {
 						$urlmyaccount = $conf->global->$newurlkey;
 					} else {
-						$urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
+						$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
 					}
 				}
 			}
@@ -439,7 +439,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// Ref supplier
 	$morehtmlref.='<br>';
 	$morehtmlref.=$form->editfieldkey("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string', '', 0, 1);
-	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':'.$conf->global->THIRDPARTY_REF_INPUT_SIZE : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
+	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':' . getDolGlobalString('THIRDPARTY_REF_INPUT_SIZE') : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
 	// Thirdparty
 	$morehtmlref .= '<br>'.$object->thirdparty->getNomUrl(1, 'customer');
 	if (empty($conf->global->MAIN_DISABLE_OTHER_LINK) && $object->thirdparty->id > 0) {
@@ -687,7 +687,7 @@ print '<table class="noborder centpercent tableforfield">';
 // Nb of users
 print '<tr><td width="20%">'.$langs->trans("NbOfUsers").'</td><td><font size="+2">'.(isset($object->nbofusers) ? round($object->nbofusers) : '').'</font></td>';
 print '<td></td><td>';
-if (! $object->user_id && $user->rights->sellyoursaas->write) {
+if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refresh&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
 }
 print '</td>';
@@ -696,11 +696,13 @@ print '</tr>';
 // Authorized key file
 print '<tr>';
 print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+}
 print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td>';
-if (! $object->user_id && $user->rights->sellyoursaas->write) {
+if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=refreshfilesonly&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
 }
 print '</td>';
@@ -709,7 +711,9 @@ print '</tr>';
 // Install.lock file
 print '<tr>';
 print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+}
 print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
@@ -718,7 +722,9 @@ print '</tr>';
 // Upgrade.unlock file
 print '<tr>';
 print '<td>'.$langs->trans("UnlockfileInstalled").'</td><td>'.($object->array_options['options_fileunlock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileunlock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addupgradeunlock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addupgradeunlock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+}
 print ($object->array_options['options_fileunlock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delupgradeunlock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
@@ -727,7 +733,9 @@ print '</tr>';
 // Installmodules.lock file
 print '<tr>';
 print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
-print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstallmoduleslock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstallmoduleslock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
+}
 print ($object->array_options['options_fileinstallmoduleslock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstallmoduleslock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
 print '</td>';
 print '<td></td><td></td>';
@@ -792,7 +800,7 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td class="nowraponall">'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';
 	print '<td align="right">';
-	if ($user->rights->sellyoursaas->write) {
+	if ($user->hasRight('sellyoursaas', 'write')) {
 		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("MarkAsSpamAndClose").'</span></a>';
 		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
 			print ' &nbsp; ';

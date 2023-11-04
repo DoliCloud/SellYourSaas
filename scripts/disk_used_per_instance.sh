@@ -63,7 +63,7 @@ fi
 	#exit 31
 #fi
 
-echo "***** Disk used per instance (scan home dir duc.db file, containing the analysis of the content of backup dir)"
+echo "***** Disk used per instance (scan home dir duc.db file, containing the analysis of the content of home dir)"
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - list|update|delete"

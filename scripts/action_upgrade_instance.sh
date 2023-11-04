@@ -20,7 +20,7 @@ echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
 echo "# PWD ------------> $PWD"
-echo "# arguments ------> ${@}"
+#echo "# arguments ------> ${@}"
 echo "# parent path ----> ${0%/*}"
 echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
@@ -282,7 +282,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 		versionfrom=$lastversiondolibarrinstance
 		versionto=$(( $versionfrom + 1 ))
-		while [ $versionfrom -le $laststableupgradeversion ]
+		while [ $versionto -le $laststableupgradeversion ]
 		do
 			if [ -f "$instancedir/documents/install.lock" ]
 			then

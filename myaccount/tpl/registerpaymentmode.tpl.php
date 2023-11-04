@@ -52,7 +52,7 @@ print '<!-- mode = registerpaymentmode -->
 		<div class="portlet-body">';
 
 
-print '<!-- Form payment-form STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION = '.$conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION.' STRIPE_USE_NEW_CHECKOUT = '.$conf->global->STRIPE_USE_NEW_CHECKOUT.' -->'."\n";
+print '<!-- Form payment-form STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION = ' . getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION').' STRIPE_USE_NEW_CHECKOUT = ' . getDolGlobalString('STRIPE_USE_NEW_CHECKOUT').' -->'."\n";
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="payment-form">'."\n";
 
 print '<input type="hidden" name="token" value="'.newToken().'">'."\n";
@@ -87,7 +87,7 @@ if ($totalInvoiced == 0) {
 	}
 
 	$defaultdiscountcode = GETPOST('discountcode', 'aZ09');
-	$acceptdiscountcode = ($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE ? 1 : 0);
+	$acceptdiscountcode = getDolGlobalInt('SELLYOURSAAS_ACCEPT_DISCOUNTCODE');
 
 	// We are not yet a customer
 	if ($amounttopayasfirstinvoice) {
@@ -114,7 +114,7 @@ if ($totalInvoiced == 0) {
 				}
 			}
 
-			$urlforplanprices = $conf->global->SELLYOURSAAS_PRICES_URL;
+			$urlforplanprices = getDolGlobalString('SELLYOURSAAS_PRICES_URL');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_PRICES_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
@@ -241,6 +241,8 @@ if ($foundcard) {
 
 
 if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {	// Use a SCA ready method
+	dol_syslog("Test if Stripe customer exists for current thirdparty (create it if not) and create the setupintent");
+
 	$fulltag='CUS='.$mythirdpartyaccount->id;
 	$fulltag=dol_string_unaccent($fulltag);
 
@@ -439,7 +441,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 				}
 			});
 
-		<?php
+	<?php
 } else { // Old method (not SCA ready)
 	print "
             	// Old code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION off and STRIPE_USE_NEW_CHECKOUT off

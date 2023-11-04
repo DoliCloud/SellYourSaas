@@ -68,7 +68,7 @@ $langs->loadLangs(array("main", "errors"));
 
 $db2=getDoliDBInstance('mysqli', $conf->global->DOLICLOUD_DATABASE_HOST, $conf->global->DOLICLOUD_DATABASE_USER, $conf->global->DOLICLOUD_DATABASE_PASS, $conf->global->DOLICLOUD_DATABASE_NAME, $conf->global->DOLICLOUD_DATABASE_PORT);
 if ($db2->error) {
-	dol_print_error($db2, "host=".$conf->global->DOLICLOUD_DATABASE_HOST.", port=".$conf->global->DOLICLOUD_DATABASE_PORT.", user=".$conf->global->DOLICLOUD_DATABASE_USER.", databasename=".$conf->global->DOLICLOUD_DATABASE_NAME.", ".$db2->error);
+	dol_print_error($db2, "host=" . getDolGlobalString('DOLICLOUD_DATABASE_HOST').", port=" . getDolGlobalString('DOLICLOUD_DATABASE_PORT').", user=" . getDolGlobalString('DOLICLOUD_DATABASE_USER').", databasename=" . getDolGlobalString('DOLICLOUD_DATABASE_NAME').", ".$db2->error);
 	exit(-1);
 }
 
@@ -341,7 +341,7 @@ if ($result <= 0 || $newobject->statut == 0) {
 	}
 
 	if (! empty($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG)) {
-		print "Set category of customer ".$conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG."\n";
+		print "Set category of customer " . getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG')."\n";
 		$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG), 'customer');
 		if ($result < 0) {
 			$db->rollback();
@@ -856,8 +856,8 @@ $newpassword=$newobject->password_web;
 $newloginbase=$newobject->username_db;
 $newpasswordbase=$newobject->password_db;
 
-$sourcedir=$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.$olddirdb;
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb;
+$sourcedir=getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$oldlogin.'/'.$olddirdb;
+$targetdir=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$newlogin.'/'.$newdirdb;
 $oldserver=$oldobject->hostname_os;
 $newserver=$newobject->array_options['options_hostname_os'];
 
@@ -866,8 +866,8 @@ if (empty($oldlogin) || empty($olddirdb)) {
 	exit(-5);
 }
 
-$oldsftpconnectstring=$oldobject->username_os.'@'.$oldobject->hostname_os.':'.$conf->global->DOLICLOUD_EXT_HOME.'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $olddirdb);
-$newsftpconnectstring=$newobject->username_os.'@'.$newobject->hostname_os.':'.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdirdb);
+$oldsftpconnectstring=$oldobject->username_os.'@'.$oldobject->hostname_os.':' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$oldlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $olddirdb);
+$newsftpconnectstring=$newobject->username_os.'@'.$newobject->hostname_os.':' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdirdb);
 
 print '--- Synchro of files '.$sourcedir.' to '.$targetdir."\n";
 print 'SFTP old connect string : '.$oldsftpconnectstring."\n";
@@ -924,7 +924,7 @@ print "\n";
 
 
 
-print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb."\n";
+print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." " . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.$newdirdb."\n";
 $output=array();
 $return_varchmod=0;
 if ($mode == 'confirm') {
@@ -932,7 +932,7 @@ if ($mode == 'confirm') {
 		print 'Bad value for data. We stop to avoid drama';
 		exit(-7);
 	}
-	exec("chown -R ".$newlogin.".".$newlogin." ".$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$newlogin.'/'.$newdirdb, $output, $return_varchmod);
+	exec("chown -R ".$newlogin.".".$newlogin." " . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.$newdirdb, $output, $return_varchmod);
 }
 
 // Output result
@@ -1060,7 +1060,7 @@ if ($mode == 'confirm') {
 	print "Finished. DON'T FORGET TO\n";
 	print " - SET INVOICING ON OLD SYSTEM FOR ".$oldinstance." TO MANUAL COLLECTION\n";
 	print " - CHANGE TEMPLATE INVOICE PRICE IF SPECIFIC INVOICING\n";
-	print " - CHANGE DNS /etc/bind/on.dolicloud.com.hosts OF ".$newobject->ref_customer." TO ".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP." AND THEN rndc reload on.dolicloud.com\n";
+	print " - CHANGE DNS /etc/bind/on.dolicloud.com.hosts OF ".$newobject->ref_customer." TO " . getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP')." AND THEN rndc reload on.dolicloud.com\n";
 } else {
 	print '-> Dump NOT loaded (test mode) into database '.$newobject->database_db.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
 	print "Finished. DON'T FORGET TO DELETE CONTRACT AND TEMPLATE INVOICE AFTER THIS TEST !!!\n";

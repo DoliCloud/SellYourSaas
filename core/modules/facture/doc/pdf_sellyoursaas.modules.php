@@ -48,9 +48,9 @@ class pdf_sellyoursaas extends pdf_crabe
 	 *
 	 *  @param		DoliDB		$db      Database handler
 	 */
-	function __construct($db)
+	public function __construct($db)
 	{
-		global $conf,$langs,$mysoc;
+		global $conf,$langs;
 
 		parent::__construct($db);
 
@@ -63,6 +63,7 @@ class pdf_sellyoursaas extends pdf_crabe
 	}
 
 
+	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.PublicUnderscore
 	/**
 	 *  Show top header of page.
 	 *
@@ -70,17 +71,19 @@ class pdf_sellyoursaas extends pdf_crabe
 	 *  @param  Object		$object     	Object to show
 	 *  @param  int	    	$showaddress    0=no, 1=yes
 	 *  @param  Translate	$outputlangs	Object lang for output
+	 *  @param  Translate	$outputlangsbis	Object lang bis for output
 	 *  @return	void
 	 */
-	function _pagehead(&$pdf, $object, $showaddress, $outputlangs, $outputlangsbis = null)
+	protected function _pagehead(&$pdf, $object, $showaddress, $outputlangs, $outputlangsbis = null)
 	{
+		// phpcs:enable
 		global $conf;
 
 		$savname = $this->emetteur->name;
 		$savlogo = $this->emetteur->logo;
 
 		if (!empty($conf->global->SELLYOURSAAS_NAME) && $conf->global->SELLYOURSAAS_NAME != $this->emetteur->name) {
-			$this->emetteur->name = $this->emetteur->name.' - '.$conf->global->SELLYOURSAAS_NAME;
+			$this->emetteur->name = $this->emetteur->name.' - ' . getDolGlobalString('SELLYOURSAAS_NAME');
 		}
 		$this->emetteur->logo = $conf->global->SELLYOURSAAS_LOGO;
 

@@ -3,6 +3,8 @@
 
 ## 2.1
 
+* NEW Better mesage on PDF in customer dashboard when PDF not yet available (SEPA payment).
+* NEW Add option --nostats to not update stats when doing a backup
 * NEW Show oldest date of backup ok/ko in popup on list of instances
 * NEW Removed a lot of useless or duplicated SQL request in remoteAction.
 * NEW Add a test on a signature of parameters provided to remoteaction

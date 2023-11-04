@@ -67,6 +67,10 @@ if ($fp) {
 		}
 	}
 }
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
 
 // Load Dolibarr environment
 $res=0;
@@ -87,7 +91,7 @@ if (! $res) {
 	exit(-1);
 }
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("/sellyoursaas/lib/sellyoursaas.lib.php");
 
 // Read /etc/sellyoursaas.conf file
@@ -100,6 +104,10 @@ $databasepass='';
 $usecompressformatforarchive='gzip';
 $emailfrom='';
 $emailsupervision='';
+$backupignoretables='';
+$backupcompressionalgorithms='';	// can be '' or 'zstd'
+$backuprsyncdayfrequency=1;	// Default value is an rsync every 1 day.
+$backupdumpdayfrequency=1;	// Default value is a sql dump every 1 day.
 $master_unique_id = '';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
@@ -128,6 +136,24 @@ if ($fp) {
 		if ($tmpline[0] == 'databasepass') {
 			$databasepass = $tmpline[1];
 		}
+		if ($tmpline[0] == 'dolibarrdir') {
+			$dolibarrdir = $tmpline[1];
+		}
+		if ($tmpline[0] == 'usecompressformatforarchive') {
+			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupignoretables') {
+			$backupignoretables = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupcompressionalgorithms') {
+			$backupcompressionalgorithms = preg_replace('/[^a-z]/', '', $tmpline[1]);
+		}
+		if ($tmpline[0] == 'backuprsyncdayfrequency') {
+			$backuprsyncdayfrequency = $tmpline[1];
+		}
+		if ($tmpline[0] == 'backupdumpdayfrequency') {
+			$backupdumpdayfrequency = $tmpline[1];
+		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = dol_string_nospecial($tmpline[1]);
 		}
@@ -145,6 +171,7 @@ if ($fp) {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit(-1);
 }
+
 if (empty($emailfrom)) {
 	$emailfrom="noreply@".$domain;
 }
@@ -152,9 +179,16 @@ if (empty($emailsupervision)) {
 	$emailsupervision="supervision@".$domain;
 }
 
-
 if (empty($dolibarrdir)) {
 	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+if (empty($backuprsyncdayfrequency)) {
+	print "Bad value for 'backuprsyncdayfrequency'. Must contains the number of days between each rsync.\n";
+	exit(-1);
+}
+if (empty($backupdumpdayfrequency)) {
+	print "Bad value for 'backupdumpdayfrequency'. Must contains the number of days between each sql dump.\n";
 	exit(-1);
 }
 
@@ -183,7 +217,7 @@ if (empty($db)) $db=$dbmaster;
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
 	print "Usage:   $script_file backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmysqldump instance [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
-	print "Example: $script_file ".$conf->global->DOLICLOUD_BACKUP_PATH."/osu123456/dbn789012  myinstance  31  testrsync\n";
+	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  myinstance  31  testrsync\n";
 	print "Note:    ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted user to have testrsync and confirmrsync working.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
@@ -231,8 +265,8 @@ dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 
 $object = new SellYourSaasContract($dbmaster);
 
-if (empty($conf->file->unique_instance_id)) {
-	$conf->file->unique_instance_id = empty($master_unique_id) ? '' : $master_unique_id;
+if (empty($conf->file->instance_unique_id)) {
+	$conf->file->instance_unique_id = empty($master_unique_id) ? '' : $master_unique_id;
 }
 
 $result=0;
@@ -271,7 +305,7 @@ if (! is_dir($dirroot)) {
 $dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 $login = $object->username_os;
 
-$targetdir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
+$targetdir=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$login.'/'.$dirdb;
 $server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
 
 if (empty($login) || empty($dirdb)) {
@@ -501,7 +535,7 @@ if (empty($return_var) && empty($return_varmysql)) {
 		$msg = 'Restore done without errors by '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." ".(empty($argv[3]) ? '' : $argv[3])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n";
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Restore instance - '.gethostname().'] Restore of user instance succeed.'."\n";
+		print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Restore instance - '.gethostname().'] Restore of user instance succeed.'."\n";
 		$cmail = new CMailFile('[Restore instance - '.gethostname().'] Restore of user instance succeed - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 		$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 		if (!$result) {
@@ -544,7 +578,7 @@ if (empty($return_var) && empty($return_varmysql)) {
 		$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." ".(empty($argv[3]) ? '' : $argv[3])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$return_var."\n".$return_varmysql;
 
 		include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-		print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in restoring - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
+		print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Warning] Error(s) in restoring - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
 		$cmail = new CMailFile('[Warning] Error(s) in restore process - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 		$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 		if (!$result) {

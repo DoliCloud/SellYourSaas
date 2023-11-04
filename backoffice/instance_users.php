@@ -44,7 +44,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/contract.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 dol_include_once('/sellyoursaas/class/packages.class.php');
 
@@ -102,7 +102,7 @@ if ($id > 0 || $ref) {
 	$id = $object->id;
 }
 
-$backupstring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/backup_instance.php '.$object->instance.' '.$conf->global->DOLICLOUD_INSTANCES_PATH;
+$backupstring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/backup_instance.php '.$object->instance.' ' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
 
 
 $instance = 'xxxx';
@@ -508,7 +508,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	 * Fiche en mode visualisation
 	 */
 
-	$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+		$newdb=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	}
 
 	if (is_object($newdb) && $newdb->connected) {
 		$fordolibarr = 1;
@@ -561,7 +563,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// Ref supplier
 	$morehtmlref.='<br>';
 	$morehtmlref.=$form->editfieldkey("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string', '', 0, 1);
-	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':'.$conf->global->THIRDPARTY_REF_INPUT_SIZE : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
+	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':' . getDolGlobalString('THIRDPARTY_REF_INPUT_SIZE') : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
 	// Thirdparty
 	$morehtmlref .= '<br>'.$object->thirdparty->getNomUrl(1, 'customer');
 	if (empty($conf->global->MAIN_DISABLE_OTHER_LINK) && $object->thirdparty->id > 0) {
@@ -623,7 +625,9 @@ $username_os = $object->array_options['options_username_os'];
 $password_os = $object->array_options['options_password_os'];
 $hostname_os = $object->array_options['options_hostname_os'];
 
-$dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+if ($object->array_options['options_deployment_status'] !== 'undeployed') {
+	$dbcustomerinstance=getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+}
 
 if (!$error && is_object($dbcustomerinstance) && $dbcustomerinstance->connected) {
 	// Get user/pass of last admin user
@@ -675,7 +679,7 @@ print '</form>'."\n";
 if (!$error && ! $user->socid) {
 	print '<div class="tabsAction">';
 
-	if ($user->rights->sellyoursaas->write) {
+	if ($user->hasRight('sellyoursaas', 'write')) {
 		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=createsupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('CreateSupportUser').'</a>';
 		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deletesupportuser&token='.newToken().($sortfield ? '&sortfield='.$sortfield.'&sortorder='.$sortorder : '').'">'.$langs->trans('DeleteSupportUser').'</a>';
 	}

@@ -24,7 +24,7 @@
 // Files with some functions
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
-include_once DOL_DOCUMENT_ROOT.'/contrat/class/contract.class.php';
+include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
 /**
@@ -80,43 +80,43 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 
 				// Check if authorized_keys_support exists
 				//$filecert="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/.ssh/authorized_keys_support';
-				$filecert="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
-				$fstat=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support');
+				$filecert="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os.'/.ssh/authorized_keys_support';    // With PHP 5.6.27+
+				$fstat=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/.ssh/authorized_keys_support');
 				// Create authorized_keys_support file
 				if (empty($fstat['atime']) || $recreateauthorizekey == 2) {
 					if ($recreateauthorizekey) {
-						@ssh2_sftp_mkdir($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh');
+						@ssh2_sftp_mkdir($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/.ssh');
 
 						$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 
 						// We overwrite authorized_keys_support
-						if ($printoutput) print 'Write file '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support.'."\n";
+						if ($printoutput) print 'Write file ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os.'/.ssh/authorized_keys_support.'."\n";
 
 						$stream = @fopen($filecert, 'w');
 						//var_dump($stream);exit;
 						if ($stream) {
 							fwrite($stream, $publickeystodeploy);
 							fclose($stream);
-							$fstat=ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/.ssh/authorized_keys_support');
+							$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/.ssh/authorized_keys_support');
 						} else {
 							$errors[]='Failed to open for write '.$filecert."\n";
 						}
 					} else {
-						if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os."/.ssh/authorized_keys_support not found.\n";
+						if ($printoutput) print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support not found.\n";
 					}
 				} else {
-					if ($printoutput) print 'File '.$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os."/.ssh/authorized_keys_support already exists.\n";
+					if ($printoutput) print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support already exists.\n";
 				}
 				$object->fileauthorizedkey=(empty($fstat['mtime'])?'':$fstat['mtime']);
 
 				// Check if install.lock exists
 				//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 				//$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/install.lock';    // With PHP 5.6.27+
-				$fstatlock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/install.lock');
+				$fstatlock=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/'.$dir.'/documents/install.lock');
 				$object->filelock=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
 
 				// Check if installmodules.lock exists
-				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
+				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
 				$object->fileinstallmoduleslock=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
 
 				// Define dates
@@ -284,9 +284,9 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 				}
 			}
 
-			$sqltogetlastloginadmin = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE admin = 1 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+			$sqltogetlastloginadmin = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE admin = 1 AND login <> '" . getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')."' ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 			$sqltogetmodules = "SELECT name, value FROM ".$prefix_db."const WHERE name LIKE 'MAIN_MODULE_%' or name = 'MAIN_VERSION_LAST_UPGRADE' or name = 'MAIN_VERSION_LAST_INSTALL'";
-			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."' ORDER BY datelastlogin DESC LIMIT 1";
+			$sqltogetlastloginuser = "SELECT login, pass, datelastlogin FROM ".$prefix_db."user WHERE statut <> 0 AND login <> '" . getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')."' ORDER BY datelastlogin DESC LIMIT 1";
 
 			// Get user/pass of last admin user
 			if (! $error) {
@@ -416,7 +416,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 	$now = dol_now();
 
-	// Get list of deployed instances
+	// Get list of living deployed instances (to get stats on deployment status, paying status, ...)
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
 	$sql.= " ce.deployment_status as instance_status,";
 	$sql.= " s.parent, s.nom as name";
@@ -443,12 +443,12 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 		$i = 0;
 		if ($num) {
-			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 			include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
+			dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
 			dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 
 			$now = dol_now();
-			$object = new Contrat($db);
+			$object = new SellYourSaasContract($db);
 			$templateinvoice = new FactureRec($db);
 			//$cacheofthirdparties = array();
 
@@ -459,12 +459,14 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 					// We process the instance (ref_customer)
 					$instance = $obj->instance;
 
+					dol_syslog("sellyoursaas_calculate_stats analyze ".$instance, LOG_DEBUG);
+
 					unset($object->linkedObjects);
 					unset($object->linkedObjectsIds);
 
 					// Load data of instance and set $instance_status (PROCESSING, DEPLOYED, SUSPENDED, UNDEPLOYED)
 					$instance_status = 'UNKNOWN';
-					$result = $object->fetch($obj->id);
+					$result = $object->fetch($obj->id);	// Make the fetch_lines() required later in the sellyoursaasGetExpirationDate()
 					if ($result <= 0) {
 						$i++;
 						dol_print_error($db, $object->error, $object->errors);
@@ -480,7 +482,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 							$nbofinstancedeployed++;
 						}
 						if ($instance_status == 'DEPLOYED') {
-							$issuspended = sellyoursaasIsSuspended($object);
+							$issuspended = sellyoursaasIsSuspended($object);	// Use the property ->nb... loaded by the fetch_lines() in the fetch()
 							if ($issuspended) {
 								$instance_status = 'SUSPENDED';
 							}
@@ -492,7 +494,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 
 						// Load array $tmpdata
-						$tmpdata = sellyoursaasGetExpirationDate($object, 0);
+						$tmpdata = sellyoursaasGetExpirationDate($object, 0);	// Loop on $object->lines
 						$nbofuser = $tmpdata['nbusers'];
 						$totalinstances++;
 						$totalusers+=$nbofuser;
@@ -500,7 +502,10 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 						// Set $payment_status ('TRIAL', 'PAID' or 'FAILURE')
 						$payment_status='PAID';
-						$ispaid = sellyoursaasIsPaidInstance($object, 0, 0);	// Return true if instance $object is paying instance (invoice or template invoice exists)
+
+						// This load linkedObjectsIds
+						$ispaid = sellyoursaasIsPaidInstance($object, 0, 0);	// Make the fetchObjectLink(). Return true if instance $object is paying instance (invoice or template invoice exists)
+
 						if (! $ispaid) {		// This is a test only customer, trial expired or not, suspended or not (just no invoice or template invoice at all)
 							$payment_status='TRIAL';
 
@@ -518,7 +523,7 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 							$listofcustomerstrial[$obj->customer_id]++;	// This is the total of trial only customers
 							//print "cpt=".$totalinstances." customer_id=".$obj->customer_id." instance=".$obj->instance." status=".$obj->status." instance_status=".$obj->instance_status." payment_status=".$obj->payment_status." => Price = ".$obj->price_instance.' * '.($obj->plan_meter_id == 1 ? $obj->nbofusers : 1)." + ".max(0,($obj->nbofusers - $obj->min_threshold))." * ".$obj->price_user." = ".$price." -> 0<br>\n";
 						} else {
-							$ispaymentko = sellyoursaasIsPaymentKo($object);
+							$ispaymentko = sellyoursaasIsPaymentKo($object);	// Read table of actioncomm to find if payment error on an open invoice linked to contract
 							if ($ispaymentko) {
 								$payment_status='FAILURE';
 							}
@@ -544,25 +549,34 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 									$templateinvoice->suspended = 0;
 									$templateinvoice->unit_frequency = 0;
 									$templateinvoice->total_ht = 0;
+									$templateinvoice->total_ttc = 0;
 									$templateinvoice->frequency = 0;
 
-									$result = $templateinvoice->fetch($idtemplateinvoice);
+									$nolines = 1;
+									$noextrafields = 1;
+
+									$result = $templateinvoice->fetch($idtemplateinvoice, '', '', $noextrafields, $nolines);
 									if ($result > 0) {
 										if (! $templateinvoice->suspended) {
 											if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency >= 1) {
-												$price += $templateinvoice->total_ht / $templateinvoice->frequency;
-												$price_ttc += $templateinvoice->total_ttc / $templateinvoice->frequency;
+												$pricem = $templateinvoice->total_ht / $templateinvoice->frequency;
+												$price_ttcm = $templateinvoice->total_ttc / $templateinvoice->frequency;
 											} elseif ($templateinvoice->unit_frequency == 'y' && $templateinvoice->frequency >= 1) {
-												$price += ($templateinvoice->total_ht / (12 * $templateinvoice->frequency));
-												$price_ttc += ($templateinvoice->total_ttc / (12 * $templateinvoice->frequency));
+												$pricem = ($templateinvoice->total_ht / (12 * $templateinvoice->frequency));
+												$price_ttcm = ($templateinvoice->total_ttc / (12 * $templateinvoice->frequency));
 											} else {
-												$price += $templateinvoice->total_ht;
-												$price_ttc += $templateinvoice->total_ttc;
+												$pricem = $templateinvoice->total_ht;
+												$price_ttcm = $templateinvoice->total_ttc;
+											}
+
+											if (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') <= 0 || $pricem < getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
+												$price += $pricem;
+												$price_ttc += $price_ttcm;
 											}
 
 											$atleastonenotsuspended = 1;
 										} else {
-											$listofsuspendedrecurringinvoice[$idtemplateinvoice]=$idtemplateinvoice;
+											$listofsuspendedrecurringinvoice[$idtemplateinvoice] = $idtemplateinvoice;
 										}
 									} else {
 										$error++;
@@ -621,31 +635,48 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 		dol_print_error($db);
 	}
 
-	dol_syslog("sellyoursaas_calculate_stats end", LOG_DEBUG, -1);
+	dol_syslog("sellyoursaas_calculate_stats end of getting list of instance", LOG_DEBUG, -1);
 
 
 	// Get list of new deployed instances
 	$sql = "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
-	$sql.= " ce.deployment_status as instance_status,";
 	$sql.= " s.parent, s.nom as name,";
 	$sql.= " f.total_ht, f.unit_frequency";
-	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
-	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object,";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
 	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
 	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
 	$sql.= " ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
-	//$sql.= " AND ce.deployment_status = 'done'";
-	//$sql.= " AND f.suspended = 0";
-	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
-	$sql.= " AND ((ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid)";
-	$sql.= " OR (ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid))";
+	$sql.= " AND ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid";
 	if ($datelim && ($datelim < $now)) {
 		$sql.= " AND f.datec <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
 	}
 	if ($datefirstday) {
 		$sql.= " AND f.datec >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
 	}
+	// We exclude contracts that are redirection contracts
+	$sql .= " AND NOT EXISTS (SELECT ce.rowid FROM llx_contrat_extrafields as ce WHERE ce.fk_object=c.rowid AND ce.suspendmaintenance_message LIKE 'http%')";
+
+	$sql .= " UNION ";
+
+	$sql.= "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
+	$sql.= " s.parent, s.nom as name,";
+	$sql.= " f.total_ht, f.unit_frequency";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
+	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
+	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
+	$sql.= " ".MAIN_DB_PREFIX."societe as s";
+	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
+	$sql.= " AND ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid";
+	if ($datelim && ($datelim < $now)) {
+		$sql.= " AND f.datec <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
+	}
+	if ($datefirstday) {
+		$sql.= " AND f.datec >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
+	}
+	// We exclude contracts that are redirection contracts
+	$sql .= " AND NOT EXISTS (SELECT ce.rowid FROM llx_contrat_extrafields as ce WHERE ce.fk_object=c.rowid AND ce.suspendmaintenance_message LIKE 'http%')";
+
 
 	dol_syslog("sellyoursaas_calculate_stats new begin", LOG_DEBUG, 1);
 
@@ -660,16 +691,23 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
-					if (!isset($listofnewinstances[$obj->customer_id])) {
-						$listofnewinstances[$obj->customer_id] = 0;
+					if (!isset($listofnewinstances[$obj->id])) {
+						$listofnewinstances[$obj->id] = 0;
+					} else {
+						continue;	// We have already processed this contract
 					}
-					$listofnewinstances[$obj->customer_id]++;
+
+					$listofnewinstances[$obj->id]++;
 
 					$nbmonth = 1;
 					if ($obj->unit_frequency == 'y') {
 						$nbmonth = 12;
 					}
-					$totalnewinstances += ($obj->total_ht / $nbmonth);
+
+					$pricem = ($obj->total_ht / $nbmonth);
+					if (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') <= 0 || $pricem < getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
+						$totalnewinstances += $pricem;
+					}
 				}
 				$i++;
 			}
@@ -684,23 +722,43 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	$sql.= " ce.deployment_status as instance_status, ce.undeployment_date,";
 	$sql.= " s.parent, s.nom as name,";
 	$sql.= " f.total_ht, f.unit_frequency";
-	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
-	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object,";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
+	$sql.= " ".MAIN_DB_PREFIX."contrat_extrafields as ce,";
 	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
 	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
 	$sql.= " ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
-	$sql.= " AND ce.deployment_status = 'undeployed'";
-	//$sql.= " AND f.suspended = 0";
-	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
-	$sql.= " AND ((ee.sourcetype = 'contrat' AND ee.fk_source = c.rowid AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid)";
-	$sql.= " OR (ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = c.rowid))";
+	$sql.= " AND ee.sourcetype = 'contrat' AND ee.fk_source = ce.fk_object AND ee.targettype = 'facturerec' AND ee.fk_target = f.rowid";
 	if ($datelim && ($datelim < $now)) {
 		$sql.= " AND ce.undeployment_date <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
 	}
 	if ($datefirstday) {
 		$sql.= " AND ce.undeployment_date >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
 	}
+	$sql.= " AND c.rowid = ce.fk_object AND ce.deployment_status = 'undeployed'";
+	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
+
+	$sql.= " UNION ";
+
+	$sql.= "SELECT c.rowid as id, c.ref_customer as instance, c.fk_soc as customer_id,";
+	$sql.= " ce.deployment_status as instance_status, ce.undeployment_date,";
+	$sql.= " s.parent, s.nom as name,";
+	$sql.= " f.total_ht, f.unit_frequency";
+	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
+	$sql.= " ".MAIN_DB_PREFIX."contrat_extrafields as ce,";
+	$sql.= " ".MAIN_DB_PREFIX."element_element as ee,";
+	$sql.= " ".MAIN_DB_PREFIX."facture_rec as f,";
+	$sql.= " ".MAIN_DB_PREFIX."societe as s";
+	$sql.= " WHERE s.rowid = c.fk_soc AND c.ref_customer <> '' AND c.ref_customer IS NOT NULL";	// client or client + prospect
+	$sql.= " AND ee.sourcetype = 'facturerec' AND ee.fk_source = f.rowid AND ee.targettype = 'contrat' AND ee.fk_target = ce.fk_object";
+	if ($datelim && ($datelim < $now)) {
+		$sql.= " AND ce.undeployment_date <= '".$db->idate($datelim)."'";	// Only instances deployed with end before this date
+	}
+	if ($datefirstday) {
+		$sql.= " AND ce.undeployment_date >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
+	}
+	$sql.= " AND c.rowid = ce.fk_object AND ce.deployment_status = 'undeployed'";
+	$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instances of type redirect
 
 	dol_syslog("sellyoursaas_calculate_stats lostinstances begin", LOG_DEBUG, 1);
 
@@ -715,15 +773,20 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 			while ($i < $num) {
 				$obj = $db->fetch_object($resql);
 				if ($obj) {
-					if (!isset($listoflostinstances[$obj->customer_id])) {
-						$listoflostinstances[$obj->customer_id] = 0;
+					if (!isset($listoflostinstances[$obj->id])) {
+						$listoflostinstances[$obj->id] = 0;
+					} else {
+						continue;	// We have already processed this contract
 					}
-					$listoflostinstances[$obj->customer_id]++;
+					$listoflostinstances[$obj->id]++;
 					$nbmonth = 1;
 					if ($obj->unit_frequency == 'y') {
 						$nbmonth = 12;
 					}
-					$totallostinstances += ($obj->total_ht / $nbmonth);
+					$pricem = ($obj->total_ht / $nbmonth);
+					if (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') <= 0 || $pricem < getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
+						$totallostinstances += $pricem;
+					}
 				}
 				$i++;
 			}

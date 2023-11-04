@@ -691,7 +691,8 @@ if (isset($extrafields->attributes[$object->table_element]['computed']) && is_ar
 $openinstances = array();
 $backupokinstances = array();
 $backuptotalinstances = array();
-$backuptotalinstancesremote = array();
+$backuptotalinstancesremote = array();		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
+
 $sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko,";
@@ -734,6 +735,7 @@ while ($i < $imaxinloop) {
 			print '<div class="box-flex-container kanban">';
 		}
 		// Output Kanban
+		$selected = -1;
 		if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
 			$selected = 0;
 			if (in_array($object->id, $arrayofselected)) {
@@ -744,7 +746,8 @@ while ($i < $imaxinloop) {
 		$object->nb_backuptotal = empty($backuptotalinstances[$obj->ipaddress]) ? 0 : $backuptotalinstances[$obj->ipaddress];
 		$object->nb_backuptotalremote = empty($backuptotalinstancesremote[$obj->ipaddress]) ? 0 : $backuptotalinstancesremote[$obj->ipaddress];
 		$object->nb_backupok = empty($backupokinstances[$obj->ipaddress]) ? 0 : $backupokinstances[$obj->ipaddress];
-		print $object->getKanbanView('', array('selected' => in_array($object->id, $arrayofselected)));
+
+		print $object->getKanbanView('', array('selected' => $selected));
 		if ($i == ($imaxinloop - 1)) {
 			print '</div>';
 			print '</td></tr>';
@@ -786,8 +789,8 @@ while ($i < $imaxinloop) {
 				$cssforfield .= ($cssforfield ? ' ' : '').'right';
 			}
 			if (!empty($arrayfields['t.'.$key]['checked'])) {
-				print '<td'.($cssforfield ? ' class="'.$cssforfield.(preg_match('/tdoverflow/', $cssforfield) ? ' classfortooltip' : '').'"' : '');
-				if (preg_match('/tdoverflow/', $cssforfield) && !is_numeric($object->$key)) {
+				print '<td'.($cssforfield ? ' class="'.$cssforfield.((preg_match('/tdoverflow/', $cssforfield) && $key != 'ref') ? ' classfortooltip' : '').'"' : '');
+				if (preg_match('/tdoverflow/', $cssforfield) && !in_array($val['type'], array('ip', 'url')) && !is_numeric($object->$key)) {
 					print ' title="'.dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($object->$key), 1, 1, 1)).'"';
 				}
 				print '>';
@@ -898,7 +901,7 @@ while ($i < $imaxinloop) {
 			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
 			if (!empty($backuptotalinstances[$obj->ipaddress])) {
 				if ($backupokinstances[$obj->ipaddress] != $backuptotalinstances[$obj->ipaddress]) {
-					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->options_deployment_host).'">';
+					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->ipaddress).'">';
 					print img_warning($langs->trans("Errors"), '', 'paddingrightonly');
 					print '<span class="error">';
 				}

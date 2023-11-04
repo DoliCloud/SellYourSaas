@@ -105,7 +105,7 @@ class ActionsSellyoursaas
 							if (! empty($conf->global->$newurlkey)) {
 								$urlmyaccount = $conf->global->$newurlkey;
 							} else {
-								$urlmyaccount = preg_replace('/'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
+								$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
 							}
 
 							$sellyoursaasname = $conf->global->$newnamekey;
@@ -236,8 +236,8 @@ class ActionsSellyoursaas
 			if ($user->hasRight('sellyoursaas', 'write')) {
 				if (in_array($object->array_options['options_deployment_status'], array('processing', 'undeployed'))) {
 					if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-						$alt = $langs->trans("SellYourSaasSubDomains").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES;
-						$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' '.$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP;
+						$alt = $langs->trans("SellYourSaasSubDomains").' ' . getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES');
+						$alt.= '<br>'.$langs->trans("SellYourSaasSubDomainsIP").' ' . getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP');
 					} else {
 						$listsubdomainname = array();
 						$listsubdomainip = array();
@@ -247,6 +247,7 @@ class ActionsSellyoursaas
 						$resql = $this->db->query($sql);
 						if ($resql) {
 							$num = $this->db->num_rows($resql);
+							$i = 0;
 							while ($i < $num) {
 								$obj = $this->db->fetch_object($resql);
 								$listsubdomainname[] = $obj->ref;
@@ -541,7 +542,7 @@ class ActionsSellyoursaas
 				$newid = GETPOST('socid', 'int');
 
 				if ($newid != $object->thirdparty->id) {
-					$object->oldcopy = dol_clone($object);
+					$object->oldcopy = dol_clone($object, 2);
 
 					$object->fk_soc = $newid;
 					$object->socid = $newid;
@@ -562,7 +563,7 @@ class ActionsSellyoursaas
 								$tmpfacturerec = new FactureRec($this->db);
 								$result = $tmpfacturerec->fetch($val);
 								if ($result > 0) {
-									$tmpfacturerec->oldcopy = dol_clone($tmpfacturerec);
+									$tmpfacturerec->oldcopy = dol_clone($tmpfacturerec, 2);
 									$tmpfacturerec->fk_soc = $newid;
 									$tmpfacturerec->socid = $newid;
 

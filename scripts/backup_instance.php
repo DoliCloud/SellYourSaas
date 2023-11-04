@@ -82,6 +82,46 @@ foreach ($keystocheck as $keytocheck) {
 @set_time_limit(0);							// No timeout for this script
 define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
+// Read /etc/sellyoursaas.conf file just for $dolibarrdir
+$dolibarrdir='';
+$fp = @fopen('/etc/sellyoursaas.conf', 'r');
+// Add each line to an array
+if ($fp) {
+	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
+	foreach ($array as $val) {
+		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'dolibarrdir') {
+			$dolibarrdir = preg_replace('/[^a-zA-Z0-9_\-\/]/', '', $tmpline[1]);
+		}
+	}
+}
+if (empty($dolibarrdir)) {
+	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
+	exit(-1);
+}
+
+// Load Dolibarr environment
+$res=0;
+// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+// Try master.inc.php using relative path
+if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
+if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
+if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include $dolibarrdir."/htdocs/master.inc.php";
+if (! $res) {
+	print ("Include of master fails");
+	exit(-1);
+}
+
+include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
+
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
 $databaseport='3306';
@@ -159,28 +199,6 @@ if (empty($backupdumpdayfrequency)) {
 	exit(-1);
 }
 
-// Load Dolibarr environment
-$res=0;
-// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
-// Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
-if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include $dolibarrdir."/htdocs/master.inc.php";
-if (! $res) {
-	print ("Include of master fails");
-	exit(-1);
-}
-
-include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
-
 $return_varother = 0;
 $return_var = 0;
 $return_varmysql = 0;
@@ -209,6 +227,10 @@ if ($dbmaster->error) {
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
+if (empty($conf->file->instance_unique_id)) {
+	$conf->file->instance_unique_id = empty($master_unique_id) ? '' : $master_unique_id;
+	//print 'instance_unique_id used to decrypt data will be '.substr($conf->file->instance_unique_id, 0, 4) . str_repeat('*', strlen($conf->file->instance_unique_id) - 4)."\n";
+}
 if (empty($db)) {
 	$db = $dbmaster;
 }
@@ -216,7 +238,7 @@ if (empty($db)) {
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' user.\n";
 	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick] [--forcersync] [--forcedump] [--nostats]\n";
-	print "Example: $script_file  myinstance  ".$conf->global->DOLICLOUD_BACKUP_PATH."  testrsync\n";
+	print "Example: $script_file  myinstance  " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
 	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
 	print "         the parameter --delete run the rsync with the --delete option\n";
@@ -271,10 +293,6 @@ dol_include_once('/sellyoursaas/class/sellyoursaascontract.class.php');
 
 $object = new SellYourSaasContract($dbmaster);
 
-if (empty($conf->file->unique_instance_id)) {
-	$conf->file->unique_instance_id = empty($master_unique_id) ? '' : $master_unique_id;
-}
-
 $result=0;
 if ($idofinstancefound) {
 	$result = $object->fetch($idofinstancefound);
@@ -310,7 +328,7 @@ if (! is_dir($dirroot)) {
 $dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 $login = $object->username_os;
 
-$sourcedir=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$login.'/'.$dirdb;
+$sourcedir=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$login.'/'.$dirdb;
 $server=($object->deployment_host ? $object->deployment_host : $object->array_options['options_hostname_os']);
 
 if (empty($login) || empty($dirdb)) {
@@ -343,6 +361,8 @@ if ($mode == 'confirm' || $mode == 'confirmrsync' || $mode == 'confirmdatabase')
 		}
 	}
 }
+
+$linesforresult = '';
 
 // Backup files
 if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm') {
@@ -430,7 +450,7 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		//$param[] = (in_array($server, array('127.0.0.1','localhost')) ? '' : $login.'@'.$server.":") . $sourcedir;
 		$param[] = $login.'@'.$server.":" . $sourcedir;
 		$param[] = $dirroot.'/'.$login;
-		$fullcommand=$command." ".join(" ", $param);
+		$fullcommand=$command." ".join(" ", $param)." 2>&1";
 		$output=array();
 		$datebeforersync = dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt');
 		print $datebeforersync.' '.$fullcommand."\n";
@@ -439,8 +459,11 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		print $dateafterrsync.' rsync done (return='.$return_var.')'."\n";
 
 		// Output result
+		$i = 0;
 		foreach ($output as $outputline) {
 			print $outputline."\n";
+			$linesforresult .= $outputline."\n";
+			$i++;
 		}
 
 		// Add file tag
@@ -570,6 +593,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 		$outputerr = file_get_contents($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err');
 		print $outputerr;
+		$linesforresult .= $outputerr."\n";
 
 		$return_outputmysql = (count(file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err')) - 1);	// If there is more than 1 line in .err, this is an error in dump.
 		if (empty($return_outputmysql)) {	// If no error detected with the number of lines, we try also to detect by searching ' Error ' into .err content
@@ -613,8 +637,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		print $dateaftermysqldump.' mysqldump done (return='.$return_varmysql.', error in output='.$return_outputmysql.')'."\n";
 
 		// Output result
+		$i = 0;
 		foreach ($output as $outputline) {
 			print $outputline."\n";
+			$linesforresult .= $outputline."\n";
+			$i++;
 		}
 
 		// Add file tag
@@ -690,7 +717,7 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		// Update database
 		$object->array_options['options_latestbackup_date'] = $now;	// date latest files and database rsync backup try
 		$object->array_options['options_latestbackup_status'] = 'KO';
-		$object->array_options['options_latestbackup_message'] = dol_trunc('', 8000);
+		$object->array_options['options_latestbackup_message'] = dol_trunc($linesforresult, 8000);
 
 		$object->update($user, 1);
 

@@ -44,7 +44,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/date.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php";
-dol_include_once("/sellyoursaas/core/lib/dolicloud.lib.php");
+dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
 $langs->loadLangs(array("admin", "companies", "users", "other", "commercial", "bills", "sellyoursaas@sellyoursaas"));

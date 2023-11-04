@@ -79,12 +79,16 @@ include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// 
 
 // Global variables
 $FORCE=0;
-if (!empty($argv[2]) && $argv[2] == '--force') {
-	unset($argv[2]);
-	$FORCE=1;
-}
-if (!empty($argv[3]) && $argv[3] == '--force') {
-	$FORCE=1;
+$NOSTATS=0;
+$keystocheck = array(3, 3, 4);
+foreach ($keystocheck as $keytocheck) {
+	if (isset($argv[$keytocheck])) {
+		if ($argv[$keytocheck] == '--force') {
+			$FORCE=1;
+		} elseif ($argv[$keytocheck] == '--nostats') {
+			$NOSTATS=1;
+		}
+	}
 }
 
 // Read /etc/sellyoursaas.conf file
@@ -162,7 +166,7 @@ if ($dbmaster->error) {
 	$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
 	$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
-	$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$dbmaster->error;
+	$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\nFailed to connect to the master database server at host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database."\n".$dbmaster->error;
 
 	include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 	print 'Send email MAIN_MAIL_SENDMODE='.getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER='.getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
@@ -194,8 +198,8 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter] [--force]\n";
-	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force]\n";
+	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter] [--force] [--nostats]\n";
+	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force] [--nostats]\n";
 	print "\n";
 	print "action can be:\n";
 	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
@@ -441,11 +445,14 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 				if ($action == 'backupdeleteexclude') {
 					$command .= ' --delete --delete-excluded';
 				}
+				//$command .= " --notransaction";
+				$command .= " --quick";
 				if ($FORCE) {
 					$command .= ' --forcersync --forcedump';
 				}
-				//$command .= " --notransaction";
-				$command .= " --quick";
+				if ($NOSTATS) {
+					$command .= ' --nostats';
+				}
 
 				echo $command."\n";
 
@@ -687,18 +694,8 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 } else {
 	$out.= "***** Summary for all deployment servers\n";
 }
-$out.= "** Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
-$out.= "** Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
-$out.= "** Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
-$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n\n":"\n");
-$out.= "** Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
-$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n":"\n");
-$out.= "** Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
-$out.= "** Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
-$out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
-
 if ($action != 'updatestatsonly') {
-	$out.= "** Nb of paying instances processed ko: ".$nboferrors;
+	$out.= "\n** Nb of paying instances processed ko: ".$nboferrors;
 }
 if (count($instancesbackuperror)) {
 	$out.= ", ERROR FOR BACKUP ON ";
@@ -715,8 +712,20 @@ if (count($instancesupdateerror)) {
 
 $out.= "\n\n";
 
+$out.= "* Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
+$out.= "* Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
+$out.= "* Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
+$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n\n":"\n");
+$out.= "* Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
+$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n":"\n");
+$out.= "* Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
+$out.= "* Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
+$out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
+
+$out.= "\n\n";
+
 if ($action != 'updatestatsonly') {
-	$out.= "** Nb of paying instances processed ok+discarded: ".$nbofok."+".$nbofokdiscarded."=".($nbofok + $nbofokdiscarded);
+	$out.= "* Nb of paying instances processed ok+discarded: ".$nbofok."+".$nbofokdiscarded."=".($nbofok + $nbofokdiscarded);
 }
 if (count($instancesbackupsuccess)) {
 	$out.= ", success for backup on ";
@@ -796,7 +805,7 @@ if (! $nboferrors) {
 			}*/
 
 			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Backup instances - '.gethostname().'] Backup of user instances succeed'."\n";
+			print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Backup instances - '.gethostname().'] Backup of user instances succeed'."\n";
 			$cmail = new CMailFile('[Backup instances - '.gethostname().'] Backup of user instances succeed', $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 			$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 			if (!$result) {
@@ -823,7 +832,7 @@ if (! $nboferrors) {
 			$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
 			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			print 'Send email MAIN_MAIL_SENDMODE='.$conf->global->MAIN_MAIL_SENDMODE.' MAIN_MAIL_SMTP_SERVER='.$conf->global->MAIN_MAIL_SMTP_SERVER.' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
+			print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
 			$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 			$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 			if (!$result) {

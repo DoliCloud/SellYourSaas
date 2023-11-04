@@ -750,7 +750,7 @@ git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 
-=== Creation of sellyoursaas.conf with credentials
+=== Creation of /.conf with credentials
 
 * Create a file */etc/sellyoursaas.conf* on the server (on the server *Master* and the *Deployment servers*)
 
@@ -1811,6 +1811,9 @@ echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - 
 Note: To test a rule file on an existing log file:
 fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
+Note: To ban an IP
+fail2ban-client set nameofjail banip IP.to.unban
+
 Note: To unban an IP
 fail2ban-client unban IP.to.unban
 
@@ -2199,6 +2202,7 @@ Complete the file */etc/postfix/main.cf* with:
 ---------------
 #mydestination = $myhostname, myserver, localhost.localdomain, localhost
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
+#WARNING: This value must match the same value than domain in /etc/mailname
 myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
@@ -2471,7 +2475,7 @@ On *all servers*:
 ---------------
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
 -- For newer versions of mariadb, you must also do:
-UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE User='root';
+UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE user='root';
 
 FLUSH PRIVILEGES;
 ---------------
@@ -2540,7 +2544,7 @@ Note: To delete active plugins, empty the mysql *plugin* table. See "Starting my
 [[creer_un_compte_db_sellyoursaas]]
 ==== Create a user sellyoursaas to control databases of user instances
 
-On the *Master* server and each *Deployment server*, grant access localy to the login *sellyoursaas*:
+On the *Master* server and on each *Deployment server*, grant access localy to the login *sellyoursaas*:
 
 [source,sql]
 ---------------
@@ -2553,22 +2557,26 @@ GRANT CREATE, CREATE TEMPORARY TABLES, CREATE VIEW, DROP, DELETE, INSERT, SELECT
 FLUSH PRIVILEGES;
 ---------------
 
+
 Give permission, on the *Master server*, to the account *sellyoursaas* for each deployment server, on the database *dolibarr* (so the mysql client on deployment server can connect to the database):
 
 [source,sql]
 ---------------
 CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (password is the one into /etc/sellyoursaas.conf of the deployment server)
 
-GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
+GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON databasename_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
 
 FLUSH PRIVILEGES;
 ---------------
 
 --TODO Reduce permissions of this database user sellyoursaas
 This is used by:
-* the batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
-* the batch *batch_detect_evil_instances.php* to SELECT contracts
-* the batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm 
+* the root batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
+* the root batch *batch_detect_evil_instances.php* to SELECT contracts
+* the admin batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm 
+* the admin batch *backup_instance.php* to get and update properties of instances to backup 
+* the admin batch *restore_instance.php* to get and update properties of instances to restore 
+* the admin batch *backup_backup.php* to update status of remote backup 
 
 Note: If the user already exists, to set only the password:
 
@@ -3378,8 +3386,7 @@ Take into account the change with:
 
 [source,bash]
 ---------------
-systemctl stop systemd-journald
-systemctl start systemd-journald
+systemctl stop systemd-journald; systemctl start systemd-journald
 ---------------
 
 To force clear of journal:
@@ -3503,9 +3510,11 @@ Run cerbot with the following command line (you can test it beforehand by adding
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
+certbot certonly -n [--manual-public-ip-logging-ok] --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
 ---------------
 
+The option [--expand] is to concate the result to the existing certificate when you want to add another domain.
+ 
 For example, you can use *supervision@mysaasdomainname.com* as the email for letsencrypt account.
 
 This create certificates and also enable the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
@@ -5548,7 +5557,13 @@ Error when sending email in */var/log/mail.log*
 Check in file */etc/apparmor.d/usr.sbin.apache2* that /etc/passwd is not denied.
 
 
-==== Error sometimes when sendig emails with Gmail
+==== Error when sending email by the cron of a user. EMail is sent to the external relay instead of locally.
+
+When cron fails, and email must be sent locally. If it is not sent locally, it means the value of domain into */etc/mailname* does not match the one
+into the parameter *myhostname* or *mydestination* in file */etc/postfix/main.cf*
+
+
+==== Error sometimes when sending emails with Gmail
 
 If you have error like this one
 ------------
@@ -5981,6 +5996,42 @@ init_config:
     postfix_user: postfix
     min_collection_interval: 300
 ---------------
+
+
+==== Error HTTP_DATA_ERROR, CertPathValidatorException when using DoliDroid
+
+If you see this king of log into a DoliDroid session:
+
+[12345] Stop requested with status HTTP_DATA_ERROR: java.security.cert.CertPathValidatorException: Trust anchor for certification path not found.
+
+=> Android need to have the CA certificate and intermediate into the main certificate.
+
+First check your certificate with the command
+openssl s_client -connect myinstance.withX.myaaasdomain.com:443
+
+Take a look at the section "*Certificate chain*".
+If you like this
+Certificate chain
+ 0 s:/C=US/ST=California/L=Mountain View/O=Google LLC/CN=mail.google.com
+   i:/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte SGC CA
+ 1 s:/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte SGC CA
+   i:/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authority
+   
+It means main certificate was verified by Thawte and Thawte was verified by VeriSign
+
+But if you have only
+Certificate chain
+ 0 s:CN = *.with1.doliasso.org
+   i:C = US, O = Let's Encrypt, CN = R3
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Sep  1 10:49:46 2023 GMT; NotAfter: Nov 30 10:49:45 2023 GMT
+
+It means main certificate was verified by Let's Encrypt but the issuer of Let's encrypt is not included
+
+See https://developer.android.com/privacy-and-security/security-ssl#MissingCa
+
+Fix this by setting correctly your SSLxxx variable in your apache virtual host.
+
 
 
 
