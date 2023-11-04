@@ -4547,7 +4547,7 @@ class SellYourSaasUtils
 	 * Note: SELLYOURSAAS_SUB_DOMAIN_IP has format    '1.2.3.4,5.6.7.8,...'
 	 *
 	 * @param	string		$domainname		Domain name to select remote ip to deploy to (example: 'home.lan', 'withX.mysellyoursaasdomain.com', ...)
-	 * @param	int			$onlyifopen		0
+	 * @param	int			$onlyifopen		0 by default, If 1 and server is closed, return ''
 	 * @return	string						'' if KO, IP if OK
 	 */
 	public function getRemoteServerDeploymentIp($domainname, $onlyifopen = 0)
@@ -4580,8 +4580,8 @@ class SellYourSaasUtils
 				$this->errors[] = "Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
 				$error++;
 			} else {
-				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
-				$REMOTEIPTODEPLOYTO=$tmparray[($found-1)];
+				$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+				$REMOTEIPTODEPLOYTO = $tmparray[($found-1)];
 				if (! $REMOTEIPTODEPLOYTO) {
 					dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP".$conf->global->SELLYOURSAAS_SUB_DOMAIN_IP, LOG_WARNING);
 					$this->error = "Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP";
@@ -4606,7 +4606,7 @@ class SellYourSaasUtils
 				$error++;
 			}
 
-			if ($deployementserver->status != $deployementserver::STATUS_DISABLED) {
+			if ($deployementserver->status != $deployementserver::STATUS_DISABLED || !$onlyifopen) {
 				$REMOTEIPTODEPLOYTO = $deployementserver->ipaddress;
 			}
 		}
