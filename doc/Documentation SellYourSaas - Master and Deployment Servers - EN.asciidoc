@@ -1798,6 +1798,7 @@ grep logpath /etc/fail2ban/jail.local | cut -d= -f2 | grep '^ /'|sort|uniq|xargs
 ---------------
 /etc/init.d/fail2ban stop
 /etc/init.d/fail2ban start
+systemctl enable fail2ban
 systemctl status fail2ban
 fail2ban-client status
 ---------------
