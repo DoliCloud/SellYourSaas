@@ -1453,6 +1453,9 @@ if ($action == "confirmundeploy") {
 	print '<form id="formaddanotherinstance" class="form-group reposition" style="'.(GETPOST('addanotherinstance', 'int') ? '' : 'display: none;').'" action="register_instance.php" method="POST">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="action" value="deployall" />';
+if (GETPOSTISSET('forcesubdomain')) {
+	print '<input type="hidden" name="forcesubdomain" value="'.GETPOST('forcesubdomain', 'alpha').'">';
+}
 	print '<input type="hidden" name="fromsocid" value="0" />';
 	print '<input type="hidden" name="reusesocid" value="'.((int) $socid).'" />';
 	print '
@@ -1502,27 +1505,27 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 
 		print '
 
-		        			<div class="horizontal-fld clearboth margintoponly">
-		        			<div class="control-group required">
-		        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" minlength="8" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required autocomplete="new-password" spellcheck="false" autocapitalize="off" />
-		        			</div>
-		        			</div>
-		        			<div class="horizontal-fld margintoponly">
-		        			<div class="control-group required">
-		        			<label class="control-label" for="password2" trans="1">'.$langs->trans("PasswordRetype").'</label><input name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" />
-		        			</div>
-		        			</div>
-		        			</div> <!-- end group -->';
+			        			<div class="horizontal-fld clearboth margintoponly">
+			        			<div class="control-group required">
+			        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" minlength="8" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required autocomplete="new-password" spellcheck="false" autocapitalize="off" />
+			        			</div>
+			        			</div>
+			        			<div class="horizontal-fld margintoponly">
+			        			<div class="control-group required">
+			        			<label class="control-label" for="password2" trans="1">'.$langs->trans("PasswordRetype").'</label><input name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" />
+			        			</div>
+			        			</div>
+			        			</div> <!-- end group -->';
 
 		print '
-							<!-- Selection of domain to create instance -->
-		        			<section id="selectDomain" style="margin-top: 20px;">
-		        			<div class="fld select-domain required">
-		        			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
-		        			<div class="linked-flds">
-		        			<span class="opacitymedium">https://</span>
-		        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-		        			<select name="tldid" id="tldid">';
+								<!-- Selection of domain to create instance -->
+			        			<section id="selectDomain" style="margin-top: 20px;">
+			        			<div class="fld select-domain required">
+			        			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
+			        			<div class="linked-flds">
+			        			<span class="opacitymedium">https://</span>
+			        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
+			        			<select name="tldid" id="tldid">';
 		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
@@ -1542,10 +1545,12 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			$tmpdomains = array();
 			if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 				$tmpnewval = explode(':', $newval);
-				if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed') {
-					continue;
-				}
 				$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
+				if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed') {
+					if ($newval != GETPOST('forcesubdomain', 'alpha') || !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
+						continue;
+					}
+				}
 
 				$domainqualified = false;
 				$tmpdomains = explode('+', $reg[1]);
@@ -1622,34 +1627,34 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		}
 
 		print '</select>
-		        			<br class="unfloat" />
-		        			</div>
-		        			</div>
-		        			</section>'."\n";
+			        			<br class="unfloat" />
+			        			</div>
+			        			</div>
+			        			</section>'."\n";
 
 		// Add code to make constraints on deployment servers
 		print '<!-- JS Code to force plan -->';
 		print '<script type="text/javascript" language="javascript">
-					function disable_combo_if_not(s) {
-						console.log("Disable combo choice except if s="+s);
-						$("#tldid > option").each(function() {
-							if (this.value.endsWith(s)) {
-								console.log("We enable the option "+this.value);
-								$(this).removeAttr("disabled");
-								$(this).attr("selected", "selected");
-							} else {
-								console.log("We disable the option "+this.value);
-								$(this).attr("disabled", "disabled");
-								$(this).removeAttr("selected");
-							}
-						});
-					}
+						function disable_combo_if_not(s) {
+							console.log("Disable combo choice except if s="+s);
+							$("#tldid > option").each(function() {
+								if (this.value.endsWith(s)) {
+									console.log("We enable the option "+this.value);
+									$(this).removeAttr("disabled");
+									$(this).attr("selected", "selected");
+								} else {
+									console.log("We disable the option "+this.value);
+									$(this).attr("disabled", "disabled");
+									$(this).removeAttr("selected");
+								}
+							});
+						}
 
-		    		jQuery(document).ready(function() {
-						jQuery("#service").change(function () {
-							var pid = jQuery("#service option:selected").val();
-							console.log("We select product id = "+pid);
-						';
+			    		jQuery(document).ready(function() {
+							jQuery("#service").change(function () {
+								var pid = jQuery("#service option:selected").val();
+								console.log("We select product id = "+pid);
+							';
 		foreach ($arrayofplansfull as $key => $plan) {
 			if (!empty($plan['restrict_domains'])) {
 				$restrict_domains = explode(",", $plan['restrict_domains']);
@@ -1664,9 +1669,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		}
 
 		print '
-						});
-						jQuery("#service").trigger("change");
-					});'."\n";
+							});
+							jQuery("#service").trigger("change");
+						});'."\n";
 
 		foreach ($arrayofplansfull as $key => $plan) {
 			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
