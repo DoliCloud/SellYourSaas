@@ -388,10 +388,13 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Mysql command to block/allow remote ip access
+	$ipofmaster = $_SERVER['SERVER_ADDR'];
 	//$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/filetorestore.sql';
 	$mysqlblockallowremoteip = "CREATE USER '".$object->username_db."'@'%' IDENTIFIED BY '".$object->password_db."'; GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON '".$object->database_db.".* TO '".$object->username_db."'@'%';";
 	$mysqlblockallowremoteip .= "\n";
-	$mysqlblockallowremoteip .= "DROP USER '".$object->username_db."'@'%'";
+	$mysqlblockallowremoteip .= "CREATE USER '".$object->username_db."'@'".$ipofmaster."' IDENTIFIED BY '".$object->password_db."'; GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON '".$object->database_db.".* TO '".$object->username_db."'@'".$ipofmaster."';";
+	$mysqlblockallowremoteip .= "\n";
+	$mysqlblockallowremoteip .= "DROP USER '".$object->username_db."'@'%'; DROP USER '".$object->username_db."'@'".$ipofmaster."'; ";
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql sql command to block/allow remote IP access:<br>';
 	$links.='<textarea id="mysqlblockallowremoteip" name="mysqlblockallowremoteip" class="marginleftonly quatrevingtpercent" rows="'.ROWS_3.'">'.$mysqlblockallowremoteip.'</textarea>';
