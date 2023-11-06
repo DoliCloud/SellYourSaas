@@ -387,6 +387,17 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlrestorecommand", 0);
 	$links.='<br>';
 
+	// Mysql command to block/allow remote ip access
+	//$mysqlresotrecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < '.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/filetorestore.sql';
+	$mysqlblockallowremoteip = "CREATE USER '".$object->username_db."'@'%' IDENTIFIED BY '".$object->password_db."'; GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON '".$object->database_db.".* TO '".$object->username_db."'@'%';";
+	$mysqlblockallowremoteip .= "\n";
+	$mysqlblockallowremoteip .= "DROP USER '".$object->username_db."'@'%'";
+	$links.='<span class="fa fa-database"></span> ';
+	$links.='Mysql sql command to block/allow remote IP access:<br>';
+	$links.='<textarea id="mysqlblockallowremoteip" name="mysqlblockallowremoteip" class="marginleftonly quatrevingtpercent" rows="'.ROWS_3.'">'.$mysqlblockallowremoteip.'</textarea>';
+	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlblockallowremoteip", 0);
+	$links.='<br><br>';
+
 	// Rsync to Restore Program directory
 	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' htdocs/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/';
 	$links.='<span class="fa fa-terminal"></span> ';
