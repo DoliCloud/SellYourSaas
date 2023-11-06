@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW Backup for instance is using localhostip if possible
 * FIX Event "Increase end date of services for contract" was not linked to the thirdparty.
 * NEW Better mesage on PDF in customer dashboard when PDF not yet available (SEPA payment).
 * NEW Add option --nostats to not update stats when doing a backup

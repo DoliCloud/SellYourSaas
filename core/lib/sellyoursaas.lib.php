@@ -395,7 +395,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql sql command to block/allow remote IP access:<br>';
 	$links.='<textarea id="mysqlblockallowremoteip" name="mysqlblockallowremoteip" class="marginleftonly quatrevingtpercent" rows="'.ROWS_3.'">'.$mysqlblockallowremoteip.'</textarea>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlblockallowremoteip", 0);
+	//if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlblockallowremoteip", 0);
 	$links.='<br><br>';
 
 	// Rsync to Restore Program directory

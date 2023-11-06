@@ -123,6 +123,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 
 // Read /etc/sellyoursaas.conf file
+$ipserverdeployment='';
 $databasehost='localhost';
 $databaseport='3306';
 $database='';
@@ -143,6 +144,9 @@ if ($fp) {
 		$tmpline=explode("=", $val);
 		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'ipserverdeployment') {
+			$ipserverdeployment = $tmpline[1];
 		}
 		if ($tmpline[0] == 'databasehost') {
 			$databasehost = $tmpline[1];
@@ -512,6 +516,10 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		if (filter_var($object->hostname_db, FILTER_VALIDATE_IP) !== false) {
 			print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' hostname_db value is an IP, so we use it in priority instead of ip of deployment server'."\n";
 			$serverdb = $object->hostname_db;
+		}
+		if ($serverdb == $ipserverdeployment) {
+			print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' hostname_db value is same IP than current server, so we use "localhost" name in priority instead of this ip'."\n";
+			$serverdb = 'localhost';
 		}
 
 		$command="mysqldump";
