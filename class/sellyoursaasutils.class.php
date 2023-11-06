@@ -2040,7 +2040,7 @@ class SellYourSaasUtils
 	 */
 	public function doRefreshContracts($thirdparty_id = 0)
 	{
-		global $conf, $langs, $user;
+		global $conf, $langs;
 
 		$langs->load("agenda");
 
@@ -2132,6 +2132,7 @@ class SellYourSaasUtils
 					//var_dump($expirationdate.' '.$enddatetoscan);
 
 					// Load linked ->linkedObjects (objects linked)
+					// @TODO Comment this line and then make the search if there is n open invoice(s) by doing a dedicated SQL COUNT request to fill $contractcanceled.
 					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 					// Test if there is at least 1 open invoice
@@ -2156,11 +2157,10 @@ class SellYourSaasUtils
 						}
 						if ($someinvoicenotpaid) {
 							$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
-							continue;
 						}
 					}
 
-					if ($expirationdate && $expirationdate < $enddatetoscan) {
+					if (empty($contractcanceled[$object->id]) && $expirationdate && $expirationdate < $enddatetoscan) {
 						dol_syslog("Define the newdate of end of services from expirationdate=".$expirationdate.' ('.dol_print_date($expirationdate, 'dayhourlog').')');
 						$newdate = $expirationdate;
 						$protecti=0;	//$protecti is to avoid infinite loop
@@ -2299,7 +2299,7 @@ class SellYourSaasUtils
 					// Test if this is a paid or not instance
 					$object = new Contrat($this->db);
 					$object->fetch($obj->rowid);		// fetch also lines
-					$object->fetch_thirdparty();
+					//$object->fetch_thirdparty();
 
 					if ($object->id <= 0) {
 						$error++;
@@ -2330,9 +2330,12 @@ class SellYourSaasUtils
 					$duration_unit = $tmparray['duration_unit'];
 					//var_dump($expirationdate.' '.$enddatetoscan);
 
-					// Test if there is pending invoice
+					// Load linked ->linkedObjects (objects linked)
+					// @TODO Comment this line and then make the search if there is n open invoice(s) by doing a dedicated SQL COUNT request to fill $contractcanceled.
 					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
+					// Test if there is at least 1 open invoice
+					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
 					if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						// Sort on ascending date
 						usort($object->linkedObjects['facture'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
@@ -2353,11 +2356,10 @@ class SellYourSaasUtils
 						}
 						if ($someinvoicenotpaid) {
 							$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
-							continue;
 						}
 					}
 
-					if ($expirationdate && $expirationdate < $enddatetoscan) {
+					if (empty($contractcanceled[$object->id]) && $expirationdate && $expirationdate < $enddatetoscan) {
 						dol_syslog("Define the newdate of end of services from expirationdate=".$expirationdate);
 						$newdate = $expirationdate;
 						$protecti=0;	//$protecti is to avoid infinite loop
@@ -2409,7 +2411,7 @@ class SellYourSaasUtils
 									$actioncomm->datep        = $now;
 									$actioncomm->datef        = $now;
 									$actioncomm->percentage   = -1;   // Not applicable
-									$actioncomm->socid        = $object->thirdparty->id;
+									$actioncomm->socid        = $object->socid;
 									$actioncomm->authorid     = $user->id;   // User saving action
 									$actioncomm->userownerid  = $user->id;	// Owner of action
 									$actioncomm->fk_element   = $object->id;
