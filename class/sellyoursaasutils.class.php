@@ -296,7 +296,7 @@ class SellYourSaasUtils
 													$actioncomm->datep        = $now;
 													$actioncomm->datef        = $now;
 													$actioncomm->percentage   = -1;   // Not applicable
-													$actioncomm->socid        = $contract->thirdparty->id;
+													$actioncomm->socid        = $contract->socid;
 													$actioncomm->authorid     = $user->id;   // User saving action
 													$actioncomm->userownerid  = $user->id;	// Owner of action
 													$actioncomm->fk_element   = $contract->id;
