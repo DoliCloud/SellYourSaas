@@ -225,10 +225,10 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 
 $HISTODIR = dol_print_date(dol_now(), '%d');
-if ($argv[2] == "w" || $argv[2] == "week") {
+if (isset($argv[2]) && ($argv[2] == "w" || $argv[2] == "week")) {
 	$HISTODIR = dol_print_date(dol_now(), '%w');
 }
-if ($argv[2] == "n" || $argv[2] == "none") {
+if (isset($argv[2]) && ($argv[2] == "n" || $argv[2] == "none")) {
 	$HISTODIR = "";
 }
 
@@ -300,7 +300,7 @@ if (empty($db)) {
 }
 
 $user = new User($dbmaster);
-$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+$user->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 
 // Nb of deployed instances
 $nbofinstancedeployed=0;
@@ -590,8 +590,11 @@ dol_delete_dir($homedir."/emptydir");
 
 // Send email if there is one error
 if ($atleastoneerror != 0) {
-	$subject = "[Warning] Backup of backup to remote server(s) failed for ".gethostname();
+	$subject = '[Warning] Error(s) in backups of backups to remote server(s) - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc');
 	$msg = "Failed to make copy backup to remote backup server(s) ".$SERVDESTI.".\nNumber of instances successfully saved: ".$totalinstancessaved."\nNumber of instances unsuccessfully saved: ".$totalinstancesfailed."\nErrors or warnings are:\n".$errstring;
+
+	print 'Send email to alert on error, MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$EMAILFROM.' to='.$EMAILTO.' subject='.$subject."\n";
+
 	$cmail = new CMailFile($subject, $EMAILTO, $EMAILFROM, $msg);
 	$cmail->sendfile();
 	exit(1);
@@ -601,9 +604,11 @@ print "\n";
 if (isset($argv[3]) && $argv[3] != "--delete") {
 	print "Script was called for only one of few given instances. No email or supervision event sent on success in such situation.\n";
 } else {
-	print "Send email to inform about backup success, to=".$EMAILTO.", subject=".$subject."\n";
 	$subject = "[Backup of Backup - ".gethostname()."] Backup of backup to remote server succeed";
 	$msg = "The backup of backup for ".gethostname()." to remote backup server ".$SERVDESTI." succeed.\nNumber of instances successfully saved: ".$totalinstancessaved."\n".$errstring;
+
+	print 'Send email to inform about backup success, MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$EMAILFROM.' to='.$EMAILTO.' subject='.$subject."\n";
+
 	$cmail = new CMailFile($subject, $EMAILTO, $EMAILFROM, $msg);
 	$cmail->sendfile();
 }

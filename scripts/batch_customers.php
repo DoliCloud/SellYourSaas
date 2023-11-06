@@ -75,6 +75,7 @@ if (! $res) {
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
+include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
 
 // Global variables
@@ -166,11 +167,11 @@ if ($dbmaster->error) {
 	$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
 	$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
+	$subject = '[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc');
 	$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\nFailed to connect to the master database server at host=".$databasehost.", port=".$databaseport.", user=".$databaseuser.", databasename=".$database."\n".$dbmaster->error;
 
-	include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-	print 'Send email MAIN_MAIL_SENDMODE='.getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER='.getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
-	$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
+	print 'Send email to alert of error, MAIN_MAIL_SENDMODE='.getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER='.getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' subject='.$subject."\n";
+	$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 	$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 	if (!$result) {
 		print 'Failed to send email. See dolibarr.log file'."\n";
@@ -792,6 +793,7 @@ if (! $nboferrors) {
 			$conf->global->MAIN_MAIL_SENDMODE_EMAILING = 'mail';
 			$conf->global->MAIN_MAIL_SMTP_SERVER = 'localhost';
 
+			$subject = '[Backup instances - '.gethostname().'] Backup of user instances succeed';
 			$msg = 'Backup done without errors on '.gethostname().' by '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
 			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
@@ -804,9 +806,8 @@ if (! $nboferrors) {
 				$sellyoursaasname = $conf->global->$constforaltname;
 			}*/
 
-			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Backup instances - '.gethostname().'] Backup of user instances succeed'."\n";
-			$cmail = new CMailFile('[Backup instances - '.gethostname().'] Backup of user instances succeed', $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
+			print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' subject='.$subject."\n";
+			$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 			$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 			if (!$result) {
 				print 'Failed to send email. See dolibarr.log file'."\n";
@@ -829,11 +830,11 @@ if (! $nboferrors) {
 
 			// Supervision tools are generic for all domains. No way to target a specific supervision email.
 
+			$subject = '[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc');
 			$msg = 'Error in '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
-			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			print 'Send email MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' title=[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc')."\n";
-			$cmail = new CMailFile('[Warning] Error(s) in backups - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc'), $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
+			print 'Send email to alert on error, MAIN_MAIL_SENDMODE=' . getDolGlobalString('MAIN_MAIL_SENDMODE').' MAIN_MAIL_SMTP_SERVER=' . getDolGlobalString('MAIN_MAIL_SMTP_SERVER').' from='.$from.' to='.$to.' subject='.$subject."\n";
+			$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 0, '', '', '', '', $sendcontext);
 			$result = $cmail->sendfile();		// Use the $conf->global->MAIN_MAIL_SMTPS_PW_$SENDCONTEXT for password
 			if (!$result) {
 				print 'Failed to send email. See dolibarr.log file'."\n";
