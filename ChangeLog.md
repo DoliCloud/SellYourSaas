@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* FIX Event "Increase end date of services for contract" was not linked to the thirdparty.
 * NEW Better mesage on PDF in customer dashboard when PDF not yet available (SEPA payment).
 * NEW Add option --nostats to not update stats when doing a backup
 * NEW Show oldest date of backup ok/ko in popup on list of instances
