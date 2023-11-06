@@ -1811,7 +1811,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 			$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
 			if (is_array($object->linkedObjects['facturerec']) && count($object->linkedObjects['facturerec']) > 0) {
-				usort($object->linkedObjects['facturerec'], "cmp");
+				// Sort on ascending date
+				usort($object->linkedObjects['facturerec'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 				//var_dump($object->linkedObjects['facture']);
 				//dol_sort_array($object->linkedObjects['facture'], 'date');
@@ -1907,7 +1908,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 				$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
 				if (is_array($object->linkedObjects['facturerec']) && count($object->linkedObjects['facturerec']) > 0) {
-					usort($object->linkedObjects['facturerec'], "cmp");
+					// Sort on ascending date
+					usort($object->linkedObjects['facturerec'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 					//var_dump($object->linkedObjects['facture']);
 					//dol_sort_array($object->linkedObjects['facture'], 'date');

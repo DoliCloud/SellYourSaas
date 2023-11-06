@@ -111,8 +111,8 @@ if (count($listofcontractid) > 0) {
 		$contract->fetchObjectLinked();
 		$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
 		if (!empty($contract->linkedObjects['facture']) && is_array($contract->linkedObjects['facture']) && count($contract->linkedObjects['facture']) > 0) {
-			//var_dump($contract->linkedObjects['facture']);
-			usort($contract->linkedObjects['facture'], "cmpr_invoice_object_date_desc");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
+			// Sort on ascending date
+			usort($contract->linkedObjects['facture'], "sellyoursaasCmpDateDesc");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 			//var_dump($contract->linkedObjects['facture']);
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');

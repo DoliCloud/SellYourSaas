@@ -2093,12 +2093,14 @@ class SellYourSaasUtils
 				$obj = $this->db->fetch_object($resql);
 				if ($obj) {
 					// Check if this contract was already processed (because loop is on lines of contract)
-					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contractcanceled[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) continue;
+					if (! empty($contractprocessed[$obj->rowid]) || ! empty($contractignored[$obj->rowid]) || ! empty($contractcanceled[$obj->rowid]) || ! empty($contracterror[$obj->rowid])) {
+						continue;
+					}
 
 					// Test if this is a paid or not instance
 					$object = new Contrat($this->db);
 					$object->fetch($obj->rowid);		// fetch also lines
-					$object->fetch_thirdparty();		// TODO This may not be used.
+					//$object->fetch_thirdparty();		// Removed this. Seems not used.
 
 					if ($object->id <= 0) {
 						$error++;
@@ -2122,7 +2124,7 @@ class SellYourSaasUtils
 
 					// Get expiration date of instance (the min of end date among all lines)
 					dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
-					$tmparray = sellyoursaasGetExpirationDate($object, 0);				// This loop on $object->lines
+					$tmparray = sellyoursaasGetExpirationDate($object, 0);				// This loops on $object->lines (memory only actions)
 					dol_syslog('Call sellyoursaasGetExpirationDate end', LOG_DEBUG, -1);
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
@@ -2135,7 +2137,8 @@ class SellYourSaasUtils
 					// Test if there is at least 1 open invoice
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
 					if (isset($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
-						usort($object->linkedObjects['facture'], "cmp");	// function cmp compares objects on ->date and is defined into sellyoursaas.lib.php.
+						// Sort array of linked invoices by ascending date
+						usort($object->linkedObjects['facture'], "sellyoursaasCmpDate");	// function cmp() compares objects on ->date and is defined into sellyoursaas.lib.php.
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
 						$someinvoicenotpaid=0;
@@ -2331,7 +2334,8 @@ class SellYourSaasUtils
 					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 					if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
-						usort($object->linkedObjects['facture'], "cmp");
+						// Sort on ascending date
+						usort($object->linkedObjects['facture'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
 						$someinvoicenotpaid=0;

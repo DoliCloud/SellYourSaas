@@ -58,8 +58,11 @@ if (!function_exists('getDolGlobalInt')) {
  * @param 	int 	$b		Date B
  * @return 	boolean			Result of comparison
  */
-function cmp($a, $b)
+function sellyoursaasCmpDate($a, $b)
 {
+	if ($a->date == $b->date) {
+		return strcmp((string) $a->id, (string) $b->id);
+	}
 	return strcmp($a->date, $b->date);
 }
 
@@ -70,10 +73,10 @@ function cmp($a, $b)
  * @param 	int 	$b		Date B
  * @return 	boolean			Result of comparison
  */
-function cmpr_invoice_object_date_desc($a, $b)
+function sellyoursaasCmpDateDesc($a, $b)
 {
 	if ($a->date == $b->date) {
-		return strcmp($b->id, $a->id);
+		return strcmp((string) $b->id, (string) $a->id);
 	}
 	return strcmp($b->date, $a->date);
 }
@@ -275,15 +278,20 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 	include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 
 	global $cachefortmpprod;
-	if (! isset($cachefortmpprod) || ! is_array($cachefortmpprod)) $cachefortmpprod = array();
+	if (! isset($cachefortmpprod) || ! is_array($cachefortmpprod)) {
+		$cachefortmpprod = array();
+	}
 
 	dol_syslog("sellyoursaasGetExpirationDate for contract id=".$contract->id." onlyexpirationdate=".$onlyexpirationdate);
 
 	// Loop on each line to get lowest expiration date
 	foreach ($contract->lines as $line) {
 		if ($line->date_end) {	// Planned end date of service
-			if ($expirationdate > 0) $expirationdate = min($expirationdate, $line->date_end);
-			else $expirationdate = $line->date_end;
+			if ($expirationdate > 0) {
+				$expirationdate = min($expirationdate, $line->date_end);
+			} else {
+				$expirationdate = $line->date_end;
+			}
 		}
 
 		if (empty($onlyexpirationdate) && $line->fk_product > 0) {
