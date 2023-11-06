@@ -601,7 +601,7 @@ print "\n";
 if (isset($argv[3]) && $argv[3] != "--delete") {
 	print "Script was called for only one of few given instances. No email or supervision event sent on success in such situation.\n";
 } else {
-	print "Send email to ".$EMAILTO." to inform about backup success\n";
+	print "Send email to inform about backup success, to=".$EMAILTO.", subject=".$subject."\n";
 	$subject = "[Backup of Backup - ".gethostname()."] Backup of backup to remote server succeed";
 	$msg = "The backup of backup for ".gethostname()." to remote backup server ".$SERVDESTI." succeed.\nNumber of instances successfully saved: ".$totalinstancessaved."\n".$errstring;
 	$cmail = new CMailFile($subject, $EMAILTO, $EMAILFROM, $msg);
