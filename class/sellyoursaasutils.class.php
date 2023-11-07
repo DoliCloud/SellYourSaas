@@ -119,9 +119,9 @@ class SellYourSaasUtils
 					} else {
 						$tmparray = $invoice->thirdparty->getOutstandingBills('customer');
 						if ($tmparray['opened'] > 0) {
-							dol_syslog("Note: This thirdparty already owns validated open invoices: ".join(', ', $tmparray['arrayofrefopened']));
+							dol_syslog("Note: This thirdparty already owns validated open invoices: ".(is_array($tmparray['refsopened']) ? join(', ', $tmparray['refsopened']) : ''));
 							// We exclude the current draft invoice (should be useless, but with this, we are sure)
-							unset($tmparray['arrayofrefopened'][$obj->rowid]);
+							unset($tmparray['refsopened'][$obj->rowid]);
 							// Note also that later, we don't validate invoice if services are suspended.
 						}
 
@@ -138,17 +138,19 @@ class SellYourSaasUtils
 									continue;	// If already processed because of a previous contract line, do nothing more
 								}
 
-								// Try to avoid validation of the current $invoice if on same contract, there is other open invoice !!!
-								$sqltocheckcontratnotlinkedtoanopeninvoice = "SELECT COUNT(rowid) FROM ".MAIN_DB_PREFIX."element_element";
-								$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE sourcetype = 'contrat' AND fk_source = ".((int) $idcontract);
-								$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND target_type = 'facture' AND fk_target IN (".$this->db->sanitize(join(',', array_keys($tmparray['arrayofrefopened']))).")";
-								dol_syslog("We check sql = ".$sqltocheckcontratnotlinkedtoanopeninvoice);
-								// If we found some record, we discard validation of this invoice
-								$nbfound = 0;
-								// TODO
+								if (!empty($tmparray['refsopened'])) {	// If there is other invoices
+									// Try to avoid validation of the current $invoice if another invoice is open on the same contract !!!
+									$sqltocheckcontratnotlinkedtoanopeninvoice = "SELECT COUNT(rowid) FROM ".MAIN_DB_PREFIX."element_element";
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE sourcetype = 'contrat' AND fk_source = ".((int) $idcontract);
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND target_type = 'facture' AND fk_target IN (".$this->db->sanitize(join(',', array_keys($tmparray['refsopened']))).")";
+									dol_syslog("We check sql = ".$sqltocheckcontratnotlinkedtoanopeninvoice);
+									// If we found some record, we discard validation of this invoice
+									$nbfound = 0;
+									// TODO
 
-								if ($nbfound > 0) {
-									continue;
+									if ($nbfound > 0) {
+										continue;
+									}
 								}
 
 								// We ignore $contract->nbofserviceswait +  and $contract->nbofservicesclosed
