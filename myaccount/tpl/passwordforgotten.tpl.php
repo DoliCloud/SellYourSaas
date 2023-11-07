@@ -59,6 +59,10 @@ if ($favicon) {
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
 
+if (empty($message)) {
+	$message = '';
+}
+
 print top_htmlhead_sellyoursaas($head, $titleofpage, 0, 0, $arrayofjs, array(), 0, $disablenofollow);
 
 ?>
@@ -103,7 +107,7 @@ $(document).ready(function () {
 <?php if ($mode == 'dolibarr' || ! $disabled) { ?>
 	<span class="passwordmessagedesc opacitymedium">
 	<?php
-	if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
+	if (empty($asknewpass) && !preg_match('/class="(ok|warning)"/', $message)) {
 		echo str_replace('<br>', ' ', $langs->trans('SendNewPasswordDesc'));
 	}
 	?>
@@ -270,8 +274,8 @@ if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 <br>
 
 <!-- authentication mode = <?php echo $main_authentication ?> -->
-<!-- cookie name used for this session = <?php echo $session_name ?> -->
-<!-- urlfrom in this session = <?php echo isset($_SESSION["urlfrom"])?$_SESSION["urlfrom"]:''; ?> -->
+<!-- cookie name used for this session = <?php echo empty($session_name) ? '' : $session_name ?> -->
+<!-- urlfrom in this session = <?php echo isset($_SESSION["urlfrom"]) ? $_SESSION["urlfrom"] : ''; ?> -->
 
 <!-- Common footer is not used for login page, this is same than footer but inside login tpl -->
 
