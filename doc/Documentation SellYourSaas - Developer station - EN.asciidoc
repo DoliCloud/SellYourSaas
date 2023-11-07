@@ -1,0 +1,423 @@
+= Installation and operation document SellYourSaas - Developer station
+:source-highlighter: red
+:companyname: Teclib
+:corpname: Teclib
+:orgname: Teclib
+:title: Installation document for the SellYourSaas developer or maintainer stattion
+// Document date:
+:docdate: 01/30/2019
+// City associated with the document
+:city: Bordeaux
+:toc: manual
+:toc-placement: preamble
+
+This document describes the technical specifications for the implementation of the client workstation of the SellYourSaas service administrator (SaaS implementation service automated by Dolibarr).
+
+
+
+== Machine installation and OS
+
+=== Machine choice ===
+
+* PC running Ubuntu with 16GB of memory
+
+
+=== OS Ubuntu server ===
+
+* Installing Ubuntu 22.04+
+
+
+=== Local DNS installation
+
+* Install bind.
+
+See https://lani78.com/2012/07/22/setting-up-a-dns-for-the-local-network-on-the-ubuntu-12-04-precise-pangolin-server/
+to configure the server with a local domain.
+
+     host home.lan 127.0.0.1 should then work
+
+Ensure the client performs resolutions using local server 127.0.0.1 automatically
+
+     host home.lan should also work
+
+Otherwise, check the */etc/resolv.conf* file and deactivate systemd-resolver to give control to NetWorkManager (see next point)
+
+* Disable *systemd-resolver* to let NetWorkManager populate the *resolv.conf* file
+
+[source,bash]
+---------------
+sudo systemctl disable systemd-resolved.service
+sudo systemctl stop systemd-resolved
+vi /etc/NetworkManager/NetworkManager.conf to add dns=default in the [main] section
+rm /etc/resolv.conf
+sudo service network-manager restart
+---------------
+
+
+Note: Another solution may be to edit */etc/systemd/resolved.conf* with
+
+[source,bash]
+---------------
+[Resolve]
+DNS=127.0.0.1 # or 192.168.0.254
+#FallbackDNS=8.8.8.8 8.8.4.4 2001:4860:4860::8888 2001:4860:4860::8844
+Domains=lan # <-- change to your localdomain name (maybe .local)
+---------------
+
+
+=== Installing mailhog
+
+Place the *mailhog_linux64* program in a directory.
+
+Create the *mailhog* launch script to put in */etc/init.d*
+
+[source,bash]
+---------------
+#!/bin/sh -e
+# You can use sh -x instead of sh -e to activate debug
+
+DAEMON="/media/HDDATA1_LD/My Linux Apps/MailHog/mailhog_linux64" #program command line. The program name must not exceed 15 characters.
+daemon_OPT="" #argument to use by the program
+DAEMONUSER="myoslogin" #program user
+daemon_NAME="mailhog_linux64" #Program name (must be the same as the executable)
+
+PATH="/sbin:/bin:/usr/sbin:/usr/bin" #Do not touch
+
+test -x "$DAEMON" || exit 0
+
+. /lib/lsb/init-functions
+
+d_start() {
+         log_daemon_msg "Starting system $daemon_NAME Daemon"
+         start-stop-daemon --background --name $daemon_NAME --start --quiet --chuid $DAEMONUSER --exec "$DAEMON" -- $daemon_OPT
+         log_end_msg$?
+}
+
+d_stop() {
+         log_daemon_msg "Stopping system $daemon_NAME Daemon"
+         start-stop-daemon --name $daemon_NAME --stop --retry 5 --quiet --name $daemon_NAME
+         log_end_msg$?
+}
+
+case "$1" in
+
+         start|stop)
+                 d_${1}
+                 ;;
+
+         restart|reload|force-reload)
+                         d_stop
+                         d_start
+                 ;;
+
+         force-stop)
+                d_stop
+                 killall -q $daemon_NAME || true
+                 sleep 2
+                 killall -q -9 $daemon_NAME || true
+                 ;;
+
+         status)
+                 status_of_proc "$daemon_NAME" "$DAEMON" "system-wide $daemon_NAME" && exit 0 || exit$?
+                 ;;
+         *)
+                 echo "Usage: /etc/init.d/$daemon_NAME {start|stop|force-stop|restart|reload|force-reload|status}"
+                 exit 1
+                 ;;
+esac
+exit 0
+---------------
+
+Try to connect to webhog on: http://localhost:8025
+
+
+=== Installing postfix
+
+Install postfix by apt.
+
+Edit the postfix configuration file */etc/postfix/main.cf* to enable relaying to mailhog. Thus any email sent will be captured by mailhog.
+
+[source,bash]
+---------------
+relayhost=127.0.0.1:1025
+---------------
+
+
+=== Installing ClamAV
+
+Install clamav and clamav-daemon
+
+Creation virus test file. Create a file with this content
+
+[source,bash]
+---------------
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+---------------
+
+
+=== Installation of the sound output switcher ===
+
+[source,bash]
+---------------
+sudo add-apt-repository ppa:yktooo/ppa
+sudo apt update
+sudo apt install indicator-sound-switcher
+---------------
+
+
+
+=== Added asciidoc support to Gedit or Pluma
+
+[source,bash]
+---------------
+cd ~/git
+git clone https://github.com/edusantana/asciidoc-highlight
+cd ~/git/asciidoc-highlight/gedit/
+./install.sh
+---------------
+
+
+
+=== Gestion Google Cloud Print
+
+[source,bash]
+---------------
+cd ~
+sudo apt install google-cloud-print-connector
+adduser cloud-print-connector
+/usr/bin/gcp-connector-util i
+---------------
+
+Corriger les chemins dans *~/gcp-cups-connector.config.json* si nécessaire et mettre les droits.
+
+chmod ug+rw ~/gcp-cups-connector.config.json
+chgrp cloud-print-connector ~/gcp-cups-connector.config.json
+
+Lancer manuellement /usr/bin/gcp-cups-connector et vérifier dans *https://www.google.com/cloudprint#printers* que les imprimantes sont visibles.
+
+
+Créer un fichier de lancement automatique *~/cloud-print-connector.service* avec ce contenu
+
+[source,bash]
+---------------
+# Copyright 2016 Google Inc. All rights reserved.
+#
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file or at
+# https://developers.google.com/open-source/licenses/bsd
+
+[Unit]
+Description=Google Cloud Print Connector
+Documentation="https://github.com/google/cloud-print-connector"
+After=cups.service avahi-daemon.service network-online.target
+Wants=cups.service avahi-daemon.service network-online.target
+
+[Service]
+ExecStart=/usr/bin/gcp-cups-connector -config-filename /home/mylogin/gcp-cups-connector.config.json
+Restart=on-failure
+User=cloud-print-connector
+
+[Install]
+WantedBy=multi-user.target
+---------------
+
+Et installer le lancement par
+
+    sudo install -o root -m 0664 cloud-print-connector.service /etc/systemd/system
+    sudo systemctl enable cloud-print-connector.service
+    sudo systemctl start cloud-print-connector.service
+    sudo systemctl status cloud-print-connector.service
+
+
+=== Avoir un bureau distant
+
+* Installer "vino"
+
+* Si le client VNC est trop ancien et refuse l'accès car le server demande du TLS, il est possible de faire ceci sur le serveur:
+
+[source,bash]
+---------------
+sudo killall vino-server
+gsettings set org.gnome.Vino require-encryption false
+/usr/lib/vino/vino-server
+---------------
+
+
+== Cloner son poste sur un autre
+Prerequisites:
+- You must have a remote ssh access to store the backup and you must be able to access it with 
+  ssh username@servername
+- The computer must have a LAN internet connexion
+
+Prepare the USB boot key:
+- Download the amd64 (x86-64) version of Clonezilla Live zip file from (https://clonezilla.org/)
+- unzip the file
+- copy all files into the root of the USB key.
+
+Make the image of the partition to save:
+- Start the computer with the CloneZilla USB key as boot
+- Choose to start CloneZilla then choose the SSH for the media storing the image.
+- Choose *saveparts* (or savedisks)
+
+Restore:
+
+- Start the computer with the CloneZilla USB key as boot
+- Choose to start CloneZilla then choose the SSH for the media storing the image.
+- Choose *restoreparts* (or restoredisks)
+- If the target partition is larger, don't forget to check during restoration option that the option auto-resize is set.
+
+After the restoration, you can make some check and fix keeping troubles:
+Reboot from a Live ubuntu) and then you can:
+
+Rename the UUID if it is already used by another partition on same disk. If not, fix this with 
+[source,bash]
+---------------
+tune2fs 
+---------------
+
+Check that the boot partition has the flag on (flag boot for BIOS/Legacy or flag ESP for UEFI).
+[source,bash]
+---------------
+gparted
+---------------
+
+Reinstall grub (if something is rong)
+[source,bash]
+---------------
+update-grub
+---------------
+
+You can also: Check/modify the /etc/fstab to automount the new partition. 
+
+
+If after a final reboot, you reach a grub prompt, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a Live Ubunu. Then:
+[source,bash]
+---------------
+sudo add-apt-repository ppa:yannubuntu/boot-repair
+sudo apt update
+sudo apt install -y boot-repair
+sudo boot-repair
+---------------
+
+
+=== Google Cloud Print management
+
+[source,bash]
+---------------
+cd ~
+sudo apt install google-cloud-print-connector
+adduser cloud-print-connector
+/usr/bin/gcp-connector-util i
+---------------
+
+Correct the paths in *~/gcp-cups-connector.config.json* if necessary and set the rights.
+
+chmod ug+rw ~/gcp-cups-connector.config.json
+chgrp cloud-print-connector ~/gcp-cups-connector.config.json
+
+Manually launch /usr/bin/gcp-cups-connector and check in *https://www.google.com/cloudprint#printers* that the printers are visible.
+
+
+Create an auto-launch file *~/cloud-print-connector.service* with this content
+
+[source,bash]
+---------------
+# Copyright 2016 Google Inc. All rights reserved.
+#
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file or at
+# https://developers.google.com/open-source/licenses/bsd
+
+[Unit]
+Description=Google Cloud Print Connector
+Documentation="https://github.com/google/cloud-print-connector"
+After=cups.service avahi-daemon.service network-online.target
+Wants=cups.service avahi-daemon.service network-online.target
+
+[Service]
+ExecStart=/usr/bin/gcp-cups-connector -config-filename /home/mylogin/gcp-cups-connector.config.json
+Restart=on-failure
+User=cloud-print-connector
+
+[Install]
+WantedBy=multi-user.target
+---------------
+
+And install the launch by
+
+     sudo install -o root -m 0664 cloud-print-connector.service /etc/systemd/system
+     sudo systemctl enable cloud-print-connector.service
+     sudo systemctl start cloud-print-connector.service
+     sudo systemctl status cloud-print-connector.service
+
+
+=== Have a remote desktop
+
+* Install “vino”
+
+* If the VNC client is too old and refuses access because the server requests TLS, it is possible to do this on the server:
+
+[source,bash]
+---------------
+sudo killall vino-server
+gsettings set org.gnome.Vino require-encryption false
+/usr/lib/vino/vino-server
+---------------
+
+
+== Clone your workstation to another
+Prerequisites:
+- You must have a remote ssh access to store the backup and you must be able to access it with
+   ssh username@servername
+- The computer must have a LAN internet connection
+
+Prepare the USB boot key:
+- Download the amd64 (x86-64) version of Clonezilla Live zip file from (https://clonezilla.org/)
+- unzip the file
+- copy all files into the root of the USB key.
+
+Make the image of the partition to save:
+- Start the computer with the CloneZilla USB key as boot
+- Choose to start CloneZilla then choose the SSH for the media storing the image.
+- Choose *saveparts* (or saveddisks)
+
+Restore:
+
+- Start the computer with the CloneZilla USB key as boot
+- Choose to start CloneZilla then choose the SSH for the media storing the image.
+- Choose *restoreparts* (or restoredisks)
+- If the target partition is larger, don't forget to check during restoration option that the auto-resize option is set.
+
+After the restoration, you can do some check and fix keeping problems:
+Reboot from a Live ubuntu) and then you can:
+
+Rename the UUID if it is already used by another partition on same disk. If not, fix this with
+[source,bash]
+---------------
+tune2fs
+---------------
+
+Check that the boot partition has the flag on (flag boot for BIOS/Legacy or flag ESP for UEFI).
+[source,bash]
+---------------
+gparted
+---------------
+
+Reinstall grub (if something is wrong)
+[source,bash]
+---------------
+update-grub
+---------------
+
+You can also: Check/modify the /etc/fstab to automount the new partition.
+
+
+If after a final reboot, you reach a grub prompt, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a Live Ubunu. Then:
+[source,bash]
+---------------
+sudo add-apt-repository ppa:yannubuntu/boot-repair
+sudo apt update
+sudo apt install -y boot-repair
+sudo boot-repair
+---------------
+
