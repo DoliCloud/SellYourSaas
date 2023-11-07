@@ -371,7 +371,7 @@ if (empty($reshook)) {
 		}
 	}
 
-	if ($action == "confirm_resetpassword") {
+	if ($action == "confirm_resetpassword" && GETPOST('confirm') != 'no') {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		if (is_object($newdb)) {
 			$password=GETPOST('newpassword', 'none');
