@@ -4345,7 +4345,22 @@ netplan apply
 
 *With ScaleWay*:
 
-TODO
+Create an image from the server.
+
+Create a server from the image. If after creating the server, you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
+
+Detach IP on the 2 servers. Then attach IP of the production serveur to the new one. 
+
+Go on the new server using the new IP to set the hostname with same value than old name:
+
+[source,bash]
+---------------
+hostname oldhostname
+vi /etc/hostname
+vi /etc/hosts
+---------------
+
+Restart the server.
 
 
 ==== Disable cron
@@ -4849,12 +4864,42 @@ chroot /mnt
 passwd root
 ---------------
 
-* To disable firewall, use this command:
+* You can also edit the */mnt/etc/ssh/sshd_config.d/sellyoursaas.conf* to allow direct SSH access to root using SSH (should not be used, good practice is to ssh using key to a user then doing a sudo using user password)
 
-@TODO
+[source,ini]
+---------------
+PermitRootLogin yes
+PasswordAuthentication yes
+---------------
+
+Then
+
+[source,bash]
+---------------
+/etc/init.d/ssh restart
+---------------
+
+
+* If you have also doubt on the firewall, to disable firewall rules, use this command:
+
+[source,bash]
+---------------
+# Accept all traffic first to avoid ssh lockdown  via iptables firewall rules #
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+ 
+# Flush All Iptables Chains/Firewall rules #
+iptables -F
+ 
+# Delete all Iptables Chains #
+iptables -X
+
+# To list rules
+iptables -L
+---------------
 
 When all this is done you can reboot your server by using the button Exit rescue mode in the dashboard.
-
 
 
 === Analysing changes in system files
@@ -5754,6 +5799,26 @@ This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
 You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1
 
 
+==== Failed to start ssh server, message "sshd: no hostkeys available -- exiting"
+
+After creation of a new server, it is not possible to reach the server using SSH.
+When logging using the "Console", after trying to start ssh server, we can find into the */var/log/syslog*, a line
+
+[source,bash]
+---------------
+sshd: no hostkeys available -- exiting
+---------------
+
+To fix this, just run from root user 
+
+[source,bash]
+---------------
+ssh-keygen -A
+---------------
+
+then restart the server.
+
+
 ==== On a deployment server, the user root can read files into /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 
 Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
@@ -6032,8 +6097,5 @@ It means main certificate was verified by Let's Encrypt but the issuer of Let's 
 See https://developer.android.com/privacy-and-security/security-ssl#MissingCa
 
 Fix this by setting correctly your SSLxxx variable in your apache virtual host.
-
-
-
 
 

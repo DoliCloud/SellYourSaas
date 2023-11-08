@@ -290,8 +290,8 @@ if (! $error) {
 
 			$invoice_rec = new FactureRec($db);
 
-			$invoice_rec->titre = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
 			$invoice_rec->title = 'Template invoice for '.$contract->ref.' '.$contract->ref_customer;
+			$invoice_rec->titre = $invoice_rec->title;
 			$invoice_rec->note_private = $contract->note_private;
 			//$invoice_rec->note_public  = dol_concatdesc($contract->note_public, '__(Period)__ : __INVOICE_DATE_NEXT_INVOICE_BEFORE_GEN__ - __INVOICE_DATE_NEXT_INVOICE_AFTER_GEN__');
 			$invoice_rec->note_public  = $contract->note_public;
