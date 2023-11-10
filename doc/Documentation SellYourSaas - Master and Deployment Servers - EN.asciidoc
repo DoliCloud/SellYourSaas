@@ -632,14 +632,14 @@ Example for 2 virtual IPs:
 ---------------
 # To declare persistent virtual IPs
 
-auto eth0: 0
-iface eth0: 0 inet static
+auto eth0:0
+iface eth0:0 inet static
             address a.b.c.d
             netmask 255.255.255.255
             broadcast a.b.c.d
 
-auto eth0: 1
-iface eth0: 1 inet static
+auto eth0:1
+iface eth0:1 inet static
             address e.f.g.h
             netmask 255.255.255.255
             broadcast e.f.g.h
