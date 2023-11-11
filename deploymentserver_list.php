@@ -690,8 +690,9 @@ if (isset($extrafields->attributes[$object->table_element]['computed']) && is_ar
 // Get nb of open instances per ip
 $openinstances = array();
 $backupokinstances = array();
+$backupokinstancesremote = array();
 $backuptotalinstances = array();
-$backuptotalinstancesremote = array();		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
+$backuptotalinstancesremote = array();
 
 $sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
 $sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
@@ -706,6 +707,7 @@ if ($resqlperhost) {
 	while ($obj = $db->fetch_object($resqlperhost)) {
 		$openinstances[$obj->deployment_host] = (int) $obj->nb;
 		$backupokinstances[$obj->deployment_host] = (int) $obj->nbbackupok;
+		$backupokinstancesremote[$obj->deployment_host] = (int) $obj->nbbackupremoteok;
 		$backuptotalinstances[$obj->deployment_host] = (int) $obj->nbbackupok + (int) $obj->nbbackupko;
 		$backuptotalinstancesremote[$obj->deployment_host] = (int) $obj->nbbackupremoteok + (int) $obj->nbbackupremoteko;
 	}
@@ -746,6 +748,7 @@ while ($i < $imaxinloop) {
 		$object->nb_backuptotal = empty($backuptotalinstances[$obj->ipaddress]) ? 0 : $backuptotalinstances[$obj->ipaddress];
 		$object->nb_backuptotalremote = empty($backuptotalinstancesremote[$obj->ipaddress]) ? 0 : $backuptotalinstancesremote[$obj->ipaddress];
 		$object->nb_backupok = empty($backupokinstances[$obj->ipaddress]) ? 0 : $backupokinstances[$obj->ipaddress];
+		$object->nb_backupokremote = empty($backupokinstancesremote[$obj->ipaddress]) ? 0 : $backupokinstancesremote[$obj->ipaddress];
 
 		print $object->getKanbanView('', array('selected' => $selected));
 		if ($i == ($imaxinloop - 1)) {
@@ -891,7 +894,7 @@ while ($i < $imaxinloop) {
 		// Column nb of instances backups
 		if (!empty($arrayfields['nb_backups']['checked'])) {
 			$titletoshow = '';
-			$tmpdata = $object->getLastBackupDate();
+			$tmpdata = $object->getLastBackupDate('');
 			$titletoshow .= '<br>Oldest backup try: '.dol_print_date(findMinimum($tmpdata['mintryok'], $tmpdata['mintryko']), 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Oldest backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
@@ -920,8 +923,29 @@ while ($i < $imaxinloop) {
 		}
 		// Column nb of instances backups
 		if (!empty($arrayfields['nb_backupsremote']['checked'])) {
+			$titletoshow = '';
+			$tmpdata = $object->getLastBackupDate('remote');
+			$titletoshow .= '<br>Oldest remote backup try: '.dol_print_date(findMinimum($tmpdata['mintryok'], $tmpdata['mintryko']), 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest remote backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Oldest remote backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest remote backup KO: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Oldest remote backup OK: '.dol_print_date($tmpdata['minokok'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest remote backup OK: '.dol_print_date($tmpdata['maxokok'], 'dayhoursec', 'tzuserrel');
 			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
-			// TODO
+			if (!empty($backuptotalinstancesremote[$obj->ipaddress])) {
+				if ($backupokinstancesremote[$obj->ipaddress] != $backuptotalinstancesremote[$obj->ipaddress]) {
+					print '<a href="'.DOL_URL_ROOT.'/contrat/list.php?search_options_deployment_status[]=done&search_options_deployment_status[]=processing&search_options_latestbackup_status=KO&search_options_deployment_host='.urlencode($obj->ipaddress).'">';
+					print img_warning($langs->trans("Errors"), '', 'paddingrightonly');
+					print '<span class="error">';
+				}
+				print $backupokinstancesremote[$obj->ipaddress];
+				print '/';
+				print $backuptotalinstancesremote[$obj->ipaddress];
+				if ($backupokinstancesremote[$obj->ipaddress] != $backuptotalinstancesremote[$obj->ipaddress]) {
+					print '</span>';
+					print '</a>';
+				}
+			}
 			print '</td>';
 			if (!$i) {
 				$totalarray['nbfield']++;

@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW Show statistics (success/error) of remote backups in list of deployment servers
 * NEW Backup for instance is using localhostip if possible
 * FIX Event "Increase end date of services for contract" was not linked to the thirdparty.
 * NEW Better mesage on PDF in customer dashboard when PDF not yet available (SEPA payment).
