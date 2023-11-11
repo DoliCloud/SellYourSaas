@@ -1143,7 +1143,7 @@ class Deploymentserver extends CommonObject
 		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
 		$mintryok = $minokok = $mintryko = $minokko = null;
 
-		$sql = "SELECT ce.latestbackup".$mode."_status,";
+		$sql = "SELECT ce.latestbackup".$mode."_status as status,";
 		$sql .= " MIN(ce.latestbackup".$mode."_date) as mintry, MIN(ce.latestbackup".$mode."_date_ok) as minok,";
 		$sql .= " MAX(ce.latestbackup".$mode."_date) as maxtry, MAX(ce.latestbackup".$mode."_date_ok) as maxok";
 		$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
@@ -1155,18 +1155,18 @@ class Deploymentserver extends CommonObject
 		$resql = $this->db->query($sql);
 		if ($resql) {
 			while ($obj = $this->db->fetch_object($resql)) {
-				if ($obj->latestbackup_status == 'OK') {
+				if ($obj->status == 'OK') {
 					$maxtryok = $this->db->jdate($obj->maxtry);
 					$maxokok = $this->db->jdate($obj->maxok);
 					$mintryok = $this->db->jdate($obj->mintry);
 					$minokok = $this->db->jdate($obj->minok);
-				} elseif ($obj->latestbackup_status == 'KO') {
+				} elseif ($obj->status == 'KO') {
 					$maxtryko = $this->db->jdate($obj->maxtry);
 					$maxokko = $this->db->jdate($obj->maxok);
 					$mintryko = $this->db->jdate($obj->mintry);
 					$minokko = $this->db->jdate($obj->minok);
-				} elseif ($obj->latestbackup_status) {
-					dol_print_error($this->db, 'Bad value for latestbackup_status');
+				} elseif ($obj->status) {
+					dol_print_error($this->db, 'Bad value for latestbackup(remote)_status');
 				}
 			}
 		} else {
