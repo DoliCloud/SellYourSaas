@@ -260,7 +260,7 @@ if ($testorconfirm != "confirm") {
 	$TESTN = "-n";
 }
 
-print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." (".$testorconfirm.") *****\n";
 if (empty($argv[1])) {
 	echo "Usage: ${0} (test|confirm) [month|week|none] [osuX] [--delete]\n";
 	echo "With  month (default) is to keep 1 month of backup using --backup option of rsync\n";
@@ -557,13 +557,13 @@ if (!empty($instanceserver)) {
 
 							$res = $object->update($user, 1); //Make script stop crash
 							if ($res <= 0) {
-								print "\nUpdate of Contract with result - error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
+								print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Update of Contract with result - error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
 							} else {
-								print "\nUpdate of Contract with result for ".$backupdir."/".$obj->osu."\n";
+								print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." Update of Contract with result - success for ".$backupdir."/".$obj->osu."\n";
 							}
 						}
 					} else {
-						print "No directory found starting with name ".$backupdir."/".$obj->osu."\n";
+						print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." No directory found starting with name ".$backupdir."/".$obj->osu."\n";
 						$errstring .= dol_print_date(dol_now(), "%Y-%m-%d %H:%M:%S")." No directory found starting with name ".$backupdir."/".$obj->osu."\n";
 					}
 					print "\n";
