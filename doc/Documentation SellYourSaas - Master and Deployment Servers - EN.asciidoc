@@ -574,6 +574,14 @@ To take this into account, try this, otherwise, reboot.
 /etc/init.d/networking restart
 ---------------
 
+To disable manually an interface:
+
+[source, bash]
+---------------
+ifconfig ethX down   or    ifconfig ethX:Y down
+---------------
+
+
 ==== With netplan (Ubuntu 18.04 +)
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.

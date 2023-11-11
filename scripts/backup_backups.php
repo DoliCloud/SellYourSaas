@@ -557,7 +557,9 @@ if (!empty($instanceserver)) {
 
 							$res = $object->update($user, 1); //Make script stop crash
 							if ($res <= 0) {
-								print "\nUpdate of Contract error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
+								print "\nUpdate of Contract with result - error ".$backupdir."/".$obj->osu.": ".$object->error.", ".join($object->errors)."\n";
+							} else {
+								print "\nUpdate of Contract with result for ".$backupdir."/".$obj->osu."\n";
 							}
 						}
 					} else {
