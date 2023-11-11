@@ -1135,21 +1135,22 @@ class Deploymentserver extends CommonObject
 	/**
 	 * Return info about last backups on the server
 	 *
-	 * @return	array		Array with info
+	 * @param	string		$mode		'' = Request data for common backup, 'remote' = data for remote backup
+	 * @return	array					Array with info
 	 */
-	public function getLastBackupDate()
+	public function getLastBackupDate($mode = '')
 	{
 		$maxtryok = $maxokok = $maxtryko = $maxokko = null;
 		$mintryok = $minokok = $mintryko = $minokko = null;
 
-		$sql = "SELECT ce.latestbackup_status,";
-		$sql .= " MIN(ce.latestbackup_date) as mintry, MIN(ce.latestbackup_date_ok) as minok,";
-		$sql .= " MAX(ce.latestbackup_date) as maxtry, MAX(ce.latestbackup_date_ok) as maxok";
+		$sql = "SELECT ce.latestbackup".$mode."_status,";
+		$sql .= " MIN(ce.latestbackup".$mode."_date) as mintry, MIN(ce.latestbackup".$mode."_date_ok) as minok,";
+		$sql .= " MAX(ce.latestbackup".$mode."_date) as maxtry, MAX(ce.latestbackup".$mode."_date_ok) as maxok";
 		$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
 		$sql .= " WHERE ce.fk_object = c.rowid";
 		$sql .= " AND ce.deployment_status IN ('done', 'processing')";
 		$sql .= " AND ce.deployment_host = '".$this->db->escape($this->ipaddress)."'";
-		$sql .= " GROUP BY ce.latestbackup_status";
+		$sql .= " GROUP BY ce.latestbackup".$mode."_status";
 
 		$resql = $this->db->query($sql);
 		if ($resql) {
