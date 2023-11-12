@@ -65,6 +65,9 @@ if [ -f /etc/init.d/datadog-agent ]; then
 	/etc/init.d/datadog-agent stop >>/tmp/post_inst_script.log
 	echo result = $? >>/tmp/post_inst_script.log
 	
+	systemctl stop datadog-agent 2>&1 >>/tmp/post_inst_script.log
+	systemctl disable datadog-agent 2>&1 >>/tmp/post_inst_script.log
+	
 	echo "Stop datadog end"
 	echo "Stop datadog end" >>/tmp/post_inst_script.log
 fi
