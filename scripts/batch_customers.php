@@ -392,7 +392,7 @@ if ($resql) {
 	$nboferrors++;
 	dol_print_error($dbtousetosearch);
 }
-print "We found ".count($instancestrial)." deployed trial + ".count($instances)." deployed paid or confirmed instances, including ".count($instancespaidsuspended)." suspended + ".count($instancespaidnotsuspendedpaymenterror)." active with payment ko\n";
+print "We found ".count($instancestrial)." deployed trial + ".count($instances)." deployed paid/confirmed instances, including ".count($instancespaidsuspended)." suspended + ".count($instancespaidnotsuspendedpaymenterror)." active with payment ko\n";
 
 
 //print "----- Start loop for backup_instance\n";
