@@ -2382,11 +2382,28 @@ broken_sasl_auth_clients = yes
 
 ==== Setup
 
+On a *Master* only server, change only the listened address of the Mysql/Mariadb server:
+
+Edit config file 
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
+or
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
+to change:
+
+[source,bash]
+--------------
+bind-address = 0.0.0.0
+--------------
+
+Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
+
+
+
 On *Deployment servers*:
 
 Edit the config file 
 */lib/systemd/system/mysql.service*  or  */lib/systemd/system/mariadb.service*
-to put into section *[Service]* a value that is a limit number of files that is higher than the default value of *4096* (visible with *sudo systemctl show -p DefaultLimitNOFILE*) of systemd:
+to put into section *[Service]* a value that is a limit of number of files that is higher than the default value of *4096* (visible with *sudo systemctl show -p DefaultLimitNOFILE*) of systemd:
 
 [source,bash]
 ---------------
@@ -2405,12 +2422,11 @@ Take the change into account with command:
 systemctl daemon-reload
 ---------------
 
-Edit config file 
+Then edit config file 
 */etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
 or
 */etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
 to change:
-
 
 [source,bash]
 ---------------
@@ -2443,23 +2459,19 @@ innodb_file_per_table=1
 innodb_log_file_size=256M
 innodb_log_buffer_size=32M
 
+character-set-server  = utf8
+collation-server      = utf8_unicode_ci
+
+log_error = /var/log/mysql/error.log
+
+...
 
 [mariadb]
 log_warnings = 2
 ---------------
 
-On a *Master* only server, change only the listened address :
 
-[source,bash]
---------------
-bind-address = 0.0.0.0
---------------
-
-Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
-
-
-
-Comment the line into */etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf* (if not, the error log file will not be isolated into the /var/log/mysql/mysql.log file):
+Comment also the line into */etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf* (if not, the error log file will not be isolated into the /var/log/mysql/mysql.log file):
 
 [source,bash]
 --------------
@@ -2467,8 +2479,8 @@ Comment the line into */etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf* (if not, th
 --------------
 
 
+Check that file /var/log/mysql/error.log is owned by mysql user and Restart the database server
 
-Restart the database server
 [source,bash]
 --------------
 /etc/init.d/mysql restart
