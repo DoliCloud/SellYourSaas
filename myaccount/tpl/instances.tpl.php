@@ -623,7 +623,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' :'hidden').'">';
 		print '<br>';
-		print '<div class="areaforresources sectionresources">';
+		print '<div class="areaforresources sectionresources">ffff';
 		print '<br>';
 
 		// Hard coded option: Custom domain name
@@ -651,9 +651,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<span class="opacitymedium small">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'</span><br>';
 
 			print '<div class="installcertif margintop">';
-			print $langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
-			print '<input type="text" name="domainname" value="" placeholder="'.$langs->trans("Example").': myerp.mycompany.com"><br>';
-			print $langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
+			print $langs->trans("Step", 1).' : '.$langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
+			print $langs->trans("Step", 2).' : '.$langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
+			print '<input type="text" name="domainname" value="" placeholder="myerp.mycompany.com"><br>';
 			print '</div></div>';
 			print '<div class="tagtd center">';
 			// TODO Use same frequency than into the template invoice ?
@@ -687,16 +687,19 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$password_web = $contract->thirdparty->array_options['options_password'];
 			$iphostwebsite = $contract->array_options['options_deployment_host'];
 
+			$websitemodenabled = 0;
+
 			$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 			$newdb->prefix_db = $prefix_db;
 
-			$confinstance = new Conf();
-			$confinstance->setValues($newdb);
+			if ($newdb->connected) {
+				$confinstance = new Conf();
+				$confinstance->setValues($newdb);
 
-			$websitemodenabled = 0;
-			foreach ($confinstance->global as $key => $val) {
-				if (preg_match('/^MAIN_MODULE_WEBSITE+$/', $key) && ! empty($val)) {
-					$websitemodenabled ++;
+				foreach ($confinstance->global as $key => $val) {
+					if (preg_match('/^MAIN_MODULE_WEBSITE+$/', $key) && ! empty($val)) {
+						$websitemodenabled ++;
+					}
 				}
 			}
 
@@ -715,7 +718,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			} else {
 				include_once DOL_DOCUMENT_ROOT."/website/class/website.class.php";
 				$websitestatic = new Website($newdb);
-				$websitestatic->fetchAll('', '', 0, 0, array('t.status'=>$websitestatic::STATUS_VALIDATED));
+				//$websitestatic->fetchAll('', '', 0, 0, array('t.status'=>$websitestatic::STATUS_VALIDATED));
+				$websitestatic->fetchAll('', '', 0, 0);
 				print '<span class="small">';
 				print $langs->trans("OptionYourWebsiteDesc").'<br>';
 				print $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
@@ -732,7 +736,15 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
 				print '<option value="">&nbsp;</option>';
 				foreach ($websitestatic->records as $website) {
-					print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "").'>'.$website->ref.'</option>';
+					print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "");
+					if ($website->status != $websitestatic::STATUS_VALIDATED) {
+						print " disabled";
+					}
+					print '>'.$website->ref;
+					if ($website->status != $websitestatic::STATUS_VALIDATED) {
+						print ' - '.$langs->trans("Disabled");
+					}
+					print '</option>';
 				}
 				print '</select>';
 				print ajax_combobox("websiteidoption");
