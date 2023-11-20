@@ -650,13 +650,13 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'</span><br>';
 			print '<span class="opacitymedium small">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'</span><br>';
 
-			print '<div class="installcertif margintop hidden">';
+			print '<div class="installcertif margintop hidden" id="customurlparam">';
 			print '<br>';
 			print $langs->trans("Step", 1).' : '.$langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
 			print '<br>';
 			print $langs->trans("Step", 2).' : '.$langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
 			print '<input type="text" name="domainname" value="" placeholder="myerp.mycompany.com">';
-			print '<input type="submit" class="btn btn-primary wordbreak reposition" id="activateoptioncustomurl" name="activateoption" value="'.$langs->trans("Enable").'">';
+			print '<input type="button" class="btn btn-primary wordbreak reposition" id="activateoptioncustomurl" name="activateoption" value="'.$langs->trans("Enable").'">';
 			print '<br>';
 			print '</div></div>';
 			print '<div class="tagtd center">';
@@ -670,9 +670,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '</form>';
 
 			print '<script>
-				jQuery("#chooseoptioncustomurl).on("click", function() {
+				jQuery("#chooseoptioncustomurl").on("click", function() {
 					console.log("Click on button Activate custom urls");
-					jQuery("#installcertif").toggle();
+					jQuery("#customurlparam").toggle();
 				});
 			</script>';
 
