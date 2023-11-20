@@ -656,7 +656,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<br>';
 			print $langs->trans("Step", 2).' : '.$langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
 			print '<input type="text" name="domainname" value="" placeholder="myerp.mycompany.com">';
-			print '<input type="button" class="btn btn-primary wordbreak reposition" id="activateoptioncustomurl" name="activateoption" value="'.$langs->trans("Enable").'">';
+			print '<input type="submit" class="btn btn-primary wordbreak reposition" id="activateoptioncustomurl" name="activateoption" value="'.$langs->trans("Enable").'">';
 			print '<br>';
 			print '</div></div>';
 			print '<div class="tagtd center">';
@@ -664,7 +664,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$nbmonth = 1;
 			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 			//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-			print '<input type="submit" class="btn btn-primary wordbreak reposition" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Enable").'">';
+			print '<input type="button" class="btn btn-primary wordbreak reposition" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Enable").'">';
 			print '</div>';
 
 			print '</form>';
