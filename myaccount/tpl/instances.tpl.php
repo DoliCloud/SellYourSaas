@@ -664,17 +664,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			$nbmonth = 1;
 			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 			//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-			print '<input type="button" class="btn btn-primary wordbreak reposition" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Enable").'">';
+			print '<input type="button" class="btn btn-primary wordbreak" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Enable").'">';
 			print '</div>';
 
 			print '</form>';
-
-			print '<script>
-				jQuery("#chooseoptioncustomurl").on("click", function() {
-					console.log("Click on button Activate custom urls");
-					jQuery("#customurlparam").toggle();
-				});
-			</script>';
 
 			print '</div></div>';
 
@@ -1439,7 +1432,7 @@ if ($action == "confirmundeploy") {
 
 			/* Code to toggle the show of the option section */
 			jQuery(".switchoptionpanel").click(function() {
-				console.log("We click on toggle see more options");
+				console.log("We click on toggle to see more options");
 				var id = parseInt($(this).attr("id").match(/[0-9]+$/g));
 				if (jQuery("#optionpanel_" + id + ":hidden").length){
 					jQuery("#optionpanel_" + id).removeClass("hidden");
@@ -1447,6 +1440,11 @@ if ($action == "confirmundeploy") {
 					jQuery("#optionpanel_" + id).addClass("hidden");
 				}
 				return false;
+			});
+
+			jQuery("#chooseoptioncustomurl").click(function() {
+				console.log("We click on button Activate custom urls");
+				jQuery("#customurlparam").toggle();
 			});
 
             /* Apply constraints if sldAndSubdomain field is change */
