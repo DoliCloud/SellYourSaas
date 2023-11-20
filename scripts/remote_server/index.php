@@ -288,6 +288,33 @@ if (in_array($tmparray[0], array('deploywebsite'))) {
 	exit();
 }
 
+if (in_array($tmparray[0], array('deploycustomurl'))) {
+	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	else fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
+
+	// Add a security layer on the CLI scripts
+	//$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	//checkScriptFile($cliafter, $fh, $params);
+	//checkScriptFile($cliafterpaid, $fh, $params);
+
+	exec('./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
+
+	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
+	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output)."\n");
+	fclose($fh);
+
+	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
+	if ($return_var == 0) {
+		$httpresponse = 200;
+	}
+	http_response_code($httpresponse);
+
+	print 'action_customurl_instance.sh for action '.$tmparray[0].' on '.$paramarray[2].'.'.$paramarray[3].' return '.$return_var.", so remote agent returns http code ".$httpresponse."\n";
+
+	exit();
+}
+
 if (in_array($tmparray[0], array('actionafterpaid'))) {
 	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
 	else fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
