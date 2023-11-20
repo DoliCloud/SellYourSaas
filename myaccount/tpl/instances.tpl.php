@@ -623,7 +623,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' :'hidden').'">';
 		print '<br>';
-		print '<div class="areaforresources sectionresources">ffff';
+		print '<div class="areaforresources sectionresources">';
 		print '<br>';
 
 		// Hard coded option: Custom domain name
@@ -650,20 +650,31 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'</span><br>';
 			print '<span class="opacitymedium small">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'</span><br>';
 
-			print '<div class="installcertif margintop">';
+			print '<div class="installcertif margintop hidden">';
+			print '<br>';
 			print $langs->trans("Step", 1).' : '.$langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
+			print '<br>';
 			print $langs->trans("Step", 2).' : '.$langs->trans("OptionYourCustomDomainNameStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
-			print '<input type="text" name="domainname" value="" placeholder="myerp.mycompany.com"><br>';
+			print '<input type="text" name="domainname" value="" placeholder="myerp.mycompany.com">';
+			print '<input type="submit" class="btn btn-primary wordbreak reposition" id="activateoptioncustomurl" name="activateoption" value="'.$langs->trans("Enable").'">';
+			print '<br>';
 			print '</div></div>';
 			print '<div class="tagtd center">';
 			// TODO Use same frequency than into the template invoice ?
 			$nbmonth = 1;
 			print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 			//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-			print '<input type="submit" class="btn btn-primary wordbreak reposition" name="activateoption" value="'.$langs->trans("Enable").'">';
+			print '<input type="submit" class="btn btn-primary wordbreak reposition" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Enable").'">';
 			print '</div>';
 
 			print '</form>';
+
+			print '<script>
+				jQuery("#chooseoptioncustomurl).on("click", function() {
+					console.log("Click on button Activate custom urls");
+					jQuery("#installcertif").toggle();
+				});
+			</script>';
 
 			print '</div></div>';
 
