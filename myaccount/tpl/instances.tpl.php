@@ -648,7 +648,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 				print '<span class="small">';
 				print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'</span><br>';
-				print '<span class="opacitymedium small">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'</span><br>';
+				print '<span class="opacitymedium small hideonsmartphone">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'<br></span>';
 
 				print '<div class="installcertif margintop hidden" id="customurlparam">';
 				print '<br>';
@@ -658,8 +658,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<input type="text" name="domainname" value="" placeholder="myerp.mycompany.com">';
 				print '<input type="submit" class="btn btn-primary wordbreak reposition" id="activateoptioncustomurl" name="activateoption" value="'.$langs->trans("Enable").'">';
 				print '<br>';
-				print '</div></div>';
-				print '<div class="tagtd center">';
+				print '</div>';
+				print '</div>';
+
+				print '<div class="tagtd center minwidth100">';
 				// TODO Use same frequency than into the template invoice ?
 				$nbmonth = 1;
 				print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
@@ -669,7 +671,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 				print '</form>';
 
-				print '</div></div>';
+				print '</div></div>';	// end tr, end table
 
 				print '<hr>';
 			}
@@ -708,6 +710,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 
 				print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
+
 				print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
 
 				print '<div class="titleoption">'; // title line
@@ -782,10 +785,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					</script>';
 				}
 				print '</div>';
-				print '<div class="tagtd">';
+
+				print '<div class="tagtd minwidth100 right">';
 				print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
 				print '</div>';
-				print '</div></div>';
+
+				print '</div></div>';	// end tr, end table
 
 				print '<hr>';
 			}
