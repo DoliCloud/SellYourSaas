@@ -1426,12 +1426,25 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		if (!$error) {
 			$id_payment_mode_ban = dol_getIdFromCode($db, 'PRE', 'c_paiement', 'code', 'id', 1);
 
-			// Update all pending recurring invoices of the thirdparty to the payment mode direct debit.
+			// Update all pending recurring invoices of the thirdparty to the payment mode direct debit. Update also the open invoices.
 			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended). For such case, recuring invoice is created at end of this action.
 			if ($id_payment_mode_ban > 0) {
+				// First update recurring invoices
 				$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
 				$sql .= " SET fk_mode_reglement = ".((int) $id_payment_mode_ban);
 				$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
+
+				$result = $db->query($sql);
+				if ($result < 0) {
+					$error++;
+					setEventMessages($db->lasterror(), null, 'errors');
+				}
+
+				// Now update open invoices
+				$sql = "UPDATE ".MAIN_DB_PREFIX."facture";
+				$sql .= " SET fk_mode_reglement = ".((int) $id_payment_mode_ban);
+				$sql .= " WHERE fk_soc = ".((int) $mythirdpartyaccount->id);
+				$sql .= " AND fk_statut = ".((int) Facture::STATUS_VALIDATED);
 
 				$result = $db->query($sql);
 				if ($result < 0) {
