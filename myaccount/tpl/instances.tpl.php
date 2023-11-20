@@ -618,6 +618,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '</div>';
 			print '</a>';
 
+
 			// Add here the Option panel
 
 			print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' :'hidden').'">';
@@ -721,8 +722,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				} else {
 					include_once DOL_DOCUMENT_ROOT."/website/class/website.class.php";
 					$websitestatic = new Website($newdb);
-					//$websitestatic->fetchAll('', '', 0, 0, array('t.status'=>$websitestatic::STATUS_VALIDATED));
-					$websitestatic->fetchAll('', '', 0, 0);
+					$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0, array('t.status'=>$websitestatic::STATUS_VALIDATED));
+					//$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0);
 					print '<span class="small">';
 					print $langs->trans("OptionYourWebsiteDesc").'<br>';
 					print $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
@@ -738,7 +739,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<span class="bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
 					print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
 					print '<option value="">&nbsp;</option>';
-					foreach ($websitestatic->records as $website) {
+					foreach ($listofwebsitestoactivate as $website) {
 						print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "");
 						if ($website->status != $websitestatic::STATUS_VALIDATED) {
 							print " disabled";
@@ -868,11 +869,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';
 			print '<br>';
 			print '</div></div></div>';
+
+			print '</div>';
+			print '</div>';
 		}
-
-		print '</div>';
-		print '</div>';
-
 
 		print '<br><br>';
 
