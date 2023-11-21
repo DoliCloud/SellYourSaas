@@ -627,7 +627,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<br>';
 
 			// Hard coded option: Custom domain name
-			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))) {
+			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOMURL") > 0
+				&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))) {
 				print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
 
 				print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
@@ -677,7 +678,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 
 			// Hard coded option: A website
-			if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT") > 0
+			if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT") > 0
 				&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID'))))) {
 				$type_db = $conf->db->type;
 				$hostname_db  = $contract->array_options['options_hostname_db'];
