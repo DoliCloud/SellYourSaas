@@ -3,6 +3,7 @@
 
 ## 2.1
 
+* NEW Add ansible script to edit crontab on all servers.
 * NEW Show statistics (success/error) of remote backups in list of deployment servers
 * NEW Backup for instance is using localhostip if possible
 * FIX Event "Increase end date of services for contract" was not linked to the thirdparty.

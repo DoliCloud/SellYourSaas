@@ -622,14 +622,14 @@ Addition:
 
 [source, bash]
 ---------------
-ifconfig eth0: 0 a.b.c.d
+ifconfig eth0:0 a.b.c.d
 ---------------
 
 Deletion:
 
 [source, bash]
 ---------------
-ifconfig eth0: 0 down
+ifconfig eth0:0 down
 ---------------
 
 - For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
