@@ -155,14 +155,17 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 				$sellyoursaasname = $conf->global->$constforaltname;
 			}
 
-			$titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
+			$titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Spam by an instance reported', 90);
 
 			if ($mode != 'test' && $mode != 'nodatadog') {
 				$body = file_get_contents('php://input');
+				$textforemail = "Spam by an instance reported.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".$body."\n";
+				$textforemail .= "HTTP_USER_AGENT = ".$_SERVER["HTTP_USER_AGENT"]."\n";
+				$textforemail .= "REMOTE_ADDR = ".$_SERVER["HTTP_USER_AGENT"]."\n";
 
 				$statsd->event($titleofevent,
 					array(
-						'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".$body."\n".var_export($_SERVER, true),
+						'text'       => $textforemail,
 						'alert_type' => 'warning',
 						'source_type_name' => 'API',
 						'host'       => gethostname()

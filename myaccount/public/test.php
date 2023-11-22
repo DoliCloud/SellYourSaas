@@ -81,60 +81,6 @@ echo "<br>\n";
 echo "Now make internal js test...<br>\n";
 
 
-// Send email
-//file_put_contents($tmpfile, "Now we send an email to supervisor ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n", FILE_APPEND);
-
-/*$headers = 'From: <'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.">\r\n";
-$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from SendGrid', 'Spam was reported by SendGrid:'."\r\n".$body, $headers);
-if (!$success) {
-	$errorMessage = error_get_last()['message'];
-	print $errorMessage;
-}
-else
-{
-	echo "Email sent to ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."<br>\n";
-}
-
-// Send to DataDog (metric + event)
-if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED))
-{
-	try {
-		file_put_contents($tmpfile, "Now we send ping to DataDog\n", FILE_APPEND);
-		echo "Now we send ping to DataDog<br>\n";
-
-		dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
-
-		$arrayconfig=array();
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY))
-		{
-			$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
-		}
-
-		$statsd = new DataDog\DogStatsd($arrayconfig);
-
-		$arraytags=null;
-
-		$statsd->increment('sellyoursaas.spamreported', 1, $arraytags);
-
-		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-		$titleofevent =  dol_trunc('[Alert] '.$sellyoursaasname.' - '.gethostname().' - Spam of a customer detected', 90);
-		$statsd->event($titleofevent,
-			array(
-				'text'       => "Spam of a customer detected.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".var_export($_SERVER, true),
-				'alert_type' => 'warning',
-				'source_type_name' => 'API',
-				'host'       => gethostname()
-			)
-		);
-
-		echo "Ping sent to DataDog<br>\n";
-	}
-	catch(Exception $e)
-	{
-
-	}
-}
-*/
 
 print '</body>
 </html>';
