@@ -340,7 +340,7 @@ function getInstancesOfUser($pathtospamdir)
 		fclose($fp);
 	} else {
 		global $logfile;
-		file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/mailquota can't be read.\n", FILE_APPEND);
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/mailquota can't be read (check apparmor log, check also that apache-php does not use a private /tmp directory).\n", FILE_APPEND);
 	}
 	return $instanceofuser;
 }

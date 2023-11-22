@@ -2807,7 +2807,7 @@ All the disabled profiles are visible into */etc/apparmor.d/disable*
 The log are visible into */var/log/kern.log* or */var/log/audit/audit.log*. You can use *aa-logprof* to know the log file used and convert its content into real rules into existing profiles.
 
 
-* Note: From Ubuntu 20.04, to unload ALL apparmor profiles and reload them:
+* Note: From Ubuntu 20.04+, to unload ALL apparmor profiles and reload them:
 
 [source,bash]
 ---------------
