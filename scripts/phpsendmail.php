@@ -339,7 +339,8 @@ function getInstancesOfUser($pathtospamdir)
 		}
 		fclose($fp);
 	} else {
-		//file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/mailquota can't be read.\n", FILE_APPEND);
+		global $logfile;
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " ERROR $pathtospamdir/mailquota can't be read.\n", FILE_APPEND);
 	}
 	return $instanceofuser;
 }
