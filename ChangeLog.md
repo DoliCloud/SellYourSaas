@@ -1,6 +1,11 @@
 # CHANGELOG SELLYOURSAAS FOR <a href="https://www.dolibarr.org">DOLIBARR ERP CRM</a>
 
 
+## Unreleased
+
+* NEW Add support for a signature key of remote action messages. 
+
+
 ## 2.1
 
 * NEW Add ansible script to edit crontab on all servers.

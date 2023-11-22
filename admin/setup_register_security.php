@@ -134,6 +134,8 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_HASHALGOFORPASSWORD", GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", 'alpha'), 'chaine', 0, '', $conf->entity);
+
+		dolibarr_set_const($db, "SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION", GETPOST("SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION", 'alpha'), 'chaine', 0, '', $conf->entity);
 	}
 	if (! $error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
@@ -326,7 +328,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD').'">';
 print '</td>';
-print '<td><span class="opacitymedium small">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
+print '<td><span class="opacitymedium small">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or __APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
 print '</tr>';
 
 if (empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) || $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
@@ -337,6 +339,13 @@ if (empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) || $conf->global->SEL
 	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
 }
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION").'</td>';
+print '<td>';
+print '<input type="text" name="SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION" value="'.getDolGlobalString('SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">Define a value to add a security signature of messages. This key must also be added into all deployment servers into file /etc/sellyoursaas.conf on key "signature_key=..."</span></td>';
+print '</tr>';
 
 print '</table>';
 print '</div>';
