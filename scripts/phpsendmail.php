@@ -32,7 +32,7 @@ $emailfrom = '';
 $MAXOK = 10;
 $MAXPERDAY = 250;	// By default, will be overwritten with sellyoursaas-public.conf
 
-file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start phpsendmail.php\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start ".__FILE__."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . " SERVER_NAME = ".(empty($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'])."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . " DOCUMENT_ROOT = ".(empty($_SERVER['DOCUMENT_ROOT']) ? '' : $_SERVER['DOCUMENT_ROOT'])."\n", FILE_APPEND);
 
