@@ -558,6 +558,7 @@ print "We found ".count($instancestrial)." deployed trial + ".count($instances).
 
 print "----- Generate file ".$pathtospamdir."/mailquota for paid instances\n";
 
+// Erase and recreate file mailquota
 file_put_contents($pathtospamdir.'/mailquota', "# File of paid instance with their quota\n");
 
 $i = 0;
