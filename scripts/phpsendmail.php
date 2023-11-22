@@ -189,6 +189,8 @@ if (empty($ip)) {
 	// exit(7);		// We do not exit, this can occurs sometime
 }
 
+//file_put_contents($logfile, date('Y-m-d H:i:s')." Nb of entry into instanceofuser = ".count($instanceofuser), FILE_APPEND);
+
 // Count other existing file starting with '/tmp/phpsendmail-'.posix_getuid()
 // and return error if nb is higher than 500
 $commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
