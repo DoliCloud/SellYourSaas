@@ -662,11 +662,15 @@ if (!empty($arrayfields['nb_instances']['checked'])) {
 	$totalarray['nbfield']++;
 }
 if (!empty($arrayfields['nb_backups']['checked'])) {
-	print '<th class="liste_titre right">'.$langs->trans($arrayfields['nb_backups']['label']).'</th>';
+	print '<th class="liste_titre right">'.$langs->trans($arrayfields['nb_backups']['label']);
+	print $form->textwithpicto('', $langs->trans("InstancesToBackupWithoutRedirectionInstances"));
+	print '</th>';
 	$totalarray['nbfield']++;
 }
 if (!empty($arrayfields['nb_backupsremote']['checked'])) {
-	print '<th class="liste_titre right">'.$langs->trans($arrayfields['nb_backupsremote']['label']).'</th>';
+	print '<th class="liste_titre right">'.$langs->trans($arrayfields['nb_backupsremote']['label']);
+	print $form->textwithpicto('', $langs->trans("InstancesToBackupWithoutRedirectionInstances"));
+	print '</th>';
 	$totalarray['nbfield']++;
 }
 // Action column
@@ -694,18 +698,31 @@ $backupokinstancesremote = array();
 $backuptotalinstances = array();
 $backuptotalinstancesremote = array();
 
-$sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb,";
-$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
-$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko,";
-$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackupremote_status = 'OK'", "1", "0").") as nbbackupremoteok,";
-$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackupremote_status = 'KO'", "1", "0").") as nbbackupremoteko";
+$sqlperhost = "SELECT ce.deployment_host, COUNT(rowid) as nb";
 $sqlperhost .= " FROM ".$db->prefix()."contrat_extrafields as ce";
-$sqlperhost .= " WHERE deployment_status in ('processing', 'done')";
+$sqlperhost .= " WHERE ce.deployment_status in ('processing', 'done')";
 $sqlperhost .= " GROUP BY ce.deployment_host";
 $resqlperhost = $db->query($sqlperhost);
 if ($resqlperhost) {
 	while ($obj = $db->fetch_object($resqlperhost)) {
 		$openinstances[$obj->deployment_host] = (int) $obj->nb;
+	}
+} else {
+	dol_print_error($db);
+}
+
+$sqlperhost = "SELECT ce.deployment_host,";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'OK'", "1", "0").") as nbbackupok,";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackup_status = 'KO'", "1", "0").") as nbbackupko,";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackupremote_status = 'OK'", "1", "0").") as nbbackupremoteok,";
+$sqlperhost .= " SUM(".$db->ifsql("ce.latestbackupremote_status = 'KO'", "1", "0").") as nbbackupremoteko";
+$sqlperhost .= " FROM ".$db->prefix()."contrat_extrafields as ce";
+$sqlperhost .= " WHERE ce.deployment_status in ('processing', 'done')";
+$sqlperhost .= " AND (ce.suspendmaintenance_message NOT LIKE 'http%' OR ce.suspendmaintenance_message IS NULL)";
+$sqlperhost .= " GROUP BY ce.deployment_host";
+$resqlperhost = $db->query($sqlperhost);
+if ($resqlperhost) {
+	while ($obj = $db->fetch_object($resqlperhost)) {
 		$backupokinstances[$obj->deployment_host] = (int) $obj->nbbackupok;
 		$backupokinstancesremote[$obj->deployment_host] = (int) $obj->nbbackupremoteok;
 		$backuptotalinstances[$obj->deployment_host] = (int) $obj->nbbackupok + (int) $obj->nbbackupko;
@@ -714,6 +731,7 @@ if ($resqlperhost) {
 } else {
 	dol_print_error($db);
 }
+
 
 // Loop on record
 // --------------------------------------------------------------------
