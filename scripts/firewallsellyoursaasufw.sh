@@ -254,18 +254,44 @@ ufw reload
 
 
 # Note: to enabled including --log-uid, we must insert rule directly in iptables
+# When you have log with UID inside, you can try to find process for this UID with
+# ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled )  |  grep uid:XXX 
+# ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled ) dst [$smtpipcalled]  |  grep uid:XXX 
 # We add rule only if not already found
-iptables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
+iptables -n --line-numbers -L OUTPUT | grep 'ALLOW SELLYOURSAAS' > /dev/null
 if [ "x$?" == "x1" ]; then
-	echo Add iptables rule
+	echo Add iptables rule for log uid
 	iptables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
 fi
-ip6tables -n --line-numbers -L OUTPUT | grep 'SELLYOURSAAS' > /dev/null
+ip6tables -n --line-numbers -L OUTPUT | grep 'ALLOW SELLYOURSAAS' > /dev/null
 if [ "x$?" == "x1" ]; then
-	echo Add ip6tables rule
+	echo Add ip6tables rule for log uid
 	ip6tables -I OUTPUT 1 -p tcp -m multiport --dports 25,2525,465,587 -m state --state NEW -j LOG --log-uid --log-prefix  "[UFW ALLOW SELLYOURSAAS] "
 fi
 
+# Note: To enable log with uid on blocking access, you can enable this.
+# When you have log with UID inside, you can try to find process for this UID with
+# ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled )  |  grep uid:XXX 
+# ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled ) dst [$smtpipcalled]  |  grep uid:XXX
+if [ "aaa" == "bbb" ]; then
+	# TODO Disable log instructions added by ufw to avoid duplicate logs
+	iptables -n --line-numbers -L | grep 'BLOCK SELLYOURSAAS' > /dev/null
+	if [ "x$?" == "x1" ]; then
+		echo Add iptables rule for log uid
+		iptables -A ufw-after-logging-input -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+		iptables -A ufw-after-logging-output -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+		iptables -A ufw-after-logging-forward -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+		iptables -A ufw-logging-deny -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+	fi
+	ip6tables -n --line-numbers -L | grep 'BLOCK SELLYOURSAAS' > /dev/null
+	if [ "x$?" == "x1" ]; then
+		echo Add ip6tables rule for log uid
+		ip6tables -A ufw6-after-logging-input -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+		ip6tables -A ufw6-after-logging-output -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+		ip6tables -A ufw6-after-logging-forward -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+		ip6tables -A ufw6-logging-deny -j LOG --log-uid --log-prefix "[UFW BLOCK SELLYOURSAAS] " -m limit --limit 3/min --limit-burst 10
+	fi
+fi
 
 $0 status
 	;;
