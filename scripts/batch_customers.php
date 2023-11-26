@@ -696,7 +696,7 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 	$out.= "***** Summary for all deployment servers\n";
 }
 if ($action != 'updatestatsonly') {
-	$out.= "\n** Nb of paying instances processed ko: ".$nboferrors;
+	$out.= "\n* Nb of paying instances processed KO: ".$nboferrors;
 }
 if (count($instancesbackuperror)) {
 	$out.= ", ERROR FOR BACKUP ON ";
@@ -723,10 +723,10 @@ $out.= "* Nb of paying instances (deployed not suspended): ".count($instancespai
 $out.= "* Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
 $out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
 
-$out.= "\n\n";
+$out.= "\n";
 
 if ($action != 'updatestatsonly') {
-	$out.= "* Nb of paying instances processed ok+discarded: ".$nbofok."+".$nbofokdiscarded."=".($nbofok + $nbofokdiscarded);
+	$out.= "* Nb of paying instances processed OK+discarded: ".$nbofok."+".$nbofokdiscarded."=".($nbofok + $nbofokdiscarded);
 }
 if (count($instancesbackupsuccess)) {
 	$out.= ", success for backup on ";
