@@ -38,6 +38,8 @@ if [[ "x$ipserverdeployment" == "x" && "x$instanceserver" != "x" && "x$instances
 	exit 4
 fi
 
+addloguidonufwblock=`grep '^addloguidonufwblock=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 
 if [[ -s /etc/ssh/sshd_config.d/sellyoursaas.conf ]]; then
 	port_ssh=`grep '^Port ' /etc/ssh/sshd_config.d/sellyoursaas.conf | cut -d ' ' -f 2`
@@ -273,7 +275,7 @@ fi
 # When you have log with UID inside, you can try to find process for this UID with
 # ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled )  |  grep uid:XXX 
 # ss -e -H -p -t state all '( sport = $smtpportcaller and dport = $smtpportcalled ) dst [$smtpipcalled]  |  grep uid:XXX
-if [ "aaa" == "bbb" ]; then
+if [ "x$addloguidonufwblock" == "x1" ]; then
 	# TODO Disable log instructions added by ufw to avoid duplicate logs
 	iptables -n --line-numbers -L | grep 'BLOCK SELLYOURSAAS' > /dev/null
 	if [ "x$?" == "x1" ]; then
