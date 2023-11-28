@@ -195,7 +195,12 @@ if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
 		$urlfaq='https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/faq-'.$langcode.'.php';
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-			$urlfaq = 'https://www.'.$mythirdpartyaccount->array_options['options_domain_registration_page'].'/faq-'.$langcode.'.php';
+			$newnamekey = 'SELLYOURSAAS_MAIN_FAQ_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+			if (!empty($conf->global->$newnamekey)) {
+				$urlfaq = $conf->global->$newnamekey;
+			} else {
+				$urlfaq = 'https://www.'.$mythirdpartyaccount->array_options['options_domain_registration_page'].'/faq-'.$langcode.'.php';
+			}
 		}
 	}
 } else {
