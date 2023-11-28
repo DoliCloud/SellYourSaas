@@ -2221,7 +2221,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
-} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOMURL") > 0) {
+} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOM_URL') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0) {
 	// TODO
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
@@ -2268,7 +2268,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		$db->begin();
 
-		$productid = getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOMURL");
+		$productid = getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL");
 		$product = new Product($db);
 		$product->fetch($productid);
 		$tmparray = sellyoursaasGetExpirationDate($object, 0);

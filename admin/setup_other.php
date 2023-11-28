@@ -442,9 +442,9 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 
 // Product ID for custom URL
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOMURL").'</td>';
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'</td>';
 	print '<td>';
-	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOMURL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOMURL");
+	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL");
 	print '</td>';
 	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
