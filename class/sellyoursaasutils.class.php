@@ -110,7 +110,7 @@ class SellYourSaasUtils
 			while ($i < $num_rows) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj && $invoice->fetch($obj->rowid) > 0) {
-					dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref." restrictonthirdpartyid=".$restrictonthirdpartyid);
+					dol_syslog("--- Process invoice id=".$invoice->id." ref=".$invoice->ref." restrictonthirdpartyid=".$restrictonthirdpartyid);
 
 					$invoice->fetch_thirdparty();
 
@@ -137,6 +137,8 @@ class SellYourSaasUtils
 								if (!empty($draftinvoiceprocessed[$invoice->id]) || !empty($draftinvoicecanceled[$invoice->id])) {
 									continue;	// If already processed because of a previous contract line, do nothing more
 								}
+
+								dol_syslog("-- Process validation of invoices for the contract ".$contract->ref, LOG_DEBUG);
 
 								if (!empty($tmparray['refsopened'])) {	// If there is other invoices
 									// Try to avoid validation of the current $invoice if another invoice is open on the same contract !!!
@@ -178,10 +180,13 @@ class SellYourSaasUtils
 									$outputlangs->loadLangs(array('main', 'bills', 'products', 'users', 'sellyoursaas@sellyoursaas'));
 
 									// Set notes with the $contract->array_options['options_commentonqty']
-									dol_syslog("Check if we must update the public note with the comment on qty", LOG_DEBUG);
+									dol_syslog("-- Check if we must update the public note of invoice with the comment on qty of the contract", LOG_DEBUG);
 									if (!empty($contract->array_options['options_commentonqty'])) {
 										$publicnoteofcontract = str_replace('User Accounts', $outputlangs->trans("ListOfUsers"), $contract->array_options['options_commentonqty']);
 										$newpublicnote = dol_concatdesc($invoice->note_public, $publicnoteofcontract);
+
+										$invoice->context['actionmsg'] = 'Record modified to concat the non empty options_commentonqty into the public note by doValidateDraftInvoices()';
+
 										$invoice->update_note($newpublicnote, '_public');
 									}
 
@@ -211,6 +216,8 @@ class SellYourSaasUtils
 											break;
 										}
 									}
+
+									$invoice->context['actionmsg'] = 'Invoice id = '.$invoice->id.' validated by doValidateDraftInvoices()';
 
 									$result = $invoice->validate($user);
 
@@ -242,7 +249,7 @@ class SellYourSaasUtils
 								}
 
 								if (!$errorforinvoice) {
-									dol_syslog("Check if invoice payment mode is a differed mode (direct debit or credit transfer): mode_reglement_code=".$invoice->mode_reglement_code);
+									dol_syslog("-- Check if invoice payment mode is a differed mode (direct debit or credit transfer): mode_reglement_code=".$invoice->mode_reglement_code);
 
 									$codepaiementdirectdebit = 'PRE';
 									$codepaiementtransfer = 'VIR';
