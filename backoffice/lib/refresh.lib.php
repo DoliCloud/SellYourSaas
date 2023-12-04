@@ -165,10 +165,10 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
  * 	->nbofusers,
  * 	->modulesenabled, version, date_lastcheck, lastcheck
  *
- * @param 	Conf			$conf		Conf
- * @param 	Database		$db			Database handler
- * @param 	Contrat 		$object	    Customer (can modify caller)
- * @param	array			$errors	    Array of errors
+ * @param 	Conf					$conf		Conf
+ * @param 	Database				$db			Database handler
+ * @param 	SellYourSaasContract	$object	    Customer (can modify caller)
+ * @param	array					$errors	    Array of errors
  * @return	int										1
  */
 function dolicloud_database_refresh($conf, $db, &$object, &$errors)
@@ -359,6 +359,28 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 								$modulesenabled[$name]=$name;
 							}
 						}
+						$i++;
+					}
+					$object->modulesenabled=join(',', $modulesenabled);
+
+					$newdb->free($resql);
+				} else {
+					$error++;
+				}
+			}
+
+			// Get version
+			// TODO Use the formula to get version stored on package (Note we do a similar thing previously with the formula of service to count users).
+			if (! $error) {
+				$modulesenabled=array();
+				$lastinstall='';
+				$lastupgrade='';
+				$resql=$newdb->query($sqltogetmodules);
+				if ($resql) {
+					$num = $newdb->num_rows($resql);
+					$i=0;
+					while ($i < $num) {
+						$obj = $newdb->fetch_object($resql);
 						if (preg_match('/MAIN_VERSION_LAST_UPGRADE/', $obj->name)) {
 							$lastupgrade=$obj->value;
 						}
@@ -367,14 +389,16 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 						}
 						$i++;
 					}
-					$object->modulesenabled=join(',', $modulesenabled);
-					$object->version=($lastupgrade ? $lastupgrade : $lastinstall);
+
+					$object->version = ($lastupgrade ? $lastupgrade : $lastinstall);
+					$object->array_options['options_instanceversion'] = 'version='.$object->version;
 
 					$newdb->free($resql);
 				} else {
 					$error++;
 				}
 			}
+
 
 			$deltatzserver=(getServerTimeZoneInt()-0)*3600;	// Diff between TZ of NLTechno and DoliCloud
 
@@ -413,9 +437,6 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 			//$object->array_options['options_latestresupdate_date']=$now;
 
 			$result = $object->update($user);	// persist
-			if (method_exists($object, 'update_old')) {
-				$result = $object->update_old($user);
-			}	// persist
 
 			if ($result < 0) {
 				dol_syslog("Failed to persist data on object into database", LOG_ERR);

@@ -300,6 +300,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$hostname_os  = $object->array_options['options_hostname_os'];
 	$username_os  = $object->array_options['options_username_os'];
 	$password_os  = $object->array_options['options_password_os'];
+	$version      = $object->array_options['options_instanceversion'];
 	$username_web = $object->thirdparty->email;
 	$password_web = $object->thirdparty->array_options['options_password'];
 
@@ -315,6 +316,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->username_os  = $username_os;
 	$object->password_os  = $password_os;
 	$object->hostname_os  = $hostname_os;
+	$object->version      = $version;
 	$object->username_web = $username_web;
 	$object->password_web = $password_web;
 
@@ -422,6 +424,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 					}
 					$i++;
 				}
+
+				$object->version = $stringofversion;
+				$object->array_options['options_instanceversion'] = $stringofversion;
 			} else {
 				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
 				$error++;
@@ -443,6 +448,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 					$i++;
 				}
 			}
+
+			$object->modulesenabled = $stringoflistofmodules;
 		}
 	}
 
@@ -775,13 +782,13 @@ print '</tr>';
 // Version
 print '<tr>';
 print '<td>'.$langs->trans("Version").'</td>';
-print '<td colspan="3">'.$stringofversion.'</td>';
+print '<td colspan="3">'.$object->version.'</td>';
 print '</tr>';
 
 // Modules
 print '<tr>';
 print '<td>'.$langs->trans("Modules").'</td>';
-print '<td colspan="3"><span class="small">'.$stringoflistofmodules.'</span></td>';
+print '<td colspan="3"><span class="small">'.$object->modulesenabled.'</span></td>';
 print '</tr>';
 
 print "</table><br>";
